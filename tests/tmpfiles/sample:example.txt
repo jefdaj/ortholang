@@ -3,9 +3,8 @@
 |-- exprs
 |   `-- str
 |       `-- 88db00dd3a
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/str/88db00dd3a/0/result
+    `-- result -> ../exprs/str/88db00dd3a/result
 
-6 directories, 2 files
+5 directories, 2 files

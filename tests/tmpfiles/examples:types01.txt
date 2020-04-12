@@ -2,29 +2,23 @@
 |-- cache
 |-- exprs
 |   |-- list
-|   |   |-- 36ee392a2a
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 6e372b0588
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- a17da5f703
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- e561e0acac
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   |-- 50f59637b6
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- a1743379b3
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- dc30042f69
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- f4ce99f05c
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- num
 |       |-- 1f7e7abac9
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- 89fb8b4aed
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- l.num.list -> ../exprs/list/36ee392a2a/0/result
-    |-- lol.num.list.list -> ../exprs/list/e561e0acac/0/result
-    |-- lolol.num.list.list.list -> ../exprs/list/6e372b0588/0/result
+    |-- l.num.list -> ../exprs/list/dc30042f69/result
+    |-- lol.num.list.list -> ../exprs/list/a1743379b3/result
+    |-- lolol.num.list.list.list -> ../exprs/list/50f59637b6/result
     `-- result -> ../vars/lolol.num.list.list.list
 
-17 directories, 10 files
+11 directories, 10 files

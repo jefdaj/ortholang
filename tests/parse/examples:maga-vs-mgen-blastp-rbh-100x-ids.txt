@@ -1,53 +1,51 @@
 [ 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "fwdHits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "1.0e-5" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-5" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "revHits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "1.0e-5" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-5" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "recHits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
         ] "reciprocal_best" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] 
             ( Var ( RepID Nothing ) "fwdHits" )
-        , Ref bht ( Salt 0 ) 
+        , Ref bht Nothing 
             [ Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "maga" 
             ] 
@@ -56,11 +54,11 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "n_repeats" 
-    , Lit num ( Salt 0 ) "3.0" 
+    , Lit num "3.0" 
     ) 
 , 
     ( Var ( RepID Nothing ) "solidHits" 
-    , Fun bht.list ( Salt 0 ) 
+    , Fun bht.list Nothing 
         [ Var ( RepID Nothing ) "recHits" 
         , Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
@@ -68,22 +66,22 @@
         , Var ( RepID Nothing ) "revHits" 
         , Var ( RepID Nothing ) "n_repeats" 
         ] "repeat" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "fwdHits" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "revHits" 
             ] 
             ( Var ( RepID Nothing ) "recHits" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
-        , Ref num ( Salt 0 ) [] 
+        , Ref num Nothing [] 
             ( Var ( RepID Nothing ) "n_repeats" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "solidHitIDs" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "solidHits" 
         , Var ( RepID Nothing ) "recHits" 
         , Var ( RepID Nothing ) "fwdHits" 
@@ -92,7 +90,7 @@
         , Var ( RepID Nothing ) "revHits" 
         , Var ( RepID Nothing ) "n_repeats" 
         ] "all" 
-        [ Fun str.list.list ( Salt 0 ) 
+        [ Fun str.list.list Nothing 
             [ Var ( RepID Nothing ) "solidHits" 
             , Var ( RepID Nothing ) "recHits" 
             , Var ( RepID Nothing ) "fwdHits" 
@@ -101,7 +99,7 @@
             , Var ( RepID Nothing ) "revHits" 
             , Var ( RepID Nothing ) "n_repeats" 
             ] "extract_queries_each" 
-            [ Ref bht.list ( Salt 0 ) 
+            [ Ref bht.list Nothing 
                 [ Var ( RepID Nothing ) "recHits" 
                 , Var ( RepID Nothing ) "fwdHits" 
                 , Var ( RepID Nothing ) "maga" 
@@ -115,7 +113,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "solidHitIDs100" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "solidHitIDs" 
         , Var ( RepID Nothing ) "solidHits" 
         , Var ( RepID Nothing ) "recHits" 
@@ -125,7 +123,7 @@
         , Var ( RepID Nothing ) "revHits" 
         , Var ( RepID Nothing ) "n_repeats" 
         ] "all" 
-        [ Fun str.list.list ( Salt 0 ) 
+        [ Fun str.list.list Nothing 
             [ Var ( RepID Nothing ) "solidHitIDs" 
             , Var ( RepID Nothing ) "solidHits" 
             , Var ( RepID Nothing ) "recHits" 
@@ -135,7 +133,7 @@
             , Var ( RepID Nothing ) "revHits" 
             , Var ( RepID Nothing ) "n_repeats" 
             ] "repeat" 
-            [ Ref str.list ( Salt 0 ) 
+            [ Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "solidHits" 
                 , Var ( RepID Nothing ) "recHits" 
                 , Var ( RepID Nothing ) "fwdHits" 
@@ -145,15 +143,15 @@
                 , Var ( RepID Nothing ) "n_repeats" 
                 ] 
                 ( Var ( RepID Nothing ) "solidHitIDs" )
-            , Ref num ( Salt 0 ) [] 
+            , Ref num Nothing [] 
                 ( Var ( RepID Nothing ) "n_repeats" )
-            , Lit num ( Salt 0 ) "100.0" 
+            , Lit num "100.0" 
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref str.list ( Salt 0 ) 
+    , Ref str.list Nothing 
         [ Var ( RepID Nothing ) "solidHitIDs" 
         , Var ( RepID Nothing ) "solidHits" 
         , Var ( RepID Nothing ) "recHits" 

@@ -2,14 +2,12 @@
 |-- cache
 |-- exprs
 |   |-- glob_files
-|   |   `-- 844850e0c9
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 5b3fc9067d
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       `-- f78ef4ca97
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/glob_files/844850e0c9/0/result
+    `-- result -> ../exprs/glob_files/5b3fc9067d/result
 
-9 directories, 3 files
+7 directories, 3 files

@@ -196,7 +196,7 @@ blastdblist = let name = "blastdblist" in Function
   -- , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fInputs = [Exactly str]
   , fOutput =  Exactly (ListOf str)
-  ,fTags = []
+  , fTags = [ReadsURL]
   , fNewRules = NewNotImplemented, fOldRules = rBlastdblist
   }
 

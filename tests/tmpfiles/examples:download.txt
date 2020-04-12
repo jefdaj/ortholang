@@ -1,20 +1,19 @@
 .
 |-- cache
-|   `-- blastdbget
-|       |-- dblist.txt
-|       |-- dblist.txt.err
-|       `-- dblist.txt.out -> $TMPDIR/cache/blastdbget/dblist.txt
+|   |-- curl
+|   |   `-- 0ba64ec1b2
+|   `-- load
+|       |-- 46d3084751
+|       `-- 46d3084751.ids
 |-- exprs
-|   |-- blastdblist
-|   |   `-- f547d63fe4
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |-- load_fna
+|   |   `-- 39cfbdcad3
+|   |       `-- result -> ../../../cache/load/46d3084751
 |   `-- str
-|       `-- 072c64781f
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|       `-- 0ba64ec1b2
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- ncbi_human_db_list.str.list -> ../exprs/blastdblist/f547d63fe4/0/result
-    `-- result -> ../vars/ncbi_human_db_list.str.list
+    |-- result -> ../vars/samplefa.fna
+    `-- samplefa.fna -> ../exprs/load_fna/39cfbdcad3/result
 
-10 directories, 7 files
+9 directories, 7 files

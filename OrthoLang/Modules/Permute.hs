@@ -82,6 +82,7 @@ leaveEachOut = newFnA1 "leave_each_out"
                  (ListSigs $            AnyType "any type")
                  (ListSigs $ ListSigs $ AnyType "any type")
                  (aPermute dropEach)
+                 []
 
 -- combosTypeCheck :: [Type] -> Either String Type
 -- combosTypeCheck [ListOf t] = Right $ ListOf $ ListOf t

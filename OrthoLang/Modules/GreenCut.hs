@@ -31,7 +31,7 @@ greencutTwoFamilies = Function
   -- , fTypeDesc  = mkTypeDesc name  [bht, bht] gcr
   , fInputs = [Exactly bht, Exactly bht]
   , fOutput = Exactly gcr
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimpleScript $ name ++ ".py"
   }
   where

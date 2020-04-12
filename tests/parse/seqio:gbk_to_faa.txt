@@ -1,14 +1,13 @@
 [ 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "gbk_to_faa" 
-        [ Lit str ( Salt 0 ) "cds" 
-        , Fun gbk ( Salt 0 ) [] "load_gbk" 
-            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_PG2.gbk" ]
+    , Fun faa Nothing [] "gbk_to_faa" 
+        [ Lit str "cds" 
+        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2.gbk" ]
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref faa ( Salt 0 ) [] 
+    , Ref faa Nothing [] 
         ( Var ( RepID Nothing ) "maga" )
     ) 
 ] 

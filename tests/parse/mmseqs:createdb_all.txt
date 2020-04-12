@@ -1,22 +1,21 @@
 [ 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga_db" 
-    , Fun mms ( Salt 0 ) 
+    , Fun mms Nothing 
         [ Var ( RepID Nothing ) "maga" ] "mmseqs_createdb_all" 
-        [ Lst faa ( Salt 0 ) 
+        [ Lst faa 
             [ Var ( RepID Nothing ) "maga" ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
             ]
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref mms ( Salt 0 ) 
+    , Ref mms Nothing 
         [ Var ( RepID Nothing ) "maga" ] 
         ( Var ( RepID Nothing ) "maga_db" )
     ) 

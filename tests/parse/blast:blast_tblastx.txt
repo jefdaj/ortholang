@@ -1,54 +1,52 @@
 [ 
     ( Var ( RepID Nothing ) "genes5" 
-    , Fun fna ( Salt 0 ) [] "load_fna" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun fna ( Salt 0 ) [] "gbk_to_fna" 
-        [ Lit str ( Salt 0 ) "cds" 
-        , Fun gbk ( Salt 0 ) [] "load_gbk" 
-            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+    , Fun fna Nothing [] "gbk_to_fna" 
+        [ Lit str "cds" 
+        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "hits" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "genes5" 
         , Var ( RepID Nothing ) "maga" 
         ] "extract_queries" 
-        [ Fun bht ( Salt 0 ) 
+        [ Fun bht Nothing 
             [ Var ( RepID Nothing ) "genes5" 
             , Var ( RepID Nothing ) "maga" 
             ] "tblastx" 
-            [ Lit num ( Salt 0 ) "1.0e-5" 
-            , Ref fna ( Salt 0 ) [] 
+            [ Lit num "1.0e-5" 
+            , Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "genes5" )
-            , Ref fna ( Salt 0 ) [] 
+            , Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "genes5" 
         , Var ( RepID Nothing ) "maga" 
         ] "all" 
-        [ Fun str.list.list ( Salt 0 ) 
+        [ Fun str.list.list Nothing 
             [ Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "genes5" 
             , Var ( RepID Nothing ) "maga" 
             ] "repeat" 
-            [ Ref str.list ( Salt 0 ) 
+            [ Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "genes5" 
                 , Var ( RepID Nothing ) "maga" 
                 ] 
                 ( Var ( RepID Nothing ) "hits" )
-            , Ref fna ( Salt 0 ) [] 
+            , Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "genes5" )
-            , Lit num ( Salt 0 ) "10.0" 
+            , Lit num "10.0" 
             ] 
         ]
     ) 

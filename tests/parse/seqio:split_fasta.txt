@@ -1,49 +1,48 @@
 [ 
     ( Var ( RepID Nothing ) "multifa" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "genes" 
-    , Fun faa.list ( Salt 0 ) 
+    , Fun faa.list Nothing 
         [ Var ( RepID Nothing ) "multifa" ] "split_faa" 
-        [ Ref faa ( Salt 0 ) [] 
+        [ Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "multifa" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mapped" 
-    , Fun faa.list.list ( Salt 0 ) 
+    , Fun faa.list.list Nothing 
         [ Var ( RepID Nothing ) "multifa" ] "split_faa_each" 
-        [ Lst faa ( Salt 0 ) 
+        [ Lst faa 
             [ Var ( RepID Nothing ) "multifa" ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "multifa" )
             ]
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun num.list ( Salt 0 ) 
+    , Fun num.list Nothing 
         [ Var ( RepID Nothing ) "genes" 
         , Var ( RepID Nothing ) "multifa" 
         , Var ( RepID Nothing ) "mapped" 
         ] "length_each" 
-        [ Bop faa.list.list ( Salt 0 ) 
+        [ Bop faa.list.list Nothing 
             [ Var ( RepID Nothing ) "genes" 
             , Var ( RepID Nothing ) "multifa" 
             , Var ( RepID Nothing ) "mapped" 
             ] "|" 
-            ( Lst faa.list ( Salt 0 ) 
+            ( Lst faa.list 
                 [ Var ( RepID Nothing ) "genes" 
                 , Var ( RepID Nothing ) "multifa" 
                 ] 
-                [ Ref faa.list ( Salt 0 ) 
+                [ Ref faa.list Nothing 
                     [ Var ( RepID Nothing ) "multifa" ] 
                     ( Var ( RepID Nothing ) "genes" )
                 ]
             ) 
-            ( Ref faa.list.list ( Salt 0 ) 
+            ( Ref faa.list.list Nothing 
                 [ Var ( RepID Nothing ) "multifa" ] 
                 ( Var ( RepID Nothing ) "mapped" )
             )

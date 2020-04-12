@@ -46,7 +46,7 @@ sonicparanoid = let name = "sonicparanoid" in Function
   -- , fTypeCheck = defaultTypeCheck name [ListOf faa] spr -- TODO or fna
   , fInputs = [Exactly $ ListOf faa]
   , fOutput = Exactly spr
-  , fTags = []
+  , fTags = [Stochastic]
   , fNewRules = NewNotImplemented
   , fOldRules = rSimple aSonicParanoid
   }

@@ -1,55 +1,53 @@
 [ 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgendb" 
-    , Fun faa.blastdb ( Salt 0 ) 
+    , Fun faa.blastdb Nothing 
         [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_faa" 
-        [ Ref faa ( Salt 0 ) [] 
+        [ Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "single" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "extract_queries" 
-        [ Fun bht ( Salt 0 ) 
+        [ Fun bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] "blastp" 
-            [ Lit num ( Salt 0 ) "1.0e-5" 
-            , Ref faa ( Salt 0 ) [] 
+            [ Lit num "1.0e-5" 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "mgen" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mapped" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list.list Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "extract_queries_each" 
-        [ Fun bht.list ( Salt 0 ) 
+        [ Fun bht.list Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] "blastp_each" 
-            [ Lit num ( Salt 0 ) "1.0e-5" 
-            , Ref faa ( Salt 0 ) [] 
+            [ Lit num "1.0e-5" 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
-            , Lst faa ( Salt 0 ) 
+            , Lst faa 
                 [ Var ( RepID Nothing ) "mgen" ] 
-                [ Ref faa ( Salt 0 ) [] 
+                [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
                 ]
             ] 
@@ -57,20 +55,20 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "singledb" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgendb" 
         , Var ( RepID Nothing ) "mgen" 
         ] "extract_queries" 
-        [ Fun bht ( Salt 0 ) 
+        [ Fun bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgendb" 
             , Var ( RepID Nothing ) "mgen" 
             ] "blastp_db" 
-            [ Lit num ( Salt 0 ) "1.0e-5" 
-            , Ref faa ( Salt 0 ) [] 
+            [ Lit num "1.0e-5" 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
-            , Ref faa.blastdb ( Salt 0 ) 
+            , Ref faa.blastdb Nothing 
                 [ Var ( RepID Nothing ) "mgen" ] 
                 ( Var ( RepID Nothing ) "mgendb" )
             ] 
@@ -78,24 +76,24 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "mappeddb" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list.list Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgendb" 
         , Var ( RepID Nothing ) "mgen" 
         ] "extract_queries_each" 
-        [ Fun bht.list ( Salt 0 ) 
+        [ Fun bht.list Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgendb" 
             , Var ( RepID Nothing ) "mgen" 
             ] "blastp_db_each" 
-            [ Lit num ( Salt 0 ) "1.0e-5" 
-            , Ref faa ( Salt 0 ) [] 
+            [ Lit num "1.0e-5" 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
-            , Lst faa.blastdb ( Salt 0 ) 
+            , Lst faa.blastdb 
                 [ Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] 
-                [ Ref faa.blastdb ( Salt 0 ) 
+                [ Ref faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "mgen" ] 
                     ( Var ( RepID Nothing ) "mgendb" )
                 ]
@@ -104,7 +102,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun num.list ( Salt 0 ) 
+    , Fun num.list Nothing 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
@@ -113,7 +111,7 @@
         , Var ( RepID Nothing ) "mgendb" 
         , Var ( RepID Nothing ) "mappeddb" 
         ] "length_each" 
-        [ Bop str.list.list ( Salt 0 ) 
+        [ Bop str.list.list Nothing 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
@@ -122,7 +120,7 @@
             , Var ( RepID Nothing ) "mgendb" 
             , Var ( RepID Nothing ) "mappeddb" 
             ] "|" 
-            ( Bop str.list.list ( Salt 0 ) 
+            ( Bop str.list.list Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
@@ -130,38 +128,38 @@
                 , Var ( RepID Nothing ) "singledb" 
                 , Var ( RepID Nothing ) "mgendb" 
                 ] "|" 
-                ( Bop str.list.list ( Salt 0 ) 
+                ( Bop str.list.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "mapped" 
                     ] "|" 
-                    ( Lst str.list ( Salt 0 ) 
+                    ( Lst str.list 
                         [ Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "maga" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
-                        [ Ref str.list ( Salt 0 ) 
+                        [ Ref str.list Nothing 
                             [ Var ( RepID Nothing ) "maga" 
                             , Var ( RepID Nothing ) "mgen" 
                             ] 
                             ( Var ( RepID Nothing ) "single" )
                         ]
                     ) 
-                    ( Ref str.list.list ( Salt 0 ) 
+                    ( Ref str.list.list Nothing 
                         [ Var ( RepID Nothing ) "maga" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
                         ( Var ( RepID Nothing ) "mapped" )
                     )
                 ) 
-                ( Lst str.list ( Salt 0 ) 
+                ( Lst str.list 
                     [ Var ( RepID Nothing ) "singledb" 
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
-                    [ Ref str.list ( Salt 0 ) 
+                    [ Ref str.list Nothing 
                         [ Var ( RepID Nothing ) "maga" 
                         , Var ( RepID Nothing ) "mgendb" 
                         , Var ( RepID Nothing ) "mgen" 
@@ -170,7 +168,7 @@
                     ]
                 )
             ) 
-            ( Ref str.list.list ( Salt 0 ) 
+            ( Ref str.list.list Nothing 
                 [ Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "mgen" 

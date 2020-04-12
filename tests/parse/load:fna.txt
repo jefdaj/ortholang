@@ -1,28 +1,25 @@
 [ 
     ( Var ( RepID Nothing ) "single" 
-    , Fun fna ( Salt 0 ) [] "load_fna" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
+    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mapped" 
-    , Fun fna.list ( Salt 0 ) [] "load_fna_each" 
-        [ Lst str ( Salt 0 ) [] 
-            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
-        ]
+    , Fun fna.list Nothing [] "load_fna_each" 
+        [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ] ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop fna.list ( Salt 0 ) 
+    , Bop fna.list Nothing 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "mapped" 
         ] "|" 
-        ( Lst fna ( Salt 0 ) 
+        ( Lst fna 
             [ Var ( RepID Nothing ) "single" ] 
-            [ Ref fna ( Salt 0 ) [] 
+            [ Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "single" )
             ]
         ) 
-        ( Ref fna.list ( Salt 0 ) [] 
+        ( Ref fna.list Nothing [] 
             ( Var ( RepID Nothing ) "mapped" )
         )
     ) 

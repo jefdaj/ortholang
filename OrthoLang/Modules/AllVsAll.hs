@@ -35,7 +35,7 @@ mkAva name = let name' = name ++ "_ava" in Function
   -- , fTypeCheck = defaultTypeCheck name' [num, ListOf faa] ava
   , fInputs = [Exactly num, Exactly (ListOf faa)]
   , fOutput = Exactly ava
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMkAva
   }
 

@@ -1,151 +1,151 @@
 [ 
     ( Var ( RepID Nothing ) "l1" 
-    , Fun num.list ( Salt 0 ) [] "range_integers" 
-        [ Lit num ( Salt 0 ) "1.0" 
-        , Lit num ( Salt 0 ) "10.0" 
+    , Fun num.list Nothing [] "range_integers" 
+        [ Lit num "1.0" 
+        , Lit num "10.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "l2" 
-    , Fun num.list ( Salt 0 ) [] "range_integers" 
-        [ Lit num ( Salt 0 ) "3.0" 
-        , Lit num ( Salt 0 ) "15.0" 
+    , Fun num.list Nothing [] "range_integers" 
+        [ Lit num "3.0" 
+        , Lit num "15.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "l3" 
-    , Fun num.list ( Salt 0 ) [] "range_integers" 
-        [ Lit num ( Salt 0 ) "3.0" 
-        , Lit num ( Salt 0 ) "20.0" 
+    , Fun num.list Nothing [] "range_integers" 
+        [ Lit num "3.0" 
+        , Lit num "20.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "l4" 
-    , Fun num.list ( Salt 0 ) [] "range_integers" 
-        [ Lit num ( Salt 0 ) "15.0" 
-        , Lit num ( Salt 0 ) "50.0" 
+    , Fun num.list Nothing [] "range_integers" 
+        [ Lit num "15.0" 
+        , Lit num "50.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "l5" 
-    , Fun num.list ( Salt 0 ) [] "range_integers" 
-        [ Lit num ( Salt 0 ) "0.0" 
-        , Lit num ( Salt 0 ) "10.0" 
+    , Fun num.list Nothing [] "range_integers" 
+        [ Lit num "0.0" 
+        , Lit num "10.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "l6" 
-    , Fun num.list ( Salt 0 ) [] "range_integers" 
-        [ Lit num ( Salt 0 ) "0.0" 
-        , Lit num ( Salt 0 ) "100.0" 
+    , Fun num.list Nothing [] "range_integers" 
+        [ Lit num "0.0" 
+        , Lit num "100.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "d_one" 
-    , Fun tsv ( Salt 0 ) 
+    , Fun tsv Nothing 
         [ Var ( RepID Nothing ) "l1" ] "sets_table" 
-        [ Lst num.list ( Salt 0 ) 
+        [ Lst num.list 
             [ Var ( RepID Nothing ) "l1" ] 
-            [ Ref num.list ( Salt 0 ) [] 
+            [ Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l1" )
             ]
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "d_two" 
-    , Fun tsv ( Salt 0 ) 
+    , Fun tsv Nothing 
         [ Var ( RepID Nothing ) "l1" 
         , Var ( RepID Nothing ) "l2" 
         ] "sets_table" 
-        [ Lst num.list ( Salt 0 ) 
+        [ Lst num.list 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             ] 
-            [ Ref num.list ( Salt 0 ) [] 
+            [ Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l1" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l2" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "d_three" 
-    , Fun tsv ( Salt 0 ) 
+    , Fun tsv Nothing 
         [ Var ( RepID Nothing ) "l1" 
         , Var ( RepID Nothing ) "l2" 
         , Var ( RepID Nothing ) "l3" 
         ] "sets_table" 
-        [ Lst num.list ( Salt 0 ) 
+        [ Lst num.list 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l3" 
             ] 
-            [ Ref num.list ( Salt 0 ) [] 
+            [ Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l1" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l2" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l3" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "d_four" 
-    , Fun tsv ( Salt 0 ) 
+    , Fun tsv Nothing 
         [ Var ( RepID Nothing ) "l1" 
         , Var ( RepID Nothing ) "l2" 
         , Var ( RepID Nothing ) "l3" 
         , Var ( RepID Nothing ) "l4" 
         ] "sets_table" 
-        [ Lst num.list ( Salt 0 ) 
+        [ Lst num.list 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l3" 
             , Var ( RepID Nothing ) "l4" 
             ] 
-            [ Ref num.list ( Salt 0 ) [] 
+            [ Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l1" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l2" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l3" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l4" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "d_five" 
-    , Fun tsv ( Salt 0 ) 
+    , Fun tsv Nothing 
         [ Var ( RepID Nothing ) "l1" 
         , Var ( RepID Nothing ) "l2" 
         , Var ( RepID Nothing ) "l3" 
         , Var ( RepID Nothing ) "l4" 
         , Var ( RepID Nothing ) "l5" 
         ] "sets_table" 
-        [ Lst num.list ( Salt 0 ) 
+        [ Lst num.list 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l3" 
             , Var ( RepID Nothing ) "l4" 
             , Var ( RepID Nothing ) "l5" 
             ] 
-            [ Ref num.list ( Salt 0 ) [] 
+            [ Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l1" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l2" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l3" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l4" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l5" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "d_six" 
-    , Fun tsv ( Salt 0 ) 
+    , Fun tsv Nothing 
         [ Var ( RepID Nothing ) "l1" 
         , Var ( RepID Nothing ) "l2" 
         , Var ( RepID Nothing ) "l3" 
@@ -153,7 +153,7 @@
         , Var ( RepID Nothing ) "l5" 
         , Var ( RepID Nothing ) "l6" 
         ] "sets_table" 
-        [ Lst num.list ( Salt 0 ) 
+        [ Lst num.list 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l3" 
@@ -161,53 +161,53 @@
             , Var ( RepID Nothing ) "l5" 
             , Var ( RepID Nothing ) "l6" 
             ] 
-            [ Ref num.list ( Salt 0 ) [] 
+            [ Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l1" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l2" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l3" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l4" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l5" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l6" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "d_five_unordered" 
-    , Fun tsv ( Salt 0 ) 
+    , Fun tsv Nothing 
         [ Var ( RepID Nothing ) "l2" 
         , Var ( RepID Nothing ) "l5" 
         , Var ( RepID Nothing ) "l1" 
         , Var ( RepID Nothing ) "l3" 
         , Var ( RepID Nothing ) "l4" 
         ] "sets_table" 
-        [ Lst num.list ( Salt 0 ) 
+        [ Lst num.list 
             [ Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l5" 
             , Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l3" 
             , Var ( RepID Nothing ) "l4" 
             ] 
-            [ Ref num.list ( Salt 0 ) [] 
+            [ Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l2" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l5" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l1" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l3" )
-            , Ref num.list ( Salt 0 ) [] 
+            , Ref num.list Nothing [] 
                 ( Var ( RepID Nothing ) "l4" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lst tsv ( Salt 0 ) 
+    , Lst tsv 
         [ Var ( RepID Nothing ) "d_one" 
         , Var ( RepID Nothing ) "l1" 
         , Var ( RepID Nothing ) "d_two" 
@@ -222,28 +222,28 @@
         , Var ( RepID Nothing ) "d_six" 
         , Var ( RepID Nothing ) "l6" 
         ] 
-        [ Ref tsv ( Salt 0 ) 
+        [ Ref tsv Nothing 
             [ Var ( RepID Nothing ) "l1" ] 
             ( Var ( RepID Nothing ) "d_one" )
-        , Ref tsv ( Salt 0 ) 
+        , Ref tsv Nothing 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             ] 
             ( Var ( RepID Nothing ) "d_two" )
-        , Ref tsv ( Salt 0 ) 
+        , Ref tsv Nothing 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l3" 
             ] 
             ( Var ( RepID Nothing ) "d_three" )
-        , Ref tsv ( Salt 0 ) 
+        , Ref tsv Nothing 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l3" 
             , Var ( RepID Nothing ) "l4" 
             ] 
             ( Var ( RepID Nothing ) "d_four" )
-        , Ref tsv ( Salt 0 ) 
+        , Ref tsv Nothing 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l3" 
@@ -251,7 +251,7 @@
             , Var ( RepID Nothing ) "l5" 
             ] 
             ( Var ( RepID Nothing ) "d_five" )
-        , Ref tsv ( Salt 0 ) 
+        , Ref tsv Nothing 
             [ Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l5" 
             , Var ( RepID Nothing ) "l1" 
@@ -259,7 +259,7 @@
             , Var ( RepID Nothing ) "l4" 
             ] 
             ( Var ( RepID Nothing ) "d_five_unordered" )
-        , Ref tsv ( Salt 0 ) 
+        , Ref tsv Nothing 
             [ Var ( RepID Nothing ) "l1" 
             , Var ( RepID Nothing ) "l2" 
             , Var ( RepID Nothing ) "l3" 

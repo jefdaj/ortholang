@@ -1,49 +1,47 @@
 [ 
     ( Var ( RepID Nothing ) "hits" 
-    , Fun bht ( Salt 0 ) [] "blastp" 
-        [ Lit num ( Salt 0 ) "1.0e-5" 
-        , Fun faa ( Salt 0 ) [] "load_faa" 
-            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
-        , Fun faa ( Salt 0 ) [] "load_faa" 
-            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun bht Nothing [] "blastp" 
+        [ Lit num "1.0e-5" 
+        , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+        , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "single" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "hits" ] "extract_queries" 
-        [ Ref bht ( Salt 0 ) [] 
+        [ Ref bht Nothing [] 
             ( Var ( RepID Nothing ) "hits" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mapped" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list.list Nothing 
         [ Var ( RepID Nothing ) "hits" ] "extract_queries_each" 
-        [ Lst bht ( Salt 0 ) 
+        [ Lst bht 
             [ Var ( RepID Nothing ) "hits" ] 
-            [ Ref bht ( Salt 0 ) [] 
+            [ Ref bht Nothing [] 
                 ( Var ( RepID Nothing ) "hits" )
             ]
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list.list Nothing 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "mapped" 
         ] "|" 
-        ( Lst str.list ( Salt 0 ) 
+        ( Lst str.list 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "hits" 
             ] 
-            [ Ref str.list ( Salt 0 ) 
+            [ Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "hits" ] 
                 ( Var ( RepID Nothing ) "single" )
             ]
         ) 
-        ( Ref str.list.list ( Salt 0 ) 
+        ( Ref str.list.list Nothing 
             [ Var ( RepID Nothing ) "hits" ] 
             ( Var ( RepID Nothing ) "mapped" )
         )

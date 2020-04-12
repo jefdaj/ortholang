@@ -1,45 +1,43 @@
 [ 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgendb" 
-    , Fun mms ( Salt 0 ) 
+    , Fun mms Nothing 
         [ Var ( RepID Nothing ) "mgen" ] "mmseqs_createdb" 
-        [ Ref faa ( Salt 0 ) [] 
+        [ Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "hits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgendb" 
         , Var ( RepID Nothing ) "mgen" 
         ] "mmseqs_search_db" 
-        [ Lit num ( Salt 0 ) "1.0e-30" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-30" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Ref mms ( Salt 0 ) 
+        , Ref mms Nothing 
             [ Var ( RepID Nothing ) "mgen" ] 
             ( Var ( RepID Nothing ) "mgendb" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun num ( Salt 0 ) 
+    , Fun num Nothing 
         [ Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgendb" 
         , Var ( RepID Nothing ) "mgen" 
         ] "length" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgendb" 
             , Var ( RepID Nothing ) "mgen" 

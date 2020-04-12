@@ -1,5 +1,5 @@
 [ 
     ( Var ( RepID Nothing ) "result" 
-    , Lit str ( Salt 0 ) "function not finished yet" 
+    , Lit str "function not finished yet" 
     ) 
 ]

@@ -7,38 +7,33 @@
 |   |   `-- cb3e90dc00.ids
 |   `-- makeblastdb
 |       `-- 583d3fe84e
-|           |-- 583d3fe84e.faa.blastdb.err
-|           |-- 583d3fe84e.faa.blastdb.out
-|           |-- 583d3fe84e.faa.blastdb.phr
-|           |-- 583d3fe84e.faa.blastdb.pin
-|           `-- 583d3fe84e.faa.blastdb.psq
+|           |-- result
+|           |-- result.err
+|           |-- result.out
+|           |-- result.phr
+|           |-- result.pin
+|           `-- result.psq
 |-- exprs
 |   |-- list
-|   |   `-- f04d901533
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 1034960c01
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 649c67c82e
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/28e059b2a9
-|   |   `-- 998406b615
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/cb3e90dc00
+|   |   |-- 81fa36fcfa
+|   |   |   `-- result -> ../../../cache/load/cb3e90dc00
+|   |   `-- ae9e22061f
+|   |       `-- result -> ../../../cache/load/28e059b2a9
 |   |-- makeblastdb_faa_all
-|   |   `-- 24ea89c454
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- d432260851
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 1e020faf26
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- ead30046d0
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- db.faa.blastdb -> ../exprs/makeblastdb_faa_all/24ea89c454/0/result
-    |-- genes5.faa -> ../exprs/load_faa/998406b615/0/result
+    |-- db.faa.blastdb -> ../exprs/makeblastdb_faa_all/d432260851/result
+    |-- genes5.faa -> ../exprs/load_faa/81fa36fcfa/result
     |-- result -> ../vars/db.faa.blastdb
-    `-- single.faa -> ../exprs/load_faa/649c67c82e/0/result
+    `-- single.faa -> ../exprs/load_faa/ae9e22061f/result
 
-22 directories, 19 files
+16 directories, 20 files

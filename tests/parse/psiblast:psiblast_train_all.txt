@@ -1,59 +1,56 @@
 [ 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "cyanodb" 
-    , Fun faa.blastdb ( Salt 0 ) 
+    , Fun faa.blastdb Nothing 
         [ Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "makeblastdb_faa_all" 
-        [ Lst faa ( Salt 0 ) 
+        [ Lst faa 
             [ Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "maga" 
             ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "mgen" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "query" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "pssm" 
-    , Fun pssm ( Salt 0 ) 
+    , Fun pssm Nothing 
         [ Var ( RepID Nothing ) "query" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "psiblast_train_all" 
-        [ Lit num ( Salt 0 ) "1.0e-10" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-10" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "query" )
-        , Lst faa ( Salt 0 ) 
+        , Lst faa 
             [ Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "maga" 
             ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "mgen" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
             ] 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref pssm ( Salt 0 ) 
+    , Ref pssm Nothing 
         [ Var ( RepID Nothing ) "query" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "maga" 

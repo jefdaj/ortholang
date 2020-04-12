@@ -1,32 +1,30 @@
 [ 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "db" 
-    , Fun dmnd ( Salt 0 ) 
+    , Fun dmnd Nothing 
         [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb" 
-        [ Ref faa ( Salt 0 ) [] 
+        [ Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "db" 
         , Var ( RepID Nothing ) "mgen" 
         ] "diamond_blastp_db_sensitive" 
-        [ Lit num ( Salt 0 ) "1.0e-50" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-50" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Ref dmnd ( Salt 0 ) 
+        , Ref dmnd Nothing 
             [ Var ( RepID Nothing ) "mgen" ] 
             ( Var ( RepID Nothing ) "db" )
         ] 

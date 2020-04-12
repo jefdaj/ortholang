@@ -1,46 +1,41 @@
 [ 
     ( Var ( RepID Nothing ) "query" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgendb" 
-    , Fun faa.blastdb ( Salt 0 ) [] "makeblastdb_faa" 
-        [ Fun faa ( Salt 0 ) [] "load_faa" 
-            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
-        ]
+    , Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+        [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ] ]
     ) 
 , 
     ( Var ( RepID Nothing ) "magadb" 
-    , Fun faa.blastdb ( Salt 0 ) [] "makeblastdb_faa" 
-        [ Fun faa ( Salt 0 ) [] "load_faa" 
-            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-        ]
+    , Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+        [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
     ) 
 , 
     ( Var ( RepID Nothing ) "cyanodbs" 
-    , Lst faa.blastdb ( Salt 0 ) 
+    , Lst faa.blastdb 
         [ Var ( RepID Nothing ) "mgendb" 
         , Var ( RepID Nothing ) "magadb" 
         ] 
-        [ Ref faa.blastdb ( Salt 0 ) [] 
+        [ Ref faa.blastdb Nothing [] 
             ( Var ( RepID Nothing ) "mgendb" )
-        , Ref faa.blastdb ( Salt 0 ) [] 
+        , Ref faa.blastdb Nothing [] 
             ( Var ( RepID Nothing ) "magadb" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "hitlists" 
-    , Fun bht.list ( Salt 0 ) 
+    , Fun bht.list Nothing 
         [ Var ( RepID Nothing ) "query" 
         , Var ( RepID Nothing ) "cyanodbs" 
         , Var ( RepID Nothing ) "mgendb" 
         , Var ( RepID Nothing ) "magadb" 
         ] "psiblast_db_each" 
-        [ Lit num ( Salt 0 ) "0.5" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "0.5" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "query" )
-        , Ref faa.blastdb.list ( Salt 0 ) 
+        , Ref faa.blastdb.list Nothing 
             [ Var ( RepID Nothing ) "mgendb" 
             , Var ( RepID Nothing ) "magadb" 
             ] 
@@ -49,7 +44,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref bht.list ( Salt 0 ) 
+    , Ref bht.list Nothing 
         [ Var ( RepID Nothing ) "query" 
         , Var ( RepID Nothing ) "cyanodbs" 
         , Var ( RepID Nothing ) "mgendb" 

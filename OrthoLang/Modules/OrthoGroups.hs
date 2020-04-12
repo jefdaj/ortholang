@@ -85,7 +85,7 @@ orthogroups = let name = "orthogroups" in Function
   -- , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup"] sll
   , fInputs = [Some og "some orthogroup"]
   , fOutput =  Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthogroups
   }
 
@@ -171,7 +171,7 @@ orthogroupContaining = let name = "orthogroup_containing" in Function
   -- , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup", str] (ListOf str)
   , fInputs = [Some og "some orthogroup", Exactly str]
   , fOutput = Exactly (ListOf str)
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple aOrthogroupContaining
   }
 
@@ -202,7 +202,7 @@ orthogroupsContaining = let name = "orthogroups_containing" in Function
   -- , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup", ListOf str] sll
   , fInputs = [Some og "some orthogroup", Exactly (ListOf str)]
   , fOutput = Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aOrthogroupsFilter containsOneOf
   }
 
@@ -238,7 +238,7 @@ orthologInAny = let name = "ortholog_in_any" in Function
   -- , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup", ListOf faa] sll
   , fInputs = [Some og "some orthogroup", Exactly (ListOf faa)]
   , fOutput = Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules name
   }
 
@@ -260,7 +260,7 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in Function
   -- , fTypeCheck = defaultTypeCheck name [sll, sll] sll
   , fInputs = [Exactly sll, Exactly sll]
   , fOutput = Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAny
   }
 
@@ -315,7 +315,7 @@ orthologInAll = let name = "ortholog_in_all" in Function
   -- , fTypeCheck = defaultTypeCheck name [Some og "some orthogroup", ListOf faa] sll
   , fInputs = [Some og "some orthogroup", Exactly (ListOf faa)]
   , fOutput = Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules "ortholog_in_all"
   }
 
@@ -326,7 +326,7 @@ orthologInAllStr = let name = "ortholog_in_all_str" in Function
   -- , fTypeCheck = defaultTypeCheck name [sll, sll] sll
   , fInputs = [Exactly sll, Exactly sll]
   , fOutput = Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAll
   }
 
@@ -352,7 +352,7 @@ orthologInMinStr = let name = "ortholog_in_min_str" in Function
   -- , fTypeCheck = defaultTypeCheck name [num, sll, sll] sll
   , fInputs = [Exactly num, Exactly sll, Exactly sll]
   , fOutput = Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStrFrac "min" pickMin
   }
 
@@ -407,7 +407,7 @@ orthologInMin = let name = "ortholog_in_min" in Function
   -- , fTypeCheck = defaultTypeCheck name [num, Some og "some orthogroup", ListOf faa] sll
   , fInputs = [Exactly num, Some og "some orthogroup", Exactly (ListOf faa)]
   , fOutput = Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
   }
 
@@ -430,7 +430,7 @@ orthologInMax = let name = "ortholog_in_max" in Function
   -- , fTypeCheck = defaultTypeCheck name [num, Some og "some orthogroup", ListOf faa] sll
   , fInputs = [Exactly num, Some og "some orthogroup", Exactly (ListOf faa)]
   , fOutput = Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
   }
 
@@ -441,7 +441,7 @@ orthologInMaxStr = let name = "ortholog_in_max_str" in Function
   -- , fTypeCheck = defaultTypeCheck name [num, sll, sll] sll
   , fInputs = [Exactly num, Exactly sll, Exactly sll]
   , fOutput = Exactly sll
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStrFrac "max" pickMax
   }
 

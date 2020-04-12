@@ -99,9 +99,10 @@ newFnS1
   -> TypeSig              -- ^ 1 argument type
   -> TypeSig              -- ^ return type
   -> String               -- ^ script basename
+  -> [FnTag]              -- ^ tags
   -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS1 n i1 r s os = newFn n Nothing [i1] r rNewRulesA1 $ aNewRulesS1 s os
+newFnS1 n i1 r s ts os = newFn n Nothing [i1] r rNewRulesA1 (aNewRulesS1 s os) ts
 
 -- TODO failed to lookup out path in here?
 aNewRulesS1 :: String -> (CmdDesc -> CmdDesc) -> NewAction1
@@ -112,9 +113,10 @@ newFnS2
   -> (TypeSig, TypeSig)   -- ^ 2 argument types
   -> TypeSig              -- ^ return type
   -> String               -- ^ script basename
+  -> [FnTag]              -- ^ tags
   -> (CmdDesc -> CmdDesc) -- ^ extra options
   -> Function
-newFnS2 n (i1, i2) r s os = newFn n Nothing [i1, i2] r rNewRulesA2 $ aNewRulesS2 s os
+newFnS2 n (i1, i2) r s ts os = newFn n Nothing [i1, i2] r rNewRulesA2 (aNewRulesS2 s os) ts
 
 aNewRulesS2 :: String -> (CmdDesc -> CmdDesc) -> NewAction2
 aNewRulesS2 sname opts o i1 i2 = aNewRulesS sname opts o [i1, i2]
@@ -124,9 +126,10 @@ newFnS3
   -> (TypeSig, TypeSig, TypeSig) -- ^ 3 argument types
   -> TypeSig                     -- ^ return type
   -> String                      -- ^ script basename
+  -> [FnTag]                     -- ^ tags
   -> (CmdDesc -> CmdDesc)        -- ^ extra options
   -> Function
-newFnS3 n (i1, i2, i3) r s os = newFn n Nothing [i1, i2, i3] r rNewRulesA3 $ aNewRulesS3 s os
+newFnS3 n (i1, i2, i3) r s ts os = newFn n Nothing [i1, i2, i3] r rNewRulesA3 (aNewRulesS3 s os) ts
 
 aNewRulesS3 :: String -> (CmdDesc -> CmdDesc) -> NewAction3
 aNewRulesS3 sname opts o i1 i2 i3 = aNewRulesS sname opts o [i1, i2, i3]
@@ -172,6 +175,7 @@ newFnA1
   -> TypeSig    -- ^ 1 input type
   -> TypeSig    -- ^ return type
   -> NewAction1 -- ^ 1-input action function
+  -> [FnTag]    -- ^ tags
   -> Function
 newFnA1 n i1 r = newFn n Nothing [i1] r rNewRulesA1
 
@@ -180,6 +184,7 @@ newFnA2
   -> (TypeSig, TypeSig) -- ^ 2 input types
   -> TypeSig            -- ^ return type
   -> NewAction2         -- ^ 2-input action function
+  -> [FnTag]            -- ^ tags
   -> Function
 newFnA2 n (i1, i2) r = newFn n Nothing [i1, i2] r rNewRulesA2
 
@@ -188,6 +193,7 @@ newFnA3
   -> (TypeSig, TypeSig, TypeSig) -- ^ 3 input types
   -> TypeSig                     -- ^ return type
   -> NewAction3                  -- ^ 3-input action function
+  -> [FnTag]                     -- ^ tags
   -> Function
 newFnA3 n (i1, i2, i3) r = newFn n Nothing [i1, i2, i3] r rNewRulesA3
 
@@ -201,6 +207,7 @@ newBop
   -> TypeSig    -- ^ 1 input type (each side of the bop will be this)
   -> TypeSig    -- ^ return type
   -> NewAction1 -- ^ 1-input action function (list of 2 args in case of bop, or 2+ for the prefix fn)
+  -> [FnTag]    -- ^ tags
   -> Function
 newBop n c i r = newFn n (Just c) [ListSigs i] r rNewRulesA1
 
@@ -306,21 +313,22 @@ is not type safe because it assumes the list of input types will match the
 rules function + action function.
 -}
 newFn
-  :: String     -- ^ name
-  -> Maybe Char -- ^ opchar
-  -> [TypeSig]     -- ^ list of input types
-  ->  TypeSig      -- ^ return type
+  :: String                               -- ^ name
+  -> Maybe Char                           -- ^ opchar
+  -> [TypeSig]                            -- ^ list of input types
+  ->  TypeSig                             -- ^ return type
   -> (TypeSig -> String -> t -> Rules ()) -- ^ rules function
-  -> t                                 -- ^ matching action function
+  -> t                                    -- ^ matching action function
+  -> [FnTag]                              -- ^ tags
   -> Function
-newFn name mChar iSigs oSig rFn aFn =Function
+newFn name mChar iSigs oSig rFn aFn tags = Function
   { fOpChar    = mChar
   , fName      = name
   -- , fTypeDesc  = mkTypeDesc name dTypes oType
   -- , fTypeCheck = tFn
   , fInputs    = iSigs
   , fOutput    = oSig
-  , fTags      = []
+  , fTags      = tags
   , fOldRules  = undefined
   , fNewRules  = NewRules $ rFn oSig name aFn
   }
@@ -362,15 +370,15 @@ directly.  The only type checking planned so far is that
 'OrthoLang.Core.Compile.Basic.rMacro' will prevent macro expansions from
 changing the return type of their input 'Expr'.
 -}
-newMacro :: String -> [TypeSig] -> TypeSig -> MacroExpansion -> Function
-newMacro name iSigs oSig mFn = Function
+newMacro :: String -> [TypeSig] -> TypeSig -> MacroExpansion -> [FnTag] -> Function
+newMacro name iSigs oSig mFn tags = Function
   { fOpChar    = Nothing
   , fName      = name
   -- , fTypeDesc  = mkTypeDesc name dTypes oType
   -- , fTypeCheck = tFn
   , fInputs    = iSigs
   , fOutput    = oSig
-  , fTags      = []
+  , fTags      = tags
   , fOldRules  = undefined
   , fNewRules  = NewMacro mFn
   }

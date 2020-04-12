@@ -23,10 +23,11 @@ import Control.DeepSeq
 -- TODO can it figure out the types automatically from fn1 and fn2?
 compose1
   :: String   -- ^ overall function name
+  -> [FnTag]  -- ^ tags (TODO additional tags, or the only ones?)
   -> Function -- ^ first function (takes inputs, returns 1 intermediate file)
   -> Function -- ^ second function (takes intermediate file, produces output)
   -> Function -- ^ overall fn (runs fn1, then fn2 on its output)
-compose1 name fn1 fn2 = newMacro name (fInputs fn1) (fOutput fn2) macro'
+compose1 name ts fn1 fn2 = newMacro name (fInputs fn1) (fOutput fn2) macro' ts
   where
     macro = mCompose1 fn1 fn2
     macro' = macro `deepseq` macro -- force composition errors immediately

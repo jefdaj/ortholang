@@ -1,85 +1,83 @@
 [ 
     ( Var ( RepID Nothing ) "nums" 
-    , Lst num ( Salt 0 ) [] 
-        [ Lit num ( Salt 0 ) "1.0" 
-        , Lit num ( Salt 0 ) "2.0" 
-        , Lit num ( Salt 0 ) "3.0" 
+    , Lst num [] 
+        [ Lit num "1.0" 
+        , Lit num "2.0" 
+        , Lit num "3.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "strs" 
-    , Lst str ( Salt 0 ) [] 
-        [ Lit str ( Salt 0 ) "1" 
-        , Lit str ( Salt 0 ) "2" 
-        , Lit str ( Salt 0 ) "3" 
+    , Lst str [] 
+        [ Lit str "1" 
+        , Lit str "2" 
+        , Lit str "3" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "genes5" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "gbk_to_faa" 
-        [ Lit str ( Salt 0 ) "CDS" 
-        , Fun gbk ( Salt 0 ) [] "load_gbk" 
-            [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+    , Fun faa Nothing [] "gbk_to_faa" 
+        [ Lit str "CDS" 
+        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "dbs" 
-    , Fun faa.blastdb.list ( Salt 0 ) 
+    , Fun faa.blastdb.list Nothing 
         [ Var ( RepID Nothing ) "genes5" 
         , Var ( RepID Nothing ) "mgen" 
         ] "makeblastdb_faa_each" 
-        [ Lst faa ( Salt 0 ) 
+        [ Lst faa 
             [ Var ( RepID Nothing ) "genes5" 
             , Var ( RepID Nothing ) "mgen" 
             ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "genes5" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "mgen" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lst num.list ( Salt 0 ) 
+    , Lst num.list 
         [ Var ( RepID Nothing ) "nums" 
         , Var ( RepID Nothing ) "strs" 
         , Var ( RepID Nothing ) "dbs" 
         , Var ( RepID Nothing ) "genes5" 
         , Var ( RepID Nothing ) "mgen" 
         ] 
-        [ Fun num.list ( Salt 0 ) 
+        [ Fun num.list Nothing 
             [ Var ( RepID Nothing ) "nums" ] "length_each" 
-            [ Fun num.list.list ( Salt 0 ) 
+            [ Fun num.list.list Nothing 
                 [ Var ( RepID Nothing ) "nums" ] "singletons" 
-                [ Ref num.list ( Salt 0 ) [] 
+                [ Ref num.list Nothing [] 
                     ( Var ( RepID Nothing ) "nums" )
                 ]
             ]
-        , Fun num.list ( Salt 0 ) 
+        , Fun num.list Nothing 
             [ Var ( RepID Nothing ) "strs" ] "length_each" 
-            [ Fun str.list.list ( Salt 0 ) 
+            [ Fun str.list.list Nothing 
                 [ Var ( RepID Nothing ) "strs" ] "singletons" 
-                [ Ref str.list ( Salt 0 ) [] 
+                [ Ref str.list Nothing [] 
                     ( Var ( RepID Nothing ) "strs" )
                 ]
             ]
-        , Fun num.list ( Salt 0 ) 
+        , Fun num.list Nothing 
             [ Var ( RepID Nothing ) "dbs" 
             , Var ( RepID Nothing ) "genes5" 
             , Var ( RepID Nothing ) "mgen" 
             ] "length_each" 
-            [ Fun faa.blastdb.list.list ( Salt 0 ) 
+            [ Fun faa.blastdb.list.list Nothing 
                 [ Var ( RepID Nothing ) "dbs" 
                 , Var ( RepID Nothing ) "genes5" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "singletons" 
-                [ Ref faa.blastdb.list ( Salt 0 ) 
+                [ Ref faa.blastdb.list Nothing 
                     [ Var ( RepID Nothing ) "genes5" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 

@@ -1,23 +1,21 @@
 [ 
     ( Var ( RepID Nothing ) "all_faas" 
-    , Fun faa.list ( Salt 0 ) [] "load_faa_glob" 
-        [ Lit str ( Salt 0 ) "examples/sequences/*.faa" ]
+    , Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/*.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "small_faas" 
-    , Fun faa.list ( Salt 0 ) [] "load_faa_glob" 
-        [ Lit str ( Salt 0 ) "examples/sequences/*_small.faa" ]
+    , Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/*_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop faa.list ( Salt 0 ) 
+    , Bop faa.list Nothing 
         [ Var ( RepID Nothing ) "all_faas" 
         , Var ( RepID Nothing ) "small_faas" 
         ] "~" 
-        ( Ref faa.list ( Salt 0 ) [] 
+        ( Ref faa.list Nothing [] 
             ( Var ( RepID Nothing ) "all_faas" )
         ) 
-        ( Ref faa.list ( Salt 0 ) [] 
+        ( Ref faa.list Nothing [] 
             ( Var ( RepID Nothing ) "small_faas" )
         )
     ) 

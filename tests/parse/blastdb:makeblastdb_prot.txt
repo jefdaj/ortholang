@@ -1,115 +1,113 @@
 [ 
     ( Var ( RepID Nothing ) "single" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "genes5" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "singles" 
-    , Lst faa.blastdb ( Salt 0 ) 
+    , Lst faa.blastdb 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 
         ] 
-        [ Fun faa.blastdb ( Salt 0 ) 
+        [ Fun faa.blastdb Nothing 
             [ Var ( RepID Nothing ) "single" ] "makeblastdb_faa" 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "single" )
             ]
-        , Fun faa.blastdb ( Salt 0 ) 
+        , Fun faa.blastdb Nothing 
             [ Var ( RepID Nothing ) "genes5" ] "makeblastdb_faa" 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "genes5" )
             ]
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "each" 
-    , Fun faa.blastdb.list ( Salt 0 ) 
+    , Fun faa.blastdb.list Nothing 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 
         ] "makeblastdb_faa_each" 
-        [ Lst faa ( Salt 0 ) 
+        [ Lst faa 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "genes5" 
             ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "single" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "genes5" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "both" 
-    , Fun faa.blastdb ( Salt 0 ) 
+    , Fun faa.blastdb Nothing 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 
         ] "makeblastdb_faa_all" 
-        [ Lst faa ( Salt 0 ) 
+        [ Lst faa 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "genes5" 
             ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "single" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "genes5" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun num.list ( Salt 0 ) 
+    , Fun num.list Nothing 
         [ Var ( RepID Nothing ) "singles" 
         , Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 
         , Var ( RepID Nothing ) "each" 
         , Var ( RepID Nothing ) "both" 
         ] "length_each" 
-        [ Lst faa.blastdb.list ( Salt 0 ) 
+        [ Lst faa.blastdb.list 
             [ Var ( RepID Nothing ) "singles" 
             , Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "genes5" 
             , Var ( RepID Nothing ) "each" 
             , Var ( RepID Nothing ) "both" 
             ] 
-            [ Ref faa.blastdb.list ( Salt 0 ) 
+            [ Ref faa.blastdb.list Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] 
                 ( Var ( RepID Nothing ) "singles" )
-            , Ref faa.blastdb.list ( Salt 0 ) 
+            , Ref faa.blastdb.list Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] 
                 ( Var ( RepID Nothing ) "each" )
-            , Bop faa.blastdb.list ( Salt 0 ) 
+            , Bop faa.blastdb.list Nothing 
                 [ Var ( RepID Nothing ) "singles" 
                 , Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 , Var ( RepID Nothing ) "each" 
                 ] "|" 
-                ( Ref faa.blastdb.list ( Salt 0 ) 
+                ( Ref faa.blastdb.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
                     ( Var ( RepID Nothing ) "singles" )
                 ) 
-                ( Ref faa.blastdb.list ( Salt 0 ) 
+                ( Ref faa.blastdb.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
                     ( Var ( RepID Nothing ) "each" )
                 )
-            , Lst faa.blastdb ( Salt 0 ) 
+            , Lst faa.blastdb 
                 [ Var ( RepID Nothing ) "both" 
                 , Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] 
-                [ Ref faa.blastdb ( Salt 0 ) 
+                [ Ref faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 

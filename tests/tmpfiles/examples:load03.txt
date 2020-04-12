@@ -1,73 +1,61 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- 1bb4e11878.txt -> ../../cache/lines/...
+|   |   |-- b0f43e2731.txt -> ../../cache/lines/...
 |   |   `-- emptyfaa.txt -> ../../cache/lines/...
 |   |-- each
-|   |   `-- 167564532a
+|   |   `-- ec93ee6e2f
 |   |       |-- 4489902099
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/4489902099/0/result
+|   |       |   `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/4489902099/result
 |   |       `-- 5b8c12652f
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/5b8c12652f/0/result
+|   |           `-- result -> ../../../../exprs/gbk_to_faa/a1cea34ec0/5b8c12652f/result
 |   |-- load
 |   |   |-- 5e5e074c73 -> $WORKDIR/examples/gene-lists/pcc7942-random-100.txt
 |   |   |-- d8da51f7cd -> $WORKDIR/examples/sequences/PCC_7942_pANL.gbk
 |   |   `-- ec9540d17e -> $WORKDIR/examples/sequences/PCC_7942_chr.gbk
 |   `-- seqio
-|       `-- f4fd3e6a1f.txt -> ../../cache/lines/...
+|       `-- b4b6f1db24.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- concat_faa
-|   |   `-- 6b2ff554c7
-|   |       `-- 0
-|   |           `-- result
+|   |   `-- 8bf3365695
+|   |       `-- result
 |   |-- extract_seqs
-|   |   `-- 98c32d62ce
-|   |       `-- f4fd3e6a1f
-|   |           `-- 0
-|   |               `-- result
+|   |   `-- 0d7ea79044
+|   |       `-- b4b6f1db24
+|   |           `-- result
 |   |-- gbk_to_faa
 |   |   `-- a1cea34ec0
 |   |       |-- 4489902099
-|   |       |   `-- 0
-|   |       |       `-- result
+|   |       |   `-- result
 |   |       `-- 5b8c12652f
-|   |           `-- 0
-|   |               `-- result
+|   |           `-- result
 |   |-- gbk_to_faa_each
-|   |   `-- 169f0411dc
-|   |       `-- 37e7920eb0
-|   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
-|   |-- list
-|   |   `-- 02a87cbe39
-|   |       `-- 0
+|   |   `-- 3feaffccb4
+|   |       `-- 6d7964f8c0
 |   |           `-- result -> ../../../../cache/lines/...
+|   |-- list
+|   |   `-- ab37b73374
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |-- load_gbk_each
-|   |   `-- 92f524e420
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- fc92400a9c
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_list
-|   |   `-- c5b6d83a5a
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/5e5e074c73
+|   |   `-- b5c1f0d946
+|   |       `-- result -> ../../../cache/load/5e5e074c73
 |   `-- str
 |       |-- 352a01db6d
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       |-- 3a80eda966
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       |-- 90811d06ee
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- b6bd6d67ae
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- result -> ../vars/sequences_of_interest.faa
-    `-- sequences_of_interest.faa -> ../exprs/extract_seqs/98c32d62ce/f4fd3e6a1f/0/result
+    `-- sequences_of_interest.faa -> ../exprs/extract_seqs/0d7ea79044/b4b6f1db24/result
 
-46 directories, 24 files
+34 directories, 24 files

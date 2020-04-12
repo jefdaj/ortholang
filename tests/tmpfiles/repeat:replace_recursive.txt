@@ -2,40 +2,34 @@
 |-- cache
 |-- exprs
 |   |-- divide
-|   |   `-- 829957f84b
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 69072a9db1
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 32f9ff6558
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- 35e823dbcc
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   |-- 4885acae78
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- 72e8339163
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- num
 |       |-- 89fb8b4aed
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       |-- a629005e3c
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- eaad7f2e40
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 |-- reps
-|   |-- 0ef63fc187
-|   |   |-- dep2.num -> ../../exprs/num/eaad7f2e40/0/result
-|   |   |-- result -> ../../reps/0ef63fc187/var_that_depends_on_replace_result.num
-|   |   `-- var_that_depends_on_replace_result.num -> ../../exprs/divide/829957f84b/0/result
-|   |-- bd5aa12eae
-|   |   |-- dep2.num -> ../../reps/f30bf527df/result
-|   |   `-- result -> ../../reps/bd5aa12eae/dep2.num
-|   `-- f30bf527df
-|       |-- dep.num -> ../../exprs/num/89fb8b4aed/0/result
-|       `-- result -> ../../reps/f30bf527df/dep.num
+|   |-- 04b3f74db4
+|   |   |-- dep2.num -> ../../exprs/num/eaad7f2e40/result
+|   |   |-- result -> ../../reps/04b3f74db4/var_that_depends_on_replace_result.num
+|   |   `-- var_that_depends_on_replace_result.num -> ../../exprs/divide/69072a9db1/result
+|   |-- 809cf32772
+|   |   |-- dep.num -> ../../exprs/num/89fb8b4aed/result
+|   |   `-- result -> ../../reps/809cf32772/dep.num
+|   `-- 886e99a1ab
+|       |-- dep2.num -> ../../reps/809cf32772/result
+|       `-- result -> ../../reps/886e99a1ab/dep2.num
 `-- vars
-    |-- result -> ../exprs/list/35e823dbcc/0/result
-    |-- var_that_ignores_first_replace_result.num -> ../reps/0ef63fc187/result
-    `-- var_that_replaces_in_first_replace_call.num -> ../reps/bd5aa12eae/result
+    |-- result -> ../exprs/list/72e8339163/result
+    |-- var_that_ignores_first_replace_result.num -> ../reps/04b3f74db4/result
+    `-- var_that_replaces_in_first_replace_call.num -> ../reps/886e99a1ab/result
 
-22 directories, 16 files
+16 directories, 16 files

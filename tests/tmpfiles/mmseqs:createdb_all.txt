@@ -5,35 +5,31 @@
 |   |   `-- 36189032ad.ids
 |   `-- mmseqs
 |       `-- createdb
-|           |-- 763f327ded.mmseqs2db
-|           |-- 763f327ded.mmseqs2db.dbtype
-|           |-- 763f327ded.mmseqs2db.err
-|           |-- 763f327ded.mmseqs2db_h
-|           |-- 763f327ded.mmseqs2db_h.dbtype
-|           |-- 763f327ded.mmseqs2db_h.index
-|           |-- 763f327ded.mmseqs2db.index
-|           |-- 763f327ded.mmseqs2db.lookup
-|           `-- 763f327ded.mmseqs2db.out
+|           |-- 563d748ac6.mmseqs2db
+|           |-- 563d748ac6.mmseqs2db.dbtype
+|           |-- 563d748ac6.mmseqs2db.err
+|           |-- 563d748ac6.mmseqs2db_h
+|           |-- 563d748ac6.mmseqs2db_h.dbtype
+|           |-- 563d748ac6.mmseqs2db_h.index
+|           |-- 563d748ac6.mmseqs2db.index
+|           |-- 563d748ac6.mmseqs2db.lookup
+|           `-- 563d748ac6.mmseqs2db.out
 |-- exprs
 |   |-- list
-|   |   `-- 39b18dbf05
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 7666691bcd
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
-|   |   `-- fee73b8143
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/36189032ad
+|   |   `-- 1e0498b59a
+|   |       `-- result -> ../../../cache/load/36189032ad
 |   |-- mmseqs_createdb_all
-|   |   `-- 356d67a59b
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/mmseqs/createdb/763f327ded.mmseqs2db.index
+|   |   `-- 329cb2539d
+|   |       `-- result -> ../../../cache/mmseqs/createdb/563d748ac6.mmseqs2db.index
 |   `-- str
 |       `-- 824ccbd8b2
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- maga_db.mms -> ../exprs/mmseqs_createdb_all/356d67a59b/0/result
-    |-- maga.faa -> ../exprs/load_faa/fee73b8143/0/result
+    |-- maga_db.mms -> ../exprs/mmseqs_createdb_all/329cb2539d/result
+    |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     `-- result -> ../vars/maga_db.mms
 
-18 directories, 18 files
+14 directories, 18 files

@@ -1,57 +1,55 @@
 [ 
     ( Var ( RepID Nothing ) "maga5" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "n" 
-    , Lit num ( Salt 0 ) "1.0e-5" 
+    , Lit num "1.0e-5" 
     ) 
 , 
     ( Var ( RepID Nothing ) "singleFwd" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "n" 
         , Var ( RepID Nothing ) "maga5" 
         , Var ( RepID Nothing ) "maga" 
         ] "extract_queries" 
-        [ Fun bht ( Salt 0 ) 
+        [ Fun bht Nothing 
             [ Var ( RepID Nothing ) "n" 
             , Var ( RepID Nothing ) "maga5" 
             , Var ( RepID Nothing ) "maga" 
             ] "blastp" 
-            [ Ref num ( Salt 0 ) [] 
+            [ Ref num Nothing [] 
                 ( Var ( RepID Nothing ) "n" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga5" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mappedFwd" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list.list Nothing 
         [ Var ( RepID Nothing ) "n" 
         , Var ( RepID Nothing ) "maga5" 
         , Var ( RepID Nothing ) "maga" 
         ] "extract_queries_each" 
-        [ Fun bht.list ( Salt 0 ) 
+        [ Fun bht.list Nothing 
             [ Var ( RepID Nothing ) "n" 
             , Var ( RepID Nothing ) "maga5" 
             , Var ( RepID Nothing ) "maga" 
             ] "blastp_each" 
-            [ Ref num ( Salt 0 ) [] 
+            [ Ref num Nothing [] 
                 ( Var ( RepID Nothing ) "n" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga5" )
-            , Lst faa ( Salt 0 ) 
+            , Lst faa 
                 [ Var ( RepID Nothing ) "maga" ] 
-                [ Ref faa ( Salt 0 ) [] 
+                [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
                 ]
             ] 
@@ -59,42 +57,42 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "singleRev" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "n" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "maga5" 
         ] "extract_queries" 
-        [ Fun bht ( Salt 0 ) 
+        [ Fun bht Nothing 
             [ Var ( RepID Nothing ) "n" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "maga5" 
             ] "blastp_rev" 
-            [ Ref num ( Salt 0 ) [] 
+            [ Ref num Nothing [] 
                 ( Var ( RepID Nothing ) "n" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga5" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "single" 
-    , Bop str.list ( Salt 0 ) 
+    , Bop str.list Nothing 
         [ Var ( RepID Nothing ) "singleFwd" 
         , Var ( RepID Nothing ) "n" 
         , Var ( RepID Nothing ) "maga5" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "singleRev" 
         ] "|" 
-        ( Ref str.list ( Salt 0 ) 
+        ( Ref str.list Nothing 
             [ Var ( RepID Nothing ) "n" 
             , Var ( RepID Nothing ) "maga5" 
             , Var ( RepID Nothing ) "maga" 
             ] 
             ( Var ( RepID Nothing ) "singleFwd" )
         ) 
-        ( Ref str.list ( Salt 0 ) 
+        ( Ref str.list Nothing 
             [ Var ( RepID Nothing ) "n" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "maga5" 
@@ -104,7 +102,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref str.list.list ( Salt 0 ) 
+    , Ref str.list.list Nothing 
         [ Var ( RepID Nothing ) "n" 
         , Var ( RepID Nothing ) "maga5" 
         , Var ( RepID Nothing ) "maga" 

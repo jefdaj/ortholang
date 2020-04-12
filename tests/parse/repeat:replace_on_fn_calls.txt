@@ -1,48 +1,47 @@
 [ 
     ( Var ( RepID Nothing ) "faa_paths" 
-    , Lst str ( Salt 0 ) [] 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_PG2.gbk" 
-        , Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_arthritidis_protein_refseq.faa" 
-        , Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_capricolum_protein_refseq.faa" 
-        , Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" 
+    , Lst str [] 
+        [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2.gbk" 
+        , Lit str "examples/sequences/Mycoplasma_arthritidis_protein_refseq.faa" 
+        , Lit str "examples/sequences/Mycoplasma_capricolum_protein_refseq.faa" 
+        , Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "faa_path" 
-    , Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" 
+    , Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" 
     ) 
 , 
     ( Var ( RepID Nothing ) "faa" 
-    , Fun faa ( Salt 0 ) 
+    , Fun faa Nothing 
         [ Var ( RepID Nothing ) "faa_path" ] "load_faa" 
-        [ Ref str ( Salt 0 ) [] 
+        [ Ref str Nothing [] 
             ( Var ( RepID Nothing ) "faa_path" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "faa_alternatives" 
-    , Fun faa.list ( Salt 0 ) 
+    , Fun faa.list Nothing 
         [ Var ( RepID Nothing ) "faa" 
         , Var ( RepID Nothing ) "faa_path" 
         , Var ( RepID Nothing ) "faa_paths" 
         ] "replace_each" 
-        [ Ref faa ( Salt 0 ) 
+        [ Ref faa Nothing 
             [ Var ( RepID Nothing ) "faa_path" ] 
             ( Var ( RepID Nothing ) "faa" )
-        , Ref str ( Salt 0 ) [] 
+        , Ref str Nothing [] 
             ( Var ( RepID Nothing ) "faa_path" )
-        , Ref str.list ( Salt 0 ) [] 
+        , Ref str.list Nothing [] 
             ( Var ( RepID Nothing ) "faa_paths" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "faa_paths_fn" 
-    , Fun str.list ( Salt 0 ) [] "glob_files" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_*.faa" ]
+    , Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref faa.list ( Salt 0 ) 
+    , Ref faa.list Nothing 
         [ Var ( RepID Nothing ) "faa" 
         , Var ( RepID Nothing ) "faa_path" 
         , Var ( RepID Nothing ) "faa_paths" 

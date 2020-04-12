@@ -1,21 +1,18 @@
 [ 
     ( Var ( RepID Nothing ) "pcc6803" 
-    , Fun fna ( Salt 0 ) [] "load_fna" 
-        [ Lit str ( Salt 0 ) "examples/sequences/PCC_6803_genes.fna" ]
+    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/PCC_6803_genes.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "pcc7942" 
-    , Fun fna ( Salt 0 ) [] "load_fna" 
-        [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_genes.fna" ]
+    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/PCC_7942_genes.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "both" 
-    , Fun fna.list ( Salt 0 ) [] "load_fna_glob" 
-        [ Lit str ( Salt 0 ) "examples/sequences/PCC_*_genes.fna" ]
+    , Fun fna.list Nothing [] "load_fna_glob" [ Lit str "examples/sequences/PCC_*_genes.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref fna.list ( Salt 0 ) [] 
+    , Ref fna.list Nothing [] 
         ( Var ( RepID Nothing ) "both" )
     ) 
 ] 

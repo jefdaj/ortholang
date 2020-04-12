@@ -307,7 +307,7 @@ rPsiblastEach st (Fun rtn salt deps name [e, fa, fas])
 rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 
 psiblastAll :: Function
-psiblastAll = compose1 "psiblast_all" psiblastEach (mkConcat bht) -- TODO name the mkConcat?
+psiblastAll = compose1 "psiblast_all" [Stochastic] psiblastEach (mkConcat bht) -- TODO name the mkConcat?
 -- psiblastAll = compose1 name
 --   (mkTypeDesc name [num, faa, ListOf faa] bht)
 --   psiblastEach
@@ -555,7 +555,7 @@ psiblastEachPssmDb = Function
     name = "psiblast_each_pssm_db"
 
 psiblastPssmsDb :: Function
-psiblastPssmsDb = compose1 "psiblast_pssms_db" psiblastEachPssmDb (mkConcat bht) -- TODO name the mkConcat?
+psiblastPssmsDb = compose1 "psiblast_pssms_db" [Stochastic] psiblastEachPssmDb (mkConcat bht) -- TODO name the mkConcat?
 -- psiblastPssmsDb = compose1 name
 --   (mkTypeDesc name [num, ListOf pssm, pdb] bht)
 --   psiblastEachPssmDb
@@ -582,7 +582,7 @@ psiblastEachPssm = Function
 
 -- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
 psiblastPssms :: Function
-psiblastPssms = compose1 "psiblast_pssms" psiblastEachPssm (mkConcat bht)
+psiblastPssms = compose1 "psiblast_pssms" [Stochastic] psiblastEachPssm (mkConcat bht)
 -- psiblastPssms = compose1 name
 --   (mkTypeDesc name [num, ListOf pssm, faa] bht)
 --   psiblastEachPssm
@@ -593,7 +593,7 @@ psiblastPssms = compose1 "psiblast_pssms" psiblastEachPssm (mkConcat bht)
 
 -- TODO wait, this is the same as above?
 psiblastPssmsAll :: Function
-psiblastPssmsAll = compose1 "psiblast_pssms_all" psiblastEachPssm (mkConcat bht)
+psiblastPssmsAll = compose1 "psiblast_pssms_all" [Stochastic] psiblastEachPssm (mkConcat bht)
 -- psiblastPssmsAll = compose1 name
 --   (mkTypeDesc name [num, ListOf pssm, faa] bht)
 --   psiblastEachPssm
@@ -609,7 +609,7 @@ psiblastPssmsAll = compose1 "psiblast_pssms_all" psiblastEachPssm (mkConcat bht)
 -- TODO test this
 -- TODO wait this is the same as above too??
 psiblastPssmsEach :: Function
-psiblastPssmsEach = compose1 "psiblast_pssms_each" psiblastEachPssm (mkConcat bht)
+psiblastPssmsEach = compose1 "psiblast_pssms_each" [Stochastic] psiblastEachPssm (mkConcat bht)
 -- psiblastPssmsEach = compose1 name
 --   -- (mkTypeDesc name [num, ListOf pssm, faa] bht)
 --   (mkTypeDesc name [num, ListOf pssm, ListOf faa] (ListOf bht))

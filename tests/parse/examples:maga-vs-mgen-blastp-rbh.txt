@@ -1,53 +1,51 @@
 [ 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "fwdHits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "1.0e-5" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-5" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "revHits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "1.0e-5" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-5" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "recHits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
         ] "reciprocal_best" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] 
             ( Var ( RepID Nothing ) "fwdHits" )
-        , Ref bht ( Salt 0 ) 
+        , Ref bht Nothing 
             [ Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "maga" 
             ] 
@@ -56,7 +54,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref bht ( Salt 0 ) 
+    , Ref bht Nothing 
         [ Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 

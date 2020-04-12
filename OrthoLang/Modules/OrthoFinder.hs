@@ -47,7 +47,7 @@ orthofinder = let name = "orthofinder" in Function
   -- , fTypeCheck = defaultTypeCheck name [ListOf faa] ofr
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly ofr
-  , fTags = []
+  , fTags = [Stochastic]
   , fNewRules = NewNotImplemented
   , fOldRules = rSimple aOrthofinder
   }

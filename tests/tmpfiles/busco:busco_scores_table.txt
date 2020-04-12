@@ -689,13 +689,13 @@
 |   |-- curl
 |   |   `-- 9c46bc8ed4
 |   |-- each
-|   |   `-- 606ca87c3f
+|   |   `-- 6349ce9f2c
 |   |       |-- 3926b9a46b
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/busco_proteins/d9e802246e/3926b9a46b/0/result
+|   |       |   `-- result -> ../../../../exprs/busco_proteins/d9e802246e/3926b9a46b/result
 |   |       `-- 7725ce8ba9
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/busco_proteins/d9e802246e/7725ce8ba9/0/result
+|   |           `-- result -> ../../../../exprs/busco_proteins/d9e802246e/7725ce8ba9/result
 |   `-- load
 |       |-- 0d8dfa261e
 |       |-- 0d8dfa261e.ids
@@ -703,57 +703,46 @@
 |       `-- 11bbf54fc6.ids
 |-- exprs
 |   |-- busco_fetch_lineage
-|   |   `-- c2b623aad0
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/busco/lineages/v2/datasets/proteobacteria_odb9/dataset.cfg
+|   |   `-- 0203c11bab
+|   |       `-- result -> ../../../cache/busco/lineages/v2/datasets/proteobacteria_odb9/dataset.cfg
 |   |-- busco_proteins
 |   |   `-- d9e802246e
 |   |       |-- 3926b9a46b
-|   |       |   `-- 0
-|   |       |       |-- result -> ../../../../../cache/busco/runs/run_result/short_summary_result.txt
-|   |       |       |-- result.err
-|   |       |       `-- result.out
+|   |       |   |-- result -> ../../../../cache/busco/runs/run_result/short_summary_result.txt
+|   |       |   |-- result.err
+|   |       |   `-- result.out
 |   |       `-- 7725ce8ba9
-|   |           `-- 0
-|   |               |-- result -> ../../../../../cache/busco/runs/run_result/short_summary_result.txt
-|   |               |-- result.err
-|   |               `-- result.out
+|   |           |-- result -> ../../../../cache/busco/runs/run_result/short_summary_result.txt
+|   |           |-- result.err
+|   |           `-- result.out
 |   |-- busco_proteins_each
-|   |   `-- edd00d7f92
-|   |       `-- ddc60ffcea
-|   |           `-- 0
-|   |               `-- result -> ../../../../../cache/lines/...
-|   |-- busco_scores_table
-|   |   `-- 24486246f4
-|   |       `-- 0
-|   |           `-- result
-|   |-- list
-|   |   `-- 744e193f65
-|   |       `-- 0
+|   |   `-- ed410559ab
+|   |       `-- c674eab207
 |   |           `-- result -> ../../../../cache/lines/...
+|   |-- busco_scores_table
+|   |   `-- f99e5746e5
+|   |       `-- result
+|   |-- list
+|   |   `-- f46c98b562
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 1264040575
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/0d8dfa261e
-|   |   `-- 5477a8255c
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/11bbf54fc6
+|   |   |-- 3ddeac190c
+|   |   |   `-- result -> ../../../cache/load/0d8dfa261e
+|   |   `-- d96205bf90
+|   |       `-- result -> ../../../cache/load/11bbf54fc6
 |   `-- str
 |       |-- 385ae70d8e
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       |-- c58447896b
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- f6e8c8ce02
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- maga.faa -> ../exprs/load_faa/1264040575/0/result
-    |-- mgen.faa -> ../exprs/load_faa/5477a8255c/0/result
-    |-- odb9_proteobacteria.blh -> ../exprs/busco_fetch_lineage/c2b623aad0/0/result
+    |-- maga.faa -> ../exprs/load_faa/3ddeac190c/result
+    |-- mgen.faa -> ../exprs/load_faa/d96205bf90/result
+    |-- odb9_proteobacteria.blh -> ../exprs/busco_fetch_lineage/0203c11bab/result
     |-- result -> ../vars/table.bst
-    |-- scores.bsr.list -> ../exprs/busco_proteins_each/edd00d7f92/ddc60ffcea/0/result
-    `-- table.bst -> ../exprs/busco_scores_table/24486246f4/0/result
+    |-- scores.bsr.list -> ../exprs/busco_proteins_each/ed410559ab/c674eab207/result
+    `-- table.bst -> ../exprs/busco_scores_table/f99e5746e5/result
 
-51 directories, 705 files
+40 directories, 705 files

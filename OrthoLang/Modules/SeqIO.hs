@@ -229,6 +229,7 @@ extractSeqs = newFnA2
   (Some fa "any fasta file", Exactly $ ListOf str)
   (Some fa "any fasta file")
   aExtractSeqs
+  [] -- TODO tag for "re-load output"?
 
 {-|
 This is a little more complicated than it would seem because users will
@@ -302,7 +303,7 @@ extractSeqsEach = Function
 -- TODO fix unable to decode the fna error
 --      must be that load_fna* aren't adding their digests?
 translate :: Function
-translate = newFnS1 "translate" (Exactly fna) (Exactly faa) "translate.py" id
+translate = newFnS1 "translate" (Exactly fna) (Exactly faa) "translate.py" [] id
 
 translateEach :: Function
 translateEach = Function

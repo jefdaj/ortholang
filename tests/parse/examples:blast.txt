@@ -1,37 +1,35 @@
 [ 
     ( Var ( RepID Nothing ) "my_species" 
-    , Fun fna ( Salt 0 ) [] "gbk_to_fna" 
-        [ Lit str ( Salt 0 ) "cds" 
-        , Fun gbk ( Salt 0 ) [] "load_gbk" 
-            [ Lit str ( Salt 0 ) "examples/sequences/PCC_6803_genome.gbff" ]
+    , Fun fna Nothing [] "gbk_to_fna" 
+        [ Lit str "cds" 
+        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_6803_genome.gbff" ]
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "swissprot" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
-        [ Lit str ( Salt 0 ) "swissprot" ]
+    , Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "swissprot" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "blast_hits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "my_species" 
         , Var ( RepID Nothing ) "swissprot" 
         ] "blastx_db" 
-        [ Lit num ( Salt 0 ) "1.0e-20" 
-        , Ref fna ( Salt 0 ) [] 
+        [ Lit num "1.0e-20" 
+        , Ref fna Nothing [] 
             ( Var ( RepID Nothing ) "my_species" )
-        , Ref faa.blastdb ( Salt 0 ) [] 
+        , Ref faa.blastdb Nothing [] 
             ( Var ( RepID Nothing ) "swissprot" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "genes_with_hits" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "blast_hits" 
         , Var ( RepID Nothing ) "my_species" 
         , Var ( RepID Nothing ) "swissprot" 
         ] "extract_queries" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "my_species" 
             , Var ( RepID Nothing ) "swissprot" 
             ] 
@@ -40,12 +38,12 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "nr_seq_matches" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "blast_hits" 
         , Var ( RepID Nothing ) "my_species" 
         , Var ( RepID Nothing ) "swissprot" 
         ] "extract_targets" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "my_species" 
             , Var ( RepID Nothing ) "swissprot" 
             ] 
@@ -54,6 +52,6 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lit str ( Salt 0 ) "nothing so far" 
+    , Lit str "nothing so far" 
     ) 
 ] 

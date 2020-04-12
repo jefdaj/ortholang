@@ -16,51 +16,42 @@
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   `-- 39b18dbf05
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 7666691bcd
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 649c67c82e
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/28e059b2a9
-|   |   `-- fee73b8143
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/36189032ad
+|   |   |-- 1e0498b59a
+|   |   |   `-- result -> ../../../cache/load/36189032ad
+|   |   `-- ae9e22061f
+|   |       `-- result -> ../../../cache/load/28e059b2a9
 |   |-- makeblastdb_faa_all
-|   |   `-- 356d67a59b
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 329cb2539d
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- 3e281fad0f
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- psiblast
-|   |   `-- 6a51491fae
-|   |       `-- e1ab47db91
-|   |           `-- 11b90c7cd6
-|   |               `-- 0
-|   |                   |-- result
-|   |                   |-- result.err
-|   |                   `-- result.out
+|   |   `-- 01b1e93729
+|   |       `-- 28e026e5bd
+|   |           `-- 4f0bccea88
+|   |               |-- result
+|   |               |-- result.err
+|   |               `-- result.out
 |   |-- psiblast_train_db
-|   |   `-- 6a51491fae
-|   |       `-- f08a52b741
-|   |           `-- 11b90c7cd6
-|   |               `-- 0
-|   |                   |-- result -> ../../../../../../cache/lines/...
-|   |                   |-- result.tmp.err
-|   |                   `-- result.tmp.out
+|   |   `-- 01b1e93729
+|   |       `-- ec1f6f502d
+|   |           `-- 4f0bccea88
+|   |               |-- result -> ../../../../../cache/lines/...
+|   |               |-- result.tmp.err
+|   |               `-- result.tmp.out
 |   `-- str
 |       |-- 1e020faf26
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- 824ccbd8b2
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/psiblast/6a51491fae/e1ab47db91/11b90c7cd6/0/result
-    |-- maga.faa -> ../exprs/load_faa/fee73b8143/0/result
-    |-- query.faa -> ../exprs/load_faa/649c67c82e/0/result
+    |-- hits.bht -> ../exprs/psiblast/01b1e93729/28e026e5bd/4f0bccea88/result
+    |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
+    |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hits.bht
 
-36 directories, 27 files
+27 directories, 27 files

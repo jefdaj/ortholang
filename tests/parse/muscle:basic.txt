@@ -1,41 +1,39 @@
 [ 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "hits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "0.1" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "0.1" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "hits_faa" 
-    , Fun faa ( Salt 0 ) 
+    , Fun faa Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "mgen" 
         ] "extract_seqs" 
-        [ Ref faa ( Salt 0 ) [] 
+        [ Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Fun str.list ( Salt 0 ) 
+        , Fun str.list Nothing 
             [ Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "maga" 
             ] "extract_targets" 
-            [ Ref bht ( Salt 0 ) 
+            [ Ref bht Nothing 
                 [ Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] 
@@ -45,13 +43,13 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "hits_aln" 
-    , Fun aln ( Salt 0 ) 
+    , Fun aln Nothing 
         [ Var ( RepID Nothing ) "hits_faa" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "mgen" 
         ] "muscle" 
-        [ Ref faa ( Salt 0 ) 
+        [ Ref faa Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "mgen" 
@@ -61,7 +59,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref aln ( Salt 0 ) 
+    , Ref aln Nothing 
         [ Var ( RepID Nothing ) "hits_faa" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "hits" 

@@ -1,78 +1,78 @@
 [ 
     ( Var ( RepID Nothing ) "set1" 
-    , Lst str ( Salt 0 ) [] 
-        [ Lit str ( Salt 0 ) "1" 
-        , Lit str ( Salt 0 ) "2" 
-        , Lit str ( Salt 0 ) "3" 
-        , Lit str ( Salt 0 ) "4" 
-        , Lit str ( Salt 0 ) "5" 
-        , Lit str ( Salt 0 ) "6" 
-        , Lit str ( Salt 0 ) "7" 
-        , Lit str ( Salt 0 ) "8" 
-        , Lit str ( Salt 0 ) "9" 
-        , Lit str ( Salt 0 ) "10" 
+    , Lst str [] 
+        [ Lit str "1" 
+        , Lit str "2" 
+        , Lit str "3" 
+        , Lit str "4" 
+        , Lit str "5" 
+        , Lit str "6" 
+        , Lit str "7" 
+        , Lit str "8" 
+        , Lit str "9" 
+        , Lit str "10" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "set2" 
-    , Lst str ( Salt 0 ) [] 
-        [ Lit str ( Salt 0 ) "5" 
-        , Lit str ( Salt 0 ) "6" 
-        , Lit str ( Salt 0 ) "7" 
-        , Lit str ( Salt 0 ) "8" 
-        , Lit str ( Salt 0 ) "9" 
-        , Lit str ( Salt 0 ) "10" 
-        , Lit str ( Salt 0 ) "11" 
-        , Lit str ( Salt 0 ) "12" 
-        , Lit str ( Salt 0 ) "13" 
-        , Lit str ( Salt 0 ) "14" 
-        , Lit str ( Salt 0 ) "15" 
+    , Lst str [] 
+        [ Lit str "5" 
+        , Lit str "6" 
+        , Lit str "7" 
+        , Lit str "8" 
+        , Lit str "9" 
+        , Lit str "10" 
+        , Lit str "11" 
+        , Lit str "12" 
+        , Lit str "13" 
+        , Lit str "14" 
+        , Lit str "15" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "res1" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         ] "any" 
-        [ Lst str.list ( Salt 0 ) 
+        [ Lst str.list 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 
-            [ Ref str.list ( Salt 0 ) [] 
+            [ Ref str.list Nothing [] 
                 ( Var ( RepID Nothing ) "set1" )
-            , Ref str.list ( Salt 0 ) [] 
+            , Ref str.list Nothing [] 
                 ( Var ( RepID Nothing ) "set2" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "res2" 
-    , Bop str.list ( Salt 0 ) 
+    , Bop str.list Nothing 
         [ Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         ] "|" 
-        ( Ref str.list ( Salt 0 ) [] 
+        ( Ref str.list Nothing [] 
             ( Var ( RepID Nothing ) "set1" )
         ) 
-        ( Ref str.list ( Salt 0 ) [] 
+        ( Ref str.list Nothing [] 
             ( Var ( RepID Nothing ) "set2" )
         )
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lst str.list ( Salt 0 ) 
+    , Lst str.list 
         [ Var ( RepID Nothing ) "res1" 
         , Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         , Var ( RepID Nothing ) "res2" 
         ] 
-        [ Ref str.list ( Salt 0 ) 
+        [ Ref str.list Nothing 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 
             ( Var ( RepID Nothing ) "res1" )
-        , Ref str.list ( Salt 0 ) 
+        , Ref str.list Nothing 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 

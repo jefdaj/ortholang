@@ -1,18 +1,18 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 258e4db54b
-|   |   |   `-- 10f6d4b026
-|   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/makeblastdb_faa/10f6d4b026/0/result
-|   |   |-- 6c1c06113b
+|   |   |-- a694b5db48
 |   |   |   `-- 178c544575
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/blastp_db/e10471b511/1526b30a41/178c544575/0/result
-|   |   `-- 82ec78498d
-|   |       `-- 3345c434eb
+|   |   |       `-- result -> ../../../../exprs/blastp_db/e10471b511/1526b30a41/178c544575/result
+|   |   |-- aff4bc8a34
+|   |   |   `-- fbf67b29d0
+|   |   |       |-- args -> ../../../../cache/lines/...
+|   |   |       `-- result -> ../../../../exprs/extract_queries/fbf67b29d0/result
+|   |   `-- b696d5f6c8
+|   |       `-- 10f6d4b026
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/3345c434eb/0/result
+|   |           `-- result -> ../../../../exprs/makeblastdb_faa/10f6d4b026/result
 |   |-- load
 |   |   |-- 36189032ad
 |   |   |-- 36189032ad.ids
@@ -31,62 +31,49 @@
 |   |   `-- e10471b511
 |   |       `-- 1526b30a41
 |   |           `-- 178c544575
-|   |               `-- 0
-|   |                   `-- result -> out
+|   |               `-- result -> out
 |   |-- blastp_db_each
-|   |   `-- 4300292626
-|   |       `-- ee6b931ef7
-|   |           `-- 3a99cd7dec
-|   |               `-- 0
-|   |                   `-- result -> ../../../../../../cache/lines/...
+|   |   `-- b6d4e4cdf4
+|   |       `-- 2c7651beca
+|   |           `-- f659b9405b
+|   |               `-- result -> ../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   `-- 3345c434eb
-|   |       `-- 0
-|   |           |-- result -> ../../../../cache/lines/...
-|   |           `-- tmp
+|   |   `-- fbf67b29d0
+|   |       |-- result -> ../../../cache/lines/...
+|   |       `-- tmp
 |   |-- extract_queries_each
-|   |   `-- 5e622bf496
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 0265bd7849
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   `-- 39b18dbf05
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 7666691bcd
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- 998406b615
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/cb3e90dc00
-|   |   `-- fee73b8143
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/36189032ad
+|   |   |-- 1e0498b59a
+|   |   |   `-- result -> ../../../cache/load/36189032ad
+|   |   `-- 81fa36fcfa
+|   |       `-- result -> ../../../cache/load/cb3e90dc00
 |   |-- makeblastdb_faa
 |   |   `-- 10f6d4b026
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_faa_each
-|   |   `-- 4b77a796de
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 9800dcdd74
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- singletons
-|   |   `-- 356d67a59b
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 329cb2539d
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 824ccbd8b2
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- ead30046d0
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- maga5.faa -> ../exprs/load_faa/998406b615/0/result
-    |-- maga.faa -> ../exprs/load_faa/fee73b8143/0/result
-    |-- mappedFwd.str.list.list -> ../exprs/extract_queries_each/5e622bf496/0/result
-    |-- n.num -> ../exprs/num/a53b190835/0/result
+    |-- maga5.faa -> ../exprs/load_faa/81fa36fcfa/result
+    |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
+    |-- mappedFwd.str.list.list -> ../exprs/extract_queries_each/0265bd7849/result
+    |-- n.num -> ../exprs/num/a53b190835/result
     `-- result -> ../vars/mappedFwd.str.list.list
 
-54 directories, 35 files
+41 directories, 35 files

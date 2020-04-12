@@ -25,7 +25,7 @@ olModule = Module
 sample :: Function
 sample = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = []
+  ,fTags = [Stochastic]
   -- , fTypeCheck = tSample
   -- , fTypeDesc  = name ++ " : num X.list -> X.list"
   , fInputs = [Exactly num, ListSigs (AnyType "any type")]

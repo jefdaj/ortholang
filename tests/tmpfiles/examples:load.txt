@@ -2,15 +2,13 @@
 |-- cache
 |-- exprs
 |   |-- glob_files
-|   |   `-- 2ee4832e75
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 497d843f47
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       `-- a2afbbbddc
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- pcc7942.str.list -> ../exprs/glob_files/2ee4832e75/0/result
+    |-- pcc7942.str.list -> ../exprs/glob_files/497d843f47/result
     `-- result -> ../vars/pcc7942.str.list
 
-9 directories, 4 files
+7 directories, 4 files

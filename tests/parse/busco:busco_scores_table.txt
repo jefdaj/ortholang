@@ -1,47 +1,44 @@
 [ 
     ( Var ( RepID Nothing ) "odb9_proteobacteria" 
-    , Fun blh ( Salt 0 ) [] "busco_fetch_lineage" 
-        [ Lit str ( Salt 0 ) "v2/datasets/proteobacteria_odb9" ]
+    , Fun blh Nothing [] "busco_fetch_lineage" [ Lit str "v2/datasets/proteobacteria_odb9" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "scores" 
-    , Fun bsr.list ( Salt 0 ) 
+    , Fun bsr.list Nothing 
         [ Var ( RepID Nothing ) "odb9_proteobacteria" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "busco_proteins_each" 
-        [ Ref blh ( Salt 0 ) [] 
+        [ Ref blh Nothing [] 
             ( Var ( RepID Nothing ) "odb9_proteobacteria" )
-        , Lst faa ( Salt 0 ) 
+        , Lst faa 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "mgen" )
             ] 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "table" 
-    , Fun bst ( Salt 0 ) 
+    , Fun bst Nothing 
         [ Var ( RepID Nothing ) "scores" 
         , Var ( RepID Nothing ) "odb9_proteobacteria" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "busco_scores_table" 
-        [ Ref bsr.list ( Salt 0 ) 
+        [ Ref bsr.list Nothing 
             [ Var ( RepID Nothing ) "odb9_proteobacteria" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
@@ -51,7 +48,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref bst ( Salt 0 ) 
+    , Ref bst Nothing 
         [ Var ( RepID Nothing ) "scores" 
         , Var ( RepID Nothing ) "odb9_proteobacteria" 
         , Var ( RepID Nothing ) "maga" 

@@ -1,62 +1,62 @@
 [ 
     ( Var ( RepID Nothing ) "set1" 
-    , Lst str ( Salt 0 ) [] 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" 
-        , Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" 
+    , Lst str [] 
+        [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
+        , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "set2" 
-    , Lst str ( Salt 0 ) [] 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" 
-        , Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_small.faa" 
-        , Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_hyopneumoniae_small.faa" 
+    , Lst str [] 
+        [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
+        , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
+        , Lit str "examples/sequences/Mycoplasma_hyopneumoniae_small.faa" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "res1" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         ] "diff" 
-        [ Lst str.list ( Salt 0 ) 
+        [ Lst str.list 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 
-            [ Ref str.list ( Salt 0 ) [] 
+            [ Ref str.list Nothing [] 
                 ( Var ( RepID Nothing ) "set1" )
-            , Ref str.list ( Salt 0 ) [] 
+            , Ref str.list Nothing [] 
                 ( Var ( RepID Nothing ) "set2" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "res2" 
-    , Bop str.list ( Salt 0 ) 
+    , Bop str.list Nothing 
         [ Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         ] "~" 
-        ( Ref str.list ( Salt 0 ) [] 
+        ( Ref str.list Nothing [] 
             ( Var ( RepID Nothing ) "set1" )
         ) 
-        ( Ref str.list ( Salt 0 ) [] 
+        ( Ref str.list Nothing [] 
             ( Var ( RepID Nothing ) "set2" )
         )
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lst str.list ( Salt 0 ) 
+    , Lst str.list 
         [ Var ( RepID Nothing ) "res1" 
         , Var ( RepID Nothing ) "set1" 
         , Var ( RepID Nothing ) "set2" 
         , Var ( RepID Nothing ) "res2" 
         ] 
-        [ Ref str.list ( Salt 0 ) 
+        [ Ref str.list Nothing 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 
             ( Var ( RepID Nothing ) "res1" )
-        , Ref str.list ( Salt 0 ) 
+        , Ref str.list Nothing 
             [ Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
             ] 

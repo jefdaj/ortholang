@@ -1,67 +1,65 @@
 [ 
     ( Var ( RepID Nothing ) "minimgen" 
-    , Fun fna ( Salt 0 ) [] "load_fna" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "single" 
-    , Fun crb ( Salt 0 ) 
+    , Fun crb Nothing 
         [ Var ( RepID Nothing ) "minimgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "crb_blast" 
-        [ Ref fna ( Salt 0 ) [] 
+        [ Ref fna Nothing [] 
             ( Var ( RepID Nothing ) "minimgen" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "mapped" 
-    , Fun crb.list ( Salt 0 ) 
+    , Fun crb.list Nothing 
         [ Var ( RepID Nothing ) "minimgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "crb_blast_each" 
-        [ Ref fna ( Salt 0 ) [] 
+        [ Ref fna Nothing [] 
             ( Var ( RepID Nothing ) "minimgen" )
-        , Lst faa ( Salt 0 ) 
+        , Lst faa 
             [ Var ( RepID Nothing ) "maga" ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
             ]
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun num ( Salt 0 ) 
+    , Fun num Nothing 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "minimgen" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mapped" 
         ] "length" 
-        [ Bop crb.list ( Salt 0 ) 
+        [ Bop crb.list Nothing 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "minimgen" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mapped" 
             ] "|" 
-            ( Lst crb ( Salt 0 ) 
+            ( Lst crb 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "minimgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] 
-                [ Ref crb ( Salt 0 ) 
+                [ Ref crb Nothing 
                     [ Var ( RepID Nothing ) "minimgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
                     ( Var ( RepID Nothing ) "single" )
                 ]
             ) 
-            ( Ref crb.list ( Salt 0 ) 
+            ( Ref crb.list Nothing 
                 [ Var ( RepID Nothing ) "minimgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] 

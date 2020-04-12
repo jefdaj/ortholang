@@ -53,7 +53,7 @@ diamondmakedb = let name = "diamond_makedb" in Function
   -- , fTypeCheck = defaultTypeCheck name [faa] dmnd
   , fInputs = [Exactly faa]
   , fOutput = Exactly dmnd
-  ,fTags = []
+  , fTags = [Stochastic] -- TODO double check: is it deterministic?
   , fNewRules = NewNotImplemented, fOldRules = rSimpleScriptPar "diamond_makedb.sh"
   }
 
@@ -70,7 +70,7 @@ diamondmakedbEach = let name = "diamond_makedb_each" in Function
   -- , fTypeCheck = defaultTypeCheck name [ListOf faa] (ListOf dmnd)
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly (ListOf dmnd)
-  ,fTags = []
+  , fTags = [Stochastic] -- TODO double check: is it deterministic?
   , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "diamond_makedb.sh"
   }
  
@@ -85,7 +85,7 @@ diamondmakedbAll = let name = "diamond_makedb_all" in Function
   -- , fTypeCheck = defaultTypeCheck name [ListOf faa] dmnd
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly dmnd
-  ,fTags = []
+  , fTags = [Stochastic] -- TODO double check: is it deterministic?
   , fNewRules = NewNotImplemented, fOldRules = rDiamondmakedbAll
   }
 
@@ -189,7 +189,7 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" +
   -- , fTypeCheck = defaultTypeCheck name [num, qType, sType] rType
   , fInputs = [Exactly num, Exactly qType, Exactly sType]
   , fOutput = Exactly rType
-  ,fTags = []
+  , fTags = [Stochastic] -- TODO double check: is it deterministic?
   , fNewRules = NewNotImplemented, fOldRules = rFn dCmd
   }
 

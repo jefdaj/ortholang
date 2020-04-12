@@ -1,35 +1,33 @@
 [ 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mbov" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_bovis_small.fa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_bovis_small.fa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga_mbov" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mbov" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "1.0e-10" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-10" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mbov" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "maga_mbov_stringent" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "maga_mbov" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mbov" 
         ] "filter_evalue" 
-        [ Lit num ( Salt 0 ) "1.0e-50" 
-        , Ref bht ( Salt 0 ) 
+        [ Lit num "1.0e-50" 
+        , Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mbov" 
             ] 
@@ -38,12 +36,12 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "maga_best_mbov" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "maga_mbov" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mbov" 
         ] "best_hits" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mbov" 
             ] 
@@ -52,31 +50,31 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "maga_mbov_rev" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "mbov" 
         , Var ( RepID Nothing ) "maga" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "1.0e-10" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-10" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mbov" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "maga_mbov_rbh" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "maga_mbov" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mbov" 
         , Var ( RepID Nothing ) "maga_mbov_rev" 
         ] "reciprocal_best" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mbov" 
             ] 
             ( Var ( RepID Nothing ) "maga_mbov" )
-        , Ref bht ( Salt 0 ) 
+        , Ref bht Nothing 
             [ Var ( RepID Nothing ) "mbov" 
             , Var ( RepID Nothing ) "maga" 
             ] 
@@ -85,14 +83,14 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "maga_ids" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "maga_mbov_rbh" 
         , Var ( RepID Nothing ) "maga_mbov" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mbov" 
         , Var ( RepID Nothing ) "maga_mbov_rev" 
         ] "extract_queries" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga_mbov" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mbov" 
@@ -103,14 +101,14 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "mbov_ids" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "maga_mbov_rbh" 
         , Var ( RepID Nothing ) "maga_mbov" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mbov" 
         , Var ( RepID Nothing ) "maga_mbov_rev" 
         ] "extract_targets" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga_mbov" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mbov" 
@@ -121,7 +119,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun num.list ( Salt 0 ) 
+    , Fun num.list Nothing 
         [ Var ( RepID Nothing ) "maga_ids" 
         , Var ( RepID Nothing ) "maga_mbov_rbh" 
         , Var ( RepID Nothing ) "maga_mbov" 
@@ -130,7 +128,7 @@
         , Var ( RepID Nothing ) "maga_mbov_rev" 
         , Var ( RepID Nothing ) "maga_best_mbov" 
         ] "length_each" 
-        [ Lst str.list ( Salt 0 ) 
+        [ Lst str.list 
             [ Var ( RepID Nothing ) "maga_ids" 
             , Var ( RepID Nothing ) "maga_mbov_rbh" 
             , Var ( RepID Nothing ) "maga_mbov" 
@@ -139,7 +137,7 @@
             , Var ( RepID Nothing ) "maga_mbov_rev" 
             , Var ( RepID Nothing ) "maga_best_mbov" 
             ] 
-            [ Ref str.list ( Salt 0 ) 
+            [ Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "maga_mbov_rbh" 
                 , Var ( RepID Nothing ) "maga_mbov" 
                 , Var ( RepID Nothing ) "maga" 
@@ -147,13 +145,13 @@
                 , Var ( RepID Nothing ) "maga_mbov_rev" 
                 ] 
                 ( Var ( RepID Nothing ) "maga_ids" )
-            , Fun str.list ( Salt 0 ) 
+            , Fun str.list Nothing 
                 [ Var ( RepID Nothing ) "maga_best_mbov" 
                 , Var ( RepID Nothing ) "maga_mbov" 
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mbov" 
                 ] "extract_queries" 
-                [ Ref bht ( Salt 0 ) 
+                [ Ref bht Nothing 
                     [ Var ( RepID Nothing ) "maga_mbov" 
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mbov" 

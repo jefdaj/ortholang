@@ -60,7 +60,7 @@ loadList = mkLoad False "load_list" (Exactly $ ListOf str)
 ----------------
 
 globFiles :: Function
-globFiles = newFnA1 "glob_files" (Exactly str) (Exactly (ListOf str)) aGlobNew
+globFiles = newFnA1 "glob_files" (Exactly str) (Exactly (ListOf str)) aGlobNew [ReadsDirs]
 
 aGlobNew :: NewAction1
 aGlobNew (ExprPath out) a1 = do
@@ -74,7 +74,7 @@ aGlobNew (ExprPath out) a1 = do
 ------------
 
 mkLoadGlob :: String -> Function -> Function
-mkLoadGlob name eachFn = compose1 name globFiles eachFn
+mkLoadGlob name eachFn = compose1 name [ReadsDirs, ReadsFile, ReadsURL] globFiles eachFn
 
 mkLoaders :: Bool -> Type -> [Function]
 mkLoaders hashSeqIDs loadType = [single, each, glb]
@@ -98,7 +98,7 @@ mkLoad hashSeqIDs name oSig = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly str]
   , fOutput = oSig
-  , fTags = []
+  , fTags = [ReadsFile, ReadsURL]
   , fOldRules = rLoad hashSeqIDs
   , fNewRules = NewNotImplemented
   }
@@ -113,7 +113,7 @@ mkLoadList hashSeqIDs name elemSig = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf str)]
   , fOutput = ListSigs elemSig
-  , fTags = []
+  , fTags = [ReadsFile, ReadsURL]
   , fOldRules = rLoadList hashSeqIDs
   , fNewRules = NewNotImplemented
   }

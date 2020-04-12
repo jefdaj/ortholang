@@ -4,26 +4,21 @@
 |       `-- dblist.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- busco_list_lineages
-|   |   |-- 4d7f83f63a
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- 9927f5e097
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   |-- 4f1d387677
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- a10bc5cbb6
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   `-- bc49392ad8
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 2125f6af0c
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 9d4568c009
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- bdca26ac34
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- ball.str.list -> ../exprs/busco_list_lineages/4d7f83f63a/0/result
-    |-- blins.str.list -> ../exprs/busco_list_lineages/9927f5e097/0/result
-    `-- result -> ../exprs/list/bc49392ad8/0/result
+    |-- ball.str.list -> ../exprs/busco_list_lineages/a10bc5cbb6/result
+    |-- blins.str.list -> ../exprs/busco_list_lineages/4f1d387677/result
+    `-- result -> ../exprs/list/2125f6af0c/result
 
-17 directories, 9 files
+12 directories, 9 files

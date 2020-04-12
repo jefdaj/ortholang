@@ -1,16 +1,14 @@
 [ 
     ( Var ( RepID Nothing ) "human_dbs" 
-    , Fun str.list ( Salt 0 ) [] "blastdblist" 
-        [ Lit str ( Salt 0 ) "human" ]
+    , Fun str.list Nothing [] "blastdblist" [ Lit str "human" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "swissprot" 
-    , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
-        [ Lit str ( Salt 0 ) "swissprot" ]
+    , Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "swissprot" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref str.list ( Salt 0 ) [] 
+    , Ref str.list Nothing [] 
         ( Var ( RepID Nothing ) "human_dbs" )
     ) 
 ] 

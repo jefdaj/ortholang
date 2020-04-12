@@ -1,96 +1,94 @@
 [ 
     ( Var ( RepID Nothing ) "fna" 
-    , Fun fna ( Salt 0 ) [] "load_fna" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "faa" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "singleFna" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "fna" ] "extract_ids" 
-        [ Ref fna ( Salt 0 ) [] 
+        [ Ref fna Nothing [] 
             ( Var ( RepID Nothing ) "fna" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "singleFaa" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "faa" ] "extract_ids" 
-        [ Ref faa ( Salt 0 ) [] 
+        [ Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "faa" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mappedFna" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list.list Nothing 
         [ Var ( RepID Nothing ) "fna" ] "extract_ids_each" 
-        [ Lst fna ( Salt 0 ) 
+        [ Lst fna 
             [ Var ( RepID Nothing ) "fna" ] 
-            [ Ref fna ( Salt 0 ) [] 
+            [ Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "fna" )
             ]
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mappedFaa" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list.list Nothing 
         [ Var ( RepID Nothing ) "faa" ] "extract_ids_each" 
-        [ Lst faa ( Salt 0 ) 
+        [ Lst faa 
             [ Var ( RepID Nothing ) "faa" ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "faa" )
             ]
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "bothFna" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list.list Nothing 
         [ Var ( RepID Nothing ) "singleFna" 
         , Var ( RepID Nothing ) "fna" 
         , Var ( RepID Nothing ) "mappedFna" 
         ] "|" 
-        ( Lst str.list ( Salt 0 ) 
+        ( Lst str.list 
             [ Var ( RepID Nothing ) "singleFna" 
             , Var ( RepID Nothing ) "fna" 
             ] 
-            [ Ref str.list ( Salt 0 ) 
+            [ Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "fna" ] 
                 ( Var ( RepID Nothing ) "singleFna" )
             ]
         ) 
-        ( Ref str.list.list ( Salt 0 ) 
+        ( Ref str.list.list Nothing 
             [ Var ( RepID Nothing ) "fna" ] 
             ( Var ( RepID Nothing ) "mappedFna" )
         )
     ) 
 , 
     ( Var ( RepID Nothing ) "bothFaa" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list.list Nothing 
         [ Var ( RepID Nothing ) "singleFaa" 
         , Var ( RepID Nothing ) "faa" 
         , Var ( RepID Nothing ) "mappedFaa" 
         ] "|" 
-        ( Lst str.list ( Salt 0 ) 
+        ( Lst str.list 
             [ Var ( RepID Nothing ) "singleFaa" 
             , Var ( RepID Nothing ) "faa" 
             ] 
-            [ Ref str.list ( Salt 0 ) 
+            [ Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "faa" ] 
                 ( Var ( RepID Nothing ) "singleFaa" )
             ]
         ) 
-        ( Ref str.list.list ( Salt 0 ) 
+        ( Ref str.list.list Nothing 
             [ Var ( RepID Nothing ) "faa" ] 
             ( Var ( RepID Nothing ) "mappedFaa" )
         )
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list ( Salt 0 ) 
+    , Bop str.list.list Nothing 
         [ Var ( RepID Nothing ) "bothFna" 
         , Var ( RepID Nothing ) "singleFna" 
         , Var ( RepID Nothing ) "fna" 
@@ -100,14 +98,14 @@
         , Var ( RepID Nothing ) "faa" 
         , Var ( RepID Nothing ) "mappedFaa" 
         ] "|" 
-        ( Ref str.list.list ( Salt 0 ) 
+        ( Ref str.list.list Nothing 
             [ Var ( RepID Nothing ) "singleFna" 
             , Var ( RepID Nothing ) "fna" 
             , Var ( RepID Nothing ) "mappedFna" 
             ] 
             ( Var ( RepID Nothing ) "bothFna" )
         ) 
-        ( Ref str.list.list ( Salt 0 ) 
+        ( Ref str.list.list Nothing 
             [ Var ( RepID Nothing ) "singleFaa" 
             , Var ( RepID Nothing ) "faa" 
             , Var ( RepID Nothing ) "mappedFaa" 

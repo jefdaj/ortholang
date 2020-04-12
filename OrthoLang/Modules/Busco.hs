@@ -81,7 +81,7 @@ buscoListLineages = Function
   -- , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fInputs = [Exactly str]
   , fOutput = Exactly (ListOf str)
-  , fTags = []
+  , fTags = [] -- TODO make it read a URL?
   , fNewRules = NewNotImplemented
   , fOldRules = rBuscoListLineages
   }
@@ -187,7 +187,7 @@ buscoFetchLineage  = Function
   -- , fTypeDesc  = mkTypeDesc name  [str] blh
   , fInputs = [Exactly str]
   , fOutput = Exactly blh
-  , fTags = []
+  , fTags = [ReadsURL]
   , fNewRules = NewNotImplemented
   , fOldRules = rBuscoFetchLineage
   }
@@ -246,7 +246,7 @@ mkBusco name mode inType = Function
   -- , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
   , fInputs = [Exactly blh, Exactly inType]
   , fOutput = Exactly bsr
-  , fTags = []
+  , fTags = [Stochastic] -- TODO double check stochasticity
   , fNewRules = NewNotImplemented
   , fOldRules = rSimple $ aBusco mode
   }
@@ -298,7 +298,7 @@ mkBuscoEach name mode inType = Function
   -- , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
   , fInputs = [Exactly blh, Exactly (ListOf inType)]
   , fOutput = Exactly (ListOf bsr)
-  , fTags = []
+  , fTags = [Stochastic] -- TODO double check stochasticity
   , fNewRules = NewNotImplemented
   , fOldRules = rMap 2 $ aBusco mode
   }
@@ -319,7 +319,7 @@ buscoPercentComplete  = Function
   -- , fTypeDesc  = mkTypeDesc name  [bsr] num
   , fInputs = [Exactly bsr]
   , fOutput = Exactly num
-  , fTags = []
+  , fTags = [Stochastic] -- TODO double check stochasticity
   , fNewRules = NewNotImplemented
   , fOldRules = rSimpleScript "busco_percent_complete.sh"
   }
@@ -333,7 +333,7 @@ buscoPercentCompleteEach  = Function
   -- , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
   , fInputs = [Exactly (ListOf bsr)]
   , fOutput =  Exactly (ListOf num)
-  , fTags = []
+  , fTags = [Stochastic] -- TODO double check stochasticity
   , fNewRules = NewNotImplemented
   , fOldRules = rMapSimpleScript 1 "busco_percent_complete.sh"
   }
@@ -351,7 +351,7 @@ buscoScoresTable  = Function
   -- , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
   , fInputs = [Exactly (ListOf bsr)]
   , fOutput = Exactly bst
-  , fTags = []
+  , fTags = [] -- TODO not deterministic, right?
   -- , fNewRules = NewNotImplemented, fOldRules = rSimpleScript $ name <.> "py"
   , fNewRules = NewNotImplemented
   , fOldRules = rBuscoScoresTable

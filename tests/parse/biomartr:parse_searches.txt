@@ -1,9 +1,9 @@
 [ 
     ( Var ( RepID Nothing ) "result" 
-    , Fun search ( Salt 0 ) [] "parse_searches" 
-        [ Lst str ( Salt 0 ) [] 
-            [ Lit str ( Salt 0 ) "Synechococcus elongatus PCC maga (refseq)" 
-            , Lit str ( Salt 0 ) "Synechocystis sp. PCC mgen (refseq)" 
+    , Fun search Nothing [] "parse_searches" 
+        [ Lst str [] 
+            [ Lit str "Synechococcus elongatus PCC maga (refseq)" 
+            , Lit str "Synechocystis sp. PCC mgen (refseq)" 
             ] 
         ]
     ) 

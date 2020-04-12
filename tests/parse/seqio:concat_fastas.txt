@@ -1,34 +1,30 @@
 [ 
     ( Var ( RepID Nothing ) "single" 
-    , Fun fna ( Salt 0 ) [] "concat_fna" 
-        [ Lst fna ( Salt 0 ) [] 
-            [ Fun fna ( Salt 0 ) [] "gbk_to_fna" 
-                [ Lit str ( Salt 0 ) "cds" 
-                , Fun gbk ( Salt 0 ) [] "load_gbk" 
-                    [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+    , Fun fna Nothing [] "concat_fna" 
+        [ Lst fna [] 
+            [ Fun fna Nothing [] "gbk_to_fna" 
+                [ Lit str "cds" 
+                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
                 ] 
-            , Fun fna ( Salt 0 ) [] "gbk_to_fna" 
-                [ Lit str ( Salt 0 ) "cds" 
-                , Fun gbk ( Salt 0 ) [] "load_gbk" 
-                    [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk" ]
+            , Fun fna Nothing [] "gbk_to_fna" 
+                [ Lit str "cds" 
+                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk" ]
                 ] 
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mapped" 
-    , Fun fna.list ( Salt 0 ) [] "concat_fna_each" 
-        [ Lst fna.list ( Salt 0 ) [] 
-            [ Lst fna ( Salt 0 ) [] 
-                [ Fun fna ( Salt 0 ) [] "gbk_to_fna" 
-                    [ Lit str ( Salt 0 ) "cds" 
-                    , Fun gbk ( Salt 0 ) [] "load_gbk" 
-                        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+    , Fun fna.list Nothing [] "concat_fna_each" 
+        [ Lst fna.list [] 
+            [ Lst fna [] 
+                [ Fun fna Nothing [] "gbk_to_fna" 
+                    [ Lit str "cds" 
+                    , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
                     ] 
-                , Fun fna ( Salt 0 ) [] "gbk_to_fna" 
-                    [ Lit str ( Salt 0 ) "cds" 
-                    , Fun gbk ( Salt 0 ) [] "load_gbk" 
-                        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk" ]
+                , Fun fna Nothing [] "gbk_to_fna" 
+                    [ Lit str "cds" 
+                    , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk" ]
                     ] 
                 ] 
             ]
@@ -36,17 +32,17 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop fna.list ( Salt 0 ) 
+    , Bop fna.list Nothing 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "mapped" 
         ] "|" 
-        ( Lst fna ( Salt 0 ) 
+        ( Lst fna 
             [ Var ( RepID Nothing ) "single" ] 
-            [ Ref fna ( Salt 0 ) [] 
+            [ Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "single" )
             ]
         ) 
-        ( Ref fna.list ( Salt 0 ) [] 
+        ( Ref fna.list Nothing [] 
             ( Var ( RepID Nothing ) "mapped" )
         )
     ) 

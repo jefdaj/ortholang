@@ -1,33 +1,31 @@
 [ 
     ( Var ( RepID Nothing ) "minimgen" 
-    , Fun fna ( Salt 0 ) [] "load_fna" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "hits" 
-    , Fun crb ( Salt 0 ) 
+    , Fun crb Nothing 
         [ Var ( RepID Nothing ) "minimgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "crb_blast" 
-        [ Ref fna ( Salt 0 ) [] 
+        [ Ref fna Nothing [] 
             ( Var ( RepID Nothing ) "minimgen" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "minimgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "extract_targets" 
-        [ Ref crb ( Salt 0 ) 
+        [ Ref crb Nothing 
             [ Var ( RepID Nothing ) "minimgen" 
             , Var ( RepID Nothing ) "maga" 
             ] 

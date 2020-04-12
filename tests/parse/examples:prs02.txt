@@ -1,91 +1,88 @@
 [ 
     ( Var ( RepID Nothing ) "pcc6803" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/PCC_6803_genes.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/PCC_6803_genes.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "pcc7942" 
-    , Fun faa ( Salt 0 ) [] "concat_faa" 
-        [ Lst faa ( Salt 0 ) [] 
-            [ Fun faa ( Salt 0 ) [] "gbk_to_faa" 
-                [ Lit str ( Salt 0 ) "cds" 
-                , Fun gbk ( Salt 0 ) [] "load_gbk" 
-                    [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_chr.gbk" ]
+    , Fun faa Nothing [] "concat_faa" 
+        [ Lst faa [] 
+            [ Fun faa Nothing [] "gbk_to_faa" 
+                [ Lit str "cds" 
+                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_chr.gbk" ]
                 ] 
-            , Fun faa ( Salt 0 ) [] "gbk_to_faa" 
-                [ Lit str ( Salt 0 ) "cds" 
-                , Fun gbk ( Salt 0 ) [] "load_gbk" 
-                    [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_pANL.gbk" ]
+            , Fun faa Nothing [] "gbk_to_faa" 
+                [ Lit str "cds" 
+                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_pANL.gbk" ]
                 ] 
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "cutoff" 
-    , Lit num ( Salt 0 ) "1.0e-10" 
+    , Lit num "1.0e-10" 
     ) 
 , 
     ( Var ( RepID Nothing ) "hits" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "cutoff" 
         , Var ( RepID Nothing ) "pcc7942" 
         , Var ( RepID Nothing ) "pcc6803" 
         ] "extract_queries" 
-        [ Fun bht ( Salt 0 ) 
+        [ Fun bht Nothing 
             [ Var ( RepID Nothing ) "cutoff" 
             , Var ( RepID Nothing ) "pcc7942" 
             , Var ( RepID Nothing ) "pcc6803" 
             ] "blastp" 
-            [ Ref num ( Salt 0 ) [] 
+            [ Ref num Nothing [] 
                 ( Var ( RepID Nothing ) "cutoff" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "pcc7942" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "pcc6803" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "cutoffs" 
-    , Lst num ( Salt 0 ) [] 
-        [ Lit num ( Salt 0 ) "1.0e-5" 
-        , Lit num ( Salt 0 ) "1.0e-10" 
-        , Lit num ( Salt 0 ) "1.0e-20" 
-        , Lit num ( Salt 0 ) "1.0e-50" 
-        , Lit num ( Salt 0 ) "1.0e-100" 
+    , Lst num [] 
+        [ Lit num "1.0e-5" 
+        , Lit num "1.0e-10" 
+        , Lit num "1.0e-20" 
+        , Lit num "1.0e-50" 
+        , Lit num "1.0e-100" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "lengths" 
-    , Fun num.list ( Salt 0 ) 
+    , Fun num.list Nothing 
         [ Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "cutoff" 
         , Var ( RepID Nothing ) "pcc7942" 
         , Var ( RepID Nothing ) "pcc6803" 
         , Var ( RepID Nothing ) "cutoffs" 
         ] "replace_each" 
-        [ Fun num ( Salt 0 ) 
+        [ Fun num Nothing 
             [ Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "cutoff" 
             , Var ( RepID Nothing ) "pcc7942" 
             , Var ( RepID Nothing ) "pcc6803" 
             ] "length" 
-            [ Ref str.list ( Salt 0 ) 
+            [ Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "cutoff" 
                 , Var ( RepID Nothing ) "pcc7942" 
                 , Var ( RepID Nothing ) "pcc6803" 
                 ] 
                 ( Var ( RepID Nothing ) "hits" )
             ]
-        , Ref num ( Salt 0 ) [] 
+        , Ref num Nothing [] 
             ( Var ( RepID Nothing ) "cutoff" )
-        , Ref num.list ( Salt 0 ) [] 
+        , Ref num.list Nothing [] 
             ( Var ( RepID Nothing ) "cutoffs" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref num.list ( Salt 0 ) 
+    , Ref num.list Nothing 
         [ Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "cutoff" 
         , Var ( RepID Nothing ) "pcc7942" 

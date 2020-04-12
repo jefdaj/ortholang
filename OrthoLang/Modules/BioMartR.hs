@@ -90,7 +90,7 @@ parseSearches = let name = "parse_searches" in Function
   -- , fTypeDesc  = mkTypeDesc name [ListOf str] search
   , fInputs = [Exactly (ListOf str)]
   , fOutput = Exactly search
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rParseSearches
   }
 
@@ -105,7 +105,7 @@ getGenomes = let name = "get_genomes" in Function
   -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf fnagz)
   , fInputs = [Exactly (ListOf str)]
   , fOutput = Exactly (ListOf fnagz)
-  ,fTags = []
+  , fTags = [ReadsURL]
   , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getGenome"
   }
 
@@ -120,7 +120,7 @@ getProteomes = let name = "get_proteomes" in Function
   -- , fTypeDesc  = mkTypeDesc name [(ListOf str)] (ListOf faagz)
   , fInputs = [Exactly (ListOf str)]
   , fOutput = Exactly (ListOf faagz)
-  ,fTags = []
+  , fTags = [ReadsURL]
   , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getProteome"
   }
 

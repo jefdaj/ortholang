@@ -1,69 +1,67 @@
 [ 
     ( Var ( RepID Nothing ) "small" 
-    , Fun fna ( Salt 0 ) [] "load_fna" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
+    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "large" 
-    , Fun fna ( Salt 0 ) [] "load_fna" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "fwds" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "small" 
         , Var ( RepID Nothing ) "large" 
         ] "extract_queries" 
-        [ Fun bht ( Salt 0 ) 
+        [ Fun bht Nothing 
             [ Var ( RepID Nothing ) "small" 
             , Var ( RepID Nothing ) "large" 
             ] "blastn" 
-            [ Lit num ( Salt 0 ) "1.0e-5" 
-            , Ref fna ( Salt 0 ) [] 
+            [ Lit num "1.0e-5" 
+            , Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "small" )
-            , Ref fna ( Salt 0 ) [] 
+            , Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "large" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "srevs" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "large" 
         , Var ( RepID Nothing ) "small" 
         ] "extract_queries" 
-        [ Fun bht ( Salt 0 ) 
+        [ Fun bht Nothing 
             [ Var ( RepID Nothing ) "large" 
             , Var ( RepID Nothing ) "small" 
             ] "blastn_rev" 
-            [ Lit num ( Salt 0 ) "1.0e-5" 
-            , Ref fna ( Salt 0 ) [] 
+            [ Lit num "1.0e-5" 
+            , Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "large" )
-            , Ref fna ( Salt 0 ) [] 
+            , Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "small" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mrevs" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "large" 
         , Var ( RepID Nothing ) "small" 
         ] "any" 
-        [ Fun str.list.list ( Salt 0 ) 
+        [ Fun str.list.list Nothing 
             [ Var ( RepID Nothing ) "large" 
             , Var ( RepID Nothing ) "small" 
             ] "extract_queries_each" 
-            [ Fun bht.list ( Salt 0 ) 
+            [ Fun bht.list Nothing 
                 [ Var ( RepID Nothing ) "large" 
                 , Var ( RepID Nothing ) "small" 
                 ] "blastn_rev_each" 
-                [ Lit num ( Salt 0 ) "1.0e-5" 
-                , Ref fna ( Salt 0 ) [] 
+                [ Lit num "1.0e-5" 
+                , Ref fna Nothing [] 
                     ( Var ( RepID Nothing ) "large" )
-                , Lst fna ( Salt 0 ) 
+                , Lst fna 
                     [ Var ( RepID Nothing ) "small" ] 
-                    [ Ref fna ( Salt 0 ) [] 
+                    [ Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "small" )
                     ]
                 ] 
@@ -72,31 +70,31 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "fwds" 
         , Var ( RepID Nothing ) "small" 
         , Var ( RepID Nothing ) "large" 
         , Var ( RepID Nothing ) "srevs" 
         , Var ( RepID Nothing ) "mrevs" 
         ] "some" 
-        [ Lst str.list ( Salt 0 ) 
+        [ Lst str.list 
             [ Var ( RepID Nothing ) "fwds" 
             , Var ( RepID Nothing ) "small" 
             , Var ( RepID Nothing ) "large" 
             , Var ( RepID Nothing ) "srevs" 
             , Var ( RepID Nothing ) "mrevs" 
             ] 
-            [ Ref str.list ( Salt 0 ) 
+            [ Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "small" 
                 , Var ( RepID Nothing ) "large" 
                 ] 
                 ( Var ( RepID Nothing ) "fwds" )
-            , Ref str.list ( Salt 0 ) 
+            , Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "large" 
                 , Var ( RepID Nothing ) "small" 
                 ] 
                 ( Var ( RepID Nothing ) "srevs" )
-            , Ref str.list ( Salt 0 ) 
+            , Ref str.list Nothing 
                 [ Var ( RepID Nothing ) "large" 
                 , Var ( RepID Nothing ) "small" 
                 ] 

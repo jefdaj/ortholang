@@ -51,7 +51,7 @@ blastCRB = Function
   -- , fTypeCheck = defaultTypeCheck name [fna, Some fa "some fa"] crb
   , fInputs = [Exactly fna, Some fa "any fasta file"]
   , fOutput = Exactly crb
-  , fTags = []
+  , fTags = [Stochastic]
   , fNewRules = NewNotImplemented
   , fOldRules = rSimpleTmp name aCRBBlast
   }
@@ -67,7 +67,7 @@ blastCRBEach = Function
   -- , fTypeDesc  = mkTypeDesc       name [fna, ListOf (Some fa "some fa")] (ListOf crb)
   , fInputs = [Exactly fna, ListSigs (Some fa "any fasta file")]
   , fOutput = Exactly (ListOf crb)
-  ,fTags = []
+  , fTags = [Stochastic]
   , fNewRules = NewNotImplemented, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"
   }
   where

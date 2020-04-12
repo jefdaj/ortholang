@@ -1,38 +1,34 @@
 [ 
     ( Var ( RepID Nothing ) "pcc6803" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/PCC_6803_genes.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/PCC_6803_genes.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "pcc7942" 
-    , Fun faa ( Salt 0 ) [] "concat_faa" 
-        [ Lst faa ( Salt 0 ) [] 
-            [ Fun faa ( Salt 0 ) [] "gbk_to_faa" 
-                [ Lit str ( Salt 0 ) "cds" 
-                , Fun gbk ( Salt 0 ) [] "load_gbk" 
-                    [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_chr.gbk" ]
+    , Fun faa Nothing [] "concat_faa" 
+        [ Lst faa [] 
+            [ Fun faa Nothing [] "gbk_to_faa" 
+                [ Lit str "cds" 
+                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_chr.gbk" ]
                 ] 
-            , Fun faa ( Salt 0 ) [] "gbk_to_faa" 
-                [ Lit str ( Salt 0 ) "cds" 
-                , Fun gbk ( Salt 0 ) [] "load_gbk" 
-                    [ Lit str ( Salt 0 ) "examples/sequences/PCC_7942_pANL.gbk" ]
+            , Fun faa Nothing [] "gbk_to_faa" 
+                [ Lit str "cds" 
+                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_pANL.gbk" ]
                 ] 
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "hits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "pcc7942" ] "blastp_db" 
-        [ Lit num ( Salt 0 ) "1.0e-50" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-50" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "pcc7942" )
-        , Fun faa.blastdb ( Salt 0 ) [] "blastdbget_faa" 
-            [ Lit str ( Salt 0 ) "swissprot" ]
+        , Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "swissprot" ]
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Lit str ( Salt 0 ) "nothing so far" 
+    , Lit str "nothing so far" 
     ) 
 ] 

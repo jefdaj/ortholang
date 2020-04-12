@@ -1,47 +1,45 @@
 [ 
     ( Var ( RepID Nothing ) "maga" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "fwdHits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "1.0e-5" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-5" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "revHits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "1.0e-5" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "1.0e-5" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "bestFwd" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "best_hits" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] 
@@ -50,18 +48,18 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "bestRec" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
         ] "reciprocal_best" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] 
             ( Var ( RepID Nothing ) "fwdHits" )
-        , Ref bht ( Salt 0 ) 
+        , Ref bht Nothing 
             [ Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "maga" 
             ] 
@@ -70,61 +68,61 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "best5fwd" 
-    , Fun bht.list ( Salt 0 ) 
+    , Fun bht.list Nothing 
         [ Var ( RepID Nothing ) "bestFwd" 
         , Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "repeat" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "fwdHits" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] 
             ( Var ( RepID Nothing ) "bestFwd" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Lit num ( Salt 0 ) "5.0" 
+        , Lit num "5.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "best5rec" 
-    , Fun bht.list ( Salt 0 ) 
+    , Fun bht.list Nothing 
         [ Var ( RepID Nothing ) "bestRec" 
         , Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
         ] "repeat" 
-        [ Ref bht ( Salt 0 ) 
+        [ Ref bht Nothing 
             [ Var ( RepID Nothing ) "fwdHits" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "revHits" 
             ] 
             ( Var ( RepID Nothing ) "bestRec" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Lit num ( Salt 0 ) "5.0" 
+        , Lit num "5.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "solidFwd" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "best5fwd" 
         , Var ( RepID Nothing ) "bestFwd" 
         , Var ( RepID Nothing ) "fwdHits" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "all" 
-        [ Fun str.list.list ( Salt 0 ) 
+        [ Fun str.list.list Nothing 
             [ Var ( RepID Nothing ) "best5fwd" 
             , Var ( RepID Nothing ) "bestFwd" 
             , Var ( RepID Nothing ) "fwdHits" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] "extract_queries_each" 
-            [ Ref bht.list ( Salt 0 ) 
+            [ Ref bht.list Nothing 
                 [ Var ( RepID Nothing ) "bestFwd" 
                 , Var ( RepID Nothing ) "fwdHits" 
                 , Var ( RepID Nothing ) "maga" 
@@ -136,7 +134,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "solidRec" 
-    , Fun str.list ( Salt 0 ) 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "best5rec" 
         , Var ( RepID Nothing ) "bestRec" 
         , Var ( RepID Nothing ) "fwdHits" 
@@ -144,7 +142,7 @@
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
         ] "all" 
-        [ Fun str.list.list ( Salt 0 ) 
+        [ Fun str.list.list Nothing 
             [ Var ( RepID Nothing ) "best5rec" 
             , Var ( RepID Nothing ) "bestRec" 
             , Var ( RepID Nothing ) "fwdHits" 
@@ -152,7 +150,7 @@
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "revHits" 
             ] "extract_queries_each" 
-            [ Ref bht.list ( Salt 0 ) 
+            [ Ref bht.list Nothing 
                 [ Var ( RepID Nothing ) "bestRec" 
                 , Var ( RepID Nothing ) "fwdHits" 
                 , Var ( RepID Nothing ) "maga" 
@@ -165,7 +163,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun num ( Salt 0 ) 
+    , Fun num Nothing 
         [ Var ( RepID Nothing ) "solidRec" 
         , Var ( RepID Nothing ) "best5rec" 
         , Var ( RepID Nothing ) "bestRec" 
@@ -174,7 +172,7 @@
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "revHits" 
         ] "length" 
-        [ Ref str.list ( Salt 0 ) 
+        [ Ref str.list Nothing 
             [ Var ( RepID Nothing ) "best5rec" 
             , Var ( RepID Nothing ) "bestRec" 
             , Var ( RepID Nothing ) "fwdHits" 

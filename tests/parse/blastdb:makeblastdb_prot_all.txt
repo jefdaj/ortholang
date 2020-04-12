@@ -1,33 +1,31 @@
 [ 
     ( Var ( RepID Nothing ) "single" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "genes5" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "db" 
-    , Fun faa.blastdb ( Salt 0 ) 
+    , Fun faa.blastdb Nothing 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 
         ] "makeblastdb_faa_all" 
-        [ Lst faa ( Salt 0 ) 
+        [ Lst faa 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "genes5" 
             ] 
-            [ Ref faa ( Salt 0 ) [] 
+            [ Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "single" )
-            , Ref faa ( Salt 0 ) [] 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "genes5" )
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref faa.blastdb ( Salt 0 ) 
+    , Ref faa.blastdb Nothing 
         [ Var ( RepID Nothing ) "single" 
         , Var ( RepID Nothing ) "genes5" 
         ] 

@@ -1,36 +1,34 @@
 [ 
     ( Var ( RepID Nothing ) "n" 
-    , Lit num ( Salt 0 ) "4.0" 
+    , Lit num "4.0" 
     ) 
 , 
     ( Var ( RepID Nothing ) "l" 
-    , Lst num ( Salt 0 ) [] 
-        [ Lit num ( Salt 0 ) "4.0" ]
+    , Lst num [] [ Lit num "4.0" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "lol" 
-    , Lst num.list ( Salt 0 ) 
+    , Lst num.list 
         [ Var ( RepID Nothing ) "l" ] 
-        [ Ref num.list ( Salt 0 ) [] 
+        [ Ref num.list Nothing [] 
             ( Var ( RepID Nothing ) "l" )
-        , Lst num ( Salt 0 ) [] 
-            [ Lit num ( Salt 0 ) "2.5" ]
+        , Lst num [] [ Lit num "2.5" ]
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "lolol" 
-    , Lst num.list.list ( Salt 0 ) 
+    , Lst num.list.list 
         [ Var ( RepID Nothing ) "lol" 
         , Var ( RepID Nothing ) "l" 
         ] 
-        [ Ref num.list.list ( Salt 0 ) 
+        [ Ref num.list.list Nothing 
             [ Var ( RepID Nothing ) "l" ] 
             ( Var ( RepID Nothing ) "lol" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref num.list.list.list ( Salt 0 ) 
+    , Ref num.list.list.list Nothing 
         [ Var ( RepID Nothing ) "lol" 
         , Var ( RepID Nothing ) "l" 
         ] 

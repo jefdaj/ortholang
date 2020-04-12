@@ -1,64 +1,61 @@
 [ 
     ( Var ( RepID Nothing ) "odb9_firmicutes" 
-    , Fun blh ( Salt 0 ) [] "busco_fetch_lineage" 
-        [ Lit str ( Salt 0 ) "v2/datasets/firmicutes_odb9" ]
+    , Fun blh Nothing [] "busco_fetch_lineage" [ Lit str "v2/datasets/firmicutes_odb9" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "odb9_proteobacteria" 
-    , Fun blh ( Salt 0 ) [] "busco_fetch_lineage" 
-        [ Lit str ( Salt 0 ) "v2/datasets/proteobacteria_odb9" ]
+    , Fun blh Nothing [] "busco_fetch_lineage" [ Lit str "v2/datasets/proteobacteria_odb9" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "res1" 
-    , Fun bsr ( Salt 0 ) 
+    , Fun bsr Nothing 
         [ Var ( RepID Nothing ) "odb9_firmicutes" 
         , Var ( RepID Nothing ) "mgen" 
         ] "busco_proteins" 
-        [ Ref blh ( Salt 0 ) [] 
+        [ Ref blh Nothing [] 
             ( Var ( RepID Nothing ) "odb9_firmicutes" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "res2" 
-    , Fun bsr ( Salt 0 ) 
+    , Fun bsr Nothing 
         [ Var ( RepID Nothing ) "odb9_proteobacteria" 
         , Var ( RepID Nothing ) "mgen" 
         ] "busco_proteins" 
-        [ Ref blh ( Salt 0 ) [] 
+        [ Ref blh Nothing [] 
             ( Var ( RepID Nothing ) "odb9_proteobacteria" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun num.list ( Salt 0 ) 
+    , Fun num.list Nothing 
         [ Var ( RepID Nothing ) "res1" 
         , Var ( RepID Nothing ) "odb9_firmicutes" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "res2" 
         , Var ( RepID Nothing ) "odb9_proteobacteria" 
         ] "busco_percent_complete_each" 
-        [ Lst bsr ( Salt 0 ) 
+        [ Lst bsr 
             [ Var ( RepID Nothing ) "res1" 
             , Var ( RepID Nothing ) "odb9_firmicutes" 
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "res2" 
             , Var ( RepID Nothing ) "odb9_proteobacteria" 
             ] 
-            [ Ref bsr ( Salt 0 ) 
+            [ Ref bsr Nothing 
                 [ Var ( RepID Nothing ) "odb9_firmicutes" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] 
                 ( Var ( RepID Nothing ) "res1" )
-            , Ref bsr ( Salt 0 ) 
+            , Ref bsr Nothing 
                 [ Var ( RepID Nothing ) "odb9_proteobacteria" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] 

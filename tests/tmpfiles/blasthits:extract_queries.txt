@@ -1,10 +1,10 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- aecec244d7
-|   |       `-- 1c8e892c31
+|   |   `-- 3db62d4ff0
+|   |       `-- 1530f8919d
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/1c8e892c31/0/result
+|   |           `-- result -> ../../../../exprs/extract_queries/1530f8919d/result
 |   |-- load
 |   |   |-- 10ffe0cf0f
 |   |   |-- 10ffe0cf0f.ids
@@ -20,67 +20,52 @@
 |           `-- result.psq
 |-- exprs
 |   |-- any
-|   |   `-- 78c32df335
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 9aeedc940e
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- blastp_db
-|   |   `-- 4300292626
-|   |       `-- b8ba873461
-|   |           `-- a884ed83b6
-|   |               `-- 0
-|   |                   `-- result -> out
+|   |   `-- b6d4e4cdf4
+|   |       `-- afa6e907a5
+|   |           `-- b62e287c6e
+|   |               `-- result -> out
 |   |-- extract_queries
-|   |   |-- 1c8e892c31
-|   |   |   `-- 0
-|   |   |       |-- result -> ../../../../cache/lines/...
-|   |   |       `-- tmp
-|   |   `-- 8599057397
-|   |       `-- 0
-|   |           |-- result -> ../../../../cache/lines/...
-|   |           `-- tmp
+|   |   |-- 1530f8919d
+|   |   |   |-- result -> ../../../cache/lines/...
+|   |   |   `-- tmp
+|   |   `-- f8a5fa3db7
+|   |       |-- result -> ../../../cache/lines/...
+|   |       `-- tmp
 |   |-- extract_queries_each
-|   |   `-- a6befca20f
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 3eaadd8bef
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 0c47839dc1
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 22bb31f882
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 39b18dbf05
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- a4393e5d00
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   |-- 5c755a23ea
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 75e58b093f
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 7666691bcd
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- d43b252e7f
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- b4f8a9bd8e
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/10ffe0cf0f
-|   |   `-- fee73b8143
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/36189032ad
+|   |   |-- 1e0498b59a
+|   |   |   `-- result -> ../../../cache/load/36189032ad
+|   |   `-- cfed7edd23
+|   |       `-- result -> ../../../cache/load/10ffe0cf0f
 |   |-- makeblastdb_faa
-|   |   `-- 356d67a59b
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 329cb2539d
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 824ccbd8b2
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- cdba97c8d8
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/blastp_db/4300292626/b8ba873461/a884ed83b6/0/result
-    |-- mapped.str.list.list -> ../exprs/extract_queries_each/a6befca20f/0/result
-    |-- result -> ../exprs/any/78c32df335/0/result
-    `-- single.str.list -> ../exprs/extract_queries/8599057397/0/result
+    |-- hits.bht -> ../exprs/blastp_db/b6d4e4cdf4/afa6e907a5/b62e287c6e/result
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/3eaadd8bef/result
+    |-- result -> ../exprs/any/9aeedc940e/result
+    `-- single.str.list -> ../exprs/extract_queries/f8a5fa3db7/result
 
-50 directories, 33 files
+35 directories, 33 files

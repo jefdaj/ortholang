@@ -7,19 +7,16 @@
 |       `-- ff08c7f09e.ids
 |-- exprs
 |   |-- glob_files
-|   |   `-- de772ac298
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 59076e7c1d
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna_each
-|   |   `-- 9c2320da00
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 88788d3805
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       `-- cbc44e51d7
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- both.fna.list -> ../exprs/load_fna_each/9c2320da00/0/result
+    |-- both.fna.list -> ../exprs/load_fna_each/88788d3805/result
     `-- result -> ../vars/both.fna.list
 
-13 directories, 9 files
+10 directories, 9 files

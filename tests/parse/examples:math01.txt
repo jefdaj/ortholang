@@ -1,77 +1,75 @@
 [ 
     ( Var ( RepID Nothing ) "x" 
-    , Lit num ( Salt 0 ) "2.0" 
+    , Lit num "2.0" 
     ) 
 , 
     ( Var ( RepID Nothing ) "y" 
-    , Lit num ( Salt 0 ) "3.5" 
+    , Lit num "3.5" 
     ) 
 , 
     ( Var ( RepID Nothing ) "z" 
-    , Lit num ( Salt 0 ) "1.0e-50" 
+    , Lit num "1.0e-50" 
     ) 
 , 
     ( Var ( RepID Nothing ) "a" 
-    , Bop num ( Salt 0 ) 
+    , Bop num Nothing 
         [ Var ( RepID Nothing ) "x" 
         , Var ( RepID Nothing ) "y" 
         ] "/" 
-        ( Ref num ( Salt 0 ) [] 
+        ( Ref num Nothing [] 
             ( Var ( RepID Nothing ) "x" )
         ) 
-        ( Ref num ( Salt 0 ) [] 
+        ( Ref num Nothing [] 
             ( Var ( RepID Nothing ) "y" )
         )
     ) 
 , 
     ( Var ( RepID Nothing ) "b" 
-    , Bop num ( Salt 0 ) 
+    , Bop num Nothing 
         [ Var ( RepID Nothing ) "y" 
         , Var ( RepID Nothing ) "a" 
         , Var ( RepID Nothing ) "x" 
         ] "-" 
-        ( Bop num ( Salt 0 ) 
-            [ Var ( RepID Nothing ) "y" ] "*" 
-            ( Lit num ( Salt 0 ) "9.71" ) 
-            ( Ref num ( Salt 0 ) [] 
+        ( Bop num Nothing 
+            [ Var ( RepID Nothing ) "y" ] "*" ( Lit num "9.71" ) 
+            ( Ref num Nothing [] 
                 ( Var ( RepID Nothing ) "y" )
             )
         ) 
-        ( Bop num ( Salt 0 ) 
+        ( Bop num Nothing 
             [ Var ( RepID Nothing ) "a" 
             , Var ( RepID Nothing ) "x" 
             , Var ( RepID Nothing ) "y" 
             ] "*" 
-            ( Ref num ( Salt 0 ) 
+            ( Ref num Nothing 
                 [ Var ( RepID Nothing ) "x" 
                 , Var ( RepID Nothing ) "y" 
                 ] 
                 ( Var ( RepID Nothing ) "a" )
             ) 
-            ( Ref num ( Salt 0 ) [] 
+            ( Ref num Nothing [] 
                 ( Var ( RepID Nothing ) "x" )
             )
         )
     ) 
 , 
     ( Var ( RepID Nothing ) "c" 
-    , Bop num ( Salt 0 ) 
+    , Bop num Nothing 
         [ Var ( RepID Nothing ) "z" 
         , Var ( RepID Nothing ) "y" 
         ] "-" 
-        ( Ref num ( Salt 0 ) [] 
+        ( Ref num Nothing [] 
             ( Var ( RepID Nothing ) "z" )
         ) 
-        ( Ref num ( Salt 0 ) [] 
+        ( Ref num Nothing [] 
             ( Var ( RepID Nothing ) "y" )
         )
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Bop num ( Salt 0 ) 
-        [ Var ( RepID Nothing ) "z" ] "*" 
-        ( Lit num ( Salt 0 ) "2.43" ) 
-        ( Ref num ( Salt 0 ) [] 
+    , Bop num Nothing 
+        [ Var ( RepID Nothing ) "z" ] "*" ( Lit num "2.43" ) 
+        ( Ref num Nothing [] 
             ( Var ( RepID Nothing ) "z" )
         )
     ) 

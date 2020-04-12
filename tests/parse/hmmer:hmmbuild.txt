@@ -1,41 +1,39 @@
 [ 
     ( Var ( RepID Nothing ) "query" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa ( Salt 0 ) [] "load_faa" 
-        [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
+    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "hits" 
-    , Fun bht ( Salt 0 ) 
+    , Fun bht Nothing 
         [ Var ( RepID Nothing ) "query" 
         , Var ( RepID Nothing ) "mgen" 
         ] "blastp" 
-        [ Lit num ( Salt 0 ) "0.1" 
-        , Ref faa ( Salt 0 ) [] 
+        [ Lit num "0.1" 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "query" )
-        , Ref faa ( Salt 0 ) [] 
+        , Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "hits_faa" 
-    , Fun faa ( Salt 0 ) 
+    , Fun faa Nothing 
         [ Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "query" 
         ] "extract_seqs" 
-        [ Ref faa ( Salt 0 ) [] 
+        [ Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
-        , Fun str.list ( Salt 0 ) 
+        , Fun str.list Nothing 
             [ Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "query" 
             , Var ( RepID Nothing ) "mgen" 
             ] "extract_targets" 
-            [ Ref bht ( Salt 0 ) 
+            [ Ref bht Nothing 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] 
@@ -45,13 +43,13 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "hits_aln" 
-    , Fun aln ( Salt 0 ) 
+    , Fun aln Nothing 
         [ Var ( RepID Nothing ) "hits_faa" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "query" 
         ] "muscle" 
-        [ Ref faa ( Salt 0 ) 
+        [ Ref faa Nothing 
             [ Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "query" 
@@ -61,14 +59,14 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "hits_hmm" 
-    , Fun hmm ( Salt 0 ) 
+    , Fun hmm Nothing 
         [ Var ( RepID Nothing ) "hits_aln" 
         , Var ( RepID Nothing ) "hits_faa" 
         , Var ( RepID Nothing ) "mgen" 
         , Var ( RepID Nothing ) "hits" 
         , Var ( RepID Nothing ) "query" 
         ] "hmmbuild" 
-        [ Ref aln ( Salt 0 ) 
+        [ Ref aln Nothing 
             [ Var ( RepID Nothing ) "hits_faa" 
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "hits" 
@@ -79,7 +77,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref hmm ( Salt 0 ) 
+    , Ref hmm Nothing 
         [ Var ( RepID Nothing ) "hits_aln" 
         , Var ( RepID Nothing ) "hits_faa" 
         , Var ( RepID Nothing ) "mgen" 

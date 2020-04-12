@@ -7,46 +7,37 @@
 |   `-- seqio
 |-- exprs
 |   |-- diamond_blastx
-|   |   `-- 82cd2c1301
-|   |       `-- c11b3cd068
-|   |           `-- cb10e2ac0f
-|   |               `-- 0
-|   |                   `-- result
-|   |-- diamond_makedb
-|   |   `-- b8ba873461
-|   |       `-- 0
-|   |           `-- result
-|   |-- gbk_to_fna
-|   |   `-- 169f0411dc
-|   |       `-- fb068ed793
-|   |           `-- 0
+|   |   `-- 87c44c2675
+|   |       `-- 42cf2a2326
+|   |           `-- 8a3f178282
 |   |               `-- result
+|   |-- diamond_makedb
+|   |   `-- afa6e907a5
+|   |       `-- result
+|   |-- gbk_to_fna
+|   |   `-- 3feaffccb4
+|   |       `-- 980bd58c0d
+|   |           `-- result
 |   |-- load_faa
-|   |   `-- b4f8a9bd8e
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/10ffe0cf0f
+|   |   `-- cfed7edd23
+|   |       `-- result -> ../../../cache/load/10ffe0cf0f
 |   |-- load_fna
 |   |-- load_gbk
-|   |   `-- 54f0f526a0
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/bb17ca9dfe
+|   |   `-- 22d675da85
+|   |       `-- result -> ../../../cache/load/bb17ca9dfe
 |   |-- num
 |   |   `-- 6de785566e
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 3e6793b201
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       |-- 90811d06ee
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- cdba97c8d8
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- maga.fna -> ../exprs/gbk_to_fna/169f0411dc/fb068ed793/0/result
-    |-- mgen.faa -> ../exprs/load_faa/b4f8a9bd8e/0/result
-    `-- result -> ../exprs/diamond_blastx/82cd2c1301/c11b3cd068/cb10e2ac0f/0/result
+    |-- maga.fna -> ../exprs/gbk_to_fna/3feaffccb4/980bd58c0d/result
+    |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
+    `-- result -> ../exprs/diamond_blastx/87c44c2675/42cf2a2326/8a3f178282/result
 
-34 directories, 15 files
+25 directories, 15 files

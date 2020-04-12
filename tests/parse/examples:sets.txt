@@ -1,5 +1,5 @@
 [ 
     ( Var ( RepID Nothing ) "result" 
-    , Lit str ( Salt 0 ) "example not written yet" 
+    , Lit str "example not written yet" 
     ) 
 ]

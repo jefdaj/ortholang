@@ -2,40 +2,31 @@
 |-- cache
 |-- exprs
 |   |-- list
-|   |   |-- 52a480654a
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- 9a95aa88f9
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- fad06516ce
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   |-- 498806aaa8
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 8e10e2d2ad
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- dcfc1b8c30
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- multiply
-|   |   |-- 58d5c28fca
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- a17ec09dcb
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   |-- 728dab85e8
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- bfd28a4c2c
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   |-- 9d7db6f932
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- ca076eb63f
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- eaad7f2e40
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- subtract
-|       `-- cdb83bba2b
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|       `-- d0fb350167
+|           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- result -> ../vars/var4.num
-    |-- var1.num -> ../exprs/num/ca076eb63f/0/result
-    |-- var3.num -> ../exprs/multiply/58d5c28fca/0/result
-    `-- var4.num -> ../exprs/subtract/cdb83bba2b/0/result
+    |-- var1.num -> ../exprs/num/ca076eb63f/result
+    |-- var3.num -> ../exprs/multiply/bfd28a4c2c/result
+    `-- var4.num -> ../exprs/subtract/d0fb350167/result
 
-25 directories, 13 files
+16 directories, 13 files

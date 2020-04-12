@@ -1,40 +1,39 @@
 [ 
     ( Var ( RepID Nothing ) "small5" 
-    , Fun faa.list ( Salt 0 ) [] "load_faa_each" 
-        [ Fun str.list ( Salt 0 ) [] "sample" 
-            [ Lit num ( Salt 0 ) "5.0" 
-            , Fun str.list ( Salt 0 ) [] "glob_files" 
-                [ Lit str ( Salt 0 ) "examples/sequences/Mycoplasma_*_refseq.faa" ]
+    , Fun faa.list Nothing [] "load_faa_each" 
+        [ Fun str.list Nothing [] "sample" 
+            [ Lit num "5.0" 
+            , Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ]
             ] 
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "ofres" 
-    , Fun ofr ( Salt 0 ) 
+    , Fun ofr Nothing 
         [ Var ( RepID Nothing ) "small5" ] "orthofinder" 
-        [ Ref faa.list ( Salt 0 ) [] 
+        [ Ref faa.list Nothing [] 
             ( Var ( RepID Nothing ) "small5" )
         ]
     ) 
 , 
     ( Var ( RepID Nothing ) "ogs" 
-    , Fun str.list.list ( Salt 0 ) 
+    , Fun str.list.list Nothing 
         [ Var ( RepID Nothing ) "ofres" 
         , Var ( RepID Nothing ) "small5" 
         ] "orthogroups_containing" 
-        [ Ref ofr ( Salt 0 ) 
+        [ Ref ofr Nothing 
             [ Var ( RepID Nothing ) "small5" ] 
             ( Var ( RepID Nothing ) "ofres" )
-        , Lst str ( Salt 0 ) [] 
-            [ Lit str ( Salt 0 ) "WP_010925290.1" 
-            , Lit str ( Salt 0 ) "NP_975756.1" 
-            , Lit str ( Salt 0 ) "WP_011949581.1" 
+        , Lst str [] 
+            [ Lit str "WP_010925290.1" 
+            , Lit str "NP_975756.1" 
+            , Lit str "WP_011949581.1" 
             ] 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Ref str.list.list ( Salt 0 ) 
+    , Ref str.list.list Nothing 
         [ Var ( RepID Nothing ) "ofres" 
         , Var ( RepID Nothing ) "small5" 
         ] 
