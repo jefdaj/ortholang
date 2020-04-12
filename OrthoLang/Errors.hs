@@ -61,7 +61,7 @@ module OrthoLang.Errors
 
   -- * Eval exceptions
   , ScriptFailed(..)
-  , ShakeError(..)
+  -- , ShakeError(..)
   -- TODO lock errors
   -- TODO no such file/dir
   -- TODO permissions error
@@ -199,6 +199,8 @@ replFromException x = do
 -- eval exceptions --
 ---------------------
 
+-- TODO are there any that aren't also shake exeptions? if not, remove this
+
 data SomeEvalException = forall e . Exception e => SomeEvalException e
 
 instance Show SomeEvalException where
@@ -216,9 +218,7 @@ evalFromException x = do
   SomeEvalException a <- fromException x
   cast a
 
-----------------------
--- shake exceptions --
-----------------------
+-- TODO read http://dev.stephendiehl.com/hask/#exceptions
 
 -- TODO how to wrap shake exceptions?
 -- TODO ScriptFailed needs to be a subset of shake exceptions
@@ -226,16 +226,16 @@ evalFromException x = do
 
 -- TODO write the long shake error to a logfile and print single-line description of it
 --      does that require a separate catch-and-re-throw function to do the writing?
-data ShakeError = ShakeError S.ShakeException
+-- data SomeEvalException = SomeEvalException S.ShakeException
 
-instance Show ShakeError where
-  show (ShakeError e) = "Shake failed: " ++ firstLine ++ "... See ortholang.log for details."
-    where
-      firstLine = takeWhile (/= '\n') $ show e
+-- instance Show ShakeError where
+--   show (ShakeError e) = "Shake failed: " ++ firstLine ++ "... See ortholang.log for details."
+--     where
+--       firstLine = takeWhile (/= '\n') $ show e
 
-instance Exception ShakeError where
-  toException   = evalToException
-  fromException = evalFromException
+-- instance Exception ShakeError where
+--   toException   = evalToException
+--   fromException = evalFromException
 
 data ScriptFailed = ScriptFailed String FilePath Int
 
