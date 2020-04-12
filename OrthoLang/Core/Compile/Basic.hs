@@ -86,19 +86,19 @@ TODO remove the insert digests hack? or is this the main entry point for that to
 TODO are the extra rExpr steps needed in most cases, or only for rNamedFunction?
 -}
 rExpr :: RulesFn
-rExpr s e@(Lit _ _ _      ) = rLit s e
+rExpr s e@(Lit _ _      ) = rLit s e
 rExpr s e@(Ref _ _ _ _    ) = rRef s e
-rExpr s e@(Lst _ _ _   es) = mapM (rExpr s) es >> rList s e
+rExpr s e@(Lst _ _   es) = mapM (rExpr s) es >> rList s e
 rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO is the map part needed?
-rExpr s e@(Bop t r ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t r ds [e1, e2]] >> rBop s e
+rExpr s e@(Bop t r ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t ds [e1, e2]] >> rBop s e
 rExpr _ (Com (CompiledExpr _ _ rules)) = rules
 
 -- | Temporary hack to fix Bops
 rBop :: RulesFn
-rBop s e@(Bop t r ds _ e1 e2) = rExpr s es >> rExpr s fn
+rBop s e@(Bop t ms ds _ e1 e2) = rExpr s es >> rExpr s fn
   where
-    es = Lst t r ds [e1, e2] -- TODO (ListOf t)?
-    fn = Fun t r ds (prefixOf e) [es]
+    es = Lst t ds [e1, e2] -- TODO (ListOf t)?
+    fn = Fun t ms ds (prefixOf e) [es] -- TODO is the salt right?
 rBop _ e = error "rBop" $ "called with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- | This is in the process of being replaced with fNewRules,
@@ -169,7 +169,7 @@ aLit :: Expr -> Path -> Action ()
 aLit expr out = do
   cfg <- fmap fromJust getShakeExtra
   let paths :: Expr -> FilePath
-      paths (Lit _ _ p) = p
+      paths (Lit _ p) = p
       paths _ = fail "bad argument to paths"
       ePath = paths expr
       out'  = fromPath cfg out
@@ -184,7 +184,7 @@ whose type is a @'ListOf' \<something\>@ instead.
 TODO remove the insert digests hack
 -}
 rList :: RulesFn
-rList s e@(Lst rtn _ _ _)
+rList s e@(Lst rtn _ _)
   | rtn `elem` [Empty, str, num] = rListLits  s e
   | otherwise                    = rListPaths s e
 rList _ _ = error "rList" "bad arguemnt"
@@ -216,7 +216,7 @@ TODO can it be mostly unified with rListPaths digest-wise?
 TODO what happens when you make a list of literals in two steps using links?
 -}
 rListLits :: RulesFn
-rListLits scr e@(Lst _ _ _ exprs) = do
+rListLits scr e@(Lst _ _ exprs) = do
   litPaths <- mapM (rExpr scr) exprs
   cfg <- fmap fromJust getShakeExtraRules
   let litPaths' = map (\(ExprPath p) -> toPath cfg p) litPaths
@@ -261,7 +261,7 @@ known until after the function runs.
 TODO hash mismatch error here?
 -}
 rListPaths :: RulesFn
-rListPaths scr e@(Lst _ _ _ exprs) = do
+rListPaths scr e@(Lst _ _ exprs) = do
   paths <- mapM (rExpr scr) exprs
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules

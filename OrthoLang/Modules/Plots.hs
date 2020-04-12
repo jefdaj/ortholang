@@ -39,7 +39,7 @@ png = Type
  - Otherwise it will return an empty string, which the script should ignore.
  -}
 varName :: RulesFn
-varName scr expr = rExpr scr $ Lit str (Salt 0) $ case expr of
+varName scr expr = rExpr scr $ Lit str $ case expr of
   (Ref _ _ _ (Var _ name)) -> name
   _ -> ""
 
@@ -47,7 +47,7 @@ varName scr expr = rExpr scr $ Lit str (Salt 0) $ case expr of
 varNames :: RulesFn
 varNames _ expr = undefined lits -- TODO implement this
   where
-    lits = Lit str (Salt 0) $ case expr of
+    lits = Lit str $ case expr of
              (Ref _ _ _ (Var _ name)) -> name
              _ -> ""
 
@@ -150,12 +150,12 @@ rPlotRepeatScores :: FilePath -> RulesFn
 rPlotRepeatScores = rPlotNumScores indRepeatVarName
 
 indRepeatVarName :: RulesFn
-indRepeatVarName scr expr = rExpr scr $ Lit str (Salt 0) $ case expr of
+indRepeatVarName scr expr = rExpr scr $ Lit str $ case expr of
   (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
   _ -> ""
 
 depRepeatVarName :: RulesFn
-depRepeatVarName scr expr = rExpr scr $ Lit str (Salt 0) $ case expr of
+depRepeatVarName scr expr = rExpr scr $ Lit str $ case expr of
   (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
   _ -> ""
 

@@ -91,12 +91,12 @@ writeScript cfg scr path = do
 
 -- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty Expr where
-  pPrint e@(Lit _ _ s)
+  pPrint e@(Lit _ s)
     | typeOf e == num = prettyNum s
     | otherwise = text $ show s
   pPrint (Ref _ _ _ v)    = pPrint v
   pPrint (Fun _ _ _ s es) = text s <+> sep (map pNested es)
-  pPrint (Lst _ _ _ es)  = pList es
+  pPrint (Lst _ _ es)  = pList es
   pPrint (Com (CompiledExpr t (ExprPath p) _)) = text $ "Compiled " ++ tExtOf t ++ " " ++ p
 
   -- this is almost right except it breaks lines too early (always nesting),

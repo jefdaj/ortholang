@@ -111,7 +111,7 @@ rMapSimpleScript index = rMap index . aSimpleScript
  - but am open to alternatives if anyone thinks of something!
  -}
 rMapMain :: Int -> Maybe ([Path] -> IO Path) -> (Path -> [Path] -> Action ()) -> RulesFn
-rMapMain mapIndex mTmpFn actFn scr e@(Fun r salt _ name exprs) = do
+rMapMain mapIndex mTmpFn actFn scr e@(Fun r ms _ name exprs) = do
   let mapIndex' = mapIndex - 1 -- index arguments from 1 rather than 0
       (mappedExpr, normalExprs) = popFrom mapIndex' exprs
   regularArgPaths <- mapM (rExpr scr) normalExprs
@@ -129,7 +129,7 @@ rMapMain mapIndex mTmpFn actFn scr e@(Fun r salt _ name exprs) = do
                 (ListOf t) -> debugC "rMapMain" ("type of \"" ++ render (pPrint e)
                                   ++ "' (" ++ show e ++ ") is " ++ show t) t
                 _ -> error "rMapMain" $ "bad argument: " ++ show e
-  elemCachePtn %> aMapElem eType mTmpFn actFn singleName salt
+  elemCachePtn %> aMapElem eType mTmpFn actFn singleName ms
   mainOutPath  %> aMapMain mapIndex' regularArgPaths' elemCacheDir' eType argLastsPath'
   return $ debugRules "rMapMain" e $ ExprPath mainOutPath
 rMapMain _ _ _ _ _ = fail "bad argument to rMapMain"
@@ -212,8 +212,8 @@ aMapArgs mapIndex eType regularArgs' tmp' mappedArg = do
 aMapElem :: Type
          -> Maybe ([Path] -> IO Path)
          -> (Path -> [Path] -> Action ())
-         -> String -> Salt -> FilePath -> Action ()
-aMapElem eType tmpFn actFn singleName salt out = do
+         -> String -> Maybe Salt -> FilePath -> Action ()
+aMapElem eType tmpFn actFn singleName mSalt out = do
   let argsPath = replaceBaseName out "args"
   args <- readPaths argsPath
   cfg <- fmap fromJust getShakeExtra
@@ -232,7 +232,7 @@ aMapElem eType tmpFn actFn singleName salt out = do
   let out' = traceA "aMapElem" (toPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toPath cfg) args'' -- TODO make it match exprPath
-      single  = unsafeExprPathExplicit cfg dRef singleName eType salt hashes
+      single  = unsafeExprPathExplicit cfg dRef singleName eType mSalt hashes
       single' = fromPath cfg single
       args''' = single:map (toPath cfg) args''
   -- TODO any risk of single' being made after we test for it here?

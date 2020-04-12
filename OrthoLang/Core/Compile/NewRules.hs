@@ -78,6 +78,7 @@ import OrthoLang.Core.Types
 import System.Exit (ExitCode(..))
 
 import Control.Monad              (when)
+import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>), takeDirectory)
 import OrthoLang.Core.Actions     (need')
@@ -229,9 +230,11 @@ newRules = do
 -- TODO any need to look up prefixOf to get the canonical name?
 {-|
 -}
-newPattern :: Config -> String -> Int -> FilePattern
-newPattern cfg name nArgs =
-  cfgTmpDir cfg </> "exprs" </> name </> (foldl1 (</>) (take (nArgs+1) $ repeat "*")) </> "result"
+newPattern :: Config -> Bool -> String -> Int -> FilePattern
+newPattern cfg useSalt name nArgs =
+  cfgTmpDir cfg </> "exprs" </> name </> (foldl1 (</>) (take nStars $ repeat "*")) </> "result"
+  where
+    nStars = if useSalt then nArgs+1 else nArgs
 
 -- TODO need to addDigest in here somehow?
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
@@ -247,7 +250,8 @@ rNewRules
   -> Rules ()
 rNewRules nArgs applyFn oSig name aFn = do
   cfg <- fmap fromJust $ getShakeExtraRules
-  let ptn = newPattern cfg name nArgs
+  let useSalt = elem Stochastic $ fTags $ fromRight $ findFun cfg name
+      ptn = newPattern cfg useSalt name nArgs
       ptn' = traceShow "rNewrules" ptn
   ptn' %> \p -> do
     -- TODO if adding rules works anywhere in an action it'll be here right?

@@ -144,7 +144,7 @@ pNum = debugParser "pNum" $ do
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
   let sign = case neg of { Just x -> x; _ -> ' ' }
       lit  = show (read (sign:n:ns) :: Scientific)
-      expr = Lit num (Salt 0) lit 
+      expr = Lit num lit 
   -- putDigests "pNum" [expr]
   return expr
 
@@ -171,6 +171,6 @@ pQuoted = debugParser "pQuoted" ((lexeme $ between (char '\"') (char '\"') $ man
 
 pStr :: ParseM Expr
 pStr = debugParser "pStr" $ do
-  expr <- Lit str (Salt 0) <$> pQuoted <?> "string literal"
+  expr <- Lit str <$> pQuoted <?> "string literal"
   -- putDigests "pStr" [expr]
   return expr

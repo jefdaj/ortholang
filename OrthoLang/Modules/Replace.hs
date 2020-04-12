@@ -69,11 +69,11 @@ olModule = Module
  -}
 
 mapExprVars :: (Var -> Var) -> Expr -> Expr
-mapExprVars _ e@(Lit  _ _ _) = e
+mapExprVars _ e@(Lit  _ _) = e
 mapExprVars fn (Ref  t n vs v      ) = Ref  t n (map fn vs)   (fn v)
 mapExprVars fn (Bop  t n vs s e1 e2) = Bop  t n (map fn vs) s (mapExprVars fn e1) (mapExprVars fn e2)
 mapExprVars fn (Fun  t n vs s es   ) = Fun  t n (map fn vs) s (map (mapExprVars fn) es)
-mapExprVars fn (Lst t n vs   es   ) = Lst t n (map fn vs)   (map (mapExprVars fn) es)
+mapExprVars fn (Lst t vs   es   ) = Lst t (map fn vs)   (map (mapExprVars fn) es)
 mapExprVars _ (Com _) = error "implement this!"
 
 mapAssignVars :: (Var -> Var) -> Assign -> Assign

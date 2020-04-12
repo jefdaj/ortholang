@@ -43,7 +43,7 @@ tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
-rSample scr expr@(Fun _ salt _ _ [n, lst]) = do
+rSample scr expr@(Fun _ (Just salt) _ _ [n, lst]) = do
   (ExprPath nPath' ) <- rExpr scr n
   (ExprPath inPath') <- rExpr scr lst
   cfg  <- fmap fromJust getShakeExtraRules

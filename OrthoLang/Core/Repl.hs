@@ -206,11 +206,11 @@ dereference :: Script -> Var -> Expr -> Expr
 dereference scr var e@(Ref _ _ _ v2)
   | var == v2 = justOrDie "failed to dereference variable!" $ lookup var scr
   | otherwise = e
-dereference _   _   e@(Lit _ _ _) = e
+dereference _   _   e@(Lit _ _) = e
 dereference _   _   (Com _) = error "implement this! or rethink?"
-dereference scr var (Bop  t n vs s e1 e2) = Bop  t n (delete var vs) s (dereference scr var e1) (dereference scr var e2)
-dereference scr var (Fun  t n vs s es   ) = Fun  t n (delete var vs) s (map (dereference scr var) es)
-dereference scr var (Lst t n vs   es   ) = Lst t n (delete var vs)   (map (dereference scr var) es)
+dereference scr var (Bop  t ms vs s e1 e2) = Bop  t ms (delete var vs) s (dereference scr var e1) (dereference scr var e2)
+dereference scr var (Fun  t ms vs s es   ) = Fun  t ms (delete var vs) s (map (dereference scr var) es)
+dereference scr var (Lst t vs   es   ) = Lst t (delete var vs)   (map (dereference scr var) es)
 
 --------------------------
 -- dispatch to commands --

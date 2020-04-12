@@ -156,12 +156,13 @@ module OrthoLang.Core.Paths
 import OrthoLang.Errors
 import OrthoLang.Core.Types
 
+import Data.Maybe                     (maybeToList)
 import Data.List                      (intersperse, isPrefixOf)
 import Data.List.Split                (splitOn)
 import Data.String.Utils              (replace)
 import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
 import OrthoLang.Core.Pretty          (render, pPrint)
-import OrthoLang.Util            (digest)
+import OrthoLang.Util            (digest, digestLength)
 import Path                           (parseAbsFile, fromAbsFile)
 -- import Text.PrettyPrint.HughesPJClass (Pretty)
 
@@ -253,15 +254,15 @@ argHashes :: Config -> DigestsRef -> Script -> Expr -> [String]
 argHashes c d s (Ref _ _ _ v) = case lookup v s of
                                          Nothing -> error "argHashes" $ "no such var " ++ show v
                                          Just e  -> argHashes c d s e
-argHashes _ _ _ (Lit  _ _     v    ) = [digest v]
+argHashes _ _ _ (Lit  _     v    ) = [digest v]
 argHashes c d s (Fun  _ _ _ _ es   ) = map (digest . exprPath c d s) es
 argHashes c d s (Bop  _ _ _ _ e1 e2) = map (digest . exprPath c d s) [e1, e2] -- TODO remove?
-argHashes c d s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c d s) es]
+argHashes c d s (Lst _ _   es   ) = [digest $ map (digest . exprPath c d s) es]
 argHashes _ _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
 
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
-bop2fun e@(Bop t r ds _ e1 e2) = Fun t r ds (prefixOf e) [Lst t r ds [e1, e2]]
+bop2fun e@(Bop t r ds _ e1 e2) = Fun t r ds (prefixOf e) [Lst t ds [e1, e2]]
 bop2fun e = error "bop2fun" $ "called with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- TODO rename to tmpPath?
@@ -282,11 +283,11 @@ exprPath c d s expr = traceP "exprPath" expr res
 
 -- TODO remove repeat salt if fn is deterministic
 -- note this is always used with its unsafe digest wrapper (below)
-exprPathExplicit :: Config -> String -> Salt -> [String] -> Path
-exprPathExplicit cfg prefix (Salt s) hashes = toPath cfg path
+exprPathExplicit :: Config -> String -> Maybe Salt -> [String] -> Path
+exprPathExplicit cfg prefix mSalt hashes = toPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
-    base = (concat $ intersperse "/" $ hashes ++ [show s])
+    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap show mSalt)
     path = dir </> base </> "result" -- <.> tExtOf rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
@@ -363,9 +364,9 @@ addDigest dRef rtype path = atomicModifyIORef' dRef $ \ds ->
   (M.insert (pathDigest path) (rtype, path) ds, ())
 
 -- TODO should the safe version still exist? should one be renamed?
-unsafeExprPathExplicit :: Config -> DigestsRef -> String -> Type -> Salt -> [String] -> Path
-unsafeExprPathExplicit cfg dRef prefix rtype salt hashes =
-  let path = exprPathExplicit cfg prefix salt hashes
+unsafeExprPathExplicit :: Config -> DigestsRef -> String -> Type -> Maybe Salt -> [String] -> Path
+unsafeExprPathExplicit cfg dRef prefix rtype mSalt hashes =
+  let path = exprPathExplicit cfg prefix mSalt hashes
   in path `seq` unsafePerformIO $ addDigest dRef rtype path >> return path
 
 pathDigest :: Path -> PathDigest
@@ -391,10 +392,10 @@ TODO is there a better word for this, or a matching typeclass?
 -}
 listExprs :: Expr -> [Expr]
 listExprs   (Ref _ _ _ _    ) = [] -- TODO or is it e?
-listExprs e@(Lit _ _ _      ) = [e]
+listExprs e@(Lit _ _      ) = [e]
 listExprs e@(Com _          ) = [e]
 listExprs e@(Fun _ _ _ _  es) = e : concatMap listExprs es
-listExprs e@(Lst _ _ _    es) = e : concatMap listExprs es
+listExprs e@(Lst _ _    es) = e : concatMap listExprs es
 listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e
 
 -- listScriptExprs :: Script -> [Expr]
@@ -433,7 +434,7 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
     Just (oType, _) -> do
       let findk k = case M.lookup k dMap of { Nothing -> Left k; Just d -> Right d }
           dKeys  = listDigestsInPath cfg out
-          (dFails, dVals) = partitionEithers $ map findk dKeys
+          (dFails, dVals) = partitionEithers $ map findk $ trace "decodeNewRulesDeps" ("dKeys: " ++ show dKeys) dKeys
           dTypes = map fst dVals
           dPaths = map snd dVals
       when (length dFails > 0) $ throwIO $ MissingDigests out $ map show dFails
@@ -445,9 +446,9 @@ listDigestsInPath :: Config -> FilePath -> [PathDigest]
 listDigestsInPath cfg
   = map PathDigest
   . reverse
-  . drop 2
+  . dropWhile (\s -> length s < digestLength) -- drop "result" or "<salt>/result"
   . reverse
-  . drop 2
+  . drop 2 -- TODO drop "exprs", "<fnname>"
   . dropWhile (/= "exprs")
   . map (filter (/= '/'))
   . splitPath

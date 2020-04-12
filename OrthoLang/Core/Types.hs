@@ -184,11 +184,11 @@ data Var = Var RepID String
 --      (do we need to add salts of subepxressions or something? or use randoms?)
 -- * list of dependencies (except lits don't have any)
 data Expr
-  = Lit Type Salt String
-  | Ref Type Salt [Var] Var -- do refs need a salt? yes! (i think?)
-  | Bop Type Salt [Var] String  Expr Expr
-  | Fun Type Salt [Var] String [Expr] -- TODO is the Eq instance wrong?
-  | Lst Type Salt [Var] [Expr]
+  = Lit Type String
+  | Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
+  | Bop Type (Maybe Salt) [Var] String  Expr Expr -- TODO remove salt?
+  | Fun Type (Maybe Salt) [Var] String [Expr] -- TODO is the Eq instance wrong?
+  | Lst Type [Var] [Expr] -- TODO maybe salt?
   | Com CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show, Typeable)
 
@@ -210,29 +210,29 @@ instance Eq CompiledExpr where
   (CompiledExpr _ p1 _) == (CompiledExpr _ p2 _) = p1 == p2
 
 -- TODO is this not actually needed? seems "show expr" handles it?
-saltOf :: Expr -> Salt
-saltOf (Lit _ n _)       = n
-saltOf (Ref _ n _ _)     = n
-saltOf (Bop _ n _ _ _ _) = n
-saltOf (Fun _ n _ _ _)   = n
-saltOf (Lst _ n _ _)     = n
-saltOf (Com (CompiledExpr _ _ _)) = error "saltOf" "CompiledExprs don't have salts" -- TODO is that OK?
+saltOf :: Expr -> Maybe Salt
+saltOf (Lit _ _)                = Nothing
+saltOf (Lst _ _ _)              = Nothing -- TODO was the salt important?
+saltOf (Com (CompiledExpr _ _ _)) = Nothing -- TODO this makes sense right?
+saltOf (Ref _ ms _ _)     = ms
+saltOf (Bop _ ms _ _ _ _) = ms
+saltOf (Fun _ ms _ _ _)   = ms
 
 -- TODO this needs to be recursive?
 -- TODO would a recursive version be able to replace addPrefixes in ReplaceEach?
 setSalt :: Int -> Expr -> Expr
-setSalt r (Lit t _ s)          = Lit  t (Salt r) s
-setSalt r (Ref t _ ds v)       = Ref  t (Salt r) ds v
-setSalt r (Bop t _ ds s e1 e2) = Bop  t (Salt r) ds s e1 e2
-setSalt r (Fun t _ ds s es)    = Fun  t (Salt r) ds s es
-setSalt r (Lst t _ ds es)     = Lst t (Salt r) ds es
+setSalt r e@(Lit t s)     = e
+setSalt r e@(Lst t ds es) = e
+setSalt r (Ref t ms ds v)       = Ref  t (fmap (const $ Salt r) ms) ds v
+setSalt r (Bop t ms ds s e1 e2) = Bop  t (fmap (const $ Salt r) ms) ds s e1 e2
+setSalt r (Fun t ms ds s es)    = Fun  t (fmap (const $ Salt r) ms) ds s es
 setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt" "not implemented for compiled rules" -- TODO should it be?
 
 -- TODO add names to the Bops themselves... or associate with prefix versions?
 prefixOf :: Expr -> String
-prefixOf (Lit rtn _ _     ) = tExtOf rtn
+prefixOf (Lit rtn _     ) = tExtOf rtn
 prefixOf (Fun _ _ _ name _) = name
-prefixOf (Lst _ _ _ _    ) = "list"
+prefixOf (Lst _ _ _    ) = "list"
 prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
 prefixOf (Com (CompiledExpr _ _ _)) = error "prefixOf" "CompiledExprs don't need a prefix"
 prefixOf (Bop _ _ _ n _ _ ) = case n of
@@ -267,7 +267,7 @@ ensureResult :: Script -> Script
 ensureResult as = if null as then noRes else scr'
   where
     resVar = Var (RepID Nothing) "result"
-    noRes  = as ++ [(resVar, Lit str (Salt 0) "no result")]
+    noRes  = as ++ [(resVar, Lit str "no result")]
     scr'   = as ++ [(resVar, snd $ last as)               ]
 
 lookupResult :: [(Var, b)] -> Maybe b
@@ -383,11 +383,11 @@ defaultShowN nLines _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy 
                     else nPlusOne
 
 typeOf :: Expr -> Type
-typeOf (Lit   t _ _      ) = t
+typeOf (Lit   t _      ) = t
 typeOf (Ref   t _ _ _    ) = t
 typeOf (Bop   t _ _ _ _ _) = t
 typeOf (Fun   t _ _ _ _  ) = t
-typeOf (Lst  t _ _ _    ) = ListOf t
+typeOf (Lst  t _ _    ) = ListOf t
 typeOf (Com (CompiledExpr t _ _)) = t
 -- typeOf (Lst _ _ _ ts     ) = ListOf $ firstNonEmpty $ map typeOf ts
 -- typeOf (Lst _ _ _ []     ) = Empty
@@ -424,11 +424,11 @@ varOf (Ref _ _ _ v) = [v]
 varOf _                = [ ]
 
 depsOf :: Expr -> [Var]
-depsOf (Lit  _ _ _         ) = []
+depsOf (Lit  _ _         ) = []
 depsOf (Ref  _ _ vs v      ) = v:vs -- TODO redundant?
 depsOf (Bop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
 depsOf (Fun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
-depsOf (Lst _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
+depsOf (Lst _ vs   es   ) = nub $ vs ++ concatMap varOf es
 depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
 
 rDepsOf :: Script -> Var -> [Var]
@@ -648,10 +648,10 @@ instance Show Module where
 -- do we have to make a rule that you can't use those?
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: Script -> Expr -> [Expr]
-extractExprs  _  (Lst _ _ _ es) = es
-extractExprs scr (Ref  _ _ _ v ) = case lookup v scr of
-                                        Nothing -> error "extractExprs" $ "no such var " ++ show v
-                                        Just e  -> extractExprs scr e
+extractExprs  _  (Lst _ _ es) = es
+extractExprs scr (Ref _ _ _ v ) = case lookup v scr of
+                                       Nothing -> error "extractExprs" $ "no such var " ++ show v
+                                       Just e  -> extractExprs scr e
 extractExprs _   (Fun _ _ _ _ _) = error "extractExprs" explainFnBug
 extractExprs scr (Bop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
 extractExprs  _   e               = error "extractExprs" $ "bad arg: " ++ show e

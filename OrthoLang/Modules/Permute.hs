@@ -29,28 +29,26 @@ olModule = Module
 -- TODO produce each output list in a separate Shake monad section?
 -- TODO are paths hashes unique now??
 --      (if it turns out to be re-running stuff unneccesarily)
-rPermute :: ([String] -> [[String]]) -> RulesFn
-rPermute comboFn scr expr@(Fun _ salt _ _ [iList]) = do
-  (ExprPath iPath) <- rExpr scr iList
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let oList = fromPath cfg $ exprPath cfg dRef scr expr
-  oList %> aPermute comboFn iPath salt
-  return (ExprPath oList)
-rPermute _ _ _ = fail "bad argument to rCombos"
+-- rPermute :: ([String] -> [[String]]) -> RulesFn
+-- rPermute comboFn scr expr@(Fun _ salt _ _ [iList]) = do
+--   (ExprPath iPath) <- rExpr scr iList
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   let oList = fromPath cfg $ exprPath cfg dRef scr expr
+--   oList %> aPermute comboFn iPath salt
+--   return (ExprPath oList)
+-- rPermute _ _ _ = fail "bad argument to rCombos"
 
 -- TODO once back-compilation or whatever works, also use it here?
 -- TODO do something more obvious than writing to the "list" prefix??
-aPermute :: ([String] -> [[String]])
-         -> FilePath -> Salt
-         -> FilePath -> Action ()
-aPermute comboFn iPath salt out = do
-  need' "ortholang.modules.permute.aPermute" [iPath]
+aPermute :: ([String] -> [[String]]) -> NewAction1
+aPermute comboFn (ExprPath out) iPath = do
+  -- need' "ortholang.modules.permute.aPermute" [iPath]
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
   lt@(ListOf et) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out)
   elements <- readStrings et iPath
-  let mkOut p = unsafeExprPathExplicit cfg dRef "list" lt salt [digest $ makeRelative (cfgTmpDir cfg) p]
+  let mkOut p = unsafeExprPathExplicit cfg dRef "list" lt Nothing [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
       oPaths' = map (fromPath cfg) oPaths
       combos  = comboFn elements
@@ -68,17 +66,22 @@ aPermute comboFn iPath salt out = do
 
 -- TODO rename actual function to drop_each?
 
-leaveEachOut :: Function
-leaveEachOut = let name = "leave_each_out" in Function
-  { fOpChar = Nothing, fName = name 
-  , fTags = []
-  -- , fTypeCheck = combosTypeCheck
-  -- , fTypeDesc  = name ++ " : X.list -> X.list.list"
-  , fInputs = [ListSigs (AnyType "any type")]
-  , fOutput =  ListSigs (AnyType "any type")
-  , fNewRules = NewNotImplemented
-  , fOldRules = rPermute dropEach
-  }
+-- leaveEachOut :: Function
+-- leaveEachOut = let name = "leave_each_out" in Function
+--   { fOpChar = Nothing, fName = name 
+--   , fTags = []
+--   -- , fTypeCheck = combosTypeCheck
+--   -- , fTypeDesc  = name ++ " : X.list -> X.list.list"
+--   , fInputs = [ListSigs (AnyType "any type")]
+--   , fOutput =  ListSigs (AnyType "any type")
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rPermute dropEach
+--   }
+
+leaveEachOut = newFnA1 "leave_each_out"
+                 (ListSigs $            AnyType "any type")
+                 (ListSigs $ ListSigs $ AnyType "any type")
+                 (aPermute dropEach)
 
 -- combosTypeCheck :: [Type] -> Either String Type
 -- combosTypeCheck [ListOf t] = Right $ ListOf $ ListOf t

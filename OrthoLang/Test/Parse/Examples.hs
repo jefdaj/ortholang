@@ -17,41 +17,41 @@ import OrthoLang.Modules.SeqIO (faa)
 ---------------------------------
 
 n1, n2 :: Expr
-n1 = Lit num (Salt 0) "1.0"
-n2 = Lit num (Salt 0) "2.0"
+n1 = Lit num "1.0"
+n2 = Lit num "2.0"
 
 lst0, lst1, lst2, lst3 :: Expr
-lst0  = Lst Empty (Salt 0) [] [] -- ah, this is getting empty.list instead of empty
-lst1  = Lst num (Salt 0) [] [n1]
-lst2  = Lst num (Salt 0) [] [n1, n2]
-lst3  = Lst (ListOf num) (Salt 0) [] [lst1]
+lst0  = Lst Empty [] [] -- ah, this is getting empty.list instead of empty
+lst1  = Lst num [] [n1]
+lst2  = Lst num [] [n1, n2]
+lst3  = Lst (ListOf num) [] [lst1]
 
 s4, lst4 :: Expr
-s4   = Lit str (Salt 0) "four"
-lst4 = Lst str (Salt 0) [] [s4]
+s4   = Lit str "four"
+lst4 = Lst str [] [s4]
 
 -- TODO why do bops use the list type while lists use the elem type?
 bop00, bop10, bop01, bop40, bop04 :: Expr
-bop00 = Bop (ListOf Empty) (Salt 0) [] "|" lst0 lst0
-bop10 = Bop (ListOf num  ) (Salt 0) [] "|" lst1 lst0
-bop01 = Bop (ListOf num  ) (Salt 0) [] "|" lst0 lst1
-bop40 = Bop (ListOf str  ) (Salt 0) [] "|" lst4 lst0
-bop04 = Bop (ListOf str  ) (Salt 0) [] "|" lst0 lst4
+bop00 = Bop (ListOf Empty) Nothing [] "|" lst0 lst0
+bop10 = Bop (ListOf num  ) Nothing [] "|" lst1 lst0
+bop01 = Bop (ListOf num  ) Nothing [] "|" lst0 lst1
+bop40 = Bop (ListOf str  ) Nothing [] "|" lst4 lst0
+bop04 = Bop (ListOf str  ) Nothing [] "|" lst0 lst4
 
 len :: [Expr] -> Expr
-len es = Fun num (Salt 0) [] "length" es
+len es = Fun num Nothing [] "length" es
 
 addParens :: (String, a) -> (String, a)
 addParens (s, a) = ("(" ++ s ++ ")", a)
 
 faa0 :: Expr
-faa0  = Fun (ListOf faa) (Salt 0) [] "load_faa_each" [lst0]
+faa0  = Fun (ListOf faa) Nothing [] "load_faa_each" [lst0]
 
 -- TODO fix pretty-printing to write (ListOf faa) instead of faa.lst here
 somefaa, loadsome, loadbop1 :: Expr
-somefaa  = Lst str (Salt 0) [] [Lit str (Salt 0) "some.faa"]
-loadsome = (Fun (ListOf faa) (Salt 0) [] "load_faa_each" [somefaa])
-loadbop1 = Bop (ListOf faa) (Salt 0) [] "~" loadsome loadsome
+somefaa  = Lst str [] [Lit str "some.faa"]
+loadsome = (Fun (ListOf faa) Nothing [] "load_faa_each" [somefaa])
+loadbop1 = Bop (ListOf faa) Nothing [] "~" loadsome loadsome
 
 --------------
 -- examples --
@@ -94,14 +94,14 @@ exExprs = exTerms ++ map addParens exTerms ++
   , ("[] | [\"four\"]", bop04)
 
   -- bops should be left-associative, and type-picking-up should still work
-  , ("[1] | [] | []", Bop (ListOf num) (Salt 0) [] "|" bop10 lst0)
-  , ("[\"four\"] | [] | []", Bop (ListOf str) (Salt 0) [] "|" bop40 lst0)
+  , ("[1] | [] | []", Bop (ListOf num) Nothing [] "|" bop10 lst0)
+  , ("[\"four\"] | [] | []", Bop (ListOf str) Nothing [] "|" bop40 lst0)
 
   -- can put fn calls in lsts, with or without separators
-  , ("[ length [] ]", Lst num (Salt 0) [] [len [lst0]])
-  , ("[(length [])]", Lst num (Salt 0) [] [len [lst0]])
-  , ("[length [],  length []]", Lst num (Salt 0) [] [len [lst0], len [lst0]])
-  , ("[length [],\nlength []]", Lst num (Salt 0) [] [len [lst0], len [lst0]])
+  , ("[ length [] ]", Lst num [] [len [lst0]])
+  , ("[(length [])]", Lst num [] [len [lst0]])
+  , ("[length [],  length []]", Lst num [] [len [lst0], len [lst0]])
+  , ("[length [],\nlength []]", Lst num [] [len [lst0], len [lst0]])
 
   -- should be able to put fn calls in bops, with or without parens
   , ("(load_faa_each [\"some.faa\"]) ~ (load_faa_each [\"some.faa\"])", loadbop1)
