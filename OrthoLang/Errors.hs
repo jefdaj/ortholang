@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 {-|
 An attempt to structure the various runtime errors OrthoLang is already subject
@@ -59,7 +60,7 @@ module OrthoLang.Errors
   -- TODO type errors (a hierarchy?)
 
   -- * Compiler exceptions
-  , MissingDigests(..)
+  , MissingDigests(..) -- TODO should this count as an eval exception?
   , PathLitMixup(..)
   -- TODO type errors (a hierarchy?)
 
@@ -68,6 +69,7 @@ module OrthoLang.Errors
 
   -- * Eval exceptions
   , ScriptFailed(..)
+  , simplifyShakeErrors
   -- , ShakeError(..)
   -- TODO lock errors
   -- TODO no such file/dir
@@ -83,9 +85,10 @@ module OrthoLang.Errors
   )
   where
 
+import OrthoLang.Debug (warn)
 import qualified Development.Shake as S
 
-import Control.Exception (Exception, SomeException, fromException, toException)
+import Control.Exception.Safe (Exception, SomeException, fromException, toException, catch)
 import Data.Typeable     (Typeable, cast)
 
 ------------------------
@@ -250,6 +253,13 @@ instance Exception ScriptFailed where
 -- TODO write the long shake error to a logfile and print single-line description of it
 --      does that require a separate catch-and-re-throw function to do the writing?
 -- data SomeEvalException = SomeEvalException S.ShakeException
+
+simplifyShakeErrors :: IO () -> IO ()
+simplifyShakeErrors io = io `catch` \(e :: S.ShakeException) -> do
+  warn "errors.simplifyShakeErrors" $ show e
+  print $ "error while building '" ++ S.shakeExceptionTarget e ++ "':"
+  print $ S.shakeExceptionInner e
+  -- TODO also print a smaller error message
 
 -- instance Show ShakeError where
 --   show (ShakeError e) = "Shake failed: " ++ firstLine ++ "... See ortholang.log for details."
