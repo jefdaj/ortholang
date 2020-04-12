@@ -46,7 +46,7 @@ aPermute comboFn (ExprPath out) iPath = do
   -- need' "ortholang.modules.permute.aPermute" [iPath]
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
-  lt@(ListOf et) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out)
+  (ListOf lt@(ListOf et)) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out)
   elements <- readStrings et iPath
   let mkOut p = unsafeExprPathExplicit cfg dRef "list" lt Nothing [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
