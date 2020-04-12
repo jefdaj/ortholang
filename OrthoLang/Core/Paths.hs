@@ -138,6 +138,7 @@ module OrthoLang.Core.Paths
   , exprDigest
   , exprDigests
   -- , scriptDigests
+  , decodeNewRulesType
   , decodeNewRulesDeps
 
   -- * Internal utilities
@@ -254,7 +255,7 @@ argHashes c d s (Ref _ _ _ v) = case lookup v s of
                                          Just e  -> argHashes c d s e
 argHashes _ _ _ (Lit  _ _     v    ) = [digest v]
 argHashes c d s (Fun  _ _ _ _ es   ) = map (digest . exprPath c d s) es
-argHashes c d s (Bop  _ _ _ _ e1 e2) = map (digest . exprPath c d s) [e1, e2]
+argHashes c d s (Bop  _ _ _ _ e1 e2) = map (digest . exprPath c d s) [e1, e2] -- TODO remove?
 argHashes c d s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c d s) es]
 argHashes _ _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
 
@@ -280,10 +281,9 @@ exprPath c d s expr = traceP "exprPath" expr res
     res    = unsafeExprPathExplicit c d prefix rtype salt hashes
 
 -- TODO remove repeat salt if fn is deterministic
--- TODO why is rtype unused?
 -- note this is always used with its unsafe digest wrapper (below)
-exprPathExplicit :: Config -> String -> Type -> Salt -> [String] -> Path
-exprPathExplicit cfg prefix _ (Salt s) hashes = toPath cfg path
+exprPathExplicit :: Config -> String -> Salt -> [String] -> Path
+exprPathExplicit cfg prefix (Salt s) hashes = toPath cfg path
   where
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
     base = (concat $ intersperse "/" $ hashes ++ [show s])
@@ -365,7 +365,7 @@ addDigest dRef rtype path = atomicModifyIORef' dRef $ \ds ->
 -- TODO should the safe version still exist? should one be renamed?
 unsafeExprPathExplicit :: Config -> DigestsRef -> String -> Type -> Salt -> [String] -> Path
 unsafeExprPathExplicit cfg dRef prefix rtype salt hashes =
-  let path = exprPathExplicit cfg prefix rtype salt hashes
+  let path = exprPathExplicit cfg prefix salt hashes
   in path `seq` unsafePerformIO $ addDigest dRef rtype path >> return path
 
 pathDigest :: Path -> PathDigest
@@ -409,6 +409,14 @@ listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e
 --     eType   = typeOf expr
 --     ePath   = exprPath cfg dRef scr expr
 --     eDigest = pathDigest ePath
+
+decodeNewRulesType :: Config -> DigestsRef -> ExprPath -> IO Type
+decodeNewRulesType cfg dRef (ExprPath out) = do
+  dMap <- readIORef dRef
+  let k = pathDigest $ toPath cfg out
+  case M.lookup k dMap of
+    Nothing -> throwIO $ MissingDigests out [show k]
+    Just (t, _) -> return t
 
 -- TODO take an ExprPath
 decodeNewRulesDeps :: Config -> DigestsRef -> ExprPath -> IO (Type, [Type], [Path])

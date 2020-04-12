@@ -34,33 +34,33 @@ rPermute comboFn scr expr@(Fun _ salt _ _ [iList]) = do
   (ExprPath iPath) <- rExpr scr iList
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let oList      = fromPath cfg $ exprPath cfg dRef scr expr
-      (ListOf t) = typeOf iList
-  oList %> aPermute comboFn iPath t salt
+  let oList = fromPath cfg $ exprPath cfg dRef scr expr
+  oList %> aPermute comboFn iPath salt
   return (ExprPath oList)
 rPermute _ _ _ = fail "bad argument to rCombos"
 
 -- TODO once back-compilation or whatever works, also use it here?
 -- TODO do something more obvious than writing to the "list" prefix??
 aPermute :: ([String] -> [[String]])
-         -> FilePath -> Type -> Salt
+         -> FilePath -> Salt
          -> FilePath -> Action ()
-aPermute comboFn iPath eType salt out = do
+aPermute comboFn iPath salt out = do
   need' "ortholang.modules.permute.aPermute" [iPath]
   cfg  <- fmap fromJust getShakeExtra
-  elements <- readStrings eType iPath
   dRef <- fmap fromJust getShakeExtra
-  let mkOut p = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) salt [digest $ makeRelative (cfgTmpDir cfg) p]
+  lt@(ListOf et) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out)
+  elements <- readStrings et iPath
+  let mkOut p = unsafeExprPathExplicit cfg dRef "list" lt salt [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
       oPaths' = map (fromPath cfg) oPaths
       combos  = comboFn elements
   -- TODO traceA instead here?
-  mapM_ (\(p,ps) -> writeStrings eType p $
+  mapM_ (\(p,ps) -> writeStrings et p $
                       trace "modules.permute.aPermute"
                                ("combo: " ++ show ps) ps)
                                (zip oPaths' combos)
-  let out' = traceA "aPermute" out [iPath, tExtOf eType, out]
-  writeStrings (ListOf eType) out' oPaths'
+  let out' = traceA "aPermute" out [iPath, show lt, out]
+  writeStrings lt out' oPaths'
 
 --------------------
 -- leave_each_out --

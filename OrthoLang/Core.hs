@@ -28,6 +28,8 @@ module OrthoLang.Core
   , NewRules(..)
   , MacroExpansion
   , addDigest
+  , decodeNewRulesType
+  , decodeNewRulesDeps
 
   -- * Transitional stuff
   -- , applyList2
