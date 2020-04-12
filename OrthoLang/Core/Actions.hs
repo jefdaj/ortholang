@@ -252,11 +252,11 @@ readLit path = do
   empty <- isEmpty path
   if empty
     then return ""
-    else fmap (checkLit . init) -- TODO safe? already checked if empty
+    else fmap (checkLit "core.actions.readLit" . init) -- TODO safe? already checked if empty
        $ readFileStrict' path
 
 readLits :: FilePath -> Action [String]
-readLits path = readList path >>= return . checkLits
+readLits path = readList path >>= return . checkLits "core.actions.readLits"
 
 readPath :: FilePath -> Action Path
 readPath path = readPaths path >>= return . headOrDie "readPath failed"
@@ -412,7 +412,7 @@ writeLits path lits = do
   debugA' "writeLits" $ show lits ++ " -> writeCachedLines " ++ show lits'
   writeCachedLines path lits'
   where
-    lits' = if null lits then ["<<emptylist>>"] else checkLits lits
+    lits' = if null lits then ["<<emptylist>>"] else checkLits "core.actions.writeLits" lits
 
 -- TODO any need to prevent writing <<emptystr>> in a .num?
 --      (seems almost certain to be caught on reading later)

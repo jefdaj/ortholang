@@ -25,7 +25,7 @@ module OrthoLang.Core.Eval
   where
 
 import OrthoLang.Debug
-import OrthoLang.Errors (simplifyShakeErrors)
+import OrthoLang.Errors (oneLineShakeErrors)
 import Development.Shake
 import Text.PrettyPrint.HughesPJClass hiding ((<>))
 
@@ -166,7 +166,7 @@ myShake cfg ref ids dr pm delay rules = do
         , shakeExtra = shakeEnv cfg ref ids dr
         }
 
-  simplifyShakeErrors $ (shake shakeOpts . alternatives) rules
+  oneLineShakeErrors "core.eval.myShake" $ (shake shakeOpts . alternatives) rules
   -- removeIfExists $ cfgTmpDir cfg </> ".shake.lock"
   --
 {- This seems to be separately required to show the final result of eval.

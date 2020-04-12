@@ -69,7 +69,7 @@ module OrthoLang.Errors
 
   -- * Eval exceptions
   , ScriptFailed(..)
-  , simplifyShakeErrors
+  , oneLineShakeErrors
   -- , ShakeError(..)
   -- TODO lock errors
   -- TODO no such file/dir
@@ -184,14 +184,14 @@ instance Exception MissingDigests where
   toException   = compilerToException
   fromException = compilerFromException
 
-data PathLitMixup = PathLitMixup String
+data PathLitMixup = PathLitMixup String String -- location, description
 
 instance Exception PathLitMixup where
   toException   = compilerToException
   fromException = compilerFromException
 
 instance Show PathLitMixup where
-  show (PathLitMixup s) = s
+  show (PathLitMixup loc s) = "path/lit mixup in " ++ loc ++ "? " ++ s
 
 ---------------------
 -- repl exceptions --
@@ -220,6 +220,11 @@ replFromException x = do
 
 -- TODO are there any that aren't also shake exeptions? if not, remove this
 
+oneLineShakeErrors :: String -> IO () -> IO ()
+oneLineShakeErrors loc io = io `catch` \(e :: S.ShakeException) -> do
+  warn loc $ '\n' : show e
+  putStrLn $ "error: " ++ show (S.shakeExceptionInner e)
+
 data SomeEvalException = forall e . Exception e => SomeEvalException e
 
 instance Show SomeEvalException where
@@ -246,26 +251,3 @@ instance Show ScriptFailed where
 instance Exception ScriptFailed where
   toException   = evalToException
   fromException = evalFromException
-
--- TODO how to wrap shake exceptions?
--- TODO ScriptFailed needs to be a subset of shake exceptions
---      probably need to provide a function that catches them and re-throws one of my exceptions?
--- TODO write the long shake error to a logfile and print single-line description of it
---      does that require a separate catch-and-re-throw function to do the writing?
--- data SomeEvalException = SomeEvalException S.ShakeException
-
-simplifyShakeErrors :: IO () -> IO ()
-simplifyShakeErrors io = io `catch` \(e :: S.ShakeException) -> do
-  warn "errors.simplifyShakeErrors" $ show e
-  print $ "error while building '" ++ S.shakeExceptionTarget e ++ "':"
-  print $ S.shakeExceptionInner e
-  -- TODO also print a smaller error message
-
--- instance Show ShakeError where
---   show (ShakeError e) = "Shake failed: " ++ firstLine ++ "... See ortholang.log for details."
---     where
---       firstLine = takeWhile (/= '\n') $ show e
-
--- instance Exception ShakeError where
---   toException   = evalToException
---   fromException = evalFromException

@@ -196,7 +196,7 @@ toGeneric cfg txt = replace (cfgWorkDir cfg) "$WORKDIR"
 fromGeneric :: Config -> String -> String
 fromGeneric cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
                     $ replace "$TMPDIR"  (cfgTmpDir  cfg)
-                    $ checkPath txt
+                    $ checkPath "core.paths.fromGeneric" txt -- TODO take loc arg?
 
 isGeneric :: FilePath -> Bool
 isGeneric path
@@ -206,7 +206,7 @@ isGeneric path
 
 -- TODO print warning on failure?
 toPath :: Config -> FilePath -> Path
-toPath cfg = Path . checkPath . toGeneric cfg . normalize
+toPath cfg = Path . checkPath "core.paths.toPath" . toGeneric cfg . normalize -- TODO take loc arg?
   where
     normalize p = case parseAbsFile p of
       Nothing -> error "toPath" $ "can't parse: " ++ p
@@ -306,22 +306,22 @@ varPath cfg (Var (RepID rep) var) expr = toPath cfg $ cfgTmpDir cfg </> repDir <
 These are just to alert me of programming mistakes,
 and can be removed once the rest of the IO stuff is solid.
 -}
-checkLit :: String -> String
-checkLit l = if isGeneric l
-               then throw $ PathLitMixup $ "'" ++  l ++ "' looks like a path"
-               else l
+checkLit :: String -> String -> String
+checkLit loc l = if isGeneric l
+                   then throw $ PathLitMixup loc $ "'" ++  l ++ "' looks like a path"
+                   else l
 
-checkLits :: [String] -> [String] -- (or error, but let's ignore that)
-checkLits = map checkLit
+checkLits :: String -> [String] -> [String] -- (or error, but let's ignore that)
+checkLits loc = map $ checkLit loc
 
 
-checkPath :: FilePath -> FilePath
-checkPath path = if isAbsolute path || isGeneric path
-                   then path
-                   else throw $ PathLitMixup $ "'" ++ path ++ "' looks like a literal"
+checkPath :: String -> FilePath -> FilePath
+checkPath loc path = if isAbsolute path || isGeneric path
+                       then path
+                       else throw $ PathLitMixup loc $ "'" ++ path ++ "' looks like a literal"
 
-checkPaths :: [FilePath] -> [FilePath]
-checkPaths = map checkPath
+checkPaths :: String -> [FilePath] -> [FilePath]
+checkPaths loc = map $ checkPath loc
 
 -----------
 -- utils --
