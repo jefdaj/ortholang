@@ -8,7 +8,7 @@ module OrthoLang.Debug
   , traceShow
   , debug
   , time
-  , log
+  , logIO
   , traceP
 
   )
@@ -44,8 +44,8 @@ time :: String -> String -> IO a -> IO a
 time suffix msg act = L.timedDebugEndS (T.pack $ "ortholang." ++ suffix)
                                        (T.pack msg) act
 
-log :: String -> String -> IO ()
-log fnName msg = debug fnName msg
+logIO :: String -> String -> IO ()
+logIO fnName msg = debug fnName msg
 
 -- TODO take Text instead?
 traceP :: (Pretty a, Show b) => String -> a -> b -> b

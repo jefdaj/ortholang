@@ -152,6 +152,7 @@ module OrthoLang.Core.Paths
   )
   where
 
+import OrthoLang.Errors
 import OrthoLang.Core.Types
 
 import Data.List                      (intersperse, isPrefixOf)
@@ -161,19 +162,19 @@ import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
 import OrthoLang.Core.Pretty          (render, pPrint)
 import OrthoLang.Util            (digest)
 import Path                           (parseAbsFile, fromAbsFile)
-import Text.PrettyPrint.HughesPJClass (Pretty)
+-- import Text.PrettyPrint.HughesPJClass (Pretty)
 
 import Prelude hiding (error, log)
 import qualified Data.Map.Strict as M
-import qualified OrthoLang.Util as U
+-- import qualified OrthoLang.Util as U
 
 import Control.Monad              (when)
-import Data.Maybe                 (catMaybes)
+import Data.Either                (partitionEithers)
 import Development.Shake.FilePath (makeRelative, splitPath)
 import OrthoLang.Debug
 import Data.IORef (readIORef, atomicModifyIORef')
 import System.IO.Unsafe (unsafePerformIO)
-
+import Control.Exception (throwIO)
 
 -----------
 -- paths --
@@ -304,11 +305,13 @@ varPath cfg (Var (RepID rep) var) expr = toPath cfg $ cfgTmpDir cfg </> repDir <
 {-|
 These are just to alert me of programming mistakes,
 and can be removed once the rest of the IO stuff is solid.
+
+TODO error types for these
 -}
 checkLit :: String -> String
-checkLit lit = if isGeneric lit
-                 then error "checkLit" $ "placeholder in lit: \"" ++ lit ++ "\""
-                 else lit
+checkLit l = if isGeneric l
+                 then error "checkLit" $ "placeholder in lit: \"" ++ l ++ "\""
+                 else l
 
 checkLits :: [String] -> [String] -- (or error, but let's ignore that)
 checkLits = map checkLit
@@ -389,7 +392,7 @@ exprDigests cfg dRef scr exprs = M.unions $ map (exprDigest cfg dRef scr) $ conc
 TODO is there a better word for this, or a matching typeclass?
 -}
 listExprs :: Expr -> [Expr]
-listExprs e@(Ref _ _ _ _    ) = [] -- TODO or is it e?
+listExprs   (Ref _ _ _ _    ) = [] -- TODO or is it e?
 listExprs e@(Lit _ _ _      ) = [e]
 listExprs e@(Com _          ) = [e]
 listExprs e@(Fun _ _ _ _  es) = e : concatMap listExprs es
@@ -409,35 +412,27 @@ listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e
 --     ePath   = exprPath cfg dRef scr expr
 --     eDigest = pathDigest ePath
 
--- TODO what monad should this be in?
--- TODO encode lookup failure as Maybe? it indicates a programmer error though, not user error
 -- TODO take an ExprPath
--- TODO remove any unneccesary path components before lookup, and count the necessary ones
--- TODO is drop 2 a safe enough way to remove 'result' and repeat salt from the ends of the paths?
--- TODO better split function
-decodeNewRulesDeps :: Config -> DigestsRef -> ExprPath
-                   -> IO (Type, [Type], [Path])
+decodeNewRulesDeps :: Config -> DigestsRef -> ExprPath -> IO (Type, [Type], [Path])
 decodeNewRulesDeps cfg dRef (ExprPath out) = do
-  log "decodeNewRulesDeps" $ "out: " ++ show out
   dMap <- readIORef dRef
-  let dKeys  = listDigestsInPath cfg out
-      dVals  = catMaybes $ map (\k -> M.lookup k dMap) dKeys
-      dVals' = trace "ortholang.core.types.decodeNewRulesDeps" ("\"" ++ out ++ "' -> " ++ show dVals) dVals
-      dTypes = map fst dVals'
-      dPaths = map snd dVals'
-      oKey   = pathDigest $ toPath cfg out
-      Just (oType, _) = M.lookup oKey dMap
-  log "decodeNewRulesDeps" $ "dKeys: " ++ show dKeys
-  log "decodeNewRulesDeps" $ "dTypes: " ++ show dTypes
-  log "decodeNewRulesDeps" $ "dVals': " ++ show dVals'
-  log "decodeNewRulesDeps" $ "dPaths: " ++ show dPaths
-  log "decodeNewRulesDeps" $ "oKey: " ++ show oKey
-  when (length dVals /= length dKeys) $ do
-    -- TODO err function here
-    log "decodeNewRulesDeps" $ "failed to decode path: " ++ out
-    log "decodeNewRulesDeps" $ unlines $ "dMap when lookup failed:\n" : (map show $ M.toList dMap)
-    error "decodeNewRulesDeps" $ "failed to decode path: \"" ++ out ++ "\""
-  return (oType, dTypes, dPaths)
+  -- look up the outpath digest, and throw an error if missing
+  -- (could do this before or after dependencies)
+  let oKey  = pathDigest $ toPath cfg out
+      moDig = M.lookup oKey dMap
+  case moDig of
+    Nothing -> throwIO $ MissingDigests out [show oKey]
+    -- then look up the others too
+    -- TODO any reason to re-confirm that the path is right here too?
+    Just (oType, _) -> do
+      let findk k = case M.lookup k dMap of { Nothing -> Left k; Just d -> Right d }
+          dKeys  = listDigestsInPath cfg out
+          (dFails, dVals) = partitionEithers $ map findk dKeys
+          dTypes = map fst dVals
+          dPaths = map snd dVals
+      when (length dFails > 0) $ throwIO $ MissingDigests out $ map show dFails
+      -- if everything looks good, return types + paths
+      return (oType, dTypes, dPaths)
 
 -- TODO hey, is it worth just looking up every path component to make it more robust?
 listDigestsInPath :: Config -> FilePath -> [PathDigest]

@@ -6,6 +6,11 @@ An attempt to structure the various runtime errors OrthoLang is already subject
 to. Based on the standard 'Control.Exception' Haddocks, as well as
 Shake's 'Development.Shake.Internal.Errors'. 
 
+TODO remove the hierarchy any just have a bunch of individual errors?
+     decide after putting in the handlers whether you need to pass some through anywhere
+
+TODO declare errors in the same files they're used in so you have access to the same types?
+
 They should be 'Control.Exception.throw'n using the most specific class
 possible. Then you can 'Control.Exception.catch' them using any superclass up
 through 'Control.Exception.SomeException':
@@ -25,10 +30,11 @@ no such var: 'bob'
 λ: throw (ScriptFailed "test.sh" "test.log" 3) \`catch\` \\e -> putStrLn (show (e :: SomeEvalException))
 test.sh failed with exit code 3. See test.log for details.
 
-λ: throw (MissingDigest "aTestAction" "$TMPDIR\/exprs\/whatever\/result" "230478234")
-  \`catch\` \\e -> putStrLn $ show (e :: SomeCompilerException)
-Missing digest '230478234', needed by aTestAction to build '$TMPDIR/exprs/whatever/result'
-
+λ: throw (MissingDigests "$TMPDIR/exprs/some/path/to/result" ["328904723", "023470uh"])
+  \`catch\` \\e -> print (e :: SomeOLException)
+Missing digests needed for '$TMPDIR/exprs/some/path/to/result':
+  328904723
+  023470uh
 @
 
 If none of the superclasses match, you get an actual error:
@@ -53,7 +59,7 @@ module OrthoLang.Errors
   -- TODO type errors (a hierarchy?)
 
   -- * Compiler exceptions
-  , MissingDigest(..)
+  , MissingDigests(..)
   -- TODO type errors (a hierarchy?)
 
   -- * Repl exceptions
@@ -164,13 +170,13 @@ compilerFromException x = do
   cast a
 
 -- TODO Path/PathDigest instead of FilePath/String? if it works without an import cycle
-data MissingDigest = MissingDigest String FilePath String
+data MissingDigests = MissingDigests FilePath [String]
 
-instance Show MissingDigest where
-  show (MissingDigest act path dig) =
-    "Missing digest '" ++ dig ++ "', needed by " ++ act ++ " to build '" ++ path ++ "'"
+instance Show MissingDigests where
+  show (MissingDigests path digests) =
+    "Missing digests needed for '" ++ path ++ "':\n" ++ unlines (map ("  " ++) digests)
 
-instance Exception MissingDigest where
+instance Exception MissingDigests where
   toException   = compilerToException
   fromException = compilerFromException
 
@@ -218,12 +224,19 @@ evalFromException x = do
   SomeEvalException a <- fromException x
   cast a
 
--- TODO read http://dev.stephendiehl.com/hask/#exceptions
+data ScriptFailed = ScriptFailed String FilePath Int
+
+instance Show ScriptFailed where
+  show (ScriptFailed name logfile code) =
+    name ++ " failed with exit code " ++ show code ++ ". See " ++ logfile ++ " for details."
+
+instance Exception ScriptFailed where
+  toException   = evalToException
+  fromException = evalFromException
 
 -- TODO how to wrap shake exceptions?
 -- TODO ScriptFailed needs to be a subset of shake exceptions
 --      probably need to provide a function that catches them and re-throws one of my exceptions?
-
 -- TODO write the long shake error to a logfile and print single-line description of it
 --      does that require a separate catch-and-re-throw function to do the writing?
 -- data SomeEvalException = SomeEvalException S.ShakeException
@@ -236,13 +249,3 @@ evalFromException x = do
 -- instance Exception ShakeError where
 --   toException   = evalToException
 --   fromException = evalFromException
-
-data ScriptFailed = ScriptFailed String FilePath Int
-
-instance Show ScriptFailed where
-  show (ScriptFailed name logfile code) =
-    name ++ " failed with exit code " ++ show code ++ ". See " ++ logfile ++ " for details."
-
-instance Exception ScriptFailed where
-  toException   = evalToException
-  fromException = evalFromException
