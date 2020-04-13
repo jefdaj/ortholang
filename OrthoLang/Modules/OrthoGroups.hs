@@ -99,7 +99,8 @@ rOrthogroups _ e = error $ "bad argument to rOrthogroups: " ++ show e
 parseOrthoFinder :: Path -> Action [[String]]
 parseOrthoFinder ofrPath = do
   cfg <- fmap fromJust getShakeExtra
-  let resDir = fromPath cfg $ upBy 2 ofrPath
+  let loc = "modules.orthogroups.parseOrthoFinder"
+      resDir = fromPath loc cfg $ upBy 2 ofrPath
       orthoPath = resDir </> "Orthogroups" </> "Orthogroups.txt"
   -- ids <- liftIO $ readIORef idref
   -- txt <- fmap (unhashIDs False ids) $ readFileStrict' orthoPath -- TODO openFile error during this?
@@ -110,7 +111,8 @@ parseOrthoFinder ofrPath = do
 parseSonicParanoid :: Path -> Action [[String]]
 parseSonicParanoid ogPath = do
   cfg <- fmap fromJust getShakeExtra
-  let resDir = takeDirectory $ fromPath cfg ogPath
+  let loc = "modules.orthogroups.parseSonicParanoid"
+      resDir = takeDirectory $ fromPath loc cfg ogPath
       grpPath = resDir </> "ortholog_groups.tsv"
   -- ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
   -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' grpPath -- TODO openFile error during this?
@@ -126,7 +128,8 @@ parseSonicParanoid ogPath = do
 parseGreenCut :: Path -> Action [[String]]
 parseGreenCut ogPath = do
   cfg <- fmap fromJust getShakeExtra
-  txt <- readFileStrict' $ fromPath cfg ogPath
+  let loc = "modules.orthogroups.parseGreenCut"
+  txt <- readFileStrict' $ fromPath loc cfg ogPath
   let groups = map parseLine $ lines txt
   return groups
   where
@@ -143,8 +146,8 @@ writeOrthogroups out groups = do
         -- group' = map (unhashIDs cfg ids) group
     -- liftIO $ putStrLn $ "group': " ++ show group'
     writeLits loc path group
-    return $ toPath cfg path
-  writePaths loc (fromPath cfg out) paths
+    return $ toPath loc cfg path
+  writePaths loc (fromPath loc cfg out) paths
 
 -- TODO something wrong with the paths/lits here, and it breaks parsing the script??
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
@@ -182,14 +185,14 @@ aOrthogroupContaining [out, ofrPath, idPath] = do
   ids' <- liftIO $ readIORef ids
   cfg  <- fmap fromJust getShakeExtra
   let loc = "modules.orthogroups.aOrthogroupContaining"
-  partialID <- readLit loc $ fromPath cfg idPath
+  partialID <- readLit loc $ fromPath loc cfg idPath
   -- TODO should there be a separate case for multiple matches?
   let geneId = case lookupID ids' partialID of
                  Just k -> k
                  Nothing -> error $ "ERROR: id \"" ++ partialID ++ "' not found"
   groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder ofrPath -- TODO handle the others!
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
-  writeLits loc (fromPath cfg out) group
+  writeLits loc (fromPath loc cfg out) group
 aOrthogroupContaining args = error $ "bad argument to aOrthogroupContaining: " ++ show args
 
 ----------------------------
@@ -221,7 +224,7 @@ aOrthogroupsFilter filterFn [out, ofrPath, idsPath] = do
   ids' <- liftIO $ readIORef ids
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.orthogroups.aOrthogroupsFilter"
-  lookups <- fmap (map $ lookupID ids') $ readLits loc $ fromPath cfg idsPath
+  lookups <- fmap (map $ lookupID ids') $ readLits loc $ fromPath loc cfg idsPath
   when (not $ all isJust lookups) $ error "unable to find some seqids! probably a programming error"
   let geneIds = catMaybes lookups
   groups <- parseOrthoFinder ofrPath -- TODO handle the others!
@@ -278,8 +281,8 @@ rOrthologFilterStr fnName pickerFn scr e@(Fun _ _ _ _ [groupLists, idLists]) = d
   dRef <- fmap fromJust getShakeExtraRules
   let out     = exprPath cfg dRef scr e
       loc = "modules.orthogroups.rOrthologFilterStr"
-      out'    = debugRules loc e $ fromPath cfg out
-      ogDir   = fromPath cfg $ ogCache cfg
+      out'    = debugRules loc e $ fromPath loc cfg out
+      ogDir   = fromPath loc cfg $ ogCache cfg
       ogsPath = ogDir </> digest groupListsPath <.> "txt"
       idsPath = ogDir </> digest idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir
@@ -376,8 +379,8 @@ rOrthologFilterStrFrac fnName pickerFn scr e@(Fun _ _ _ _ [frac, groupLists, idL
   dRef <- fmap fromJust getShakeExtraRules
   let out     = exprPath cfg dRef scr e
       loc = "modules.orthogroups.rOrthologFilterStrFrac"
-      out'    = debugRules loc e $ fromPath cfg out
-      ogDir   = fromPath cfg $ ogCache cfg
+      out'    = debugRules loc e $ fromPath loc cfg out
+      ogDir   = fromPath loc cfg $ ogCache cfg
       ogsPath = ogDir </> digest groupListsPath <.> "txt"
       idsPath = ogDir </> digest idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir

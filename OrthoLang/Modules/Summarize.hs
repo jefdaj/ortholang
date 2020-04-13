@@ -46,7 +46,8 @@ rSummary summaryFn scr expr@(Fun _ _ _ _ [iList]) = do
   -- let (ListOf (ListOf eType)) = typeOf iList
       -- (ExprPath oPath) = unsafeExprPathExplicit cfg True (ListOf eType) fnName 
                                           -- [show expr, iPath]
-  let oPath = fromPath cfg $ exprPath cfg dRef scr expr
+  let loc = "modules.summarize.rSummary"
+      oPath = fromPath loc cfg $ exprPath cfg dRef scr expr
   oPath %> aSummary summaryFn iPath
   return (ExprPath oPath)
 rSummary _ _ _ = fail "bad argument to rSummary"

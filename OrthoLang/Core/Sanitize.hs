@@ -68,9 +68,9 @@ hashIDsTxt txt = (unlines lines', M.fromList seqids)
 -- copy a fasta file to another path, replacing sequence ids with their hashes
 -- hashIDsFile :: Config -> LocksRef -> Path -> Path -> Action IDs
 -- hashIDsFile cfg ref inPath outPath = do
---   let inPath'  = fromPath cfg inPath
---       outPath' = fromPath cfg outPath
---   -- txt <- withReadLock' inPath' $ readFile' $ fromPath cfg inPath
+--   let inPath'  = fromPath loc cfg inPath
+--       outPath' = fromPath loc cfg outPath
+--   -- txt <- withReadLock' inPath' $ readFile' $ fromPath loc cfg inPath
 --   txt <- readFileStrict' inPath'
 --   let (!fasta', !ids) = hashIDsTxt txt
 --       (Path k) = outPath
@@ -85,10 +85,11 @@ hashIDsTxt txt = (unlines lines', M.fromList seqids)
 hashIDsFile2 :: Path -> Path -> Action ()
 hashIDsFile2 inFa outFa = do
   cfg <- fmap fromJust getShakeExtra
-  let inFa'   = fromPath cfg inFa
-      outFa'  = fromPath cfg outFa
+  let loc = "core.sanitize.hashIDsFile2"
+      inFa'   = fromPath loc cfg inFa
+      outFa'  = fromPath loc cfg outFa
       outIDs' = outFa' <.> "ids"
-      outIDs  = toPath cfg outIDs'
+      outIDs  = toPath loc cfg outIDs'
       -- (Path k) = inFa
       -- v = takeFileName inPath'
       -- ids' = M.insert k v ids
@@ -118,7 +119,7 @@ hashIDsFile2 inFa outFa = do
 --     $ M.toList ids
 --   trackWrite' [path']
 --   where
---     path' = fromPath cfg path
+--     path' = fromPath loc cfg path
 --     toLine (h, i) = h ++ "\t" ++ i
 
 -- see https://stackoverflow.com/q/48571481
@@ -160,8 +161,9 @@ unhashIDs longIDs ids t = case findNext t of
 unhashIDsFile :: Path -> FilePath -> Action ()
 unhashIDsFile inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
-  let inPath'  = fromPath cfg inPath
-  -- txt <- withReadLock' inPath' $ readFile' $ fromPath cfg inPath
+  let loc = "core.sanitize.unhashIDsFile"
+      inPath'  = fromPath loc cfg inPath
+  -- txt <- withReadLock' inPath' $ readFile' $ fromPath loc cfg inPath
   txt <- readFileStrict' inPath'
   -- liftIO $ putStrLn $ "txt: \"" ++ txt ++ "\""
   -- let txt' = unhashIDs ids txt
@@ -181,7 +183,8 @@ splitAtFirst x = fmap (drop 1) . break (x ==)
 readIDs :: Path -> Action (M.Map String String)
 readIDs path = do
   cfg <- fmap fromJust getShakeExtra
-  let path' = fromPath cfg path
+  let loc = "core.sanitize.readIDs"
+      path' = fromPath loc cfg path
   -- txt <- withReadLock' path' $ readFile' path'
   txt <- readFileStrict' path'
   -- let splitFn l = let ws = split "\t" l
@@ -215,7 +218,7 @@ lookupIDsFile :: Path -> Path -> Action ()
 lookupIDsFile inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "core.sanitize.lookupIDsFile"
-  partialIDs <- readList loc $ fromPath cfg inPath
+  partialIDs <- readList loc $ fromPath loc cfg inPath
   ref <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef ref
   let lookupFn v = case lookupID ids v of
@@ -227,4 +230,4 @@ lookupIDsFile inPath outPath = do
   dRef <- fmap fromJust getShakeExtra
   liftIO $ addDigest dRef (ListOf str) outPath -- TODO make this an Action?
   let loc = "core.sanitize.lookupIDsFile"
-  writeCachedLines loc (fromPath cfg outPath) idKeys
+  writeCachedLines loc (fromPath loc cfg outPath) idKeys

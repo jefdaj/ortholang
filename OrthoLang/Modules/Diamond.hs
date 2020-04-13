@@ -97,7 +97,7 @@ rDiamondmakedbAll scr e@(Fun _ _ _ _ [fas]) = do
   dRef <- fmap fromJust getShakeExtraRules
   let out  = exprPath cfg dRef scr e
       loc = "modules.diamond.aDiamondmakedbAll"
-      out' = debugRules loc e $ fromPath cfg out
+      out' = debugRules loc e $ fromPath loc cfg out
   out' %> \_ -> do
     faPaths <- readPaths loc fasPath
     aSimpleScriptPar "diamond_makedb_all.sh" (out:faPaths)
@@ -198,10 +198,10 @@ aDiamondFromDb :: [String] -> ActionFn2
 aDiamondFromDb dCmd [o, e, q, db] = do
   -- wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ dCmd
   cfg <- fmap fromJust getShakeExtra
-  let o'  = fromPath cfg o
-      e'  = fromPath cfg e
-      q'  = fromPath cfg q
-      db' = fromPath cfg db
+  let o'  = fromPath loc cfg o
+      e'  = fromPath loc cfg e
+      q'  = fromPath loc cfg q
+      db' = fromPath loc cfg db
       loc = "modules.diamond.aDiamondblastpdb"
       o'' = traceA loc o' $ dCmd ++ [e', o', q', db']
   eStr <- readLit loc e'

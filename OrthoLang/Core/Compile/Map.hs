@@ -86,9 +86,10 @@ rMapTmps :: Int -> (Path -> [Path] -> Action ()) -> String -> RulesFn
 rMapTmps index actFn tmpPrefix scr e = do
   cfg <- fmap fromJust getShakeExtraRules
   let tmpFn args = do
-        let base = concat $ intersperse "/" $ map digest args
-            dir  = fromPath cfg $ cacheDir cfg tmpPrefix
-        return $ toPath cfg (dir </> base)
+        let loc = "core.compile.map.rMapTmps"
+            base = concat $ intersperse "/" $ map digest args
+            dir  = fromPath loc cfg $ cacheDir cfg tmpPrefix
+        return $ toPath loc cfg (dir </> base)
   rMapMain index (Just tmpFn) actFn scr e
 
 {- Like rSimpleScript, but the last argument should be a list.
@@ -119,11 +120,12 @@ rMapMain mapIndex mTmpFn actFn scr e@(Fun r ms _ name exprs) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let singleName     = replace "_each" "" name -- TODO any less brittle ideas? could make this a fn
-      mainOutPath    = fromPath cfg $ exprPath cfg dRef scr e
-      regularArgPaths'  = map (\(ExprPath p) -> toPath cfg p) regularArgPaths
-      argLastsPath'  = toPath cfg mappedArgsPath
-      elemCacheDir   = (fromPath cfg $ cacheDir cfg "each") </> hashFun cfg dRef scr e
-      elemCacheDir'  = toPath cfg elemCacheDir -- TODO redundant?
+      loc = "core.compile.map.rMapMain"
+      mainOutPath    = fromPath loc cfg $ exprPath cfg dRef scr e
+      regularArgPaths'  = map (\(ExprPath p) -> toPath loc cfg p) regularArgPaths
+      argLastsPath'  = toPath loc cfg mappedArgsPath
+      elemCacheDir   = (fromPath loc cfg $ cacheDir cfg "each") </> hashFun cfg dRef scr e
+      elemCacheDir'  = toPath loc cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" </> "result" -- <.> tExtOf eType
       eType = case r of
                 (ListOf t) -> debugC "rMapMain" ("type of \"" ++ render (pPrint e)
@@ -147,17 +149,17 @@ aMapMain :: Int
 aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
   cfg <- fmap fromJust getShakeExtra
   let resolve = resolveSymlinks $ Just $ cfgTmpDir cfg
-      regularArgs'   = map (fromPath cfg) regularArgs
-      mappedArgList' = fromPath cfg mappedArg
-      mapTmpDir'     = fromPath cfg mapTmpDir
+      regularArgs'   = map (fromPath loc cfg) regularArgs
+      mappedArgList' = fromPath loc cfg mappedArg
+      mapTmpDir'     = fromPath loc cfg mapTmpDir
       loc = "ortholang.core.compile.map.aMapMain"
   need' loc regularArgs'
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
   mappedPaths  <- readPaths loc mappedArgList'
-  mappedPaths' <- liftIO $ mapM resolve $ map (fromPath cfg) mappedPaths
+  mappedPaths' <- liftIO $ mapM resolve $ map (fromPath loc cfg) mappedPaths
   debugA' loc $ "mappedPaths': " ++ show mappedPaths'
   mapM_ (aMapArgs mapIndex eType regularArgs'' mapTmpDir')
-        (map (toPath cfg) mappedPaths') -- TODO wrong if lits?
+        (map (toPath loc cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
   need' loc outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
@@ -165,14 +167,15 @@ aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
               (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
   if eType `elem` [str, num]
     then mapM (readLit loc) outPaths' >>= writeLits loc out
-    else writePaths loc out $ map (toPath cfg) outPaths'
+    else writePaths loc out $ map (toPath loc cfg) outPaths'
 
 -- TODO take + return Paths?
 -- TODO blast really might be nondeterministic here now that paths are hashed!
 eachPath :: Config -> FilePath -> Type -> FilePath -> FilePath
 eachPath cfg tmpDir eType path = tmpDir </> hash' </> "result" -- <.> tExtOf eType TODO /result?
   where
-    path' = toPath cfg path
+    loc = "core.compile.map.eachPath"
+    path' = toPath loc cfg path
     hash  = digest path'
     hash' = debugC "eachPath" ("hash of " ++ show path' ++ " is " ++ hash) hash
 
@@ -184,11 +187,11 @@ aMapArgs :: Int
          -> Action ()
 aMapArgs mapIndex eType regularArgs' tmp' mappedArg = do
   cfg <- fmap fromJust getShakeExtra
-  let mappedArg' = fromPath cfg mappedArg
+  let mappedArg' = fromPath loc cfg mappedArg
       argsPath   = replaceBaseName (eachPath cfg tmp' eType mappedArg') "args"
       -- argPaths   = regularArgs' ++ [mappedArg'] -- TODO abs path bug here?
       argPaths   = insertAt mapIndex mappedArg' regularArgs'
-      argPaths'  = map (toPath cfg) argPaths
+      argPaths'  = map (toPath loc cfg) argPaths
   debugFn $ "mappedArg': " ++ show mappedArg'
   debugFn $ "argsPath: " ++ show argsPath
   debugFn $ "argPaths: " ++ show argPaths
@@ -220,7 +223,7 @@ aMapElem eType tmpFn actFn singleName mSalt out = do
       loc = "ortholang.core.compile.map.aMapElem"
   args <- readPaths loc argsPath
   cfg <- fmap fromJust getShakeExtra
-  let args' = map (fromPath cfg) args
+  let args' = map (fromPath loc cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
   need' loc args'
   debugA loc $ "out: " ++ show out
@@ -228,16 +231,16 @@ aMapElem eType tmpFn actFn singleName mSalt out = do
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?
     Just fn -> do
       d <- fn args
-      let d' = fromPath cfg d
+      let d' = fromPath loc cfg d
       createDirectoryIfMissing True d'
       return d
   dRef <- fmap fromJust getShakeExtra
-  let out' = traceA loc (toPath cfg out) args''
+  let out' = traceA loc (toPath loc cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
-      hashes  = map (digest . toPath cfg) args'' -- TODO make it match exprPath
+      hashes  = map (digest . toPath loc cfg) args'' -- TODO make it match exprPath
       single  = unsafeExprPathExplicit cfg dRef singleName eType mSalt hashes
-      single' = fromPath cfg single
-      args''' = single:map (toPath cfg) args''
+      single' = fromPath loc cfg single
+      args''' = single:map (toPath loc cfg) args''
   -- TODO any risk of single' being made after we test for it here?
   unlessExists single' $ actFn dir args'''
   -- TODO is there a way to use withWriteOnce without an indefinite block??

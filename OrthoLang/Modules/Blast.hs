@@ -91,16 +91,16 @@ rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 aMkBlastFromDb :: String -> ([Path] -> Action ())
 aMkBlastFromDb bCmd [o, e, q, p] = do
   cfg <- fmap fromJust getShakeExtra
-  let o'  = fromPath cfg o
-      q'  = fromPath cfg q
-      p'  = fromPath cfg p
-      e'  = fromPath cfg e
+  let o'  = fromPath loc cfg o
+      q'  = fromPath loc cfg q
+      p'  = fromPath loc cfg p
+      e'  = fromPath loc cfg e
       loc = "modules.blast.aMkBlastFromDb"
       o'' = traceA loc o' [bCmd, e', o', q', p']
   eStr   <- readLit  loc e'
   prefix <- readPath loc p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
-      prefix' = fromPath cfg prefix
+      prefix' = fromPath loc cfg prefix
       -- cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
       ptn     = prefix' ++ "*"
       -- args    = [ "-db", takeFileName prefix'
@@ -165,7 +165,7 @@ aMkBlastFromDb bCmd [o, e, q, p] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [o'' ++ "*", stdoutPath, stderrPath]
     }
-  symlink o (toPath cfg stdoutPath)
+  symlink o (toPath loc cfg stdoutPath)
 aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
 
 -------------

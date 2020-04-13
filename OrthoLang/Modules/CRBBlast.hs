@@ -83,12 +83,13 @@ blastCRBEach = Function
 aCRBBlast :: Path -> [Path] -> Action ()
 aCRBBlast tmpDir [o, q, t] = do
   cfg <- fmap fromJust getShakeExtra
-  let o'   = fromPath cfg o
-      o''  = traceA "aCRBBlast" o [fromPath cfg tmpDir, o', q', t']
-      tmp' = fromPath cfg tmpDir
-      q'   = fromPath cfg q
-      t'   = fromPath cfg t
-  need' "ortholang.modules.crbblast.aCRBBlast" [q', t']
+  let loc = "modules.crbblast.aCRBBlast"
+      o'   = fromPath loc cfg o
+      o''  = traceA loc o [fromPath loc cfg tmpDir, o', q', t']
+      tmp' = fromPath loc cfg tmpDir
+      q'   = fromPath loc cfg q
+      t'   = fromPath loc cfg t
+  need' loc [q', t']
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
   tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) t'
@@ -101,13 +102,13 @@ aCRBBlast tmpDir [o, q, t] = do
   -- liftIO $ putStrLn $ "tDst: " ++ tDst
   let qSrc  = tmp' </> qDst
       tSrc  = tmp' </> tName
-      qSrc' = toPath cfg qSrc
-      qDst' = toPath cfg qDst
-      tSrc' = toPath cfg tSrc
-      tDst' = toPath cfg tDst
+      qSrc' = toPath loc cfg qSrc
+      qDst' = toPath loc cfg qDst
+      tSrc' = toPath loc cfg tSrc
+      tDst' = toPath loc cfg tDst
       oPath = tmp' </> "results.crb"
-      oPath' = toPath cfg oPath
-  need' "ortholang.modules.crbblast.aCRBBlast" [qDst, tDst]
+      oPath' = toPath loc cfg oPath
+  need' loc [qDst, tDst]
   symlink qSrc' qDst'
   symlink tSrc' tDst'
   runCmd $ CmdDesc

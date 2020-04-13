@@ -195,10 +195,10 @@ toGeneric cfg txt = replace (cfgWorkDir cfg) "$WORKDIR"
 
 -- | Replace generic path placeholders with current paths
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
-fromGeneric :: Config -> String -> String
-fromGeneric cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
+fromGeneric :: DebugLocation -> Config -> String -> String
+fromGeneric loc cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
                     $ replace "$TMPDIR"  (cfgTmpDir  cfg)
-                    $ checkPath "core.paths.fromGeneric" txt -- TODO take loc arg?
+                    $ checkPath (loc ++ ".fromGeneric") txt -- TODO take loc arg?
 
 isGeneric :: FilePath -> Bool
 isGeneric path
@@ -207,15 +207,15 @@ isGeneric path
   || "$WORKDIR" `isPrefixOf` path
 
 -- TODO print warning on failure?
-toPath :: Config -> FilePath -> Path
-toPath cfg = Path . checkPath "core.paths.toPath" . toGeneric cfg . normalize -- TODO take loc arg?
+toPath :: DebugLocation -> Config -> FilePath -> Path
+toPath loc cfg = Path . checkPath (loc ++ ".toPath") . toGeneric cfg . normalize -- TODO take loc arg?
   where
     normalize p = case parseAbsFile p of
       Nothing -> error "toPath" $ "can't parse: " ++ p
       Just p' -> fromAbsFile p'
 
-fromPath :: Config -> Path -> FilePath
-fromPath cfg (Path path) = fromGeneric cfg path
+fromPath :: DebugLocation -> Config -> Path -> FilePath
+fromPath loc cfg (Path path) = fromGeneric (loc ++ ".fromPath") cfg path
 
 sharedPath :: Config -> Path -> Maybe FilePath
 sharedPath cfg (Path path) = fmap (\sd -> replace "$TMPDIR" sd path) (cfgShare cfg)
@@ -233,8 +233,9 @@ stringPath = Path
 ----------------
 
 cacheDir :: Config -> String -> Path
-cacheDir cfg modName = toPath cfg path
+cacheDir cfg modName = toPath loc cfg path
   where
+    loc = "core.paths.cacheDir"
     path = cfgTmpDir cfg </> "cache" </> modName
 
 -- TODO cacheDirUniq or Explicit?
@@ -268,7 +269,9 @@ bop2fun e = error "bop2fun" $ "called with non-Bop: \"" ++ render (pPrint e) ++ 
 -- TODO rename to tmpPath?
 -- TODO remove the third parseenv arg (digestmap)?
 exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
-exprPath c _ _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath c p
+exprPath c _ _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath loc c p
+  where
+    loc = "core.paths.exprPath"
 exprPath c d s (Ref _ _ _ v) = case lookup v s of
                                Nothing -> error "exprPath" $ "no such var " ++ show v ++ "\n" ++ show s
                                Just e  -> exprPath c d s e
@@ -284,16 +287,18 @@ exprPath c d s expr = traceP "exprPath" expr res
 -- TODO remove repeat salt if fn is deterministic
 -- note this is always used with its unsafe digest wrapper (below)
 exprPathExplicit :: Config -> String -> Maybe Salt -> [String] -> Path
-exprPathExplicit cfg prefix mSalt hashes = toPath cfg path
+exprPathExplicit cfg prefix mSalt hashes = toPath loc cfg path
   where
+    loc = "core.paths.exprPathExplicit"
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
     base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap show mSalt)
     path = dir </> base </> "result" -- <.> tExtOf rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
 varPath :: Config -> Var -> Expr -> Path
-varPath cfg (Var (RepID rep) var) expr = toPath cfg $ cfgTmpDir cfg </> repDir </> base
+varPath cfg (Var (RepID rep) var) expr = toPath loc cfg $ cfgTmpDir cfg </> repDir </> base
   where
+    loc = "core.paths.varPath"
     base = if var == "result" then var else var <.> tExtOf (typeOf expr)
     repDir = case rep of
                Nothing -> "vars"
@@ -307,21 +312,21 @@ varPath cfg (Var (RepID rep) var) expr = toPath cfg $ cfgTmpDir cfg </> repDir <
 These are just to alert me of programming mistakes,
 and can be removed once the rest of the IO stuff is solid.
 -}
-checkLit :: String -> String -> String
+checkLit :: DebugLocation -> String -> String
 checkLit loc l = if isGeneric l
                    then throw $ PathLitMixup loc $ "'" ++  l ++ "' looks like a path"
                    else l
 
-checkLits :: String -> [String] -> [String] -- (or error, but let's ignore that)
+checkLits :: DebugLocation -> [String] -> [String] -- (or error, but let's ignore that)
 checkLits loc = map $ checkLit loc
 
 
-checkPath :: String -> FilePath -> FilePath
+checkPath :: DebugLocation -> FilePath -> FilePath
 checkPath loc path = if isAbsolute path || isGeneric path
                        then path
                        else throw $ PathLitMixup loc $ "'" ++ path ++ "' looks like a literal"
 
-checkPaths :: String -> [FilePath] -> [FilePath]
+checkPaths :: DebugLocation -> [FilePath] -> [FilePath]
 checkPaths loc = map $ checkPath loc
 
 -----------
@@ -414,7 +419,8 @@ listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e
 decodeNewRulesType :: Config -> DigestsRef -> ExprPath -> IO Type
 decodeNewRulesType cfg dRef (ExprPath out) = do
   dMap <- readIORef dRef
-  let k = pathDigest $ toPath cfg out
+  let loc = "core.paths.decodeNewRulesType"
+      k = pathDigest $ toPath loc cfg out
   case M.lookup k dMap of
     Nothing -> throwIO $ MissingDigests out [show k]
     Just (t, _) -> return t
@@ -425,7 +431,8 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
   dMap <- readIORef dRef
   -- look up the outpath digest, and throw an error if missing
   -- (could do this before or after dependencies)
-  let oKey  = pathDigest $ toPath cfg out
+  let loc = "core.paths.decodeNewRulesDeps"
+      oKey  = pathDigest $ toPath loc cfg out
       moDig = M.lookup oKey dMap
   case moDig of
     Nothing -> throwIO $ MissingDigests out [show oKey]
@@ -434,7 +441,7 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
     Just (oType, _) -> do
       let findk k = case M.lookup k dMap of { Nothing -> Left k; Just d -> Right d }
           dKeys  = listDigestsInPath cfg out
-          (dFails, dVals) = partitionEithers $ map findk $ trace "decodeNewRulesDeps" ("dKeys: " ++ show dKeys) dKeys
+          (dFails, dVals) = partitionEithers $ map findk $ trace loc ("dKeys: " ++ show dKeys) dKeys
           dTypes = map fst dVals
           dPaths = map snd dVals
       when (length dFails > 0) $ throwIO $ MissingDigests out $ map show dFails

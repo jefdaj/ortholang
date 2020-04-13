@@ -48,10 +48,11 @@ rSample scr expr@(Fun _ (Just salt) _ _ [n, lst]) = do
   (ExprPath inPath') <- rExpr scr lst
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let nPath    = toPath cfg nPath'
-      inPath   = toPath cfg inPath'
+  let loc = "modules.sample.rSample"
+      nPath    = toPath loc cfg nPath'
+      inPath   = toPath loc cfg inPath'
       outPath  = exprPath cfg dRef scr expr
-      outPath' = fromPath cfg outPath
+      outPath' = fromPath loc cfg outPath
       (ListOf t) = typeOf lst
   outPath' %> \_ -> aSample salt t outPath nPath inPath
   return $ ExprPath outPath'
@@ -60,9 +61,9 @@ rSample _ _ = fail "bad argument to rSample"
 aSample :: Salt -> Type -> Action2
 aSample salt t outPath nPath lstPath = do
   cfg <- fmap fromJust getShakeExtra
-  let nPath'   = fromPath cfg nPath
-      lstPath' = fromPath cfg lstPath
-      outPath' = fromPath cfg outPath
+  let nPath'   = fromPath loc cfg nPath
+      lstPath' = fromPath loc cfg lstPath
+      outPath' = fromPath loc cfg outPath
       loc = "ortholang.modules.sample.aSample"
   nStr <- readLit loc nPath'
   lst  <- readStrings loc t lstPath'

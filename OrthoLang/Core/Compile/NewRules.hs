@@ -293,6 +293,7 @@ aNewRules
 aNewRules applyFn oSig aFn o@(ExprPath out) = do
   cfg  <- fmap fromJust $ getShakeExtra
   dRef <- fmap fromJust $ getShakeExtra
+  let loc = "modules.newrulestest.aNewRules"
   -- TODO don't try to return oType here because outpath won't have a digest entry yet
   (oType, dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef o
 
@@ -301,10 +302,10 @@ aNewRules applyFn oSig aFn o@(ExprPath out) = do
     error "aNewRules" $ "typechecking error: " ++ show oSig ++ " /= " ++ show oType
 
   dRef <- fmap fromJust $ getShakeExtra
-  liftIO $ addDigest dRef oType $ toPath cfg out
+  liftIO $ addDigest dRef oType $ toPath loc cfg out
 
-  let dPaths' = map (fromPath cfg) dPaths
-  need' "ortholang.modules.newrulestest.aNewRules" dPaths'
+  let dPaths' = map (fromPath loc cfg) dPaths
+  need' loc dPaths'
   applyFn (aFn o) dPaths'
 
 {-|

@@ -84,7 +84,8 @@ rSetFold fn scr e@(Fun _ _ _ _ [lol]) = do
   (ExprPath setsPath) <- rExpr scr lol
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let oPath      = fromPath cfg $ exprPath cfg dRef scr e
+  let loc = "modules.sets.rSetFold"
+      oPath      = fromPath loc cfg $ exprPath cfg dRef scr e
       oPath'     = cfgTmpDir cfg </> oPath
       oPath''    = debugRules "rSetFold" e oPath
       (ListOf t) = typeOf lol
@@ -98,7 +99,7 @@ aSetFold fn (ListOf etype) oPath setsPath = do
   let loc = "modules.sets.aSetFold"
   setPaths  <- readPaths loc setsPath
   cfg <- fmap fromJust getShakeExtra
-  setElems  <- mapM (readStrings loc etype) (map (fromPath cfg) setPaths)
+  setElems  <- mapM (readStrings loc etype) (map (fromPath loc cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   idsRef <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef idsRef
@@ -126,7 +127,8 @@ dedupByContent :: [FilePath] -> Action [FilePath]
 dedupByContent paths = do
   -- TODO if the paths are already in the load cache, no need for content?
   cfg <- fmap fromJust getShakeExtra
-  hashes <- mapM hashContent $ map (toPath cfg) paths
+  let loc = "modules.sets.dedupByContent"
+  hashes <- mapM hashContent $ map (toPath loc cfg) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'
 

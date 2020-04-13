@@ -25,7 +25,8 @@ isURL s = "://" `isInfixOf` take 10 s
 curl :: String -> Action Path
 curl url = do
   cfg <- fmap fromJust getShakeExtra
-  let cDir    = fromPath cfg $ cacheDir cfg "curl"
+  let loc = "modules.curl.curl"
+      cDir    = fromPath loc cfg $ cacheDir cfg "curl"
       outPath = cDir </> digest url
   liftIO $ createDirectoryIfMissing True cDir
   runCmd $ CmdDesc
@@ -41,4 +42,4 @@ curl url = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath]
     }
-  return $ toPath cfg outPath
+  return $ toPath loc cfg outPath

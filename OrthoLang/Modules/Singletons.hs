@@ -77,8 +77,9 @@ rSingletons scr expr@(Fun rtn _ _ _ [listExpr]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let outPath  = exprPath cfg dRef scr expr
-      outPath' = fromPath cfg outPath
-      listPath = toPath cfg listPath'
+      loc = "modules.singletons.rSingletons"
+      outPath' = fromPath loc cfg outPath
+      listPath = toPath loc cfg listPath'
       (ListOf (ListOf t)) = rtn
   outPath' %> \_ -> aSingletons t outPath listPath
   return $ ExprPath outPath'
@@ -87,8 +88,8 @@ rSingletons _ _ = fail "bad argument to rSingletons"
 aSingletons :: Type -> Action1
 aSingletons elemType outPath listPath = do
   cfg <- fmap fromJust getShakeExtra
-  let listPath' = fromPath cfg listPath
-      outPath'  = fromPath cfg outPath
+  let listPath' = fromPath loc cfg listPath
+      outPath'  = fromPath loc cfg outPath
       loc = "modules.singletons.aSingletons"
       dbg = debugA' loc
   dbg $ "listpath': " ++ listPath'
@@ -97,7 +98,7 @@ aSingletons elemType outPath listPath = do
   dbg $ "elems: " ++ show elems
   singletonPaths <- forM elems $ \e -> do
     let singletonPath' = cachedLinesPath cfg [e] -- TODO nondeterministic?
-        singletonPath  = toPath cfg singletonPath'
+        singletonPath  = toPath loc cfg singletonPath'
     dbg $ "singletonPath': " ++ singletonPath'
     writeStrings loc elemType singletonPath' [e]
     return singletonPath

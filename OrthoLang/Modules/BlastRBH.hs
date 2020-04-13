@@ -138,10 +138,11 @@ reciprocalBest = Function
 aReciprocalBest :: [Path] -> Action ()
 aReciprocalBest [out, left, right] = do
   cfg <- fmap fromJust getShakeExtra
-  let out'   = fromPath cfg out
-      left'  = fromPath cfg left
-      right' = fromPath cfg right
-      out''  = traceA "aReciprocalBest" out' [out', left', right']
+  let loc = "modules.blastrbh.aReciprocalBest"
+      out'   = fromPath loc cfg out
+      left'  = fromPath loc cfg left
+      right' = fromPath loc cfg right
+      out''  = traceA loc out' [out', left', right']
   runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
@@ -177,13 +178,13 @@ reciprocalBestAll = Function
 aReciprocalBestAll :: [Path] -> Action ()
 aReciprocalBestAll (out:ins) = do
   cfg <- fmap fromJust getShakeExtra
-  let cDir = fromPath cfg $ cacheDir cfg "blastrbh"
+  let cDir = fromPath loc cfg $ cacheDir cfg "blastrbh"
       tmpPath p = cDir </> digest p <.> "bht"
-      ins' = map (\p -> (p, tmpPath p)) $ map (fromPath cfg) ins
+      ins' = map (\p -> (p, tmpPath p)) $ map (fromPath loc cfg) ins
       loc = "modules.blastrbh.aReciprocalBestAll"
   liftIO $ createDirectoryIfMissing True cDir
   mapM_ (\(inPath, outPath) -> absolutizePaths loc inPath outPath) ins'
-  aSimpleScriptNoFix "reciprocal_best_all.R" (out:map (toPath cfg . snd) ins')
+  aSimpleScriptNoFix "reciprocal_best_all.R" (out:map (toPath loc cfg . snd) ins')
 aReciprocalBestAll ps = error $ "bad argument to aReciprocalBestAll: " ++ show ps
 
 -----------------

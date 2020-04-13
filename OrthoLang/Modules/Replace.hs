@@ -170,9 +170,9 @@ calcRepID scr resExpr subVar subExpr = RepID $ Just $ digest
 aReplaceEachLits :: Type -> Path -> Path -> [Path] -> Action ()
 aReplaceEachLits _ outPath subPaths resPaths = do
   cfg <- fmap fromJust getShakeExtra
-  let outPath'  = fromPath cfg outPath
-      subPaths' = fromPath cfg subPaths
-      resPaths' = map (fromPath cfg) resPaths
+  let outPath'  = fromPath loc cfg outPath
+      subPaths' = fromPath loc cfg subPaths
+      resPaths' = map (fromPath loc cfg) resPaths
       loc = "modules.summarize.aReplaceEachLits"
       out = traceA loc outPath' (outPath':subPaths':resPaths')
   lits <- mapM (readLit loc) resPaths'
@@ -185,9 +185,9 @@ aReplaceEachLits _ outPath subPaths resPaths = do
 aReplaceEachLinks :: Path -> Path -> [Path] -> Action ()
 aReplaceEachLinks outPath subPaths resPaths = do
   cfg <- fmap fromJust getShakeExtra
-  let outPath'  = fromPath cfg outPath
-      subPaths' = fromPath cfg subPaths
-      resPaths' = map (fromPath cfg) resPaths
+  let outPath'  = fromPath loc cfg outPath
+      subPaths' = fromPath loc cfg subPaths
+      resPaths' = map (fromPath loc cfg) resPaths
       loc = "modules.summarize.aReplaceEachLinks"
       out = traceA loc outPath' (outPath':subPaths':resPaths')
   need' loc (subPaths':resPaths') -- TODO is needing subPaths required?
@@ -264,10 +264,11 @@ rReplaceEach scr expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subList:[])) = do
   resPaths <- mapM (rReplace' scr resExpr subVar) subExprs
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let subPaths' = (\(ExprPath p) -> toPath cfg p) subPaths
-      resPaths' = map (\(ExprPath p) -> toPath cfg p) resPaths
+  let loc = "modules.replace.rReplaceEach"
+      subPaths' = (\(ExprPath p) -> toPath loc cfg p) subPaths
+      resPaths' = map (\(ExprPath p) -> toPath loc cfg p) resPaths
       outPath   = exprPath cfg dRef scr expr
-      outPath'  = debugRules "rReplaceEach" expr $ fromPath cfg outPath
+      outPath'  = debugRules loc expr $ fromPath loc cfg outPath
   outPath' %> \_ ->
     let actFn = if typeOf expr `elem` [ListOf str, ListOf num]
                   then aReplaceEachLits (typeOf expr)

@@ -93,13 +93,14 @@ rBuscoListLineages scr e@(Fun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr scr f
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let oPath   = exprPath cfg dRef scr e
+  let loc = "modules.busco.rBuscoListLineages"
+      oPath   = exprPath cfg dRef scr e
       tmpDir  = buscoCache cfg
-      tmpDir' = fromPath cfg tmpDir
+      tmpDir' = fromPath loc cfg tmpDir
       listTmp = tmpDir' </> "dblist" <.> "txt"
-      oPath'  = fromPath cfg oPath
-      lTmp'   = toPath   cfg listTmp
-  let fPath' = toPath   cfg fPath
+      oPath'  = fromPath loc cfg oPath
+      lTmp'   = toPath loc cfg listTmp
+      fPath' = toPath loc cfg fPath
   listTmp %> \_ -> aBuscoListLineages lTmp'
   oPath'  %> \_ -> aFilterList oPath lTmp' fPath'
   return (ExprPath oPath')
@@ -108,7 +109,7 @@ rBuscoListLineages _ _ = fail "bad argument to rBuscoListLineages"
 aBuscoListLineages :: Path -> Action ()
 aBuscoListLineages listTmp = do
   cfg <- fmap fromJust getShakeExtra
-  let listTmp' = fromPath cfg listTmp
+  let listTmp' = fromPath loc cfg listTmp
       tmpDir   = takeDirectory $ listTmp'
       loc = "modules.busco.rBuscoListLineages"
       oPath    = traceA loc listTmp' [listTmp']
@@ -199,8 +200,9 @@ buscoFetchLineage  = Function
 untar :: Path -> Path -> Action ()
 untar from to = do
   cfg <- fmap fromJust getShakeExtra
-  let from' = fromPath cfg from
-      to' = fromPath cfg to
+  let loc = "modules.busco.untar"
+      from' = fromPath loc cfg from
+      to' = fromPath loc cfg to
   runCmd $ CmdDesc
     { cmdBinary = "tar"
     , cmdArguments = ["-xf", from', "-C", takeDirectory to']
@@ -221,18 +223,18 @@ rBuscoFetchLineage scr expr@(Fun _ _ _ _ [nPath]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let outPath  = exprPath cfg dRef scr expr
-      outPath' = fromPath cfg outPath
-      blhDir   = (fromPath cfg $ buscoCache cfg) </> "lineages"
+      outPath' = fromPath loc cfg outPath
+      blhDir   = (fromPath loc cfg $ buscoCache cfg) </> "lineages"
       loc = "modules.busco.rBuscoFetchLineage"
   outPath' %> \_ -> do
     nameStr <- readLit loc namePath
     let untarPath = blhDir </> nameStr
         url       = "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
         datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
-        datasetPath   = toPath cfg datasetPath'
-    tarPath <- fmap (fromPath cfg) $ curl url
+        datasetPath   = toPath loc cfg datasetPath'
+    tarPath <- fmap (fromPath loc cfg) $ curl url
     unlessExists untarPath $ do
-      untar (toPath cfg tarPath) (toPath cfg untarPath)
+      untar (toPath loc cfg tarPath) (toPath loc cfg untarPath)
     symlink outPath datasetPath
   return $ ExprPath outPath'
 rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show e
@@ -261,11 +263,12 @@ buscoTranscriptome = mkBusco "busco_transcriptome" "tran" fna
 aBusco :: String -> ([Path] -> Action ())
 aBusco mode [outPath, blhPath, faaPath] = do
   cfg <- fmap fromJust getShakeExtra
-  let out' = fromPath cfg outPath
-      blh' = takeDirectory $ fromPath cfg blhPath
-      cDir = fromPath cfg $ buscoCache cfg
+  let loc = "modules.busco.aBusco"
+      out' = fromPath loc cfg outPath
+      blh' = takeDirectory $ fromPath loc cfg blhPath
+      cDir = fromPath loc cfg $ buscoCache cfg
       rDir = cDir </> "runs"
-      faa' = fromPath cfg faaPath
+      faa' = fromPath loc cfg faaPath
   blh'' <- liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) blh'
   liftIO $ createDirectoryIfMissing True rDir
   runCmd $ CmdDesc
@@ -286,7 +289,7 @@ aBusco mode [outPath, blhPath, faaPath] = do
       tmpOutPtn = rDir </> oBasePtn </> "short_summary*.txt"
   tmpOut <- liftIO $ fmap (headOrDie "failed to read BUSCO summary in aBusco") $ glob tmpOutPtn
   sanitizeFileInPlace tmpOut -- will this confuse shake?
-  symlink outPath $ toPath cfg tmpOut
+  symlink outPath $ toPath loc cfg tmpOut
 aBusco _ as = error $ "bad argument to aBusco: " ++ show as
 
 ------------------------------------------------
@@ -368,11 +371,11 @@ rBuscoScoresTable scr e@(Fun _ _ _ _ [l]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let o  = exprPath cfg dRef scr e
-      o' = fromPath cfg o
+      o' = fromPath loc cfg o
       loc = "modules.busco.rBuscoScoresTable"
   o' %> \_ -> do
     ins <- readPaths loc lsPath
-    let ins' = map (fromPath cfg) ins
+    let ins' = map (fromPath loc cfg) ins
     runCmd $ CmdDesc
       { cmdBinary = "busco_scores_table.py"
       , cmdArguments = o':ins'
@@ -426,7 +429,7 @@ rBuscoFilterCompleteness scr e@(Fun _ _ _ _ [m, t, fs]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let out  = exprPath cfg dRef scr e
-      out' = fromPath cfg out
+      out' = fromPath loc cfg out
       loc = "modules.busco.rBuscoFilterCompleteness"
   out' %> \_ -> do
     score <- fmap (read :: String -> Scientific) $ readLit loc scorePath

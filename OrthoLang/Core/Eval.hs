@@ -182,28 +182,34 @@ prettyResult :: Config -> LocksRef -> Type -> Path -> Action Doc
 prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits "core.eval.prettyResult" $ fromPath cfg f
+    lits <- readLits "core.eval.prettyResult" $ fromPath loc cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    paths <- readPaths "core.eval.prettyResult" $ fromPath cfg f
+    paths <- readPaths "core.eval.prettyResult" $ fromPath loc cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
+  where
+    loc = "core.eval.eval.prettyResult"
 prettyResult cfg ref (ScoresOf _)  f = do
-  s <- liftIO (defaultShow cfg ref $ fromPath cfg f)
+  s <- liftIO (defaultShow cfg ref $ fromPath loc cfg f)
   return $ text s
+  where
+    loc = "core.eval.eval.prettyResult"
 
 -- TODO case for EncodedAs here, and later redesign this as a typeclass
 prettyResult cfg ref (EncodedAs e _)  f = liftIO $ fmap text $ enShow e cfg ref f'
   where
-    f' = fromPath cfg f
+    f' = fromPath loc cfg f
+    loc = "core.eval.eval.prettyResult"
 
 prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
   where
     showFn = if t == num then prettyNum else text
-    f' = fromPath cfg f
+    f' = fromPath loc cfg f
+    loc = "core.eval.eval.prettyResult"
 
 -- run the result of any of the c* functions, and print it
 -- (only compileScript is actually useful outside testing though)
@@ -235,6 +241,7 @@ eval hdl cfg ref ids dr rtype ls p = do
   eval' delay pOpts ls p -- TODO ignoreErrors again?
   where
     eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg ref ids dr pm delay $ do
+      let loc = "core.eval.eval.eval'"
       newRules
       lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
       (ResPath path) <- rpath
@@ -255,7 +262,7 @@ eval hdl cfg ref ids dr rtype ls p = do
         when (cfgInteractive cfg) (printShort cfg ref ids pm rtype path)
         completeProgress pm
         case cfgOutFile cfg of
-          Just out -> writeResult cfg ref ids (toPath cfg path) out
+          Just out -> writeResult cfg ref ids (toPath loc cfg path) out
           Nothing  -> when (not $ cfgInteractive cfg)
                         -- TODO printLong should work more like printShort but no line limit?
                         -- (printLong cfg ref ids pm rtype path)
@@ -288,7 +295,8 @@ printLong _ ref idsref pm _ path = do
 printShort :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
 printShort cfg ref idsref pm rtype path = do
   ids <- liftIO $ readIORef idsref
-  res <- prettyResult cfg ref rtype $ toPath cfg path
+  let loc = "core.eval.printShort"
+  res <- prettyResult cfg ref rtype $ toPath loc cfg path
   -- liftIO $ putStrLn $ show ids
   -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids) ++ " keys)..."
   -- TODO fix the bug that causes this to remove newlines after seqids:

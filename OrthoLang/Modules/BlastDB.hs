@@ -155,9 +155,10 @@ rLoadDB scr e@(Fun _ _ _ _ [s]) = do
   (ExprPath sPath) <- rExpr scr s
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let oPath  = exprPath cfg dRef scr e
-      oPath' = fromPath cfg oPath
-  let sPath' = toPath cfg sPath
+  let loc = "modules.blastdb.rLoadDB"
+      oPath  = exprPath cfg dRef scr e
+      oPath' = fromPath loc cfg oPath
+  let sPath' = toPath loc cfg sPath
   oPath' %> \_ -> aLoadDB oPath sPath'
   return (ExprPath oPath')
 rLoadDB _ _ = fail "bad argument to rLoadDB"
@@ -165,8 +166,8 @@ rLoadDB _ _ = fail "bad argument to rLoadDB"
 aLoadDB :: Path -> Path -> Action ()
 aLoadDB oPath sPath = do
   cfg <- fmap fromJust getShakeExtra
-  let oPath'  = fromPath cfg oPath
-      sPath'  = fromPath cfg sPath
+  let oPath'  = fromPath loc cfg oPath
+      sPath'  = fromPath loc cfg sPath
       loc = "modules.blastdb.aLoadDB"
       oPath'' = traceA loc oPath' [oPath', sPath']
   pattern <- readLit loc sPath'
@@ -219,13 +220,14 @@ rBlastdblist scr e@(Fun _ _ _ _ [f]) = do
   (ExprPath fPath) <- rExpr scr f
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let fPath' = toPath cfg fPath
+  let loc = "modules.blastdb.rBlastdblist"
+      fPath' = toPath loc cfg fPath
       oPath   = exprPath cfg dRef scr e
       tmpDir  = blastdbgetCache cfg
-      tmpDir' = fromPath cfg tmpDir
+      tmpDir' = fromPath loc cfg tmpDir
       listTmp = tmpDir' </> "dblist" <.> "txt"
-      oPath'  = fromPath cfg oPath
-      lTmp'   = toPath   cfg listTmp
+      oPath'  = fromPath loc cfg oPath
+      lTmp'   = toPath loc cfg listTmp
   listTmp %> \_ -> aBlastdblist lTmp'
   oPath'  %> \_ -> aFilterList oPath lTmp' fPath'
   return (ExprPath oPath')
@@ -234,9 +236,10 @@ rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 aBlastdblist :: Path -> Action ()
 aBlastdblist listTmp = do
   cfg <- fmap fromJust getShakeExtra
-  let listTmp' = fromPath cfg listTmp
+  let loc = "modules.blastdb.aBlastdblist"
+      listTmp' = fromPath loc cfg listTmp
       tmpDir   = takeDirectory $ listTmp'
-      oPath    = traceA "aBlastdblist" listTmp' [listTmp']
+      oPath    = traceA loc listTmp' [listTmp']
   liftIO $ createDirectoryIfMissing True tmpDir
   withWriteLock' tmpDir $ do
     runCmd $ CmdDesc
@@ -258,9 +261,9 @@ aBlastdblist listTmp = do
 aFilterList :: Path -> Path -> Path -> Action ()
 aFilterList oPath listTmp fPath = do
   cfg <- fmap fromJust getShakeExtra
-  let fPath'   = fromPath cfg fPath
-      oPath'   = fromPath cfg oPath
-      listTmp' = fromPath cfg listTmp
+  let fPath'   = fromPath loc cfg fPath
+      oPath'   = fromPath loc cfg oPath
+      listTmp' = fromPath loc cfg listTmp
       loc = "modules.blastdb.aFilterList"
       oPath''  = traceA loc oPath' [oPath', listTmp', fPath']
   filterStr <- readLit  loc fPath'
@@ -294,10 +297,11 @@ rBlastdbget scr e@(Fun _ _ _ _ [name]) = do
   (ExprPath nPath) <- rExpr scr name
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let tmpDir    = blastdbgetCache cfg
+  let loc = "modules.blastdb.rBlastdbget"
+      tmpDir    = blastdbgetCache cfg
       dbPrefix  = exprPath cfg dRef scr e -- final prefix
-      dbPrefix' = fromPath cfg dbPrefix
-      nPath'    = toPath cfg nPath
+      dbPrefix' = fromPath loc cfg dbPrefix
+      nPath'    = toPath loc cfg nPath
   dbPrefix' %> \_ -> aBlastdbget dbPrefix tmpDir nPath'
   return (ExprPath dbPrefix')
 rBlastdbget _ _ = fail "bad argument to rBlastdbget"
@@ -305,9 +309,9 @@ rBlastdbget _ _ = fail "bad argument to rBlastdbget"
 aBlastdbget :: Path -> Path -> Path -> Action ()
 aBlastdbget dbPrefix tmpDir nPath = do
   cfg <- fmap fromJust getShakeExtra
-  let tmp'       = fromPath cfg tmpDir
-      nPath'     = fromPath cfg nPath
-      dbPrefix'  = fromPath cfg dbPrefix
+  let tmp'       = fromPath loc cfg tmpDir
+      nPath'     = fromPath loc cfg nPath
+      dbPrefix'  = fromPath loc cfg dbPrefix
       loc = "ortholang.modules.blastdb.aBlastdbget"
       dbPrefix'' = traceA loc dbPrefix' [dbPrefix', tmp', nPath']
   need' loc [nPath']
@@ -385,10 +389,11 @@ rMakeblastdbAll scr e@(Fun rtn _ _ _ [fas]) = do
   (ExprPath fasPath) <- rExpr scr fas
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let out       = exprPath cfg dRef scr e
-      out'      = debugR' cfg "rMakeblastdbAll" e $ fromPath cfg out
+  let loc = "modules.blastdb.rMakeblastdbAll"
+      out       = exprPath cfg dRef scr e
+      out'      = debugR' cfg loc e $ fromPath loc cfg out
       cDir      = makeblastdbCache cfg
-      fasPath'   = toPath cfg fasPath
+      fasPath'  = toPath loc cfg fasPath
 
   -- TODO need new shake first:
   -- out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
@@ -411,11 +416,12 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRel_ ative (cfgTmpDir cfg) dbOut
   cfg <- fmap fromJust getShakeExtra
-  let out'     = fromPath cfg out
-      cDir'    = fromPath cfg cDir
-      fasPath' = fromPath cfg fasPath
+  let loc = "modules.blastdb.aMakeblastdbAll"
+      out'     = fromPath loc cfg out
+      cDir'    = fromPath loc cfg cDir
+      fasPath' = fromPath loc cfg fasPath
   let dbType' = if dbType == ndb then "nucl" else "prot"
-  need' "ortholang.modules.blastdb.aMakeblastdbAll" [fasPath']
+  need' loc [fasPath']
 
   -- The idea was to hash content here, but it took a long time.
   -- So now it gets hashed only once, in another thread, by a load_* function,
@@ -424,8 +430,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
 
   let dbDir  = cDir' </> fasHash
       dbOut  = dbDir </> "result"
-      dbOut' = toPath cfg dbOut
-      loc = "modules.blastdb.aMakeblastdbAll"
+      dbOut' = toPath loc cfg dbOut
       out''  = traceA loc out' [tExtOf dbType, out', dbOut, fasPath']
       dbPtn  = dbDir </> "*" -- TODO does this actually help?
       dbg = debugA' loc
@@ -439,11 +444,11 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   --
   -- TODO would quoting JUST inner paths be right? And Shake does the outer ones?
   faPaths <- readPaths loc fasPath'
-  let noQuoting  = unwords $ map (fromPath cfg) faPaths
+  let noQuoting  = unwords $ map (fromPath loc cfg) faPaths
       quoteOuter = "\"" ++ noQuoting ++ "\""
       fixedPaths = if isJust (cfgWrapper cfg) then quoteOuter else noQuoting
       -- quoteInner = "\"" ++ unwords
-      --              (map (\p -> "\"" ++ fromPath cfg p ++ "\"") faPaths)
+      --              (map (\p -> "\"" ++ fromPath loc cfg p ++ "\"") faPaths)
       --              ++ "\""
 
   dbg $ "out': "       ++ out'
@@ -582,10 +587,11 @@ rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 -- TODO remove the Volumes... lines too?
 showBlastDb :: Config -> LocksRef -> FilePath -> IO String
 showBlastDb cfg ref path = do
-  path' <- fmap (fromGeneric cfg . stripWhiteSpace) $ readFileStrict ref path
-  let dbDir  = takeDirectory path'
+  let loc = "modules.blastdb.showBlastDb"
+  path' <- fmap (fromGeneric loc cfg . stripWhiteSpace) $ readFileStrict ref path
+  let dbDir = takeDirectory path'
       -- dbBase = takeBaseName  dbDir
-  debug "modules.blastdb.showBlastDb" $ "showBlastDb dbDir: \"" ++ dbDir ++ "\""
+  debug loc $ "dbDir: \"" ++ dbDir ++ "\""
   out <- withReadLock ref path' $
            readCreateProcess (proc "blastdbcmd.sh" [dbDir]) ""
   let out1 = lines out

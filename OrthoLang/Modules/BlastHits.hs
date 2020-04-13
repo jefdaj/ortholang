@@ -108,10 +108,10 @@ extractTargetsEach = Function
 aCutCol :: Bool -> Int -> [Path] -> Action ()
 aCutCol _ n [outPath, tsvPath] = do
   cfg <- fmap fromJust getShakeExtra
-  let outPath'  = fromPath cfg outPath
+  let outPath'  = fromPath loc cfg outPath
       loc = "modules.blasthits.aCutCol"
       outPath'' = traceA loc outPath' [show n, outPath', tsvPath']
-      tsvPath'  = fromPath cfg tsvPath
+      tsvPath'  = fromPath loc cfg tsvPath
       tmpPath'  = takeDirectory outPath'' </> "tmp" -- the non-deduped version
   runCmd $ CmdDesc
     { cmdParallel = False
@@ -132,7 +132,7 @@ aCutCol _ n [outPath, tsvPath] = do
   -- TODO remove this? why does it need to be here at all?
   -- let outOut = outPath' <.> "out"
   -- unlessExists outOut $ do
-  --   symlink outPath $ toPath cfg outOut
+  --   symlink outPath $ toPath loc cfg outOut
 
 aCutCol _ _ _ = fail "bad arguments to aCutCol"
 
@@ -175,10 +175,11 @@ mkFilterHitsEach colname = Function
 aFilterHits :: String -> ([Path] -> Action ())
 aFilterHits colname [out, cutoff, hits] = do
   cfg <- fmap fromJust getShakeExtra
-  let out'    = fromPath cfg out
+  let loc = "modules.blasthits.aFilterHits"
+      out'    = fromPath loc cfg out
       out''   = traceA "aFilterHits" out' [out', cutoff', hits']
-      cutoff' = fromPath cfg cutoff
-      hits'   = fromPath cfg hits
+      cutoff' = fromPath loc cfg cutoff
+      hits'   = fromPath loc cfg hits
   runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
@@ -232,9 +233,10 @@ bestHitsEach = Function
 aBestExtract :: [Path] -> Action ()
 aBestExtract [out, hits] = do
   cfg <- fmap fromJust getShakeExtra
-  let out'  = fromPath cfg out
+  let loc = "modules.blasthits.aBestExtract"
+      out'  = fromPath loc cfg out
       out'' = traceA "aBestExtract" out' [out', hits']
-      hits' = fromPath cfg hits
+      hits' = fromPath loc cfg hits
   runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True

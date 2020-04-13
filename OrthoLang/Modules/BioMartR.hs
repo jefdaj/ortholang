@@ -197,9 +197,10 @@ rParseSearches scr expr@(Fun _ _ _ _ [searches]) = do
   (ExprPath sList) <- rExpr scr searches
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let searchTable  = exprPath cfg dRef scr expr
-      searchTable' = fromPath cfg searchTable
-      sList' = toPath cfg sList
+  let loc = "modules.biomartr.rParseSearches"
+      searchTable  = exprPath cfg dRef scr expr
+      searchTable' = fromPath loc cfg searchTable
+      sList' = toPath loc cfg sList
   searchTable' %> \_ -> aParseSearches sList' searchTable
   return (ExprPath searchTable')
 rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
@@ -207,8 +208,8 @@ rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
 aParseSearches :: Path -> Path -> Action ()
 aParseSearches sList out = do
   cfg <- fmap fromJust getShakeExtra
-  let sList' = fromPath cfg sList
-      out'   = fromPath cfg out
+  let sList' = fromPath loc cfg sList
+      out'   = fromPath loc cfg out
       loc = "modules.biomartr.aParseSearches"
       out''  = traceA loc out' [sList', out']
   parses <- (fmap . map) readSearch (readLits loc sList')
@@ -238,12 +239,13 @@ rBioMartR fn scr expr@(Fun rtn salt _ _ [ss]) = do
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
-      tmp'    = toPath cfg bmTmp
+  let loc = "modules.biomartr.rBioMartR"
+      bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
+      tmp'    = toPath loc cfg bmTmp
       out     = exprPath cfg dRef scr expr
-      out'    = fromPath cfg out
-      sTable' = toPath cfg sTable
-      bmFn'   = toPath cfg bmFn
+      out'    = fromPath loc cfg out
+      sTable' = toPath loc cfg sTable
+      bmFn'   = toPath loc cfg bmFn
   out' %> \_ -> aBioMartR out bmFn' tmp' sTable'
   return (ExprPath out')
 rBioMartR _ _ _ = error "bad rBioMartR call"
@@ -251,12 +253,13 @@ rBioMartR _ _ _ = error "bad rBioMartR call"
 aBioMartR :: Path -> Path -> Path -> Path -> Action ()
 aBioMartR out bmFn bmTmp sTable = do
   cfg <- fmap fromJust getShakeExtra
-  let out'    = fromPath cfg out
-      bmFn'   = fromPath cfg bmFn
-      bmTmp'  = fromPath cfg bmTmp
-      sTable' = fromPath cfg sTable
+  let loc = "modules.biomartr.aBioMartR"
+      out'    = fromPath loc cfg out
+      bmFn'   = fromPath loc cfg bmFn
+      bmTmp'  = fromPath loc cfg bmTmp
+      sTable' = fromPath loc cfg sTable
       out'' = traceA "aBioMartR" out' [out', bmFn', bmTmp', sTable']
-  need' "ortholang.modules.biomartr.aBioMartR" [bmFn', sTable']
+  need' loc [bmFn', sTable']
   -- TODO should biomartr get multiple output paths?
   liftIO $ createDirectoryIfMissing True bmTmp'
   -- wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']

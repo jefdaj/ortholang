@@ -43,7 +43,7 @@ rRange scr e@(Fun _ _ _ name args) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let out = exprPath cfg dRef scr e
-      out' = fromPath cfg out
+      out' = fromPath loc cfg out
       loc = "modules.range.rRange"
   argPaths <- fmap (map (\(ExprPath p) -> p)) $ mapM (rExpr scr) args
   out' %> \_ -> do

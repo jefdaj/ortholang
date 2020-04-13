@@ -71,7 +71,7 @@ histogram = let name = "histogram" in Function
 -- dedupByContent :: Config -> LocksRef -> [FilePath] -> Action [FilePath]
 -- dedupByContent cfg ref paths = do
 --   -- TODO if the paths are already in the load cache, no need for content?
---   hashes <- mapM (hashContent cfg ref) $ map (toPath cfg) paths
+--   hashes <- mapM (hashContent cfg ref) $ map (toPath loc cfg) paths
 --   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
 --   return paths'
 
@@ -82,11 +82,12 @@ rPlotNumList script scr expr@(Fun _ _ _ _ [title, nums]) = do
   xlabPath  <- varName scr nums
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let outPath   = exprPath cfg dRef scr expr
-      outPath'  = fromPath cfg outPath
+  let loc = "modules.plots.rPlotNumList"
+      outPath   = exprPath cfg dRef scr expr
+      outPath'  = fromPath loc cfg outPath
       outPath'' = ExprPath outPath'
       args      = [titlePath, numsPath, xlabPath]
-      args'     = map (\(ExprPath p) -> toPath cfg p) args
+      args'     = map (\(ExprPath p) -> toPath loc cfg p) args
   outPath' %> \_ -> withBinHash expr outPath $ \out ->
                       aSimpleScript script (out:args')
   return outPath''
@@ -136,11 +137,12 @@ rPlotNumScores xFn sPath scr expr@(Fun _ _ _ _ [title, nums]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   -- ylabPath  <- yFn   st nums
-  let outPath   = exprPath cfg dRef scr expr
-      outPath'  = fromPath cfg outPath
+  let loc = "modules.plots.rPlotNumScores"
+      outPath   = exprPath cfg dRef scr expr
+      outPath'  = fromPath loc cfg outPath
       outPath'' = ExprPath outPath'
       args      = [titlePath, numsPath, xlabPath]
-      args'     = map (\(ExprPath p) -> toPath cfg p) args
+      args'     = map (\(ExprPath p) -> toPath loc cfg p) args
   outPath' %> \_ -> withBinHash expr outPath $ \out ->
                       aSimpleScript sPath (out:args')
   return outPath''
@@ -198,22 +200,22 @@ rPlotListOfLists sPath scr expr@(Fun _ _ _ _ [lol]) = do
   let labels = map (plotLabel cfg dRef scr) (extractExprs scr lol)
       lists  = map (exprPath  cfg dRef scr) (extractExprs scr lol)
       outPath   = exprPath cfg dRef scr expr
-      outPath'  = fromPath cfg outPath
+      outPath'  = fromPath loc cfg outPath
       outPath'' = ExprPath outPath'
-      cDir      = fromPath cfg $ plotCache cfg
+      cDir      = fromPath loc cfg $ plotCache cfg
       loc = "modules.plots.rPlotListOfLists"
   outPath' %> \_ -> do
-    need' loc $ map (fromPath cfg) lists
+    need' loc $ map (fromPath loc cfg) lists
     -- write labels + list paths to the cache dir
     let labPath  = cDir </> digest expr ++ "_names.txt"
         aLolPath = cDir </> digest expr ++ "_lists.txt"
     liftIO $ createDirectoryIfMissing True cDir
     writeCachedLines loc labPath labels
-    writeLits loc aLolPath $ map (fromPath cfg) lists
+    writeLits loc aLolPath $ map (fromPath loc cfg) lists
     let args = [labPath, aLolPath]
     -- call the main script
     withBinHash expr outPath $ \out ->
-      aSimpleScript sPath (out:map (toPath cfg) args)
+      aSimpleScript sPath (out:map (toPath loc cfg) args)
   return outPath''
 rPlotListOfLists _ _ _ = fail "bad argument to rPlotListOfLists"
 

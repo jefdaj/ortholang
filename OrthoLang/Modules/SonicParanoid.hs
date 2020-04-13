@@ -67,10 +67,10 @@ aSonicParanoid [out, faListPath] = do
 
       -- TODO does this need some work to get consistently?
       statsPath'     = tmpDir </> "stats.tsv" -- this gets symlinked to the actual one, whose path varies
-      statsPath      = toPath cfg statsPath'
+      statsPath      = toPath loc cfg statsPath'
 
-      faListPath' = fromPath cfg faListPath
-      out'        = fromPath cfg out
+      faListPath' = fromPath loc cfg faListPath
+      out'        = fromPath loc cfg out
       loc = "modules.sonicparanoid.aSonicParanoid"
       statsPath''    = traceA loc out' [out', statsPath', faListPath']
   liftIO $ createDirectoryIfMissing True sharedDir
@@ -79,9 +79,9 @@ aSonicParanoid [out, faListPath] = do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
     faPaths <- readPaths loc faListPath'
-    let faPaths' = map (fromPath cfg) faPaths
+    let faPaths' = map (fromPath loc cfg) faPaths
     need' "ortholang.moodules.sonicparanoid.aSonicParanoid" faPaths'
-    let faLinks = map (\p -> toPath cfg $ inDir </> (takeBaseName $ fromPath cfg p)) faPaths
+    let faLinks = map (\p -> toPath loc cfg $ inDir </> (takeBaseName $ fromPath loc cfg p)) faPaths
     mapM_ (\(p, l) -> symlink l p) $ zip faPaths faLinks
 
     -- TODO decide mode based on fn name

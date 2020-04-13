@@ -91,14 +91,14 @@ rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
   dRef <- fmap fromJust getShakeExtraRules
   let out    = exprPath cfg dRef scr e
       loc = "modules.mmseqs.aMmseqsCreateDbAll"
-      out'   = debugRules loc e $ fromPath cfg out
+      out'   = debugRules loc e $ fromPath loc cfg out
       createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest fas
       dbPath = createDbDir </> "result" -- TODO take hash from somewhere else?
       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
   out' %> \_ -> do
     unlessExists dbPath $ do -- TODO any reason it would exist already?
       faPaths <- readPaths loc fasPath
-      let faPaths' = map (fromPath cfg) faPaths
+      let faPaths' = map (fromPath loc cfg) faPaths
       liftIO $ createDirectoryIfMissing True createDbDir
       -- TODO does mmseqs no longer always write a plain .mmseqs2db file? maybe we have to touch that ourselves?
       runCmd $ CmdDesc
@@ -114,7 +114,7 @@ rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
         , cmdExitCode = ExitSuccess
         , cmdRmPatterns = [out', dbPath ++ "*"] -- TODO adjust the code to handle patterns!
         }
-    symlink out $ toPath cfg index
+    symlink out $ toPath loc cfg index
   return (ExprPath out')
 rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e
 
@@ -181,8 +181,9 @@ rMmseqsSearchDb scr e@(Fun _ salt _ _ [n, q, s]) = do
   (ExprPath sPath) <- rExpr scr s -- note: the subject should already have been converted to a db
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let out    = exprPath cfg dRef scr e
-      out'   = debugRules "rMmseqsSearch" e $ fromPath cfg out
+  let loc = "modules.mmseqs.rMmseqsSearchDb"
+      out    = exprPath cfg dRef scr e
+      out'   = debugRules "rMmseqsSearch" e $ fromPath loc cfg out
       -- createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
       -- createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
       searchDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "search"

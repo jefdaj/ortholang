@@ -108,21 +108,21 @@ hmmsearchEach = let name = "hmmsearch_each" in Function
 -- aHmmbuild cfg ref _ [out, fa] = do
 --   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
 --   where
---     out'  = fromPath cfg out
+--     out'  = fromPath loc cfg out
 --     out'' = traceA "aHmmbuild" out' [out', fa']
---     fa'   = fromPath cfg fa
+--     fa'   = fromPath loc cfg fa
 -- aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
 -- TODO make it parallel and mark as such if possible
 aHmmsearch :: [Path] -> Action ()
 aHmmsearch [out, e, hm, fa] = do
   cfg <- fmap fromJust getShakeExtra
-  let out'  = fromPath cfg out
+  let out'  = fromPath loc cfg out
       loc = "modules.hmmer.aHmmsearch"
       out'' = traceA loc out' [out', fa']
-      e'    = fromPath cfg e
-      hm'   = fromPath cfg hm
-      fa'   = fromPath cfg fa
+      e'    = fromPath loc cfg e
+      hm'   = fromPath loc cfg hm
+      fa'   = fromPath loc cfg fa
   eStr <- readLit loc e'
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
 
@@ -185,9 +185,10 @@ aExtractHmm n [outPath, tsvPath] = do
   -- writeLits outPath'' lits'''
   -- wrappedCmdWrite False True cfg ref outPath'' [outPath'] [] [] "extract-hmm.py" [outPath', tsvPath', show n]
   cfg <- fmap fromJust getShakeExtra
-  let outPath'  = fromPath cfg outPath
+  let loc = "modules.hmmer.aExtractHmm"
+      outPath'  = fromPath loc cfg outPath
       outPath'' = traceA "aExtractHmm" outPath' [show n, outPath', tsvPath']
-      tsvPath'  = fromPath cfg tsvPath
+      tsvPath'  = fromPath loc cfg tsvPath
   runCmd $ CmdDesc
     { cmdBinary = "extract-hmm.py"
     , cmdArguments = [outPath', tsvPath', show n]

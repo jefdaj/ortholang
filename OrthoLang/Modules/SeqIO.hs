@@ -135,12 +135,12 @@ gbkToFnaEach = Function
 aGenbankToFasta :: Type -> String -> ([Path] -> Action ())
 aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
   cfg <- fmap fromJust getShakeExtra
-  let faPath'   = fromPath cfg faPath
-      ftPath'   = fromPath cfg ftPath
+  let faPath'   = fromPath loc cfg faPath
+      ftPath'   = fromPath loc cfg ftPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
-      tmpDir'   = fromPath cfg $ cacheDir cfg "seqio"
+      tmpDir'   = fromPath loc cfg $ cacheDir cfg "seqio"
       outDir'   = exprDir' </> "load_" ++ tExtOf rtn
-      outPath'  = fromPath cfg outPath
+      outPath'  = fromPath loc cfg outPath
       loc = "modules.seqio.aGenbankToFasta"
       outPath'' = traceA loc outPath' [outPath', faPath']
   -- liftIO $ putStrLn $ "ftPath': " ++ show ftPath'
@@ -240,19 +240,21 @@ the hash-named ones from the previously-sanitized fasta file.
 aExtractSeqs :: NewAction2
 aExtractSeqs out inFa inList = do
   cfg <- fmap fromJust getShakeExtra
-  let tmp  = fromPath cfg $ cacheDir cfg "seqio"
-      ids  = tmp </> digest (toPath cfg inList) <.> "txt"
-      ids' = toPath cfg ids
-  lookupIDsFile (toPath cfg inList) ids' -- TODO implement as a macro
+  let loc = "modules.seqio.aExtractSeqs"
+      tmp  = fromPath loc cfg $ cacheDir cfg "seqio"
+      ids  = tmp </> digest (toPath loc cfg inList) <.> "txt"
+      ids' = toPath loc cfg ids
+  lookupIDsFile (toPath loc cfg inList) ids' -- TODO implement as a macro
   aNewRulesS2 "extract_seqs.py" id out inFa ids
 
 -- TODO remove by rewriting map functions to work on the new one above
 aExtractSeqsOld :: [Path] -> Action ()
 aExtractSeqsOld [outPath, inFa, inList] = do
   cfg <- fmap fromJust getShakeExtra
-  let cDir     = fromPath cfg $ cacheDir cfg "seqio"
+  let loc = "modules.seqio.aExtractSeqsOld"
+      cDir     = fromPath loc cfg $ cacheDir cfg "seqio"
       tmpList' = cDir </> digest inList <.> "txt"
-      tmpList  = toPath cfg tmpList'
+      tmpList  = toPath loc cfg tmpList'
   liftIO $ createDirectoryIfMissing True cDir
   lookupIDsFile inList tmpList
   aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, tmpList]
@@ -365,9 +367,9 @@ mkConcatEach cType = Function
 -- aConcat :: Type -> [Path] -> Action ()
 -- aConcat cType cfg ref ids [oPath, fsPath] = do
 --   fPaths <- readPaths fs'
---   let fPaths' = map (fromPath cfg) fPaths
+--   let fPaths' = map (fromPath loc cfg) fPaths
 --   need' "aConcat" fPaths'
---   let out'    = fromPath cfg oPath
+--   let out'    = fromPath loc cfg oPath
 --       out''   = traceA "aConcat" out' [out', fs']
 --       outTmp  = out'' <.> "tmp"
 --       emptyStr = "<<empty" ++ tExtOf cType ++ ">>"
@@ -380,7 +382,7 @@ mkConcatEach cType = Function
 --     then liftIO $ writeFile out'' emptyStr
 --     else copyFile' outTmp out''
 --   where
---     fs' = fromPath cfg fsPath
+--     fs' = fromPath loc cfg fsPath
 -- aConcat _ _ _ _ = fail "bad argument to aConcat"
 
 -- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
@@ -395,15 +397,15 @@ aConcat cType [outPath, inList] = do
       inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
       loc = "ortholang.modules.seqio.aConcat"
   liftIO $ createDirectoryIfMissing True tmpDir'
-  liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromPath cfg outPath
+  liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromPath loc cfg outPath
   writeCachedLines loc emptyPath [emptyStr]
-  inPaths <- readPaths loc $ fromPath cfg inList
-  let inPaths' = map (fromPath cfg) inPaths
+  inPaths <- readPaths loc $ fromPath loc cfg inList
+  let inPaths' = map (fromPath loc cfg) inPaths
   need' loc inPaths'
   writeCachedLines loc inList' inPaths'
   aSimpleScriptNoFix "cat.py" [ outPath
-                              , toPath cfg inList'
-                              , toPath cfg emptyPath]
+                              , toPath loc cfg inList'
+                              , toPath loc cfg emptyPath]
 aConcat _ _ = fail "bad argument to aConcat"
 
 -- writeCachedLines outPath content = do
@@ -449,12 +451,12 @@ splitFastaEach faType = Function
 aSplit :: String -> String -> ([Path] -> Action ())
 aSplit name ext [outPath, faPath] = do
   cfg <- fmap fromJust getShakeExtra
-  let faPath'   = fromPath cfg faPath
+  let faPath'   = fromPath loc cfg faPath
       exprDir'  = cfgTmpDir cfg </> "exprs"
       tmpDir'   = cfgTmpDir cfg </> "cache" </> name -- TODO is there a fn for this?
       prefix'   = tmpDir' </> digest faPath ++ "/"
       outDir'   = exprDir' </> "load_" ++ ext
-      outPath'  = fromPath cfg outPath
+      outPath'  = fromPath loc cfg outPath
       loc = "modules.seqio.aSplit"
       outPath'' = traceA loc outPath' [outPath', faPath']
       tmpList   = tmpDir' </> takeFileName outPath' <.> "tmp"

@@ -34,7 +34,7 @@ olModule = Module
 --   (ExprPath iPath) <- rExpr scr iList
 --   cfg  <- fmap fromJust getShakeExtraRules
 --   dRef <- fmap fromJust getShakeExtraRules
---   let oList = fromPath cfg $ exprPath cfg dRef scr expr
+--   let oList = fromPath loc cfg $ exprPath cfg dRef scr expr
 --   oList %> aPermute comboFn iPath salt
 --   return (ExprPath oList)
 -- rPermute _ _ _ = fail "bad argument to rCombos"
@@ -51,7 +51,7 @@ aPermute comboFn (ExprPath out) iPath = do
   elements <- readStrings loc et iPath
   let mkOut p = unsafeExprPathExplicit cfg dRef "list" lt Nothing [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
-      oPaths' = map (fromPath cfg) oPaths
+      oPaths' = map (fromPath loc cfg) oPaths
       combos  = comboFn elements
   -- TODO traceA instead here?
   mapM_ (\(p,ps) -> writeStrings loc et p $

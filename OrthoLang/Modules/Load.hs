@@ -133,9 +133,10 @@ rLoad hashSeqIDs scr e@(Fun _ _ _ _ [p]) = do
   (ExprPath strPath) <- rExpr scr p
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let out  = exprPath cfg dRef scr e
-      out' = fromPath cfg out
-  out' %> \_ -> aLoad hashSeqIDs (toPath cfg strPath) out
+  let loc = "modules.load.rLoad"
+      out  = exprPath cfg dRef scr e
+      out' = fromPath loc cfg out
+  out' %> \_ -> aLoad hashSeqIDs (toPath loc cfg strPath) out
   return (ExprPath out')
 rLoad _ _ _ = fail "bad argument to rLoad"
 
@@ -145,18 +146,20 @@ aLoadHash hashSeqIDs t src = do
   alwaysRerun -- makes sure we can decode hashed seqids
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
   cfg <- fmap fromJust getShakeExtra
-  let src' = fromPath cfg src
-  need' "core.compile.basic.aLoadHash" [src']
+  let loc = "modules.load.aLoadHash"
+      src' = fromPath loc cfg src
+  need' "modules.load.aLoadHash" [src']
   md5 <- hashContent src
-  let tmpDir'   = fromPath cfg $ cacheDir cfg "load"
+  let loc = "modules.load.aLoadHash"
+      tmpDir'   = fromPath loc cfg $ cacheDir cfg "load"
       ext = tExtOf t -- TODO safe because always an exact type?
       hashPath' = tmpDir' </> md5 <.> ext
-      hashPath  = toPath cfg hashPath'
+      hashPath  = toPath loc cfg hashPath'
   if not hashSeqIDs
     then symlink hashPath src
     else do
       let idsPath' = hashPath' <.> "ids"
-          idsPath  = toPath cfg idsPath'
+          idsPath  = toPath loc cfg idsPath'
       unlessExists idsPath' $ hashIDsFile2 src hashPath -- TODO remove unlessExists?
       let (Path k) = hashPath
           v = takeFileName src' -- TODO ext issue here?
@@ -171,9 +174,9 @@ aLoad :: Bool -> Path -> Path -> Action ()
 aLoad hashSeqIDs strPath outPath = do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
-  let strPath'  = fromPath cfg strPath
-      outPath'  = fromPath cfg outPath
-      loc = "core.compile.basic.aLoad"
+  let strPath'  = fromPath loc cfg strPath
+      outPath'  = fromPath loc cfg outPath
+      loc = "modules.load.aLoad"
       outPath'' = traceA loc outPath [strPath', outPath']
       toAbs line = if isAbsolute line
                      then line
@@ -184,7 +187,7 @@ aLoad hashSeqIDs strPath outPath = do
   pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits loc strPath' -- TODO safer!
   pth' <- if isURL pth
             then curl pth
-            else fmap (toPath cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
+            else fmap (toPath loc cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
   hashPath <- aLoadHash hashSeqIDs t pth'
   -- liftIO $ putStrLn $ "ext: " ++ takeExtension outPath'
   symlink outPath'' hashPath
@@ -204,9 +207,10 @@ rLoadListLits scr expr = do
   (ExprPath litsPath') <- rExpr scr expr
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let outPath  = exprPath cfg dRef scr expr
-      outPath' = fromPath cfg outPath
-      litsPath = toPath cfg litsPath'
+  let loc = "modules.load.rLoadListLits"
+      outPath  = exprPath cfg dRef scr expr
+      outPath' = fromPath loc cfg outPath
+      litsPath = toPath loc cfg litsPath'
   outPath' %> \_ -> aLoadListLits outPath litsPath
   return (ExprPath outPath')
 
@@ -214,9 +218,9 @@ rLoadListLits scr expr = do
 aLoadListLits :: Path -> Path -> Action ()
 aLoadListLits outPath litsPath = do
   cfg  <- fmap fromJust getShakeExtra
-  let litsPath' = fromPath cfg litsPath
-      outPath'  = fromPath cfg outPath
-      loc = "modules.load.aLoadListLits"
+  let loc = "modules.load.aLoadListLits"
+      litsPath' = fromPath loc cfg litsPath
+      outPath'  = fromPath loc cfg outPath
       out       = traceA loc outPath' [outPath', litsPath']
   lits  <- readLits loc litsPath'
   lits' <- liftIO $ mapM absolutize lits
@@ -229,9 +233,10 @@ rLoadListPaths hashSeqIDs scr e@(Fun _ _ _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr scr es
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let outPath  = exprPath cfg dRef scr e
-      outPath' = fromPath cfg outPath
-  outPath' %> \_ -> aLoadListPaths hashSeqIDs (toPath cfg pathsPath) outPath
+  let loc = "modules.load.rLoadListPaths"
+      outPath  = exprPath cfg dRef scr e
+      outPath' = fromPath loc cfg outPath
+  outPath' %> \_ -> aLoadListPaths hashSeqIDs (toPath loc cfg pathsPath) outPath
   return (ExprPath outPath')
 rLoadListPaths _ _ _ = fail "bad arguments to rLoadListPaths"
 
@@ -243,17 +248,17 @@ aLoadListPaths hashSeqIDs pathsPath outPath = do
   -- TODO this should be a macro expansion in the loader fns rather than a basic rule!
   -- alwaysRerun -- TODO does this help?
   cfg <- fmap fromJust getShakeExtra
-  let outPath'   = fromPath cfg outPath
-      pathsPath' = fromPath cfg pathsPath
-      loc = "core.compile.basic.aLoadListPaths"
+  let loc = "modules.load.aLoadListPaths"
+      outPath'   = fromPath loc cfg outPath
+      pathsPath' = fromPath loc cfg pathsPath
       out = traceA loc outPath' [outPath', pathsPath']
   paths <- readLitPaths loc pathsPath'
-  let paths' = map (fromPath cfg) paths
+  let paths' = map (fromPath loc cfg) paths
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
-  let paths''' = map (toPath cfg) paths''
+  let paths''' = map (toPath loc cfg) paths''
   dRef <- fmap fromJust getShakeExtra
   (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef $ ExprPath $ outPath'
   hashPaths <- mapM (aLoadHash hashSeqIDs t) paths'''
-  let hashPaths' = map (fromPath cfg) hashPaths
+  let hashPaths' = map (fromPath loc cfg) hashPaths
   need' loc hashPaths'
   writePaths loc out hashPaths

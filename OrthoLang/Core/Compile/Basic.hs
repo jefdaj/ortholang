@@ -111,6 +111,7 @@ rNamedFunction' :: Script -> Expr -> String -> Rules ExprPath
 rNamedFunction' scr expr name = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
+  let loc = "core.compile.basic.rNamedFunction'"
   case findFunction cfg name of
     Nothing -> error "rNamedFunction" $ "no such function \"" ++ name ++ "\""
     Just f  -> case fNewRules f of
@@ -118,7 +119,7 @@ rNamedFunction' scr expr name = do
                                         then (fOldRules f) scr $ setSalt 0 expr
                                         else (fOldRules f) scr expr
                  -- note that the rules themselves should have been added by 'newRules'
-                 NewRules _ -> let p   = fromPath cfg $ exprPath cfg dRef scr expr
+                 NewRules _ -> let p   = fromPath loc cfg $ exprPath cfg dRef scr expr
                                    res = ExprPath p
                                in return $ debugRules "rNamedFunction'" expr res
                  -- TODO typecheck here to make sure the macro didn't mess anything up?
@@ -129,7 +130,8 @@ rAssign :: Script -> Assign -> Rules (Var, VarPath)
 rAssign scr (var, expr) = do
   (ExprPath path) <- rExpr scr expr
   cfg <- fmap fromJust getShakeExtraRules
-  path' <- rVar var expr $ toPath cfg path
+  let loc = "core.compile.basic.rAssign"
+  path' <- rVar var expr $ toPath loc cfg path
   let res  = (var, path')
       res' = debugRules "rAssign" (var, expr) res
   return res'
@@ -158,8 +160,9 @@ rLit :: RulesFn
 rLit scr expr = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
+  let loc = "core.compile.basic.rLit"
   let path  = exprPath cfg dRef scr expr -- absolute paths allowed!
-      path' = debugRules "rLit" expr $ fromPath cfg path
+      path' = debugRules "rLit" expr $ fromPath loc cfg path
   path' %> \_ -> aLit expr path
   return (ExprPath path')
 
@@ -173,7 +176,7 @@ aLit expr out = do
       paths (Lit _ p) = p
       paths _ = fail "bad argument to paths"
       ePath = paths expr
-      out'  = fromPath cfg out
+      out'  = fromPath loc cfg out
       out'' = traceA loc out' [ePath, out']
   writeLit loc out'' ePath -- TODO too much dedup?
 
@@ -220,10 +223,11 @@ rListLits :: RulesFn
 rListLits scr e@(Lst _ _ exprs) = do
   litPaths <- mapM (rExpr scr) exprs
   cfg <- fmap fromJust getShakeExtraRules
-  let litPaths' = map (\(ExprPath p) -> toPath cfg p) litPaths
+  let loc = "core.compile.basic.rListLits"
+      litPaths' = map (\(ExprPath p) -> toPath loc cfg p) litPaths
   dRef <- fmap fromJust getShakeExtraRules
   let outPath  = exprPath cfg dRef scr e
-      outPath' = debugRules "rListLits" e $ fromPath cfg outPath
+      outPath' = debugRules loc e $ fromPath loc cfg outPath
   outPath' %> \_ -> aListLits litPaths' outPath
   return (ExprPath outPath')
 rListLits _ e = error "rListLits" $ "bad argument: " ++ show e
@@ -233,9 +237,9 @@ aListLits :: [Path] -> Path -> Action ()
 aListLits paths outPath = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "core.compile.basic.aListLits"
-      out'   = fromPath cfg outPath
+      out'   = fromPath loc cfg outPath
       out''  = traceA "aListLits" out' (out':paths')
-      paths' = map (fromPath cfg) paths
+      paths' = map (fromPath loc cfg) paths
   need' loc paths' -- TODO remove?
   lits <- mapM (readLit loc) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
@@ -267,11 +271,12 @@ rListPaths scr e@(Lst _ _ exprs) = do
   paths <- mapM (rExpr scr) exprs
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let paths'   = map (\(ExprPath p) -> toPath cfg p) paths
+  let loc = "core.compile.basic.rListPaths"
+      paths'   = map (\(ExprPath p) -> toPath loc cfg p) paths
       -- hash     = digest $ concat $ map digest paths'
       -- outPath  = unsafeExprPathExplicit cfg "list" (ListOf rtn) salt [hash]
       outPath  = exprPath cfg dRef scr e
-      outPath' = debugRules "rListPaths" e $ fromPath cfg outPath
+      outPath' = debugRules loc e $ fromPath loc cfg outPath
   outPath' %> \_ -> aListPaths paths' outPath
   return (ExprPath outPath')
 rListPaths _ _ = error "rListPaths" "bad argument"
@@ -279,14 +284,14 @@ rListPaths _ _ = error "rListPaths" "bad argument"
 aListPaths :: [Path] -> Path -> Action ()
 aListPaths paths outPath = do
   cfg <- fmap fromJust getShakeExtra
-  let out'   = fromPath cfg outPath
+  let out'   = fromPath loc cfg outPath
       loc    = "core.compile.basic.aListPaths"
       out''  = traceA "aListPaths" out' (out':paths')
-      paths' = map (fromPath cfg) paths -- TODO remove this
+      paths' = map (fromPath loc cfg) paths -- TODO remove this
   need' loc paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
   need' loc paths''
-  let paths''' = map (toPath cfg) paths'' -- TODO not working?
+  let paths''' = map (toPath loc cfg) paths'' -- TODO not working?
   writePaths loc out'' paths'''
 
 -- return a link to an existing named variable
@@ -294,7 +299,8 @@ aListPaths paths outPath = do
 rRef :: RulesFn
 rRef _ e@(Ref _ _ _ var) = do
   cfg <- fmap fromJust getShakeExtraRules
-  let ePath p = ExprPath $ debugRules "rRef" e $ fromPath cfg p
+  let loc = "core.compile.basic.rRef"
+      ePath p = ExprPath $ debugRules loc e $ fromPath loc cfg p
   return $ ePath $ varPath cfg var e
     
 rRef _ _ = fail "bad argument to rRef"
@@ -306,7 +312,8 @@ rVar :: Var -> Expr -> Path -> Rules VarPath
 rVar var expr oPath = do
   cfg <- fmap fromJust getShakeExtraRules
   let vPath  = varPath cfg var expr
-      vPath' = debugRules "rVar" var $ fromPath cfg vPath
+      loc = "core.compile.basic.rVar"
+      vPath' = debugRules loc var $ fromPath loc cfg vPath
   vPath' %> \_ -> aVar vPath oPath
   return (VarPath vPath')
 
@@ -314,10 +321,11 @@ aVar :: Path -> Path -> Action ()
 aVar vPath oPath = do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
-  let oPath'  = fromPath cfg oPath
-      vPath'  = fromPath cfg vPath
+  let loc = "core.compile.basic.aVar"
+      oPath'  = fromPath loc cfg oPath
+      vPath'  = fromPath loc cfg vPath
       vPath'' = traceA "aVar" vPath [vPath', oPath']
-  need' "core.compile.basic.aVar" [oPath']
+  need' loc [oPath']
   ref <- fmap fromJust getShakeExtra
   liftIO $ removeIfExists ref vPath'
   -- TODO should it sometimes symlink and sometimes copy?

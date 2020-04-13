@@ -148,11 +148,11 @@ aPsiblastDb :: Bool -> [String] -> Action3
 aPsiblastDb writingPssm args oPath ePath qPath dbPath = do
 
   cfg <- fmap fromJust getShakeExtra
-  let oPath'  = fromPath cfg oPath
+  let oPath'  = fromPath loc cfg oPath
       tPath'  = if writingPssm then oPath' <.> "tmp" else oPath' -- see below
-      ePath'  = fromPath cfg ePath
-      qPath'  = fromPath cfg qPath -- might be a fasta or pssm
-      dbPath' = fromPath cfg dbPath
+      ePath'  = fromPath loc cfg ePath
+      qPath'  = fromPath loc cfg qPath -- might be a fasta or pssm
+      dbPath' = fromPath loc cfg dbPath
       loc = "modules.psiblast.aPsiblastDb"
   need' loc [ePath', qPath', dbPath']
 
@@ -160,15 +160,15 @@ aPsiblastDb writingPssm args oPath ePath qPath dbPath = do
 
   -- TODO is there something wrong with the map handlign here? or general makeblastdb?
   -- dbPrePath <- readPath dbPath' -- TODO is this right?
-  -- let dbPrePath' = fromPath cfg dbPrePath
+  -- let dbPrePath' = fromPath loc cfg dbPrePath
 
   -- this version works for withPdbSubject, but breaks something else?
   dbPre     <- readPath loc dbPath' -- TODO is this right?
   dbg "aPsiblastDb" $ "dbPre: " ++ show dbPre
 
   let eDec = formatScientific Fixed Nothing $ read eStr
-      cDir = fromPath cfg $ cacheDir cfg "psiblast"
-      dbPre' = fromPath cfg dbPre
+      cDir = fromPath loc cfg $ cacheDir cfg "psiblast"
+      dbPre' = fromPath loc cfg dbPre
 
         -- , "-num_threads", "8"    -- TODO add this in the wrapper script
         -- , "-out", undefined      -- TODO include this?

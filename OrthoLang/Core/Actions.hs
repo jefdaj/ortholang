@@ -115,7 +115,8 @@ traceA name out args = trace "core.actions" msg out
 need' :: String -> [FilePath] -> Action ()
 need' fnName paths = do
   cfg <- fmap fromJust getShakeExtra
-  mapM_ (needShared fnName . toPath cfg) paths
+  let loc = fnName ++ ".need'"
+  mapM_ (needShared fnName . toPath loc cfg) paths -- TODO loc instead of fnName?
 
 needDebug :: String -> [FilePath] -> Action ()
 needDebug fnName paths = do
@@ -140,8 +141,9 @@ TODO If the path is to a list of paths, should we also recursively need those
 needShared :: String -> Path -> Action ()
 needShared name path@(Path p) = do
   cfg <- fmap fromJust getShakeExtra
-  let path' = fromPath cfg path
-  debugA' "needShared" $ "called for '" ++ path' ++ "'"
+  let loc = "core.actions.needShared" -- TODO pass from callers?
+      path' = fromPath loc cfg path
+  debugA' loc $ "called for '" ++ path' ++ "'"
   -- skip cache lookup if the file exists already
   done <- doesFileExist path'
   if done
@@ -267,7 +269,8 @@ readPaths :: DebugLocation -> FilePath -> Action [Path]
 readPaths loc path = do
   paths <- (fmap . map) stringPath $ readList loc path
   cfg <- fmap fromJust getShakeExtra
-  need' (loc ++ ".readPaths") $ map (fromPath cfg) paths
+  let loc' = loc ++ ".readPaths"
+  need' loc' $ map (fromPath loc' cfg) paths
   return paths
 
 -- makes a copy of a list of paths without ortholang funny business,
@@ -277,7 +280,7 @@ absolutizePaths :: DebugLocation -> FilePath -> FilePath -> Action ()
 absolutizePaths loc inPath outPath = do
   paths  <- readPaths loc inPath
   cfg <- fmap fromJust getShakeExtra
-  paths' <- mapM (liftIO . absolutize. fromPath cfg) paths
+  paths' <- mapM (liftIO . absolutize. fromPath loc cfg) paths
   need' "core.actions.absolutizePaths" paths' -- because they will be read by the script next
   -- liftIO $ putStrLn $ "paths': " ++ show paths'
   withWriteLock' outPath $ writeFile' outPath $ unlines paths'
@@ -294,7 +297,7 @@ readLitPaths loc path = do
                      else cfgWorkDir cfg </> line
   ls <- readList loc' path
   let ls'  = map toAbs ls
-      ls'' = map (toPath cfg) ls'
+      ls'' = map (toPath loc cfg) ls'
   -- Note: need' causes infinite recursion here, so we skip to needDebug
   needDebug loc' ls'
   return ls''
@@ -312,7 +315,7 @@ readStrings loc etype path = if etype' `elem` [str, num]
   then readLits loc path
   else do
     cfg <- fmap fromJust getShakeExtra
-    (fmap . map) (fromPath cfg) (readPaths loc path)
+    (fmap . map) (fromPath loc cfg) (readPaths loc path)
   where
     etype' = trace "core.actions.readStrings" ("readStrings (each " ++ tExtOf etype ++ ") from " ++ path) etype
 
@@ -343,10 +346,12 @@ readList loc path = do
 -- write files --
 -----------------
 
+-- TODO move to Paths?
 cachedLinesPath :: Config -> [String] -> FilePath
 cachedLinesPath cfg content = cDir </> digest content <.> "txt"
   where
-    cDir = fromPath cfg $ cacheDir cfg "lines"
+    loc = "core.actions.cachedLinesPath"
+    cDir = fromPath loc cfg $ cacheDir cfg "lines"
 
 -- TODO move to Util?
 first50 :: Show a => a -> String
@@ -385,7 +390,7 @@ writeCachedLines loc outPath content = do
   -- liftIO $ createDirectoryIfMissing True cDir
   withWriteOnce cache $ writeFile' cache $ unlines content -- TODO is this strict?
   -- unlessExists outPath $ -- TODO remove?
-  symlink (toPath cfg outPath) (toPath cfg cache)
+  symlink (toPath loc cfg outPath) (toPath loc cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script
 -- TODO remove in favor of sanitizeFileInPlace?
@@ -440,7 +445,7 @@ writeStrings loc etype out whatevers = do
     then writeLits loc out whatevers
     else do
       cfg <- fmap fromJust getShakeExtra
-      writePaths loc out $ map (toPath cfg) whatevers
+      writePaths loc out $ map (toPath loc cfg) whatevers
 
 writeString :: DebugLocation -> Type -> FilePath -> String -> Action ()
 writeString loc etype out whatever = writeStrings loc etype out [whatever]
@@ -623,8 +628,9 @@ hashContent path = do
   -- alwaysRerun -- TODO does this help?
   cfg <- fmap fromJust getShakeExtra
   Just (disk, _) <- (getShakeExtra :: Action (Maybe LocksRef))
-  let path' = fromPath cfg path
-  need' "hashContent" [path']
+  let loc = "core.actions.hashContent"
+      path' = fromPath loc cfg path
+  need' loc [path']
   -- Stdout out <- withReadLock' path' $ command [] "md5sum" [path']
   -- out <- wrappedCmdOut False True [path'] [] [] "md5sum" [path'] -- TODO runCmd here
   Stdout out <- withReadLock' path' $ withResource disk 1 $ case cfgWrapper cfg of
@@ -657,18 +663,19 @@ withBinHash :: Expr -> Path
             -> (Path -> Action ()) -> Action ()
 withBinHash expr outPath actFn = do
   cfg <- fmap fromJust getShakeExtra
-  let binDir'  = fromPath cfg $ cacheDir cfg "bin"
-      outPath' = fromPath cfg outPath
+  let loc = "core.actions.withBinHash"
+      binDir'  = fromPath loc cfg $ cacheDir cfg "bin"
+      outPath' = fromPath loc cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
   let binTmp' = binDir' </> digest expr -- <.> takeExtension outPath'
-      binTmp  = toPath cfg binTmp'
+      binTmp  = toPath loc cfg binTmp'
   _ <- actFn binTmp
   md5 <- hashContent binTmp
   let binOut' = binDir' </> md5 -- <.> takeExtension outPath'
-      binOut  = toPath cfg binOut'
+      binOut  = toPath loc cfg binOut'
   -- debugS $ "withBinHash binOut: "  ++ show binOut
   -- debugS $ "withBinHash binOut': " ++ show binOut'
-  debugA' "withBinHash" $ show binTmp ++ " -> " ++ show binOut
+  debugA' loc $ show binTmp ++ " -> " ++ show binOut
   symlink binOut  binTmp
   symlink outPath binOut
 
@@ -693,8 +700,9 @@ to be kind of confusing either way)
 symlink :: Path -> Path -> Action ()
 symlink src dst = do
   cfg <- fmap fromJust getShakeExtra
-  let src' = fromPath cfg src
-      dst' = fromPath cfg dst
+  let loc = "core.actions.symlink"
+      src' = fromPath loc cfg src
+      dst' = fromPath loc cfg dst
       dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
   -- TODO why does this break it?
   -- need' "core.actions.symlink" [dst']

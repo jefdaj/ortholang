@@ -35,20 +35,20 @@ map3of3 inType outType act3 out a1 a2 a3 = do
   -- this way breaks psiblast_db_each
   cfg <- fmap fromJust getShakeExtra
   let loc = "core.compile.map2.map3of3"
-  inPaths <- readStrings loc inType $ fromPath cfg a3
+  inPaths <- readStrings loc inType $ fromPath loc cfg a3
   -- but this way breaks something too, right?
-  -- a3path  <- readPath locks $ fromPath cfg a3
+  -- a3path  <- readPath locks $ fromPath loc cfg a3
   -- debugA $ "map3Base a3path: " ++ show a3path
-  -- inPaths <- readStrings inType cfg locks $ fromPath cfg a3path
+  -- inPaths <- readStrings inType cfg locks $ fromPath loc cfg a3path
   debugFn $ "map3Base inPaths read from a3: " ++ show inPaths
   let tmpDir   = cfgTmpDir cfg </> "cache" </> "map" -- TODO figure this out better
-      outPaths = (flip map) inPaths $ \i -> tmpDir </> digest [out, toPath cfg i] </> "result"
+      outPaths = (flip map) inPaths $ \i -> tmpDir </> digest [out, toPath loc cfg i] </> "result"
                  -- <.> tExtOf outType
       ioPairs  = zip inPaths outPaths
   forM_ ioPairs $ \(i,o) -> do
     debugFn $ "map3Base input and output: " ++ show i ++ ", " ++ show o
-    act3 (toPath cfg o) a1 a2 (toPath cfg i)
-  writeStrings loc outType (fromPath cfg out) outPaths
+    act3 (toPath loc cfg o) a1 a2 (toPath loc cfg i)
+  writeStrings loc outType (fromPath loc cfg out) outPaths
   where
     debugFn = debugA' "map3Base"
 
@@ -60,11 +60,12 @@ rFun3 act3 scr expr@(Fun _ _ _ _ [a1, a2, a3]) = do
   (ExprPath arg3') <- rExpr scr a3
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let arg1   = toPath cfg arg1'
-      arg2   = toPath cfg arg2'
-      arg3   = toPath cfg arg3'
+  let loc = "core.compile.map2.rFun3"
+      arg1   = toPath loc cfg arg1'
+      arg2   = toPath loc cfg arg2'
+      arg3   = toPath loc cfg arg3'
       oPath  = exprPath cfg dRef scr expr
-      oPath' = debugRules "rFun3" expr $ fromPath cfg oPath
+      oPath' = debugRules "rFun3" expr $ fromPath loc cfg oPath
   oPath' %> \_ -> do
     debugFn $ "rFun3 arg1: "  ++ show arg1
     debugFn $ "rFun3 arg2: "  ++ show arg2

@@ -72,9 +72,10 @@ aSimpleScript' parCmd fixEmpties script (out:ins) = do
   c <- fmap fromJust getShakeExtra
   -- TODO is tmpDir used here at all? should it be?
   -- TODO match []?
-  let actFn t (o:is) = let o'  = fromPath c o -- TODO better var names here
-                           t'  = fromPath c t
-                           is' = map (fromPath c) is
+  let loc = "core.compile.simple.aSimpleScript'"
+      actFn t (o:is) = let o'  = fromPath loc c o -- TODO better var names here
+                           t'  = fromPath loc c t
+                           is' = map (fromPath loc c) is
                        -- in wrappedCmdWrite parCmd fixEmpties c r o' is' [] [Cwd t'] script (o':is')
                        in runCmd $ CmdDesc
                          { cmdBinary = script
@@ -101,9 +102,10 @@ rSimple' mTmpPrefix actFn scr e@(Fun _ _ _ _ exprs) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let mTmpDir  = fmap (cacheDir cfg) mTmpPrefix -- TODO tables bug here?
+      loc = "core.compile.basic.rSimple'"
       outPath  = exprPath cfg dRef scr e
-      outPath' = fromPath cfg outPath
-      argPaths' = map (\(ExprPath p) -> toPath cfg p) argPaths
+      outPath' = fromPath loc cfg outPath
+      argPaths' = map (\(ExprPath p) -> toPath loc cfg p) argPaths
   outPath' %> \_ -> aSimple' outPath actFn mTmpDir argPaths'
   return (ExprPath outPath')
 rSimple' _ _ _ _ = fail "bad argument to rSimple'"
@@ -116,15 +118,16 @@ aSimple' outPath actFn mTmpDir argPaths = do
   -- TODO probably not "simple tmp" anymore... remove? rename?
   cfg <- fmap fromJust getShakeExtra
   let hashes     = concat $ intersperse "/" $ map digest argPaths'
-      argPaths'  = map (fromPath cfg) argPaths
-      outPath'   = fromPath cfg outPath
-      out = traceA "aSimple'" outPath' (outPath':tmpDir':argPaths')
+      loc = "core.compile.basic.aSimple'"
+      argPaths'  = map (fromPath loc cfg) argPaths
+      outPath'   = fromPath loc cfg outPath
+      out = traceA loc outPath' (outPath':tmpDir':argPaths')
       (tmpDir, tmpDir') = case mTmpDir of
-                  Nothing  -> (toPath cfg $ cfgTmpDir cfg, cfgTmpDir cfg)
-                  Just dir -> let d = fromPath cfg dir </> hashes in (toPath cfg d, d)
-  need' "ortholang.core.compile.basic.aSimple'" argPaths'
-  argPaths'' <- liftIO $ mapM (fmap (toPath cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
-  let o' = debugC "aSimple'" ("outPath': " ++ outPath' ++ "\"") outPath
-      as = debugC "aSimple'" ("argsPaths'': " ++ show argPaths'') argPaths''
+                  Nothing  -> (toPath loc cfg $ cfgTmpDir cfg, cfgTmpDir cfg)
+                  Just dir -> let d = fromPath loc cfg dir </> hashes in (toPath loc cfg d, d)
+  need' loc argPaths'
+  argPaths'' <- liftIO $ mapM (fmap (toPath loc cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
+  let o' = debugC loc ("outPath': " ++ outPath' ++ "\"") outPath
+      as = debugC loc ("argsPaths'': " ++ show argPaths'') argPaths''
   actFn tmpDir (o':as)
   trackWrite [out] -- TODO remove?

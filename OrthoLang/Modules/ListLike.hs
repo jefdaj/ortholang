@@ -72,9 +72,10 @@ rLength scr e@(Fun _ _ _ _ [l]) = do
   -- (ExprPath outPath) = unsafeExprPathExplicit cfg True num "length" [relPath]
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let outPath = exprPath cfg dRef scr e
-      out'    = fromPath cfg outPath
-      lPath'  = toPath   cfg lPath
+  let loc = "modules.listlike.rLength"
+      outPath = exprPath cfg dRef scr e
+      out'    = fromPath loc cfg outPath
+      lPath'  = toPath loc cfg lPath
   out' %> \_ -> aLength [outPath, lPath']
   return (ExprPath out')
 rLength _ _ = fail "bad arguments to rLength"
@@ -85,8 +86,8 @@ aLength :: [Path] -> Action ()
 aLength [out, lst] = do
   let count ls = read (show $ P.length ls) :: Scientific
   cfg <- fmap fromJust getShakeExtra
-  let out'  = fromPath cfg out
-      lst'  = fromPath cfg lst
+  let out'  = fromPath loc cfg out
+      lst'  = fromPath loc cfg lst
       loc = "modules.listlike.aLength"
       out'' = traceA loc out' [out', lst']
   n <- fmap count $ readPaths loc lst'

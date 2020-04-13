@@ -57,21 +57,21 @@ orthofinder = let name = "orthofinder" in Function
 aOrthofinder :: [Path] -> Action ()
 aOrthofinder [out, faListPath] = do
   cfg <- fmap fromJust getShakeExtra
-  let out'        = fromPath cfg out
-      faListPath' = fromPath cfg faListPath
+  let out'        = fromPath loc cfg out
+      faListPath' = fromPath loc cfg faListPath
       loc = "modules.orthofinder.aOrthofinder"
       out''       = traceA loc out' [out', faListPath']
       tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
-      statsPath = toPath cfg $ tmpDir
+      statsPath = toPath loc cfg $ tmpDir
                     </> "OrthoFinder" </> "Results_"
                     </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"
-      statsPath' = fromPath cfg statsPath
+      statsPath' = fromPath loc cfg statsPath
   liftIO $ createDirectoryIfMissing True tmpDir
   -- withWriteLock' (tmpDir </> "lock") $ do
   faPaths <- readPaths loc faListPath'
-  let faPaths' = map (fromPath cfg) faPaths
+  let faPaths' = map (fromPath loc cfg) faPaths
   need' "ortholang.modules.orthofinder.aOrthofinder" faPaths'
-  let faLinks = map (\p -> toPath cfg $ tmpDir </> (takeFileName $ fromPath cfg p)) faPaths
+  let faLinks = map (\p -> toPath loc cfg $ tmpDir </> (takeFileName $ fromPath loc cfg p)) faPaths
   -- orthofinder is sensitive to which files and dirs have been created before it runs
   -- so we need to lock the tmpDir to prevent it creating something like Results__1
   -- and we can't mark statsPath' as an extra outpath
