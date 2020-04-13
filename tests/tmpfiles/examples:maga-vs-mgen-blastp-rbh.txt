@@ -1,19 +1,19 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 10ffe0cf0f
-|   |   |-- 10ffe0cf0f.ids
-|   |   |-- 36189032ad
-|   |   `-- 36189032ad.ids
+|   |   |-- 10ffe0cf0f.faa
+|   |   |-- 10ffe0cf0f.faa.ids
+|   |   |-- 36189032ad.faa
+|   |   `-- 36189032ad.faa.ids
 |   `-- makeblastdb
-|       |-- 3b85f97551
+|       |-- b7cb78026e
 |       |   |-- result
 |       |   |-- result.err
 |       |   |-- result.out
 |       |   |-- result.phr
 |       |   |-- result.pin
 |       |   `-- result.psq
-|       `-- c27509026d
+|       `-- d77632b774
 |           |-- result
 |           |-- result.err
 |           |-- result.out
@@ -36,9 +36,9 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 1e0498b59a
-|   |   |   `-- result -> ../../../cache/load/36189032ad
+|   |   |   `-- result -> ../../../cache/load/36189032ad.faa
 |   |   `-- cfed7edd23
-|   |       `-- result -> ../../../cache/load/10ffe0cf0f
+|   |       `-- result -> ../../../cache/load/10ffe0cf0f.faa
 |   |-- makeblastdb_faa
 |   |   |-- 1ee5bf3dcb
 |   |   |   `-- result -> ../../../cache/lines/...

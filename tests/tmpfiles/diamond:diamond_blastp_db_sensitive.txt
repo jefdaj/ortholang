@@ -1,24 +1,26 @@
 .
 |-- cache
 |   `-- load
-|       |-- 10ffe0cf0f
-|       |-- 10ffe0cf0f.ids
-|       |-- 36189032ad
-|       `-- 36189032ad.ids
+|       |-- 10ffe0cf0f.faa
+|       |-- 10ffe0cf0f.faa.ids
+|       |-- 36189032ad.faa
+|       `-- 36189032ad.faa.ids
 |-- exprs
 |   |-- diamond_blastp_db_sensitive
 |   |   `-- 87c44c2675
 |   |       `-- ccc25bfe26
-|   |           `-- 8a3f178282
-|   |               `-- result
+|   |           `-- d57a361f8f
+|   |               `-- Salt 0
+|   |                   `-- result
 |   |-- diamond_makedb
 |   |   `-- afa6e907a5
-|   |       `-- result
+|   |       `-- Salt 0
+|   |           `-- result
 |   |-- load_faa
 |   |   |-- 1e0498b59a
-|   |   |   `-- result -> ../../../cache/load/36189032ad
+|   |   |   `-- result -> ../../../cache/load/36189032ad.faa
 |   |   `-- cfed7edd23
-|   |       `-- result -> ../../../cache/load/10ffe0cf0f
+|   |       `-- result -> ../../../cache/load/10ffe0cf0f.faa
 |   |-- num
 |   |   `-- 6de785566e
 |   |       `-- result -> ../../../cache/lines/...
@@ -28,9 +30,9 @@
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- db.dmnd -> ../exprs/diamond_makedb/afa6e907a5/result
+    |-- db.dmnd -> ../exprs/diamond_makedb/afa6e907a5/Salt 0/result
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
-    `-- result -> ../exprs/diamond_blastp_db_sensitive/87c44c2675/ccc25bfe26/8a3f178282/result
+    `-- result -> ../exprs/diamond_blastp_db_sensitive/87c44c2675/ccc25bfe26/d57a361f8f/Salt 0/result
 
-18 directories, 15 files
+20 directories, 15 files

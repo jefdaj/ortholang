@@ -19,6 +19,7 @@ module OrthoLang.Core.Actions
   , readString
   , readStrings
   , readList
+  , countLines
   , readFileStrict
   , readFileStrict'
 
@@ -90,6 +91,7 @@ import qualified Data.ByteString as BS
 import Network.Download (openURIString)
 -- import Control.Exception (try)
 import Control.Exception.Safe (catchAny)
+import Data.Scientific            (Scientific())
 
 ---------------
 -- debugging --
@@ -341,6 +343,10 @@ readList loc path = do
         $ liftIO
         $ readFileStrict lRef path
 
+countLines :: FilePath -> Action Scientific
+countLines path = readList "core.actions.countLines" path >>= return . count
+  where
+    count ls = read (show $ length ls) :: Scientific
 
 -----------------
 -- write files --

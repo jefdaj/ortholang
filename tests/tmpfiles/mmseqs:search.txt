@@ -1,90 +1,81 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 11bbf54fc6
-|   |   |-- 11bbf54fc6.ids
-|   |   |-- 36189032ad
-|   |   `-- 36189032ad.ids
+|   |   |-- 11bbf54fc6.faa
+|   |   |-- 11bbf54fc6.faa.ids
+|   |   |-- 36189032ad.faa
+|   |   `-- 36189032ad.faa.ids
 |   `-- mmseqs
 |       |-- createdb
-|       |   |-- 03fe4ce84c.mmseqs2db
-|       |   |-- 03fe4ce84c.mmseqs2db.dbtype
-|       |   |-- 03fe4ce84c.mmseqs2db.err
-|       |   |-- 03fe4ce84c.mmseqs2db_h
-|       |   |-- 03fe4ce84c.mmseqs2db_h.dbtype
-|       |   |-- 03fe4ce84c.mmseqs2db_h.index
-|       |   |-- 03fe4ce84c.mmseqs2db.index
-|       |   |-- 03fe4ce84c.mmseqs2db.lookup
-|       |   |-- 03fe4ce84c.mmseqs2db.out
-|       |   |-- 763f327ded.mmseqs2db
-|       |   |-- 763f327ded.mmseqs2db.dbtype
-|       |   |-- 763f327ded.mmseqs2db.err
-|       |   |-- 763f327ded.mmseqs2db_h
-|       |   |-- 763f327ded.mmseqs2db_h.dbtype
-|       |   |-- 763f327ded.mmseqs2db_h.index
-|       |   |-- 763f327ded.mmseqs2db.index
-|       |   |-- 763f327ded.mmseqs2db.lookup
-|       |   `-- 763f327ded.mmseqs2db.out
+|       |   |-- 529a563f45
+|       |   |   |-- result
+|       |   |   |-- result.dbtype
+|       |   |   |-- result.err
+|       |   |   |-- result_h
+|       |   |   |-- result_h.dbtype
+|       |   |   |-- result_h.index
+|       |   |   |-- result.index
+|       |   |   |-- result.lookup
+|       |   |   `-- result.out
+|       |   `-- 563d748ac6
+|       |       |-- result
+|       |       |-- result.dbtype
+|       |       |-- result.err
+|       |       |-- result_h
+|       |       |-- result_h.dbtype
+|       |       |-- result_h.index
+|       |       |-- result.index
+|       |       |-- result.lookup
+|       |       `-- result.out
 |       `-- search
-|           |-- 2116d82944.mmseqs2db.0
-|           |-- 2116d82944.mmseqs2db.1
-|           |-- 2116d82944.mmseqs2db.2
-|           |-- 2116d82944.mmseqs2db.3
-|           |-- 2116d82944.mmseqs2db.4
-|           |-- 2116d82944.mmseqs2db.5
-|           |-- 2116d82944.mmseqs2db.dbtype
-|           |-- 2116d82944.mmseqs2db.err
-|           |-- 2116d82944.mmseqs2db.index
-|           `-- 2116d82944.mmseqs2db.out
+|           |-- 5a7cb15a12.mmseqs2db.0
+|           |-- 5a7cb15a12.mmseqs2db.1
+|           |-- 5a7cb15a12.mmseqs2db.2
+|           |-- 5a7cb15a12.mmseqs2db.3
+|           |-- 5a7cb15a12.mmseqs2db.4
+|           |-- 5a7cb15a12.mmseqs2db.5
+|           |-- 5a7cb15a12.mmseqs2db.dbtype
+|           |-- 5a7cb15a12.mmseqs2db.err
+|           |-- 5a7cb15a12.mmseqs2db.index
+|           `-- 5a7cb15a12.mmseqs2db.out
 |-- exprs
 |   |-- length
-|   |   `-- c66c7071d2
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 0585169216
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 39b18dbf05
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- cb6a976474
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   |-- 7666691bcd
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- 95f688921b
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
-|   |   |-- d295af26ec
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/load/11bbf54fc6
-|   |   `-- fee73b8143
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/36189032ad
+|   |   |-- 1e0498b59a
+|   |   |   `-- result -> ../../../cache/load/36189032ad.faa
+|   |   `-- f8a41afad4
+|   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
 |   |-- mmseqs_createdb
-|   |   |-- 356d67a59b
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/mmseqs/createdb/763f327ded.mmseqs2db.index
-|   |   `-- 4a091d869f
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/mmseqs/createdb/03fe4ce84c.mmseqs2db.index
+|   |   |-- 1898488812
+|   |   |   `-- result -> ../../../cache/mmseqs/createdb/529a563f45/result.index
+|   |   `-- 329cb2539d
+|   |       `-- result -> ../../../cache/mmseqs/createdb/563d748ac6/result.index
 |   |-- mmseqs_search
-|   |   `-- 9566497ef4
-|   |       `-- baaaae33ea
-|   |           `-- 6ff1bae4d6
-|   |               `-- 0
-|   |                   |-- result
-|   |                   |-- result.err
-|   |                   `-- result.out
+|   |   `-- fa72fd49d4
+|   |       `-- ccc25bfe26
+|   |           `-- b635a15c5c
+|   |               |-- result
+|   |               |-- result.err
+|   |               `-- result.out
 |   |-- num
 |   |   `-- ac9644e51f
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 40edb92618
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- 824ccbd8b2
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/mmseqs_search/9566497ef4/baaaae33ea/6ff1bae4d6/0/result
-    |-- maga.faa -> ../exprs/load_faa/fee73b8143/0/result
-    |-- mgen.faa -> ../exprs/load_faa/d295af26ec/0/result
-    `-- result -> ../exprs/length/c66c7071d2/0/result
+    |-- hits.bht -> ../exprs/mmseqs_search/fa72fd49d4/ccc25bfe26/b635a15c5c/result
+    |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
+    |-- mgen.faa -> ../exprs/load_faa/f8a41afad4/result
+    `-- result -> ../exprs/length/0585169216/result
 
-38 directories, 49 files
+29 directories, 49 files

@@ -30,6 +30,7 @@ module OrthoLang.Core
   , addDigest
   , decodeNewRulesType
   , decodeNewRulesDeps
+  , countLines
 
   -- * Transitional stuff
   -- , applyList2

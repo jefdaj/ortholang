@@ -84,12 +84,11 @@ rLength _ _ = fail "bad arguments to rLength"
 -- TODO account for the last empty line in mms files! (currently returns length + 1)
 aLength :: [Path] -> Action ()
 aLength [out, lst] = do
-  let count ls = read (show $ P.length ls) :: Scientific
-  cfg <- fmap fromJust getShakeExtra
+  cfg  <- fmap fromJust getShakeExtra
   let out'  = fromPath loc cfg out
       lst'  = fromPath loc cfg lst
       loc = "modules.listlike.aLength"
       out'' = traceA loc out' [out', lst']
-  n <- fmap count $ readPaths loc lst'
+  n <- countLines lst'
   writeLit loc out'' $ show n
 aLength args = error $ "bad arguments to aLength: " ++ show args

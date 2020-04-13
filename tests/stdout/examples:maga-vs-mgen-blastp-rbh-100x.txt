@@ -1,1 +1,1 @@
-plot image '$TMPDIR/vars/result'
+plot image "$TMPDIR/vars/result"
