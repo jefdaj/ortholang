@@ -49,8 +49,8 @@ mms :: Type
 mms = Type
   { tExt  = "mms"
   , tDesc = "MMSeqs2 sequence database"
-  , tShow = \_ ref path -> do
-      path' <- fmap (-<.> "lookup") $ resolveSymlinks Nothing path
+  , tShow = \cfg ref path -> do
+      path' <- fmap (-<.> "lookup") $ resolveSymlinks (Just $ cfgTmpDir cfg) path
       Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
       let n = headOrDie "failed to read first word of MMSeqs2 db description" $ words out
       -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' path'
@@ -91,8 +91,8 @@ rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
   dRef <- fmap fromJust getShakeExtraRules
   let out    = exprPath cfg dRef scr e
       out'   = debugRules "rMmseqsCreateDbAll" e $ fromPath cfg out
-      createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
-      dbPath = createDbDir </> digest fas <.> "mmseqs2db" -- TODO take hash from somewhere else?
+      createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest fas
+      dbPath = createDbDir </> "result" -- TODO take hash from somewhere else?
       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
   out' %> \_ -> do
     unlessExists dbPath $ do -- TODO any reason it would exist already?
