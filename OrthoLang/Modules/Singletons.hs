@@ -89,15 +89,16 @@ aSingletons elemType outPath listPath = do
   cfg <- fmap fromJust getShakeExtra
   let listPath' = fromPath cfg listPath
       outPath'  = fromPath cfg outPath
-      dbg = debugA' "aSingletons"
+      loc = "modules.singletons.aSingletons"
+      dbg = debugA' loc
   dbg $ "listpath': " ++ listPath'
   dbg $ "outpath': " ++ outPath'
-  elems <- readStrings elemType listPath'
+  elems <- readStrings loc elemType listPath'
   dbg $ "elems: " ++ show elems
   singletonPaths <- forM elems $ \e -> do
     let singletonPath' = cachedLinesPath cfg [e] -- TODO nondeterministic?
         singletonPath  = toPath cfg singletonPath'
     dbg $ "singletonPath': " ++ singletonPath'
-    writeStrings elemType singletonPath' [e]
+    writeStrings loc elemType singletonPath' [e]
     return singletonPath
-  writePaths outPath' singletonPaths -- TODO nondeterministic?
+  writePaths loc outPath' singletonPaths -- TODO nondeterministic?

@@ -95,9 +95,10 @@ aMkBlastFromDb bCmd [o, e, q, p] = do
       q'  = fromPath cfg q
       p'  = fromPath cfg p
       e'  = fromPath cfg e
-      o'' = traceA "aMkBlastFromDb" o' [bCmd, e', o', q', p']
-  eStr   <- readLit e'
-  prefix <- readPath p'
+      loc = "modules.blast.aMkBlastFromDb"
+      o'' = traceA loc o' [bCmd, e', o', q', p']
+  eStr   <- readLit  loc e'
+  prefix <- readPath loc p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromPath cfg prefix
       -- cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?

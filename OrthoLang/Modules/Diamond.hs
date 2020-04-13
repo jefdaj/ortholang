@@ -96,9 +96,10 @@ rDiamondmakedbAll scr e@(Fun _ _ _ _ [fas]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let out  = exprPath cfg dRef scr e
-      out' = debugRules "rDiamondmakedbAll" e $ fromPath cfg out
+      loc = "modules.diamond.aDiamondmakedbAll"
+      out' = debugRules loc e $ fromPath cfg out
   out' %> \_ -> do
-    faPaths <- readPaths fasPath
+    faPaths <- readPaths loc fasPath
     aSimpleScriptPar "diamond_makedb_all.sh" (out:faPaths)
   return (ExprPath out')
 rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
@@ -201,8 +202,9 @@ aDiamondFromDb dCmd [o, e, q, db] = do
       e'  = fromPath cfg e
       q'  = fromPath cfg q
       db' = fromPath cfg db
-      o'' = traceA "aDiamondblastpdb" o' $ dCmd ++ [e', o', q', db']
-  eStr <- readLit e'
+      loc = "modules.diamond.aDiamondblastpdb"
+      o'' = traceA loc o' $ dCmd ++ [e', o', q', db']
+  eStr <- readLit loc e'
   runCmd $ CmdDesc
     { cmdBinary = "diamond.sh"
     , cmdArguments = [o'', q', eStr, db'] ++ dCmd

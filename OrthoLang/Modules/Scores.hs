@@ -45,8 +45,9 @@ olModule = Module
 aScores :: Path -> Path -> Type -> Path -> Action ()
 aScores scoresPath othersPath othersType outPath = do
   cfg <- fmap fromJust getShakeExtra
-  scores <- readLits $ fromPath cfg scoresPath
-  others <- readStrings othersType $ fromPath cfg othersPath
+  let loc = "modules.scores.aScores"
+  scores <- readLits loc $ fromPath cfg scoresPath
+  others <- readStrings loc othersType $ fromPath cfg othersPath
   let out' = fromPath cfg outPath
       rows = map (\(a,b) -> a ++ "\t" ++ b) $ zip scores others
   when (length scores /= length others) $ error $ unlines
@@ -54,7 +55,7 @@ aScores scoresPath othersPath othersType outPath = do
   debug' $ "aScores scores': " ++ show scores
   debug' $ "aScores others': " ++ show others
   debug' $ "aScores rows: "    ++ show rows
-  writeLits out' rows
+  writeLits loc out' rows
   where
     debug' = dbg "aScores"
 

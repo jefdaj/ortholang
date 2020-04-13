@@ -180,8 +180,9 @@ aReciprocalBestAll (out:ins) = do
   let cDir = fromPath cfg $ cacheDir cfg "blastrbh"
       tmpPath p = cDir </> digest p <.> "bht"
       ins' = map (\p -> (p, tmpPath p)) $ map (fromPath cfg) ins
+      loc = "modules.blastrbh.aReciprocalBestAll"
   liftIO $ createDirectoryIfMissing True cDir
-  mapM_ (\(inPath, outPath) -> absolutizePaths inPath outPath) ins'
+  mapM_ (\(inPath, outPath) -> absolutizePaths loc inPath outPath) ins'
   aSimpleScriptNoFix "reciprocal_best_all.R" (out:map (toPath cfg . snd) ins')
 aReciprocalBestAll ps = error $ "bad argument to aReciprocalBestAll: " ++ show ps
 

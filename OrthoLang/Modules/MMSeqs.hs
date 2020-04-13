@@ -90,13 +90,14 @@ rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let out    = exprPath cfg dRef scr e
-      out'   = debugRules "rMmseqsCreateDbAll" e $ fromPath cfg out
+      loc = "modules.mmseqs.aMmseqsCreateDbAll"
+      out'   = debugRules loc e $ fromPath cfg out
       createDbDir  = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest fas
       dbPath = createDbDir </> "result" -- TODO take hash from somewhere else?
       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
   out' %> \_ -> do
     unlessExists dbPath $ do -- TODO any reason it would exist already?
-      faPaths <- readPaths fasPath
+      faPaths <- readPaths loc fasPath
       let faPaths' = map (fromPath cfg) faPaths
       liftIO $ createDirectoryIfMissing True createDbDir
       -- TODO does mmseqs no longer always write a plain .mmseqs2db file? maybe we have to touch that ourselves?
@@ -207,7 +208,8 @@ resolveMmseqsDb path = do
 -- TODO search creates some db.* files but not the plain base file or .index! separate into different dir?
 aMmseqsSearchDb :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
 aMmseqsSearchDb ePath qDb sDb outDb = do
-  eStr <- readLit ePath
+  let loc = "modules.mmseqs.aMmseqsSearchDb"
+  eStr <- readLit loc ePath
   qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
   sDb' <- fmap dropExtension $ resolveMmseqsDb sDb
   let tmpDir = takeDirectory outDb </> "tmp" -- TODO align this with sonicparanoid

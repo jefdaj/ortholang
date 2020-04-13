@@ -87,7 +87,8 @@ aLength [out, lst] = do
   cfg <- fmap fromJust getShakeExtra
   let out'  = fromPath cfg out
       lst'  = fromPath cfg lst
-      out'' = traceA "aLength" out' [out', lst']
-  n <- fmap count $ readPaths lst'
-  writeLit out'' $ show n
+      loc = "modules.listlike.aLength"
+      out'' = traceA loc out' [out', lst']
+  n <- fmap count $ readPaths loc lst'
+  writeLit loc out'' $ show n
 aLength args = error $ "bad arguments to aLength: " ++ show args

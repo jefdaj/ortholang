@@ -2,7 +2,8 @@ module OrthoLang.Debug
   (
 
   -- * debugging
-    trace
+    DebugLocation
+  , trace
   , warn
   , error
   , traceShow
@@ -21,6 +22,8 @@ import qualified Control.Logging as L
 import qualified Data.Text       as T
 
 import Text.PrettyPrint.HughesPJClass
+
+type DebugLocation = String
 
 error :: String -> String -> a
 error suffix msg = L.errorSL' (T.pack $ "ortholang." ++ suffix) (T.pack msg)

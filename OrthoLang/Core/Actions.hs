@@ -106,7 +106,7 @@ debugA' name = debugA ("core.actions." ++ name)
 
 -- TODO use this for all (or most) of the current debugS calls if possible
 -- TODO use Shake's traced function for this? rewrite it to work with Logging?
-traceA :: (Show a, Show b) => String -> a -> [b] -> a
+traceA :: (Show a, Show b) => DebugLocation -> a -> [b] -> a
 traceA name out args = trace "core.actions" msg out
   where
     msg = name ++ " creating " ++ show out ++ " from " ++ show args
@@ -244,38 +244,38 @@ readFileStrict' path = do
  - failing, and from empty lists in case of an error in the typechecker.  This
  - also gives empty lists and strings distinct hashes.
  -}
-readLit :: FilePath -> Action String
-readLit path = do
+readLit :: DebugLocation -> FilePath -> Action String
+readLit loc path = do
   debugA' "readLit" path
   -- TODO need' here?
   need [path] -- Note isEmpty also does this
   empty <- isEmpty path
   if empty
     then return ""
-    else fmap (checkLit "core.actions.readLit" . init) -- TODO safe? already checked if empty
+    else fmap (checkLit loc . init) -- TODO safe? already checked if empty
        $ readFileStrict' path
 
-readLits :: FilePath -> Action [String]
-readLits path = readList path >>= return . checkLits "core.actions.readLits"
+readLits :: DebugLocation -> FilePath -> Action [String]
+readLits loc path = readList loc path >>= return . checkLits loc
 
-readPath :: FilePath -> Action Path
-readPath path = readPaths path >>= return . headOrDie "readPath failed"
+readPath :: DebugLocation -> FilePath -> Action Path
+readPath loc path = readPaths loc path >>= return . headOrDie "readPath failed"
 
 -- TODO should this have checkPaths?
 -- TODO what happens when each is itself a list of paths?
-readPaths :: FilePath -> Action [Path]
-readPaths path = do
-  paths <- (fmap . map) stringPath $ readList path
+readPaths :: DebugLocation -> FilePath -> Action [Path]
+readPaths loc path = do
+  paths <- (fmap . map) stringPath $ readList loc path
   cfg <- fmap fromJust getShakeExtra
-  need' "core.actions.readPaths" $ map (fromPath cfg) paths
+  need' (loc ++ ".readPaths") $ map (fromPath cfg) paths
   return paths
 
 -- makes a copy of a list of paths without ortholang funny business,
 -- suitible for external scripts to read
 -- TODO does this go here or somewhere else?
-absolutizePaths :: FilePath -> FilePath -> Action ()
-absolutizePaths inPath outPath = do
-  paths  <- readPaths inPath
+absolutizePaths :: DebugLocation -> FilePath -> FilePath -> Action ()
+absolutizePaths loc inPath outPath = do
+  paths  <- readPaths loc inPath
   cfg <- fmap fromJust getShakeExtra
   paths' <- mapM (liftIO . absolutize. fromPath cfg) paths
   need' "core.actions.absolutizePaths" paths' -- because they will be read by the script next
@@ -285,33 +285,34 @@ absolutizePaths inPath outPath = do
 -- read a file as lines, convert to absolute paths, then parse those as cutpaths
 -- used by the load_* functions to convert user-friendly relative paths to absolute
 -- Note this does *not* imply that the paths are to literals
-readLitPaths :: FilePath -> Action [Path]
-readLitPaths path = do
+readLitPaths :: DebugLocation -> FilePath -> Action [Path]
+readLitPaths loc path = do
+  let loc' = loc ++ ".readLitPaths"
   cfg <- fmap fromJust getShakeExtra
   let toAbs line = if isAbsolute line
                      then line
                      else cfgWorkDir cfg </> line
-  ls <- readList path
+  ls <- readList loc' path
   let ls'  = map toAbs ls
       ls'' = map (toPath cfg) ls'
   -- Note: need' causes infinite recursion here, so we skip to needDebug
-  needDebug "core.actinos.readLitPaths" ls'
+  needDebug loc' ls'
   return ls''
 
 -- TODO how should this relate to readLit and readStr?
-readString :: Type -> FilePath -> Action String
-readString etype path = readStrings etype path >>= return . headOrDie "readString failed"
+readString :: DebugLocation -> Type -> FilePath -> Action String
+readString loc etype path = readStrings loc etype path >>= return . headOrDie "readString failed"
 
 {- Read a "list of whatever". Mostly for generic set operations. You include
  - the Type (of each element, not the list!) so it knows how to convert from
  - String, and then within the function you treat them as Strings.
  -}
-readStrings :: Type -> FilePath -> Action [String]
-readStrings etype path = if etype' `elem` [str, num]
-  then readLits path
+readStrings :: DebugLocation -> Type -> FilePath -> Action [String]
+readStrings loc etype path = if etype' `elem` [str, num]
+  then readLits loc path
   else do
     cfg <- fmap fromJust getShakeExtra
-    (fmap . map) (fromPath cfg) (readPaths path)
+    (fmap . map) (fromPath cfg) (readPaths loc path)
   where
     etype' = trace "core.actions.readStrings" ("readStrings (each " ++ tExtOf etype ++ ") from " ++ path) etype
 
@@ -322,10 +323,11 @@ readStrings etype path = if etype' `elem` [str, num]
  -
  - Note that strict reading is important to avoid "too many open files" on long lists.
  -}
-readList :: FilePath -> Action [String]
-readList path = do
-  debugA' "readList" $ show path
-  need' "core.actions.readList" [path] -- Note isEmpty also does this
+readList :: DebugLocation -> FilePath -> Action [String]
+readList loc path = do
+  let loc' = loc ++ ".readList"
+  debugA' loc $ show path
+  need' loc' [path] -- Note isEmpty also does this
   empty <- isEmpty path
   if empty
     then return []
@@ -373,12 +375,12 @@ TODO does it need to handle a race condition when writing to the cache?
 TODO any reason to keep original extensions instead of all using .txt?
      oh, if we're testing extensions anywhere. lets not do that though
 -}
-writeCachedLines :: FilePath -> [String] -> Action ()
-writeCachedLines outPath content = do
+writeCachedLines :: DebugLocation -> FilePath -> [String] -> Action ()
+writeCachedLines loc outPath content = do
   cfg <- fmap fromJust getShakeExtra
   let cache = cachedLinesPath cfg content
   -- TODO show as Path?
-  debugA' "writeCachedLines" $ first50 content ++ " -> " ++ last50 cache
+  debugA' (loc ++ ".writeCachedLines") $ first50 content ++ " -> " ++ last50 cache
       -- lock  = cache <.> "lock"
   -- liftIO $ createDirectoryIfMissing True cDir
   withWriteOnce cache $ writeFile' cache $ unlines content -- TODO is this strict?
@@ -387,41 +389,41 @@ writeCachedLines outPath content = do
 
 -- like writeCachedLines but starts from a file written by a script
 -- TODO remove in favor of sanitizeFileInPlace?
-writeCachedVersion :: FilePath -> FilePath -> Action ()
-writeCachedVersion outPath inPath = do
+writeCachedVersion :: DebugLocation -> FilePath -> FilePath -> Action ()
+writeCachedVersion loc outPath inPath = do
   content <- fmap lines $ readFileStrict' inPath
   cfg <- fmap fromJust getShakeExtra
   let content' = map (toGeneric cfg) content
-  writeCachedLines outPath content'
+  writeCachedLines loc outPath content'
 
 -- TODO take a Path for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
 -- TODO explicit case for empty lists that isn't just an empty file!
-writePaths :: FilePath -> [Path] -> Action ()
-writePaths out cpaths = writeCachedLines out paths >> trackWrite paths -- TODO trackwrite'?
+writePaths :: DebugLocation -> FilePath -> [Path] -> Action ()
+writePaths loc out cpaths = writeCachedLines loc out paths >> trackWrite paths -- TODO trackwrite'?
   where
     paths = if null cpaths then ["<<emptylist>>"] else map pathString cpaths
 
-writePath :: FilePath -> Path -> Action ()
-writePath out path = do
-  debugA' "writePath" (show path)
-  writePaths out [path]
+writePath :: DebugLocation -> FilePath -> Path -> Action ()
+writePath loc out path = do
+  debugA' (loc ++ ".writePath") (show path)
+  writePaths loc out [path]
 
-writeLits :: FilePath -> [String] -> Action ()
-writeLits path lits = do
+writeLits :: DebugLocation -> FilePath -> [String] -> Action ()
+writeLits loc path lits = do
   debugA' "writeLits" $ show lits ++ " -> writeCachedLines " ++ show lits'
-  writeCachedLines path lits'
+  writeCachedLines loc path lits'
   where
-    lits' = if null lits then ["<<emptylist>>"] else checkLits "core.actions.writeLits" lits
+    lits' = if null lits then ["<<emptylist>>"] else checkLits loc lits
 
 -- TODO any need to prevent writing <<emptystr>> in a .num?
 --      (seems almost certain to be caught on reading later)
-writeLit :: FilePath -> String -> Action ()
-writeLit path lit = do
+writeLit :: DebugLocation -> FilePath -> String -> Action ()
+writeLit loc path lit = do
   -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lit: \"" ++ lit ++ "\"")
   -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lits: \"" ++ lits ++ "\"")
   debugA' "writeLit" $ show lit ++ " -> writeLits " ++ show lits
-  writeLits path lits
+  writeLits loc path lits
   where
     lits = [if null lit then "<<emptystr>>" else lit]
 
@@ -430,18 +432,18 @@ Write a "list of whatever". Mostly for generic set operations. You include
 the Type (of each element, not the list!) so it knows how to convert
 to/from String, and then within the function you treat them as Strings.
 -}
-writeStrings :: Type -> FilePath -> [String] -> Action ()
-writeStrings etype out whatevers = do
+writeStrings :: DebugLocation -> Type -> FilePath -> [String] -> Action ()
+writeStrings loc etype out whatevers = do
   debugA' "writeStrings"
     $ first50 (take 3 whatevers) ++ " (each " ++ tExtOf etype ++ ") -> " ++ last50 out
   if etype `elem` [str, num]
-    then writeLits  out whatevers
+    then writeLits loc out whatevers
     else do
       cfg <- fmap fromJust getShakeExtra
-      writePaths out $ map (toPath cfg) whatevers
+      writePaths loc out $ map (toPath cfg) whatevers
 
-writeString :: Type -> FilePath -> String -> Action ()
-writeString etype out whatever = writeStrings etype out [whatever]
+writeString :: DebugLocation -> Type -> FilePath -> String -> Action ()
+writeString loc etype out whatever = writeStrings loc etype out [whatever]
 
 {-|
 Turns out there's a race condition during `repeat` calls, because the same

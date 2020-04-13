@@ -63,12 +63,13 @@ aSample salt t outPath nPath lstPath = do
   let nPath'   = fromPath cfg nPath
       lstPath' = fromPath cfg lstPath
       outPath' = fromPath cfg outPath
-  nStr <- readLit nPath'
-  lst  <- readStrings t lstPath'
-  debugA ("ortholang.modules.sample.aSample") ("salt: " ++ show salt)
+      loc = "ortholang.modules.sample.aSample"
+  nStr <- readLit loc nPath'
+  lst  <- readStrings loc t lstPath'
+  debugA loc ("salt: " ++ show salt)
   let n         = read $ formatScientific Fixed (Just 0) $ read nStr
       elements' = randomSample salt n lst
-  writeStrings t outPath' elements'
+  writeStrings loc t outPath' elements'
 
 randomSample :: Salt -> Int -> [String] -> [String]
 randomSample (Salt s) n lst = take n $ shuffle lst randGen

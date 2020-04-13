@@ -150,21 +150,22 @@ aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
       regularArgs'   = map (fromPath cfg) regularArgs
       mappedArgList' = fromPath cfg mappedArg
       mapTmpDir'     = fromPath cfg mapTmpDir
-  need' "ortholang.core.compile.map.aMapMain" regularArgs'
+      loc = "ortholang.core.compile.map.aMapMain"
+  need' loc regularArgs'
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
-  mappedPaths  <- readPaths mappedArgList'
+  mappedPaths  <- readPaths loc mappedArgList'
   mappedPaths' <- liftIO $ mapM resolve $ map (fromPath cfg) mappedPaths
-  debugA' "aMapMain" $ "mappedPaths': " ++ show mappedPaths'
+  debugA' loc $ "mappedPaths': " ++ show mappedPaths'
   mapM_ (aMapArgs mapIndex eType regularArgs'' mapTmpDir')
         (map (toPath cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
-  need' "ortholang.core.compile.map.aMapMain" outPaths
+  need' loc outPaths
   outPaths' <- liftIO $ mapM resolve outPaths
   let out = traceA "aMapMain" outPath
               (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
   if eType `elem` [str, num]
-    then mapM readLit outPaths' >>= writeLits out
-    else writePaths out $ map (toPath cfg) outPaths'
+    then mapM (readLit loc) outPaths' >>= writeLits loc out
+    else writePaths loc out $ map (toPath cfg) outPaths'
 
 -- TODO take + return Paths?
 -- TODO blast really might be nondeterministic here now that paths are hashed!
@@ -192,9 +193,10 @@ aMapArgs mapIndex eType regularArgs' tmp' mappedArg = do
   debugFn $ "argsPath: " ++ show argsPath
   debugFn $ "argPaths: " ++ show argPaths
   debugFn $ "argPaths': " ++ show argPaths'
-  writePaths argsPath argPaths'
+  writePaths loc argsPath argPaths'
   where
-    debugFn = debugA' "aMapArgs"
+    loc = "core.compile.map.aMapArgs"
+    debugFn = debugA' loc
 
 {- This gathers together Rules-time and Action-time arguments and passes
  - everything to actFn. To save on duplicated computation it writes the same
@@ -215,12 +217,13 @@ aMapElem :: Type
          -> String -> Maybe Salt -> FilePath -> Action ()
 aMapElem eType tmpFn actFn singleName mSalt out = do
   let argsPath = replaceBaseName out "args"
-  args <- readPaths argsPath
+      loc = "ortholang.core.compile.map.aMapElem"
+  args <- readPaths loc argsPath
   cfg <- fmap fromJust getShakeExtra
   let args' = map (fromPath cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) args' -- TODO remove?
-  need' "ortholang.core.compile.map.aMapElem" args'
-  debugA "ortholang.core.compile.map.aMapElem" $ "out: " ++ show out
+  need' loc args'
+  debugA loc $ "out: " ++ show out
   dir <- liftIO $ case tmpFn of
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?
     Just fn -> do
@@ -229,7 +232,7 @@ aMapElem eType tmpFn actFn singleName mSalt out = do
       createDirectoryIfMissing True d'
       return d
   dRef <- fmap fromJust getShakeExtra
-  let out' = traceA "aMapElem" (toPath cfg out) args''
+  let out' = traceA loc (toPath cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toPath cfg) args'' -- TODO make it match exprPath
       single  = unsafeExprPathExplicit cfg dRef singleName eType mSalt hashes

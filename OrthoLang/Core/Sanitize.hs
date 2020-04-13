@@ -214,7 +214,8 @@ lookupID (IDs {hFiles = f, hSeqIDs = s}) i =
 lookupIDsFile :: Path -> Path -> Action ()
 lookupIDsFile inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
-  partialIDs <- readList $ fromPath cfg inPath
+  let loc = "core.sanitize.lookupIDsFile"
+  partialIDs <- readList loc $ fromPath cfg inPath
   ref <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef ref
   let lookupFn v = case lookupID ids v of
@@ -225,4 +226,5 @@ lookupIDsFile inPath outPath = do
   idKeys <- mapM lookupFn partialIDs
   dRef <- fmap fromJust getShakeExtra
   liftIO $ addDigest dRef (ListOf str) outPath -- TODO make this an Action?
-  writeCachedLines (fromPath cfg outPath) idKeys
+  let loc = "core.sanitize.lookupIDsFile"
+  writeCachedLines loc (fromPath cfg outPath) idKeys

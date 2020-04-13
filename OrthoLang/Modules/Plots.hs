@@ -201,14 +201,15 @@ rPlotListOfLists sPath scr expr@(Fun _ _ _ _ [lol]) = do
       outPath'  = fromPath cfg outPath
       outPath'' = ExprPath outPath'
       cDir      = fromPath cfg $ plotCache cfg
+      loc = "modules.plots.rPlotListOfLists"
   outPath' %> \_ -> do
-    need' "rPlotListOfLists" $ map (fromPath cfg) lists
+    need' loc $ map (fromPath cfg) lists
     -- write labels + list paths to the cache dir
     let labPath  = cDir </> digest expr ++ "_names.txt"
         aLolPath = cDir </> digest expr ++ "_lists.txt"
     liftIO $ createDirectoryIfMissing True cDir
-    writeCachedLines labPath labels
-    writeLits aLolPath $ map (fromPath cfg) lists
+    writeCachedLines loc labPath labels
+    writeLits loc aLolPath $ map (fromPath cfg) lists
     let args = [labPath, aLolPath]
     -- call the main script
     withBinHash expr outPath $ \out ->

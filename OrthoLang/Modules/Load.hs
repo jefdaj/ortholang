@@ -64,10 +64,11 @@ globFiles = newFnA1 "glob_files" (Exactly str) (Exactly (ListOf str)) aGlobNew [
 
 aGlobNew :: NewAction1
 aGlobNew (ExprPath out) a1 = do
-  ptn    <- fmap strip $ readLit a1
+  let loc = "modules.load.aGlobNew"
+  ptn    <- fmap strip $ readLit loc a1
   paths  <- liftIO $ fmap sort $ glob ptn
   paths' <- liftIO $ mapM makeRelativeToCurrentDirectory paths
-  writeLits out paths'
+  writeLits loc out paths'
 
 ------------
 -- load_* --
@@ -172,14 +173,15 @@ aLoad hashSeqIDs strPath outPath = do
   cfg <- fmap fromJust getShakeExtra
   let strPath'  = fromPath cfg strPath
       outPath'  = fromPath cfg outPath
-      outPath'' = traceA "aLoad" outPath [strPath', outPath']
+      loc = "core.compile.basic.aLoad"
+      outPath'' = traceA loc outPath [strPath', outPath']
       toAbs line = if isAbsolute line
                      then line
                      else cfgWorkDir cfg </> line
   dRef <- fmap fromJust getShakeExtra
   t <- liftIO $ decodeNewRulesType cfg dRef $ ExprPath $ outPath'
-  need' "core.compile.basic.aLoad" [strPath']
-  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits strPath' -- TODO safer!
+  need' loc [strPath']
+  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits loc strPath' -- TODO safer!
   pth' <- if isURL pth
             then curl pth
             else fmap (toPath cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
@@ -214,10 +216,11 @@ aLoadListLits outPath litsPath = do
   cfg  <- fmap fromJust getShakeExtra
   let litsPath' = fromPath cfg litsPath
       outPath'  = fromPath cfg outPath
-      out       = traceA "aLoadListLits" outPath' [outPath', litsPath']
-  lits  <- readLits litsPath'
+      loc = "modules.load.aLoadListLits"
+      out       = traceA loc outPath' [outPath', litsPath']
+  lits  <- readLits loc litsPath'
   lits' <- liftIO $ mapM absolutize lits
-  writeLits out lits'
+  writeLits loc out lits'
 
 -- | Regular case for lists of any other file type
 -- TODO hash mismatch here?
@@ -242,8 +245,9 @@ aLoadListPaths hashSeqIDs pathsPath outPath = do
   cfg <- fmap fromJust getShakeExtra
   let outPath'   = fromPath cfg outPath
       pathsPath' = fromPath cfg pathsPath
-      out = traceA "aLoadListPaths" outPath' [outPath', pathsPath']
-  paths <- readLitPaths pathsPath'
+      loc = "core.compile.basic.aLoadListPaths"
+      out = traceA loc outPath' [outPath', pathsPath']
+  paths <- readLitPaths loc pathsPath'
   let paths' = map (fromPath cfg) paths
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
   let paths''' = map (toPath cfg) paths''
@@ -251,5 +255,5 @@ aLoadListPaths hashSeqIDs pathsPath outPath = do
   (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef $ ExprPath $ outPath'
   hashPaths <- mapM (aLoadHash hashSeqIDs t) paths'''
   let hashPaths' = map (fromPath cfg) hashPaths
-  need' "core.compile.basic.aLoadListPaths" hashPaths'
-  writePaths out hashPaths
+  need' loc hashPaths'
+  writePaths loc out hashPaths

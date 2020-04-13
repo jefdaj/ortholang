@@ -167,10 +167,11 @@ aLoadDB oPath sPath = do
   cfg <- fmap fromJust getShakeExtra
   let oPath'  = fromPath cfg oPath
       sPath'  = fromPath cfg sPath
-      oPath'' = traceA "aLoadDB" oPath' [oPath', sPath']
-  pattern <- readLit sPath'
+      loc = "modules.blastdb.aLoadDB"
+      oPath'' = traceA loc oPath' [oPath', sPath']
+  pattern <- readLit loc sPath'
   let pattern' = makeRelative (cfgTmpDir cfg) pattern -- TODO is this right??
-  writeLit oPath'' pattern'
+  writeLit loc oPath'' pattern'
 
 loadFnaDb :: Function
 loadFnaDb = mkLoadDB "load_fna_db" fna
@@ -260,13 +261,14 @@ aFilterList oPath listTmp fPath = do
   let fPath'   = fromPath cfg fPath
       oPath'   = fromPath cfg oPath
       listTmp' = fromPath cfg listTmp
-      oPath''  = traceA "aFilterList" oPath' [oPath', listTmp', fPath']
-  filterStr <- readLit  fPath'
-  out       <- readLits listTmp'
+      loc = "modules.blastdb.aFilterList"
+      oPath''  = traceA loc oPath' [oPath', listTmp', fPath']
+  filterStr <- readLit  loc fPath'
+  out       <- readLits loc listTmp'
   let names  = if null out then [] else tail out
       names' = if null filterStr then names else filterNames filterStr names
-  debugA' "aFilterList" $ "names': " ++ show names'
-  writeLits oPath'' names'
+  debugA' loc $ "names': " ++ show names'
+  writeLits loc oPath'' names'
 
 mkBlastdbget :: String -> Type -> Function
 mkBlastdbget name faType = Function
@@ -306,9 +308,10 @@ aBlastdbget dbPrefix tmpDir nPath = do
   let tmp'       = fromPath cfg tmpDir
       nPath'     = fromPath cfg nPath
       dbPrefix'  = fromPath cfg dbPrefix
-      dbPrefix'' = traceA "aBlastdbget" dbPrefix' [dbPrefix', tmp', nPath']
-  need' "ortholang.modules.blastdb.aBlastdbget" [nPath']
-  dbName <- fmap stripWhiteSpace $ readLit nPath' -- TODO need to strip?
+      loc = "ortholang.modules.blastdb.aBlastdbget"
+      dbPrefix'' = traceA loc dbPrefix' [dbPrefix', tmp', nPath']
+  need' loc [nPath']
+  dbName <- fmap stripWhiteSpace $ readLit loc nPath' -- TODO need to strip?
   let dbPath = tmp' </> dbName
   liftIO $ createDirectoryIfMissing True tmp'
   -- TODO was taxdb needed for anything else?
@@ -327,7 +330,7 @@ aBlastdbget dbPrefix tmpDir nPath = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
     }
-  writeLit dbPrefix'' dbPath -- note this writes the path itself!
+  writeLit loc dbPrefix'' dbPath -- note this writes the path itself!
 
 --------------------------------------------
 -- make one db from a list of FASTA files --
@@ -422,8 +425,10 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   let dbDir  = cDir' </> fasHash
       dbOut  = dbDir </> "result"
       dbOut' = toPath cfg dbOut
-      out''  = traceA "aMakeblastdbAll" out' [tExtOf dbType, out', dbOut, fasPath']
+      loc = "modules.blastdb.aMakeblastdbAll"
+      out''  = traceA loc out' [tExtOf dbType, out', dbOut, fasPath']
       dbPtn  = dbDir </> "*" -- TODO does this actually help?
+      dbg = debugA' loc
 
   -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
   -- be passed as one quoted arg, but we also have to take into account Shake's
@@ -433,7 +438,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   -- solution is just to avoid that for now?
   --
   -- TODO would quoting JUST inner paths be right? And Shake does the outer ones?
-  faPaths <- readPaths fasPath'
+  faPaths <- readPaths loc fasPath'
   let noQuoting  = unwords $ map (fromPath cfg) faPaths
       quoteOuter = "\"" ++ noQuoting ++ "\""
       fixedPaths = if isJust (cfgWrapper cfg) then quoteOuter else noQuoting
@@ -441,7 +446,6 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
       --              (map (\p -> "\"" ++ fromPath cfg p ++ "\"") faPaths)
       --              ++ "\""
 
-  let dbg = debugA' "aMakeblastdbAll"
   dbg $ "out': "       ++ out'
   dbg $ "cDir: "       ++ show cDir
   dbg $ "cDir': "      ++ cDir'
@@ -486,7 +490,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
     
   -- dbg $ "dbOut was also created: " ++ dbOut
   -- TODO why should this work when outside the when block but not inside?? something about retries?
-  writePath out'' dbOut'
+  writePath loc out'' dbOut'
 aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
 
 ----------------------------------------

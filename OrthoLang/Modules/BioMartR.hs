@@ -209,13 +209,14 @@ aParseSearches sList out = do
   cfg <- fmap fromJust getShakeExtra
   let sList' = fromPath cfg sList
       out'   = fromPath cfg out
-      out''  = traceA "aParseSearches" out' [sList', out']
-  parses <- (fmap . map) readSearch (readLits sList')
+      loc = "modules.biomartr.aParseSearches"
+      out''  = traceA loc out' [sList', out']
+  parses <- (fmap . map) readSearch (readLits loc sList')
   let (errors, searches') = partitionEithers parses
   -- TODO better error here
   if (not . null) errors
     then error "invalid search!"
-    else writeLits out'' $ toTsvRows searches'
+    else writeLits loc out'' $ toTsvRows searches'
 
 ------------------
 -- run biomartr --

@@ -71,13 +71,14 @@ aSonicParanoid [out, faListPath] = do
 
       faListPath' = fromPath cfg faListPath
       out'        = fromPath cfg out
-      statsPath''    = traceA "aSonicParanoid" out' [out', statsPath', faListPath']
+      loc = "modules.sonicparanoid.aSonicParanoid"
+      statsPath''    = traceA loc out' [out', statsPath', faListPath']
   liftIO $ createDirectoryIfMissing True sharedDir
 
   withWriteLock' tmpDir $ unlessExists statsPath' $ do
     liftIO $ createDirectoryIfMissing True inDir -- sonicparanoid will create the others
 
-    faPaths <- readPaths faListPath'
+    faPaths <- readPaths loc faListPath'
     let faPaths' = map (fromPath cfg) faPaths
     need' "ortholang.moodules.sonicparanoid.aSonicParanoid" faPaths'
     let faLinks = map (\p -> toPath cfg $ inDir </> (takeBaseName $ fromPath cfg p)) faPaths

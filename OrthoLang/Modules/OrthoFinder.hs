@@ -59,7 +59,8 @@ aOrthofinder [out, faListPath] = do
   cfg <- fmap fromJust getShakeExtra
   let out'        = fromPath cfg out
       faListPath' = fromPath cfg faListPath
-      out''       = traceA "aOrthofinder" out' [out', faListPath']
+      loc = "modules.orthofinder.aOrthofinder"
+      out''       = traceA loc out' [out', faListPath']
       tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
       statsPath = toPath cfg $ tmpDir
                     </> "OrthoFinder" </> "Results_"
@@ -67,7 +68,7 @@ aOrthofinder [out, faListPath] = do
       statsPath' = fromPath cfg statsPath
   liftIO $ createDirectoryIfMissing True tmpDir
   -- withWriteLock' (tmpDir </> "lock") $ do
-  faPaths <- readPaths faListPath'
+  faPaths <- readPaths loc faListPath'
   let faPaths' = map (fromPath cfg) faPaths
   need' "ortholang.modules.orthofinder.aOrthofinder" faPaths'
   let faLinks = map (\p -> toPath cfg $ tmpDir </> (takeFileName $ fromPath cfg p)) faPaths

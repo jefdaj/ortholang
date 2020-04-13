@@ -118,11 +118,12 @@ aHmmsearch :: [Path] -> Action ()
 aHmmsearch [out, e, hm, fa] = do
   cfg <- fmap fromJust getShakeExtra
   let out'  = fromPath cfg out
-      out'' = traceA "aHmmsearch" out' [out', fa']
+      loc = "modules.hmmer.aHmmsearch"
+      out'' = traceA loc out' [out', fa']
       e'    = fromPath cfg e
       hm'   = fromPath cfg hm
       fa'   = fromPath cfg fa
-  eStr <- readLit e'
+  eStr <- readLit loc e'
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
 
       -- TODO warn users about this? hmmer fails on smaller values than ~1e-307 on my machine

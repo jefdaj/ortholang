@@ -44,9 +44,10 @@ rRange scr e@(Fun _ _ _ name args) = do
   dRef <- fmap fromJust getShakeExtraRules
   let out = exprPath cfg dRef scr e
       out' = fromPath cfg out
+      loc = "modules.range.rRange"
   argPaths <- fmap (map (\(ExprPath p) -> p)) $ mapM (rExpr scr) args
   out' %> \_ -> do
-    as <- mapM readLit argPaths
+    as <- mapM (readLit loc) argPaths
     runCmd $ CmdDesc
       { cmdBinary = name <.> "R"
       , cmdArguments = out':as

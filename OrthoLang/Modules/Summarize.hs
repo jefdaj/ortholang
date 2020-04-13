@@ -53,10 +53,11 @@ rSummary _ _ _ = fail "bad argument to rSummary"
 
 aSummary :: ([[String]] -> [String]) -> FilePath -> FilePath -> Action ()
 aSummary summaryFn iPath out = do
-  need' "ortholang.modules.summary.aSummary" [iPath]
-  iLists <- readLits iPath
+  let loc = "ortholang.modules.summary.aSummary"
+  need' loc [iPath]
+  iLists <- readLits loc iPath
   cfg <- fmap fromJust getShakeExtra
-  iElems <- mapM (readLits . (\p -> cfgTmpDir cfg </> p)) iLists
+  iElems <- mapM (readLits loc . (\p -> cfgTmpDir cfg </> p)) iLists
   let oElems = summaryFn iElems
-      out' = traceA "aSummary" out [out, iPath]
-  writeLits out' oElems
+      out' = traceA loc out [out, iPath]
+  writeLits loc out' oElems

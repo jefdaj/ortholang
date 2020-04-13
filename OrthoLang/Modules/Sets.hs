@@ -95,20 +95,21 @@ rSetFold _ _ _ = fail "bad argument to rSetFold"
 aSetFold :: ([Set String] -> Set String)
          -> Type -> FilePath -> FilePath -> Action ()
 aSetFold fn (ListOf etype) oPath setsPath = do
-  setPaths  <- readPaths setsPath
+  let loc = "modules.sets.aSetFold"
+  setPaths  <- readPaths loc setsPath
   cfg <- fmap fromJust getShakeExtra
-  setElems  <- mapM (readStrings etype) (map (fromPath cfg) setPaths)
+  setElems  <- mapM (readStrings loc etype) (map (fromPath cfg) setPaths)
   setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
   idsRef <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef idsRef
   let sets = map fromList setElems'
       sets' = (map . Set.map) (unhashIDs False ids) sets -- TODO will this work?
       oLst = toList $ fn sets'
-      oPath' = traceA "aSetFold" oPath [oPath, setsPath]
+      oPath' = traceA loc oPath [oPath, setsPath]
   oLst'' <- if etype `elem` [str, num]
               then mapM return oLst
               else dedupByContent oLst -- TODO remove?
-  writeStrings etype oPath' oLst''
+  writeStrings loc etype oPath' oLst''
 aSetFold _ _ _ _ = fail "bad argument to aSetFold"
 
 -- a kludge to resolve the difference between load_* and load_*_each paths

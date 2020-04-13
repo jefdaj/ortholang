@@ -34,7 +34,8 @@ map3of3 inType outType act3 out a1 a2 a3 = do
   -- debugA $ "map3Base arg paths: " ++ show [a1, a2, a3]
   -- this way breaks psiblast_db_each
   cfg <- fmap fromJust getShakeExtra
-  inPaths <- readStrings inType $ fromPath cfg a3
+  let loc = "core.compile.map2.map3of3"
+  inPaths <- readStrings loc inType $ fromPath cfg a3
   -- but this way breaks something too, right?
   -- a3path  <- readPath locks $ fromPath cfg a3
   -- debugA $ "map3Base a3path: " ++ show a3path
@@ -47,7 +48,7 @@ map3of3 inType outType act3 out a1 a2 a3 = do
   forM_ ioPairs $ \(i,o) -> do
     debugFn $ "map3Base input and output: " ++ show i ++ ", " ++ show o
     act3 (toPath cfg o) a1 a2 (toPath cfg i)
-  writeStrings outType (fromPath cfg out) outPaths
+  writeStrings loc outType (fromPath cfg out) outPaths
   where
     debugFn = debugA' "map3Base"
 

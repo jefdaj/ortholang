@@ -173,10 +173,11 @@ aReplaceEachLits _ outPath subPaths resPaths = do
   let outPath'  = fromPath cfg outPath
       subPaths' = fromPath cfg subPaths
       resPaths' = map (fromPath cfg) resPaths
-      out = traceA "aReplaceEachLits" outPath' (outPath':subPaths':resPaths')
-  lits <- mapM readLit resPaths'
+      loc = "modules.summarize.aReplaceEachLits"
+      out = traceA loc outPath' (outPath':subPaths':resPaths')
+  lits <- mapM (readLit loc) resPaths'
   let lits' = map stripWhiteSpace lits
-  writeLits out lits'
+  writeLits loc out lits'
 
 {- Helper function to write the final list when the results are links to files
  - TODO factor out, and maybe unify with rListLinks
@@ -187,14 +188,15 @@ aReplaceEachLinks outPath subPaths resPaths = do
   let outPath'  = fromPath cfg outPath
       subPaths' = fromPath cfg subPaths
       resPaths' = map (fromPath cfg) resPaths
-      out = traceA "aReplaceEachLinks" outPath' (outPath':subPaths':resPaths')
-  need' "aReplaceEachLinks" (subPaths':resPaths') -- TODO is needing subPaths required?
+      loc = "modules.summarize.aReplaceEachLinks"
+      out = traceA loc outPath' (outPath':subPaths':resPaths')
+  need' loc (subPaths':resPaths') -- TODO is needing subPaths required?
 
   -- this fixes load:faa.ol but breaks repeat:load.ol and repeat:replace_each_recursive.ol
   -- wait no, it doesn't fix that either lol
   -- mapM_ readPaths resPaths'
 
-  writePaths out resPaths
+  writePaths loc out resPaths
 
 ------------------
 -- replace_each --

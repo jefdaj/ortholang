@@ -141,9 +141,10 @@ aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
       tmpDir'   = fromPath cfg $ cacheDir cfg "seqio"
       outDir'   = exprDir' </> "load_" ++ tExtOf rtn
       outPath'  = fromPath cfg outPath
-      outPath'' = traceA "aGenbankToFasta" outPath' [outPath', faPath']
+      loc = "modules.seqio.aGenbankToFasta"
+      outPath'' = traceA loc outPath' [outPath', faPath']
   -- liftIO $ putStrLn $ "ftPath': " ++ show ftPath'
-  ft <- readLit ftPath'
+  ft <- readLit loc ftPath'
   let ft' = if ft  == "cds" then "CDS" else ft
       (st', extraArgs) = if ft' == "whole" then ("whole", ["--annotations", "all"]) else (st, [])
       args = [ "--in_file", faPath'
@@ -392,13 +393,14 @@ aConcat cType [outPath, inList] = do
       emptyPath = tmpDir' </> ("empty" ++ tExtOf cType) <.> "txt"
       emptyStr  = "<<empty" ++ tExtOf cType ++ ">>"
       inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
+      loc = "ortholang.modules.seqio.aConcat"
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromPath cfg outPath
-  writeCachedLines emptyPath [emptyStr]
-  inPaths <- readPaths $ fromPath cfg inList
+  writeCachedLines loc emptyPath [emptyStr]
+  inPaths <- readPaths loc $ fromPath cfg inList
   let inPaths' = map (fromPath cfg) inPaths
-  need' "ortholang.modules.seqio.aConcat" inPaths'
-  writeCachedLines inList' inPaths'
+  need' loc inPaths'
+  writeCachedLines loc inList' inPaths'
   aSimpleScriptNoFix "cat.py" [ outPath
                               , toPath cfg inList'
                               , toPath cfg emptyPath]
@@ -453,7 +455,8 @@ aSplit name ext [outPath, faPath] = do
       prefix'   = tmpDir' </> digest faPath ++ "/"
       outDir'   = exprDir' </> "load_" ++ ext
       outPath'  = fromPath cfg outPath
-      outPath'' = traceA "aSplit" outPath' [outPath', faPath']
+      loc = "modules.seqio.aSplit"
+      outPath'' = traceA loc outPath' [outPath', faPath']
       tmpList   = tmpDir' </> takeFileName outPath' <.> "tmp"
       args      = [tmpList, outDir', prefix', faPath']
   -- TODO make sure stderr doesn't come through?
@@ -481,5 +484,5 @@ aSplit name ext [outPath, faPath] = do
   -- loadPaths <- readPaths tmpList
   -- when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
   -- writePaths outPath'' loadPaths
-  writeCachedVersion outPath'' tmpList
+  writeCachedVersion loc outPath'' tmpList
 aSplit _ _ paths = error $ "bad argument to aSplit: " ++ show paths

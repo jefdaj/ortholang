@@ -46,19 +46,20 @@ aPermute comboFn (ExprPath out) iPath = do
   -- need' "ortholang.modules.permute.aPermute" [iPath]
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
+  let loc = "modules.permute.aPermute"
   (ListOf lt@(ListOf et)) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out)
-  elements <- readStrings et iPath
+  elements <- readStrings loc et iPath
   let mkOut p = unsafeExprPathExplicit cfg dRef "list" lt Nothing [digest $ makeRelative (cfgTmpDir cfg) p]
       oPaths  = map mkOut elements
       oPaths' = map (fromPath cfg) oPaths
       combos  = comboFn elements
   -- TODO traceA instead here?
-  mapM_ (\(p,ps) -> writeStrings et p $
-                      trace "modules.permute.aPermute"
+  mapM_ (\(p,ps) -> writeStrings loc et p $
+                      trace loc
                                ("combo: " ++ show ps) ps)
                                (zip oPaths' combos)
-  let out' = traceA "aPermute" out [iPath, show lt, out]
-  writeStrings lt out' oPaths'
+  let out' = traceA loc out [iPath, show lt, out]
+  writeStrings loc lt out' oPaths'
 
 --------------------
 -- leave_each_out --

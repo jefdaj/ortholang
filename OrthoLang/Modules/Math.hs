@@ -37,8 +37,9 @@ log' = liftIO . debug "modules.math.amath" . show
 aMathBop :: (Scientific -> Scientific -> Scientific) -> NewAction1
 aMathBop mathFn (ExprPath outPath) nsPath = do
   log' nsPath
-  ns <- readLits nsPath
+  let loc = "modules.math.aMathBop"
+  ns <- readLits loc nsPath
   log' ns
   let n = foldl1 mathFn $ map (read :: String -> Scientific) ns
-  writeLit outPath $ show n
+  writeLit loc outPath $ show n
   log' n

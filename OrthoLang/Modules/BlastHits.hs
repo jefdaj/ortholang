@@ -109,7 +109,8 @@ aCutCol :: Bool -> Int -> [Path] -> Action ()
 aCutCol _ n [outPath, tsvPath] = do
   cfg <- fmap fromJust getShakeExtra
   let outPath'  = fromPath cfg outPath
-      outPath'' = traceA "aCutCol" outPath' [show n, outPath', tsvPath']
+      loc = "modules.blasthits.aCutCol"
+      outPath'' = traceA loc outPath' [show n, outPath', tsvPath']
       tsvPath'  = fromPath cfg tsvPath
       tmpPath'  = takeDirectory outPath'' </> "tmp" -- the non-deduped version
   runCmd $ CmdDesc
@@ -126,7 +127,7 @@ aCutCol _ n [outPath, tsvPath] = do
     , cmdRmPatterns = [outPath']
     }
   trackWrite' [tmpPath']
-  writeCachedVersion outPath'' tmpPath'
+  writeCachedVersion loc outPath'' tmpPath'
 
   -- TODO remove this? why does it need to be here at all?
   -- let outOut = outPath' <.> "out"
