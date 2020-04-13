@@ -8,7 +8,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "single" 
-    , Fun crb Nothing 
+    , Fun crb 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "minimgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "crb_blast" 
@@ -20,7 +21,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "mapped" 
-    , Fun crb.list Nothing 
+    , Fun crb.list 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "minimgen" 
         , Var ( RepID Nothing ) "maga" 
         ] "crb_blast_each" 
@@ -52,14 +54,16 @@
                 , Var ( RepID Nothing ) "minimgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] 
-                [ Ref crb Nothing 
+                [ Ref crb 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "minimgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
                     ( Var ( RepID Nothing ) "single" )
                 ]
             ) 
-            ( Ref crb.list Nothing 
+            ( Ref crb.list 
+                ( Just ( Salt 0 ) ) 
                 [ Var ( RepID Nothing ) "minimgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] 

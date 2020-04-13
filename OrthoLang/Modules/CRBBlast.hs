@@ -92,10 +92,14 @@ aCRBBlast tmpDir [o, q, t] = do
   -- get the hashes from the cacnonical path, but can't link to that
   qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) q'
   tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) t'
+  -- liftIO $ putStrLn $ "qName: " ++ qName
+  -- liftIO $ putStrLn $ "tName: " ++ tName
   -- instead, need to link to the actual input files
   qDst <- liftIO $ resolveSymlinks Nothing q' -- link directly to the file
   tDst <- liftIO $ resolveSymlinks Nothing t' -- link directly to the file
-  let qSrc  = tmp' </> qName
+  -- liftIO $ putStrLn $ "qDst: " ++ qDst
+  -- liftIO $ putStrLn $ "tDst: " ++ tDst
+  let qSrc  = tmp' </> qDst
       tSrc  = tmp' </> tName
       qSrc' = toPath cfg qSrc
       qDst' = toPath cfg qDst

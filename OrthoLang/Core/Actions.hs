@@ -65,7 +65,7 @@ import OrthoLang.Core.Types
 import Control.Monad              (when)
 import Data.List                  (sort, nub, isPrefixOf, isInfixOf, isSuffixOf)
 import Data.List.Split            (splitOneOf)
-import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative, replaceBaseName)
+import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
 -- import OrthoLang.Core.Debug        (debug)
 import OrthoLang.Core.Paths        (Path, toPath, fromPath, checkLit,
                                    checkLits, cacheDir, pathString,
@@ -76,7 +76,7 @@ import OrthoLang.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteLocks', withWriteOnce)
 import System.Directory           (createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
 import System.Exit                (ExitCode(..))
-import System.FilePath            ((<.>), takeDirectory, takeExtension)
+import System.FilePath            ((<.>), takeDirectory, takeExtension, takeBaseName)
 import System.FilePath.Glob       (compile, globDir1)
 -- import System.IO                  (IOMode(..), withFile)
 import System.Posix.Files         (readSymbolicLink, createSymbolicLink, setFileMode)
@@ -527,8 +527,8 @@ TODO if stdout == outfile, put it there and skip the .out file altogether, or sy
 runCmd :: CmdDesc -> Action ()
 runCmd desc = do
   cfg <- fmap fromJust getShakeExtra
-  let stdoutPath = replaceBaseName (cmdOutPath desc) "out"
-      stderrPath = replaceBaseName (cmdOutPath desc) "err"
+  let stdoutPath = takeDirectory (cmdOutPath desc) </> "out"
+      stderrPath = takeDirectory (cmdOutPath desc) </> "err"
       dbg = debugA' "runCmd"
   -- liftIO $ delay 1000000
 
@@ -544,11 +544,14 @@ runCmd desc = do
                     else id
       -- TODO any problem locking the whole dir?
       -- TODO and if not, can the other locks inside that be removed?
-      writeLockFn fn = withWriteLock' (takeDirectory $ cmdOutPath desc) $ do
-        dbg $ "runCmd acquiring main write lock: " ++ show (cmdOutPath desc)
+      writeDir = takeDirectory $ cmdOutPath desc
+      writeLockFn fn = (if (takeBaseName $ takeDirectory writeDir) == "exprs" then withWriteLock' writeDir else id) $ do
+        -- dbg $ "runCmd acquired expr dir write lock: " ++ show writeDir
         withWriteOnce (cmdOutPath desc) $ do
-          dbg $ "runCmd acquiring extra write locks: " ++ show (cmdExtraOutPaths desc)
-          withWriteLocks' (cmdExtraOutPaths desc) $ parLockFn fn
+          dbg $ "runCmd acquired outpath write lock: " ++ show (cmdOutPath desc)
+          withWriteLocks' (cmdExtraOutPaths desc) $ do
+            dbg $ "runCmd acquired extra write locks: " ++ show (cmdExtraOutPaths desc)
+            parLockFn fn
 
   -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
   writeLockFn $ withReadLocks' inPaths' $ do
@@ -561,7 +564,7 @@ runCmd desc = do
     -- Exit _ <- command [] "sync" [] -- TODO is this needed?
     -- This is disabled because it can make the logs really big
     -- dbg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
-    -- trackWrite' [stdoutPath, stderrPath] -- TODO does this happen here?
+    trackWrite' (cmdOutPath desc:stdoutPath:stderrPath:cmdExtraOutPaths desc)
     -- return ()
 
     -- TODO use exitWith here?
@@ -691,6 +694,8 @@ symlink src dst = do
   let src' = fromPath cfg src
       dst' = fromPath cfg dst
       dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
+  -- TODO why does this break it?
+  -- need' "core.actions.symlink" [dst']
   withWriteOnce src' $ do
     liftIO $ createDirectoryIfMissing True $ takeDirectory src'
     liftIO $ ignoreExistsError $ createSymbolicLink dstr src'

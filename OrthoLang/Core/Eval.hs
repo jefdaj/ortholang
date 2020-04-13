@@ -241,7 +241,11 @@ eval hdl cfg ref ids dr rtype ls p = do
       want ["eval"]
       "eval" ~> do
         alwaysRerun
-        actionRetry 9 $ need $ lpaths' ++ [path] -- TODO is this done automatically in the case of result?
+        -- TODO remove retry after newrules are finished
+        actionRetry 9 $ do
+          -- Exit _ <- command [] "sync" [] -- why is this needed?
+          -- liftIO $ threadDelay delay
+          need $ lpaths' ++ [path] -- TODO is this done automatically in the case of result?
         {- if --interactive, print the short version of a result
          - if --output, save the full result (may also be --interactive)
          - if neither, print the full result

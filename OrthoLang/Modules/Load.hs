@@ -139,8 +139,8 @@ rLoad hashSeqIDs scr e@(Fun _ _ _ _ [p]) = do
 rLoad _ _ _ = fail "bad argument to rLoad"
 
 -- note: .faa ext turns out to be required for orthofinder to recognize fasta files
-aLoadHash :: Bool -> Path -> String -> Action Path
-aLoadHash hashSeqIDs src ext = do
+aLoadHash :: Bool -> Type -> Path -> Action Path
+aLoadHash hashSeqIDs t src = do
   alwaysRerun -- makes sure we can decode hashed seqids
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
   cfg <- fmap fromJust getShakeExtra
@@ -148,6 +148,7 @@ aLoadHash hashSeqIDs src ext = do
   need' "core.compile.basic.aLoadHash" [src']
   md5 <- hashContent src
   let tmpDir'   = fromPath cfg $ cacheDir cfg "load"
+      ext = tExtOf t -- TODO safe because always an exact type?
       hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toPath cfg hashPath'
   if not hashSeqIDs
@@ -155,9 +156,9 @@ aLoadHash hashSeqIDs src ext = do
     else do
       let idsPath' = hashPath' <.> "ids"
           idsPath  = toPath cfg idsPath'
-      unlessExists idsPath' $ hashIDsFile2 src hashPath
+      unlessExists idsPath' $ hashIDsFile2 src hashPath -- TODO remove unlessExists?
       let (Path k) = hashPath
-          v = takeFileName src'
+          v = takeFileName src' -- TODO ext issue here?
       newIDs <- readIDs idsPath
       ids <- fmap fromJust getShakeExtra
       liftIO $ atomicModifyIORef' ids $
@@ -175,12 +176,15 @@ aLoad hashSeqIDs strPath outPath = do
       toAbs line = if isAbsolute line
                      then line
                      else cfgWorkDir cfg </> line
+  dRef <- fmap fromJust getShakeExtra
+  t <- liftIO $ decodeNewRulesType cfg dRef $ ExprPath $ outPath'
   need' "core.compile.basic.aLoad" [strPath']
   pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits strPath' -- TODO safer!
   pth' <- if isURL pth
             then curl pth
             else fmap (toPath cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
-  hashPath <- aLoadHash hashSeqIDs pth' (takeExtension outPath')
+  hashPath <- aLoadHash hashSeqIDs t pth'
+  -- liftIO $ putStrLn $ "ext: " ++ takeExtension outPath'
   symlink outPath'' hashPath
   where
 
@@ -243,8 +247,9 @@ aLoadListPaths hashSeqIDs pathsPath outPath = do
   let paths' = map (fromPath cfg) paths
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
   let paths''' = map (toPath cfg) paths''
-  hashPaths <- mapM (\p -> aLoadHash hashSeqIDs p
-                         $ takeExtension $ fromPath cfg p) paths'''
+  dRef <- fmap fromJust getShakeExtra
+  (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef $ ExprPath $ outPath'
+  hashPaths <- mapM (aLoadHash hashSeqIDs t) paths'''
   let hashPaths' = map (fromPath cfg) hashPaths
   need' "core.compile.basic.aLoadListPaths" hashPaths'
   writePaths out hashPaths
