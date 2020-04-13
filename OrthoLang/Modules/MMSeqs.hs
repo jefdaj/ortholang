@@ -23,7 +23,7 @@ import OrthoLang.Core
 import OrthoLang.Locks
 
 import OrthoLang.Modules.Blast   (bht)
-import OrthoLang.Modules.Singletons (withSingleton)
+import OrthoLang.Modules.Singletons (withSingletonArg)
 import OrthoLang.Modules.SeqIO   (fa, fna, faa)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
@@ -139,7 +139,7 @@ mmseqsCreateDb = let name = "mmseqs_createdb" in Function
 -- tMmseqsCreateDb name types = fail $ name ++ " requires a fasta file, but got " ++ show types
 
 rMmseqsCreateDb :: RulesFn
-rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
+rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingletonArg e
 
 ----------------------
 -- mmseqs_search_db --
