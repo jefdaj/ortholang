@@ -1,12 +1,12 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 28e059b2a9
-|   |   |-- 28e059b2a9.ids
-|   |   |-- 36189032ad
-|   |   `-- 36189032ad.ids
+|   |   |-- 28e059b2a9.faa
+|   |   |-- 28e059b2a9.faa.ids
+|   |   |-- 36189032ad.faa
+|   |   `-- 36189032ad.faa.ids
 |   |-- makeblastdb
-|   |   `-- c27509026d
+|   |   `-- d77632b774
 |   |       |-- result
 |   |       |-- result.err
 |   |       |-- result.out
@@ -20,9 +20,9 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 1e0498b59a
-|   |   |   `-- result -> ../../../cache/load/36189032ad
+|   |   |   `-- result -> ../../../cache/load/36189032ad.faa
 |   |   `-- ae9e22061f
-|   |       `-- result -> ../../../cache/load/28e059b2a9
+|   |       `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_faa
 |   |   `-- 329cb2539d
 |   |       `-- result -> ../../../cache/lines/...

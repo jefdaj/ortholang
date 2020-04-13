@@ -9,7 +9,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "ofres" 
-    , Fun ofr Nothing 
+    , Fun ofr 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "smallbacteria" ] "orthofinder" 
         [ Ref faa.list Nothing [] 
             ( Var ( RepID Nothing ) "smallbacteria" )
@@ -21,7 +22,8 @@
         [ Var ( RepID Nothing ) "ofres" 
         , Var ( RepID Nothing ) "smallbacteria" 
         ] "orthogroups" 
-        [ Ref ofr Nothing 
+        [ Ref ofr 
+            ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "smallbacteria" ] 
             ( Var ( RepID Nothing ) "ofres" )
         ]
@@ -37,7 +39,8 @@
             , Var ( RepID Nothing ) "smallbacteria" 
             ] "ortholog_in_max" 
             [ Lit num "2.0" 
-            , Ref ofr Nothing 
+            , Ref ofr 
+                ( Just ( Salt 0 ) ) 
                 [ Var ( RepID Nothing ) "smallbacteria" ] 
                 ( Var ( RepID Nothing ) "ofres" )
             , Ref faa.list Nothing [] 

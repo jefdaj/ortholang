@@ -291,7 +291,7 @@ exprPathExplicit cfg prefix mSalt hashes = toPath loc cfg path
   where
     loc = "core.paths.exprPathExplicit"
     dir  = cfgTmpDir cfg </> "exprs" </> prefix
-    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap show mSalt)
+    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Salt n) -> show n) mSalt)
     path = dir </> base </> "result" -- <.> tExtOf rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere

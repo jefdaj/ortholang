@@ -1,8 +1,8 @@
 .
 |-- cache
 |   `-- load
-|       |-- 8723e7ac8c
-|       `-- 8723e7ac8c.ids
+|       |-- 8723e7ac8c.fna
+|       `-- 8723e7ac8c.fna.ids
 |-- exprs
 |   |-- any
 |   |   `-- 85b89fa9e0
@@ -16,7 +16,7 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |   `-- 2c54deea89
-|   |       `-- result -> ../../../cache/load/8723e7ac8c
+|   |       `-- result -> ../../../cache/load/8723e7ac8c.fna
 |   |-- load_fna_each
 |   |   `-- a473d8eebb
 |   |       `-- result -> ../../../cache/lines/...

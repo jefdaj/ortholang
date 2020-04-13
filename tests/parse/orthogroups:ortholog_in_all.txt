@@ -5,9 +5,11 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "ofres" 
-    , Fun ofr Nothing 
+    , Fun ofr 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "mycoplasma" ] "orthofinder" 
-        [ Fun faa.list Nothing 
+        [ Fun faa.list 
+            ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "mycoplasma" ] "sample" 
             [ Lit num "3.0" 
             , Ref faa.list Nothing [] 
@@ -21,7 +23,8 @@
         [ Var ( RepID Nothing ) "ofres" 
         , Var ( RepID Nothing ) "mycoplasma" 
         ] "ortholog_in_all" 
-        [ Ref ofr Nothing 
+        [ Ref ofr 
+            ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "mycoplasma" ] 
             ( Var ( RepID Nothing ) "ofres" )
         , Ref faa.list Nothing [] 

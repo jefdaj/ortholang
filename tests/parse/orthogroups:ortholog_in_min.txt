@@ -9,7 +9,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "faas_to_use" 
-    , Fun faa.list Nothing 
+    , Fun faa.list 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "n_to_use" 
         , Var ( RepID Nothing ) "mycoplasma" 
         ] "sample" 
@@ -21,12 +22,14 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "spres" 
-    , Fun ofr Nothing 
+    , Fun ofr 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "faas_to_use" 
         , Var ( RepID Nothing ) "n_to_use" 
         , Var ( RepID Nothing ) "mycoplasma" 
         ] "orthofinder" 
-        [ Ref faa.list Nothing 
+        [ Ref faa.list 
+            ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "n_to_use" 
             , Var ( RepID Nothing ) "mycoplasma" 
             ] 
@@ -54,13 +57,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "0.0" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -73,13 +78,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "1.0" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -92,13 +99,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "2.0" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -111,13 +120,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "3.0" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -130,13 +141,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "4.0" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -149,13 +162,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "5.0" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -168,13 +183,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "10.0" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -187,13 +204,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "0.1" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -206,13 +225,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "0.2" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -225,13 +246,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "0.3" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -244,13 +267,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "0.4" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -263,13 +288,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "0.5" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -282,13 +309,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "-0.1" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -301,13 +330,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "-1.0" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -320,13 +351,15 @@
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_min" 
                 [ Lit num "-10.0" 
-                , Ref ofr Nothing 
+                , Ref ofr 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
                     ( Var ( RepID Nothing ) "spres" )
-                , Ref faa.list Nothing 
+                , Ref faa.list 
+                    ( Just ( Salt 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 

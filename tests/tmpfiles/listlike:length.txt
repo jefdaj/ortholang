@@ -1,0 +1,19 @@
+.
+|-- cache
+|-- exprs
+|   |-- any
+|   |   `-- 661043b177
+|   |       `-- result -> ../../../cache/lines/...
+|   |-- list
+|   |   |-- 524d48dbd8
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- 887f5c5d15
+|   |       `-- result -> ../../../cache/lines/...
+|   `-- str
+|       `-- 0ecd3e7ed5
+|           `-- result -> ../../../cache/lines/...
+`-- vars
+    |-- mapped.str.list -> ../exprs/list/887f5c5d15/result
+    `-- result -> ../exprs/any/661043b177/result
+
+10 directories, 6 files

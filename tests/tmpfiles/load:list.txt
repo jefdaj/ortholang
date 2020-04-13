@@ -1,8 +1,8 @@
 .
 |-- cache
 |   `-- load
-|       |-- 1dd6f75231 -> $WORKDIR/examples/genome-lists/proteomes-refseq.txt
-|       `-- 9c67ed8020 -> $WORKDIR/examples/genome-lists/proteomes-small.txt
+|       |-- 1dd6f75231.str.list -> $WORKDIR/examples/genome-lists/proteomes-refseq.txt
+|       `-- 9c67ed8020.str.list -> $WORKDIR/examples/genome-lists/proteomes-small.txt
 |-- exprs
 |   |-- any
 |   |   `-- 53bf1a006d
@@ -12,9 +12,9 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_list
 |   |   |-- 27b8175469
-|   |   |   `-- result -> ../../../cache/load/1dd6f75231
+|   |   |   `-- result -> ../../../cache/load/1dd6f75231.str.list
 |   |   `-- 4c0132f98f
-|   |       `-- result -> ../../../cache/load/9c67ed8020
+|   |       `-- result -> ../../../cache/load/9c67ed8020.str.list
 |   `-- str
 |       |-- 52221f8e2b
 |       |   `-- result -> ../../../cache/lines/...

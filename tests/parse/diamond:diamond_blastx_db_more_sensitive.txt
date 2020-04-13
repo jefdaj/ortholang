@@ -11,7 +11,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "db" 
-    , Fun dmnd Nothing 
+    , Fun dmnd 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb" 
         [ Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )
@@ -19,7 +20,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun bht Nothing 
+    , Fun bht 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "db" 
         , Var ( RepID Nothing ) "mgen" 
@@ -27,7 +29,8 @@
         [ Lit num "1.0e-50" 
         , Ref fna Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
-        , Ref dmnd Nothing 
+        , Ref dmnd 
+            ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "mgen" ] 
             ( Var ( RepID Nothing ) "db" )
         ] 

@@ -12,7 +12,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun bsr.list Nothing 
+    , Fun bsr.list 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "odb9_firmicutes" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 

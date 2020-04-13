@@ -2,28 +2,28 @@
 |-- cache
 |   |-- each
 |   |   `-- cd978c322b
-|   |       |-- 178c544575
+|   |       |-- 688af09c48
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/psiblast_db/fa2b0d1d52/74345cc036/178c544575/result
-|   |       `-- cbaaac52df
+|   |       |   `-- result -> ../../../../exprs/psiblast_db/fa2b0d1d52/e4e709a340/688af09c48/result
+|   |       `-- c7fe98886d
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/psiblast_db/fa2b0d1d52/74345cc036/cbaaac52df/result
+|   |           `-- result -> ../../../../exprs/psiblast_db/fa2b0d1d52/e4e709a340/c7fe98886d/result
 |   |-- load
-|   |   |-- 11bbf54fc6
-|   |   |-- 11bbf54fc6.ids
-|   |   |-- 28e059b2a9
-|   |   |-- 28e059b2a9.ids
-|   |   |-- 36189032ad
-|   |   `-- 36189032ad.ids
+|   |   |-- 11bbf54fc6.faa
+|   |   |-- 11bbf54fc6.faa.ids
+|   |   |-- 28e059b2a9.faa
+|   |   |-- 28e059b2a9.faa.ids
+|   |   |-- 36189032ad.faa
+|   |   `-- 36189032ad.faa.ids
 |   |-- makeblastdb
-|   |   |-- c27509026d
+|   |   |-- c1b08194e1
 |   |   |   |-- result
 |   |   |   |-- result.err
 |   |   |   |-- result.out
 |   |   |   |-- result.phr
 |   |   |   |-- result.pin
 |   |   |   `-- result.psq
-|   |   `-- de368a5ecd
+|   |   `-- d77632b774
 |   |       |-- result
 |   |       |-- result.err
 |   |       |-- result.out
@@ -41,11 +41,11 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 1e0498b59a
-|   |   |   `-- result -> ../../../cache/load/36189032ad
+|   |   |   `-- result -> ../../../cache/load/36189032ad.faa
 |   |   |-- ae9e22061f
-|   |   |   `-- result -> ../../../cache/load/28e059b2a9
+|   |   |   `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |   `-- f8a41afad4
-|   |       `-- result -> ../../../cache/load/11bbf54fc6
+|   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
 |   |-- makeblastdb_faa
 |   |   |-- 1898488812
 |   |   |   `-- result -> ../../../cache/lines/...
@@ -56,12 +56,12 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- psiblast_db
 |   |   `-- fa2b0d1d52
-|   |       `-- 74345cc036
-|   |           |-- 178c544575
+|   |       `-- e4e709a340
+|   |           |-- 688af09c48
 |   |           |   |-- result
 |   |           |   |-- result.err
 |   |           |   `-- result.out
-|   |           `-- cbaaac52df
+|   |           `-- c7fe98886d
 |   |               |-- result
 |   |               |-- result.err
 |   |               `-- result.out

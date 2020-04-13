@@ -12,7 +12,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "scores" 
-    , Fun bsr.list Nothing 
+    , Fun bsr.list 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "odb9_proteobacteria" 
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
@@ -38,7 +39,8 @@
         , Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "busco_scores_table" 
-        [ Ref bsr.list Nothing 
+        [ Ref bsr.list 
+            ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "odb9_proteobacteria" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 

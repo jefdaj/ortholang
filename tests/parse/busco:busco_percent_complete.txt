@@ -12,7 +12,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "res1" 
-    , Fun bsr Nothing 
+    , Fun bsr 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "odb9_firmicutes" 
         , Var ( RepID Nothing ) "mgen" 
         ] "busco_proteins" 
@@ -24,7 +25,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "res2" 
-    , Fun bsr Nothing 
+    , Fun bsr 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "odb9_proteobacteria" 
         , Var ( RepID Nothing ) "mgen" 
         ] "busco_proteins" 
@@ -43,23 +45,27 @@
         , Var ( RepID Nothing ) "res2" 
         , Var ( RepID Nothing ) "odb9_proteobacteria" 
         ] 
-        [ Fun num Nothing 
+        [ Fun num 
+            ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "res1" 
             , Var ( RepID Nothing ) "odb9_firmicutes" 
             , Var ( RepID Nothing ) "mgen" 
             ] "busco_percent_complete" 
-            [ Ref bsr Nothing 
+            [ Ref bsr 
+                ( Just ( Salt 0 ) ) 
                 [ Var ( RepID Nothing ) "odb9_firmicutes" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] 
                 ( Var ( RepID Nothing ) "res1" )
             ]
-        , Fun num Nothing 
+        , Fun num 
+            ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "res2" 
             , Var ( RepID Nothing ) "odb9_proteobacteria" 
             , Var ( RepID Nothing ) "mgen" 
             ] "busco_percent_complete" 
-            [ Ref bsr Nothing 
+            [ Ref bsr 
+                ( Just ( Salt 0 ) ) 
                 [ Var ( RepID Nothing ) "odb9_proteobacteria" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] 

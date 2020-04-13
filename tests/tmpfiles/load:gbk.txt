@@ -1,7 +1,7 @@
 .
 |-- cache
 |   `-- load
-|       `-- 28ce925871 -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
+|       `-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |-- exprs
 |   |-- any
 |   |   `-- 2d76d44d86
@@ -15,7 +15,7 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_gbk
 |   |   `-- b5a17d977e
-|   |       `-- result -> ../../../cache/load/28ce925871
+|   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- load_gbk_each
 |   |   `-- 329d7d3465
 |   |       `-- result -> ../../../cache/lines/...

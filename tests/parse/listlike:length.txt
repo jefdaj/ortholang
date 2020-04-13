@@ -1,0 +1,25 @@
+[ 
+    ( Var ( RepID Nothing ) "single" 
+    , Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" 
+    ) 
+, 
+    ( Var ( RepID Nothing ) "mapped" 
+    , Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
+    ) 
+, 
+    ( Var ( RepID Nothing ) "result" 
+    , Bop str.list Nothing 
+        [ Var ( RepID Nothing ) "single" 
+        , Var ( RepID Nothing ) "mapped" 
+        ] "|" 
+        ( Lst str 
+            [ Var ( RepID Nothing ) "single" ] 
+            [ Ref str Nothing [] 
+                ( Var ( RepID Nothing ) "single" )
+            ]
+        ) 
+        ( Ref str.list Nothing [] 
+            ( Var ( RepID Nothing ) "mapped" )
+        )
+    ) 
+] 

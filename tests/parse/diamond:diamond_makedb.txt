@@ -4,7 +4,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun dmnd Nothing 
+    , Fun dmnd 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb" 
         [ Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "mgen" )

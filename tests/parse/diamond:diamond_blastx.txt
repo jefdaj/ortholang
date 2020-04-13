@@ -11,7 +11,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun bht Nothing 
+    , Fun bht 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "maga" 
         , Var ( RepID Nothing ) "mgen" 
         ] "diamond_blastx" 

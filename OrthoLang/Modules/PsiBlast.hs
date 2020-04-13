@@ -21,7 +21,7 @@ import Control.Monad             (when)
 import Data.Scientific           (formatScientific, FPFormat(..))
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
-import System.FilePath           ((<.>), takeFileName)
+import System.FilePath           ((<.>), takeDirectory, takeFileName)
 import Data.Maybe (fromJust)
 
 dbg :: String -> String -> Action ()
@@ -226,7 +226,7 @@ aPsiblastDb writingPssm args oPath ePath qPath dbPath = do
         querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' qPath'
         pssmLines <- fmap lines $ readFileStrict' tPath'
         let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
-            dbName     = takeFileName dbPre'
+            dbName     = takeFileName $ takeDirectory dbPre'
             trainInfo  = "(trained on " ++ dbName ++ " with e-value cutoff " ++ eStr ++ ")"
             queryInfo  = unwords [querySeqId, trainInfo]
             pssmWithId = queryInfo : pssmLines'

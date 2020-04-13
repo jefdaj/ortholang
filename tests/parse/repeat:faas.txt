@@ -4,7 +4,8 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "use5" 
-    , Fun str.list Nothing 
+    , Fun str.list 
+        ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "faa_names" ] "sample" 
         [ Lit num "5.0" 
         , Ref str.list Nothing [] 
@@ -17,7 +18,8 @@
         [ Var ( RepID Nothing ) "use5" 
         , Var ( RepID Nothing ) "faa_names" 
         ] "repeat" 
-        [ Ref str.list Nothing 
+        [ Ref str.list 
+            ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "faa_names" ] 
             ( Var ( RepID Nothing ) "use5" )
         , Ref str.list Nothing [] 
