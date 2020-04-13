@@ -14,8 +14,8 @@ from optparse import OptionParser
 
 # TODO don't suppress these?? maybe just re-throw without filenames?
 import warnings
-from Bio import BiopythonParserWarning
-warnings.simplefilter('ignore', BiopythonParserWarning)
+from Bio import BiopythonWarning
+warnings.simplefilter('ignore', BiopythonWarning)
 
 from Bio import SeqIO
 from Bio.Alphabet import IUPAC
