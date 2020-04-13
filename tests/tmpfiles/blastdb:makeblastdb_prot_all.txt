@@ -1,15 +1,14 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 28e059b2a9
-|   |   |-- 28e059b2a9.ids
-|   |   |-- cb3e90dc00
-|   |   `-- cb3e90dc00.ids
+|   |   |-- 28e059b2a9.faa
+|   |   |-- 28e059b2a9.faa.ids
+|   |   |-- cb3e90dc00.faa
+|   |   `-- cb3e90dc00.faa.ids
 |   `-- makeblastdb
-|       `-- 583d3fe84e
+|       `-- 8948446e38
 |           |-- result
 |           |-- result.err
-|           |-- result.out
 |           |-- result.phr
 |           |-- result.pin
 |           `-- result.psq
@@ -19,9 +18,9 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 81fa36fcfa
-|   |   |   `-- result -> ../../../cache/load/cb3e90dc00
+|   |   |   `-- result -> ../../../cache/load/cb3e90dc00.faa
 |   |   `-- ae9e22061f
-|   |       `-- result -> ../../../cache/load/28e059b2a9
+|   |       `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_faa_all
 |   |   `-- d432260851
 |   |       `-- result -> ../../../cache/lines/...
@@ -36,4 +35,4 @@
     |-- result -> ../vars/db.faa.blastdb
     `-- single.faa -> ../exprs/load_faa/ae9e22061f/result
 
-16 directories, 20 files
+16 directories, 19 files

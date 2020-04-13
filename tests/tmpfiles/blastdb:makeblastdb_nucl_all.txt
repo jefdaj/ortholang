@@ -1,27 +1,26 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 6046a54e92
-|   |   |-- 6046a54e92.ids
-|   |   |-- 8723e7ac8c
-|   |   `-- 8723e7ac8c.ids
+|   |   |-- 6046a54e92.fna
+|   |   |-- 6046a54e92.fna.ids
+|   |   |-- 8723e7ac8c.fna
+|   |   `-- 8723e7ac8c.fna.ids
 |   `-- makeblastdb
-|       `-- 00f33c329c
+|       `-- ea1568d48b
 |           |-- result
 |           |-- result.err
 |           |-- result.nhr
 |           |-- result.nin
-|           |-- result.nsq
-|           `-- result.out
+|           `-- result.nsq
 |-- exprs
 |   |-- list
 |   |   `-- a6695c3178
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |   |-- 2c54deea89
-|   |   |   `-- result -> ../../../cache/load/8723e7ac8c
+|   |   |   `-- result -> ../../../cache/load/8723e7ac8c.fna
 |   |   `-- 821d1bdfd1
-|   |       `-- result -> ../../../cache/load/6046a54e92
+|   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_fna_all
 |   |   `-- d1dbfd10ec
 |   |       `-- result -> ../../../cache/lines/...
@@ -36,4 +35,4 @@
     |-- result -> ../vars/db.fna.blastdb
     `-- single.fna -> ../exprs/load_fna/2c54deea89/result
 
-16 directories, 20 files
+16 directories, 19 files

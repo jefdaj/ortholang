@@ -2,29 +2,27 @@
 |-- cache
 |   |-- each
 |   |   `-- d32151913c
-|   |       |-- 0c17a12f7f
+|   |       |-- 2723ce3c35
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/makeblastdb_faa/0c17a12f7f/result
-|   |       `-- a9909d8c9b
+|   |       |   `-- result -> ../../../../exprs/makeblastdb_faa/2723ce3c35/result
+|   |       `-- 976c28be96
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/makeblastdb_faa/a9909d8c9b/result
+|   |           `-- result -> ../../../../exprs/makeblastdb_faa/976c28be96/result
 |   |-- load
-|   |   |-- 28e059b2a9
-|   |   |-- 28e059b2a9.ids
-|   |   |-- cb3e90dc00
-|   |   `-- cb3e90dc00.ids
+|   |   |-- 28e059b2a9.faa
+|   |   |-- 28e059b2a9.faa.ids
+|   |   |-- cb3e90dc00.faa
+|   |   `-- cb3e90dc00.faa.ids
 |   `-- makeblastdb
-|       |-- 1eed3be6ea
+|       |-- 1da708833c
 |       |   |-- result
 |       |   |-- result.err
-|       |   |-- result.out
 |       |   |-- result.phr
 |       |   |-- result.pin
 |       |   `-- result.psq
-|       `-- 4f18717f1c
+|       `-- 4477d5b52f
 |           |-- result
 |           |-- result.err
-|           |-- result.out
 |           |-- result.phr
 |           |-- result.pin
 |           `-- result.psq
@@ -34,13 +32,13 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 81fa36fcfa
-|   |   |   `-- result -> ../../../cache/load/cb3e90dc00
+|   |   |   `-- result -> ../../../cache/load/cb3e90dc00.faa
 |   |   `-- ae9e22061f
-|   |       `-- result -> ../../../cache/load/28e059b2a9
+|   |       `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_faa
-|   |   |-- 0c17a12f7f
+|   |   |-- 2723ce3c35
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- a9909d8c9b
+|   |   `-- 976c28be96
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_faa_each
 |   |   `-- 1d8ce30e9f
@@ -59,4 +57,4 @@
     |-- result -> ../vars/dbs.faa.blastdb.list
     `-- single.faa -> ../exprs/load_faa/ae9e22061f/result
 
-26 directories, 33 files
+26 directories, 31 files

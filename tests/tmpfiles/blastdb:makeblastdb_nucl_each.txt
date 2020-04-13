@@ -2,45 +2,43 @@
 |-- cache
 |   |-- each
 |   |   `-- 74f9b0e1b5
-|   |       |-- 7e1503e6de
+|   |       |-- 201980d355
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/makeblastdb_fna/7e1503e6de/result
-|   |       `-- ccb0e7ea5e
+|   |       |   `-- result -> ../../../../exprs/makeblastdb_fna/201980d355/result
+|   |       `-- 9c3ec12a2c
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/makeblastdb_fna/ccb0e7ea5e/result
+|   |           `-- result -> ../../../../exprs/makeblastdb_fna/9c3ec12a2c/result
 |   |-- load
-|   |   |-- 6046a54e92
-|   |   |-- 6046a54e92.ids
-|   |   |-- 8723e7ac8c
-|   |   `-- 8723e7ac8c.ids
+|   |   |-- 6046a54e92.fna
+|   |   |-- 6046a54e92.fna.ids
+|   |   |-- 8723e7ac8c.fna
+|   |   `-- 8723e7ac8c.fna.ids
 |   `-- makeblastdb
-|       |-- 5334858d9f
+|       |-- 81576bbfa8
 |       |   |-- result
 |       |   |-- result.err
 |       |   |-- result.nhr
 |       |   |-- result.nin
-|       |   |-- result.nsq
-|       |   `-- result.out
-|       `-- 5d1696ca54
+|       |   `-- result.nsq
+|       `-- 933216e8a2
 |           |-- result
 |           |-- result.err
 |           |-- result.nhr
 |           |-- result.nin
-|           |-- result.nsq
-|           `-- result.out
+|           `-- result.nsq
 |-- exprs
 |   |-- list
 |   |   `-- a6695c3178
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |   |-- 2c54deea89
-|   |   |   `-- result -> ../../../cache/load/8723e7ac8c
+|   |   |   `-- result -> ../../../cache/load/8723e7ac8c.fna
 |   |   `-- 821d1bdfd1
-|   |       `-- result -> ../../../cache/load/6046a54e92
+|   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_fna
-|   |   |-- 7e1503e6de
+|   |   |-- 201980d355
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- ccb0e7ea5e
+|   |   `-- 9c3ec12a2c
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_fna_each
 |   |   `-- c82a41695e
@@ -59,4 +57,4 @@
     |-- result -> ../vars/dbs.fna.blastdb.list
     `-- single.fna -> ../exprs/load_fna/2c54deea89/result
 
-26 directories, 33 files
+26 directories, 31 files

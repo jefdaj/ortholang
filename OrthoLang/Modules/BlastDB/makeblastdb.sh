@@ -13,5 +13,6 @@ DBOUT="$(dirname "$DBOUT")/result"
 # echo "DBTYPE: $DBTYPE"
 # echo "TITLE: $TITLE"
 
-makeblastdb -in "$FIXEDPATHS" -out "$DBOUT" -title "$TITLE" -dbtype "$DBTYPE" > "${DBOUT}.out" 2> "${DBOUT}.err"
-touch "$DBOUT" # TODO is this the best way?
+# Shake requires that we write something to the actual outpath,
+# and the stdout summary seems a reasonable way to go. it also makes showing the db easier:
+makeblastdb -in "$FIXEDPATHS" -out "$DBOUT" -title "$TITLE" -dbtype "$DBTYPE" > "$DBOUT" 2> "${DBOUT}.err"

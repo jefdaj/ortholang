@@ -95,7 +95,7 @@ blastdb :: Encoding
 blastdb = Encoding
   { enExt = "blastdb"
   , enDesc = "NCBI BLAST+ sequence database"
-  , enShow = undefined
+  , enShow = showBlastDb
   }
 
 -- shorthand
@@ -253,7 +253,7 @@ aBlastdblist listTmp = do
       , cmdBinary = "blastdblist.sh"
       , cmdArguments = [tmpDir, listTmp']
       , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
-      , cmdExitCode = ExitFailure 1
+      , cmdExitCode = ExitSuccess
       }
 
 -- TODO generalize so it works with busco_list_lineages too?
@@ -592,6 +592,7 @@ showBlastDb cfg ref path = do
   let dbDir = takeDirectory path'
       -- dbBase = takeBaseName  dbDir
   debug loc $ "dbDir: \"" ++ dbDir ++ "\""
+  -- note we pass the dir here, since the filename is always result
   out <- withReadLock ref path' $
            readCreateProcess (proc "blastdbcmd.sh" [dbDir]) ""
   let out1 = lines out

@@ -73,7 +73,7 @@ gz :: Encoding
 gz = Encoding
   { enExt = "gz"
   , enDesc = "gunzip archive" -- TODO and maybe also tarballed?
-  , enShow = undefined
+  , enShow = \_ _ path -> return $ "gunzip archive '" ++ path ++ "'"
   }
 
 fnagz :: Type
