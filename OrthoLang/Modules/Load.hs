@@ -138,17 +138,17 @@ rLoad hashSeqIDs scr e@(Fun _ _ _ _ [p]) = do
   return (ExprPath out')
 rLoad _ _ _ = fail "bad argument to rLoad"
 
--- TODO remove ext? not sure it does anything
+-- note: .faa ext turns out to be required for orthofinder to recognize fasta files
 aLoadHash :: Bool -> Path -> String -> Action Path
-aLoadHash hashSeqIDs src _ = do
-  alwaysRerun
+aLoadHash hashSeqIDs src ext = do
+  alwaysRerun -- makes sure we can decode hashed seqids
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
   cfg <- fmap fromJust getShakeExtra
   let src' = fromPath cfg src
   need' "core.compile.basic.aLoadHash" [src']
-  md5 <- hashContent src -- TODO permission error here?
+  md5 <- hashContent src
   let tmpDir'   = fromPath cfg $ cacheDir cfg "load"
-      hashPath' = tmpDir' </> md5 -- <.> ext
+      hashPath' = tmpDir' </> md5 <.> ext
       hashPath  = toPath cfg hashPath'
   if not hashSeqIDs
     then symlink hashPath src

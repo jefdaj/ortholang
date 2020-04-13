@@ -6,7 +6,7 @@
 |   |   |-- 36189032ad.faa
 |   |   `-- 36189032ad.faa.ids
 |   `-- orthofinder
-|       `-- bde1b97dfd
+|       `-- a2bfc27b0f
 |           |-- OrthoFinder
 |           |   `-- Results_
 |           |       |-- Comparative_Genomics_Statistics
@@ -431,32 +431,27 @@
 |           `-- 36189032ad.faa -> ../../../cache/load/36189032ad.faa
 |-- exprs
 |   |-- list
-|   |   |-- 9af6dc7081
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- f22daab0ad
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 8d00c044aa
+|   |       `-- result -> ../../../cache/lines/...
+|   |-- load_faa_each
+|   |   `-- 2b302724e5
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- orthofinder
-|   |   `-- 07480d9ac9
-|   |       `-- 0
-|   |           |-- out
-|   |           `-- result -> ../../../../cache/orthofinder/bde1b97dfd/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
+|   |   `-- 286088944b
+|   |       `-- Salt 0
+|   |           `-- result -> ../../../../cache/orthofinder/a2bfc27b0f/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
 |   |-- orthogroups
-|   |   `-- bacb2fe175
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 1c57b38a07
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 824ccbd8b2
-|       |   `-- 0
-|       |       `-- result -> ../../../../cache/lines/...
+|       |   `-- result -> ../../../cache/lines/...
 |       `-- cdba97c8d8
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- ofogs.str.list.list -> ../exprs/orthogroups/bacb2fe175/0/result
-    |-- ofres.ofr -> ../exprs/orthofinder/07480d9ac9/0/result
+    |-- ofogs.str.list.list -> ../exprs/orthogroups/1c57b38a07/result
+    |-- ofres.ofr -> ../exprs/orthofinder/286088944b/Salt 0/result
     |-- result -> ../vars/ofogs.str.list.list
-    `-- smallbacteria.faa.list -> ../exprs/list/f22daab0ad/0/result
+    `-- smallbacteria.faa.list -> ../exprs/load_faa_each/2b302724e5/result
 
-38 directories, 421 files
+34 directories, 420 files
