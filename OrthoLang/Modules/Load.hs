@@ -32,6 +32,7 @@ import qualified Data.Map.Strict as M
 import Control.Monad.IO.Class     (liftIO)
 import Data.IORef                 (atomicModifyIORef')
 import Data.List                  (sort)
+import Data.List.Utils            (replace)
 import Data.Maybe                 (fromJust)
 import Data.String.Utils          (strip)
 import Development.Shake          (Action, getShakeExtra, getShakeExtraRules, (%>), alwaysRerun)
@@ -103,8 +104,32 @@ mkLoad hashSeqIDs name oSig = Function
   , fOutput = oSig
   , fTags = [ReadsFile, ReadsURL]
   , fOldRules = rLoad hashSeqIDs
-  , fNewRules = NewNotImplemented
+  , fNewRules = NewNotImplemented -- TODO mLoad here
   }
+
+-- TODO naming convention: _path, _paths?
+-- mkLoadNew :: Function
+-- mkLoadNew hashSeqIDs name oSig = compose1 name [ReadsDirs] (mkLoad hashSeqIDs (name ++ "_path") oSig) realpath
+
+-- TODO is the oSig needed to?
+-- TODO have the to_path fn return whatever string is used internally now, initially
+mLoad :: MacroExpansion
+mLoad scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_path" "" n) [Fun str ms ds "realpath" [p]]
+mLoad _ e = error "modules.load.mLoad" $ "bad argument: " ++ show e
+
+mLoadEach :: MacroExpansion
+mLoadEach scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_path" "" n) [Fun (ListOf str) ms ds "realpath_each" [p]]
+mLoadEach _ e = error "modules.load.mLoadEach" $ "bad argument: " ++ show e
+
+{-|
+Converts user-specified strs (which may represent relative or absolute paths)
+to properly formatted OrthoLang Paths. Used to sanitize inputs to the load_* functions
+-}
+realpath :: Function
+realpath = newFnA1 "realpath" (Exactly str) (Exactly str) undefined [ReadsDirs]
+
+realpathEach :: Function
+realpathEach = newFnA1 "realpath_each" (Exactly $ ListOf str) (Exactly $ ListOf str) undefined [ReadsDirs]
 
 {-|
 Like mkLoad, except it operates on a list of strings. Note that you can also
