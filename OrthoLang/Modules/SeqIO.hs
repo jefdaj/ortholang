@@ -147,7 +147,7 @@ gbkToFnaRawIDs = Function
 gbkToFaaEach :: Function
 -- gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] gbkToFaaRawIDsEach $ mkLoadEach True "load_faa_each" (Exactly faa)
 -- gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] loadFaaEach gbkToFaaRawIDsEach
-gbkToFaaEach = newMacro "gbk_to_faa_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf fna) mGbkToFaaEach [ReadsFile]
+gbkToFaaEach = newMacro "gbk_to_faa_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf faa) mGbkToFaaEach [ReadsFile]
 
 mGbkToFaaEach :: MacroExpansion
 mGbkToFaaEach _ (Fun r ms ds n [s, g]) = Fun r ms ds "load_faa_path_each" [Fun r ms ds (replace "_each" "_rawids_each" n) [s, g]]
