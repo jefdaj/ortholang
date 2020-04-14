@@ -1,0 +1,4 @@
+
+[list of bst (BUSCO scores table)s] -> bst (BUSCO scores table)
+
+doc for functions/concat_bst not written yet

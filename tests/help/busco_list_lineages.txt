@@ -1,0 +1,4 @@
+
+[str (string)] -> list of str (string)s
+
+doc for functions/busco_list_lineages not written yet

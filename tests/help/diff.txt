@@ -1,0 +1,4 @@
+
+[anytype.list.list] -> anytype.list
+
+doc for functions/diff not written yet

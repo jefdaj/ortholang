@@ -1,0 +1,7 @@
+The .hmm extension is for hidden markov model files.
+
+doc for types/hmm not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

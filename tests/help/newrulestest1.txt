@@ -1,0 +1,4 @@
+
+[str (string), str (string)] -> str (string)
+
+Test of the New Rules infrastructure 1

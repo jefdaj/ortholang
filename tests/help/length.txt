@@ -1,0 +1,4 @@
+
+[ll] -> num (number in scientific notation)
+
+doc for functions/length not written yet

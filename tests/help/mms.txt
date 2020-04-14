@@ -1,0 +1,7 @@
+The .mms extension is for MMSeqs2 sequence database files.
+
+doc for types/mms not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

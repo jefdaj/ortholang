@@ -10,6 +10,7 @@ olModule = Module
   , mDesc = "Generate set membership tables (spreadsheets) for easier list comparison"
   , mTypes = [tsv]
   , mGroups = [lit]
+  , mEncodings = []
   , mFunctions = [setsTable]
   }
 

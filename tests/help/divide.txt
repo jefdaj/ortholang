@@ -1,0 +1,4 @@
+
+[num (number in scientific notation).list] -> num (number in scientific notation)
+
+doc not written yet

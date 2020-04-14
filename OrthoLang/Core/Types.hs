@@ -174,7 +174,7 @@ newtype Salt = Salt Int deriving (Eq, Show, Read, Typeable)
 
 data Var = Var RepID String
   deriving (Eq, Show, Read, Typeable)
- 
+
 -- the common fields are:
 -- * return type
 -- * salt, which can be changed to force re-evaluation of an expr + all depends
@@ -619,6 +619,14 @@ data Function = Function
   }
   -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
   -- deriving (Eq, Read)
+
+-- TODO is this safe enough?
+instance Eq Function where
+  f1 == f2 = fName   f1 == fName   f2
+          && fOpChar f1 == fOpChar f2
+          && fInputs f1 == fInputs f2
+          && fOutput f1 == fOutput f2
+          && fTags   f1 == fTags   f2
 
 data NewRules
   = NewRules (Rules ())

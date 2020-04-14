@@ -22,6 +22,7 @@ olModule = Module
   , mDesc = "Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree"
   , mTypes = [faa, ofr]
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
       [ orthofinder
       ]

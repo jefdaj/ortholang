@@ -44,6 +44,7 @@ olModule = Module
   , mDesc = "Run your own script and OrthoLang will assume the types are valid"
   , mTypes = []
   , mGroups = []
+  , mEncodings = []
   , mFunctions = [cheat]
   }
 

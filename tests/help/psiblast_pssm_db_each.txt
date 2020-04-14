@@ -1,0 +1,6 @@
+
+[num (number in scientific notation),
+ pssm (PSI-BLAST position-specific substitution matrix as ASCII),
+ list of faa (FASTA (amino acid)) encoded as blastdbs] -> list of bht (tab-separated table of blast hits (outfmt 6))s
+
+doc for functions/psiblast_pssm_db_each not written yet

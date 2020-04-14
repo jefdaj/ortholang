@@ -1,0 +1,4 @@
+
+[anytype.list] -> anytype.list.list
+
+doc for functions/leave_each_out not written yet

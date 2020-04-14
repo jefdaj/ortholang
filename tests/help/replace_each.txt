@@ -1,0 +1,4 @@
+
+[anytype, anytype, anytype.list] -> anytype.list
+
+doc for functions/replace_each not written yet

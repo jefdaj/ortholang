@@ -1,0 +1,4 @@
+
+[num (number in scientific notation), ht.list] -> ht.list
+
+doc for functions/filter_bitscore_each not written yet

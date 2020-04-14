@@ -1,0 +1,11 @@
+
+[num (number in scientific notation),
+ num (number in scientific notation),
+ num (number in scientific notation)] -> num (number in scientific notation).list
+
+Arguments: start, stop, step
+
+A range made by repeatedly adding a constant step value.
+
+Examples:
+range_add 1 10 2 -> [1, 3, 5, 7, 9]

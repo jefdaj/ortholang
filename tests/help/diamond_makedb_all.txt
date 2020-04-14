@@ -1,0 +1,4 @@
+
+[list of faa (FASTA (amino acid))s] -> dmnd (DIAMOND database)
+
+Create one DIAMOND database from mutliple protein FASTA files.

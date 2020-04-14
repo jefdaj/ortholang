@@ -1,0 +1,4 @@
+
+[str (string)] -> fna (FASTA (nucleic acid)).list
+
+doc for functions/load_fna_glob not written yet

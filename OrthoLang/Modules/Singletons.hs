@@ -29,6 +29,7 @@ olModule = Module
   , mDesc = "Create, load, and download BLAST databases"
   , mTypes = []
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
     [ singletons -- TODO non-plural version too
     ]

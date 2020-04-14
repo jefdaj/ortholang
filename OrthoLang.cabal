@@ -27,6 +27,7 @@ data-files:         examples/scripts/*.ol,
                     tests/tmpfiles/*.txt,
                     tests/parse/*.txt,
                     tests/expand/*.txt,
+                    tests/help/*.txt,
                     scripts/wrappers/*.sh
 
 source-repository head
@@ -173,6 +174,7 @@ library
                     OrthoLang.Test.Parse.Arbitrary,
                     OrthoLang.Test.Parse.Examples,
                     OrthoLang.Test.Repl,
+                    OrthoLang.Test.Help,
                     OrthoLang.Test.Scripts,
                     OrthoLang.Test.Versions
 

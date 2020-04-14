@@ -1,0 +1,7 @@
+The .gbk extension is for genbank files.
+
+doc for types/gbk not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

@@ -19,6 +19,7 @@ olModule = Module
             \sublists, use in combination with the 'repeat' function"
   , mTypes = []
   , mGroups = []
+  , mEncodings = []
   , mFunctions = [sample]
   }
 

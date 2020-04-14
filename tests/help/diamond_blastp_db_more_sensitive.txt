@@ -1,0 +1,5 @@
+
+[num (number in scientific notation), faa (FASTA (amino acid)),
+ dmnd (DIAMOND database)] -> bht (tab-separated table of blast hits (outfmt 6))
+
+doc for functions/diamond_blastp_db_more_sensitive not written yet

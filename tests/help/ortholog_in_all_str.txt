@@ -1,0 +1,4 @@
+
+[list of list of str (string)ss, list of list of str (string)ss] -> list of list of str (string)ss
+
+Version of ortholog_in_all that expects arguments already extracted.

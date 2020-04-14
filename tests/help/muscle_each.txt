@@ -1,0 +1,4 @@
+
+[list of faa (FASTA (amino acid))s] -> list of aln (multiple sequence alignment)s
+
+doc for functions/muscle_each not written yet

@@ -1,0 +1,20 @@
+
+[num (number in scientific notation), fna (FASTA (nucleic acid)),
+ fna (FASTA (nucleic acid))] -> bht (tab-separated table of blast hits (outfmt 6))
+
+BLAST one file of nucleic acid (DNA) sequences against another,
+comparing all possible protein translations.
+
+WARNING: this is slow. It's equivalent to 6 * 6 = 36 blastp searches.
+
+Inputs:
+  an e-value cutoff
+  a query   FASTA nucleic acid file
+  a subject FASTA nucleic acid file
+
+Algorithm:
+  make a nucleotide database from the subject sequences
+  BLAST translations of the query sequences against translations of the database
+
+Output:
+  a table of all hits below the cutoff

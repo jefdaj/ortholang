@@ -1,0 +1,4 @@
+
+[str (string)] -> gbk (genbank)
+
+doc for functions/load_gbk not written yet

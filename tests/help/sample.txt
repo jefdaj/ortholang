@@ -1,0 +1,6 @@
+
+[num (number in scientific notation), anytype.list] -> anytype.list
+
+Take a random sample from a list. Can be used to test your
+algorithm on a smaller set of genes/genomes, or as the 'permute'
+step in the permute, repeat, summarize (PRS) pattern.

@@ -10,6 +10,7 @@ olModule = Module
   , mDesc = "Test module for the 'new rules' infrastructure"
   , mTypes = [str]
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
       [ test1
       , test2

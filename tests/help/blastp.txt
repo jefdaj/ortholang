@@ -1,0 +1,17 @@
+
+[num (number in scientific notation), faa (FASTA (amino acid)),
+ faa (FASTA (amino acid))] -> bht (tab-separated table of blast hits (outfmt 6))
+
+BLAST one file of amino acid (protein) sequences against another.
+
+Inputs:
+  an e-value cutoff
+  a query   FASTA amino acid file
+  a subject FASTA amino acid file
+
+Algorithm:
+  make a protein database from the subject sequences
+  BLAST the query sequences against the database
+
+Output:
+  a table of all hits below the cutoff

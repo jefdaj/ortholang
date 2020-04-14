@@ -11,6 +11,7 @@ olModule = Module
   , mDesc = "Align sequences with MUSCLE"
   , mTypes = [faa, aln]
   , mGroups = []
+  , mEncodings = []
   , mFunctions = [muscle, muscleEach]
   }
 

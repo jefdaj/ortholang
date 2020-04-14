@@ -1,0 +1,4 @@
+
+[faa (FASTA (amino acid))] -> aln (multiple sequence alignment)
+
+doc for functions/muscle not written yet

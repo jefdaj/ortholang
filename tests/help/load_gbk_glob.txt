@@ -1,0 +1,4 @@
+
+[str (string)] -> gbk (genbank).list
+
+doc for functions/load_gbk_glob not written yet

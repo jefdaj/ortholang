@@ -1,0 +1,5 @@
+
+[num (number in scientific notation),
+ list of list of str (string)ss, list of list of str (string)ss] -> list of list of str (string)ss
+
+doc for functions/ortholog_in_max_str not written yet

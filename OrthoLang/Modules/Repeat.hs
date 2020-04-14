@@ -23,6 +23,7 @@ olModule = Module
   , mDesc = "Repeatdly re-calculate variables using different random salts"
   , mTypes = []
   , mGroups = []
+  , mEncodings = []
   , mFunctions = [repeatN]
   }
 

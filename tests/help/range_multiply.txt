@@ -1,0 +1,6 @@
+
+[num (number in scientific notation),
+ num (number in scientific notation),
+ num (number in scientific notation)] -> num (number in scientific notation).list
+
+doc for functions/range_multiply not written yet

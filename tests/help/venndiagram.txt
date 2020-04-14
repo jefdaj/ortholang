@@ -1,0 +1,4 @@
+
+[anytype.list.list] -> png (plot image)
+
+doc for functions/venndiagram not written yet

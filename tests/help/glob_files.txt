@@ -1,0 +1,4 @@
+
+[str (string)] -> list of path (a somewhat-sanitized path (or url))s
+
+doc for functions/glob_files not written yet

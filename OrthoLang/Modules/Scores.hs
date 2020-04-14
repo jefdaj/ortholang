@@ -31,6 +31,7 @@ olModule = Module
   , mDesc = "Score repeated variables for plotting"
   , mTypes = []
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
     [ scoreRepeats
     , extractScores

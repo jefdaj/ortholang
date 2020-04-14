@@ -24,6 +24,7 @@ import qualified OrthoLang.Test.Versions as V
 import qualified OrthoLang.Test.Parse    as P
 import qualified OrthoLang.Test.Repl     as R
 import qualified OrthoLang.Test.Scripts  as S
+import qualified OrthoLang.Test.Help     as H
 
 {-|
 This is weird because all tests are always created;
@@ -34,7 +35,7 @@ because then they all match, ruining the filter.
 mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkTests cfg ref ids dRef = mkTestGroup cfg ref ids dRef "all tests" tests
   where
-    tests  = [V.mkTests, P.mkTests, R.mkTests, S.mkTests]
+    tests  = [V.mkTests, H.mkTests, P.mkTests, R.mkTests, S.mkTests]
 
 mkTestConfig :: Config -> FilePath -> Config
 mkTestConfig cfg dir =

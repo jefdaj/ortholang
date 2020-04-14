@@ -43,6 +43,7 @@ module OrthoLang.Core
   , prettyShow
 
   -- * Things used in Test
+  , help
   , spaceChars
   , escapeChars
   , literalChars

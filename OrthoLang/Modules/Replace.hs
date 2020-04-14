@@ -51,6 +51,7 @@ olModule = Module
   , mDesc = "Replace variables in the script to see how the results change"
   , mTypes = []
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
       [ replace
       , replaceEach

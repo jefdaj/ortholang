@@ -1,0 +1,12 @@
+
+[num (number in scientific notation), fna (FASTA (nucleic acid)),
+ list of fna (FASTA (nucleic acid)) encoded as blastdbs] -> list of bht (tab-separated table of blast hits (outfmt 6))s
+
+Like blastn_db, but BLASTs against a list of databases.
+Useful when you have one database per group and want to separate the hits.
+
+For example:
+  blastn_db_each 1e-20 my_species [bacteria, plants, fungi, metazoans]
+
+Note that you should probably use a protein sequence search instead for
+something like this.

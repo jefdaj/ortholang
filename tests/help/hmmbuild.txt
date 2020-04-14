@@ -1,0 +1,4 @@
+
+[aln (multiple sequence alignment)] -> hmm (hidden markov model)
+
+doc for functions/hmmbuild not written yet

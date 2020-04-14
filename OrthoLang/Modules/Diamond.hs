@@ -22,6 +22,7 @@ olModule = Module
   , mDesc = "Accelerated BLAST compatible local sequence aligner."
   , mTypes = [fna, faa, dmnd]
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
       [ diamondmakedb
       , diamondmakedbEach

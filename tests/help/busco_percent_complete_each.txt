@@ -1,0 +1,4 @@
+
+[list of bsr (BUSCO results)s] -> list of num (number in scientific notation)s
+
+doc for functions/busco_percent_complete_each not written yet

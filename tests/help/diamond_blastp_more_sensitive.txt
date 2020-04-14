@@ -1,0 +1,5 @@
+
+[num (number in scientific notation), faa (FASTA (amino acid)),
+ faa (FASTA (amino acid))] -> bht (tab-separated table of blast hits (outfmt 6))
+
+doc for functions/diamond_blastp_more_sensitive not written yet

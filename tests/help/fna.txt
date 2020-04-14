@@ -1,0 +1,7 @@
+The .fna extension is for FASTA (nucleic acid) files.
+
+doc for types/fna not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

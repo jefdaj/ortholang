@@ -1,0 +1,7 @@
+The .dmnd extension is for DIAMOND database files.
+
+doc for types/dmnd not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

@@ -1,0 +1,6 @@
+
+[num (number in scientific notation),
+ list of faa (FASTA (amino acid))s,
+ faa (FASTA (amino acid)) encoded as blastdb] -> list of pssm (PSI-BLAST position-specific substitution matrix as ASCII)s
+
+doc for functions/psiblast_train_pssms_db not written yet

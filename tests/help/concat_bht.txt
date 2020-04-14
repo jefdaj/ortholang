@@ -1,0 +1,4 @@
+
+[list of bht (tab-separated table of blast hits (outfmt 6))s] -> bht (tab-separated table of blast hits (outfmt 6))
+
+doc for functions/concat_bht not written yet

@@ -48,6 +48,7 @@ olModule = Module
   , mDesc = "Load generic lists"
   , mTypes = [str, path]
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
     [ loadListPath
     , loadList

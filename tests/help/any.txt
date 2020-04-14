@@ -1,0 +1,5 @@
+
+[anytype.list.list] -> anytype.list
+
+Given a list of lists, returns the unique elements from all of them.
+Like & (set union) but with a flexible number of arguments.

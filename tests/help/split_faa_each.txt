@@ -1,0 +1,4 @@
+
+[list of faa (FASTA (amino acid))s] -> list of list of faa (FASTA (amino acid))ss
+
+doc for functions/split_faa_each not written yet

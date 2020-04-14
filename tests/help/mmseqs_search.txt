@@ -1,0 +1,4 @@
+
+[num (number in scientific notation), fa, fa] -> bht (tab-separated table of blast hits (outfmt 6))
+
+Find matching sequences in two fasta files, similar to BLAST.

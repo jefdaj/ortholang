@@ -1,0 +1,5 @@
+
+[bht (tab-separated table of blast hits (outfmt 6)),
+ bht (tab-separated table of blast hits (outfmt 6))] -> bht (tab-separated table of blast hits (outfmt 6))
+
+doc for functions/reciprocal_best not written yet

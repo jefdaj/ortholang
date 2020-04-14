@@ -16,6 +16,7 @@ olModule = Module
   , mDesc = "Generate ranges of numbers"
   , mTypes = [num]
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
     [ mkRangeFn "range_add"      3
     , mkRangeFn "range_exponent" 4 -- TODO for this, need functions that take 4 args?

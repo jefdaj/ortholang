@@ -1,0 +1,7 @@
+The .crb extension is for tab-separated table of conditional reciprocal blast best hits files.
+
+doc for types/crb not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

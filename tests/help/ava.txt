@@ -1,0 +1,7 @@
+The .ava extension is for all-vs-all hit table listing files.
+
+doc for types/ava not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

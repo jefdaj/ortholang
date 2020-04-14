@@ -1,0 +1,10 @@
+
+[num (number in scientific notation), fna (FASTA (nucleic acid)),
+ fna (FASTA (nucleic acid))] -> bht (tab-separated table of blast hits (outfmt 6))
+
+Like blastn, but faster at finding very similar matches.
+
+This is probably what you think of as blastn if you've been using the NCBI
+site. See this blog post for details:
+
+http://www.sixthresearcher.com/when-blast-is-not-blast/

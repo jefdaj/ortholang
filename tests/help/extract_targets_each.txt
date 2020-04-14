@@ -1,0 +1,4 @@
+
+[ht.list] -> list of list of str (string)ss
+
+doc for functions/extract_targets_each not written yet

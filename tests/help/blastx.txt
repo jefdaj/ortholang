@@ -1,0 +1,18 @@
+
+[num (number in scientific notation), fna (FASTA (nucleic acid)),
+ faa (FASTA (amino acid))] -> bht (tab-separated table of blast hits (outfmt 6))
+
+BLAST nucleic acid (DNA) sequences against amino acid (protein) sequences.
+
+Inputs:
+  an e-value cutoff
+  a query   FASTA nucleic acid file
+  a subject FASTA amino acid file
+
+Algorithm:
+  make a protein database from the subject protein sequences
+  translate the query DNA sequences (all 6 reading frames)
+  BLAST the resulting query proteins against the database
+
+Output:
+  a table of all hits below the cutoff

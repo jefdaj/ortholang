@@ -1,0 +1,15 @@
+
+[num (number in scientific notation), fna (FASTA (nucleic acid)),
+ list of fna (FASTA (nucleic acid))s] -> list of bht (tab-separated table of blast hits (outfmt 6))s
+
+Like blastn_rev, but BLASTs a list of sequence files against the first one.
+
+The _rev_each functions are useful in situations where you would like to use an
+_rbh_each, but can't because the forward and reverse searches need to be done
+differently. They do the reverse half.
+
+For example if my_species is faa and species1, 2, and 3 are fna:
+
+  fwds = tblastn_each    1e-20 my_species [species1, species2, species3]
+  revs = blastx_rev_each 1e-20 my_species [species1, species2, species3]
+  rbhs = reciprocal_best_each fwds revs

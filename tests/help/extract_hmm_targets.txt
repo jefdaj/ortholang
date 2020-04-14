@@ -1,0 +1,4 @@
+
+[hht (HMMER hits table)] -> list of str (string)s
+
+doc for functions/extract_hmm_targets not written yet

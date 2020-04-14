@@ -29,6 +29,7 @@ olModule = Module
   , mDesc = "Set operations for use with lists"
   , mTypes = []
   , mGroups = []
+  , mEncodings = []
   , mFunctions = some : map mkSetFunction setOpDescs
   }
 

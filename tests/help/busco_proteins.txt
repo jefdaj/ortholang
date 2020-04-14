@@ -1,0 +1,4 @@
+
+[blh (BUSCO lineage HMMs), faa (FASTA (amino acid))] -> bsr (BUSCO results)
+
+doc for functions/busco_proteins not written yet

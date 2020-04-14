@@ -1,0 +1,4 @@
+
+[fna (FASTA (nucleic acid)), fa.list] -> list of crb (tab-separated table of conditional reciprocal blast best hits)s
+
+doc for functions/crb_blast_each not written yet

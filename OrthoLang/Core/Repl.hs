@@ -249,18 +249,22 @@ cmds cfg =
 -- TODO update to include :config getting + setting
 -- TODO if possible, make this open in `less`?
 -- TODO why does this one have a weird path before the :help text?
+-- TODO bop help by mapping to the prefixOf version
 cmdHelp :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdHelp st@(_, cfg, _, _, _) hdl line = do
-  doc <- case words line of
-           [w] -> headOrDie "failed to look up cmdHelp content" $ catMaybes
-                    [ fmap fHelp $ findFunction cfg w
-                    , fmap mHelp $ findModule   cfg w
-                    , fmap (tHelp cfg) $ findType cfg w
-                    -- TODO fix this , fmap (tHelp cfg) $ findGroup cfg w
-                    , Just $ getDoc ["notfound"]
-                    ]
-           _ -> getDoc ["repl"]
+  doc <- help cfg line
   hPutStrLn hdl doc >> return st
+
+help :: Config -> String -> IO String
+help cfg line = case words line of
+  [w] -> headOrDie "failed to look up cmdHelp content" $ catMaybes
+           [ fmap fHelp $ findFunction cfg w
+           , fmap mHelp $ findModule   cfg w
+           , fmap (tHelp cfg) $ findType cfg w
+           -- TODO fix this , fmap (tHelp cfg) $ findGroup cfg w
+           , Just $ getDoc ["notfound"]
+           ]
+  _ -> getDoc ["repl"]
 
 mHelp :: Module -> IO String
 mHelp m = getDoc ["modules" </> mName m]

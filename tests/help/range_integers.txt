@@ -1,0 +1,5 @@
+
+[num (number in scientific notation),
+ num (number in scientific notation)] -> num (number in scientific notation).list
+
+doc for functions/range_integers not written yet

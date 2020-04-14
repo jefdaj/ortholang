@@ -1,0 +1,4 @@
+
+[list of fna (FASTA (nucleic acid))s] -> list of faa (FASTA (amino acid))s
+
+doc for functions/translate_each not written yet

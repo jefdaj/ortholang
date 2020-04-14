@@ -13,6 +13,7 @@ olModule = Module
   , mDesc = "Generate random permutations of lists"
   , mTypes = []
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
     [ leaveEachOut
     -- TODO sample n elements n times

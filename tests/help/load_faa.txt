@@ -1,0 +1,4 @@
+
+[str (string)] -> faa (FASTA (amino acid))
+
+doc for functions/load_faa not written yet

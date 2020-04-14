@@ -1,0 +1,4 @@
+
+[fa, list of list of str (string)ss] -> fa.list
+
+doc for functions/extract_seqs_each not written yet

@@ -1,0 +1,4 @@
+
+[str (string)] -> path (a somewhat-sanitized path (or url))
+
+doc for functions/load_list not written yet

@@ -1,0 +1,4 @@
+
+[ht] -> ht
+
+Given a hit table, returns a smaller hit table with only the best hit per query gene ID.

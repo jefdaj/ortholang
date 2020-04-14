@@ -17,6 +17,8 @@ olModule :: Module
 olModule = Module
   { mName = "SonicParanoid" , mDesc = "Very fast, accurate, and easy orthology."
   , mTypes = [faa, fna, spr]
+  , mGroups = []
+  , mEncodings = []
   , mFunctions =
       [ sonicparanoid
       ]

@@ -1,0 +1,7 @@
+The .png extension is for plot image files.
+
+doc for types/png not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

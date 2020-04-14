@@ -1,0 +1,4 @@
+
+[blh (BUSCO lineage HMMs), list of fna (FASTA (nucleic acid))s] -> list of bsr (BUSCO results)s
+
+doc for functions/busco_transcriptome_each not written yet

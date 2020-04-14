@@ -1,0 +1,4 @@
+
+[str (string)] -> faa (FASTA (amino acid)).list
+
+doc for functions/load_faa_glob not written yet

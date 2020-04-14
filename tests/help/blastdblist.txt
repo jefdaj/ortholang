@@ -1,0 +1,8 @@
+
+[str (string)] -> list of str (string)s
+
+List NCBI BLAST databases for download with blastdbget_nucl and _prot.
+
+WARNING: Unfortunately, you have to check outside ortholang whether the
+database you're interested in is nucleic acid or protein and use the
+proper get function.

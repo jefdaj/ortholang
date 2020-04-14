@@ -1,0 +1,4 @@
+
+[list of faa (FASTA (amino acid))s] -> faa (FASTA (amino acid))
+
+doc for functions/concat_faa not written yet

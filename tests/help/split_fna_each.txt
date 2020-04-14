@@ -1,0 +1,4 @@
+
+[list of fna (FASTA (nucleic acid))s] -> list of list of fna (FASTA (nucleic acid))ss
+
+doc for functions/split_fna_each not written yet

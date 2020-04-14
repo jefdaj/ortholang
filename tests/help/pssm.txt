@@ -1,0 +1,7 @@
+The .pssm extension is for PSI-BLAST position-specific substitution matrix as ASCII files.
+
+doc for types/pssm not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

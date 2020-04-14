@@ -27,6 +27,7 @@ olModule = Module
   , mDesc = "Benchmarking Universal Single-Copy Orthologs"
   , mTypes = [blh, bsr, bst, faa]
   , mGroups = []
+  , mEncodings = []
   , mFunctions =
       [ loadLineage
       , buscoListLineages

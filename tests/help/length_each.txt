@@ -1,0 +1,4 @@
+
+[ll.list] -> list of num (number in scientific notation)s
+
+doc for functions/length_each not written yet

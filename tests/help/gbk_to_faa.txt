@@ -1,0 +1,4 @@
+
+[str (string), gbk (genbank)] -> faa (FASTA (amino acid))
+
+doc for functions/gbk_to_faa not written yet

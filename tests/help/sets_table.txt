@@ -1,0 +1,4 @@
+
+[lit.list.list] -> tsv (set membership table (spreadsheet))
+
+doc for functions/sets_table not written yet

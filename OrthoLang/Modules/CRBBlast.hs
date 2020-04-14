@@ -17,6 +17,7 @@ olModule = Module
   , mDesc = "Conditional reciprocal BLAST best hits (Aubry et al. 2014)"
   , mTypes = [fna, faa, crb]
   , mGroups = [fa]
+  , mEncodings = []
   , mFunctions =
     [ blastCRB
     , blastCRBEach -- TODO someting nicer than this!

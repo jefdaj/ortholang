@@ -1,0 +1,7 @@
+The .search extension is for intermediate table describing biomartr searches files.
+
+doc for types/search not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

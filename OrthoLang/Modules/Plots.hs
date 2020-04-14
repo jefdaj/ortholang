@@ -20,6 +20,7 @@ olModule = Module
   , mDesc = "Generate half-decent plots"
   , mTypes = [png]
   , mGroups = []
+  , mEncodings = []
   , mFunctions = [histogram, linegraph, scatterplot, venndiagram] -- TODO bargraph
   }
 

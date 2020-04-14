@@ -1,0 +1,5 @@
+
+[num (number in scientific notation),
+ list of hmm (hidden markov model)s, faa (FASTA (amino acid))] -> hht (HMMER hits table)
+
+doc for functions/hmmsearch_each not written yet

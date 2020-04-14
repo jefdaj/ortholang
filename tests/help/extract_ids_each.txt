@@ -1,0 +1,4 @@
+
+[fa.list] -> list of list of str (string)ss
+
+doc for functions/extract_ids_each not written yet

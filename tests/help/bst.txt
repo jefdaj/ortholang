@@ -1,0 +1,7 @@
+The .bst extension is for BUSCO scores table files.
+
+doc for types/bst not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

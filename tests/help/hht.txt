@@ -1,0 +1,7 @@
+The .hht extension is for HMMER hits table files.
+
+doc for types/hht not written yet
+
+You can create them with these functions:
+
+And use them with these functions:

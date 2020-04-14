@@ -1,0 +1,4 @@
+
+[list of aln (multiple sequence alignment)s] -> list of hmm (hidden markov model)s
+
+doc for functions/hmmbuild_each not written yet

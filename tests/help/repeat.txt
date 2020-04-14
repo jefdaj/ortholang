@@ -1,0 +1,4 @@
+
+[anytype, anytype, num (number in scientific notation)] -> anytype.list
+
+doc for functions/repeat not written yet

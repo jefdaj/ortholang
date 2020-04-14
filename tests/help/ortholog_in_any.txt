@@ -1,0 +1,10 @@
+
+[og, list of faa (FASTA (amino acid))s] -> list of list of str (string)ss
+
+Arguments:
+  orthogroup finder results
+  list of proteomes (fasta files)
+
+Returns: list of lists of strings
+
+Filter a list of orthogroups to keep the ones with an ortholog in one of the given proteomes.

@@ -22,6 +22,7 @@ olModule = Module
   , mDesc = "Operations on files that can be treated like lists"
   , mTypes = [bht, crb, mms]
   , mGroups = [ll]
+  , mEncodings = []
   , mFunctions = [length, lengthEach]
   }
 
