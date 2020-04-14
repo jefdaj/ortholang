@@ -1,5 +1,5 @@
-fnaSmall = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
-faaSmall = load_faa "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa"
+fnaSmall = load_fna_path (to_path "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna")
+faaSmall = load_faa_path (to_path "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa")
 fnaSmallIDs = extract_ids fnaSmall
 faaSmallIDs = extract_ids faaSmall
 fnaSmallSeqs = extract_seqs fnaSmall fnaSmallIDs

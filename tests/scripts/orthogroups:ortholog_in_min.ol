@@ -1,4 +1,4 @@
-mycoplasma = load_faa_each (glob_files "examples/sequences/Mycoplasma_*_refseq.faa")
+mycoplasma = load_faa_glob "examples/sequences/Mycoplasma_*_refseq.faa"
 n_to_use = 4
 faas_to_use = sample n_to_use mycoplasma
 spres = orthofinder faas_to_use

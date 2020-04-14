@@ -1,8 +1,8 @@
 human = blastdbget_faa "human_est"
 swissprot = blastdbget_faa "swissprot"
-mycodb = makeblastdb_faa_all (load_faa_each (glob_files "examples/sequences/Mycoplasma_*_refseq.faa"))
-pcc7942 = load_faa "examples/sequences/PCC_7942_genes.faa"
-pcc6803 = load_fna "examples/sequences/PCC_6803_genes.fna"
+mycodb = makeblastdb_faa_all (load_faa_path_each (glob_files "examples/sequences/Mycoplasma_*_refseq.faa"))
+pcc7942 = load_faa_path (to_path "examples/sequences/PCC_7942_genes.faa")
+pcc6803 = load_fna_path (to_path "examples/sequences/PCC_6803_genes.fna")
 hits1 = tblastn 1.0e-50 pcc7942 pcc6803
 hits2 = tblastn_db 1.0e-50 pcc7942 (makeblastdb_fna pcc6803)
 result = "nothing so far"

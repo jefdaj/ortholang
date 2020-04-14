@@ -16,45 +16,50 @@
 |-- exprs
 |   |-- blastp_db
 |   |   `-- b6d4e4cdf4
-|   |       `-- 69be998a0e
-|   |           `-- cf9f5098fc
+|   |       `-- f69fe77c5f
+|   |           `-- 6313083a9e
 |   |               `-- result -> out
 |   |-- length
-|   |   `-- 6db613dd4c
+|   |   `-- 02932650f4
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 95f688921b
+|   |   |-- 32d8b91267
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- b4282cd31c
+|   |   `-- a025187c6c
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_faa
-|   |   |-- 3ddeac190c
-|   |   |   `-- result -> ../../../cache/load/0d8dfa261e.faa
-|   |   `-- f8a41afad4
-|   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
+|   |-- load_faa_path
+|   |   |-- 28d9c40d78
+|   |   |   `-- result -> ../../../cache/load/11bbf54fc6.faa
+|   |   `-- 928749424b
+|   |       `-- result -> ../../../cache/load/0d8dfa261e.faa
 |   |-- makeblastdb_faa
-|   |   `-- 1898488812
+|   |   `-- 5aa84ee02e
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- repeat
-|   |   `-- fbf4abf865
-|   |       `-- 0018afe231
-|   |           `-- 79d689624d
+|   |   `-- 44540ae330
+|   |       `-- 72d32bf734
+|   |           `-- 8c6d608a61
 |   |               `-- result -> ../../../../../cache/lines/...
-|   `-- str
-|       |-- 40edb92618
+|   |-- str
+|   |   |-- 40edb92618
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- c58447896b
+|   |       `-- result -> ../../../cache/lines/...
+|   `-- to_path
+|       |-- 3ddeac190c
 |       |   `-- result -> ../../../cache/lines/...
-|       `-- c58447896b
+|       `-- f8a41afad4
 |           `-- result -> ../../../cache/lines/...
 |-- reps
-|   `-- 19132582a8
-|       |-- fwdHits.bht -> ../../exprs/blastp_db/b6d4e4cdf4/69be998a0e/cf9f5098fc/result
-|       `-- result -> ../../reps/19132582a8/fwdHits.bht
+|   `-- 3616f24050
+|       |-- fwdHits.bht -> ../../exprs/blastp_db/b6d4e4cdf4/f69fe77c5f/6313083a9e/result
+|       `-- result -> ../../reps/3616f24050/fwdHits.bht
 `-- vars
-    |-- maga.faa -> ../exprs/load_faa/3ddeac190c/result
-    |-- mgen.faa -> ../exprs/load_faa/f8a41afad4/result
-    `-- result -> ../exprs/length/6db613dd4c/result
+    |-- maga.faa -> ../exprs/load_faa_path/928749424b/result
+    |-- mgen.faa -> ../exprs/load_faa_path/28d9c40d78/result
+    `-- result -> ../exprs/length/02932650f4/result
 
-31 directories, 26 files
+34 directories, 28 files

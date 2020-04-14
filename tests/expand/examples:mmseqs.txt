@@ -1,8 +1,8 @@
-maga = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
-mbov = load_faa "examples/sequences/Mycoplasma_bovis_small.fa"
+maga = load_faa_path (to_path "examples/sequences/Mycoplasma_agalactiae_small.faa")
+mbov = load_faa_path (to_path "examples/sequences/Mycoplasma_bovis_small.fa")
 hits1 = mmseqs_search 1.0e-20 maga mbov
 genes1 = extract_queries hits1
-others = load_faa_each (glob_files "examples/sequences/Mycoplasma_*_refseq.faa") ~ [maga]
+others = load_faa_glob "examples/sequences/Mycoplasma_*_refseq.faa" ~ [maga]
 hits2 = mmseqs_search_db 1.0e-20 maga (mmseqs_createdb_all others)
 genes2 = extract_queries hits2
 result = genes1 ~ genes2

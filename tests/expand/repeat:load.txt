@@ -1,4 +1,4 @@
-maga = load_faa "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa"
-mgen = load_faa "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa"
+maga = load_faa_path (to_path "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa")
+mgen = load_faa_path (to_path "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa")
 fwdHits = blastp 1.0e-5 maga mgen
 result = length (repeat fwdHits mgen 10)

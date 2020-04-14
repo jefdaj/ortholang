@@ -1,5 +1,5 @@
 [ 
     ( Var ( RepID Nothing ) "result" 
-    , Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/*.faa" ]
+    , Fun path.list Nothing [] "glob_files" [ Lit str "examples/sequences/*.faa" ]
     ) 
 ]

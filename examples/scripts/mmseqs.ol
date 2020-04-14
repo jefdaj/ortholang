@@ -6,7 +6,7 @@ genes1 = extract_queries hits1
 
 # list M. agalactiae genes with good hits in every Mycoplasma species
 # the [maga] part subtracts maga from the others list
-others = load_faa_each (glob_files "examples/sequences/Mycoplasma_*_refseq.faa") ~ [maga]
+others = load_faa_glob "examples/sequences/Mycoplasma_*_refseq.faa" ~ [maga]
 hits2  = mmseqs_search_db 1e-20 maga (mmseqs_createdb_all others)
 genes2 = extract_queries hits2
 

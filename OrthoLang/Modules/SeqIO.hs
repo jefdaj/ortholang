@@ -11,7 +11,7 @@ import OrthoLang.Core
 
 import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
-import OrthoLang.Modules.Load       (mkLoad, mkLoadList, mkLoaders)
+import OrthoLang.Modules.Load       (mkLoadPath, mkLoad, mkLoadPathEach, mkLoadEach, mkLoadGlob, path)
 import System.Exit                 (ExitCode(..))
 import Data.Maybe (fromJust)
 
@@ -19,7 +19,7 @@ olModule :: Module
 olModule = Module
   { mName = "SeqIO"
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
-  , mTypes = [gbk, faa, fna]
+  , mTypes = [gbk, faa, fna, path]
   , mGroups = [fa]
   , mEncodings = []
   , mFunctions =
@@ -32,13 +32,38 @@ olModule = Module
     , mkConcat faa  , mkConcatEach faa
     , splitFasta faa, splitFastaEach faa
     , splitFasta fna, splitFastaEach fna
+
+    , loadFnaPath, loadFna, loadFnaPathEach, loadFnaEach, loadFnaGlob
+    , loadFaaPath, loadFaa, loadFaaPathEach, loadFaaEach, loadFaaGlob
+    , loadGbkPath, loadGbk, loadGbkPathEach, loadGbkEach, loadGbkGlob
+
+    -- , mkLoad True fna, mkLoadEach True fna, mkLoadGlob True fna
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
-    ++ mkLoaders True fna
-    ++ mkLoaders True faa
-    ++ mkLoaders False gbk -- TODO should seqids be hashed here too?
+    -- ++ mkLoaders True fna
+    -- ++ mkLoaders True fna
+    -- ++ mkLoaders True faa
+    -- ++ mkLoaders False gbk -- TODO should seqids be hashed here too?
   }
+
+loadFnaPath     = mkLoadPath     True "load_fna_path"      (Exactly fna)
+loadFnaPathEach = mkLoadPathEach True "load_fna_path_each" (Exactly fna)
+loadFna         = mkLoad              "load_fna"           loadFnaPath
+loadFnaEach     = mkLoadEach          "load_fna_each"      loadFnaPathEach
+loadFnaGlob     = mkLoadGlob          "load_fna_glob"      loadFnaPathEach
+
+loadFaaPath     = mkLoadPath     True "load_faa_path"      (Exactly faa)
+loadFaaPathEach = mkLoadPathEach True "load_faa_path_each" (Exactly faa)
+loadFaa         = mkLoad              "load_faa"           loadFaaPath
+loadFaaEach     = mkLoadEach          "load_faa_each"      loadFaaPathEach
+loadFaaGlob     = mkLoadGlob          "load_faa_glob"      loadFaaPathEach
+
+loadGbkPath     = mkLoadPath     False "load_gbk_path"      (Exactly gbk)
+loadGbkPathEach = mkLoadPathEach False "load_gbk_path_each" (Exactly gbk)
+loadGbk         = mkLoad               "load_gbk"           loadGbkPath
+loadGbkEach     = mkLoadEach           "load_gbk_each"      loadGbkPathEach
+loadGbkGlob     = mkLoadGlob           "load_gbk_glob"      loadGbkPathEach
 
 gbk :: Type
 gbk = Type
@@ -75,7 +100,11 @@ fna = Type
 -- TODO should these automatically fill in the "CDS" string?
 
 gbkToFaa :: Function
-gbkToFaa = compose1 "gbk_to_faa" [ReadsFile] gbkToFaaRawIDs $ mkLoad True "load_faa" (Exactly faa)
+gbkToFaa = newMacro "gbk_to_faa" [Exactly str, Exactly gbk] (Exactly faa) mGbkToFaa [ReadsFile]
+
+mGbkToFaa :: MacroExpansion
+mGbkToFaa _ (Fun r ms ds n [s, g]) = Fun r ms ds "load_faa_path" [Fun r ms ds (n ++ "_rawids") [s, g]]
+mGbkToFaa _ e = error "modules.seqio.mGbkToFaa" $ "bad argument: " ++ show e
 
 gbkToFaaRawIDs :: Function
 gbkToFaaRawIDs = Function
@@ -92,7 +121,12 @@ gbkToFaaRawIDs = Function
     name = "gbk_to_faa_rawids"
 
 gbkToFna :: Function
-gbkToFna = compose1 "gbk_to_fna" [ReadsFile] gbkToFnaRawIDs $ mkLoad True "load_fna" (Exactly fna)
+-- gbkToFna = compose1 "gbk_to_fna" [ReadsFile] loadFna gbkToFnaRawIDs
+gbkToFna = newMacro "gbk_to_fna" [Exactly str, Exactly gbk] (Exactly fna) mGbkToFna [ReadsFile]
+
+mGbkToFna :: MacroExpansion
+mGbkToFna _ (Fun r ms ds n [s, g]) = Fun r ms ds "load_fna_path" [Fun r ms ds (n ++ "_rawids") [s, g]]
+mGbkToFna _ e = error "modules.seqio.mGbkToFna" $ "bad argument: " ++ show e
 
 gbkToFnaRawIDs :: Function
 gbkToFnaRawIDs = Function
@@ -108,8 +142,11 @@ gbkToFnaRawIDs = Function
   where
     name = "gbk_to_fna_rawids"
 
+-- TODO fix this!
 gbkToFaaEach :: Function
-gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] gbkToFaaRawIDsEach $ mkLoadList True "load_faa_each" (Exactly faa)
+-- gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] gbkToFaaRawIDsEach $ mkLoadEach True "load_faa_each" (Exactly faa)
+gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] loadFaaEach gbkToFaaRawIDsEach
+-- gbkToFaaEach = newMacro "gbk_to_faa_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOF fna) mGbkToFaaEach [ReadsFile]
 
 gbkToFaaRawIDsEach :: Function
 gbkToFaaRawIDsEach = Function
@@ -126,7 +163,8 @@ gbkToFaaRawIDsEach = Function
     name = "gbk_to_faa_rawids_each"
 
 gbkToFnaEach :: Function
-gbkToFnaEach = compose1 "gbk_to_fna_each" [ReadsFile] gbkToFnaRawIDsEach $ mkLoadList True "load_fna_each" (Exactly fna)
+-- gbkToFnaEach = compose1 "gbk_to_fna_each" [ReadsFile] gbkToFnaRawIDsEach $ mkLoadEach True "load_fna_each" (Exactly fna)
+gbkToFnaEach = compose1 "gbk_to_fna_each" [ReadsFile] loadFnaEach gbkToFnaRawIDsEach
 
 gbkToFnaRawIDsEach :: Function
 gbkToFnaRawIDsEach = Function
@@ -338,7 +376,7 @@ translateEach = Function
 
 -- TODO how to reuse loadFaa from main modules list?
 -- translateEach :: Function
--- translateEach = compose1 "translate_each" [ReadsFile] translateRawIDsEach $ mkLoadList True "load_faa_each" (Exactly faa)
+-- translateEach = compose1 "translate_each" [ReadsFile] translateRawIDsEach $ mkLoadEach True "load_faa_each" (Exactly faa)
 
 --------------
 -- concat_* --

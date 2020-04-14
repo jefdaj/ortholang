@@ -2,9 +2,9 @@
 # each loads two files and converts them to one proteome
 
 # you have multiple similar files you want to combine into one variable
-pcc7942v1 = concat_faa (gbk_to_faa_each "cds" (load_gbk_each
+pcc7942v1 = concat_faa (gbk_to_faa_each "cds" (load_gbk_each (to_path_each
                                                 ["examples/sequences/PCC_7942_chr.gbk",
-                                                 "examples/sequences/PCC_7942_pANL.gbk"]))
+                                                 "examples/sequences/PCC_7942_pANL.gbk"])))
 
 # you want to make one variable (file), but need to get the parts in different ways
 # for example, one of these is a genbank file and the other is fasta nucleic acid
@@ -22,7 +22,8 @@ pcc7942v3 = concat_faa [translate chr, gbk_to_faa "cds" panl]
 pcc7942v4 = concat_faa
               (gbk_to_faa_each "cds"
                 (load_gbk_each
-                  (load_list "examples/genome-lists/pcc-7942-genbank.txt")))
+                  (to_path_each
+                    (load_list "examples/genome-lists/pcc-7942-genbank.txt"))))
 
 # you have multiple similar files and want to combine them into one variable,
 # but instead of an explicit list you name the files following a wildcard ("glob") pattern

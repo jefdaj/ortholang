@@ -7,7 +7,7 @@ module OrthoLang.Modules.Busco
 import Development.Shake
 import OrthoLang.Core
 import OrthoLang.Modules.Curl (curl)
-import OrthoLang.Modules.Load (mkLoad)
+import OrthoLang.Modules.Load (mkLoadPath, mkLoad)
 
 import Control.Monad             (when)
 import Data.List                 ((\\))
@@ -29,7 +29,7 @@ olModule = Module
   , mGroups = []
   , mEncodings = []
   , mFunctions =
-      [ loadLineage
+      [ loadLineagePath, loadLineage
       , buscoListLineages
       , buscoFetchLineage
       , buscoProteins       , buscoProteinsEach
@@ -65,8 +65,8 @@ bst = Type
   , tShow = defaultShow
   }
 
-loadLineage :: Function
-loadLineage = mkLoad False "load_lineage" (Exactly blh)
+loadLineagePath = mkLoadPath False "load_lineage_path" (Exactly blh)
+loadLineage     = mkLoad           "load_lineage"      loadLineagePath
 
 buscoCache :: Config -> Path
 buscoCache cfg = cacheDir cfg "busco"

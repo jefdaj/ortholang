@@ -593,7 +593,7 @@ type GlobalEnv = (Script, Config, LocksRef, IDsRef, DigestsRef)
 data FnTag
   = Stochastic -- do repeat, do cache/share
   | ReadsDirs  -- do not repeat, do not cache/share
-  | ReadsFile  -- do not repeat, do cache/share
+  | ReadsFile  -- do not repeat, do cache/share TODO ReadsFiles
   | ReadsURL   -- do not repeat, do not cache/share?
   | Broken     -- remove from functions list when loading
   | Hidden     -- remove from user-facing lists

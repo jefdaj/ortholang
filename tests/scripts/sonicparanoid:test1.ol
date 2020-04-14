@@ -1,4 +1,4 @@
-mycoplasma = load_faa_each (glob_files "examples/sequences/Mycoplasma*.faa")
+mycoplasma = load_faa_glob "examples/sequences/Mycoplasma*.faa"
 n_genomes = 8
 
 # TODO don't return just the pairs by default, but have an extractor fn for it

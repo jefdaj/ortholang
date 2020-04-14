@@ -1,3 +1,3 @@
-all_faas = load_faa_each (glob_files "examples/sequences/*.faa")
-small_faas = load_faa_each (glob_files "examples/sequences/*_small.faa")
+all_faas = load_faa_path_each (glob_files "examples/sequences/*.faa")
+small_faas = load_faa_path_each (glob_files "examples/sequences/*_small.faa")
 result = all_faas ~ small_faas
