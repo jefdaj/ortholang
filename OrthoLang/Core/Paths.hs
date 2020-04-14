@@ -117,6 +117,7 @@ module OrthoLang.Core.Paths
   , pathString
   , stringPath
   , isGeneric
+  , isURL
   , toGeneric
   , fromGeneric
 
@@ -158,7 +159,7 @@ import OrthoLang.Errors
 import OrthoLang.Core.Types
 
 import Data.Maybe                     (maybeToList)
-import Data.List                      (intersperse, isPrefixOf)
+import Data.List                      (intersperse, isInfixOf, isPrefixOf)
 import Data.List.Split                (splitOn)
 import Data.String.Utils              (replace)
 import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
@@ -207,13 +208,19 @@ isGeneric path
   || "$TMPDIR"  `isPrefixOf` path
   || "$WORKDIR" `isPrefixOf` path
 
--- TODO print warning on failure?
+-- This is hacky, but should work with multiple protocols like http(s):// and ftp://
+isURL :: String -> Bool
+isURL s = "://" `isInfixOf` take 10 s
+
 toPath :: DebugLocation -> Config -> FilePath -> Path
-toPath loc cfg = Path . checkPath (loc ++ ".toPath") . toGeneric cfg . normalize -- TODO take loc arg?
+toPath loc cfg s = Path $ checkPath loc' $ toGeneric cfg $ normalize s
   where
-    normalize p = case parseAbsFile p of
-      Nothing -> error "toPath" $ "can't parse: " ++ p
-      Just p' -> fromAbsFile p'
+    loc' = loc ++ ".toPath"
+    normalize p = if isURL s then s
+                  else case parseAbsFile p of
+                    Just p' -> fromAbsFile p'
+                    Nothing -> if isAbsolute p then p
+                               else cfgWorkDir cfg </> p
 
 fromPath :: DebugLocation -> Config -> Path -> FilePath
 fromPath loc cfg (Path path) = fromGeneric (loc ++ ".fromPath") cfg path
@@ -323,7 +330,7 @@ checkLits loc = map $ checkLit loc
 
 
 checkPath :: DebugLocation -> FilePath -> FilePath
-checkPath loc path = if isAbsolute path || isGeneric path
+checkPath loc path = if isAbsolute path || isGeneric path || isURL path
                        then path
                        else throw $ PathLitMixup loc $ "'" ++ path ++ "' looks like a literal"
 

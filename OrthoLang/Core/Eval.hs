@@ -182,7 +182,7 @@ prettyResult :: Config -> LocksRef -> Type -> Path -> Action Doc
 prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits "core.eval.prettyResult" $ fromPath loc cfg f
+    lits <- readLits "core.eval.prettyResult" $ fromPath loc cfg f -- TODO should this error on to_path? maybe it doesn't matter
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits

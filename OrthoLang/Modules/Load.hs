@@ -25,7 +25,7 @@ module OrthoLang.Modules.Load
 -- TODO should load_* be a macro that expands to load* (abs_path ...)?
 
 import OrthoLang.Core
-import OrthoLang.Modules.Curl (curl, isURL)
+import OrthoLang.Modules.Curl (curl)
 
 import qualified Data.Map.Strict as M
 
@@ -46,9 +46,9 @@ olModule :: Module
 olModule = Module
   { mName = "Load"
   , mDesc = "Load generic lists"
-  , mTypes = [str]
+  , mTypes = [str, path]
   , mGroups = []
-  , mFunctions = [loadList, globFiles, realpath, realpathEach]
+  , mFunctions = [loadList, globFiles, topath, topathEach]
   }
 
 ---------------
@@ -109,35 +109,68 @@ mkLoad hashSeqIDs name oSig = Function
 
 -- TODO naming convention: _path, _paths?
 -- mkLoadNew :: Function
--- mkLoadNew hashSeqIDs name oSig = compose1 name [ReadsDirs] (mkLoad hashSeqIDs (name ++ "_path") oSig) realpath
+-- mkLoadNew hashSeqIDs name oSig = compose1 name [ReadsDirs] (mkLoad hashSeqIDs (name ++ "_path") oSig) to_path
 
 -- TODO is the oSig needed to?
 -- TODO have the to_path fn return whatever string is used internally now, initially
 -- TODO this should still leave URL handling to the main load functions for now!
 -- TODO and it should be a special load-related expansion as done here, not a generic one for all strs!
 mLoad :: MacroExpansion
-mLoad scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_path" "" n) [Fun str ms ds "realpath" [p]]
+mLoad scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_path" "" n) [Fun path ms ds "to_path" [p]]
 mLoad _ e = error "modules.load.mLoad" $ "bad argument: " ++ show e
 
 mLoadEach :: MacroExpansion
-mLoadEach scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_path" "" n) [Fun (ListOf str) ms ds "realpath_each" [p]]
+mLoadEach scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_path" "" n) [Fun (ListOf path) ms ds "to_path_each" [p]]
 mLoadEach _ e = error "modules.load.mLoadEach" $ "bad argument: " ++ show e
 
 {-|
 Converts user-specified strs (which may represent relative or absolute paths)
 to properly formatted OrthoLang Paths. Used to sanitize inputs to the load_* functions
+Note the weird name keeps it from conflicting with 'OrthoLang.Core.Paths.toPath'
 -}
-realpath :: Function
-realpath = hidden $ newFnA1 "realpath" (Exactly str) (Exactly str) aRealpath [ReadsDirs]
+topath :: Function
+topath = hidden $ newFnA1 "to_path" (Exactly str) (Exactly path) aTopath [ReadsDirs]
 
-realpathEach :: Function
-realpathEach = hidden $ newFnA1 "realpath_each" (Exactly $ ListOf str) (Exactly $ ListOf str) aRealpathEach [ReadsDirs]
+-- TODO probably do it by mapping over to_path instead? whatever, just duplicate for now though and do that once mapping worksgq
+topathEach :: Function
+topathEach = hidden $ newFnA1 "to_path_each" (Exactly $ ListOf str) (Exactly $ ListOf path) aTopathEach [ReadsDirs]
 
-aRealpath :: NewAction1
-aRealpath (ExprPath out) userStrPath = undefined
+-- TODO can Paths be URLs? now they can :D so this is basically just toPath
+-- to_pathPure :: Config -> String -> Either String Path
+-- to_pathPure cfg userString =
+--   let loc = "modules.load.to_pathPure"
+--   in if isURL userString then Left userString
+--      else if isAbsolute userString then Right $ toPath loc cfg userString
+--      else Right $ toPath loc cfg (cfgWorkDir cfg </> userString)
 
-aRealpathEach :: NewAction1
-aRealpathEach (ExprPath out) userStrListPath = undefined
+path :: Type
+path = Type
+  { tExt = "path"
+  , tDesc = "a somewhat-sanitized path (or url)"
+  , tShow = defaultShow -- TODO will that work?
+  }
+
+-- TODO make up a few test cases: single url, single file (rel and abs), list of each of those, mixed list
+-- seems to work on the rel path so far but not the url
+-- TODO it should work whether or not the file actually exists! just concat on "$WORKDIR" if no slash
+-- TODO and no need to resolve symlinks here the way it does now, right?
+-- TODO hey the obvious thing: make a pure function, then have single + mapped action wrappers. easy to test!
+-- TODO hey make a new OrthoLang Type called path? it would capture the load types a bit better than str
+aTopath :: NewAction1
+aTopath (ExprPath outPath) strPath = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.load.aTopath"
+  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits loc strPath -- TODO safer!
+  let pth' = toPath loc cfg pth
+  writePath loc outPath pth'
+
+aTopathEach :: NewAction1
+aTopathEach (ExprPath outPath) strsPath = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.load.aTopathEach"
+  pths <- readLits loc strsPath -- TODO safer!
+  let pths' = map (toPath loc cfg) pths
+  writePaths loc outPath pths'
 
 {-|
 Like mkLoad, except it operates on a list of strings. Note that you can also
@@ -229,8 +262,8 @@ aLoad hashSeqIDs strPath outPath = do
   hashPath <- aLoadHash hashSeqIDs t pth'
   -- liftIO $ putStrLn $ "ext: " ++ takeExtension outPath'
   symlink outPath'' hashPath
-  where
 
+-- TODO this should be able to be a list of URLs too. demo that!
 rLoadList :: Bool -> RulesFn
 rLoadList hashSeqIDs s e@(Fun (ListOf r) _ _ _ [es])
   | r `elem` [str, num] = rLoadListLits s es

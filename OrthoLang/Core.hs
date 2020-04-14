@@ -167,6 +167,7 @@ module OrthoLang.Core
   , fromPath
   , toPath
   , upBy
+  , isURL
 
   -- * Old module API: Locks
   -- , withReadLock
