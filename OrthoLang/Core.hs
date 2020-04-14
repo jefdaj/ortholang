@@ -31,6 +31,7 @@ module OrthoLang.Core
   , decodeNewRulesType
   , decodeNewRulesDeps
   , countLines
+  , hidden
 
   -- * Transitional stuff
   -- , applyList2

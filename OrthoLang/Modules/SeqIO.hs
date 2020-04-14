@@ -11,7 +11,7 @@ import OrthoLang.Core
 
 import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
-import OrthoLang.Modules.Load       (mkLoaders)
+import OrthoLang.Modules.Load       (mkLoad, mkLoadList, mkLoaders)
 import System.Exit                 (ExitCode(..))
 import Data.Maybe (fromJust)
 
@@ -21,9 +21,10 @@ olModule = Module
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
   , mTypes = [gbk, faa, fna]
   , mGroups = [fa]
+  , mEncodings = []
   , mFunctions =
-    [ gbkToFaa, gbkToFaaEach
-    , gbkToFna, gbkToFnaEach
+    [ gbkToFaaRawIDs, gbkToFaaRawIDsEach, gbkToFaa, gbkToFaaEach
+    , gbkToFnaRawIDs, gbkToFnaRawIDsEach, gbkToFna, gbkToFnaEach
     , extractSeqs , extractSeqsEach
     , extractIds  , extractIdsEach
     , translate   , translateEach
@@ -34,8 +35,8 @@ olModule = Module
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
-    ++ mkLoaders True  fna
-    ++ mkLoaders True  faa
+    ++ mkLoaders True fna
+    ++ mkLoaders True faa
     ++ mkLoaders False gbk -- TODO should seqids be hashed here too?
   }
 
@@ -74,61 +75,72 @@ fna = Type
 -- TODO should these automatically fill in the "CDS" string?
 
 gbkToFaa :: Function
-gbkToFaa = Function
+gbkToFaa = compose1 "gbk_to_faa" [ReadsFile] gbkToFaaRawIDs $ mkLoad True "load_faa" (Exactly faa)
+
+gbkToFaaRawIDs :: Function
+gbkToFaaRawIDs = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [str, gbk] faa
   -- , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
   , fInputs = [Exactly str, Exactly gbk]
   , fOutput = Exactly faa
-  , fTags = []
+  , fTags = [Hidden]
   , fNewRules = NewNotImplemented
   , fOldRules = rSimple $ aGenbankToFasta faa "aa"
   }
   where
-    name = "gbk_to_faa"
-
--- TODO need to hash IDs afterward!
-gbkToFaaEach :: Function
-gbkToFaaEach = Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf faa)
-  -- , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
-  , fInputs = [Exactly str, Exactly (ListOf gbk)]
-  , fOutput = Exactly (ListOf faa)
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 2 $ aGenbankToFasta faa "aa"
-  }
-  where
-    name = "gbk_to_faa_each"
+    name = "gbk_to_faa_rawids"
 
 gbkToFna :: Function
-gbkToFna = Function
+gbkToFna = compose1 "gbk_to_fna" [ReadsFile] gbkToFnaRawIDs $ mkLoad True "load_fna" (Exactly fna)
+
+gbkToFnaRawIDs :: Function
+gbkToFnaRawIDs = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [str, gbk] fna
   -- , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
   , fInputs = [Exactly str, Exactly gbk]
   , fOutput = Exactly fna
-  , fTags = []
+  , fTags = [Hidden]
   , fNewRules = NewNotImplemented
   , fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
-    name = "gbk_to_fna"
+    name = "gbk_to_fna_rawids"
+
+gbkToFaaEach :: Function
+gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] gbkToFaaRawIDsEach $ mkLoadList True "load_faa_each" (Exactly faa)
+
+gbkToFaaRawIDsEach :: Function
+gbkToFaaRawIDsEach = Function
+  { fOpChar = Nothing, fName = name
+  -- , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf faa)
+  -- , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
+  , fInputs = [Exactly str, Exactly (ListOf gbk)]
+  , fOutput = Exactly (ListOf faa)
+  , fTags = [Hidden]
+  , fNewRules = NewNotImplemented
+  , fOldRules = rMap 2 $ aGenbankToFasta faa "nt" -- TODO add --qualifiers all?
+  }
+  where
+    name = "gbk_to_faa_rawids_each"
 
 gbkToFnaEach :: Function
-gbkToFnaEach = Function
+gbkToFnaEach = compose1 "gbk_to_fna_each" [ReadsFile] gbkToFnaRawIDsEach $ mkLoadList True "load_fna_each" (Exactly fna)
+
+gbkToFnaRawIDsEach :: Function
+gbkToFnaRawIDsEach = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf fna)
   -- , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
   , fInputs = [Exactly str, Exactly (ListOf gbk)]
   , fOutput = Exactly (ListOf fna)
-  , fTags = []
+  , fTags = [Hidden]
   , fNewRules = NewNotImplemented
   , fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
   }
   where
-    name = "gbk_to_fna_each"
+    name = "gbk_to_fna_rawids_each"
 
 -- TODO error if no features extracted since it probably means a wrong ft string
 -- TODO silence the output? or is it helpful?
@@ -306,14 +318,16 @@ extractSeqsEach = Function
 -- TODO fix unable to decode the fna error
 --      must be that load_fna* aren't adding their digests?
 translate :: Function
-translate = newFnS1 "translate" (Exactly fna) (Exactly faa) "translate.py" [] id
+translate = newFnS1 "translate" (Exactly fna) (Exactly faa) "translate.py" [ReadsFile] id
+
+-- TODO how to reuse loadFaa from main modules list?
+-- translate :: Function
+-- translate = compose1 "translate" [ReadsFile] translateRawIDs $ mkLoad True "load_faa" (Exactly faa)
 
 translateEach :: Function
 translateEach = Function
   { fOpChar = Nothing, fName = name
   , fTags = []
-  -- , fTypeCheck = defaultTypeCheck name [ListOf fna] (ListOf faa)
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf fna] (ListOf faa)
   , fInputs = [Exactly (ListOf fna)]
   , fOutput =  Exactly (ListOf faa)
   , fNewRules = NewNotImplemented
@@ -321,6 +335,10 @@ translateEach = Function
   }
   where
     name = "translate_each"
+
+-- TODO how to reuse loadFaa from main modules list?
+-- translateEach :: Function
+-- translateEach = compose1 "translate_each" [ReadsFile] translateRawIDsEach $ mkLoadList True "load_faa_each" (Exactly faa)
 
 --------------
 -- concat_* --

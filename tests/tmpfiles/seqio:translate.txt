@@ -1,54 +1,44 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 4485930015
-|   |       `-- 438a4164fa
+|   |   `-- bcde19d913
+|   |       `-- 4ddb325c30
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/translate/438a4164fa/0/result
+|   |           `-- result -> ../../../../exprs/translate/4ddb325c30/result
 |   `-- load
-|       |-- 6046a54e92
-|       `-- 6046a54e92.ids
+|       |-- 6046a54e92.fna
+|       `-- 6046a54e92.fna.ids
 |-- exprs
 |   |-- any
-|   |   `-- 6c6dcf6359
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- fcad8bc1ee
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 4c66f655fe
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   |-- dad29563a4
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
-|   |   `-- e30bfc8e29
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   |-- 0f9147993b
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 346922ae22
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- 907e647f40
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
-|   |   `-- 7360a5acb0
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/load/6046a54e92
+|   |   `-- 821d1bdfd1
+|   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- load_fna_each
-|   |   `-- 96ca212fbf
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- fdb6a09bb8
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- str
 |   |   `-- ac19b3d2a1
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- translate
-|   |   |-- 438a4164fa
-|   |   |   `-- 0
-|   |   |       `-- result
-|   |   `-- fb66f3099a
-|   |       `-- 0
-|   |           `-- result
+|   |   |-- 494baa00c6
+|   |   |   `-- result
+|   |   `-- 4ddb325c30
+|   |       `-- result
 |   `-- translate_each
-|       `-- 62cb5534f8
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|       `-- 338813bea7
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- mapped.faa.list -> ../exprs/translate_each/62cb5534f8/0/result
-    |-- result -> ../exprs/any/6c6dcf6359/0/result
-    `-- single.faa -> ../exprs/translate/fb66f3099a/0/result
+    |-- mapped.faa.list -> ../exprs/translate_each/338813bea7/result
+    |-- result -> ../exprs/any/fcad8bc1ee/result
+    `-- single.faa -> ../exprs/translate/494baa00c6/result
 
-34 directories, 17 files
+24 directories, 17 files

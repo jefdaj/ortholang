@@ -22,6 +22,8 @@ module OrthoLang.Modules.Load
   )
   where
 
+-- TODO should load_* be a macro that expands to load* (abs_path ...)?
+
 import OrthoLang.Core
 import OrthoLang.Modules.Curl (curl, isURL)
 
@@ -164,10 +166,13 @@ aLoadHash hashSeqIDs t src = do
       let (Path k) = hashPath
           v = takeFileName src' -- TODO ext issue here?
       newIDs <- readIDs idsPath
+      -- TODO factor this out into a fn like addDigests?
       ids <- fmap fromJust getShakeExtra
       liftIO $ atomicModifyIORef' ids $
         \h@(IDs {hFiles = f, hSeqIDs = s}) -> (h { hFiles  = M.insert k v f
                                                  , hSeqIDs = M.insert k newIDs s}, ())
+      dRef <- fmap fromJust getShakeExtra
+      liftIO $ addDigest dRef t hashPath
   return hashPath
 
 aLoad :: Bool -> Path -> Path -> Action ()

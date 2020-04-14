@@ -116,6 +116,7 @@ module OrthoLang.Core.Paths
   , sharedPath
   , pathString
   , stringPath
+  , isGeneric
   , toGeneric
   , fromGeneric
 

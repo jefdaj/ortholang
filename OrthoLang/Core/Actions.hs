@@ -68,7 +68,7 @@ import Data.List                  (sort, nub, isPrefixOf, isInfixOf, isSuffixOf)
 import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
 -- import OrthoLang.Core.Debug        (debug)
-import OrthoLang.Core.Paths        (Path, toPath, fromPath, checkLit,
+import OrthoLang.Core.Paths        (Path, toPath, fromPath, checkLit, isGeneric, fromGeneric,
                                    checkLits, cacheDir, pathString,
                                    stringPath, toGeneric, sharedPath, addDigest)
 import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
@@ -294,9 +294,9 @@ readLitPaths :: DebugLocation -> FilePath -> Action [Path]
 readLitPaths loc path = do
   let loc' = loc ++ ".readLitPaths"
   cfg <- fmap fromJust getShakeExtra
-  let toAbs line = if isAbsolute line
-                     then line
-                     else cfgWorkDir cfg </> line
+  let toAbs line = if isGeneric line then fromGeneric loc' cfg line
+                   else if isAbsolute line then line
+                   else cfgWorkDir cfg </> line
   ls <- readList loc' path
   let ls'  = map toAbs ls
       ls'' = map (toPath loc cfg) ls'
