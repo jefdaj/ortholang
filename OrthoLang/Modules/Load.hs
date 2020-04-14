@@ -48,22 +48,31 @@ olModule = Module
   , mDesc = "Load generic lists"
   , mTypes = [str, path]
   , mGroups = []
-  , mFunctions = [loadList, globFiles, topath, topathEach]
+  , mFunctions =
+    [ loadListPath
+    , loadList
+    , globFiles
+    , topath
+    , topathEach
+    ]
   }
 
 ---------------
 -- load_list --
 ---------------
 
+loadListPath :: Function
+loadListPath = mkLoad False "load_list_path" (Exactly path)
+
 loadList :: Function
-loadList = mkLoad False "load_list" (Exactly $ ListOf str)
+loadList = compose1 "load_list" [ReadsFile] topath loadListPath
 
 ----------------
 -- glob_files --
 ----------------
 
 globFiles :: Function
-globFiles = newFnA1 "glob_files" (Exactly str) (Exactly (ListOf str)) aGlobNew [ReadsDirs]
+globFiles = newFnA1 "glob_files" (Exactly str) (Exactly (ListOf path)) aGlobNew [ReadsDirs]
 
 aGlobNew :: NewAction1
 aGlobNew (ExprPath out) a1 = do
@@ -77,6 +86,7 @@ aGlobNew (ExprPath out) a1 = do
 -- load_* --
 ------------
 
+-- TODO does it ever read a URL?
 mkLoadGlob :: String -> Function -> Function
 mkLoadGlob name eachFn = compose1 name [ReadsDirs, ReadsFile, ReadsURL] globFiles eachFn
 
@@ -84,8 +94,9 @@ mkLoaders :: Bool -> Type -> [Function]
 mkLoaders hashSeqIDs loadType = [single, each, glb]
   where
     ext    = tExtOf loadType
-    single = mkLoad     hashSeqIDs ("load_" ++ ext           ) (Exactly loadType) -- TODO is this right?
-    each   = mkLoadList hashSeqIDs ("load_" ++ ext ++ "_each") (Exactly loadType) -- TODO is this right?
+    single = mkLoad          hashSeqIDs ("load_" ++ ext                ) (Exactly loadType)
+    -- each   = mkLoadList      hashSeqIDs ("load_" ++ ext ++      "_each") (Exactly loadType)
+    each   = mkLoadListPaths hashSeqIDs ("load_" ++ ext ++ "_each") (Exactly loadType)
     glb    = mkLoadGlob ("load_" ++ ext ++ "_glob") each
 
 -------------
@@ -97,15 +108,15 @@ Takes a string with the filepath to load. Creates a trivial expression file
 that's just a symlink to the given path. These should be the only absolute
 links, and the only ones that point outside the temp dir.
 -}
+
+-- TODO add _path to name here?
+mkLoadPath :: Bool -> String -> TypeSig -> Function
+mkLoadPath hashSeqIDs name oSig = newMacro name [Exactly path] oSig mLoad [ReadsFile]
+
 mkLoad :: Bool -> String -> TypeSig -> Function
-mkLoad hashSeqIDs name oSig = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str]
-  , fOutput = oSig
-  , fTags = [ReadsFile, ReadsURL]
-  , fOldRules = rLoad hashSeqIDs
-  , fNewRules = NewNotImplemented -- TODO mLoad here
-  }
+mkLoad hashSeqIDs name oSig = compose1 name [ReadsFile]
+  topath
+  (mkLoadPath hashSeqIDs (name ++ "_path") oSig)
 
 -- TODO naming convention: _path, _paths?
 -- mkLoadNew :: Function
@@ -116,11 +127,13 @@ mkLoad hashSeqIDs name oSig = Function
 -- TODO this should still leave URL handling to the main load functions for now!
 -- TODO and it should be a special load-related expansion as done here, not a generic one for all strs!
 mLoad :: MacroExpansion
-mLoad scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_path" "" n) [Fun path ms ds "to_path" [p]]
+mLoad scr (Fun r ms ds n [p]) = Fun r ms ds (n ++ "_path") [Fun path ms ds "to_path" [p]]
 mLoad _ e = error "modules.load.mLoad" $ "bad argument: " ++ show e
 
+-- TODO have to rename fun so rNamedFunction' doesn't complain
 mLoadEach :: MacroExpansion
-mLoadEach scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_path" "" n) [Fun (ListOf path) ms ds "to_path_each" [p]]
+mLoadEach scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_each" "_path_each" n)
+  [Fun (ListOf path) ms ds "to_path_each" [p]]
 mLoadEach _ e = error "modules.load.mLoadEach" $ "bad argument: " ++ show e
 
 {-|
@@ -131,17 +144,10 @@ Note the weird name keeps it from conflicting with 'OrthoLang.Core.Paths.toPath'
 topath :: Function
 topath = hidden $ newFnA1 "to_path" (Exactly str) (Exactly path) aTopath [ReadsDirs]
 
--- TODO probably do it by mapping over to_path instead? whatever, just duplicate for now though and do that once mapping worksgq
+-- TODO probably do it by mapping over to_path instead? whatever
+--      just duplicate for now though and do that once mapping works
 topathEach :: Function
 topathEach = hidden $ newFnA1 "to_path_each" (Exactly $ ListOf str) (Exactly $ ListOf path) aTopathEach [ReadsDirs]
-
--- TODO can Paths be URLs? now they can :D so this is basically just toPath
--- to_pathPure :: Config -> String -> Either String Path
--- to_pathPure cfg userString =
---   let loc = "modules.load.to_pathPure"
---   in if isURL userString then Left userString
---      else if isAbsolute userString then Right $ toPath loc cfg userString
---      else Right $ toPath loc cfg (cfgWorkDir cfg </> userString)
 
 path :: Type
 path = Type
@@ -177,15 +183,24 @@ Like mkLoad, except it operates on a list of strings. Note that you can also
 load lists using mkLoad, but it's not recommended because then you have to write
 the list in a file, whereas this can handle literal lists in the source code.
 -}
+
+mkLoadListPaths :: Bool -> String -> TypeSig -> Function
+mkLoadListPaths hashSeqIDs name elemSig = newMacro
+  name -- TODO what's the format at this point?
+  [Exactly $ ListOf path]
+  (ListSigs elemSig)
+  mLoadEach
+  [ReadsFile]
+
 mkLoadList :: Bool -> String -> TypeSig -> Function
-mkLoadList hashSeqIDs name elemSig = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf str)]
-  , fOutput = ListSigs elemSig
-  , fTags = [ReadsFile, ReadsURL]
-  , fOldRules = rLoadList hashSeqIDs
-  , fNewRules = NewNotImplemented
-  }
+mkLoadList hashSeqIDs name elemSig = compose1
+  name
+  [ReadsFile]
+  topathEach
+  (mkLoadListPaths
+    hashSeqIDs
+    name -- (replace "_each" "_path_each" name)
+    (ListSigs elemSig))
 
 --------------------
 -- implementation --
@@ -249,17 +264,22 @@ aLoad hashSeqIDs strPath outPath = do
       outPath'  = fromPath loc cfg outPath
       loc = "modules.load.aLoad"
       outPath'' = traceA loc outPath [strPath', outPath']
-      toAbs line = if isAbsolute line
-                     then line
-                     else cfgWorkDir cfg </> line
+      -- toAbs line = if isAbsolute line
+      --                then line
+      --                else cfgWorkDir cfg </> line
+  -- need' loc [strPath']
+
   dRef <- fmap fromJust getShakeExtra
+  pth <- readPath loc strPath'
+
+  -- pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits loc strPath' -- TODO safer!
+--   pth' <- if isURL pth
+--             then curl pth
+--             else fmap (toPath loc cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
+
   t <- liftIO $ decodeNewRulesType cfg dRef $ ExprPath $ outPath'
-  need' loc [strPath']
-  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits loc strPath' -- TODO safer!
-  pth' <- if isURL pth
-            then curl pth
-            else fmap (toPath loc cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
-  hashPath <- aLoadHash hashSeqIDs t pth'
+  hashPath <- aLoadHash hashSeqIDs t pth
+
   -- liftIO $ putStrLn $ "ext: " ++ takeExtension outPath'
   symlink outPath'' hashPath
 
@@ -272,7 +292,6 @@ rLoadList _ _ _ = fail "bad arguments to rLoadList"
 
 -- | Special case for lists of str and num
 -- TODO is it different from rLink? seems like it's just a copy/link operation...
--- TODO need to readLitPaths?
 rLoadListLits :: RulesFn
 rLoadListLits scr expr = do
   (ExprPath litsPath') <- rExpr scr expr
@@ -285,7 +304,6 @@ rLoadListLits scr expr = do
   outPath' %> \_ -> aLoadListLits outPath litsPath
   return (ExprPath outPath')
 
--- TODO have to listLitPaths here too?
 aLoadListLits :: Path -> Path -> Action ()
 aLoadListLits outPath litsPath = do
   cfg  <- fmap fromJust getShakeExtra
@@ -298,7 +316,6 @@ aLoadListLits outPath litsPath = do
   writeLits loc out lits'
 
 -- | Regular case for lists of any other file type
--- TODO hash mismatch here?
 rLoadListPaths :: Bool -> RulesFn
 rLoadListPaths hashSeqIDs scr e@(Fun _ _ _ _ [es]) = do
   (ExprPath pathsPath) <- rExpr scr es
@@ -313,23 +330,23 @@ rLoadListPaths _ _ _ = fail "bad arguments to rLoadListPaths"
 
 aLoadListPaths :: Bool -> Path -> Path -> Action ()
 aLoadListPaths hashSeqIDs pathsPath outPath = do
-  -- Careful! The user will write paths relative to workdir and those come
-  -- through as a (ListOf str) here; have to read as Strings and convert to
-  -- Paths
-  -- TODO this should be a macro expansion in the loader fns rather than a basic rule!
-  -- alwaysRerun -- TODO does this help?
+
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoadListPaths"
       outPath'   = fromPath loc cfg outPath
       pathsPath' = fromPath loc cfg pathsPath
       out = traceA loc outPath' [outPath', pathsPath']
-  paths <- readLitPaths loc pathsPath'
+
+  -- paths <- readLitPaths loc pathsPath'
+  paths <- readPaths loc pathsPath'
   let paths' = map (fromPath loc cfg) paths
-  paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths'
+  paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths' -- TODO remove?
   let paths''' = map (toPath loc cfg) paths''
+
   dRef <- fmap fromJust getShakeExtra
   (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef $ ExprPath $ outPath'
   hashPaths <- mapM (aLoadHash hashSeqIDs t) paths'''
   let hashPaths' = map (fromPath loc cfg) hashPaths
   need' loc hashPaths'
+
   writePaths loc out hashPaths
