@@ -14,6 +14,7 @@ import System.Directory            (createDirectoryIfMissing)
 import OrthoLang.Modules.Load       (mkLoadPath, mkLoad, mkLoadPathEach, mkLoadEach, mkLoadGlob, path)
 import System.Exit                 (ExitCode(..))
 import Data.Maybe (fromJust)
+import Data.List.Utils (replace)
 
 olModule :: Module
 olModule = Module
@@ -145,8 +146,12 @@ gbkToFnaRawIDs = Function
 -- TODO fix this!
 gbkToFaaEach :: Function
 -- gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] gbkToFaaRawIDsEach $ mkLoadEach True "load_faa_each" (Exactly faa)
-gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] loadFaaEach gbkToFaaRawIDsEach
--- gbkToFaaEach = newMacro "gbk_to_faa_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOF fna) mGbkToFaaEach [ReadsFile]
+-- gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] loadFaaEach gbkToFaaRawIDsEach
+gbkToFaaEach = newMacro "gbk_to_faa_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf fna) mGbkToFaaEach [ReadsFile]
+
+mGbkToFaaEach :: MacroExpansion
+mGbkToFaaEach _ (Fun r ms ds n [s, g]) = Fun r ms ds "load_faa_path_each" [Fun r ms ds (replace "_each" "_rawids_each" n) [s, g]]
+mGbkToFaaEach _ e = error "modules.seqio.mGbkToFaaEach" $ "bad argument: " ++ show e
 
 gbkToFaaRawIDsEach :: Function
 gbkToFaaRawIDsEach = Function
@@ -164,7 +169,13 @@ gbkToFaaRawIDsEach = Function
 
 gbkToFnaEach :: Function
 -- gbkToFnaEach = compose1 "gbk_to_fna_each" [ReadsFile] gbkToFnaRawIDsEach $ mkLoadEach True "load_fna_each" (Exactly fna)
-gbkToFnaEach = compose1 "gbk_to_fna_each" [ReadsFile] loadFnaEach gbkToFnaRawIDsEach
+-- gbkToFnaEach = compose1 "gbk_to_fna_each" [ReadsFile] loadFnaEach gbkToFnaRawIDsEach
+gbkToFnaEach = newMacro "gbk_to_fna_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf fna) mGbkToFnaEach [ReadsFile]
+
+mGbkToFnaEach :: MacroExpansion
+mGbkToFnaEach _ (Fun r ms ds n [s, g]) = Fun r ms ds "load_fna_path_each" [Fun r ms ds (replace "_each" "_rawids_each" n) [s, g]]
+mGbkToFnaEach _ e = error "modules.seqio.mGbkToFnaEach" $ "bad argument: " ++ show e
+
 
 gbkToFnaRawIDsEach :: Function
 gbkToFnaRawIDsEach = Function
