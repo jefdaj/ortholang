@@ -48,7 +48,7 @@ olModule = Module
   , mDesc = "Load generic lists"
   , mTypes = [str]
   , mGroups = []
-  , mFunctions = [loadList, globFiles]
+  , mFunctions = [loadList, globFiles, realpath, realpathEach]
   }
 
 ---------------
@@ -113,6 +113,8 @@ mkLoad hashSeqIDs name oSig = Function
 
 -- TODO is the oSig needed to?
 -- TODO have the to_path fn return whatever string is used internally now, initially
+-- TODO this should still leave URL handling to the main load functions for now!
+-- TODO and it should be a special load-related expansion as done here, not a generic one for all strs!
 mLoad :: MacroExpansion
 mLoad scr (Fun r ms ds n [p]) = Fun r ms ds (replace "_path" "" n) [Fun str ms ds "realpath" [p]]
 mLoad _ e = error "modules.load.mLoad" $ "bad argument: " ++ show e
@@ -126,10 +128,16 @@ Converts user-specified strs (which may represent relative or absolute paths)
 to properly formatted OrthoLang Paths. Used to sanitize inputs to the load_* functions
 -}
 realpath :: Function
-realpath = newFnA1 "realpath" (Exactly str) (Exactly str) undefined [ReadsDirs]
+realpath = hidden $ newFnA1 "realpath" (Exactly str) (Exactly str) aRealpath [ReadsDirs]
 
 realpathEach :: Function
-realpathEach = newFnA1 "realpath_each" (Exactly $ ListOf str) (Exactly $ ListOf str) undefined [ReadsDirs]
+realpathEach = hidden $ newFnA1 "realpath_each" (Exactly $ ListOf str) (Exactly $ ListOf str) aRealpathEach [ReadsDirs]
+
+aRealpath :: NewAction1
+aRealpath (ExprPath out) userStrPath = undefined
+
+aRealpathEach :: NewAction1
+aRealpathEach (ExprPath out) userStrListPath = undefined
 
 {-|
 Like mkLoad, except it operates on a list of strings. Note that you can also
