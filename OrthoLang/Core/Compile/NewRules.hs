@@ -49,7 +49,7 @@ module OrthoLang.Core.Compile.NewRules
   , hidden
 
   -- * Implementation details
-  , rSeqIDs
+  , rReloadIDs
   , newRules
   , newPattern
   , newFn
@@ -60,12 +60,12 @@ module OrthoLang.Core.Compile.NewRules
   , applyList1
   , applyList2
   , applyList3
-  , aSeqIDs
   , aNewRulesS1
   , aNewRulesS2
   , aNewRulesS3
   , aNewRulesS
   , aNewRules
+  , aLoadIDs -- TODO where should this go? Actions?
 
   )
   where
@@ -79,15 +79,16 @@ import OrthoLang.Core.Compile.Basic
 import OrthoLang.Core.Sanitize (readIDs)
 import OrthoLang.Core.Types
 import System.Exit (ExitCode(..))
+import System.Directory           (createDirectoryIfMissing)
 
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
-import Development.Shake.FilePath ((</>), takeDirectory, takeBaseName)
+import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName)
 import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest)
 import qualified Data.Map.Strict as M
-import Data.IORef                 (atomicModifyIORef')
+import Data.IORef                 (readIORef, atomicModifyIORef')
 
 ---------
 -- API --
@@ -226,26 +227,44 @@ time, but they fail to enfore re-loading them during the next program run when
 they might still be needed. This is a bit of a hack, but does enforce it
 properly (so far!).
 -}
-rSeqIDs :: Rules ()
-rSeqIDs = do
-  cfg <- fmap fromJust getShakeExtraRules
-  let ptn = cfgTmpDir cfg </> "cache" </> "load" </> "*.ids"
-  ptn %> aSeqIDs
-
-aSeqIDs :: FilePath -> Action ()
-aSeqIDs idsPath' = do
+rReloadIDs :: Rules ()
+rReloadIDs = "reloadseqids" ~> do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.load.aSeqIDs"
+  let lDir = cfgTmpDir cfg </> "cache" </> "load"
+  liftIO $ createDirectoryIfMissing True lDir
+  idNames <- liftIO $ getDirectoryFilesIO lDir ["//*.ids"]
+  let idPaths = map (lDir </>) idNames
+  -- trackWrite idPaths
+  liftIO $ debug "core.sanitize.rReloadIDs" $ "idPaths: " ++ show idPaths
+  mapM_ aLoadIDs idPaths
+
+{-|
+This is called from 'OrthoLang.Core.Sanitize.hashIDsFile2' the first time a
+sequence file is loaded, and from 'rReloadIDs' during subsequent program runs.
+-}
+aLoadIDs :: FilePath -> Action ()
+aLoadIDs idsPath' = do
+  alwaysRerun
+  liftIO $ debug "core.sanitize.aLoadIDs" $ "idsPath': " ++ idsPath'
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.load.aLoadIDs"
       idsPath = toPath loc cfg idsPath'
-  newIDs <- readIDs idsPath
+  (newIDs, newHashes) <- readIDs idsPath
+  -- TODO what should the keys actually be? probably not the idsPath
+  let (Path p) = idsPath
+      k = dropExtension p
+      v = takeBaseName idsPath' -- TODO is this good enough? maybe try to find the original filename
+  liftIO $ debug "core.sanitize.aLoadIDs" $ "k: " ++ k
+  liftIO $ debug "core.sanitize.aLoadIDs" $ "v: " ++ v
   ids <- fmap fromJust getShakeExtra
-  let (Path k) = idsPath
-      v = takeBaseName idsPath' -- TODO is this good enough?
-  liftIO $ atomicModifyIORef' ids $
-    \h@(IDs {hFiles = f, hSeqIDs = s}) -> (h { hFiles  = M.insert k v f
-                                             , hSeqIDs = M.insert k newIDs s}, ())
- {-|
+  liftIO $ atomicModifyIORef' ids $ \h@(IDs {hFiles = fs, hSeqIDs = is, hSeqHashes = hs}) ->
+    (h { hFiles     = M.insert k v fs
+       , hSeqIDs    = M.insert k newIDs    is
+       , hSeqHashes = M.insert k newHashes hs
+       }, ())
+
+{-|
 This gathers all the 'fNewRules' 'Development.Shake.Rules' together for use in
 'OrthoLang.Core.Eval.eval'. The old-style rules in use throughout OrthoLang now
 require the compilers to return exact paths. These new ones use proper patterns
@@ -258,7 +277,7 @@ newRules = do
   cfg <- fmap fromJust $ getShakeExtraRules
   let fns   = concatMap mFunctions $ cfgModules cfg
       fnRules = catRules $ map fNewRules fns
-  sequence_ fnRules
+  sequence_ $ rReloadIDs : fnRules
   where
     catRules [] = []
     catRules ((NewRules r):xs) = r : catRules xs

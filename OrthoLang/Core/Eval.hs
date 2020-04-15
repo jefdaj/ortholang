@@ -41,7 +41,7 @@ import Data.Typeable (TypeRep)
 -- import Data.List (isPrefixOf)
 
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
-import OrthoLang.Core.Compile         (compileScript, rExpr, aSeqIDs, newRules)
+import OrthoLang.Core.Compile         (compileScript, rExpr, newRules)
 import OrthoLang.Core.Parse            (parseFileIO)
 import OrthoLang.Core.Pretty           (prettyNum)
 import OrthoLang.Core.Paths            (Path, toPath, fromPath)
@@ -217,8 +217,8 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> Config -> LocksRef -> IDsRef -> DigestsRef -> Type -> Rules [ExprPath] -> Rules ResPath -> IO ()
-eval hdl cfg ref ids dr rtype ls p = do
+eval :: Handle -> Config -> LocksRef -> IDsRef -> DigestsRef -> Type -> Rules ResPath -> IO ()
+eval hdl cfg ref ids dr rtype p = do
   start <- getCurrentTime
   let ep = EvalProgress
              { epTitle = takeFileName $ fromMaybe "ortholang" $ cfgScript cfg
@@ -238,28 +238,31 @@ eval hdl cfg ref ids dr rtype ls p = do
                 , progressInitial = ep
                 , progressRender = if cfgNoProg cfg then (const "") else renderProgress
                 }
-  eval' delay pOpts ls p -- TODO ignoreErrors again?
+  eval' delay pOpts p -- TODO ignoreErrors again?
   where
-    eval' delay pOpts lpaths rpath = P.withProgress pOpts $ \pm -> myShake cfg ref ids dr pm delay $ do
+    eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake cfg ref ids dr pm delay $ do
       let loc = "core.eval.eval.eval'"
       newRules
-      lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
+      -- lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
       (ResPath path) <- rpath
-      let wanted = lpaths' ++ ["eval"]
-      -- want $ trace "core.eval.eval'" ("wanted: " ++ show wanted) wanted
-      want ["eval"]
+      -- let wanted = ["reloadseqids"] ++ lpaths' ++ ["eval"]
+      let wanted = ["eval"] -- TODO why do the lpaths' seem to be needed? and why the tmpfiles freeze?
+      want $ trace "core.eval.eval'" ("wanted: " ++ show wanted) wanted
+      -- want ["loadseqids", "eval"]
       "eval" ~> do
         alwaysRerun
+        need ["reloadseqids"] -- : lpaths'
+        -- need lpaths'
         -- TODO remove retry after newrules are finished
         actionRetry 9 $ do
           -- Exit _ <- command [] "sync" [] -- why is this needed?
           -- liftIO $ threadDelay delay
 
           -- TODO is this the only thing that works for loading?
-          idPaths <- getDirectoryFiles (cfgTmpDir cfg </> "cache/load") [".ids"]
-          mapM aSeqIDs idPaths
+          -- idPaths <- getDirectoryFiles (cfgTmpDir cfg </> "cache/load") [".ids"]
+          -- mapM aSeqIDs idPaths
 
-          need $ lpaths' ++ [path] -- TODO is this done automatically in the case of result?
+          need [path] -- TODO is this done automatically in the case of result?
         {- if --interactive, print the short version of a result
          - if --output, save the full result (may also be --interactive)
          - if neither, print the full result
@@ -321,10 +324,10 @@ evalScript hdl (scr, c, ref, ids, dRef) =
               Just r  -> r
 
       -- TODO why doesn't alwaysRerun handle these?
-      loadExprs = extractLoads scr'' res
-      loads = mapM (rExpr scr'') $ trace "ortholang.core.eval.evalScript" (unlines $ "load expressions:" :map show loadExprs) loadExprs
+      -- loadExprs = extractLoads scr'' res
+      -- loads = mapM (rExpr scr'') $ trace "ortholang.core.eval.evalScript" (unlines $ "load expressions:" :map show loadExprs) loadExprs
 
-  in eval hdl c ref ids dRef (typeOf res) loads (compileScript $ seq scr'' scr'')
+  in eval hdl c ref ids dRef (typeOf res) (compileScript $ seq scr'' scr'')
 
 -- TODO should there be a new idsref for this? how about digestsref?
 evalFile :: GlobalEnv -> Handle -> IO ()

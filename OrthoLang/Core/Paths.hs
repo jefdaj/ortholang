@@ -322,7 +322,7 @@ and can be removed once the rest of the IO stuff is solid.
 -}
 checkLit :: DebugLocation -> String -> String
 checkLit loc l = if isGeneric l
-                   then throw $ PathLitMixup loc $ "'" ++  l ++ "' looks like a path"
+                   then throw $ PathLitMixup loc $ "\"" ++  l ++ "\" looks like a path"
                    else l
 
 checkLits :: DebugLocation -> [String] -> [String] -- (or error, but let's ignore that)
@@ -332,7 +332,7 @@ checkLits loc = map $ checkLit loc
 checkPath :: DebugLocation -> FilePath -> FilePath
 checkPath loc path = if isAbsolute path || isGeneric path || isURL path
                        then path
-                       else throw $ PathLitMixup loc $ "'" ++ path ++ "' looks like a literal"
+                       else throw $ PathLitMixup loc $ "\"" ++ path ++ "\" looks like a literal"
 
 checkPaths :: DebugLocation -> [FilePath] -> [FilePath]
 checkPaths loc = map $ checkPath loc

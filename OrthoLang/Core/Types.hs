@@ -77,7 +77,7 @@ module OrthoLang.Core.Types
   , PathDigest(..)
   -- * Misc experimental stuff
   , extractExprs
-  , extractLoads
+  -- , extractLoads
   , typeSigMatches
   -- , typeSigsMatch
   -- new rules infrastructure
@@ -546,17 +546,20 @@ operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
 -- then use this hash -> seqid map to put the original ids back at the end
 -- hFiles is for making paths generic
 -- hSeqIDs is the main one, and stores hash -> seqid maps indexed by their (generic) hFiles path
+-- hSeqHashes is for reverse lookups of the seqid_... hash from actual seqid (for example from gene lists)
 -- hExprs is for decoding exprs/<hash>/<hash>/... paths
 -- TODO use bytestring-tries rather than maps with string keys?
 -- TODO should this be ActionIDs in general? aka all the stuff that might be needed in Action
 data IDs = IDs
-  { hFiles  :: M.Map String String
-  , hSeqIDs :: M.Map String (M.Map String String)
+  { hFiles     :: M.Map String String
+  , hSeqIDs    :: M.Map String (M.Map String String)
+  , hSeqHashes :: M.Map String (M.Map String String)
   -- , hExprs  :: DigestMap
   }
+  deriving (Show)
 
 emptyIDs :: IDs
-emptyIDs = IDs M.empty M.empty
+emptyIDs = IDs M.empty M.empty M.empty
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right
@@ -667,32 +670,32 @@ extractExprs  _   e               = error "extractExprs" $ "bad arg: " ++ show e
 -- exprDepsOf :: Script -> Expr -> [Expr]
 -- exprDepsOf s e = nub $ varDepsOf s e ++ flattenExpr s e
 
--- TODO any good way to avoid fromJust here?
--- TODO this should include deps directly part of the expr too
-varDepsOf :: Script -> Expr -> [Expr]
-varDepsOf scr expr = map (\e -> fromJust $ lookup e scr) (depsOf expr)
-
-{-|
-Produces a flat list of all 'Expr's contained in the given one, including via
-'Ref's to earlier in the 'Script'. Also includes the input 'Expr'.
--}
-flattenExpr :: Script -> Expr -> [Expr]
-flattenExpr s e@(Lit _ _          ) = [e]
-flattenExpr s e@(Com _            ) = [e] -- TODO is this right?
-flattenExpr s e@(Ref _ _ _ _      ) = nub $ e : concatMap (flattenExpr s) (      varDepsOf s e)
-flattenExpr s e@(Bop _ _ _ _ e1 e2) = nub $ e : concatMap (flattenExpr s) (e1:e2:varDepsOf s e)
-flattenExpr s e@(Fun _ _ _ _ es   ) = nub $ e : concatMap (flattenExpr s) (es ++ varDepsOf s e)
-flattenExpr s e@(Lst _   _   es   ) = nub $ e : concatMap (flattenExpr s) (es ++ varDepsOf s e)
-
--- needed to know what to still evaluate despite caching, so we can load seqid hashes
--- TODO rename to reflect that it's mostly about getting the functions which can't be cached
--- TODO rewrite using a ReadsSeqIDs FnTag
-extractLoads :: Script -> Expr -> [Expr]
-extractLoads s e = filter isLoad' $ flattenExpr s e
-  where
-    isLoad' expr = let res = isLoad expr in trace "ortholang.core.types.extractLoads" ("isLoad \"" ++ show expr ++ "'? " ++ show res) res
-    isLoad (Fun _ _ _ name _) = "load_f" `isPrefixOf` name
-    isLoad _ = False
+-- -- TODO any good way to avoid fromJust here?
+-- -- TODO this should include deps directly part of the expr too
+-- varDepsOf :: Script -> Expr -> [Expr]
+-- varDepsOf scr expr = map (\e -> fromJust $ lookup e scr) (depsOf expr)
+-- 
+-- {-|
+-- Produces a flat list of all 'Expr's contained in the given one, including via
+-- 'Ref's to earlier in the 'Script'. Also includes the input 'Expr'.
+-- -}
+-- flattenExpr :: Script -> Expr -> [Expr]
+-- flattenExpr s e@(Lit _ _          ) = [e]
+-- flattenExpr s e@(Com _            ) = [e] -- TODO is this right?
+-- flattenExpr s e@(Ref _ _ _ _      ) = nub $ e : concatMap (flattenExpr s) (      varDepsOf s e)
+-- flattenExpr s e@(Bop _ _ _ _ e1 e2) = nub $ e : concatMap (flattenExpr s) (e1:e2:varDepsOf s e)
+-- flattenExpr s e@(Fun _ _ _ _ es   ) = nub $ e : concatMap (flattenExpr s) (es ++ varDepsOf s e)
+-- flattenExpr s e@(Lst _   _   es   ) = nub $ e : concatMap (flattenExpr s) (es ++ varDepsOf s e)
+-- 
+-- -- needed to know what to still evaluate despite caching, so we can load seqid hashes
+-- -- TODO rename to reflect that it's mostly about getting the functions which can't be cached
+-- -- TODO rewrite using a ReadsSeqIDs FnTag
+-- extractLoads :: Script -> Expr -> [Expr]
+-- extractLoads s e = filter isLoad' $ flattenExpr s e
+--   where
+--     isLoad' expr = let res = isLoad expr in trace "ortholang.core.types.extractLoads" ("isLoad \"" ++ show expr ++ "'? " ++ show res) res
+--     isLoad (Fun _ _ _ name _) = "load_f" `isPrefixOf` name
+--     isLoad _ = False
 
 -- TODO will this get printed, or will there just be a parse error?
 explainFnBug :: String

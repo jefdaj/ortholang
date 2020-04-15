@@ -32,6 +32,7 @@ module OrthoLang.Core
   , decodeNewRulesDeps
   , countLines
   , hidden
+  , aLoadIDs
 
   -- * Transitional stuff
   -- , applyList2
@@ -41,7 +42,6 @@ module OrthoLang.Core
   , evalFile
   , expandMacros
   , prettyShow
-  , aSeqIDs
 
   -- * Things used in Test
   , help
@@ -104,6 +104,7 @@ module OrthoLang.Core
   , tExtOf
   , extractExprs
   , lookupIDsFile
+  , lookupHashesFile
   , mkTypeDesc
   , num
   , saltOf

@@ -177,7 +177,7 @@ the file to access it. Then we want to `ln` to the file it points to.
 -- note: .faa ext turns out to be required for orthofinder to recognize fasta files
 aLoadHash :: Bool -> Type -> Path -> Action Path
 aLoadHash hashSeqIDs t src = do
-  alwaysRerun -- makes sure we can decode hashed seqids
+  -- alwaysRerun -- makes sure we can decode hashed seqids
   -- liftIO $ putStrLn $ "aLoadHash " ++ show src
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoadHash"
@@ -194,15 +194,17 @@ aLoadHash hashSeqIDs t src = do
     else do
       let idsPath' = hashPath' <.> "ids"
           idsPath  = toPath loc cfg idsPath'
-      unlessExists idsPath' $ hashIDsFile2 src hashPath -- TODO remove unlessExists?
-      let (Path k) = hashPath
-          v = takeFileName src' -- TODO ext issue here?
-      newIDs <- readIDs idsPath
+      unlessExists idsPath' $ do
+        hashIDsFile2 src hashPath -- TODO remove unlessExists?
+        aLoadIDs idsPath' -- TODO do it anyway? "reloadseqids" should have already
+      -- let (Path k) = hashPath
+      --     v = takeFileName src' -- TODO ext issue here?
+      -- newIDs <- readIDs idsPath
       -- TODO factor this out into a fn like addDigests?
-      ids <- fmap fromJust getShakeExtra
-      liftIO $ atomicModifyIORef' ids $
-        \h@(IDs {hFiles = f, hSeqIDs = s}) -> (h { hFiles  = M.insert k v f
-                                                 , hSeqIDs = M.insert k newIDs s}, ())
+      -- ids <- fmap fromJust getShakeExtra
+      -- liftIO $ atomicModifyIORef' ids $
+      --   \h@(IDs {hFiles = f, hSeqIDs = s}) -> (h { hFiles  = M.insert k v f
+      --                                            , hSeqIDs = M.insert k newIDs s}, ())
       dRef <- fmap fromJust getShakeExtra
       liftIO $ addDigest dRef t hashPath
   return hashPath

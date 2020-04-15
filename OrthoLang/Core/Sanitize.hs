@@ -8,6 +8,8 @@ module OrthoLang.Core.Sanitize
   , unhashIDs
   , unhashIDsFile
   , readIDs
+  , lookupHash
+  , lookupHashesFile
   , lookupID
   , lookupIDsFile
   )
@@ -46,6 +48,8 @@ import System.FilePath (takeFileName, takeDirectory, (<.>))
 import System.Directory           (createDirectoryIfMissing)
 import Data.IORef                  (readIORef)
 import System.Exit                (ExitCode(..))
+import qualified Data.Text.Lazy as T
+import Text.Pretty.Simple (pShowNoColor)
 
 -- type HashedIDList = D.DList (String, String)
 
@@ -179,8 +183,12 @@ unhashIDsFile inPath outPath = do
 splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
 
+splitSeqid :: String -> (String, String)
+splitSeqid = fmap (drop 1) . break (`elem` " \t;:|") -- TODO any other common chars?
+
 -- TODO should this be IO or Action?
-readIDs :: Path -> Action (M.Map String String)
+-- TODO any reason to keep the rest of the seqids as keys to the hashes? most ppl will use short ones
+readIDs :: Path -> Action (M.Map String String, M.Map String String)
 readIDs path = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "core.sanitize.readIDs"
@@ -191,12 +199,12 @@ readIDs path = do
   --                 in if length ws < 2
   --                      then error ("failed to split \"" ++ l ++ "\"")
   --                      else (head ws, concat $ intersperse "\t" $ tail ws)
-  let splitFn = splitAtFirst '\t'
-      ids = map splitFn $ lines txt
+  let ids    = map (splitAtFirst '\t') (lines txt)
+      hashes = map (\(h, i) -> (fst $ splitSeqid i, h)) ids
   -- liftIO $ putStrLn $ "loaded " ++ show (length ids) ++ " ids"
   -- liftIO $ putStrLn $ "ids'' with    seqid_: " ++ show ((take 10 $ filter (\(k,_) ->     ("seqid_" `isPrefixOf` k)) ids) :: [(String, String)])
   -- liftIO $ putStrLn $ "ids'' without seqid_: " ++ show ((take 10 $ filter (\(k,_) -> not ("seqid_" `isPrefixOf` k)) ids) :: [(String, String)])
-  return $ M.fromList ids
+  return (M.fromList ids, M.fromList hashes)
 
 -- TODO display error to user in a cleaner way than error!
 -- TODO is this really needed? seems suuuper slow. replace with error or just by warning them?
@@ -206,14 +214,14 @@ readIDs path = do
 -- this works whether the ID is for a file or seqid. files are checked first
 lookupID :: IDs -> String -> Maybe String
 lookupID (IDs {hFiles = f, hSeqIDs = s}) i =
-  if M.member i f then M.lookup i f
-  else case catMaybes (map (M.lookup i) (M.elems s)) of
+  if M.member i f then M.lookup i f                     -- i is a path; return the short version
+  else case catMaybes (map (M.lookup i) (M.elems s)) of -- i is a seqid; look in all the maps for it
     []  -> Nothing
     [x] -> Just x
-    -- xs  -> error $ "duplicate seqid: " ++ show xs
     xs  -> trace "core.sanitize.lookupID" ("WARNING: duplicate seqids. using the first:\n" ++ show xs) (Just $ head xs)
 
 -- TODO move to Actions? causes an import cycle so far
+-- TODO is this one ever used, or just the reverse hashes one below? maybe remove
 lookupIDsFile :: Path -> Path -> Action ()
 lookupIDsFile inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
@@ -225,9 +233,36 @@ lookupIDsFile inPath outPath = do
                      Just i  -> return i
                      Nothing -> do
                        liftIO $ putStrLn ("warning: no ID found for \"" ++ v ++ "\"")
+                       -- TODO aha! is the problem that we're looking up non-hashed ids instead?
+                       -- liftIO $ putStrLn $ "here are all the current ids:\n" ++ T.unpack (pShowNoColor ids)
                        return v
   idKeys <- mapM lookupFn partialIDs
   dRef <- fmap fromJust getShakeExtra
   liftIO $ addDigest dRef (ListOf str) outPath -- TODO make this an Action?
   let loc = "core.sanitize.lookupIDsFile"
+  writeCachedLines loc (fromPath loc cfg outPath) idKeys
+
+lookupHash :: IDs -> String -> Maybe String
+lookupHash (IDs {hSeqHashes = hs}) i =
+  case catMaybes (map (M.lookup i) (M.elems hs)) of -- i is a seqid; look in all the maps for it
+    []  -> Nothing
+    [x] -> Just x
+    xs  -> trace "core.sanitize.lookupHash" ("WARNING: duplicate hashes. using the first:\n" ++ show xs) (Just $ head xs)
+
+-- TODO move to Actions? causes an import cycle so far
+lookupHashesFile :: Path -> Path -> Action ()
+lookupHashesFile inPath outPath = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "core.sanitize.lookupHashesFile"
+  partialIDs <- readList loc $ fromPath loc cfg inPath
+  ref <- fmap fromJust getShakeExtra
+  ids <- liftIO $ readIORef ref
+  let lookupFn v = case lookupHash ids v of
+                     Just h  -> return h
+                     Nothing -> do
+                       liftIO $ putStrLn ("warning: no seqid_ hash found for \"" ++ v ++ "\"")
+                       return v
+  idKeys <- mapM lookupFn partialIDs
+  dRef <- fmap fromJust getShakeExtra
+  liftIO $ addDigest dRef (ListOf str) outPath -- TODO make this an Action?
   writeCachedLines loc (fromPath loc cfg outPath) idKeys

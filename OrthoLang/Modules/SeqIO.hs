@@ -282,7 +282,8 @@ aExtractSeqs out inFa inList = do
       tmp  = fromPath loc cfg $ cacheDir cfg "seqio"
       ids  = tmp </> digest (toPath loc cfg inList) <.> "txt"
       ids' = toPath loc cfg ids
-  lookupIDsFile (toPath loc cfg inList) ids' -- TODO implement as a macro
+  -- need ["reloadseqids"]
+  lookupHashesFile (toPath loc cfg inList) ids' -- TODO implement as a macro
   aNewRulesS2 "extract_seqs.py" id out inFa ids
 
 -- TODO remove by rewriting map functions to work on the new one above
@@ -294,7 +295,7 @@ aExtractSeqsOld [outPath, inFa, inList] = do
       tmpList' = cDir </> digest inList <.> "txt"
       tmpList  = toPath loc cfg tmpList'
   liftIO $ createDirectoryIfMissing True cDir
-  lookupIDsFile inList tmpList
+  lookupHashesFile inList tmpList
   aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, tmpList]
 aExtractSeqsOld ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 

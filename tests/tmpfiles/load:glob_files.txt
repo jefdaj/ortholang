@@ -1,5 +1,6 @@
 .
 |-- cache
+|   `-- load
 |-- exprs
 |   |-- glob_files
 |   |   `-- 5b3fc9067d
@@ -10,4 +11,4 @@
 `-- vars
     `-- result -> ../exprs/glob_files/5b3fc9067d/result
 
-7 directories, 3 files
+8 directories, 3 files

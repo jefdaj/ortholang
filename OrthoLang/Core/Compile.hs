@@ -21,8 +21,6 @@ module OrthoLang.Core.Compile
   , aNewRulesS3
   , newMacro
   , newRules
-  , rSeqIDs
-  , aSeqIDs
   , MacroExpansion
   -- , rBop
   , rExpr
