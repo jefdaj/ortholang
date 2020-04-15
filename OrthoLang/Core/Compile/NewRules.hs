@@ -79,7 +79,6 @@ import OrthoLang.Core.Compile.Basic
 import OrthoLang.Core.Sanitize (readIDs)
 import OrthoLang.Core.Types
 import System.Exit (ExitCode(..))
-import System.Directory           (createDirectoryIfMissing)
 
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
@@ -225,19 +224,20 @@ newBop n c i r = newFn n (Just c) [ListSigs i] r rNewRulesA1
 The load_* functions handle hashing seqids of newly-loaded files the first
 time, but they fail to enfore re-loading them during the next program run when
 they might still be needed. This is a bit of a hack, but does enforce it
-properly (so far!).
+properly (so far!). Note that getDirectoryFilesIO is used on purpose, because
+it skips 'Development.Shake.need'ing the matches.
 -}
 rReloadIDs :: Rules ()
 rReloadIDs = "reloadseqids" ~> do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
   let lDir = cfgTmpDir cfg </> "cache" </> "load"
-  liftIO $ createDirectoryIfMissing True lDir
-  idNames <- liftIO $ getDirectoryFilesIO lDir ["//*.ids"]
-  let idPaths = map (lDir </>) idNames
-  -- trackWrite idPaths
-  liftIO $ debug "core.sanitize.rReloadIDs" $ "idPaths: " ++ show idPaths
-  mapM_ aLoadIDs idPaths
+  lDirExists <- doesDirectoryExist lDir
+  when lDirExists $ do
+    idNames <- liftIO $ getDirectoryFilesIO lDir ["//*.ids"]
+    let idPaths = map (lDir </>) idNames
+    liftIO $ debug "core.sanitize.rReloadIDs" $ "idPaths: " ++ show idPaths
+    mapM_ aLoadIDs idPaths
 
 {-|
 This is called from 'OrthoLang.Core.Sanitize.hashIDsFile2' the first time a
