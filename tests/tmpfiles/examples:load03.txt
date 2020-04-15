@@ -12,7 +12,7 @@
 |   |           |-- args -> ../../../../cache/lines/...
 |   |           `-- result -> ../../../../exprs/gbk_to_faa_rawids/a1cea34ec0/b812c77840/result
 |   |-- load
-|   |   |-- 5e5e074c73.str -> $WORKDIR/examples/gene-lists/pcc7942-random-100.txt
+|   |   |-- 5e5e074c73.str.list -> $WORKDIR/examples/gene-lists/pcc7942-random-100.txt
 |   |   |-- 9ebcbd938f.faa
 |   |   |-- 9ebcbd938f.faa.ids
 |   |   |-- d8da51f7cd.gbk -> $WORKDIR/examples/sequences/PCC_7942_pANL.gbk
@@ -23,10 +23,10 @@
 |       `-- b4b6f1db24.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- concat_faa
-|   |   `-- d96f4ea92a
+|   |   `-- 667205f624
 |   |       `-- result
 |   |-- extract_seqs
-|   |   `-- 8fdb890107
+|   |   `-- c40578b533
 |   |       `-- b4b6f1db24
 |   |           `-- result
 |   |-- gbk_to_faa_rawids
@@ -43,7 +43,7 @@
 |   |   `-- ab37b73374
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
-|   |-- load_faa_each
+|   |-- load_faa_path_each
 |   |   `-- 81cbfa127c
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_gbk_each
@@ -51,7 +51,7 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_list
 |   |   `-- b5c1f0d946
-|   |       `-- result -> ../../../cache/load/5e5e074c73.str
+|   |       `-- result -> ../../../cache/load/5e5e074c73.str.list
 |   `-- str
 |       |-- 352a01db6d
 |       |   `-- result -> ../../../cache/lines/...
@@ -63,6 +63,6 @@
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- result -> ../vars/sequences_of_interest.faa
-    `-- sequences_of_interest.faa -> ../exprs/extract_seqs/8fdb890107/b4b6f1db24/result
+    `-- sequences_of_interest.faa -> ../exprs/extract_seqs/c40578b533/b4b6f1db24/result
 
 36 directories, 29 files

@@ -100,7 +100,7 @@ mkLoad hashSeqIDs name oSig = newFnA1 name (Exactly str) oSig (aLoad hashSeqIDs)
 --   then load that path" indirection. Used in macro expansions for
 --   "re-loading" a file after processing it.
 mkLoadPath :: Bool -> String -> TypeSig -> Function
-mkLoadPath hashSeqIDs name oSig = newFnA1 name (Exactly str) oSig (aLoadPath hashSeqIDs) [ReadsFile]
+mkLoadPath hashSeqIDs name oSig = hidden $ newFnA1 name (Exactly str) oSig (aLoadPath hashSeqIDs) [ReadsFile]
 
 loadList :: Function
 loadList = mkLoad False "load_list" (Exactly $ ListOf str)
@@ -168,7 +168,7 @@ mkLoadEach :: Bool -> String -> TypeSig -> Function
 mkLoadEach hashSeqIDs name elemSig = newFnA1 name (Exactly $ ListOf str) (ListSigs elemSig) (aLoadEach hashSeqIDs) [ReadsFile]
 
 mkLoadPathEach :: Bool -> String -> TypeSig -> Function
-mkLoadPathEach hashSeqIDs name elemSig = newFnA1 name (Exactly $ ListOf str) (ListSigs elemSig) (aLoadListPaths hashSeqIDs) [ReadsFile]
+mkLoadPathEach hashSeqIDs name elemSig = hidden $ newFnA1 name (Exactly $ ListOf str) (ListSigs elemSig) (aLoadListPaths hashSeqIDs) [ReadsFile]
 
 {-|
 The paths here are a little confusing: expr is a str of the path we want to
@@ -209,23 +209,24 @@ aLoadHash hashSeqIDs t src = do
       liftIO $ addDigest dRef t hashPath
   return hashPath
 
--- TODO issue here is that when run from a macro we want to load the input path itself,
---      whereas when run by the user we want to read a str and then load that path
+-- TODO problem when the str is a url? shouldn't `need` it then
 aLoad :: Bool -> NewAction1
 aLoad hashSeqIDs o@(ExprPath out') strPath' = do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoad"
       out = toPath loc cfg out'
-  pth'  <- readLitPath loc strPath' -- TODO or is the bug here?
+  dRef <- fmap fromJust getShakeExtra
+  t    <- liftIO $ decodeNewRulesType cfg dRef o
+
+  pth'  <- readLit loc strPath' -- TODO bug `need`ing url here
+  let pth = toPath loc cfg pth'
 
   -- pth'  <- readString loc t strPath' -- TODO fix bug here: sometimes includes lits
 
   -- TODO is this the proper place to actually do the download?
-  pth'' <- if isURL (fromPath loc cfg pth') then curl pth' else return pth'
+  pth'' <- if isURL pth' then curl pth else return pth
 
-  dRef <- fmap fromJust getShakeExtra
-  t    <- liftIO $ decodeNewRulesType cfg dRef o
   -- liftIO $ putStrLn $ "aLoadPath pth': " ++ show pth'
   -- liftIO $ putStrLn $ "aLoadPath pth'': " ++ show pth''
   -- liftIO $ putStrLn $ "aLoadPath t: " ++ show t

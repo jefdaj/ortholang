@@ -1,8 +1,8 @@
 genome_names = load_list "examples/genome-lists/genbank-two-cyanos.txt"
 genomes = load_gbk_each genome_names
-pcc7942genes = concat_faa (load_faa_each (gbk_to_faa_rawids_each "cds"
-                                                                 (load_gbk_each ["examples/sequences/PCC_7942_chr.gbk",
-                                                                                 "examples/sequences/PCC_7942_pANL.gbk"])))
+pcc7942genes = concat_faa (load_faa_path_each (gbk_to_faa_rawids_each "cds"
+                                                                      (load_gbk_each ["examples/sequences/PCC_7942_chr.gbk",
+                                                                                      "examples/sequences/PCC_7942_pANL.gbk"])))
 genes_of_interest = load_list "examples/gene-lists/pcc7942-random-100.txt"
 sequences_of_interest = extract_seqs pcc7942genes genes_of_interest
 result = sequences_of_interest

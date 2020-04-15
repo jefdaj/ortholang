@@ -1,8 +1,7 @@
 .
 |-- cache
 |   `-- load
-|       |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
-|       `-- 28ce925871.str -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
+|       `-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |-- exprs
 |   |-- any
 |   |   `-- 2d76d44d86
@@ -16,7 +15,7 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_gbk
 |   |   `-- b5a17d977e
-|   |       `-- result -> ../../../cache/load/28ce925871.str
+|   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- load_gbk_each
 |   |   `-- 329d7d3465
 |   |       `-- result -> ../../../cache/lines/...
@@ -28,4 +27,4 @@
     |-- result -> ../exprs/any/2d76d44d86/result
     `-- single.gbk -> ../exprs/load_gbk/b5a17d977e/result
 
-16 directories, 12 files
+16 directories, 11 files
