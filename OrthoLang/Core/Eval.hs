@@ -41,7 +41,7 @@ import Data.Typeable (TypeRep)
 -- import Data.List (isPrefixOf)
 
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
-import OrthoLang.Core.Compile         (compileScript, rExpr, newRules)
+import OrthoLang.Core.Compile         (compileScript, rExpr, aSeqIDs, newRules)
 import OrthoLang.Core.Parse            (parseFileIO)
 import OrthoLang.Core.Pretty           (prettyNum)
 import OrthoLang.Core.Paths            (Path, toPath, fromPath)
@@ -150,7 +150,7 @@ myShake cfg ref ids dr pm delay rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
   let shakeOpts = shakeOptions
         { shakeFiles     = cfgTmpDir cfg
-        , shakeVerbosity = Quiet
+        , shakeVerbosity = Quiet -- TODO can you make it  but sent only to the logfile?
         , shakeThreads   = 8 -- max 1 (cfgThreads cfg - 1)
         , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ maybeToList (cfgReport cfg)
         , shakeAbbreviations = [(cfgTmpDir cfg, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
@@ -245,6 +245,8 @@ eval hdl cfg ref ids dr rtype ls p = do
       newRules
       lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
       (ResPath path) <- rpath
+      let wanted = lpaths' ++ ["eval"]
+      -- want $ trace "core.eval.eval'" ("wanted: " ++ show wanted) wanted
       want ["eval"]
       "eval" ~> do
         alwaysRerun
@@ -252,6 +254,11 @@ eval hdl cfg ref ids dr rtype ls p = do
         actionRetry 9 $ do
           -- Exit _ <- command [] "sync" [] -- why is this needed?
           -- liftIO $ threadDelay delay
+
+          -- TODO is this the only thing that works for loading?
+          idPaths <- getDirectoryFiles (cfgTmpDir cfg </> "cache/load") [".ids"]
+          mapM aSeqIDs idPaths
+
           need $ lpaths' ++ [path] -- TODO is this done automatically in the case of result?
         {- if --interactive, print the short version of a result
          - if --output, save the full result (may also be --interactive)
@@ -312,8 +319,11 @@ evalScript hdl (scr, c, ref, ids, dRef) =
       res = case lookupResult scr'' of
               Nothing -> fromJust $ lookupResult $ ensureResult scr''
               Just r  -> r
+
+      -- TODO why doesn't alwaysRerun handle these?
       loadExprs = extractLoads scr'' res
-      loads = mapM (rExpr scr'') $ trace "ortholang.core.eval.evalScript" ("load expressions: " ++ show loadExprs) loadExprs
+      loads = mapM (rExpr scr'') $ trace "ortholang.core.eval.evalScript" (unlines $ "load expressions:" :map show loadExprs) loadExprs
+
   in eval hdl c ref ids dRef (typeOf res) loads (compileScript $ seq scr'' scr'')
 
 -- TODO should there be a new idsref for this? how about digestsref?

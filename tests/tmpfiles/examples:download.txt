@@ -1,14 +1,14 @@
 .
 |-- cache
 |   |-- curl
-|   |   `-- 0ba64ec1b2
+|   |   `-- 2857224b49
 |   `-- load
-|       |-- 46d3084751.str
-|       `-- 46d3084751.str.ids
+|       |-- 46d3084751.fna
+|       `-- 46d3084751.fna.ids
 |-- exprs
 |   |-- load_fna
 |   |   `-- 39cfbdcad3
-|   |       `-- result -> ../../../cache/load/46d3084751.str
+|   |       `-- result -> ../../../cache/load/46d3084751.fna
 |   `-- str
 |       `-- 0ba64ec1b2
 |           `-- result -> ../../../cache/lines/...

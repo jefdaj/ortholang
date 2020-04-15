@@ -49,6 +49,7 @@ module OrthoLang.Core.Compile.NewRules
   , hidden
 
   -- * Implementation details
+  , rSeqIDs
   , newRules
   , newPattern
   , newFn
@@ -59,6 +60,7 @@ module OrthoLang.Core.Compile.NewRules
   , applyList1
   , applyList2
   , applyList3
+  , aSeqIDs
   , aNewRulesS1
   , aNewRulesS2
   , aNewRulesS3
@@ -74,15 +76,18 @@ import Control.Monad.Reader
 import Development.Shake
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..))
 import OrthoLang.Core.Compile.Basic
+import OrthoLang.Core.Sanitize (readIDs)
 import OrthoLang.Core.Types
 import System.Exit (ExitCode(..))
 
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
-import Development.Shake.FilePath ((</>), takeDirectory)
+import Development.Shake.FilePath ((</>), takeDirectory, takeBaseName)
 import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest)
+import qualified Data.Map.Strict as M
+import Data.IORef                 (atomicModifyIORef')
 
 ---------
 -- API --
@@ -216,6 +221,31 @@ newBop n c i r = newFn n (Just c) [ListSigs i] r rNewRulesA1
 --------------------
 
 {-|
+The load_* functions handle hashing seqids of newly-loaded files the first
+time, but they fail to enfore re-loading them during the next program run when
+they might still be needed. This is a bit of a hack, but does enforce it
+properly (so far!).
+-}
+rSeqIDs :: Rules ()
+rSeqIDs = do
+  cfg <- fmap fromJust getShakeExtraRules
+  let ptn = cfgTmpDir cfg </> "cache" </> "load" </> "*.ids"
+  ptn %> aSeqIDs
+
+aSeqIDs :: FilePath -> Action ()
+aSeqIDs idsPath' = do
+  alwaysRerun
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.load.aSeqIDs"
+      idsPath = toPath loc cfg idsPath'
+  newIDs <- readIDs idsPath
+  ids <- fmap fromJust getShakeExtra
+  let (Path k) = idsPath
+      v = takeBaseName idsPath' -- TODO is this good enough?
+  liftIO $ atomicModifyIORef' ids $
+    \h@(IDs {hFiles = f, hSeqIDs = s}) -> (h { hFiles  = M.insert k v f
+                                             , hSeqIDs = M.insert k newIDs s}, ())
+ {-|
 This gathers all the 'fNewRules' 'Development.Shake.Rules' together for use in
 'OrthoLang.Core.Eval.eval'. The old-style rules in use throughout OrthoLang now
 require the compilers to return exact paths. These new ones use proper patterns
@@ -227,8 +257,8 @@ newRules :: Rules ()
 newRules = do
   cfg <- fmap fromJust $ getShakeExtraRules
   let fns   = concatMap mFunctions $ cfgModules cfg
-      rules = catRules $ map fNewRules fns
-  sequence_ rules
+      fnRules = catRules $ map fNewRules fns
+  sequence_ fnRules
   where
     catRules [] = []
     catRules ((NewRules r):xs) = r : catRules xs

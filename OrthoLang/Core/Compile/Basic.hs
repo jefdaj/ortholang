@@ -1,6 +1,6 @@
 {-|
 This module "compiles" an expression it by translating it into a set of Shake
-build rules. To actually run the rules, use `eval` in the Interpret module.
+build rules. To actually run the rules, use 'OrthoLang.Core.Eval.eval'.
 
 TODO add more descriptive runtime error for canonicalizePath failing b/c no file
 
@@ -204,7 +204,7 @@ strs = ["one", "two", "three", "four"]
 
 These have a variable number of arguments which is known at Rules-time. So we
 fold over their digests to produce one main \"argument\" digest. All their
-actual arguments are added to their 'hExprs' entry at the same time.
+actual arguments are added to their hExprs entry at the same time.
 
 Note this is different from how function-generated lists of literals (or paths)
 are handled, because their arguments won't be known until after the function
@@ -259,7 +259,7 @@ greens = [chlamy, athaliana, pcc7942]
 
 Like lists of literals, these also have a variable number of arguments which is
 known at Rules-time. So we fold over their digests to produce one main
-\"argument\" digest. All their actual arguments are added to their 'hExprs'
+\"argument\" digest. All their actual arguments are added to their hExprs
 entry at the same time. Note this is different from how function-generated
 lists of paths (or literals) are handled, because their arguments won't be
 known until after the function runs.

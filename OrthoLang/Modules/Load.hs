@@ -12,8 +12,6 @@ module OrthoLang.Modules.Load
   , mkLoadGlob
   -- , mkLoaders
 
-  -- * Implementation details
-
   )
   where
 
@@ -30,8 +28,8 @@ import Data.List                  (sort)
 -- import Data.List.Utils            (replace)
 import Data.Maybe                 (fromJust)
 import Data.String.Utils          (strip)
-import Development.Shake          (Action, getShakeExtra, alwaysRerun)
-import Development.Shake.FilePath ((</>), (<.>), takeFileName)
+import Development.Shake          -- (Rules, Action, getShakeExtra, alwaysRerun, (%>), getShakeExtraRules)
+import Development.Shake.FilePath ((</>), (<.>), takeFileName, takeBaseName)
 import OrthoLang.Util             (absolutize, resolveSymlinks, unlessExists)
 -- import System.Directory           (makeRelativeToCurrentDirectory)
 -- import System.FilePath            (takeExtension)
@@ -209,10 +207,11 @@ aLoadHash hashSeqIDs t src = do
       liftIO $ addDigest dRef t hashPath
   return hashPath
 
+
 -- TODO problem when the str is a url? shouldn't `need` it then
 aLoad :: Bool -> NewAction1
 aLoad hashSeqIDs o@(ExprPath out') strPath' = do
-  alwaysRerun
+  -- alwaysRerun
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoad"
       out = toPath loc cfg out'
@@ -271,6 +270,7 @@ aLoadListLits (ExprPath outPath') litsPath' = do
 
 aLoadListPaths :: Bool -> NewAction1
 aLoadListPaths hashSeqIDs o@(ExprPath out') linksPath' = do
+  alwaysRerun
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoadListPaths"
   dRef <- fmap fromJust getShakeExtra

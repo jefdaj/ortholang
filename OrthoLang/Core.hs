@@ -41,6 +41,7 @@ module OrthoLang.Core
   , evalFile
   , expandMacros
   , prettyShow
+  , aSeqIDs
 
   -- * Things used in Test
   , help
