@@ -121,10 +121,12 @@ module OrthoLang.Core
   , need'
   , readFileStrict'
   , readLit
+  , readLitPath
   , readLitPaths
   , readLits
   , readPath
   , readPaths
+  , readString
   , readStrings
   , runCmd
   , sanitizeFileInPlace

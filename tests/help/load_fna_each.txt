@@ -1,4 +1,4 @@
 
-[list of path (a somewhat-sanitized path (or url))s] -> fna (FASTA (nucleic acid)).list
+[list of str (string)s] -> fna (FASTA (nucleic acid)).list
 
 doc for functions/load_fna_each not written yet

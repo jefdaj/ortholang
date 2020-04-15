@@ -1,36 +1,31 @@
 .
 |-- cache
 |   `-- load
-|       `-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
+|       |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
+|       `-- 28ce925871.str -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |-- exprs
 |   |-- any
-|   |   `-- 306e0ad742
+|   |   `-- 2d76d44d86
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 394ca385d8
+|   |   |-- 0389d2c8bf
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 9ed052b3b5
+|   |   |-- 9f695dd3c3
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- b343fefd56
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_gbk_path
-|   |   `-- 81c9427aca
-|   |       `-- result -> ../../../cache/load/28ce925871.gbk
-|   |-- load_gbk_path_each
-|   |   `-- a037c73e01
-|   |       `-- result -> ../../../cache/lines/...
-|   |-- str
-|   |   `-- ee108e12fa
-|   |       `-- result -> ../../../cache/lines/...
-|   |-- to_path
+|   |-- load_gbk
 |   |   `-- b5a17d977e
+|   |       `-- result -> ../../../cache/load/28ce925871.str
+|   |-- load_gbk_each
+|   |   `-- 329d7d3465
 |   |       `-- result -> ../../../cache/lines/...
-|   `-- to_path_each
-|       `-- 329d7d3465
+|   `-- str
+|       `-- ee108e12fa
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- mapped.gbk.list -> ../exprs/load_gbk_path_each/a037c73e01/result
-    |-- result -> ../exprs/any/306e0ad742/result
-    `-- single.gbk -> ../exprs/load_gbk_path/81c9427aca/result
+    |-- mapped.gbk.list -> ../exprs/load_gbk_each/329d7d3465/result
+    |-- result -> ../exprs/any/2d76d44d86/result
+    `-- single.gbk -> ../exprs/load_gbk/b5a17d977e/result
 
-20 directories, 13 files
+16 directories, 12 files

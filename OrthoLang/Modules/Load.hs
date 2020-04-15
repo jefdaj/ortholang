@@ -5,11 +5,10 @@ module OrthoLang.Modules.Load
     olModule
 
   -- * Functions for use in other modules
-  , path
-  , mkLoadPath
-  , mkLoadPathEach
   , mkLoad
+  , mkLoadPath
   , mkLoadEach
+  , mkLoadPathEach
   , mkLoadGlob
   -- , mkLoaders
 
@@ -33,7 +32,7 @@ import Data.Maybe                 (fromJust)
 import Data.String.Utils          (strip)
 import Development.Shake          (Action, getShakeExtra, alwaysRerun)
 import Development.Shake.FilePath ((</>), (<.>), takeFileName)
-import OrthoLang.Util             (absolutize, resolveSymlinks, headOrDie, unlessExists)
+import OrthoLang.Util             (absolutize, resolveSymlinks, unlessExists)
 -- import System.Directory           (makeRelativeToCurrentDirectory)
 -- import System.FilePath            (takeExtension)
 import System.FilePath.Glob       (glob)
@@ -42,44 +41,46 @@ olModule :: Module
 olModule = Module
   { mName = "Load"
   , mDesc = "Load generic lists"
-  , mTypes = [str, path]
+  , mTypes = [str]
   , mGroups = []
   , mEncodings = []
   , mFunctions =
-    [ loadListPath, loadList, loadListPaths -- TODO better names!
+    [ loadList
     , globFiles
-    , topath, topathEach
     ]
   }
 
 -- note path here refers to the path of the list; elements inside are still strs
-loadListPath :: Function
-loadListPath = hidden $ mkLoadPath False "load_list_path" (Exactly $ ListOf str)
+-- loadListPath :: Function
+-- loadListPath = hidden $ mkLoadPath False "load_list_path" (Exactly $ ListOf str)
 
 -- note path here refers to the path of the list; elements inside are still strs
-loadList :: Function
-loadList = mkLoad "load_list" loadListPath
+-- loadList :: Function
+-- loadList = mkLoad "load_list" loadListPath
 
-loadListPaths :: Function
-loadListPaths = compose1 "load_list_paths" [ReadsFile] loadList topathEach
+-- loadListPaths :: Function
+-- loadListPaths = compose1 "load_list_paths" [ReadsFile] loadList topathEach
 
 globFiles :: Function
-globFiles = newFnA1 "glob_files" (Exactly str) (Exactly $ ListOf path) aGlobNew [ReadsDirs]
+globFiles = newFnA1 "glob_files" (Exactly str) (Exactly $ ListOf str) aGlobNew [ReadsDirs]
 
 aGlobNew :: NewAction1
 aGlobNew (ExprPath out) a1 = do
   let loc = "modules.load.aGlobNew"
-  ptn    <- fmap strip $ readLit loc a1
-  paths  <- liftIO $ fmap sort $ glob ptn
+  globptn  <- fmap strip $ readLit loc a1
+  relpaths <- liftIO $ fmap sort $ glob globptn
+  writeLits loc out relpaths
+  -- TODO does this part help with anything? doesn't make paths absolute
   -- liftIO $ putStrLn $ "aGlobNew paths: " ++ show paths
   -- paths' <- liftIO $ mapM makeRelativeToCurrentDirectory paths
-  cfg <- fmap fromJust getShakeExtra
-  let paths'' = map (toPath loc cfg) paths
-  writePaths loc out paths''
+  -- let paths'' = map (toPath loc cfg) paths
+  -- TODO is there a better way to do this than assuming WORKDIR based paths?
+  -- cfg <- fmap fromJust getShakeExtra
+  -- let abspaths = map (\p -> toPath loc cfg $ cfgWorkDir cfg </> p) relpaths
 
 -- TODO does it ever read a URL?
 mkLoadGlob :: String -> Function -> Function
-mkLoadGlob name eachPathFn = compose1 name [ReadsDirs, ReadsFile, ReadsURL] globFiles eachPathFn
+mkLoadGlob name eachFn = compose1 name [ReadsDirs, ReadsFile, ReadsURL] globFiles eachFn
 
 {-|
 Takes a string with the filepath to load. Creates a trivial expression file
@@ -88,11 +89,21 @@ links, and the only ones that point outside the temp dir.
 -}
 
 -- TODO add _path to name here?
-mkLoadPath :: Bool -> String -> TypeSig -> Function
-mkLoadPath hashSeqIDs name oSig = newFnA1 name (Exactly path) oSig (aLoadPath hashSeqIDs) [ReadsFile]
+-- mkLoadPath :: Bool -> String -> TypeSig -> Function
+-- mkLoadPath hashSeqIDs name oSig = newFnA1 name (Exactly path) oSig (aLoadPath hashSeqIDs) [ReadsFile]
 
-mkLoad :: String -> Function -> Function
-mkLoad name loadPathFn = compose1 name [ReadsFile] topath loadPathFn
+mkLoad :: Bool -> String -> TypeSig -> Function
+-- mkLoad name loadPathFn = compose1 name [ReadsFile] topath loadPathFn
+mkLoad hashSeqIDs name oSig = newFnA1 name (Exactly str) oSig (aLoad hashSeqIDs) [ReadsFile]
+
+-- | For loading directly from a path, as opposed to the normal "read a str,
+--   then load that path" indirection. Used in macro expansions for
+--   "re-loading" a file after processing it.
+mkLoadPath :: Bool -> String -> TypeSig -> Function
+mkLoadPath hashSeqIDs name oSig = newFnA1 name (Exactly str) oSig (aLoadPath hashSeqIDs) [ReadsFile]
+
+loadList :: Function
+loadList = mkLoad False "load_list" (Exactly $ ListOf str)
 
 -- TODO is the oSig needed to?
 -- TODO have the to_path fn return whatever string is used internally now, initially
@@ -113,20 +124,13 @@ Converts user-specified strs (which may represent relative or absolute paths)
 to properly formatted OrthoLang Paths. Used to sanitize inputs to the load_* functions
 Note the weird name keeps it from conflicting with 'OrthoLang.Core.Paths.toPath'
 -}
-topath :: Function
-topath = hidden $ newFnA1 "to_path" (Exactly str) (Exactly path) aTopath [ReadsDirs]
+-- topath :: Function
+-- topath = hidden $ newFnA1 "to_path" (Exactly str) (Exactly str) aTopath [ReadsDirs]
 
 -- TODO probably do it by mapping over to_path instead? whatever
 --      just duplicate for now though and do that once mapping works
-topathEach :: Function
-topathEach = hidden $ newFnA1 "to_path_each" (Exactly $ ListOf str) (Exactly $ ListOf path) aTopathEach [ReadsDirs]
-
-path :: Type
-path = Type
-  { tExt = "path"
-  , tDesc = "a somewhat-sanitized path (or url)"
-  , tShow = defaultShow -- TODO will that work?
-  }
+-- topathEach :: Function
+-- topathEach = hidden $ newFnA1 "to_path_each" (Exactly $ ListOf str) (Exactly $ ListOf path) aTopathEach [ReadsDirs]
 
 -- TODO make up a few test cases: single url, single file (rel and abs), list of each of those, mixed list
 -- seems to work on the rel path so far but not the url
@@ -134,21 +138,21 @@ path = Type
 -- TODO and no need to resolve symlinks here the way it does now, right?
 -- TODO hey the obvious thing: make a pure function, then have single + mapped action wrappers. easy to test!
 -- TODO hey make a new OrthoLang Type called path? it would capture the load types a bit better than str
-aTopath :: NewAction1
-aTopath (ExprPath outPath) strPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.load.aTopath"
-  pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits loc strPath -- TODO safer!
-  let pth' = toPath loc cfg pth
-  writePath loc outPath pth'
+-- aTopath :: NewAction1
+-- aTopath (ExprPath outPath) strPath = do
+--   cfg <- fmap fromJust getShakeExtra
+--   let loc = "modules.load.aTopath"
+--   pth <- fmap (headOrDie "read lits in aTopath failed") $ readLits loc strPath -- TODO safer!
+--   let pth' = toPath loc cfg pth
+--   writePath loc outPath pth'
 
-aTopathEach :: NewAction1
-aTopathEach (ExprPath outPath) strsPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.load.aTopathEach"
-  pths <- readLits loc strsPath -- TODO safer!
-  let pths' = map (toPath loc cfg) pths
-  writePaths loc outPath pths'
+-- aTopathEach :: NewAction1
+-- aTopathEach (ExprPath outPath) strsPath = do
+--   cfg <- fmap fromJust getShakeExtra
+--   let loc = "modules.load.aTopathEach"
+--   pths <- readLits loc strsPath -- TODO safer!
+--   let pths' = map (toPath loc cfg) pths
+--   writePaths loc outPath pths'
 
 {-|
 Like mkLoad, except it operates on a list of strings. Note that you can also
@@ -156,11 +160,15 @@ load lists using mkLoad, but it's not recommended because then you have to write
 the list in a file, whereas this can handle literal lists in the source code.
 -}
 
-mkLoadPathEach :: Bool -> String -> TypeSig -> Function
-mkLoadPathEach hashSeqIDs name elemSig = newFnA1 name (Exactly $ ListOf path) (ListSigs elemSig) (aLoadPathEach hashSeqIDs) [ReadsFile]
+-- mkLoadPathEach :: Bool -> String -> TypeSig -> Function
+-- mkLoadPathEach hashSeqIDs name elemSig = newFnA1 name (Exactly $ ListOf path) (ListSigs elemSig) (aLoadEach hashSeqIDs) [ReadsFile]
 
-mkLoadEach :: String -> Function -> Function
-mkLoadEach name loadPathEachFn = compose1 name [ReadsFile] topathEach loadPathEachFn
+mkLoadEach :: Bool -> String -> TypeSig -> Function
+-- mkLoadEach name loadPathEachFn = compose1 name [ReadsFile] topathEach loadPathEachFn
+mkLoadEach hashSeqIDs name elemSig = newFnA1 name (Exactly $ ListOf str) (ListSigs elemSig) (aLoadEach hashSeqIDs) [ReadsFile]
+
+mkLoadPathEach :: Bool -> String -> TypeSig -> Function
+mkLoadPathEach hashSeqIDs name elemSig = newFnA1 name (Exactly $ ListOf str) (ListSigs elemSig) (aLoadListPaths hashSeqIDs) [ReadsFile]
 
 {-|
 The paths here are a little confusing: expr is a str of the path we want to
@@ -176,7 +184,7 @@ aLoadHash hashSeqIDs t src = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoadHash"
       src' = fromPath loc cfg src
-  need' "modules.load.aLoadHash" [src']
+  need' loc [src']
   md5 <- hashContent src
   -- let loc = "modules.load.aLoadHash"
   let tmpDir'   = fromPath loc cfg $ cacheDir cfg "load"
@@ -201,45 +209,46 @@ aLoadHash hashSeqIDs t src = do
       liftIO $ addDigest dRef t hashPath
   return hashPath
 
-aLoadPath :: Bool -> NewAction1
-aLoadPath hashSeqIDs (ExprPath out) strPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.load.aLoadPath"
-  aLoad hashSeqIDs (toPath loc cfg strPath) (toPath loc cfg out)
-
-aLoad :: Bool -> Path -> Path -> Action ()
-aLoad hashSeqIDs strPath outPath = do
+-- TODO issue here is that when run from a macro we want to load the input path itself,
+--      whereas when run by the user we want to read a str and then load that path
+aLoad :: Bool -> NewAction1
+aLoad hashSeqIDs o@(ExprPath out') strPath' = do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
-  let strPath'  = fromPath loc cfg strPath
-      outPath'  = fromPath loc cfg outPath
-      loc = "modules.load.aLoad"
-      outPath'' = traceA loc outPath [strPath', outPath']
-      -- toAbs line = if isAbsolute line
-      --                then line
-      --                else cfgWorkDir cfg </> line
-  -- need' loc [strPath']
+  let loc = "modules.load.aLoad"
+      out = toPath loc cfg out'
+  pth'  <- readLitPath loc strPath' -- TODO or is the bug here?
+
+  -- pth'  <- readString loc t strPath' -- TODO fix bug here: sometimes includes lits
+
+  -- TODO is this the proper place to actually do the download?
+  pth'' <- if isURL (fromPath loc cfg pth') then curl pth' else return pth'
 
   dRef <- fmap fromJust getShakeExtra
-  pth <- readPath loc strPath'
-
-  -- TODO put back curl right?
-  let pth' = fromPath loc cfg pth
-  pth'' <- if isURL pth' then curl pth' else return pth
-  -- pth <- fmap (headOrDie "read lits in aLoad failed") $ readLits loc strPath' -- TODO safer!
---   pth' <- if isURL pth
---             then curl pth
---             else fmap (toPath loc cfg . toAbs) $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) pth
-
-  t <- liftIO $ decodeNewRulesType cfg dRef $ ExprPath $ outPath'
+  t    <- liftIO $ decodeNewRulesType cfg dRef o
+  -- liftIO $ putStrLn $ "aLoadPath pth': " ++ show pth'
+  -- liftIO $ putStrLn $ "aLoadPath pth'': " ++ show pth''
+  -- liftIO $ putStrLn $ "aLoadPath t: " ++ show t
   hashPath <- aLoadHash hashSeqIDs t pth''
 
-  -- liftIO $ putStrLn $ "ext: " ++ takeExtension outPath'
-  symlink outPath'' hashPath
+  symlink out hashPath
+
+-- TODO should this alwaysRerun?
+aLoadPath :: Bool -> NewAction1
+aLoadPath hashSeqIDs o@(ExprPath out') loadPath' = do
+  alwaysRerun
+  cfg  <- fmap fromJust getShakeExtra
+  let loc = "modules.load.aLoadPath"
+      out = toPath loc cfg out'
+      loadPath = toPath loc cfg loadPath'
+  dRef <- fmap fromJust getShakeExtra
+  t    <- liftIO $ decodeNewRulesType cfg dRef o
+  hashPath <- aLoadHash hashSeqIDs t loadPath
+  symlink out hashPath
 
 -- TODO this should be able to be a list of URLs too. demo that!
-aLoadPathEach :: Bool -> NewAction1
-aLoadPathEach hashSeqIDs o lstPath = do
+aLoadEach :: Bool -> NewAction1
+aLoadEach hashSeqIDs o lstPath = do
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
   (ListOf et) <- liftIO $ decodeNewRulesType cfg dRef o
@@ -260,24 +269,15 @@ aLoadListLits (ExprPath outPath') litsPath' = do
   writeLits loc out lits'
 
 aLoadListPaths :: Bool -> NewAction1
-aLoadListPaths hashSeqIDs (ExprPath outPath') pathsPath' = do
-
+aLoadListPaths hashSeqIDs o@(ExprPath out') linksPath' = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoadListPaths"
-      -- outPath    = toPath loc cfg outPath'
-      -- pathsPath  = toPath loc cfg pathsPath'
-      out = traceA loc outPath' [outPath', pathsPath']
-
-  -- paths <- readLitPaths loc pathsPath'
-  paths <- readPaths loc pathsPath'
-  let paths' = map (fromPath loc cfg) paths
-  paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) paths' -- TODO remove?
-  let paths''' = map (toPath loc cfg) paths''
-
   dRef <- fmap fromJust getShakeExtra
-  (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef $ ExprPath $ outPath'
-  hashPaths <- mapM (aLoadHash hashSeqIDs t) paths'''
+  (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef o -- TODO does this make sense?
+  links  <- readLitPaths loc linksPath' -- TODO or is the bug here?
+  paths' <- liftIO $ mapM (resolveSymlinks $ Just $ cfgTmpDir cfg) $ map (fromPath loc cfg) links -- TODO remove?
+  let paths = map (toPath loc cfg) paths'
+  hashPaths <- mapM (aLoadHash hashSeqIDs t) paths
   let hashPaths' = map (fromPath loc cfg) hashPaths
-  need' loc hashPaths'
-
-  writePaths loc out hashPaths
+  need' loc hashPaths' -- TODO remove?
+  writePaths loc out' hashPaths

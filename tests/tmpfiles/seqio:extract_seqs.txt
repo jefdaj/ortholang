@@ -1,67 +1,72 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 6046a54e92
-|   |   |-- 6046a54e92.ids
-|   |   |-- cb3e90dc00
-|   |   `-- cb3e90dc00.ids
+|   |   |-- 6046a54e92.fna
+|   |   |-- 6046a54e92.fna.ids
+|   |   |-- cb3e90dc00.faa
+|   |   `-- cb3e90dc00.faa.ids
 |   `-- seqio
-|       |-- 00d7993aba.txt -> ../../cache/lines/...
-|       `-- 0f1884b59c.txt -> ../../cache/lines/...
+|       |-- 18045f8334.txt -> ../../cache/lines/...
+|       `-- d793805feb.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- any
-|   |   `-- a13d499d86
+|   |   `-- 14ab125282
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- diff
-|   |   |-- 2a62761d97
+|   |   |-- d79395eaa8
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- 2c21f59e12
+|   |   `-- f1ce34a0d2
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_ids
-|   |   |-- 2c7651beca
+|   |   |-- 233f7ea8c1
 |   |   |   `-- result
-|   |   |-- 494baa00c6
+|   |   |-- 3a5b1b5c3c
 |   |   |   `-- result
-|   |   |-- 57fa910811
+|   |   |-- 4734232f6b
 |   |   |   `-- result
-|   |   `-- dd8f8ca6ab
+|   |   `-- 78c7fee109
 |   |       `-- result
 |   |-- extract_seqs
-|   |   |-- 2c7651beca
-|   |   |   `-- 0f1884b59c
+|   |   |-- 3a5b1b5c3c
+|   |   |   `-- 18045f8334
 |   |   |       `-- result
-|   |   `-- 494baa00c6
-|   |       `-- 00d7993aba
+|   |   `-- 4734232f6b
+|   |       `-- d793805feb
 |   |           `-- result
 |   |-- list
-|   |   |-- ab3e4b0bfe
+|   |   |-- 1c6cf6ee28
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- dbe05e7ded
+|   |   |-- 236359be08
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- e914f18db0
+|   |   `-- b025495685
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_faa
-|   |   `-- 81fa36fcfa
-|   |       `-- result -> ../../../cache/load/cb3e90dc00
-|   |-- load_fna
-|   |   `-- 821d1bdfd1
-|   |       `-- result -> ../../../cache/load/6046a54e92
-|   `-- str
-|       |-- ac19b3d2a1
+|   |-- load_faa_path
+|   |   `-- d4b3f34af1
+|   |       `-- result -> ../../../cache/load/cb3e90dc00.faa
+|   |-- load_fna_path
+|   |   `-- f5b4fb5ab7
+|   |       `-- result -> ../../../cache/load/6046a54e92.fna
+|   |-- str
+|   |   |-- ac19b3d2a1
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- ead30046d0
+|   |       `-- result -> ../../../cache/lines/...
+|   `-- to_path
+|       |-- 81fa36fcfa
 |       |   `-- result -> ../../../cache/lines/...
-|       `-- ead30046d0
+|       `-- 821d1bdfd1
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- faaDiff.str.list -> ../exprs/diff/2c21f59e12/result
-    |-- faaSmallAll.str.list -> ../exprs/extract_ids/dd8f8ca6ab/result
-    |-- faaSmall.faa -> ../exprs/load_faa/81fa36fcfa/result
-    |-- faaSmallIDs.str.list -> ../exprs/extract_ids/2c7651beca/result
-    |-- faaSmallSeqs.faa -> ../exprs/extract_seqs/2c7651beca/0f1884b59c/result
-    |-- fnaDiff.str.list -> ../exprs/diff/2a62761d97/result
-    |-- fnaSmallAll.str.list -> ../exprs/extract_ids/57fa910811/result
-    |-- fnaSmall.fna -> ../exprs/load_fna/821d1bdfd1/result
-    |-- fnaSmallIDs.str.list -> ../exprs/extract_ids/494baa00c6/result
-    |-- fnaSmallSeqs.fna -> ../exprs/extract_seqs/494baa00c6/00d7993aba/result
-    `-- result -> ../exprs/any/a13d499d86/result
+    |-- faaDiff.str.list -> ../exprs/diff/d79395eaa8/result
+    |-- faaSmallAll.str.list -> ../exprs/extract_ids/233f7ea8c1/result
+    |-- faaSmall.faa -> ../exprs/load_faa_path/d4b3f34af1/result
+    |-- faaSmallIDs.str.list -> ../exprs/extract_ids/3a5b1b5c3c/result
+    |-- faaSmallSeqs.faa -> ../exprs/extract_seqs/3a5b1b5c3c/18045f8334/result
+    |-- fnaDiff.str.list -> ../exprs/diff/f1ce34a0d2/result
+    |-- fnaSmallAll.str.list -> ../exprs/extract_ids/78c7fee109/result
+    |-- fnaSmall.fna -> ../exprs/load_fna_path/f5b4fb5ab7/result
+    |-- fnaSmallIDs.str.list -> ../exprs/extract_ids/4734232f6b/result
+    |-- fnaSmallSeqs.fna -> ../exprs/extract_seqs/4734232f6b/d793805feb/result
+    `-- result -> ../exprs/any/14ab125282/result
 
-31 directories, 33 files
+34 directories, 35 files

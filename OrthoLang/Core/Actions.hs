@@ -15,6 +15,7 @@ module OrthoLang.Core.Actions
   , readPath
   , readPaths
   , absolutizePaths
+  , readLitPath
   , readLitPaths
   , readString
   , readStrings
@@ -69,7 +70,7 @@ import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
 -- import OrthoLang.Core.Debug        (debug)
 import OrthoLang.Core.Paths        (Path, toPath, fromPath, checkLit, isGeneric, fromGeneric,
-                                   checkLits, cacheDir, pathString,
+                                   checkLits, cacheDir, pathString, isURL,
                                    stringPath, toGeneric, sharedPath, addDigest)
 import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
@@ -280,10 +281,11 @@ readPaths loc path = do
 -- TODO does this go here or somewhere else?
 absolutizePaths :: DebugLocation -> FilePath -> FilePath -> Action ()
 absolutizePaths loc inPath outPath = do
-  paths  <- readPaths loc inPath
+  let loc' = loc ++ ".absolutizePaths"
+  paths  <- readPaths loc' inPath
   cfg <- fmap fromJust getShakeExtra
-  paths' <- mapM (liftIO . absolutize. fromPath loc cfg) paths
-  need' "core.actions.absolutizePaths" paths' -- because they will be read by the script next
+  paths' <- mapM (liftIO . absolutize. fromPath loc' cfg) paths
+  need' loc' paths' -- because they will be read by the script next
   -- liftIO $ putStrLn $ "paths': " ++ show paths'
   withWriteLock' outPath $ writeFile' outPath $ unlines paths'
 
@@ -294,7 +296,9 @@ readLitPaths :: DebugLocation -> FilePath -> Action [Path]
 readLitPaths loc path = do
   let loc' = loc ++ ".readLitPaths"
   cfg <- fmap fromJust getShakeExtra
-  let toAbs line = if isGeneric line then fromGeneric loc' cfg line
+  -- pth'' <- if isURL pth' then curl pth' else return $ toPath loc cfg pth'
+  let toAbs line = if isURL line then line
+                   else if isGeneric line then fromGeneric loc' cfg line
                    else if isAbsolute line then line
                    else cfgWorkDir cfg </> line
   ls <- readList loc' path
@@ -303,6 +307,9 @@ readLitPaths loc path = do
   -- Note: need' causes infinite recursion here, so we skip to needDebug
   needDebug loc' ls'
   return ls''
+
+readLitPath :: DebugLocation -> FilePath -> Action Path
+readLitPath loc path = readLitPaths loc path >>= return . headOrDie "readLitPaths failed"
 
 -- TODO how should this relate to readLit and readStr?
 readString :: DebugLocation -> Type -> FilePath -> Action String
@@ -313,13 +320,15 @@ readString loc etype path = readStrings loc etype path >>= return . headOrDie "r
  - String, and then within the function you treat them as Strings.
  -}
 readStrings :: DebugLocation -> Type -> FilePath -> Action [String]
-readStrings loc etype path = if etype' `elem` [str, num]
-  then readLits loc path
-  else do
-    cfg <- fmap fromJust getShakeExtra
-    (fmap . map) (fromPath loc cfg) (readPaths loc path)
-  where
-    etype' = trace "core.actions.readStrings" ("readStrings (each " ++ tExtOf etype ++ ") from " ++ path) etype
+readStrings loc etype p =
+  let loc' = loc ++ ".readStrings"
+  in if etype' `elem` [str, num]
+       then readLits loc' p
+       else do
+         cfg <- fmap fromJust getShakeExtra
+         (fmap . map) (fromPath loc' cfg) (readPaths loc' p)
+       where
+         etype' = trace "core.actions.readStrings" ("readStrings (each " ++ tExtOf etype ++ ") from " ++ p) etype
 
 {- OrthoLang requires empty lists to contain the text <<emptylist>> so we can
  - distinguish them from the empty files that might result from a cmd
@@ -331,7 +340,7 @@ readStrings loc etype path = if etype' `elem` [str, num]
 readList :: DebugLocation -> FilePath -> Action [String]
 readList loc path = do
   let loc' = loc ++ ".readList"
-  debugA' loc $ show path
+  debugA' loc' $ show path
   need' loc' [path] -- Note isEmpty also does this
   empty <- isEmpty path
   if empty
@@ -391,39 +400,44 @@ writeCachedLines loc outPath content = do
   cfg <- fmap fromJust getShakeExtra
   let cache = cachedLinesPath cfg content
   -- TODO show as Path?
-  debugA' (loc ++ ".writeCachedLines") $ first50 content ++ " -> " ++ last50 cache
+  let loc' = loc ++ ".writeCachedLines" 
+  debugA' loc' $ first50 content ++ " -> " ++ last50 cache
       -- lock  = cache <.> "lock"
   -- liftIO $ createDirectoryIfMissing True cDir
   withWriteOnce cache $ writeFile' cache $ unlines content -- TODO is this strict?
   -- unlessExists outPath $ -- TODO remove?
-  symlink (toPath loc cfg outPath) (toPath loc cfg cache)
+  symlink (toPath loc' cfg outPath) (toPath loc' cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script
 -- TODO remove in favor of sanitizeFileInPlace?
 writeCachedVersion :: DebugLocation -> FilePath -> FilePath -> Action ()
 writeCachedVersion loc outPath inPath = do
+  let loc' = loc ++ ".writeCachedVersion"
   content <- fmap lines $ readFileStrict' inPath
   cfg <- fmap fromJust getShakeExtra
   let content' = map (toGeneric cfg) content
-  writeCachedLines loc outPath content'
+  writeCachedLines loc' outPath content'
 
 -- TODO take a Path for the out file too
 -- TODO take Path Abs File and convert them... or Path Rel File?
 -- TODO explicit case for empty lists that isn't just an empty file!
 writePaths :: DebugLocation -> FilePath -> [Path] -> Action ()
-writePaths loc out cpaths = writeCachedLines loc out paths >> trackWrite paths -- TODO trackwrite'?
+writePaths loc out cpaths = writeCachedLines loc' out paths >> trackWrite paths -- TODO trackwrite'?
   where
+    loc' = loc ++ ".writePaths"
     paths = if null cpaths then ["<<emptylist>>"] else map pathString cpaths
 
 writePath :: DebugLocation -> FilePath -> Path -> Action ()
 writePath loc out path = do
-  debugA' (loc ++ ".writePath") (show path)
-  writePaths loc out [path]
+  let loc' = loc ++ ".writePath"
+  debugA' loc' (show path)
+  writePaths loc' out [path]
 
 writeLits :: DebugLocation -> FilePath -> [String] -> Action ()
 writeLits loc path lits = do
-  debugA' "writeLits" $ show lits ++ " -> writeCachedLines " ++ show lits'
-  writeCachedLines loc path lits'
+  let loc' = loc ++ ".writeLits"
+  debugA' loc' $ show lits ++ " -> writeCachedLines " ++ show lits'
+  writeCachedLines loc' path lits'
   where
     lits' = if null lits then ["<<emptylist>>"] else checkLits loc lits
 
@@ -433,9 +447,10 @@ writeLit :: DebugLocation -> FilePath -> String -> Action ()
 writeLit loc path lit = do
   -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lit: \"" ++ lit ++ "\"")
   -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lits: \"" ++ lits ++ "\"")
-  debugA' "writeLit" $ show lit ++ " -> writeLits " ++ show lits
-  writeLits loc path lits
+  debugA' loc' $ show lit ++ " -> writeLits " ++ show lits
+  writeLits loc' path lits
   where
+    loc' = loc ++ ".writeLit"
     lits = [if null lit then "<<emptystr>>" else lit]
 
 {-|
@@ -445,16 +460,18 @@ to/from String, and then within the function you treat them as Strings.
 -}
 writeStrings :: DebugLocation -> Type -> FilePath -> [String] -> Action ()
 writeStrings loc etype out whatevers = do
-  debugA' "writeStrings"
-    $ first50 (take 3 whatevers) ++ " (each " ++ tExtOf etype ++ ") -> " ++ last50 out
+  let loc' = loc ++ ".writeStrings"
+  debugA' loc' $ first50 (take 3 whatevers) ++ " (each " ++ tExtOf etype ++ ") -> " ++ last50 out
   if etype `elem` [str, num]
-    then writeLits loc out whatevers
+    then writeLits loc' out whatevers
     else do
       cfg <- fmap fromJust getShakeExtra
-      writePaths loc out $ map (toPath loc cfg) whatevers
+      writePaths loc' out $ map (toPath loc' cfg) whatevers
 
 writeString :: DebugLocation -> Type -> FilePath -> String -> Action ()
-writeString loc etype out whatever = writeStrings loc etype out [whatever]
+writeString loc etype out whatever = writeStrings loc' etype out [whatever]
+  where
+    loc' = loc ++ ".writeString"
 
 {-|
 Turns out there's a race condition during `repeat` calls, because the same

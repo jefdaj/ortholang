@@ -16,42 +16,47 @@
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   `-- 7666691bcd
+|   |   `-- 05c7b32f62
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_faa
-|   |   |-- 1e0498b59a
-|   |   |   `-- result -> ../../../cache/load/36189032ad.faa
-|   |   `-- ae9e22061f
-|   |       `-- result -> ../../../cache/load/28e059b2a9.faa
+|   |-- load_faa_path
+|   |   |-- 8a3c34f92b
+|   |   |   `-- result -> ../../../cache/load/28e059b2a9.faa
+|   |   `-- af575c351b
+|   |       `-- result -> ../../../cache/load/36189032ad.faa
 |   |-- makeblastdb_faa_all
-|   |   `-- 329cb2539d
+|   |   `-- e77039b1cb
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- 3e281fad0f
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- psiblast
 |   |   `-- 01b1e93729
-|   |       `-- 28e026e5bd
-|   |           `-- 4f0bccea88
+|   |       `-- 4e8eec37d4
+|   |           `-- 6803d4e75b
 |   |               |-- result
 |   |               |-- result.err
 |   |               `-- result.out
 |   |-- psiblast_train_db
 |   |   `-- 01b1e93729
-|   |       `-- ec1f6f502d
-|   |           `-- 4f0bccea88
+|   |       `-- 5130c9d412
+|   |           `-- 6803d4e75b
 |   |               |-- result -> ../../../../../cache/lines/...
 |   |               |-- result.tmp.err
 |   |               `-- result.tmp.out
-|   `-- str
-|       |-- 1e020faf26
+|   |-- str
+|   |   |-- 1e020faf26
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- 824ccbd8b2
+|   |       `-- result -> ../../../cache/lines/...
+|   `-- to_path
+|       |-- 1e0498b59a
 |       |   `-- result -> ../../../cache/lines/...
-|       `-- 824ccbd8b2
+|       `-- ae9e22061f
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/psiblast/01b1e93729/28e026e5bd/4f0bccea88/result
-    |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
-    |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
+    |-- hits.bht -> ../exprs/psiblast/01b1e93729/4e8eec37d4/6803d4e75b/result
+    |-- maga.faa -> ../exprs/load_faa_path/af575c351b/result
+    |-- query.faa -> ../exprs/load_faa_path/8a3c34f92b/result
     `-- result -> ../vars/hits.bht
 
-27 directories, 27 files
+30 directories, 29 files

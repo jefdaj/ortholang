@@ -1,5 +1,4 @@
-my_species = load_fna_path (gbk_to_fna_rawids "cds"
-                                              (load_gbk_path (to_path "examples/sequences/PCC_6803_genome.gbff")))
+my_species = load_fna (gbk_to_fna_rawids "cds" (load_gbk "examples/sequences/PCC_6803_genome.gbff"))
 swissprot = blastdbget_faa "swissprot"
 blast_hits = blastx_db 1.0e-20 my_species swissprot
 genes_with_hits = extract_queries blast_hits

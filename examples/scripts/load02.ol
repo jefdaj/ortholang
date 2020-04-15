@@ -30,4 +30,15 @@ pcc7942v5 = concat_faa
               (gbk_to_faa_each "cds"
                 (load_gbk_glob "examples/sequences/PCC_7942_*.gbk"))
 
+# errors on v4,3,2 but v1,5 ok
+# things that must work: concat_faa, gbk_to_faa_each, load_gbk_each, load_gbk_glob
+# and things that might not: translate, load_list
 result = [pcc7942v1, pcc7942v2, pcc7942v3, pcc7942v4, pcc7942v5]
+#
+# failing: v2,3 (1,4,5 OK), so probably translate? actually gbk_to_faa
+# gbk_to_faa_rawids works, so it's a reloading issue
+# result = [pcc7942v1, pcc7942v4, pcc7942v5]
+
+# this shows the failure:
+# TODO fix "Prelude.last" error when no result!
+# result = load_list "examples/genome-lists/pcc-7942-genbank.txt"

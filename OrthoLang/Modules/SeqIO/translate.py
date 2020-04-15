@@ -9,6 +9,11 @@
 from Bio import SeqIO
 from sys import argv
 
+# TODO don't suppress these?? maybe just re-throw without filenames?
+import warnings
+from Bio import BiopythonWarning
+warnings.simplefilter('ignore', BiopythonWarning)
+
 outfaa = argv[1]
 infna  = argv[2]
 

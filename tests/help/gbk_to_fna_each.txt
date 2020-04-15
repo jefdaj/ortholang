@@ -1,4 +1,4 @@
 
-[str (string), list of gbk (genbank)s] -> fna (FASTA (nucleic acid)).list.list
+[str (string), list of gbk (genbank)s] -> list of fna (FASTA (nucleic acid))s
 
 doc for functions/gbk_to_fna_each not written yet

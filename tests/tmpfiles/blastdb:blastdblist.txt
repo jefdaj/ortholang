@@ -3,7 +3,7 @@
 |   `-- blastdbget
 |       |-- dblist.txt
 |       |-- dblist.txt.err
-|       `-- dblist.txt.out
+|       `-- dblist.txt.out -> $TMPDIR/cache/blastdbget/dblist.txt
 |-- exprs
 |   |-- any
 |   |   |-- 0951381859

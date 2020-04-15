@@ -58,6 +58,8 @@ eExpr' cfg scr e@(Fun r s ds name es) =
                                      in trace "core.expand.eExpr'"
                                               ("expanded macro: " ++ show e ++ " -> " ++ show e'') e''
                      _ -> e'
+eExpr' cfg scr (Bop r ms vs n e1 e2) = Bop r ms vs n (eExpr cfg scr e1) (eExpr cfg scr e2)
+eExpr' cfg scr (Lst r vs es) = Lst r vs $ map (eExpr cfg scr) es
 eExpr' _ _ e = e
 
 -- typecheck :: Config -> Expr -> Either String Expr

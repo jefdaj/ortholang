@@ -1,14 +1,14 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 64ca4ac8bb
+|   |   |-- 10fcf6d03b
 |   |   |   |-- 688af09c48
 |   |   |   |   |-- args -> ../../../../cache/lines/...
-|   |   |   |   `-- result -> ../../../../exprs/psiblast/aeee2c88ad/53731bbc25/688af09c48/result
+|   |   |   |   `-- result -> ../../../../exprs/psiblast/aeee2c88ad/2c050b9606/688af09c48/result
 |   |   |   `-- c7fe98886d
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/psiblast/aeee2c88ad/53731bbc25/c7fe98886d/result
-|   |   `-- 7f1c8c40ef
+|   |   |       `-- result -> ../../../../exprs/psiblast/aeee2c88ad/2c050b9606/c7fe98886d/result
+|   |   `-- 92afecf42d
 |   |       |-- 181652430c
 |   |       |   |-- args -> ../../../../cache/lines/...
 |   |       |   `-- result -> ../../../../exprs/makeblastdb_faa/181652430c/result
@@ -38,40 +38,40 @@
 |   |       |-- result.pin
 |   |       `-- result.psq
 |   |-- map
-|   |   |-- 47926c700f
+|   |   |-- 224e3766a2
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   |-- result.tmp.err
 |   |   |   `-- result.tmp.out
-|   |   `-- cd28807502
+|   |   `-- d35e9eda3d
 |   |       |-- result -> ../../../cache/lines/...
 |   |       |-- result.tmp.err
 |   |       `-- result.tmp.out
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   `-- 46f0705730
+|   |   `-- 09a6797003
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_faa
-|   |   |-- 1e0498b59a
-|   |   |   `-- result -> ../../../cache/load/36189032ad.faa
-|   |   |-- ae9e22061f
+|   |-- load_faa_path
+|   |   |-- 28d9c40d78
+|   |   |   `-- result -> ../../../cache/load/11bbf54fc6.faa
+|   |   |-- 8a3c34f92b
 |   |   |   `-- result -> ../../../cache/load/28e059b2a9.faa
-|   |   `-- f8a41afad4
-|   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
+|   |   `-- af575c351b
+|   |       `-- result -> ../../../cache/load/36189032ad.faa
 |   |-- makeblastdb_faa
 |   |   |-- 181652430c
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- 9c076fe5cf
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_faa_each
-|   |   `-- ae8cc3ea73
+|   |   `-- 878e760ff6
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- efc8362dcc
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- psiblast
 |   |   `-- aeee2c88ad
-|   |       `-- 53731bbc25
+|   |       `-- 2c050b9606
 |   |           |-- 688af09c48
 |   |           |   |-- result
 |   |           |   |-- result.err
@@ -82,29 +82,36 @@
 |   |               `-- result.out
 |   |-- psiblast_each
 |   |   `-- 76bf3d901d
-|   |       `-- 6656523957
-|   |           `-- 52878bff7d
+|   |       `-- 4669cfddf3
+|   |           `-- 384a9b86d8
 |   |               `-- result -> ../../../../../cache/lines/...
 |   |-- psiblast_train_db_each
 |   |   `-- 76bf3d901d
-|   |       `-- ec1f6f502d
-|   |           `-- 52878bff7d
+|   |       `-- 5130c9d412
+|   |           `-- 384a9b86d8
 |   |               `-- result -> ../../../../../cache/lines/...
 |   |-- singletons
-|   |   `-- 7627de68aa
+|   |   `-- d793080328
 |   |       `-- result -> ../../../cache/lines/...
-|   `-- str
-|       |-- 1e020faf26
+|   |-- str
+|   |   |-- 1e020faf26
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 40edb92618
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- 824ccbd8b2
+|   |       `-- result -> ../../../cache/lines/...
+|   `-- to_path
+|       |-- 1e0498b59a
 |       |   `-- result -> ../../../cache/lines/...
-|       |-- 40edb92618
+|       |-- ae9e22061f
 |       |   `-- result -> ../../../cache/lines/...
-|       `-- 824ccbd8b2
+|       `-- f8a41afad4
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hitlists.bht.list -> ../exprs/psiblast_each/76bf3d901d/6656523957/52878bff7d/result
-    |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
-    |-- mgen.faa -> ../exprs/load_faa/f8a41afad4/result
-    |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
+    |-- hitlists.bht.list -> ../exprs/psiblast_each/76bf3d901d/4669cfddf3/384a9b86d8/result
+    |-- maga.faa -> ../exprs/load_faa_path/af575c351b/result
+    |-- mgen.faa -> ../exprs/load_faa_path/28d9c40d78/result
+    |-- query.faa -> ../exprs/load_faa_path/8a3c34f92b/result
     `-- result -> ../vars/hitlists.bht.list
 
-50 directories, 57 files
+54 directories, 60 files

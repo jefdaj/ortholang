@@ -7,7 +7,7 @@ module OrthoLang.Modules.Busco
 import Development.Shake
 import OrthoLang.Core
 import OrthoLang.Modules.Curl (curl)
-import OrthoLang.Modules.Load (mkLoadPath, mkLoad)
+import OrthoLang.Modules.Load (mkLoad)
 
 import Control.Monad             (when)
 import Data.List                 ((\\))
@@ -29,7 +29,7 @@ olModule = Module
   , mGroups = []
   , mEncodings = []
   , mFunctions =
-      [ loadLineagePath, loadLineage
+      [ loadLineage
       , buscoListLineages
       , buscoFetchLineage
       , buscoProteins       , buscoProteinsEach
@@ -65,8 +65,7 @@ bst = Type
   , tShow = defaultShow
   }
 
-loadLineagePath = mkLoadPath False "load_lineage_path" (Exactly blh)
-loadLineage     = mkLoad           "load_lineage"      loadLineagePath
+loadLineage = mkLoad False "load_lineage" (Exactly blh)
 
 buscoCache :: Config -> Path
 buscoCache cfg = cacheDir cfg "busco"
@@ -230,7 +229,7 @@ rBuscoFetchLineage scr expr@(Fun _ _ _ _ [nPath]) = do
   outPath' %> \_ -> do
     nameStr <- readLit loc namePath
     let untarPath = blhDir </> nameStr
-        url       = "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
+        url       = toPath loc cfg $ "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
         datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
         datasetPath   = toPath loc cfg datasetPath'
     tarPath <- fmap (fromPath loc cfg) $ curl url

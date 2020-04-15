@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 74f9b0e1b5
+|   |   `-- 07142f5c36
 |   |       |-- 201980d355
 |   |       |   |-- args -> ../../../../cache/lines/...
 |   |       |   `-- result -> ../../../../exprs/makeblastdb_fna/201980d355/result
@@ -19,21 +19,23 @@
 |       |   |-- result.err
 |       |   |-- result.nhr
 |       |   |-- result.nin
-|       |   `-- result.nsq
+|       |   |-- result.nsq
+|       |   `-- result.out
 |       `-- 933216e8a2
 |           |-- result
 |           |-- result.err
 |           |-- result.nhr
 |           |-- result.nin
-|           `-- result.nsq
+|           |-- result.nsq
+|           `-- result.out
 |-- exprs
 |   |-- list
-|   |   `-- a6695c3178
+|   |   `-- d349a29aa5
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_fna
-|   |   |-- 2c54deea89
+|   |-- load_fna_path
+|   |   |-- f2fcd29f9e
 |   |   |   `-- result -> ../../../cache/load/8723e7ac8c.fna
-|   |   `-- 821d1bdfd1
+|   |   `-- f5b4fb5ab7
 |   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_fna
 |   |   |-- 201980d355
@@ -41,20 +43,25 @@
 |   |   `-- 9c3ec12a2c
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_fna_each
-|   |   `-- c82a41695e
+|   |   `-- ab4f49484b
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- singletons
-|   |   `-- d1dbfd10ec
+|   |   `-- aede1a43d2
 |   |       `-- result -> ../../../cache/lines/...
-|   `-- str
-|       |-- 0ecd3e7ed5
+|   |-- str
+|   |   |-- 0ecd3e7ed5
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- ac19b3d2a1
+|   |       `-- result -> ../../../cache/lines/...
+|   `-- to_path
+|       |-- 2c54deea89
 |       |   `-- result -> ../../../cache/lines/...
-|       `-- ac19b3d2a1
+|       `-- 821d1bdfd1
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- dbs.fna.blastdb.list -> ../exprs/makeblastdb_fna_each/c82a41695e/result
-    |-- genes5.fna -> ../exprs/load_fna/821d1bdfd1/result
+    |-- dbs.fna.blastdb.list -> ../exprs/makeblastdb_fna_each/ab4f49484b/result
+    |-- genes5.fna -> ../exprs/load_fna_path/f5b4fb5ab7/result
     |-- result -> ../vars/dbs.fna.blastdb.list
-    `-- single.fna -> ../exprs/load_fna/2c54deea89/result
+    `-- single.fna -> ../exprs/load_fna_path/f2fcd29f9e/result
 
-26 directories, 31 files
+29 directories, 35 files

@@ -1,3 +1,3 @@
-gbk = load_gbk_path (to_path "examples/sequences/Mycoplasma_genitalium_M2321.gbk")
-fna = load_fna_path (gbk_to_fna_rawids "cds" gbk)
+gbk = load_gbk "examples/sequences/Mycoplasma_genitalium_M2321.gbk"
+fna = load_fna (gbk_to_fna_rawids "cds" gbk)
 result = fna

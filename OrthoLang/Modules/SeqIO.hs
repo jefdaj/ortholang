@@ -11,7 +11,7 @@ import OrthoLang.Core
 
 import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
-import OrthoLang.Modules.Load       (mkLoadPath, mkLoad, mkLoadPathEach, mkLoadEach, mkLoadGlob, path)
+import OrthoLang.Modules.Load       (mkLoad, mkLoadPath, mkLoadEach, mkLoadPathEach, mkLoadGlob)
 import System.Exit                 (ExitCode(..))
 import Data.Maybe (fromJust)
 import Data.List.Utils (replace)
@@ -20,51 +20,45 @@ olModule :: Module
 olModule = Module
   { mName = "SeqIO"
   , mDesc = "Sequence file manipulations using BioPython's SeqIO"
-  , mTypes = [gbk, faa, fna, path]
+  , mTypes = [gbk, faa, fna]
   , mGroups = [fa]
   , mEncodings = []
   , mFunctions =
     [ gbkToFaaRawIDs, gbkToFaaRawIDsEach, gbkToFaa, gbkToFaaEach
     , gbkToFnaRawIDs, gbkToFnaRawIDsEach, gbkToFna, gbkToFnaEach
-    , extractSeqs , extractSeqsEach
-    , extractIds  , extractIdsEach
-    , translate   , translateEach
-    , mkConcat fna  , mkConcatEach fna
-    , mkConcat faa  , mkConcatEach faa
+    , extractSeqs   , extractSeqsEach
+    , extractIds    , extractIdsEach
+    , translate     , translateEach
+    , mkConcat fna  , mkConcatEach fna -- TODO pull these apart too
+    , mkConcat faa  , mkConcatEach faa -- TODO pull these apart too
     , splitFasta faa, splitFastaEach faa
     , splitFasta fna, splitFastaEach fna
-
-    , loadFnaPath, loadFna, loadFnaPathEach, loadFnaEach, loadFnaGlob
-    , loadFaaPath, loadFaa, loadFaaPathEach, loadFaaEach, loadFaaGlob
-    , loadGbkPath, loadGbk, loadGbkPathEach, loadGbkEach, loadGbkGlob
-
+    , loadFna, loadFnaPath, loadFnaEach, loadFnaPathEach, loadFnaGlob
+    , loadFaa, loadFaaPath, loadFaaEach, loadFaaPathEach, loadFaaGlob
+    , loadGbk, loadGbkPath, loadGbkEach, loadGbkPathEach, loadGbkGlob
     -- , mkLoad True fna, mkLoadEach True fna, mkLoadGlob True fna
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
-    -- ++ mkLoaders True fna
-    -- ++ mkLoaders True fna
-    -- ++ mkLoaders True faa
-    -- ++ mkLoaders False gbk -- TODO should seqids be hashed here too?
   }
 
+loadFna         = mkLoad         True "load_fna"           (Exactly fna)
 loadFnaPath     = mkLoadPath     True "load_fna_path"      (Exactly fna)
+loadFnaEach     = mkLoadEach     True "load_fna_each"      (Exactly fna)
 loadFnaPathEach = mkLoadPathEach True "load_fna_path_each" (Exactly fna)
-loadFna         = mkLoad              "load_fna"           loadFnaPath
-loadFnaEach     = mkLoadEach          "load_fna_each"      loadFnaPathEach
-loadFnaGlob     = mkLoadGlob          "load_fna_glob"      loadFnaPathEach
+loadFnaGlob     = mkLoadGlob          "load_fna_glob"       loadFnaEach
 
+loadFaa         = mkLoad         True "load_faa"           (Exactly faa)
 loadFaaPath     = mkLoadPath     True "load_faa_path"      (Exactly faa)
+loadFaaEach     = mkLoadEach     True "load_faa_each"      (Exactly faa)
 loadFaaPathEach = mkLoadPathEach True "load_faa_path_each" (Exactly faa)
-loadFaa         = mkLoad              "load_faa"           loadFaaPath
-loadFaaEach     = mkLoadEach          "load_faa_each"      loadFaaPathEach
-loadFaaGlob     = mkLoadGlob          "load_faa_glob"      loadFaaPathEach
+loadFaaGlob     = mkLoadGlob          "load_faa_glob"       loadFaaEach
 
-loadGbkPath     = mkLoadPath     False "load_gbk_path"      (Exactly gbk)
+loadGbk         = mkLoad         False "load_gbk"           (Exactly gbk)
+loadGbkPath     = mkLoad         False "load_gbk_path"      (Exactly gbk)
+loadGbkEach     = mkLoadEach     False "load_gbk_each"      (Exactly gbk)
 loadGbkPathEach = mkLoadPathEach False "load_gbk_path_each" (Exactly gbk)
-loadGbk         = mkLoad               "load_gbk"           loadGbkPath
-loadGbkEach     = mkLoadEach           "load_gbk_each"      loadGbkPathEach
-loadGbkGlob     = mkLoadGlob           "load_gbk_glob"      loadGbkPathEach
+loadGbkGlob     = mkLoadGlob           "load_gbk_glob"       loadGbkEach
 
 gbk :: Type
 gbk = Type
@@ -110,8 +104,6 @@ mGbkToFaa _ e = error "modules.seqio.mGbkToFaa" $ "bad argument: " ++ show e
 gbkToFaaRawIDs :: Function
 gbkToFaaRawIDs = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str, gbk] faa
-  -- , fTypeDesc  = mkTypeDesc name  [str, gbk] faa
   , fInputs = [Exactly str, Exactly gbk]
   , fOutput = Exactly faa
   , fTags = [Hidden]
@@ -132,8 +124,6 @@ mGbkToFna _ e = error "modules.seqio.mGbkToFna" $ "bad argument: " ++ show e
 gbkToFnaRawIDs :: Function
 gbkToFnaRawIDs = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str, gbk] fna
-  -- , fTypeDesc  = mkTypeDesc name  [str, gbk] fna
   , fInputs = [Exactly str, Exactly gbk]
   , fOutput = Exactly fna
   , fTags = [Hidden]
@@ -143,10 +133,7 @@ gbkToFnaRawIDs = Function
   where
     name = "gbk_to_fna_rawids"
 
--- TODO fix this!
 gbkToFaaEach :: Function
--- gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] gbkToFaaRawIDsEach $ mkLoadEach True "load_faa_each" (Exactly faa)
--- gbkToFaaEach = compose1 "gbk_to_faa_each" [ReadsFile] loadFaaEach gbkToFaaRawIDsEach
 gbkToFaaEach = newMacro "gbk_to_faa_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf faa) mGbkToFaaEach [ReadsFile]
 
 mGbkToFaaEach :: MacroExpansion
@@ -156,8 +143,6 @@ mGbkToFaaEach _ e = error "modules.seqio.mGbkToFaaEach" $ "bad argument: " ++ sh
 gbkToFaaRawIDsEach :: Function
 gbkToFaaRawIDsEach = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf faa)
-  -- , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf faa)
   , fInputs = [Exactly str, Exactly (ListOf gbk)]
   , fOutput = Exactly (ListOf faa)
   , fTags = [Hidden]
@@ -168,8 +153,6 @@ gbkToFaaRawIDsEach = Function
     name = "gbk_to_faa_rawids_each"
 
 gbkToFnaEach :: Function
--- gbkToFnaEach = compose1 "gbk_to_fna_each" [ReadsFile] gbkToFnaRawIDsEach $ mkLoadEach True "load_fna_each" (Exactly fna)
--- gbkToFnaEach = compose1 "gbk_to_fna_each" [ReadsFile] loadFnaEach gbkToFnaRawIDsEach
 gbkToFnaEach = newMacro "gbk_to_fna_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf fna) mGbkToFnaEach [ReadsFile]
 
 mGbkToFnaEach :: MacroExpansion
@@ -180,8 +163,6 @@ mGbkToFnaEach _ e = error "modules.seqio.mGbkToFnaEach" $ "bad argument: " ++ sh
 gbkToFnaRawIDsEach :: Function
 gbkToFnaRawIDsEach = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str, ListOf gbk] (ListOf fna)
-  -- , fTypeDesc  = mkTypeDesc name  [str, ListOf gbk] (ListOf fna)
   , fInputs = [Exactly str, Exactly (ListOf gbk)]
   , fOutput = Exactly (ListOf fna)
   , fTags = [Hidden]
@@ -242,8 +223,6 @@ extractIds :: Function
 extractIds = Function
   { fOpChar = Nothing, fName = name
   , fTags = []
-  -- , fTypeCheck = tExtractIds
-  -- , fTypeDesc  = name ++ " : fa -> str.list"
   , fInputs = [Some fa "any fasta file"]
   , fOutput = Exactly (ListOf str)
   , fNewRules = NewNotImplemented
@@ -257,8 +236,6 @@ extractIdsEach :: Function
 extractIdsEach = Function
   { fOpChar = Nothing, fName = name
   , fTags = []
-  -- , fTypeCheck = tExtractIdsEach
-  -- , fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fInputs = [ListSigs (Some fa "any fasta file")]
   , fOutput = Exactly (ListOf (ListOf str))
   , fNewRules = NewNotImplemented
@@ -328,8 +305,6 @@ extractSeqsEach :: Function
 extractSeqsEach = Function
   { fOpChar = Nothing, fName = name
   , fTags = []
-  -- , fTypeCheck = tExtractSeqsEach
-  -- , fTypeDesc  = name ++ " : fa.list -> str.list.list"
   , fInputs = [Some fa "any fasta file", Exactly (ListOf (ListOf str))]
   , fOutput = ListSigs (Some fa "any fasta file")
   , fNewRules = NewNotImplemented
@@ -399,8 +374,6 @@ mkConcat :: Type -> Function
 mkConcat cType = Function
   { fOpChar = Nothing, fName = name
   , fTags = []
-  -- , fTypeCheck = defaultTypeCheck name [ListOf cType] cType
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf cType] cType
   , fInputs = [Exactly (ListOf cType)]
   , fOutput =  Exactly cType
   , fNewRules = NewNotImplemented
@@ -414,8 +387,6 @@ mkConcatEach :: Type -> Function
 mkConcatEach cType = Function
   { fOpChar = Nothing, fName = name
   , fTags = []
-  -- , fTypeCheck = defaultTypeCheck name [ListOf $ ListOf cType] (ListOf cType)
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf $ ListOf cType] (ListOf cType)
   , fInputs = [Exactly (ListOf (ListOf cType))]
   , fOutput =  Exactly (ListOf cType)
   , fNewRules = NewNotImplemented
@@ -489,8 +460,6 @@ splitFasta :: Type -> Function
 splitFasta faType = Function
   { fOpChar = Nothing, fName = name
   , fTags = []
-  -- , fTypeCheck = defaultTypeCheck name [faType] (ListOf faType)
-  -- , fTypeDesc  = mkTypeDesc name  [faType] (ListOf faType)
   , fInputs = [Exactly faType]
   , fOutput =  Exactly (ListOf faType)
   , fNewRules = NewNotImplemented
@@ -504,8 +473,6 @@ splitFastaEach :: Type -> Function
 splitFastaEach faType = Function
   { fOpChar = Nothing, fName = name
   , fTags = []
-  -- , fTypeCheck = defaultTypeCheck name [ListOf faType] (ListOf $ ListOf faType)
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf faType] (ListOf $ ListOf faType)
   , fInputs = [Exactly (ListOf faType)]
   , fOutput =  Exactly (ListOf (ListOf faType))
   , fNewRules = NewNotImplemented

@@ -1,4 +1,4 @@
 
-[str (string), list of gbk (genbank)s] -> faa (FASTA (amino acid)).list.list
+[str (string), list of gbk (genbank)s] -> list of faa (FASTA (amino acid))s
 
 doc for functions/gbk_to_faa_each not written yet

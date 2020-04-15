@@ -1,10 +1,10 @@
 .
 |-- cache
 |   `-- load
-|       |-- 737dfdb34e
-|       |-- 737dfdb34e.ids
-|       |-- ff08c7f09e
-|       `-- ff08c7f09e.ids
+|       |-- 737dfdb34e.fna
+|       |-- 737dfdb34e.fna.ids
+|       |-- ff08c7f09e.fna
+|       `-- ff08c7f09e.fna.ids
 |-- exprs
 |   |-- glob_files
 |   |   `-- 59076e7c1d

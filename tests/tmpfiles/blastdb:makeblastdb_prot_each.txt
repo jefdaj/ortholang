@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- d32151913c
+|   |   `-- a00380973a
 |   |       |-- 2723ce3c35
 |   |       |   |-- args -> ../../../../cache/lines/...
 |   |       |   `-- result -> ../../../../exprs/makeblastdb_faa/2723ce3c35/result
@@ -17,44 +17,51 @@
 |       |-- 1da708833c
 |       |   |-- result
 |       |   |-- result.err
+|       |   |-- result.out
 |       |   |-- result.phr
 |       |   |-- result.pin
 |       |   `-- result.psq
 |       `-- 4477d5b52f
 |           |-- result
 |           |-- result.err
+|           |-- result.out
 |           |-- result.phr
 |           |-- result.pin
 |           `-- result.psq
 |-- exprs
 |   |-- list
-|   |   `-- 1034960c01
+|   |   `-- 60a82ff656
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_faa
-|   |   |-- 81fa36fcfa
-|   |   |   `-- result -> ../../../cache/load/cb3e90dc00.faa
-|   |   `-- ae9e22061f
-|   |       `-- result -> ../../../cache/load/28e059b2a9.faa
+|   |-- load_faa_path
+|   |   |-- 8a3c34f92b
+|   |   |   `-- result -> ../../../cache/load/28e059b2a9.faa
+|   |   `-- d4b3f34af1
+|   |       `-- result -> ../../../cache/load/cb3e90dc00.faa
 |   |-- makeblastdb_faa
 |   |   |-- 2723ce3c35
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- 976c28be96
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_faa_each
-|   |   `-- 1d8ce30e9f
+|   |   `-- 512d51a522
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- singletons
-|   |   `-- d432260851
+|   |   `-- 6523dcafcd
 |   |       `-- result -> ../../../cache/lines/...
-|   `-- str
-|       |-- 1e020faf26
+|   |-- str
+|   |   |-- 1e020faf26
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- ead30046d0
+|   |       `-- result -> ../../../cache/lines/...
+|   `-- to_path
+|       |-- 81fa36fcfa
 |       |   `-- result -> ../../../cache/lines/...
-|       `-- ead30046d0
+|       `-- ae9e22061f
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- dbs.faa.blastdb.list -> ../exprs/makeblastdb_faa_each/1d8ce30e9f/result
-    |-- genes5.faa -> ../exprs/load_faa/81fa36fcfa/result
+    |-- dbs.faa.blastdb.list -> ../exprs/makeblastdb_faa_each/512d51a522/result
+    |-- genes5.faa -> ../exprs/load_faa_path/d4b3f34af1/result
     |-- result -> ../vars/dbs.faa.blastdb.list
-    `-- single.faa -> ../exprs/load_faa/ae9e22061f/result
+    `-- single.faa -> ../exprs/load_faa_path/8a3c34f92b/result
 
-26 directories, 31 files
+29 directories, 35 files

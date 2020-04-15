@@ -2,7 +2,9 @@
 |-- cache
 |   `-- load
 |       |-- 28e059b2a9.faa
-|       `-- 28e059b2a9.faa.ids
+|       |-- 28e059b2a9.faa.ids
+|       |-- 28e059b2a9.str
+|       `-- 28e059b2a9.str.ids
 |-- exprs
 |   |-- any
 |   |   `-- 8033a36aa9
@@ -19,7 +21,7 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   `-- ae9e22061f
-|   |       `-- result -> ../../../cache/load/28e059b2a9.faa
+|   |       `-- result -> ../../../cache/load/28e059b2a9.str
 |   |-- load_faa_each
 |   |   `-- 90a9691b49
 |   |       `-- result -> ../../../cache/lines/...
@@ -27,9 +29,8 @@
 |       `-- 1e020faf26
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- l1.str.list -> ../exprs/list/bda4a28e96/result
     |-- list1.faa.list -> ../exprs/load_faa_each/90a9691b49/result
     |-- list2.faa.list -> ../exprs/list/4bf25502f2/result
     `-- result -> ../exprs/length/9f80028238/result
 
-18 directories, 14 files
+18 directories, 15 files

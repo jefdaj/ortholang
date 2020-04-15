@@ -1,65 +1,59 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 0d8dfa261e.faa
-|   |   |-- 0d8dfa261e.faa.ids
-|   |   |-- 11bbf54fc6.faa
-|   |   `-- 11bbf54fc6.faa.ids
+|   |   |-- 0d8dfa261e.str
+|   |   |-- 0d8dfa261e.str.ids
+|   |   |-- 11bbf54fc6.str
+|   |   `-- 11bbf54fc6.str.ids
 |   `-- makeblastdb
-|       `-- c1b08194e1
+|       `-- 21591adb25
 |           |-- result
 |           |-- result.err
-|           |-- result.out
 |           |-- result.phr
 |           |-- result.pin
 |           `-- result.psq
 |-- exprs
 |   |-- blastp_db
 |   |   `-- b6d4e4cdf4
-|   |       `-- f69fe77c5f
-|   |           `-- 6313083a9e
+|   |       `-- 69be998a0e
+|   |           `-- cf9f5098fc
 |   |               `-- result -> out
 |   |-- length
-|   |   `-- 02932650f4
+|   |   `-- 6db613dd4c
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 32d8b91267
+|   |   |-- 95f688921b
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- a025187c6c
+|   |   `-- b4282cd31c
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_faa_path
-|   |   |-- 28d9c40d78
-|   |   |   `-- result -> ../../../cache/load/11bbf54fc6.faa
-|   |   `-- 928749424b
-|   |       `-- result -> ../../../cache/load/0d8dfa261e.faa
+|   |-- load_faa
+|   |   |-- 3ddeac190c
+|   |   |   `-- result -> ../../../cache/load/0d8dfa261e.str
+|   |   `-- f8a41afad4
+|   |       `-- result -> ../../../cache/load/11bbf54fc6.str
 |   |-- makeblastdb_faa
-|   |   `-- 5aa84ee02e
+|   |   `-- 1898488812
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- repeat
-|   |   `-- 44540ae330
-|   |       `-- 72d32bf734
-|   |           `-- 8c6d608a61
+|   |   `-- fbf4abf865
+|   |       `-- 0018afe231
+|   |           `-- 79d689624d
 |   |               `-- result -> ../../../../../cache/lines/...
-|   |-- str
-|   |   |-- 40edb92618
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- c58447896b
-|   |       `-- result -> ../../../cache/lines/...
-|   `-- to_path
-|       |-- 3ddeac190c
+|   `-- str
+|       |-- 40edb92618
 |       |   `-- result -> ../../../cache/lines/...
-|       `-- f8a41afad4
+|       `-- c58447896b
 |           `-- result -> ../../../cache/lines/...
 |-- reps
-|   `-- 3616f24050
-|       |-- fwdHits.bht -> ../../exprs/blastp_db/b6d4e4cdf4/f69fe77c5f/6313083a9e/result
-|       `-- result -> ../../reps/3616f24050/fwdHits.bht
+|   `-- 19132582a8
+|       |-- fwdHits.bht -> ../../exprs/blastp_db/b6d4e4cdf4/69be998a0e/cf9f5098fc/result
+|       `-- result -> ../../reps/19132582a8/fwdHits.bht
 `-- vars
-    |-- maga.faa -> ../exprs/load_faa_path/928749424b/result
-    |-- mgen.faa -> ../exprs/load_faa_path/28d9c40d78/result
-    `-- result -> ../exprs/length/02932650f4/result
+    |-- maga.faa -> ../exprs/load_faa/3ddeac190c/result
+    |-- mgen.faa -> ../exprs/load_faa/f8a41afad4/result
+    `-- result -> ../exprs/length/6db613dd4c/result
 
-34 directories, 28 files
+31 directories, 25 files

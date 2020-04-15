@@ -1,4 +1,4 @@
 
-[list of path (a somewhat-sanitized path (or url))s] -> faa (FASTA (amino acid)).list
+[list of str (string)s] -> faa (FASTA (amino acid)).list
 
 doc for functions/load_faa_each not written yet

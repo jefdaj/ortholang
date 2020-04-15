@@ -10,23 +10,25 @@ module OrthoLang.Modules.Curl
 import OrthoLang.Core
 
 import Control.Monad.IO.Class     (liftIO)
-import Data.List                  (isInfixOf)
+-- import Data.List                  (isInfixOf)
 import Data.Maybe                 (fromJust)
 import Development.Shake          (Action, getShakeExtra)
 import Development.Shake.FilePath ((</>))
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 
-curl :: String -> Action Path
+-- TODO should a URL also be a valid Path?
+curl :: Path -> Action Path
 curl url = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.curl.curl"
+      url'    = fromPath loc cfg url
       cDir    = fromPath loc cfg $ cacheDir cfg "curl"
       outPath = cDir </> digest url
   liftIO $ createDirectoryIfMissing True cDir
   runCmd $ CmdDesc
     { cmdBinary = "curl.sh"
-    , cmdArguments = [outPath, url]
+    , cmdArguments = [outPath, url']
     , cmdFixEmpties = False
     , cmdParallel = False
     , cmdInPatterns = []

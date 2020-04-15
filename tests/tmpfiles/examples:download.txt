@@ -3,12 +3,12 @@
 |   |-- curl
 |   |   `-- 0ba64ec1b2
 |   `-- load
-|       |-- 46d3084751
-|       `-- 46d3084751.ids
+|       |-- 46d3084751.str
+|       `-- 46d3084751.str.ids
 |-- exprs
 |   |-- load_fna
 |   |   `-- 39cfbdcad3
-|   |       `-- result -> ../../../cache/load/46d3084751
+|   |       `-- result -> ../../../cache/load/46d3084751.str
 |   `-- str
 |       `-- 0ba64ec1b2
 |           `-- result -> ../../../cache/lines/...

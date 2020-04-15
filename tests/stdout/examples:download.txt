@@ -1,1 +1,7 @@
-[]
+>derice
+ACTGACTAGCTAGCTAACTG
+>sanka
+GCATCGTAGCTAGCTACGAT
+>junior
+...
+

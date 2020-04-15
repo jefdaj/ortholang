@@ -98,10 +98,4 @@ warning: no ID found for "Synpcc7942_1891"
 warning: no ID found for "Synpcc7942_1345"
 warning: no ID found for "Synpcc7942_1496"
 warning: no ID found for "Synpcc7942_1598"
->Synpcc7942_0040 | Synpcc7942_0040 | dihydroneopterin aldolase Dihydroneopter...
-MDVLVVRGIRAYGYTGFFDAEQELGQWFEVDLRVWVDLQPAGDSDQLGDTLDYSQAVQVV
-QTGIRQSRFRTIERLAADLCDRLFQQFPALPELELTLRKLAPPIPDFSGDVSLVLRRSRK
-LTGAD
->Synpcc7942_0045 | Synpcc7942_0045 | TPR repeat | 43572:44927 Forward
-...
 

@@ -1,5 +1,5 @@
-maga = load_faa_path (to_path "examples/sequences/Mycoplasma_agalactiae_small.faa")
-mbov = load_faa_path (to_path "examples/sequences/Mycoplasma_bovis_small.fa")
+maga = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
+mbov = load_faa "examples/sequences/Mycoplasma_bovis_small.fa"
 maga_mbov = blastp 1.0e-10 maga mbov
 maga_mbov_stringent = filter_evalue 1.0e-50 maga_mbov
 maga_best_mbov = best_hits maga_mbov

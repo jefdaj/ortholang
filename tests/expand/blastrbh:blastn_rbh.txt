@@ -1,5 +1,5 @@
-mgen = load_fna_path (to_path "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna")
-maga = load_fna_path (to_path "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna")
+mgen = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
+maga = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
 n = 1.0e-5
 fwd = blastn n mgen maga
 rev1 = blastn n maga mgen

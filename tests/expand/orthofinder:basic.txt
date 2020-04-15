@@ -1,4 +1,4 @@
-smallbacteria = load_faa_path_each (to_path_each ["examples/sequences/Mycoplasma_agalactiae_small.faa",
-                                                  "examples/sequences/Mycoplasma_genitalium_small.faa"])
+smallbacteria = load_faa_each ["examples/sequences/Mycoplasma_agalactiae_small.faa",
+                               "examples/sequences/Mycoplasma_genitalium_small.faa"]
 ofres = orthofinder smallbacteria
 result = ofres

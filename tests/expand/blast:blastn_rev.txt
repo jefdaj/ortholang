@@ -1,5 +1,5 @@
-maga5 = load_fna_path (to_path "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna")
-maga = load_fna_path (to_path "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna")
+maga5 = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
+maga = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
 n = 1.0e-5
 singleFwd = extract_queries (blastn n maga5 maga)
 mappedFwd = extract_queries_each (blastn_each n maga5 [maga])
