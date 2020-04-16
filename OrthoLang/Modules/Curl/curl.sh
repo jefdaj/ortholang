@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 OUTPATH="$1"
-ERRPATH="$(dirname "$OUTPATH")"/err
+ERRPATH="${OUTPATH}.err"
 URL="$2"
 
 # from https://www.client9.com/using-curl-in-automation/
