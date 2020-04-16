@@ -400,13 +400,9 @@ writeCachedLines :: DebugLocation -> FilePath -> [String] -> Action ()
 writeCachedLines loc outPath content = do
   cfg <- fmap fromJust getShakeExtra
   let cache = cachedLinesPath cfg content
-  -- TODO show as Path?
   let loc' = loc ++ ".writeCachedLines" 
   debugA' loc' $ first50 content ++ " -> " ++ last50 cache
-      -- lock  = cache <.> "lock"
-  -- liftIO $ createDirectoryIfMissing True cDir
-  withWriteOnce cache $ writeFile' cache $ unlines content -- TODO is this strict?
-  -- unlessExists outPath $ -- TODO remove?
+  withWriteOnce cache $ writeFile' cache $ unlines content
   symlink (toPath loc' cfg outPath) (toPath loc' cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script

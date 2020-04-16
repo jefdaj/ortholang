@@ -151,12 +151,13 @@ myShake :: Config -> LocksRef -> IDsRef -> DigestsRef
         -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
 myShake cfg ref ids dr pm delay rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
-  let shakeOpts = shakeOptions
-        { shakeFiles     = cfgTmpDir cfg
+  let tDir = cfgTmpDir cfg
+      shakeOpts = shakeOptions
+        { shakeFiles     = tDir
         , shakeVerbosity = Quiet -- TODO can you make it  but sent only to the logfile?
         , shakeThreads   = 8 -- max 1 (cfgThreads cfg - 1)
-        , shakeReport    = [cfgTmpDir cfg </> "profile.html"] ++ maybeToList (cfgReport cfg)
-        , shakeAbbreviations = [(cfgTmpDir cfg, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
+        , shakeReport    = [tDir </> "profile.html"] ++ maybeToList (cfgReport cfg)
+        , shakeAbbreviations = [(tDir, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
         , shakeChange    = ChangeModtimeAndDigestInput
         -- , shakeCommandOptions = [EchoStdout True]
         , shakeProgress = updateLoop delay . updateProgress pm
@@ -169,7 +170,12 @@ myShake cfg ref ids dr pm delay rules = do
         , shakeExtra = shakeEnv cfg ref ids dr
 
         -- TODO remove this for production? or only enable when --debug set?
+        -- TODO remove cache from lint tracking?
+        -- note LintInside filters the rules that will be tracked, not the files created.
         , shakeLint = Just LintFSATrace
+        , shakeLintInside = [tDir </> "exprs", tDir </> "cache/load"]
+        -- , shakeLintIgnore = [tDir </> "cache/**/*"]
+        -- , shakeLintWatch  = [tDir </> "exprstDir </> "cache/load/*"]
         }
 
   oneLineShakeErrors "core.eval.myShake" $ (shake shakeOpts . alternatives) rules
