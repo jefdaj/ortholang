@@ -169,13 +169,20 @@ myShake cfg ref ids dr pm delay rules = do
         -- TODO shakeShare to implement shared cache on the demo site!
         , shakeExtra = shakeEnv cfg ref ids dr
 
-        -- TODO remove this for production? or only enable when --debug set?
-        -- TODO remove cache from lint tracking?
-        -- note LintInside filters the rules that will be tracked, not the files created.
+        -- This prints annoying errors whenever a file is accessed unexpectedly
+        -- TODO remove ignore patterns as you solve them
         , shakeLint = Just LintFSATrace
-        , shakeLintInside = [tDir </> "exprs", tDir </> "cache/load"]
-        -- , shakeLintIgnore = [tDir </> "cache/**/*"]
-        -- , shakeLintWatch  = [tDir </> "exprstDir </> "cache/load/*"]
+        , shakeLintInside =
+            [ tDir </> "exprs"
+            , tDir </> "cache/load"
+            ]
+        , shakeLintIgnore =
+            [ "//cache/lines/*.txt"
+            , "//cache/load/*"
+            , "//cache/makeblastdb/*/*"
+            , "//exprs/list/*/result"
+            , "//exprs//jobs"
+            ]
         }
 
   oneLineShakeErrors "core.eval.myShake" $ (shake shakeOpts . alternatives) rules
