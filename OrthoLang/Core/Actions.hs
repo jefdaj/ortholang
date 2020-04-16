@@ -60,7 +60,7 @@ module OrthoLang.Core.Actions
 
 import Prelude hiding (readList, error)
 import OrthoLang.Debug
-import Development.Shake
+import Development.Shake hiding (doesFileExist)
 import OrthoLang.Core.Types
 -- import OrthoLang.Core.Config (debug)
 
@@ -76,7 +76,7 @@ import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, abso
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
 import OrthoLang.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteLocks', withWriteOnce)
-import System.Directory           (createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
+import System.Directory           (doesFileExist, createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>), takeDirectory, takeExtension, takeBaseName)
 import System.FilePath.Glob       (compile, globDir1)
@@ -150,7 +150,7 @@ needShared name path@(Path p) = do
 
   -- special cases to skip shared lookup...
   -- skip cache lookup if the file exists already
-  done <- doesFileExist path'
+  done <- liftIO $ doesFileExist path'
   if done
     -- these are probably faster to recompute than fetch
     || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
@@ -219,7 +219,7 @@ lookupShared path = do
       if "http" `isPrefixOf` sp -- TODO come up with something more robust to detect urls!
       then liftIO $ download cfg sp
         else do
-          exists <- doesFileExist sp
+          exists <- liftIO $ doesFileExist sp
           return $ if exists
             then Just sp
             else Nothing
@@ -616,7 +616,7 @@ matchPattern cfg ptn = liftIO $ globDir1 (compile ptn) (cfgTmpDir cfg)
 
 handleCmdError :: String -> ExitCode -> FilePath -> [String] -> Action a
 handleCmdError bin n stderrPath rmPatterns = do
-  hasErr <- doesFileExist stderrPath
+  hasErr <- liftIO $ doesFileExist stderrPath
   errMsg2 <- if hasErr
                then do
                  errTxt <- readFileStrict' stderrPath
@@ -740,7 +740,7 @@ symlink src dst = do
 sanitizeFileInPlace :: FilePath -> Action ()
 sanitizeFileInPlace path = do
   -- txt <- readFileStrict' path
-  exists <- doesFileExist path
+  exists <- liftIO $ doesFileExist path
   when exists $ do
     ref <- fmap fromJust getShakeExtra
     txt <- liftIO $ readFileStrict ref path -- can't use need here

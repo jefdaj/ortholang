@@ -20,6 +20,7 @@ let
     stdenv
     bash
     bashInteractive
+    fsatrace # for shake linting
     coreutils
     diffutils
     glibcLocales # TODO even on mac?

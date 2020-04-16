@@ -167,6 +167,9 @@ myShake cfg ref ids dr pm delay rules = do
         -- , shakeColor = True
         -- TODO shakeShare to implement shared cache on the demo site!
         , shakeExtra = shakeEnv cfg ref ids dr
+
+        -- TODO remove this for production? or only enable when --debug set?
+        , shakeLint = Just LintFSATrace
         }
 
   oneLineShakeErrors "core.eval.myShake" $ (shake shakeOpts . alternatives) rules
