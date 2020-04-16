@@ -147,6 +147,8 @@ needShared name path@(Path p) = do
   let loc = "core.actions.needShared" -- TODO pass from callers?
       path' = fromPath loc cfg path
   debugA' loc $ "called for '" ++ path' ++ "'"
+
+  -- special cases to skip shared lookup...
   -- skip cache lookup if the file exists already
   done <- doesFileExist path'
   if done
@@ -163,12 +165,9 @@ needShared name path@(Path p) = do
     then do
       debugA' "needShared" $ "skip shared lookup and needDebug normally: '" ++ path' ++ "'"
       needDebug name [path']
-    -- otherwise, attempt it
+
+    -- otherwise, attempt shared lookup
     else do
-      -- if it's a symlink, recurse on the source file first
-      -- (unlike the list of paths case, this should be done first so the symlink works)
-      -- TODO should this go way at the top?
-      -- needLinkSrcIfAny name path'
       debugA' "needShared" $ "checking for shared version: '" ++ show path ++ "'"
       shared <- lookupShared path
       case shared of
@@ -202,7 +201,15 @@ needLinkSrcIfAny name link = do
     absPath <- liftIO $ absolutize $ takeDirectory link </> relPath
     need' name [absPath]
 
--- TODO move download from here to a macro expansion
+{-|
+This is also a little more complicated than it would seem, because:
+
+1. The shared location might be a local folder or a URL
+2. The file we're looking up might require others to go along with it
+
+TODO are all the files needed always the prefix + "*"?
+TODO move download from here to a macro expansion?
+-}
 lookupShared :: Path -> Action (Maybe FilePath)
 lookupShared path = do
   cfg <- fmap fromJust getShakeExtra

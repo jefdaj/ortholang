@@ -45,7 +45,6 @@ import System.FilePath            (takeDirectory)
 import System.Posix.Files         (setFileMode)
 import Control.Exception.Safe     (catch, throwM)
 import System.IO.Error            (isDoesNotExistError)
--- import System.FilePath.Glob       (compile, match)
 import Text.Regex.Posix           ((=~))
 
 import qualified Control.Logging as L
