@@ -149,26 +149,16 @@ needShared name path@(Path p) = do
   debugA' loc $ "called for '" ++ path' ++ "'"
   -- skip cache lookup if the file exists already
   done <- doesFileExist path'
-  -- TODO does this make sense?
-  -- let inShare p = case cfgShare cfg of { Nothing -> False; Just d -> d `isPrefixOf` p }
   if done
-
     -- these are probably faster to recompute than fetch
     || ("$TMPDIR/exprs/str/" `isPrefixOf` p)
     || ("$TMPDIR/exprs/num/" `isPrefixOf` p)
-    -- ("$TMPDIR/exprs/list/" `isPrefixOf` p)
     || ("$TMPDIR/reps/" `isPrefixOf` p)
     || ("$TMPDIR/vars/" `isPrefixOf` p)
-
     -- these depend on the local filesystem
-    -- (not ("$TMPDIR" `isPrefixOf` p) && not (inShare p))
     || (not ("$TMPDIR" `isPrefixOf` p))
     || ("$TMPDIR/exprs/load" `isPrefixOf` p)
     || ("$TMPDIR/exprs/glob" `isPrefixOf` p)
-
-    -- this fixes load functions, but mysteriously breaks repeat:load.ol
-    -- ("$TMPDIR/exprs/list/" `isInfixOf` p)
-
     -- if any of those ^ special cases apply, skip shared lookup
     then do
       debugA' "needShared" $ "skip shared lookup and needDebug normally: '" ++ path' ++ "'"

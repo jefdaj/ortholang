@@ -224,35 +224,33 @@ newBop n c i r = newFn n (Just c) [ListSigs i] r rNewRulesA1
 The load_* functions handle hashing seqids of newly-loaded files the first
 time, but they fail to enfore re-loading them during the next program run when
 they might still be needed. This is a bit of a hack, but does enforce it
-properly (so far!). Note that getDirectoryFilesIO and the non-Shake
-'doesDirectoryExist' are used on purpose, because it prevents
-'Development.Shake.need'ing the matches (I think).
+properly (so far!)
 -}
 rReloadIDs :: Rules ()
 rReloadIDs = "reloadids" ~> do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
-
   -- find ids in shared load cache, if any
-  idPaths1 <- case cfgShare cfg of
-    Nothing -> return []
-    Just sd -> liftIO $ do
-      let slDir = sd </> "cache" </> "load"
-      exists <- liftIO $ doesDirectoryExist slDir
-      if not exists
-        then return []
-        else (fmap . map) (slDir </>) $ liftIO $ getDirectoryFilesIO slDir ["//*.ids"]
-
+  case cfgShare cfg of
+    Nothing -> return ()
+    Just sd -> aReloadIDsDir sd
   -- find ids in regular load cache
-  let lDir = cfgTmpDir cfg </> "cache" </> "load"
-  exists <- liftIO $ doesDirectoryExist lDir
-  idPaths2 <- (fmap . map) (lDir </>) $
+  let ld = cfgTmpDir cfg </> "cache" </> "load"
+  aReloadIDsDir ld
+
+{-|
+Note that getDirectoryFilesIO and the non-Shake
+'doesDirectoryExist' are used on purpose, because it prevents
+'Development.Shake.need'ing the matches (I think).
+-}
+aReloadIDsDir :: FilePath -> Action ()
+aReloadIDsDir loadCacheDir = do
+  exists <- liftIO $ doesDirectoryExist loadCacheDir
+  idPaths <- (fmap . map) (loadCacheDir </>) $
     if not exists
       then return []
-      else liftIO $ getDirectoryFilesIO lDir ["//*.ids"]
-
-  let idPaths = idPaths1 ++ idPaths2
-  liftIO $ debug "core.sanitize.rReloadIDs" $ "idPaths: " ++ show idPaths
+      else liftIO $ getDirectoryFilesIO loadCacheDir ["//*.ids"]
+  liftIO $ debug "core.sanitize.aReloadIDsDir" $ "idPaths: " ++ show idPaths
   mapM_ aLoadIDs idPaths
 
 {-|
