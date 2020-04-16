@@ -3,7 +3,7 @@
 
 module OrthoLang.Core.Sanitize
   -- ( hashIDsFile
-  ( hashIDsFile2
+  ( hashIDsFile
   -- , writeIDs
   , unhashIDs
   , unhashIDsFile
@@ -86,10 +86,10 @@ hashIDsTxt txt = (unlines lines', M.fromList seqids)
 --   return ids'
 
 -- rewrite of hashIDsFile as a python script; will it fix the space leak?
-hashIDsFile2 :: Path -> Path -> Action ()
-hashIDsFile2 inFa outFa = do
+hashIDsFile :: Path -> Path -> Action ()
+hashIDsFile inFa outFa = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.sanitize.hashIDsFile2"
+  let loc = "core.sanitize.hashIDsFile"
       inFa'   = fromPath loc cfg inFa
       outFa'  = fromPath loc cfg outFa
       outIDs' = outFa' <.> "ids"

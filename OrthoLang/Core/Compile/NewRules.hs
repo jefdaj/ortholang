@@ -254,7 +254,7 @@ aReloadIDsDir loadCacheDir = do
   mapM_ aLoadIDs idPaths
 
 {-|
-This is called from 'OrthoLang.Core.Sanitize.hashIDsFile2' the first time a
+This is called from 'OrthoLang.Core.Sanitize.hashIDsFile' the first time a
 sequence file is loaded, and from 'rReloadIDs' during subsequent program runs.
 -}
 aLoadIDs :: FilePath -> Action ()

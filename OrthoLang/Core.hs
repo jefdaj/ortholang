@@ -196,7 +196,7 @@ module OrthoLang.Core
   , debug -- TODO disambiguate the others
 
   -- * Old module API: Sanitize
-  , hashIDsFile2
+  , hashIDsFile
   , readIDs
 
   )
