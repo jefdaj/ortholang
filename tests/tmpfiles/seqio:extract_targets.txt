@@ -1,63 +1,67 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 5d9ac83d87
-|   |       `-- dc84860a56
+|   |   `-- 5af0acd4aa
+|   |       `-- 630adf631f
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_targets/dc84860a56/result
+|   |           `-- result -> ../../../../exprs/extract_targets/630adf631f/result
 |   |-- load
-|   |   |-- 28ce925871 -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
-|   |   |-- cb3e90dc00
-|   |   `-- cb3e90dc00.ids
+|   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
+|   |   |-- 7050df5d6e.faa
+|   |   |-- 7050df5d6e.faa.ids
+|   |   |-- cb3e90dc00.faa
+|   |   `-- cb3e90dc00.faa.ids
 |   |-- makeblastdb
-|   |   `-- 71ad12fa8d
+|   |   `-- abce5b0ac9
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
 |   `-- seqio
 |-- exprs
 |   |-- any
-|   |   `-- 758631ac1a
+|   |   `-- 123614af49
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- blastp_db
 |   |   `-- b6d4e4cdf4
 |   |       `-- 2c7651beca
-|   |           `-- f627f0b588
+|   |           `-- ff4983dc13
 |   |               `-- result -> out
 |   |-- extract_targets
-|   |   |-- b4ca2d1966
+|   |   |-- 630adf631f
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   `-- dc84860a56
+|   |   `-- 8561210411
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_targets_each
-|   |   `-- 64d89f0d1f
+|   |   `-- fda04ca88d
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- gbk_to_faa
+|   |-- gbk_to_faa_rawids
 |   |   `-- 3feaffccb4
 |   |       `-- d3c226bec7
 |   |           `-- result
 |   |-- list
-|   |   |-- 1efd74255c
+|   |   |-- 6241ced0de
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 4aa7523eee
+|   |   |-- 94782d8088
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 4d4a34784d
+|   |   |-- d81dfd88c8
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- fe3d1c25c8
+|   |   `-- feed5613ba
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   `-- 81fa36fcfa
-|   |       `-- result -> ../../../cache/load/cb3e90dc00
+|   |       `-- result -> ../../../cache/load/cb3e90dc00.faa
+|   |-- load_faa_path
+|   |   `-- f18ee4a4e7
+|   |       `-- result -> ../../../cache/load/7050df5d6e.faa
 |   |-- load_gbk
 |   |   `-- b5a17d977e
-|   |       `-- result -> ../../../cache/load/28ce925871
+|   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_faa
-|   |   `-- fefa44a593
+|   |   `-- e41c27f09f
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
@@ -70,9 +74,9 @@
 |       `-- ee108e12fa
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/blastp_db/b6d4e4cdf4/2c7651beca/f627f0b588/result
-    |-- mapped.str.list.list -> ../exprs/extract_targets_each/64d89f0d1f/result
-    |-- result -> ../exprs/any/758631ac1a/result
-    `-- single.str.list -> ../exprs/extract_targets/b4ca2d1966/result
+    |-- hits.bht -> ../exprs/blastp_db/b6d4e4cdf4/2c7651beca/ff4983dc13/result
+    |-- mapped.str.list.list -> ../exprs/extract_targets_each/fda04ca88d/result
+    |-- result -> ../exprs/any/123614af49/result
+    `-- single.str.list -> ../exprs/extract_targets/8561210411/result
 
-41 directories, 34 files
+43 directories, 36 files

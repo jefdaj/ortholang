@@ -1,13 +1,10 @@
 -- TODO rename something more general like SeqUtils?
--- TODO when running gbk_to_faa*, also load_faa the result to split out the IDs!
--- TODO gbk_to_fna (and probably others) need to substitute seqid_* hashes
 
 module OrthoLang.Modules.SeqIO where
 
 import Development.Shake
 
 import OrthoLang.Core
--- import OrthoLang.Core (debug)
 
 import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)
@@ -36,7 +33,6 @@ olModule = Module
     , loadFna, loadFnaPath, loadFnaEach, loadFnaPathEach, loadFnaGlob
     , loadFaa, loadFaaPath, loadFaaEach, loadFaaPathEach, loadFaaGlob
     , loadGbk, loadGbkPath, loadGbkEach, loadGbkPathEach, loadGbkGlob
-    -- , mkLoad True fna, mkLoadEach True fna, mkLoadGlob True fna
     -- TODO combo that loads multiple fnas or faas and concats them?
     -- TODO combo that loads multiple gbks -> fna or faa?
     ]
@@ -114,7 +110,6 @@ gbkToFaaRawIDs = Function
     name = "gbk_to_faa_rawids"
 
 gbkToFna :: Function
--- gbkToFna = compose1 "gbk_to_fna" [ReadsFile] loadFna gbkToFnaRawIDs
 gbkToFna = newMacro "gbk_to_fna" [Exactly str, Exactly gbk] (Exactly fna) mGbkToFna [ReadsFile]
 
 mGbkToFna :: MacroExpansion
@@ -185,7 +180,6 @@ aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
       outPath'  = fromPath loc cfg outPath
       loc = "modules.seqio.aGenbankToFasta"
       outPath'' = traceA loc outPath' [outPath', faPath']
-  -- liftIO $ putStrLn $ "ftPath': " ++ show ftPath'
   ft <- readLit loc ftPath'
   let ft' = if ft  == "cds" then "CDS" else ft
       (st', extraArgs) = if ft' == "whole" then ("whole", ["--annotations", "all"]) else (st, [])
@@ -193,7 +187,6 @@ aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
              , "--out_file", outPath'
              , "--sequence_type", st'
              , "--feature_type", ft'] ++ extraArgs
-  -- liftIO $ putStrLn $ "args: " ++ show args
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True outDir'
   runCmd $ CmdDesc
@@ -215,10 +208,8 @@ aGenbankToFasta _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show 
 -- extract_ids(_each) --
 ------------------------
 
--- TODO this needs to do relative paths again, not absolute!
 -- TODO also extract them from genbank files
 
--- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractIds :: Function
 extractIds = Function
   { fOpChar = Nothing, fName = name
@@ -231,7 +222,6 @@ extractIds = Function
   where
     name = "extract_ids"
 
--- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractIdsEach :: Function
 extractIdsEach = Function
   { fOpChar = Nothing, fName = name
@@ -243,18 +233,6 @@ extractIdsEach = Function
   }
   where
     name = "extract_ids_each"
-
--- Some fa "any fasta file" (ListOf str)
--- shown as "fa -> str.list, where fa is any fasta file"
--- tExtractIds :: [Type] -> Either String Type
--- tExtractIds [x] | elem x [faa, fna] = Right (ListOf str)
--- tExtractIds _ = Left "expected a fasta file"
-
--- (ListOf (Some fa "any fasta file")) (ListOf (ListOf str))
--- shown as "fa.list -> str.list.list, where fa is any fasta file"
--- tExtractIdsEach :: [Type] -> Either String Type
--- tExtractIdsEach [ListOf x] | elem x [faa, fna] = Right (ListOf $ ListOf str)
--- tExtractIdsEach _ = Left "expected a fasta file"
 
 -------------------------
 -- extract_seqs(_each) --
@@ -282,9 +260,9 @@ aExtractSeqs out inFa inList = do
       tmp  = fromPath loc cfg $ cacheDir cfg "seqio"
       ids  = tmp </> digest (toPath loc cfg inList) <.> "txt"
       ids' = toPath loc cfg ids
-  -- need ["reloadseqids"]
-  lookupHashesFile (toPath loc cfg inList) ids' -- TODO implement as a macro
-  aNewRulesS2 "extract_seqs.py" id out inFa ids
+  -- TODO these should be the seqid_... ids themselves, not unhashed?
+  -- unhashIDsFile (toPath loc cfg inList) ids -- TODO implement as a macro?
+  aNewRulesS2 "extract_seqs.py" id out inFa inList
 
 -- TODO remove by rewriting map functions to work on the new one above
 aExtractSeqsOld :: [Path] -> Action ()
@@ -295,13 +273,12 @@ aExtractSeqsOld [outPath, inFa, inList] = do
       tmpList' = cDir </> digest inList <.> "txt"
       tmpList  = toPath loc cfg tmpList'
   liftIO $ createDirectoryIfMissing True cDir
-  lookupHashesFile inList tmpList
-  aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, tmpList]
+  -- lookupIDsFile inList tmpList
+  aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, inList]
 aExtractSeqsOld ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 
 -- TODO does this one even make sense? maybe only as an _all version for mixed id lists?
 --      or maybe for singletons or something?
--- TODO needs to go through (reverse?) lookup in the hashedids dict somehow!
 extractSeqsEach :: Function
 extractSeqsEach = Function
   { fOpChar = Nothing, fName = name
@@ -314,40 +291,12 @@ extractSeqsEach = Function
   where
     name = "extract_seqs_each"
 
--- (Some fa "any fasta file", ListOf str) (Some fa "any fasta file")
--- shown as "fa str.list -> fa, where fa is any fasta file"
--- tExtractSeqs  :: [Type] -> Either String Type
--- tExtractSeqs [x, ListOf s] | s == str && elem x [faa, fna] = Right x
--- tExtractSeqs _ = Left "expected a fasta file and a list of strings"
-
--- (Some fa "any fasta file", (ListOf (ListOf str))) (ListOf (Some fa "any fasta file"))
--- shown as "fa str.list -> fa.list, where fa is any fasta file"
--- tExtractSeqsEach  :: [Type] -> Either String Type
--- tExtractSeqsEach [x, ListOf (ListOf s)] | s == str && elem x [faa, fna] = Right $ ListOf x
--- tExtractSeqsEach _ = Left "expected a fasta file and a list of strings"
-
 ----------------------
 -- translate(_each) --
 ----------------------
 
--- translate = Function
---   { fOpChar = Nothing, fName = name
---   ,fTags = []
---   , fTypeCheck = defaultTypeCheck name [fna] faa
---   , fTypeDesc  = mkTypeDesc name  [fna] faa
---   , fNewRules = NewNotImplemented, fOldRules = rSimpleScript "translate.py"
---   }
---   where
---     name = "translate"
-
--- TODO fix unable to decode the fna error
---      must be that load_fna* aren't adding their digests?
 translate :: Function
 translate = newFnS1 "translate" (Exactly fna) (Exactly faa) "translate.py" [ReadsFile] id
-
--- TODO how to reuse loadFaa from main modules list?
--- translate :: Function
--- translate = compose1 "translate" [ReadsFile] translateRawIDs $ mkLoad True "load_faa" (Exactly faa)
 
 translateEach :: Function
 translateEach = Function
@@ -361,15 +310,11 @@ translateEach = Function
   where
     name = "translate_each"
 
--- TODO how to reuse loadFaa from main modules list?
--- translateEach :: Function
--- translateEach = compose1 "translate_each" [ReadsFile] translateRawIDsEach $ mkLoadEach True "load_faa_each" (Exactly faa)
-
 --------------
 -- concat_* --
 --------------
 
--- TODO separate concat module?
+-- TODO separate concat module? or maybe this goes in ListLike?
 
 mkConcat :: Type -> Function
 mkConcat cType = Function
@@ -403,28 +348,6 @@ mkConcatEach cType = Function
  -
  - TODO special case of error handling here, since cat errors are usually temporary?
  -}
--- aConcat :: Type -> [Path] -> Action ()
--- aConcat cType cfg ref ids [oPath, fsPath] = do
---   fPaths <- readPaths fs'
---   let fPaths' = map (fromPath loc cfg) fPaths
---   need' "aConcat" fPaths'
---   let out'    = fromPath loc cfg oPath
---       out''   = traceA "aConcat" out' [out', fs']
---       outTmp  = out'' <.> "tmp"
---       emptyStr = "<<empty" ++ tExtOf cType ++ ">>"
---       grepCmd = "egrep -v '^" ++ emptyStr ++ "$'"
---       catArgs = fPaths' ++ ["|", grepCmd, ">", outTmp]
---   wrappedCmdWrite cfg ref outTmp fPaths' [] [Shell] "cat"
---     (debug cfg ("catArgs: " ++ show catArgs) catArgs)
---   needsFix <- isReallyEmpty outTmp
---   if needsFix
---     then liftIO $ writeFile out'' emptyStr
---     else copyFile' outTmp out''
---   where
---     fs' = fromPath loc cfg fsPath
--- aConcat _ _ _ _ = fail "bad argument to aConcat"
-
--- TODO WHY DID THIS BREAK CREATING THE CACHE/PSIBLAST DIR? FIX THAT TODAY, QUICK!
 aConcat :: Type -> ([Path] -> Action ())
 aConcat cType [outPath, inList] = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
@@ -446,12 +369,6 @@ aConcat cType [outPath, inList] = do
                               , toPath loc cfg inList'
                               , toPath loc cfg emptyPath]
 aConcat _ _ = fail "bad argument to aConcat"
-
--- writeCachedLines outPath content = do
-
--- TODO would it work to just directly creat a string and tack onto paths here?
--- aSimpleScript' :: Bool -> String -> ([Path] -> Action ())
--- aSimpleScript' fixEmpties script cfg ref (out:ins) = aSimple' cfg ref ids out actFn Nothing ins
 
 ------------------------
 -- split_fasta(_each) --

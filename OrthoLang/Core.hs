@@ -104,7 +104,7 @@ module OrthoLang.Core
   , tExtOf
   , extractExprs
   , lookupIDsFile
-  , lookupHashesFile
+  -- , lookupHashesFile
   , mkTypeDesc
   , num
   , saltOf
@@ -181,6 +181,7 @@ module OrthoLang.Core
 
   -- * Old module API: Sanitize
   , unhashIDs
+  , unhashIDsFile
 
   -- * Old module API: Util
   , digest

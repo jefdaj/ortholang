@@ -73,9 +73,9 @@ module OrthoLang.Core.Compile.NewRules
 import Prelude hiding (error)
 import OrthoLang.Debug
 import Control.Monad.Reader
-import Development.Shake
+import Development.Shake hiding (doesDirectoryExist)
+import System.Directory (doesDirectoryExist)
 import OrthoLang.Core.Actions       (runCmd, CmdDesc(..))
-import OrthoLang.Core.Compile.Basic
 import OrthoLang.Core.Sanitize (readIDs)
 import OrthoLang.Core.Types
 import System.Exit (ExitCode(..))
@@ -87,7 +87,7 @@ import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBase
 import OrthoLang.Core.Actions     (need')
 import OrthoLang.Core.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest)
 import qualified Data.Map.Strict as M
-import Data.IORef                 (readIORef, atomicModifyIORef')
+import Data.IORef                 (atomicModifyIORef')
 
 ---------
 -- API --
@@ -224,20 +224,36 @@ newBop n c i r = newFn n (Just c) [ListSigs i] r rNewRulesA1
 The load_* functions handle hashing seqids of newly-loaded files the first
 time, but they fail to enfore re-loading them during the next program run when
 they might still be needed. This is a bit of a hack, but does enforce it
-properly (so far!). Note that getDirectoryFilesIO is used on purpose, because
-it skips 'Development.Shake.need'ing the matches.
+properly (so far!). Note that getDirectoryFilesIO and the non-Shake
+'doesDirectoryExist' are used on purpose, because it prevents
+'Development.Shake.need'ing the matches (I think).
 -}
 rReloadIDs :: Rules ()
-rReloadIDs = "reloadseqids" ~> do
+rReloadIDs = "reloadids" ~> do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
+
+  -- find ids in shared load cache, if any
+  idPaths1 <- case cfgShare cfg of
+    Nothing -> return []
+    Just sd -> liftIO $ do
+      let slDir = sd </> "cache" </> "load"
+      exists <- liftIO $ doesDirectoryExist slDir
+      if not exists
+        then return []
+        else (fmap . map) (slDir </>) $ liftIO $ getDirectoryFilesIO slDir ["//*.ids"]
+
+  -- find ids in regular load cache
   let lDir = cfgTmpDir cfg </> "cache" </> "load"
-  lDirExists <- doesDirectoryExist lDir
-  when lDirExists $ do
-    idNames <- liftIO $ getDirectoryFilesIO lDir ["//*.ids"]
-    let idPaths = map (lDir </>) idNames
-    liftIO $ debug "core.sanitize.rReloadIDs" $ "idPaths: " ++ show idPaths
-    mapM_ aLoadIDs idPaths
+  exists <- liftIO $ doesDirectoryExist lDir
+  idPaths2 <- (fmap . map) (lDir </>) $
+    if not exists
+      then return []
+      else liftIO $ getDirectoryFilesIO lDir ["//*.ids"]
+
+  let idPaths = idPaths1 ++ idPaths2
+  liftIO $ debug "core.sanitize.rReloadIDs" $ "idPaths: " ++ show idPaths
+  mapM_ aLoadIDs idPaths
 
 {-|
 This is called from 'OrthoLang.Core.Sanitize.hashIDsFile2' the first time a
@@ -250,18 +266,18 @@ aLoadIDs idsPath' = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoadIDs"
       idsPath = toPath loc cfg idsPath'
-  (newIDs, newHashes) <- readIDs idsPath
+  newIDs <- readIDs idsPath
   -- TODO what should the keys actually be? probably not the idsPath
   let (Path p) = idsPath
       k = dropExtension p
       v = takeBaseName idsPath' -- TODO is this good enough? maybe try to find the original filename
-  liftIO $ debug "core.sanitize.aLoadIDs" $ "k: " ++ k
-  liftIO $ debug "core.sanitize.aLoadIDs" $ "v: " ++ v
+  -- liftIO $ debug "core.sanitize.aLoadIDs" $ "k: " ++ k
+  -- liftIO $ debug "core.sanitize.aLoadIDs" $ "v: " ++ v
   ids <- fmap fromJust getShakeExtra
-  liftIO $ atomicModifyIORef' ids $ \h@(IDs {hFiles = fs, hSeqIDs = is, hSeqHashes = hs}) ->
-    (h { hFiles     = M.insert k v fs
-       , hSeqIDs    = M.insert k newIDs    is
-       , hSeqHashes = M.insert k newHashes hs
+  liftIO $ atomicModifyIORef' ids $ \h@(IDs {hFiles = fs, hSeqIDs = is}) ->
+    (h { hFiles  = M.insert k v fs
+       , hSeqIDs = M.insert k newIDs    is
+       -- , hSeqHashes = M.insert k newHashes hs
        }, ())
 
 {-|
@@ -344,13 +360,13 @@ aNewRules applyFn oSig aFn o@(ExprPath out) = do
   dRef <- fmap fromJust $ getShakeExtra
   let loc = "modules.newrulestest.aNewRules"
   -- TODO don't try to return oType here because outpath won't have a digest entry yet
-  (oType, dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef o
+  (oType, _, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef o
 
   -- TODO produce a better error message here
   when (not $ oSig `typeSigMatches` oType) $
     error "aNewRules" $ "typechecking error: " ++ show oSig ++ " /= " ++ show oType
 
-  dRef <- fmap fromJust $ getShakeExtra
+  -- dRef <- fmap fromJust $ getShakeExtra
   liftIO $ addDigest dRef oType $ toPath loc cfg out
 
   let dPaths' = map (fromPath loc cfg) dPaths

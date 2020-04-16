@@ -69,7 +69,7 @@ runTests args cfg ref ids dRef = withArgs [] $ do
       [] -> return ()
       ps -> do
         setEnv "TASTY_PATTERN" $ unwords ps
-        setEnv "TASTY_TIMEOUT" "60s" -- TODO configure this?
+        setEnv "TASTY_TIMEOUT" "5m" -- TODO configure this?
     let exSrc = wd </> "examples"
         exDst = tmpSubDir </> "examples"
     (_,_,_) <- readCreateProcessWithExitCode

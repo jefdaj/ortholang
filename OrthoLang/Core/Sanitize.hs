@@ -8,8 +8,8 @@ module OrthoLang.Core.Sanitize
   , unhashIDs
   , unhashIDsFile
   , readIDs
-  , lookupHash
-  , lookupHashesFile
+  -- , lookupHash
+  -- , lookupHashesFile
   , lookupID
   , lookupIDsFile
   )
@@ -42,14 +42,14 @@ import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCach
 import OrthoLang.Core.Paths   (toPath, fromPath, addDigest)
 import Data.Char             (isSpace)
 import Data.Maybe            (catMaybes, mapMaybe, fromJust)
-import Data.List             (isPrefixOf, intersperse)
+import Data.List             (isPrefixOf, intersperse, nub)
 import Data.List.Utils       (split, subIndex)
 import System.FilePath (takeFileName, takeDirectory, (<.>))
 import System.Directory           (createDirectoryIfMissing)
 import Data.IORef                  (readIORef)
 import System.Exit                (ExitCode(..))
-import qualified Data.Text.Lazy as T
-import Text.Pretty.Simple (pShowNoColor)
+-- import qualified Data.Text.Lazy as T
+-- import Text.Pretty.Simple (pShowNoColor)
 
 -- type HashedIDList = D.DList (String, String)
 
@@ -150,13 +150,13 @@ unhashIDs longIDs ids t = case findNext t of
                               Nothing -> txt -- happens to other $TMPDIR paths
                               Just v  -> if longIDs
                                            then v ++ rest
-                                           else headOrDie "failed to look up sid in unhashIDs" (words v) ++ rest
+                                           else fst (splitSeqid' v) ++ rest
     findNext txt = case catMaybes $ map (\p -> subIndex p txt) (map fst patterns) of
                      (x:xs) -> Just $ minimum (x:xs)
                      _ -> Nothing
     patterns =
-      [ ("seqid_" , \_   -> length "seqid_" + digestLength)
-      , ("$TMPDIR", \txt -> length $ takeWhile (not . isSpace) txt)
+      [ ("seqid_"  , \_   -> length "seqid_" + digestLength)
+      , ("$TMPDIR" , \txt -> length $ takeWhile (not . isSpace) txt)
       , ("$WORKDIR", \txt -> length $ takeWhile (not . isSpace) txt) -- TODO remove this one?
       ]
 
@@ -174,7 +174,7 @@ unhashIDsFile inPath outPath = do
   idref <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef idref
   -- liftIO $ putStrLn $ "ids: " ++ show ids
-  let txt' = unhashIDs False ids txt
+  let txt' = unhashIDs True ids txt
   -- liftIO $ putStrLn $ "txt': \"" ++ txt' ++ "\""
   withWriteLock' outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
   trackWrite' [outPath]
@@ -184,11 +184,14 @@ splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
 
 splitSeqid :: String -> (String, String)
-splitSeqid = fmap (drop 1) . break (`elem` " \t;:|") -- TODO any other common chars?
+splitSeqid = fmap (drop 1) . break (`elem` " \t;") -- TODO does this work for most cases?
+
+splitSeqid' :: String -> (String, String)
+splitSeqid' s = let r = splitSeqid s in trace "splitSeqid" ("splitSeqid '" ++ s ++ "' -> '" ++ show r ++ "'") r
 
 -- TODO should this be IO or Action?
 -- TODO any reason to keep the rest of the seqids as keys to the hashes? most ppl will use short ones
-readIDs :: Path -> Action (M.Map String String, M.Map String String)
+readIDs :: Path -> Action (M.Map String String)
 readIDs path = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "core.sanitize.readIDs"
@@ -199,12 +202,12 @@ readIDs path = do
   --                 in if length ws < 2
   --                      then error ("failed to split \"" ++ l ++ "\"")
   --                      else (head ws, concat $ intersperse "\t" $ tail ws)
-  let ids    = map (splitAtFirst '\t') (lines txt)
-      hashes = map (\(h, i) -> (fst $ splitSeqid i, h)) ids
+  let ids = map (splitAtFirst '\t') (lines txt)
+      -- hashes = map (\(h, i) -> (fst $ splitSeqid i, h)) ids
   -- liftIO $ putStrLn $ "loaded " ++ show (length ids) ++ " ids"
   -- liftIO $ putStrLn $ "ids'' with    seqid_: " ++ show ((take 10 $ filter (\(k,_) ->     ("seqid_" `isPrefixOf` k)) ids) :: [(String, String)])
   -- liftIO $ putStrLn $ "ids'' without seqid_: " ++ show ((take 10 $ filter (\(k,_) -> not ("seqid_" `isPrefixOf` k)) ids) :: [(String, String)])
-  return (M.fromList ids, M.fromList hashes)
+  return $ M.fromList ids
 
 -- TODO display error to user in a cleaner way than error!
 -- TODO is this really needed? seems suuuper slow. replace with error or just by warning them?
@@ -233,7 +236,6 @@ lookupIDsFile inPath outPath = do
                      Just i  -> return i
                      Nothing -> do
                        liftIO $ putStrLn ("warning: no ID found for \"" ++ v ++ "\"")
-                       -- TODO aha! is the problem that we're looking up non-hashed ids instead?
                        -- liftIO $ putStrLn $ "here are all the current ids:\n" ++ T.unpack (pShowNoColor ids)
                        return v
   idKeys <- mapM lookupFn partialIDs
@@ -242,27 +244,27 @@ lookupIDsFile inPath outPath = do
   let loc = "core.sanitize.lookupIDsFile"
   writeCachedLines loc (fromPath loc cfg outPath) idKeys
 
-lookupHash :: IDs -> String -> Maybe String
-lookupHash (IDs {hSeqHashes = hs}) i =
-  case catMaybes (map (M.lookup i) (M.elems hs)) of -- i is a seqid; look in all the maps for it
-    []  -> Nothing
-    [x] -> Just x
-    xs  -> trace "core.sanitize.lookupHash" ("WARNING: duplicate hashes. using the first:\n" ++ show xs) (Just $ head xs)
-
--- TODO move to Actions? causes an import cycle so far
-lookupHashesFile :: Path -> Path -> Action ()
-lookupHashesFile inPath outPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "core.sanitize.lookupHashesFile"
-  partialIDs <- readList loc $ fromPath loc cfg inPath
-  ref <- fmap fromJust getShakeExtra
-  ids <- liftIO $ readIORef ref
-  let lookupFn v = case lookupHash ids v of
-                     Just h  -> return h
-                     Nothing -> do
-                       liftIO $ putStrLn ("warning: no seqid_ hash found for \"" ++ v ++ "\"")
-                       return v
-  idKeys <- mapM lookupFn partialIDs
-  dRef <- fmap fromJust getShakeExtra
-  liftIO $ addDigest dRef (ListOf str) outPath -- TODO make this an Action?
-  writeCachedLines loc (fromPath loc cfg outPath) idKeys
+-- lookupHash :: IDs -> String -> Maybe String
+-- lookupHash (IDs {hSeqHashes = hs}) i =
+--   case catMaybes (map (M.lookup i) (M.elems hs)) of -- i is a seqid; look in all the maps for it
+--     []  -> Nothing
+--     [x] -> Just x
+--     xs  -> trace "core.sanitize.lookupHash" ("WARNING: duplicate hashes. using the first:\n" ++ show xs) (Just $ head xs)
+-- 
+-- -- TODO move to Actions? causes an import cycle so far
+-- lookupHashesFile :: Path -> Path -> Action ()
+-- lookupHashesFile inPath outPath = do
+--   cfg <- fmap fromJust getShakeExtra
+--   let loc = "core.sanitize.lookupHashesFile"
+--   partialIDs <- readList loc $ fromPath loc cfg inPath
+--   ref <- fmap fromJust getShakeExtra
+--   ids <- liftIO $ readIORef ref
+--   let lookupFn v = case lookupHash ids v of
+--                      Just h  -> return h
+--                      Nothing -> do
+--                        liftIO $ putStrLn ("warning: no seqid_ hash found for \"" ++ v ++ "\"")
+--                        return v
+--   idKeys <- mapM lookupFn partialIDs
+--   dRef <- fmap fromJust getShakeExtra
+--   liftIO $ addDigest dRef (ListOf str) outPath -- TODO make this an Action?
+--   writeCachedLines loc (fromPath loc cfg outPath) idKeys

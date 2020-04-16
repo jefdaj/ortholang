@@ -1,40 +1,40 @@
 [ 
     ( Var ( RepID Nothing ) "faa_names" 
-    , Fun path.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*.faa" ]
+    , Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "use5" 
-    , Fun path.list 
+    , Fun str.list 
         ( Just ( Salt 0 ) ) 
         [ Var ( RepID Nothing ) "faa_names" ] "sample" 
         [ Lit num "5.0" 
-        , Ref path.list Nothing [] 
+        , Ref str.list Nothing [] 
             ( Var ( RepID Nothing ) "faa_names" )
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "use5manytimes" 
-    , Fun path.list.list Nothing 
+    , Fun str.list.list Nothing 
         [ Var ( RepID Nothing ) "use5" 
         , Var ( RepID Nothing ) "faa_names" 
         ] "repeat" 
-        [ Ref path.list 
+        [ Ref str.list 
             ( Just ( Salt 0 ) ) 
             [ Var ( RepID Nothing ) "faa_names" ] 
             ( Var ( RepID Nothing ) "use5" )
-        , Ref path.list Nothing [] 
+        , Ref str.list Nothing [] 
             ( Var ( RepID Nothing ) "faa_names" )
         , Lit num "100.0" 
         ] 
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
-    , Fun path.list Nothing 
+    , Fun str.list Nothing 
         [ Var ( RepID Nothing ) "use5manytimes" 
         , Var ( RepID Nothing ) "use5" 
         , Var ( RepID Nothing ) "faa_names" 
         ] "all" 
-        [ Ref path.list.list Nothing 
+        [ Ref str.list.list Nothing 
             [ Var ( RepID Nothing ) "use5" 
             , Var ( RepID Nothing ) "faa_names" 
             ] 

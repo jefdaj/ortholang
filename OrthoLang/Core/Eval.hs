@@ -68,6 +68,9 @@ import qualified System.Progress as P
 import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
 import System.Time.Utils (renderSecs)
 
+-- import qualified Data.Text.Lazy as T
+-- import Text.Pretty.Simple (pShowNoColor)
+
 -- TODO how to update one last time at the end?
 -- sample is in milliseconds (1000 = a second)
 updateLoop :: Int -> IO a -> IO b
@@ -243,25 +246,13 @@ eval hdl cfg ref ids dr rtype p = do
     eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake cfg ref ids dr pm delay $ do
       let loc = "core.eval.eval.eval'"
       newRules
-      -- lpaths' <- (fmap . map) (\(ExprPath x) -> x) lpaths
       (ResPath path) <- rpath
-      -- let wanted = ["reloadseqids"] ++ lpaths' ++ ["eval"]
-      let wanted = ["eval"] -- TODO why do the lpaths' seem to be needed? and why the tmpfiles freeze?
-      want $ trace "core.eval.eval'" ("wanted: " ++ show wanted) wanted
-      -- want ["loadseqids", "eval"]
+      want ["eval"]
       "eval" ~> do
         alwaysRerun
-        need ["reloadseqids"] -- : lpaths'
-        -- need lpaths'
+        need ["reloadids"] -- this re-loads any existing cache/load/*.ids files
         -- TODO remove retry after newrules are finished
         actionRetry 9 $ do
-          -- Exit _ <- command [] "sync" [] -- why is this needed?
-          -- liftIO $ threadDelay delay
-
-          -- TODO is this the only thing that works for loading?
-          -- idPaths <- getDirectoryFiles (cfgTmpDir cfg </> "cache/load") [".ids"]
-          -- mapM aSeqIDs idPaths
-
           need [path] -- TODO is this done automatically in the case of result?
         {- if --interactive, print the short version of a result
          - if --output, save the full result (may also be --interactive)
@@ -290,6 +281,9 @@ shakeEnv cfg lRef iRef dRef =
 writeResult :: Config -> LocksRef -> IDsRef -> Path -> FilePath -> Action ()
 writeResult cfg ref idsref path out = do
   -- liftIO $ putStrLn $ "writing result to \"" ++ out ++ "\""
+  -- (dRef :: DigestsRef) <- fmap fromJust $ getShakeExtra
+  -- dMap <- liftIO $ readIORef dRef
+  -- liftIO $ putStrLn $ "here are all the current ids:\n" ++ T.unpack (pShowNoColor dMap)
   unhashIDsFile path out
 
 -- TODO what happens when the txt is a binary plot image?
@@ -299,7 +293,7 @@ printLong :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> Fi
 printLong _ ref idsref pm _ path = do
   ids <- liftIO $ readIORef idsref
   txt <- withReadLock' path $ readFile' path
-  let txt' = unhashIDs False ids txt
+  let txt' = unhashIDs True ids txt
   liftIO $ P.putMsgLn pm ("\n" ++ txt')
 
 printShort :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
@@ -310,6 +304,7 @@ printShort cfg ref idsref pm rtype path = do
   -- liftIO $ putStrLn $ show ids
   -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids) ++ " keys)..."
   -- TODO fix the bug that causes this to remove newlines after seqids:
+  -- liftIO $ putStrLn $ "here are all the current ids:\n" ++ T.unpack (pShowNoColor ids)
   res' <- fmap (unhashIDs False ids) $ liftIO $ renderIO cfg res -- TODO why doesn't this handle a str.list?
   liftIO $ P.putMsgLn pm res'
   -- liftIO $ putStrLn $ "done rendering with unhashIDs"
@@ -322,11 +317,6 @@ evalScript hdl (scr, c, ref, ids, dRef) =
       res = case lookupResult scr'' of
               Nothing -> fromJust $ lookupResult $ ensureResult scr''
               Just r  -> r
-
-      -- TODO why doesn't alwaysRerun handle these?
-      -- loadExprs = extractLoads scr'' res
-      -- loads = mapM (rExpr scr'') $ trace "ortholang.core.eval.evalScript" (unlines $ "load expressions:" :map show loadExprs) loadExprs
-
   in eval hdl c ref ids dRef (typeOf res) (compileScript $ seq scr'' scr'')
 
 -- TODO should there be a new idsref for this? how about digestsref?

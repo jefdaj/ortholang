@@ -37,7 +37,7 @@
     ) 
 , 
     ( Var ( RepID Nothing ) "faa_paths_fn" 
-    , Fun path.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*.faa" ]
+    , Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "result" 
