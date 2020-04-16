@@ -41,7 +41,6 @@
 |   |   `-- c1b08194e1
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
@@ -280,4 +279,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hitsmgen.bht.list
 
-115 directories, 165 files
+115 directories, 164 files

@@ -47,14 +47,12 @@
 |   |   |-- c1b08194e1
 |   |   |   |-- result
 |   |   |   |-- result.err
-|   |   |   |-- result.out
 |   |   |   |-- result.phr
 |   |   |   |-- result.pin
 |   |   |   `-- result.psq
 |   |   `-- c33ef12b71
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
@@ -205,4 +203,4 @@
     |-- result -> ../vars/tablemgen.bht
     `-- tablemgen.bht -> ../exprs/concat_bht/44c93f0d10/0/result
 
-108 directories, 97 files
+108 directories, 95 files

@@ -1,6 +1,5 @@
 .
 |-- cache
-|   `-- load
 |-- exprs
 |   `-- str
 |       `-- 14bf5d9d12
@@ -8,4 +7,4 @@
 `-- vars
     `-- result -> ../exprs/str/14bf5d9d12/result
 
-6 directories, 2 files
+5 directories, 2 files

@@ -37,9 +37,7 @@
     ( Var ( RepID Nothing ) "others" 
     , Bop faa.list Nothing 
         [ Var ( RepID Nothing ) "maga" ] "~" 
-        ( Fun faa.list Nothing [] "load_faa_each" 
-            [ Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ] ]
-        ) 
+        ( Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ] ) 
         ( Lst faa 
             [ Var ( RepID Nothing ) "maga" ] 
             [ Ref faa Nothing [] 

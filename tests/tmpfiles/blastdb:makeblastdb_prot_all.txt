@@ -9,36 +9,30 @@
 |       `-- 8948446e38
 |           |-- result
 |           |-- result.err
-|           |-- result.out
 |           |-- result.phr
 |           |-- result.pin
 |           `-- result.psq
 |-- exprs
 |   |-- list
-|   |   `-- 60a82ff656
+|   |   `-- 1034960c01
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_faa_path
-|   |   |-- 8a3c34f92b
-|   |   |   `-- result -> ../../../cache/load/28e059b2a9.faa
-|   |   `-- d4b3f34af1
-|   |       `-- result -> ../../../cache/load/cb3e90dc00.faa
+|   |-- load_faa
+|   |   |-- 81fa36fcfa
+|   |   |   `-- result -> ../../../cache/load/cb3e90dc00.faa
+|   |   `-- ae9e22061f
+|   |       `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_faa_all
-|   |   `-- 6523dcafcd
+|   |   `-- d432260851
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- str
-|   |   |-- 1e020faf26
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- ead30046d0
-|   |       `-- result -> ../../../cache/lines/...
-|   `-- to_path
-|       |-- 81fa36fcfa
+|   `-- str
+|       |-- 1e020faf26
 |       |   `-- result -> ../../../cache/lines/...
-|       `-- ae9e22061f
+|       `-- ead30046d0
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- db.faa.blastdb -> ../exprs/makeblastdb_faa_all/6523dcafcd/result
-    |-- genes5.faa -> ../exprs/load_faa_path/d4b3f34af1/result
+    |-- db.faa.blastdb -> ../exprs/makeblastdb_faa_all/d432260851/result
+    |-- genes5.faa -> ../exprs/load_faa/81fa36fcfa/result
     |-- result -> ../vars/db.faa.blastdb
-    `-- single.faa -> ../exprs/load_faa_path/8a3c34f92b/result
+    `-- single.faa -> ../exprs/load_faa/ae9e22061f/result
 
-19 directories, 22 files
+16 directories, 19 files

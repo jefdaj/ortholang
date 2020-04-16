@@ -9,7 +9,6 @@
 |   |   `-- d77632b774
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
@@ -54,4 +53,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hits.bht
 
-27 directories, 27 files
+27 directories, 26 files

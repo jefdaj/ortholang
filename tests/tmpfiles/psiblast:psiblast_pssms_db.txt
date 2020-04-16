@@ -47,7 +47,6 @@
 |   |   `-- c33ef12b71
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
@@ -193,4 +192,4 @@
     |-- queries.faa.list -> ../exprs/split_faa/2c7651beca/result
     `-- result -> ../vars/hittable.bht
 
-104 directories, 89 files
+104 directories, 88 files

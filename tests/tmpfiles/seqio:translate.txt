@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 59da546dd5
+|   |   `-- bcde19d913
 |   |       `-- 4ddb325c30
 |   |           |-- args -> ../../../../cache/lines/...
 |   |           `-- result -> ../../../../exprs/translate/4ddb325c30/result
@@ -10,41 +10,35 @@
 |       `-- 6046a54e92.fna.ids
 |-- exprs
 |   |-- any
-|   |   `-- 122af835e6
+|   |   `-- fcad8bc1ee
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- list
 |   |   |-- 0f9147993b
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 50ac292aaf
+|   |   |-- 346922ae22
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- 9776013a41
+|   |   `-- 907e647f40
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_fna_path
-|   |   `-- f5b4fb5ab7
+|   |-- load_fna
+|   |   `-- 821d1bdfd1
 |   |       `-- result -> ../../../cache/load/6046a54e92.fna
-|   |-- load_fna_path_each
-|   |   `-- 428ef4256b
+|   |-- load_fna_each
+|   |   `-- fdb6a09bb8
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- str
 |   |   `-- ac19b3d2a1
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- to_path
-|   |   `-- 821d1bdfd1
-|   |       `-- result -> ../../../cache/lines/...
-|   |-- to_path_each
-|   |   `-- fdb6a09bb8
-|   |       `-- result -> ../../../cache/lines/...
 |   |-- translate
-|   |   |-- 4734232f6b
+|   |   |-- 494baa00c6
 |   |   |   `-- result
 |   |   `-- 4ddb325c30
 |   |       `-- result
 |   `-- translate_each
-|       `-- 9bd15bb8a9
+|       `-- 338813bea7
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- mapped.faa.list -> ../exprs/translate_each/9bd15bb8a9/result
-    |-- result -> ../exprs/any/122af835e6/result
-    `-- single.faa -> ../exprs/translate/4734232f6b/result
+    |-- mapped.faa.list -> ../exprs/translate_each/338813bea7/result
+    |-- result -> ../exprs/any/fcad8bc1ee/result
+    `-- single.faa -> ../exprs/translate/494baa00c6/result
 
-28 directories, 19 files
+24 directories, 17 files

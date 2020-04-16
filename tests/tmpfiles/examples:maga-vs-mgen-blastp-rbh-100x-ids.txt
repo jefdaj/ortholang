@@ -14,14 +14,12 @@
 |       |-- b7cb78026e
 |       |   |-- result
 |       |   |-- result.err
-|       |   |-- result.out
 |       |   |-- result.phr
 |       |   |-- result.pin
 |       |   `-- result.psq
 |       `-- d77632b774
 |           |-- result
 |           |-- result.err
-|           |-- result.out
 |           |-- result.phr
 |           |-- result.pin
 |           `-- result.psq
@@ -104,4 +102,4 @@
     |-- solidHitIDs100.str.list -> ../exprs/all/fee1fbed38/result
     `-- solidHits.bht.list -> ../exprs/repeat/9bb1dbf667/afa6e907a5/30b1953033/result
 
-53 directories, 51 files
+53 directories, 49 files

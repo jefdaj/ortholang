@@ -1,31 +1,40 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- 9f967483b0.txt -> ../../cache/lines/...
+|   |   |-- 5ae5721285.txt -> ../../cache/lines/...
 |   |   `-- emptyfna.txt -> ../../cache/lines/...
 |   |-- load
-|   |   |-- 28ce925871 -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
-|   |   `-- 97d2ef290c -> $WORKDIR/examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk
+|   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
+|   |   |-- 97d2ef290c.gbk -> $WORKDIR/examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk
+|   |   |-- a34f77fb3c.fna
+|   |   |-- a34f77fb3c.fna.ids
+|   |   |-- e9aef2b704.fna
+|   |   `-- e9aef2b704.fna.ids
 |   `-- seqio
 |-- exprs
 |   |-- concat_fna
-|   |   `-- af2b2d73cf
+|   |   `-- 9c1a9c5d69
 |   |       `-- result
-|   |-- gbk_to_fna
+|   |-- gbk_to_fna_rawids
 |   |   `-- 3feaffccb4
 |   |       |-- 1a5bb4f8e6
 |   |       |   `-- result
 |   |       `-- d3c226bec7
 |   |           `-- result
 |   |-- list
-|   |   `-- bfb4a1fb0a
+|   |   `-- 26ad013bfe
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
+|   |-- load_fna_path
+|   |   |-- 911461e51a
+|   |   |   `-- result -> ../../../cache/load/e9aef2b704.fna
+|   |   `-- fe2757ed86
+|   |       `-- result -> ../../../cache/load/a34f77fb3c.fna
 |   |-- load_gbk
 |   |   |-- b5a17d977e
-|   |   |   `-- result -> ../../../cache/load/28ce925871
+|   |   |   `-- result -> ../../../cache/load/28ce925871.gbk
 |   |   `-- edb9de8a3f
-|   |       `-- result -> ../../../cache/load/97d2ef290c
+|   |       `-- result -> ../../../cache/load/97d2ef290c.gbk
 |   `-- str
 |       |-- 90811d06ee
 |       |   `-- result -> ../../../cache/lines/...
@@ -34,6 +43,6 @@
 |       `-- fc0141ab13
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/concat_fna/af2b2d73cf/result
+    `-- result -> ../exprs/concat_fna/9c1a9c5d69/result
 
-22 directories, 14 files
+25 directories, 20 files

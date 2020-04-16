@@ -26,7 +26,6 @@
 |   |   `-- d77632b774
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
@@ -123,4 +122,4 @@
     |-- queries.faa.list -> ../exprs/split_faa/2c7651beca/result
     `-- result -> ../vars/pssms.pssm.list
 
-70 directories, 53 files
+70 directories, 52 files

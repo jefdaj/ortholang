@@ -14,14 +14,12 @@
 |       |-- b7cb78026e
 |       |   |-- result
 |       |   |-- result.err
-|       |   |-- result.out
 |       |   |-- result.phr
 |       |   |-- result.pin
 |       |   `-- result.psq
 |       `-- d77632b774
 |           |-- result
 |           |-- result.err
-|           |-- result.out
 |           |-- result.phr
 |           |-- result.pin
 |           `-- result.psq
@@ -91,4 +89,4 @@
     |-- solidHitIDs.str.list -> ../exprs/all/df467572ed/result
     `-- solidHits.bht.list -> ../exprs/repeat/9bb1dbf667/afa6e907a5/30b1953033/result
 
-46 directories, 45 files
+46 directories, 43 files

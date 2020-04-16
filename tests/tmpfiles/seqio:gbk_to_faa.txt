@@ -1,24 +1,29 @@
 .
 |-- cache
 |   |-- load
-|   |   `-- bb17ca9dfe -> $WORKDIR/examples/sequences/Mycoplasma_agalactiae_PG2.gbk
+|   |   |-- a153359962.faa
+|   |   |-- a153359962.faa.ids
+|   |   `-- bb17ca9dfe.gbk -> $WORKDIR/examples/sequences/Mycoplasma_agalactiae_PG2.gbk
 |   `-- seqio
 |-- exprs
-|   |-- gbk_to_faa
+|   |-- gbk_to_faa_rawids
 |   |   `-- 3feaffccb4
 |   |       `-- 980bd58c0d
 |   |           `-- result
 |   |-- load_faa
+|   |-- load_faa_path
+|   |   `-- e57c9feb14
+|   |       `-- result -> ../../../cache/load/a153359962.faa
 |   |-- load_gbk
 |   |   `-- 22d675da85
-|   |       `-- result -> ../../../cache/load/bb17ca9dfe
+|   |       `-- result -> ../../../cache/load/bb17ca9dfe.gbk
 |   `-- str
 |       |-- 3e6793b201
 |       |   `-- result -> ../../../cache/lines/...
 |       `-- 90811d06ee
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- maga.faa -> ../exprs/gbk_to_faa/3feaffccb4/980bd58c0d/result
+    |-- maga.faa -> ../exprs/load_faa_path/e57c9feb14/result
     `-- result -> ../vars/maga.faa
 
-14 directories, 7 files
+16 directories, 10 files

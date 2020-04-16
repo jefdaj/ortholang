@@ -3,18 +3,16 @@
 |   `-- blastdbget
 |       |-- dblist.txt
 |       |-- dblist.txt.err
-|       `-- dblist.txt.out -> $TMPDIR/cache/blastdbget/dblist.txt
+|       `-- dblist.txt.out
 |-- exprs
 |   |-- blastdblist
-|   |   `-- f547d63fe4
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |   `-- 0761203183
+|   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       `-- 072c64781f
-|           `-- 0
-|               `-- result -> ../../../../cache/lines/...
+|           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- human_dbs.str.list -> ../exprs/blastdblist/f547d63fe4/0/result
+    |-- human_dbs.str.list -> ../exprs/blastdblist/0761203183/result
     `-- result -> ../vars/human_dbs.str.list
 
-10 directories, 7 files
+8 directories, 7 files

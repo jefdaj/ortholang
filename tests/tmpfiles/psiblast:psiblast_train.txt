@@ -9,7 +9,6 @@
 |   |   `-- d77632b774
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
@@ -47,4 +46,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/pssm.pssm
 
-23 directories, 24 files
+23 directories, 23 files

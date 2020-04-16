@@ -438,10 +438,10 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- orthofinder
 |   |   `-- 286088944b
-|   |       `-- Salt 0
+|   |       `-- 0
 |   |           `-- result -> ../../../../cache/orthofinder/a2bfc27b0f/OrthoFinder/Results_/Comparative_Genomics_Statistics/Statistics_Overall.tsv
 |   |-- orthogroups
-|   |   `-- 1c57b38a07
+|   |   `-- d9a9a7afa2
 |   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 824ccbd8b2
@@ -449,8 +449,8 @@
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- ofogs.str.list.list -> ../exprs/orthogroups/1c57b38a07/result
-    |-- ofres.ofr -> ../exprs/orthofinder/286088944b/Salt 0/result
+    |-- ofogs.str.list.list -> ../exprs/orthogroups/d9a9a7afa2/result
+    |-- ofres.ofr -> ../exprs/orthofinder/286088944b/0/result
     |-- result -> ../vars/ofogs.str.list.list
     `-- smallbacteria.faa.list -> ../exprs/load_faa_each/2b302724e5/result
 

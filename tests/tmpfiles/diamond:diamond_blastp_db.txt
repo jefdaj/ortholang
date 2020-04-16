@@ -9,12 +9,12 @@
 |   |-- diamond_blastp_db
 |   |   `-- 87c44c2675
 |   |       `-- ccc25bfe26
-|   |           `-- d57a361f8f
-|   |               `-- Salt 0
+|   |           `-- 926f3e2ba1
+|   |               `-- 0
 |   |                   `-- result
 |   |-- diamond_makedb
 |   |   `-- afa6e907a5
-|   |       `-- Salt 0
+|   |       `-- 0
 |   |           `-- result
 |   |-- load_faa
 |   |   |-- 1e0498b59a
@@ -31,8 +31,8 @@
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
-    |-- mgendb.dmnd -> ../exprs/diamond_makedb/afa6e907a5/Salt 0/result
+    |-- mgendb.dmnd -> ../exprs/diamond_makedb/afa6e907a5/0/result
     |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
-    `-- result -> ../exprs/diamond_blastp_db/87c44c2675/ccc25bfe26/d57a361f8f/Salt 0/result
+    `-- result -> ../exprs/diamond_blastp_db/87c44c2675/ccc25bfe26/926f3e2ba1/0/result
 
 20 directories, 15 files

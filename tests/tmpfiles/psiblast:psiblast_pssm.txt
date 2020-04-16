@@ -11,14 +11,12 @@
 |   |   |-- c33ef12b71
 |   |   |   |-- result
 |   |   |   |-- result.err
-|   |   |   |-- result.out
 |   |   |   |-- result.phr
 |   |   |   |-- result.pin
 |   |   |   `-- result.psq
 |   |   `-- d77632b774
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
@@ -74,4 +72,4 @@
     |-- result -> ../vars/single.bht
     `-- single.bht -> ../exprs/psiblast_pssm/0c631e7663/da9c7e1778/4f0bccea88/result
 
-32 directories, 42 files
+32 directories, 40 files

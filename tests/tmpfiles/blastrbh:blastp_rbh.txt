@@ -21,14 +21,12 @@
 |       |-- c1b08194e1
 |       |   |-- result
 |       |   |-- result.err
-|       |   |-- result.out
 |       |   |-- result.phr
 |       |   |-- result.pin
 |       |   `-- result.psq
 |       `-- d77632b774
 |           |-- result
 |           |-- result.err
-|           |-- result.out
 |           |-- result.phr
 |           |-- result.pin
 |           `-- result.psq
@@ -123,4 +121,4 @@
     |-- rev1.bht -> ../exprs/blastp_db/b6d4e4cdf4/ccc25bfe26/cf9f5098fc/result
     `-- rev2.bht -> ../exprs/blastp_db/b6d4e4cdf4/ccc25bfe26/cf9f5098fc/result
 
-59 directories, 64 files
+59 directories, 62 files

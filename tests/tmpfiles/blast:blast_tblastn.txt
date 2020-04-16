@@ -1,15 +1,15 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 4d234f5830
+|   |   |-- 85a420b763
 |   |   |   `-- 0ca171042b
 |   |   |       |-- args -> ../../../../cache/lines/...
 |   |   |       `-- result -> ../../../../exprs/extract_queries/0ca171042b/result
-|   |   |-- 4f9b013a69
+|   |   |-- ad6972d0bd
 |   |   |   `-- 9c3ec12a2c
 |   |   |       |-- args -> ../../../../cache/lines/...
 |   |   |       `-- result -> ../../../../exprs/makeblastdb_fna/9c3ec12a2c/result
-|   |   `-- 7ce6c2bd5b
+|   |   `-- d65374193d
 |   |       `-- 643f998a73
 |   |           |-- args -> ../../../../cache/lines/...
 |   |           `-- result -> ../../../../exprs/tblastn_db/e10471b511/c5b21af5d4/643f998a73/result
@@ -24,51 +24,50 @@
 |           |-- result.err
 |           |-- result.nhr
 |           |-- result.nin
-|           |-- result.nsq
-|           `-- result.out
+|           `-- result.nsq
 |-- exprs
 |   |-- all
-|   |   `-- fd2f77e722
+|   |   `-- 1566507530
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- any
-|   |   `-- 723acf7420
+|   |   `-- e00a72df64
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 0ca171042b
+|   |   |-- 0c6a2ceedf
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   `-- a114bae7d2
+|   |   `-- 0ca171042b
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
-|   |   `-- d7c92e5f70
+|   |   `-- 9390304e82
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 79aefa8f45
+|   |   |-- 6b12d6586a
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 90567bc638
+|   |   |-- cbfe3497c6
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- d03075e3c1
+|   |   `-- fa0e215d4f
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- load_faa_path
-|   |   `-- d4b3f34af1
+|   |-- load_faa
+|   |   `-- 81fa36fcfa
 |   |       `-- result -> ../../../cache/load/cb3e90dc00.faa
-|   |-- load_fna_path
-|   |   `-- f5b4fb5ab7
+|   |-- load_fna
+|   |   `-- 821d1bdfd1
 |   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_fna
-|   |   |-- 9c3ec12a2c
+|   |   |-- 6b72f6b956
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- e5106a104e
+|   |   `-- 9c3ec12a2c
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_fna_each
-|   |   `-- 735be55ae7
+|   |   `-- aa26779dc0
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- singletons
-|   |   `-- e5106a104e
+|   |   `-- 6b72f6b956
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- str
 |   |   |-- ac19b3d2a1
@@ -77,28 +76,23 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- tblastn_db
 |   |   |-- b6d4e4cdf4
-|   |   |   `-- 3a5b1b5c3c
-|   |   |       `-- f71cd5e793
+|   |   |   `-- 2c7651beca
+|   |   |       `-- e8325359a2
 |   |   |           `-- result -> out
 |   |   `-- e10471b511
 |   |       `-- c5b21af5d4
 |   |           `-- 643f998a73
 |   |               `-- result -> out
-|   |-- tblastn_db_each
-|   |   `-- b6d4e4cdf4
-|   |       `-- 3a5b1b5c3c
-|   |           `-- 06f8e19a5e
-|   |               `-- result -> ../../../../../cache/lines/...
-|   `-- to_path
-|       |-- 81fa36fcfa
-|       |   `-- result -> ../../../cache/lines/...
-|       `-- 821d1bdfd1
-|           `-- result -> ../../../cache/lines/...
+|   `-- tblastn_db_each
+|       `-- b6d4e4cdf4
+|           `-- 2c7651beca
+|               `-- 8b137d0e6a
+|                   `-- result -> ../../../../../cache/lines/...
 `-- vars
-    |-- maga5.faa -> ../exprs/load_faa_path/d4b3f34af1/result
-    |-- maga.fna -> ../exprs/load_fna_path/f5b4fb5ab7/result
-    |-- mapped.str.list.list -> ../exprs/extract_queries_each/d7c92e5f70/result
-    |-- result -> ../exprs/all/fd2f77e722/result
-    `-- single.str.list -> ../exprs/extract_queries/a114bae7d2/result
+    |-- maga5.faa -> ../exprs/load_faa/81fa36fcfa/result
+    |-- maga.fna -> ../exprs/load_fna/821d1bdfd1/result
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/9390304e82/result
+    |-- result -> ../exprs/all/1566507530/result
+    `-- single.str.list -> ../exprs/extract_queries/0c6a2ceedf/result
 
-56 directories, 45 files
+53 directories, 42 files

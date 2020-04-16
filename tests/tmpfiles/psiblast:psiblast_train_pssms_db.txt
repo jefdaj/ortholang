@@ -28,7 +28,6 @@
 |   |   `-- c33ef12b71
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
@@ -131,4 +130,4 @@
     |-- queries.faa.list -> ../exprs/split_faa/2c7651beca/result
     `-- result -> ../vars/pssms.pssm.list
 
-72 directories, 59 files
+72 directories, 58 files

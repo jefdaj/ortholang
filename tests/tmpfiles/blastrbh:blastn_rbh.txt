@@ -13,16 +13,15 @@
 |   |           |-- args -> ../../../../cache/lines/...
 |   |           `-- result -> ../../../../exprs/extract_targets/b130908187/result
 |   |-- load
-|   |   |-- 6046a54e92
-|   |   `-- 6046a54e92.ids
+|   |   |-- 6046a54e92.fna
+|   |   `-- 6046a54e92.fna.ids
 |   `-- makeblastdb
-|       `-- 5d1696ca54
+|       `-- 933216e8a2
 |           |-- result
 |           |-- result.err
 |           |-- result.nhr
 |           |-- result.nin
-|           |-- result.nsq
-|           `-- result.out
+|           `-- result.nsq
 |-- exprs
 |   |-- all
 |   |   `-- e621efdcde
@@ -70,7 +69,7 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |   `-- 821d1bdfd1
-|   |       `-- result -> ../../../cache/load/6046a54e92
+|   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_fna
 |   |   `-- 6b72f6b956
 |   |       `-- result -> ../../../cache/lines/...
@@ -100,4 +99,4 @@
     |-- rev1.bht -> ../exprs/blastn_db/b6d4e4cdf4/494baa00c6/e8325359a2/result
     `-- rev2.bht -> ../exprs/blastn_db/b6d4e4cdf4/494baa00c6/e8325359a2/result
 
-50 directories, 50 files
+50 directories, 49 files

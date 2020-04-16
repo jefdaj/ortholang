@@ -1,7 +1,6 @@
 [ 
     ( Var ( RepID Nothing ) "mycoplasma" 
-    , Fun faa.list Nothing [] "load_faa_each" 
-        [ Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ] ]
+    , Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ]
     ) 
 , 
     ( Var ( RepID Nothing ) "ofres" 

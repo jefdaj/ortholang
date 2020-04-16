@@ -1,14 +1,14 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 8678d86394
-|   |   |   `-- c3c249f589
+|   |   |-- 2be93c7566
+|   |   |   `-- c5b21af5d4
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/length/c3c249f589/result
-|   |   `-- da736266bf
-|   |       `-- c5b21af5d4
+|   |   |       `-- result -> ../../../../exprs/split_faa/c5b21af5d4/result
+|   |   `-- 77bb36e48f
+|   |       `-- c3c249f589
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/split_faa/c5b21af5d4/result
+|   |           `-- result -> ../../../../exprs/length/c3c249f589/result
 |   |-- load
 |   |   |-- cb3e90dc00.faa
 |   |   `-- cb3e90dc00.faa.ids
@@ -18,20 +18,20 @@
 |       `-- c5b21af5d4
 |-- exprs
 |   |-- any
-|   |   `-- 3f4fad4d53
+|   |   `-- 59c20b5949
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- length
 |   |   `-- c3c249f589
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- length_each
-|   |   `-- 17e43dd503
+|   |   `-- c28ab4b7fd
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 04482a8d58
+|   |   |-- 9a888a401f
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 897d0d0a09
+|   |   |-- a3f3b01544
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- c6ae708820
+|   |   `-- e939f70877
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 10
@@ -52,6 +52,8 @@
 |   |   |           `-- 16
 |   |   |               `-- 2c
 |   |   |                   `-- a.faa
+|   |   |-- 81fa36fcfa
+|   |   |   `-- result -> ../../../cache/load/cb3e90dc00.faa
 |   |   |-- a0
 |   |   |   `-- 94
 |   |   |       `-- e4
@@ -64,27 +66,21 @@
 |   |               `-- 69
 |   |                   `-- 35
 |   |                       `-- 2.faa
-|   |-- load_faa_path
-|   |   `-- d4b3f34af1
-|   |       `-- result -> ../../../cache/load/cb3e90dc00.faa
 |   |-- split_faa
-|   |   |-- 3a5b1b5c3c
+|   |   |-- 2c7651beca
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- c5b21af5d4
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- split_faa_each
-|   |   `-- 5bfaaf22e2
+|   |   `-- caac7278d9
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- str
-|   |   `-- ead30046d0
-|   |       `-- result -> ../../../cache/lines/...
-|   `-- to_path
-|       `-- 81fa36fcfa
+|   `-- str
+|       `-- ead30046d0
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- genes.faa.list -> ../exprs/split_faa/3a5b1b5c3c/result
-    |-- mapped.faa.list.list -> ../exprs/split_faa_each/5bfaaf22e2/result
-    |-- multifa.faa -> ../exprs/load_faa_path/d4b3f34af1/result
-    `-- result -> ../exprs/length_each/17e43dd503/result
+    |-- genes.faa.list -> ../exprs/split_faa/2c7651beca/result
+    |-- mapped.faa.list.list -> ../exprs/split_faa_each/caac7278d9/result
+    |-- multifa.faa -> ../exprs/load_faa/81fa36fcfa/result
+    `-- result -> ../exprs/length_each/c28ab4b7fd/result
 
-60 directories, 27 files
+57 directories, 26 files

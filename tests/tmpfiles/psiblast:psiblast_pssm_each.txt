@@ -19,21 +19,18 @@
 |   |   |-- c1b08194e1
 |   |   |   |-- result
 |   |   |   |-- result.err
-|   |   |   |-- result.out
 |   |   |   |-- result.phr
 |   |   |   |-- result.pin
 |   |   |   `-- result.psq
 |   |   |-- c33ef12b71
 |   |   |   |-- result
 |   |   |   |-- result.err
-|   |   |   |-- result.out
 |   |   |   |-- result.phr
 |   |   |   |-- result.pin
 |   |   |   `-- result.psq
 |   |   `-- d77632b774
 |   |       |-- result
 |   |       |-- result.err
-|   |       |-- result.out
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
@@ -103,4 +100,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hitlists.bht.list
 
-45 directories, 58 files
+45 directories, 55 files

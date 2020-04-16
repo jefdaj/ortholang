@@ -1,49 +1,53 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 28ce925871 -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
-|   |   |-- 6046a54e92
-|   |   `-- 6046a54e92.ids
+|   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
+|   |   |-- 6046a54e92.fna
+|   |   |-- 6046a54e92.fna.ids
+|   |   |-- a34f77fb3c.fna
+|   |   `-- a34f77fb3c.fna.ids
 |   |-- makeblastdb
-|   |   `-- 1689b74166
+|   |   `-- e2c09fad14
 |   |       |-- result
 |   |       |-- result.err
 |   |       |-- result.nhr
 |   |       |-- result.nin
-|   |       |-- result.nsq
-|   |       `-- result.out
+|   |       `-- result.nsq
 |   `-- seqio
 |-- exprs
 |   |-- all
-|   |   `-- e3aa37241a
+|   |   `-- e3b82b9a9b
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_queries
-|   |   `-- f7faad9fd3
+|   |   `-- d6120bc80f
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
-|   |-- gbk_to_fna
+|   |-- gbk_to_fna_rawids
 |   |   `-- 3feaffccb4
 |   |       `-- d3c226bec7
 |   |           `-- result
 |   |-- list
-|   |   |-- 2d2163295c
+|   |   |-- bce759b836
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- f53cf7f9aa
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |   `-- 821d1bdfd1
-|   |       `-- result -> ../../../cache/load/6046a54e92
+|   |       `-- result -> ../../../cache/load/6046a54e92.fna
+|   |-- load_fna_path
+|   |   `-- fe2757ed86
+|   |       `-- result -> ../../../cache/load/a34f77fb3c.fna
 |   |-- load_gbk
 |   |   `-- b5a17d977e
-|   |       `-- result -> ../../../cache/load/28ce925871
+|   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_fna
-|   |   `-- 597d9c9d0f
+|   |   `-- bc5062d574
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- repeat
-|   |   `-- 000456371f
+|   |   `-- 02164a58c4
 |   |       `-- 494baa00c6
 |   |           `-- 723ab8a8d7
 |   |               `-- result -> ../../../../../cache/lines/...
@@ -57,15 +61,15 @@
 |   `-- tblastx_db
 |       `-- b6d4e4cdf4
 |           `-- 494baa00c6
-|               `-- 5d4176459b
+|               `-- b355c8b3ba
 |                   `-- result -> out
 |-- reps
-|   `-- d4c9f2daad
-|       |-- hits.str.list -> ../../exprs/extract_queries/f7faad9fd3/result
-|       `-- result -> ../../reps/d4c9f2daad/hits.str.list
+|   `-- fa078e3375
+|       |-- hits.str.list -> ../../exprs/extract_queries/d6120bc80f/result
+|       `-- result -> ../../reps/fa078e3375/hits.str.list
 `-- vars
     |-- genes5.fna -> ../exprs/load_fna/821d1bdfd1/result
-    |-- maga.fna -> ../exprs/gbk_to_fna/3feaffccb4/d3c226bec7/result
-    `-- result -> ../exprs/all/e3aa37241a/result
+    |-- maga.fna -> ../exprs/load_fna_path/fe2757ed86/result
+    `-- result -> ../exprs/all/e3b82b9a9b/result
 
-39 directories, 29 files
+41 directories, 31 files

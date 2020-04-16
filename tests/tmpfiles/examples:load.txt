@@ -1,6 +1,5 @@
 .
 |-- cache
-|   `-- load
 |-- exprs
 |   |-- glob_files
 |   |   `-- 497d843f47
@@ -12,4 +11,4 @@
     |-- pcc7942.str.list -> ../exprs/glob_files/497d843f47/result
     `-- result -> ../vars/pcc7942.str.list
 
-8 directories, 4 files
+7 directories, 4 files

@@ -1,20 +1,21 @@
 .
 |-- cache
 |   `-- load
-|       |-- 10ffe0cf0f
-|       `-- 10ffe0cf0f.ids
+|       |-- 10ffe0cf0f.faa
+|       `-- 10ffe0cf0f.faa.ids
 |-- exprs
 |   |-- diamond_makedb
 |   |   `-- afa6e907a5
-|   |       `-- result
+|   |       `-- 0
+|   |           `-- result
 |   |-- load_faa
 |   |   `-- cfed7edd23
-|   |       `-- result -> ../../../cache/load/10ffe0cf0f
+|   |       `-- result -> ../../../cache/load/10ffe0cf0f.faa
 |   `-- str
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
-    `-- result -> ../exprs/diamond_makedb/afa6e907a5/result
+    `-- result -> ../exprs/diamond_makedb/afa6e907a5/0/result
 
-10 directories, 7 files
+11 directories, 7 files

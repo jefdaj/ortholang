@@ -9,14 +9,12 @@
 |       |-- b7cb78026e
 |       |   |-- result
 |       |   |-- result.err
-|       |   |-- result.out
 |       |   |-- result.phr
 |       |   |-- result.pin
 |       |   `-- result.psq
 |       `-- d77632b774
 |           |-- result
 |           |-- result.err
-|           |-- result.out
 |           |-- result.phr
 |           |-- result.pin
 |           `-- result.psq
@@ -64,4 +62,4 @@
     |-- result -> ../vars/recHits.bht
     `-- revHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/afa6e907a5/b62e287c6e/result
 
-30 directories, 34 files
+30 directories, 32 files

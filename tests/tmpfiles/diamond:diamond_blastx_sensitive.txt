@@ -1,30 +1,37 @@
 .
 |-- cache
 |   |-- load
-|   |   |-- 10ffe0cf0f
-|   |   |-- 10ffe0cf0f.ids
-|   |   `-- bb17ca9dfe -> $WORKDIR/examples/sequences/Mycoplasma_agalactiae_PG2.gbk
+|   |   |-- 10ffe0cf0f.faa
+|   |   |-- 10ffe0cf0f.faa.ids
+|   |   |-- bb17ca9dfe.gbk -> $WORKDIR/examples/sequences/Mycoplasma_agalactiae_PG2.gbk
+|   |   |-- c0d0b015f9.fna
+|   |   `-- c0d0b015f9.fna.ids
 |   `-- seqio
 |-- exprs
 |   |-- diamond_blastx
 |   |   `-- 87c44c2675
-|   |       `-- 42cf2a2326
-|   |           `-- 8a3f178282
-|   |               `-- result
+|   |       `-- b6deebbe38
+|   |           `-- 926f3e2ba1
+|   |               `-- 0
+|   |                   `-- result
 |   |-- diamond_makedb
 |   |   `-- afa6e907a5
-|   |       `-- result
-|   |-- gbk_to_fna
+|   |       `-- 0
+|   |           `-- result
+|   |-- gbk_to_fna_rawids
 |   |   `-- 3feaffccb4
 |   |       `-- 980bd58c0d
 |   |           `-- result
 |   |-- load_faa
 |   |   `-- cfed7edd23
-|   |       `-- result -> ../../../cache/load/10ffe0cf0f
+|   |       `-- result -> ../../../cache/load/10ffe0cf0f.faa
 |   |-- load_fna
+|   |-- load_fna_path
+|   |   `-- 593ca3842e
+|   |       `-- result -> ../../../cache/load/c0d0b015f9.fna
 |   |-- load_gbk
 |   |   `-- 22d675da85
-|   |       `-- result -> ../../../cache/load/bb17ca9dfe
+|   |       `-- result -> ../../../cache/load/bb17ca9dfe.gbk
 |   |-- num
 |   |   `-- 6de785566e
 |   |       `-- result -> ../../../cache/lines/...
@@ -36,8 +43,8 @@
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- maga.fna -> ../exprs/gbk_to_fna/3feaffccb4/980bd58c0d/result
+    |-- maga.fna -> ../exprs/load_fna_path/593ca3842e/result
     |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
-    `-- result -> ../exprs/diamond_blastx/87c44c2675/42cf2a2326/8a3f178282/result
+    `-- result -> ../exprs/diamond_blastx/87c44c2675/b6deebbe38/926f3e2ba1/0/result
 
-25 directories, 15 files
+29 directories, 18 files
