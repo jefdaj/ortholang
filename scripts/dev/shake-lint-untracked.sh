@@ -8,8 +8,4 @@
 
 LOG=test.log
 
-egrep '(Rule|Created):' $LOG |
-  sed 's/^\s*//g' |
-  sed 's:/home.*/exprs:exprs:g' |
-  sed 's:/home.*/cache:cache:g' |
-  sed 's:Rule:\nRule:g' > shake-lint-untracked.txt
+egrep '(Key|Used|Created):' $LOG | cut -d':' -f2- | sort | uniq
