@@ -1,0 +1,5 @@
+
+[num (number in scientific notation), faa (FASTA (amino acid)),
+ list of fna (FASTA (nucleic acid))s] -> list of bht (tab-separated table of blast hits (outfmt 6))s
+
+No matching function, filetype, or module found.

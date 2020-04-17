@@ -1,0 +1,4 @@
+
+[list of faa (FASTA (amino acid))s] -> list of faa (FASTA (amino acid)) encoded as blastdbs
+
+No matching function, filetype, or module found.

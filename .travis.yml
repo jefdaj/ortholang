@@ -41,7 +41,7 @@ before_script:
 script:
   - nix-env -iA cachix -f https://cachix.org/api/v1/install
   - cachix use jefdaj || echo "cachix install failed"
-  - ./scripts/dev/test-nix.sh
+  - ./scripts/dev/test-nix.sh help
 
 notifications:
   email:

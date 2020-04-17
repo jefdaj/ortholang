@@ -1,0 +1,4 @@
+
+[str (string), gbk (genbank)] -> fna (FASTA (nucleic acid))
+
+No matching function, filetype, or module found.

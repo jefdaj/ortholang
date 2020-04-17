@@ -127,9 +127,9 @@ getOS = return $ if os == "darwin" then "mac" else os
 -- TODO use a safe read function with locks here?
 getDoc :: [FilePath] -> IO String
 getDoc docPaths = do
-  paths' <- mapM (\p -> getDataFileName ("docs" </> p <.> "txt") >>= absolutize) docPaths
+  paths' <- mapM (\p -> getDataFileName ("docs" </> p <.> "txt") >>= absolutize) $ docPaths ++ ["notfound"]
   tests <- mapM doesFileExist paths'
-  let path' = head [p | (p, t) <- zip paths' tests, t]
+  let path' = head [p | (p, t) <- zip paths' tests, t] -- TODO remove head?
   -- putStrLn $ "path':" ++ path'
   -- this should only happen during development:
   -- written <- doesFileExist path'

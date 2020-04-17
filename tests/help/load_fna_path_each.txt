@@ -1,0 +1,4 @@
+
+[list of str (string)s] -> fna (FASTA (nucleic acid)).list
+
+No matching function, filetype, or module found.

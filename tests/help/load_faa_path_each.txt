@@ -1,0 +1,4 @@
+
+[list of str (string)s] -> faa (FASTA (amino acid)).list
+
+No matching function, filetype, or module found.

@@ -1,0 +1,4 @@
+
+[list of str (string)s] -> list of fna (FASTA (nucleic acid)) encoded as blastdbs
+
+No matching function, filetype, or module found.

@@ -1,0 +1,4 @@
+
+[str (string), list of gbk (genbank)s] -> list of fna (FASTA (nucleic acid))s
+
+No matching function, filetype, or module found.

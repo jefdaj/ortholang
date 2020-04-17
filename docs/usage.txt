@@ -18,7 +18,7 @@ Options:
                      intermediate files.
                      [default: ~/.ortholang]
   --config CONFIG    Load any/all of these options from a config file.
-                     [default: ~/.ortholang/config]
+                     [default: ~/.ortholang/ortholang.cfg]
   --workdir WORKDIR  Working directory and start point for relative paths.
                      [default: .]
   --wrapper WRAPPER  Script to wrap arbitrary system commands. Use this to

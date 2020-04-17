@@ -262,7 +262,7 @@ help cfg line = case words line of
            , fmap mHelp $ findModule   cfg w
            , fmap (tHelp cfg) $ findType cfg w
            -- TODO fix this , fmap (tHelp cfg) $ findGroup cfg w
-           , Just $ getDoc ["notfound"]
+           , Just $ getDoc ["notfound"] -- TODO remove?
            ]
   _ -> getDoc ["repl"]
 

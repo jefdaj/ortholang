@@ -1,0 +1,4 @@
+
+[str (string), list of gbk (genbank)s] -> list of faa (FASTA (amino acid))s
+
+No matching function, filetype, or module found.
