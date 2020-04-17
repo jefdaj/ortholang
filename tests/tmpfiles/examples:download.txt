@@ -1,7 +1,8 @@
 .
 |-- cache
 |   |-- curl
-|   |   `-- 2857224b49
+|   |   |-- 2857224b49
+|   |   `-- 2857224b49.err
 |   `-- load
 |       |-- 46d3084751.fna
 |       `-- 46d3084751.fna.ids
@@ -16,4 +17,4 @@
     |-- result -> ../vars/samplefa.fna
     `-- samplefa.fna -> ../exprs/load_fna/39cfbdcad3/result
 
-9 directories, 7 files
+9 directories, 8 files
