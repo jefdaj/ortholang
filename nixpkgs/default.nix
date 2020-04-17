@@ -7,17 +7,17 @@ let
   # see https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
   # to update the the sha256sum:
   # nix-prefetch-url --unpack https://github.com/jefdaj/nixpkgs/archive/<rev>.tar.gz
-  # pkgs = let
-  #   inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
-  # in import (fetchFromGitHub {
-  #   owner  = "jefdaj";
-  #   repo   = "nixpkgs";
-  #   rev    = "2020-02-01_ortholang";
-  #   sha256 = "1sxicczxc3hdjyrbhmg3dvmkq2q6dzqyrv272ksxvgr8vfamdd2h";
-  # }) {};
+  pkgs = let
+    inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
+  in import (fetchFromGitHub {
+    owner  = "jefdaj";
+    repo   = "nixpkgs";
+    rev    = "c0233c5230bdd8bcc2d2261e7ce76fd134c5fc73";
+    sha256 = "11wxbannq6s30l75b5kjklfsxh21gaac337jnsri1gd4dbph6x9w";
+  }) {};
 
-  # use this instead to try to build it with your system's current nixpkgs:
-  pkgs = import /home/user/nixpkgs {};
+  # use this instead to try to uild it with your system's current nixpkgs:
+  # pkgs = import /home/user/nixpkgs {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
