@@ -41,13 +41,14 @@ export TASTY_QUICKCHECK_SHOW_REPLAY=True
 TEST_ARGS="--debug '.*' --test $TEST_FILTER"
 
 # test using shared cache first because it's faster
-bin-run --shared http://shortcut.pmb.berkeley.edu/shared $TEST_ARGS
-code1="$?"
+# TODO put back once server is back up
+# bin-run --shared http://shortcut.pmb.berkeley.edu/shared $TEST_ARGS
+# code1="$?"
 
 # then locally to verify everything really works
 bin-run $TEST_ARGS
 code2="$?"
 
 # exit nonzero if either run failed
-[[ $code1 == 0 ]] || exit $code1
+# [[ $code1 == 0 ]] || exit $code1
 exit $code2
