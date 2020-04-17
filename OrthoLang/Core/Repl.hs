@@ -30,18 +30,15 @@ import Control.Monad.IO.Class   (liftIO, MonadIO)
 import Control.Monad.State.Lazy (get, put)
 import Data.Char                (isSpace)
 import Data.List                (isPrefixOf, isSuffixOf, filter, delete)
-import Data.List.Split          (splitOn)
 import Data.List.Utils          (delFromAL)
-import Data.Maybe               (catMaybes)
--- import Data.Map.Strict                 (empty)
 import Prelude           hiding (print)
+import OrthoLang.Core.Help      (help, renderTypeSig)
 import OrthoLang.Core.Eval       (evalScript)
 import OrthoLang.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
 import OrthoLang.Core.Types
 import OrthoLang.Core.Pretty     (pPrint, render, pPrintHdl, writeScript)
 import OrthoLang.Util       (absolutize, stripWhiteSpace, justOrDie, headOrDie)
-import OrthoLang.Core.Config     (showConfigField, setConfigField, getDoc)
--- import System.Command           (runCommand, waitForProcess)
+import OrthoLang.Core.Config     (showConfigField, setConfigField)
 import System.Process           (runCommand, waitForProcess)
 import System.IO                (Handle, hPutStrLn, stdout)
 import System.Directory         (doesFileExist)
@@ -255,59 +252,6 @@ cmdHelp st@(_, cfg, _, _, _) hdl line = do
   doc <- help cfg line
   hPutStrLn hdl doc >> return st
 
-help :: Config -> String -> IO String
-help cfg line = case words line of
-  [w] -> headOrDie "failed to look up cmdHelp content" $ catMaybes
-           [ fmap fHelp $ findFunction cfg w
-           , fmap mHelp $ findModule   cfg w
-           , fmap (tHelp cfg) $ findType cfg w
-           -- TODO fix this , fmap (tHelp cfg) $ findGroup cfg w
-           , Just $ getDoc ["notfound"] -- TODO remove?
-           ]
-  _ -> getDoc ["repl"]
-
-mHelp :: Module -> IO String
-mHelp m = getDoc ["modules" </> mName m]
-
--- TODO move somewhere better
-fHelp :: Function -> IO String
-fHelp f = do
-  doc <- getDoc ["functions" </> fName f]
-  let msg = "\n" ++ renderTypeSig f ++ "\n\n" ++ doc
-  return msg
-
--- TODO move somewhere better
-tHelp :: Config -> Type -> IO String
-tHelp cfg t = do
-  doc <- getDoc ["types" </> tExtOf t]
-  let msg = "The ." ++ tExtOf t ++ " extension is for " ++ descOf t ++ " files.\n\n"
-            ++ doc ++ "\n\n"
-            ++ tFnList
-  return msg
-  where
-    outputs = listFunctionTypesWithOutput cfg t
-    inputs  = listFunctionTypesWithInput  cfg t
-    tFnList = unlines
-                 $ ["You can create them with these functions:"]
-                ++ outputs
-                ++ ["", "And use them with these functions:"]
-                ++ inputs
-
--- TODO move somewhere better
-listFunctionTypesWithInput :: Config -> Type -> [String]
-listFunctionTypesWithInput cfg cType = filter matches descs
-  where
-    -- TODO match more carefully because it should have to be an entire word
-    matches d = (tExtOf cType) `elem` (words $ headOrDie "listFuncionTypesWithInput failed" $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
-    descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions cfg)
-
--- TODO move somewhere better
-listFunctionTypesWithOutput :: Config -> Type -> [String]
-listFunctionTypesWithOutput cfg cType = filter matches descs
-  where
-    matches d = (tExtOf cType) `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
-    descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions cfg)
-
 -- TODO this is totally duplicating code from putAssign; factor out
 -- TODO should it be an error for the new script not to play well with an existing one?
 cmdLoad :: GlobalEnv -> Handle -> String -> IO GlobalEnv
@@ -395,10 +339,6 @@ cmdType st@(scr, cfg, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
       Just f  -> renderTypeSig f
       Nothing -> showExprType st e -- TODO also show the expr itself?
     allTypes = init $ unlines $ map showAssignType scr
-
--- TODO move somewhere. Pretty?
-renderTypeSig :: Function -> String
-renderTypeSig f = render (pPrint $ fInputs f) ++ " -> " ++ render (pPrint $ fOutput f)
 
 -- TODO insert id?
 showExprType :: GlobalEnv -> String -> String

@@ -127,6 +127,7 @@ library
                     OrthoLang.Core.Parse.Util,
                     OrthoLang.Core.Paths,
                     OrthoLang.Core.Pretty,
+                    OrthoLang.Core.Help,
                     OrthoLang.Core.Repl,
                     OrthoLang.Core.Sanitize,
                     OrthoLang.Core.Types,

@@ -32,6 +32,8 @@ import Control.Monad         (when)
 import Data.List (isPrefixOf)
 import GHC.Conc (getNumProcessors)
 
+import Data.Maybe (listToMaybe, fromJust)
+
 {- The logging module keeps its own state in an IORef, so no need to include
  - this in the main OrthoLang config below.
  - TODO still put all the config stuff in Config though, and make it changable in the repl!
@@ -125,19 +127,22 @@ getOS = return $ if os == "darwin" then "mac" else os
 
 -- TODO any way to recover if missing? probably not
 -- TODO use a safe read function with locks here?
-getDoc :: [FilePath] -> IO String
+getDoc :: [FilePath] -> IO String -- TODO IO (Maybe String)?
 getDoc docPaths = do
-  paths' <- mapM (\p -> getDataFileName ("docs" </> p <.> "txt") >>= absolutize) $ docPaths ++ ["notfound"]
+  paths' <- mapM (\p -> getDataFileName ("docs" </> p <.> "txt") >>= absolutize) $ docPaths
   tests <- mapM doesFileExist paths'
+  -- let path' = listToMaybe [p | (p, t) <- zip paths' tests, t] -- TODO remove head?
   let path' = head [p | (p, t) <- zip paths' tests, t] -- TODO remove head?
   -- putStrLn $ "path':" ++ path'
   -- this should only happen during development:
   -- written <- doesFileExist path'
   -- when (not written) $ writeFile path' $ "write " ++ docPath ++ " doc here"
+  -- mapM readFile path'
   doc <- readFile path'
   return doc
 
 getUsage :: IO Docopt
+-- getUsage = getDoc ["usage"] >>= parseUsageOrExit . fromJust
 getUsage = getDoc ["usage"] >>= parseUsageOrExit
 
 -- hasArg :: Arguments -> String -> Bool
