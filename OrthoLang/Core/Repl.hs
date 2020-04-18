@@ -1,7 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 -- TODO no welcome if going to load a file + clear the screen anyway
-
 -- TODO could simplify to the same code everywhere except you pass the handle (file vs stdout)?
 
 -- Based on:
@@ -12,9 +9,52 @@
 -- TODO you should be able to write comments in the REPL
 
 module OrthoLang.Core.Repl
-  -- ( mkRepl
-  -- , runRepl
-  -- )
+  (
+
+  -- * Used in main
+    runRepl
+
+  -- * Used in tests
+  , mkRepl
+  , ReplM
+  , promptArrow
+
+  -- * Implementation details
+  , clear
+  , cmdBang
+  , cmdConfig
+  , cmdDrop
+  , cmdHelp
+  , cmdLoad
+  , cmdNeededBy
+  , cmdNeeds
+  , cmdQuit
+  , cmdReload
+  , cmdShow
+  , cmdType
+  , cmdWrite
+  , cmds
+  , depsOnly
+  , dereference
+  , loop
+  , myComplete
+  , nakedCompletions
+  , prompt
+  , quotedCompletions
+  , removeSelfReferences
+  , replSettings2
+  , replaceVar
+  , runCmd
+  , runReplM
+  , runStatement
+  , saveScript
+  , shortPrompt
+  , showAssignType
+  , showExprType
+  , step
+  , updateVars
+
+  )
   where
 
 import Prelude                  hiding (print)
@@ -49,12 +89,12 @@ import System.Process             (runCommand, waitForProcess)
 -- Repl monad --
 ----------------
 
-type ReplM  = StateT GlobalEnv IO
+type ReplM = StateT GlobalEnv IO
 
-runReplM :: GlobalEnv -> InputT ReplM (Maybe String) -> IO GlobalEnv
-runReplM st@(_, cfg, _, _, _) myLoop = execStateT (runInputT settings myLoop) st
-  where
-    settings = replSettings2 cfg
+runReplM :: InputT ReplM (Maybe String) -> GlobalEnv -> IO ()
+runReplM myLoop st@(_, cfg, _, _, _) = do
+  _ <- execStateT (runInputT (replSettings2 cfg) myLoop) st
+  return ()
 
 prompt :: String -> InputT ReplM (Maybe String)
 prompt = getInputLine
@@ -66,36 +106,25 @@ prompt = getInputLine
 clear :: IO ()
 clear = clearScreen >> cursorUp 1000
 
+welcome :: Handle -> IO ()
+welcome hdl = hPutStrLn hdl
+  "Welcome to the OrthoLang interpreter!\n\
+  \Type :help for a list of the available commands."
+
 runRepl :: GlobalEnv -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in OrthoLang/Core/Repl/Tests.hs
--- mkRepl :: [(String -> ReplM (Maybe String))] -> Handle -> GlobalEnv -> IO ()
+-- TODO separate script from rest of GlobalEnv
 mkRepl :: [String -> InputT ReplM (Maybe String)] -> Handle -> GlobalEnv -> IO ()
 mkRepl promptFns hdl (_, cfg, ref, ids, dRef) = do
-  -- load initial script if any
-  let s0 = (emptyScript, cfg, ref, ids, dRef)
-  st <- case cfgScript cfg of
-          Nothing -> do
-            clear
-            hPutStrLn hdl
-              "Welcome to the OrthoLang interpreter!\n\
-              \Type :help for a list of the available commands."
-            return s0
-          Just path -> cmdLoad s0 hdl path
-  -- run repl with initial state
-  -- runReplM (replSettings st) (loop promptFns hdl) st
-  -- return ()
-  _ <- runReplM st (loop promptFns hdl)
-  return ()
+  let st = (emptyScript, cfg, ref, ids, dRef)
+  st' <- case cfgScript cfg of
+          Nothing -> clear >> welcome hdl >> return st
+          Just path -> cmdLoad st hdl path
+  runReplM (loop promptFns hdl) st'
 
--- promptArrow = " --‣ "
--- promptArrow = " ❱❱❱ "
--- promptArrow = " --❱ "
--- promptArrow = " ⋺  "
--- promptArrow = " >> "
--- promptArrow = "-> "
 promptArrow :: String
 promptArrow = " —▶ "
 
@@ -205,6 +234,7 @@ dereference scr var (Lst t vs   es   ) = Lst t (delete var vs)   (map (dereferen
 -- dispatch to commands --
 --------------------------
 
+-- TODO can this use tab completion?
 runCmd :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 runCmd st@(_, cfg, _, _, _) hdl line = case matches of
   [(_, fn)] -> fn st hdl $ stripWhiteSpace args

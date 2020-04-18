@@ -152,13 +152,6 @@ runRulesR env act = runReaderT act env
 -- runRulesR2 :: RulesEnv2 -> RulesR2 a -> Rules (a, DigestMap)
 -- runRulesR2 env act = runStateT (runReaderT act env) emptyDigests -- (runReaderT act env)
 
--- TODO use useFile(Handle) for stdin?
--- TODO use getExternalPrint to safely print during Tasty tests!
--- runReplM :: Settings IO -> ReplM a -> GlobalEnv -> IO (Maybe GlobalEnv)
--- runReplM settings replm state =
-  -- runInputT settings $ runMaybeT $ execStateT replm state
-
-
 -- Filename extension, which in OrthoLang is equivalent to variable type
 -- TODO can this be done better with phantom types?
 -- data Ext = ListOf Ext | Ext String
