@@ -34,7 +34,7 @@ import qualified Data.Map.Strict   as M
 -- import qualified Text.Regex as R
 
 import Development.Shake
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 
 import OrthoLang.Util    (digest, digestLength, headOrDie)
 import OrthoLang.Locks   (withWriteLock')

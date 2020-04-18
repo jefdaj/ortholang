@@ -11,6 +11,7 @@ module OrthoLang.Modules.PsiBlast where
 
 import Development.Shake
 
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Modules.BlastDB    (pdb)
 import OrthoLang.Modules.Blast      (bht)

@@ -3,6 +3,7 @@ module OrthoLang.Modules.Math where
 import Development.Shake
 import Prelude hiding (log)
 import OrthoLang.Debug
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import qualified OrthoLang.Util as U
 

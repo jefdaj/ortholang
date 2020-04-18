@@ -2,7 +2,9 @@ module OrthoLang.Test.Repl where
 
 -- TODO could the mock repl be implemented more cleanly with Haskeline's Behaviors?
 
-import OrthoLang.Interpreter
+import OrthoLang.Types
+import OrthoLang.Types
+import OrthoLang.Interpreter (mkRepl, toGeneric, promptArrow)
 import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Util         (readFileStrict)
 

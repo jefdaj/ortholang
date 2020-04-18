@@ -156,7 +156,7 @@ module OrthoLang.Interpreter.Paths
   where
 
 import OrthoLang.Errors
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 
 import Data.Maybe                     (maybeToList)
 import Data.List                      (intersperse, isInfixOf, isPrefixOf)

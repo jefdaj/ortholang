@@ -31,6 +31,7 @@ TODO test operator precedence
 
 module OrthoLang.Test.Parse where
 
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Test.Parse.Arbitrary
 import OrthoLang.Test.Parse.Examples

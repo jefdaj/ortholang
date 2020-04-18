@@ -5,6 +5,7 @@ module OrthoLang.Modules.Busco
 -- TODO add old datasets? maybe no need
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Modules.Curl (curl)
 import OrthoLang.Modules.Load (mkLoad)
@@ -13,7 +14,6 @@ import Control.Monad             (when)
 import Data.List                 ((\\))
 import Data.Maybe                (isJust, fromJust)
 import Data.Scientific           (Scientific)
-import OrthoLang.Interpreter            (resolveSymlinks, unlessExists, headOrDie)
 import OrthoLang.Modules.BlastDB (aFilterList)
 import OrthoLang.Modules.SeqIO   (fna, faa, mkConcat)
 import System.Directory          (createDirectoryIfMissing)

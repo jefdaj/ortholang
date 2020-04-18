@@ -4,6 +4,7 @@ import qualified Control.Concurrent.Thread.Delay as D
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Lazy.Char8      as B8
 
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Locks (withWriteLockEmpty)
 import OrthoLang.Util   (justOrDie, rmAll)

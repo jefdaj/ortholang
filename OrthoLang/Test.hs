@@ -6,7 +6,7 @@ module OrthoLang.Test
   where
 
 import OrthoLang.Debug
-import OrthoLang.Interpreter
+import OrthoLang.Types
 
 import OrthoLang.Test.Repl   (mkTestGroup)
 import Paths_OrthoLang       (getDataFileName)

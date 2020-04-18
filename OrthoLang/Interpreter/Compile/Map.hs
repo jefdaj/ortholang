@@ -41,7 +41,7 @@ import OrthoLang.Debug
 import Development.Shake
 import OrthoLang.Interpreter.Compile.Basic
 import OrthoLang.Interpreter.Compile.Simple
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import Text.PrettyPrint.HughesPJClass
 
 import Data.List                  (intersperse)

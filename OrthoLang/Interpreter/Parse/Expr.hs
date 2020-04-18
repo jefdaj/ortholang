@@ -34,7 +34,7 @@ module OrthoLang.Interpreter.Parse.Expr
 
 import Prelude hiding (error)
 import OrthoLang.Debug
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import OrthoLang.Interpreter.Pretty ()
 import OrthoLang.Interpreter.Parse.Basic
 import OrthoLang.Interpreter.Parse.Util

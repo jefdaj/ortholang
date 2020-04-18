@@ -15,6 +15,7 @@ module OrthoLang.Modules.Load
   where
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 
 import qualified Data.Map.Strict as M

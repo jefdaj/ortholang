@@ -23,9 +23,9 @@ module OrthoLang.Interpreter
   , NewAction2
   , NewAction3
   , newRules
-  , Function(..)
-  , FnTag(..)
-  , NewRules(..)
+  -- , Function(..)
+  -- , FnTag(..)
+  -- , NewRules(..)
   , MacroExpansion
   , addDigest
   , decodeNewRulesType
@@ -49,13 +49,13 @@ module OrthoLang.Interpreter
   , escapeChars
   , literalChars
   , ParseM
-  , ReplM
-  , DigestsRef
+  -- , ReplM
+  -- , DigestsRef
   , toGeneric
   , promptArrow
   , mkRepl
   , parseFileIO
-  , emptyScript
+  -- , emptyScript
   , pQuoted
   , pNum
   , pFunName
@@ -70,51 +70,51 @@ module OrthoLang.Interpreter
   , parseWithEof -- TODO move to Test/Parse?
 
   -- * Old module API: Types
-  , Action1
-  , Action2
-  , Action3
-  , Assign
+--   , Action1
+--   , Action2
+--   , Action3
+--   , Assign
   , CmdDesc(..)
-  , Config(..)
-  , Expr(..)
-  , ExprPath(..)
-  , GlobalEnv
-  , IDs(..)
-  , IDsRef
-  , LocksRef
-  , Module(..)
-  , Path(..)
+--   , Config(..)
+--   , Expr(..)
+--   , ExprPath(..)
+--   , GlobalEnv
+--   , IDs(..)
+--   , IDsRef
+--   , LocksRef
+--   , Module(..)
+--   , Path(..)
   , Pretty
-  , RepID(..)
-  , ResPath(..)
-  , RulesFn
-  , Salt(..)
-  , Script
-  , Type(..)
-  , Encoding(..)
-  , TypeGroup(..)
-  , TypeSig(..)
-  -- , TypeChecker
-  , Var(..)
-  , VarPath(..)
-  -- , askConfig
-  -- , askLocks
-  , defaultShow
-  , depsOf
-  , tExtOf
-  , extractExprs
-  , lookupIDsFile
-  -- , lookupHashesFile
-  , mkTypeDesc
-  , num
-  , saltOf
-  , setSalt
-  , str
-  , lit
-  , typeOf
+--   , RepID(..)
+--   , ResPath(..)
+--   , RulesFn
+--   , Salt(..)
+--   , Script
+--   , Type(..)
+--   , Encoding(..)
+--   , TypeGroup(..)
+--   , TypeSig(..)
+--   -- , TypeChecker
+--   , Var(..)
+--   , VarPath(..)
+--   -- , askConfig
+--   -- , askLocks
+--   , defaultShow
+--   , depsOf
+--   , tExtOf
+--   , extractExprs
+--   , lookupIDsFile
+--   -- , lookupHashesFile
+--   , mkTypeDesc
+--   , num
+--   , saltOf
+--   , setSalt
+--   , str
+--   , lit
+--   , typeOf
 
   -- * Old module API: Actions
-  , CompiledExpr(..)
+  -- , CompiledExpr(..)
   , absolutizePaths
   , cachedLinesPath
   , debugA
@@ -210,7 +210,6 @@ import OrthoLang.Interpreter.Compile.NewRules
 import OrthoLang.Interpreter.Paths
 import OrthoLang.Interpreter.Pretty
 import OrthoLang.Interpreter.Sanitize
-import OrthoLang.Interpreter.Types
 import OrthoLang.Interpreter.Parse
 import OrthoLang.Interpreter.Parse.Util
 import OrthoLang.Interpreter.Repl hiding (runCmd) -- TODO disambiguate

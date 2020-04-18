@@ -13,7 +13,7 @@ module OrthoLang.Interpreter.Compile.Map2
   where
 
 import Development.Shake
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import OrthoLang.Interpreter.Paths
 import OrthoLang.Util (digest)
 import Control.Monad (forM_)

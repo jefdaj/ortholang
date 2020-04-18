@@ -14,7 +14,7 @@ module OrthoLang.Interpreter.Compile.Compose
 import Prelude hiding (error)
 import OrthoLang.Debug (error)
 
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import OrthoLang.Interpreter.Parse.Expr (typecheckFn) -- TODO move somewhere else
 import OrthoLang.Interpreter.Compile.NewRules
 import Control.DeepSeq

@@ -2,6 +2,7 @@ module OrthoLang.Modules.Muscle
   where
 
 -- import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Modules.SeqIO (faa)
 

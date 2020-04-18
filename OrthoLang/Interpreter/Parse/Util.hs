@@ -25,7 +25,7 @@ module OrthoLang.Interpreter.Parse.Util
   where
 
 import OrthoLang.Debug
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import OrthoLang.Util (headOrDie)
 
 import Development.Shake.FilePath (makeRelative)

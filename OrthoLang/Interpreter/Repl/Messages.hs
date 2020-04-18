@@ -20,7 +20,7 @@ module OrthoLang.Interpreter.Repl.Messages
   where
 
 import Prelude hiding (print)
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import System.Console.Haskeline
 import qualified Data.Map.Strict as M
 

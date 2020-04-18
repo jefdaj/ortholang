@@ -11,7 +11,7 @@ module OrthoLang.Interpreter.Repl.Help
   )
   where
 
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 
 import OrthoLang.Interpreter.Config (getDoc)
 import OrthoLang.Interpreter.Pretty -- (pPrint, render)

@@ -1,6 +1,7 @@
 module OrthoLang.Test.Help where
 
-import OrthoLang.Interpreter
+import OrthoLang.Types
+import OrthoLang.Interpreter (help)
 import qualified Data.ByteString.Lazy.Char8 as B8
 
 import Data.Char              (toLower)

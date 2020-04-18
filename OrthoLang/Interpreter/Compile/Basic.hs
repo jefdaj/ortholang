@@ -50,7 +50,7 @@ import Prelude hiding (error)
 
 import OrthoLang.Debug
 import Development.Shake
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import OrthoLang.Interpreter.Pretty
 
 import Data.List              (isPrefixOf)

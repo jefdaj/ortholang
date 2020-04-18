@@ -28,6 +28,7 @@ module OrthoLang.Test.Parse.Arbitrary where
 -- TODO email test function to jakewheatmail@gmail.com?
 
 import Data.Scientific
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import Test.QuickCheck
 

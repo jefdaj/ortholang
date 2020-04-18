@@ -5,6 +5,7 @@ module OrthoLang.Modules.Diamond
 -- TODO can't just cat the .dmnd files!
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Locks
 

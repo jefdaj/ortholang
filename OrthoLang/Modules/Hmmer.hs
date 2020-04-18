@@ -2,6 +2,7 @@ module OrthoLang.Modules.Hmmer
   where
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 
 import Data.Scientific          (formatScientific, FPFormat(..))

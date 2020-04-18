@@ -132,7 +132,7 @@ library
                     OrthoLang.Interpreter.Repl.Messages,
                     OrthoLang.Interpreter.Repl.Actions,
                     OrthoLang.Interpreter.Sanitize,
-                    OrthoLang.Interpreter.Types,
+                    OrthoLang.Types,
                     OrthoLang.Debug,
                     OrthoLang.Errors,
                     OrthoLang.Util,

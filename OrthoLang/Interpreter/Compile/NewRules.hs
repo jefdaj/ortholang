@@ -77,7 +77,7 @@ import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
 import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..))
 import OrthoLang.Interpreter.Sanitize (readIDs)
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import System.Exit (ExitCode(..))
 
 import Control.Monad              (when)

@@ -31,7 +31,7 @@ module OrthoLang.Interpreter.Parse.Basic
 -- TODO hold up, is Logging missing a bunch of NOINLINE statements?
 
 import OrthoLang.Debug
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import qualified Data.Map.Strict as M
 
 import Control.Applicative    ((<|>), many)

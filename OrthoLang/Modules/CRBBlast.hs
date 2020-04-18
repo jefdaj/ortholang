@@ -3,6 +3,7 @@ module OrthoLang.Modules.CRBBlast where
 -- TODO expose the e-value cutoff, since it is an option?
 --      does it make a difference?
 
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import Development.Shake
 

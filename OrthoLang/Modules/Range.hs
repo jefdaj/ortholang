@@ -4,6 +4,7 @@ module OrthoLang.Modules.Range
   where
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 
 import System.Exit     (ExitCode(..))

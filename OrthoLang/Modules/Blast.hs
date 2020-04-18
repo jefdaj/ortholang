@@ -13,6 +13,7 @@ module OrthoLang.Modules.Blast
 -- TODO can i reuse most of this code for DIAMOND?
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Modules.SeqIO   (faa, fna, mkConcat, mkConcatEach)
 import OrthoLang.Modules.BlastDB (blastdb)

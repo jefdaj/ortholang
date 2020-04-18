@@ -12,6 +12,7 @@ module OrthoLang.Modules.OrthoGroups
   where
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 
 import OrthoLang.Modules.SeqIO         (faa)

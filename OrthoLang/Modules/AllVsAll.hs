@@ -5,6 +5,7 @@ module OrthoLang.Modules.AllVsAll
 --      but should you bother since it also might not be needed for the greencut algorithm?
 
 -- import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Modules.SeqIO (faa)
 

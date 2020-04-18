@@ -19,6 +19,7 @@ module OrthoLang.Modules.MMSeqs
 --      (that can be done but requires a separate script with a few steps)
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Locks
 

@@ -61,7 +61,7 @@ module OrthoLang.Interpreter.Actions
 import Prelude hiding (readList, error)
 import OrthoLang.Debug
 import Development.Shake hiding (doesFileExist)
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 -- import OrthoLang.Interpreter.Config (debug)
 
 import Control.Monad              (when)

@@ -24,7 +24,7 @@ module OrthoLang.Interpreter.Repl.Actions
 
 import Prelude hiding (print)
 
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import OrthoLang.Interpreter.Eval          (evalScript)
 import OrthoLang.Interpreter.Parse         (isExpr, parseStatement, parseFile)
 import OrthoLang.Interpreter.Pretty        (pPrintHdl, writeScript)

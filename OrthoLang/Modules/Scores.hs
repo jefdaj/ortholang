@@ -10,17 +10,14 @@ module OrthoLang.Modules.Scores where
  -}
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 
 import Control.Monad (when)
-import OrthoLang.Interpreter (readStrings, readLits, writeLits, debugA)
-import OrthoLang.Interpreter (rExpr, debugRules)
-import OrthoLang.Interpreter         (Path, toPath, fromPath, exprPath)
 import Data.Maybe (fromJust)
 
--- import OrthoLang.Interpreter  (rMap)
+-- import OrthoLang.Types  (rMap)
 import OrthoLang.Modules.BlastHits (aCutCol)
-import OrthoLang.Interpreter (rSimple)
 
 dbg :: String -> String -> Action ()
 dbg name = debugA ("ortholang.modules.scores." ++ name)

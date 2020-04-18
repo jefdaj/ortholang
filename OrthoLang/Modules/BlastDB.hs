@@ -10,8 +10,9 @@ module OrthoLang.Modules.BlastDB where
 
 import Development.Shake
 
-import OrthoLang.Interpreter
+import OrthoLang.Types
 import OrthoLang.Locks
+import OrthoLang.Interpreter
 import OrthoLang.Modules.SeqIO      (faa, fna)
 import OrthoLang.Modules.Singletons (withSingletons, withSingletonArg)
 

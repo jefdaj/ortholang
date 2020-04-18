@@ -2,6 +2,7 @@ module OrthoLang.Modules.BlastRBH where
 
 import Development.Shake
 
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Interpreter.Compile as C
 import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs, mkBlastFromFa, aMkBlastFromDb)

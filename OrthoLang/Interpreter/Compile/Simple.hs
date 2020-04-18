@@ -23,7 +23,7 @@ import OrthoLang.Interpreter.Compile.NewRules
 import Prelude hiding (error)
 import OrthoLang.Debug
 import Development.Shake
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 
 import OrthoLang.Interpreter.Paths (cacheDir, exprPath, toPath,
                             fromPath, Path)

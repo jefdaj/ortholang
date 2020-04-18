@@ -1,12 +1,10 @@
 module OrthoLang.Modules.Summarize where
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 
-import OrthoLang.Interpreter (exprPath, fromPath)
-import OrthoLang.Interpreter      (rExpr)
-import OrthoLang.Interpreter (readLits, writeLits, traceA, need')
--- import OrthoLang.Interpreter (traceA)
+-- import OrthoLang.Types (traceA)
 import Development.Shake.FilePath ((</>))
 import Data.Maybe (fromJust)
 

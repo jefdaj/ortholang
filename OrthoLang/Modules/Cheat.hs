@@ -35,8 +35,8 @@
 module OrthoLang.Modules.Cheat where
 
 import Development.Shake
--- import OrthoLang.Interpreter (typeError)
-import OrthoLang.Interpreter
+-- import OrthoLang.Types (typeError)
+import OrthoLang.Types
 
 olModule :: Module
 olModule = Module

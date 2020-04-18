@@ -21,12 +21,13 @@ module OrthoLang.Modules.BioMartR where
 --      2. feed search table to biomartr cmd along with fn name
 
 -- import OrthoLang.Modules.Blast (gom) -- TODO fix that/deprecate
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import Development.Shake
 import OrthoLang.Modules.SeqIO (fna, faa)
--- import OrthoLang.Interpreter (readLits, writeLits, traceA, need', runCmd, CmdDesc(..))
--- import OrthoLang.Interpreter  (exprPath, Path, toPath, fromPath)
--- import OrthoLang.Interpreter (rExpr)
+-- import OrthoLang.Types (readLits, writeLits, traceA, need', runCmd, CmdDesc(..))
+-- import OrthoLang.Types  (exprPath, Path, toPath, fromPath)
+-- import OrthoLang.Types (rExpr)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
@@ -37,7 +38,7 @@ import Data.List (intercalate)
 import Data.Either (partitionEithers)
 import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
--- import OrthoLang.Interpreter   (traceA)
+-- import OrthoLang.Types   (traceA)
 import System.Directory (createDirectoryIfMissing)
 import System.Exit (ExitCode(..))
 

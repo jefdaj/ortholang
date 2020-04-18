@@ -26,7 +26,7 @@ module OrthoLang.Interpreter.Expand
   where
 
 import OrthoLang.Debug (trace)
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 
 expandMacros :: Config -> Script -> Script
 expandMacros = eScript

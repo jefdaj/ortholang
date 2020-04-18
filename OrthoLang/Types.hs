@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module OrthoLang.Interpreter.Types
+module OrthoLang.Types
   (
   -- * Types and Newtypes
     Path(..)

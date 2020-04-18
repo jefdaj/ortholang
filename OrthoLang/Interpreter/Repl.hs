@@ -34,7 +34,7 @@ module OrthoLang.Interpreter.Repl
 
 import Prelude hiding (print)
 
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import OrthoLang.Interpreter.Repl.Actions
 import OrthoLang.Interpreter.Repl.Messages
 

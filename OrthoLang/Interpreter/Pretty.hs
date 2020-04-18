@@ -19,7 +19,7 @@ module OrthoLang.Interpreter.Pretty
 import Prelude hiding ((<>))
 import Data.Scientific            (Scientific(), toBoundedInteger)
 -- import Development.Shake.FilePath ((</>))
-import OrthoLang.Interpreter.Types
+import OrthoLang.Types
 import OrthoLang.Interpreter.Config (showConfig)
 import Text.PrettyPrint.HughesPJClass
 import System.Console.Terminal.Size (Window(..), size)

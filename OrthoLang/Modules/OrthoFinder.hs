@@ -6,6 +6,7 @@ module OrthoLang.Modules.OrthoFinder
 -- TODO try DIAMOND, MMseqs2
 
 import Development.Shake
+import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Locks
 

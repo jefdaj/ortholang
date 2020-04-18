@@ -1,5 +1,6 @@
 module OrthoLang.Modules.NewRulesTest where
 
+import OrthoLang.Types
 import OrthoLang.Interpreter
 -- import Development.Shake
 import OrthoLang.Modules.SeqIO (faa)
