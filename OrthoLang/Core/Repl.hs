@@ -49,23 +49,25 @@ import Data.IORef               (readIORef)
 import Development.Shake.FilePath (takeFileName)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
 import Control.Monad.State.Strict (StateT, execStateT, evalStateT, lift)
+-- import Control.Monad.Fail
 
 -----------------
 -- Repl monad --
 ----------------
 
-type ReplM a = StateT GlobalEnv (MaybeT (InputT IO)) a
-type ReplM2  = StateT GlobalEnv IO
+-- type ReplM a = StateT GlobalEnv (MaybeT (InputT IO)) a
+type ReplM  = StateT GlobalEnv IO
 
 -- TODO use useFile(Handle) for stdin?
 -- TODO use getExternalPrint to safely print during Tasty tests!
-runReplM :: Settings IO -> ReplM a -> GlobalEnv -> IO (Maybe GlobalEnv)
-runReplM settings replm state =
-  runInputT settings $ runMaybeT $ execStateT replm state
+-- runReplM :: Settings IO -> ReplM a -> GlobalEnv -> IO (Maybe GlobalEnv)
+-- runReplM settings replm state =
+--   runInputT settings $ runMaybeT $ execStateT replm state
 
+myComplete2 :: CompletionFunc ReplM
 myComplete2 = undefined
 
-replSettings2 :: Config -> Settings ReplM2
+replSettings2 :: Config -> Settings ReplM
 replSettings2 cfg = Settings
   { complete       = myComplete2
   , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
@@ -74,15 +76,22 @@ replSettings2 cfg = Settings
 
 -- the (Maybe String) part is completely unnecessary (could be `a`),
 -- but I'm trying to fit it into the existing code for ReplM
--- runReplM2 :: InputT ReplM2 (Maybe String) -> GlobalEnv -> IO (Maybe String)
+-- runReplM :: InputT ReplM (Maybe String) -> GlobalEnv -> IO (Maybe String)
 -- TODO think through the mock function since that's the complicated part now
-runReplM2 :: GlobalEnv -> InputT ReplM2 () -> IO ()
-runReplM2 st@(_, cfg, _, _, _) myLoop = evalStateT (runInputT settings myLoop) st
+runReplM :: GlobalEnv -> InputT ReplM (Maybe String) -> IO GlobalEnv
+runReplM st@(_, cfg, _, _, _) myLoop = execStateT (runInputT settings myLoop) st
   where
     settings = replSettings2 cfg
 
-prompt :: String -> ReplM (Maybe String)
-prompt = lift . lift . getInputLine
+-- prompt :: String -> ReplM (Maybe String)
+-- prompt :: MonadException m => String -> InputT m (Maybe String)
+-- prompt = getInputLine
+
+prompt :: String -> InputT ReplM (Maybe String)
+prompt = getInputLine
+
+-- instance MonadFail (InputT ReplM) where
+  -- fail = undefined
 
 -------------------
 -- main interface --
@@ -96,19 +105,23 @@ runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in OrthoLang/Core/Repl/Tests.hs
-mkRepl :: [(String -> ReplM (Maybe String))] -> Handle -> GlobalEnv -> IO ()
-mkRepl promptFns hdl st@(_, cfg, ref, ids, dRef) = do
+-- mkRepl :: [(String -> ReplM (Maybe String))] -> Handle -> GlobalEnv -> IO ()
+mkRepl :: [String -> InputT ReplM (Maybe String)] -> Handle -> GlobalEnv -> IO ()
+mkRepl promptFns hdl (_, cfg, ref, ids, dRef) = do
   -- load initial script if any
+  let s0 = (emptyScript, cfg, ref, ids, dRef)
   st <- case cfgScript cfg of
           Nothing -> do
             clear
             hPutStrLn hdl
               "Welcome to the OrthoLang interpreter!\n\
               \Type :help for a list of the available commands."
-            return  (emptyScript, cfg, ref, ids, dRef)
-          Just path -> cmdLoad (emptyScript, cfg, ref, ids, dRef) hdl path
+            return s0
+          Just path -> cmdLoad s0 hdl path
   -- run repl with initial state
-  runReplM (replSettings st) (loop promptFns hdl) st
+  -- runReplM (replSettings st) (loop promptFns hdl) st
+  -- return ()
+  _ <- runReplM st (loop promptFns hdl)
   return ()
 
 -- promptArrow = " --‣ "
@@ -147,18 +160,25 @@ shortPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command
 --
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
-loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
+-- loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
 -- loop [] hdl = get >>= \st -> liftIO (runCmd st hdl "quit") >> return ()
-loop [] _ = return ()
+-- loop :: [String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
+-- loop :: [Handle -> String -> String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
+loop :: [String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
+loop [] _ = return Nothing
 loop (promptFn:promptFns) hdl = do
-  st@(_, cfg, _, _, _)  <- get
-  Just line <- promptFn $ shortPrompt cfg -- TODO can this fail?
-  st' <- liftIO $ try $ step st hdl line
-  case st' of
-    Right s -> put s >> loop promptFns hdl
-    Left (SomeException e) -> do
-      liftIO $ hPutStrLn hdl $ show e
-      return () -- TODO *only* return if it's QuitRepl; ignore otherwise
+  st@(_, cfg, _, _, _)  <- lift $ get
+  mLine <- promptFn $ shortPrompt cfg
+  st' <- liftIO $ step st hdl mLine -- TODO what kind of lift is appropriate here?
+  lift $ put st'
+  loop promptFns hdl
+
+  -- st' <- liftIO $ try $ step st hdl line
+  -- case st' of
+    -- Right s -> lift (put s) >> loop promptFns hdl
+    -- Left (SomeException e) -> do
+      -- liftIO $ hPutStrLn hdl $ show e
+      -- return () -- TODO *only* return if it's QuitRepl; ignore otherwise
 
 -- handler :: Handle -> SomeException -> IO (Maybe a)
 -- handler hdl e = hPutStrLn hdl ("error! " ++ show e) >> return Nothing
@@ -177,12 +197,14 @@ instance Show QuitRepl where
 -- Attempts to process a line of input, but prints an error and falls back to
 -- the current state if anything goes wrong. This should eventually be the only
 -- place exceptions are caught.
-step :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-step st hdl line = case stripWhiteSpace line of
-  ""        -> return st
-  ('#':_  ) -> return st
-  (':':cmd) -> runCmd st hdl cmd
-  statement -> runStatement st hdl statement
+step :: GlobalEnv -> Handle -> Maybe String -> IO GlobalEnv
+step st hdl mLine = case mLine of
+  Nothing -> return st
+  Just line -> case stripWhiteSpace line of
+    ""        -> return st
+    ('#':_  ) -> return st
+    (':':cmd) -> runCmd st hdl cmd
+    statement -> runStatement st hdl statement
 
 -- TODO insert ids
 runStatement :: GlobalEnv -> Handle -> String -> IO GlobalEnv

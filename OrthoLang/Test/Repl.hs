@@ -19,6 +19,8 @@ import System.Process             (cwd, readCreateProcess, shell)
 import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
 
+import System.Console.Haskeline hiding (catch)
+
 mkTestGroup ::  Config -> LocksRef -> IDsRef -> DigestsRef -> String
             -> [Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree] -> IO TestTree
 mkTestGroup cfg ref ids dRef name trees = do
@@ -40,7 +42,8 @@ extractPrompted prompt session = inputs
 -- For golden testing of REPL sessions. It takes a string with a line of text
 -- to inject, then a prompt string like the regular prompt fn. Only injects one
 -- line; map it over a list to simulate more.
-mockPrompt :: Handle -> String -> String -> ReplM (Maybe String)
+-- mockPrompt :: Handle -> String -> String -> ReplM (Maybe String)
+mockPrompt :: Handle -> String -> String -> InputT ReplM (Maybe String)
 mockPrompt handle stdinStr promptStr = do
   liftIO $ hPutStrLn handle $ promptStr ++ stdinStr
   return $ return stdinStr
