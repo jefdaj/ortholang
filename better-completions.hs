@@ -6,19 +6,29 @@ monad! Disentangling stuff from the rest of the Repl is too hard though, so
 I'll start by mocking up what I want with some of the same types. It should
 allow access to GlobalEnv via get (StateT), or maybe ask (ReaderT with IORef).
 Probably ask though since the Repl uses StateT already.
-
-I'll start from the working example in the Haddocks, then try to make it get
-completions changed during the program run.
 -}
 
 import System.Console.Haskeline
 import Control.Monad.State.Strict -- note: no MonadException instance for Lazy!
-import Data.List (nub)
+import Data.List (nub, isPrefixOf)
 
--- list of words to complete, which we should be able to add to from inside the repl
+-- list of words to complete, which we can add to from inside the repl
 type MyState = [String]
 
 type MyMonad = StateT MyState IO
+
+myComplete :: CompletionFunc MyMonad
+myComplete = completeWord Nothing " " listWords
+
+listWords :: String -> MyMonad [Completion]
+listWords s = do
+  ws <- get
+  let ws' = filter (s `isPrefixOf`) ws
+      cs  = map simpleCompletion ws'
+  return cs
+
+mySettings :: Settings MyMonad
+mySettings = setComplete myComplete defaultSettings
 
 loop :: InputT MyMonad ()
 loop = do
@@ -34,4 +44,4 @@ loop = do
          loop
 
 main :: IO ()
-main = evalStateT (runInputT defaultSettings loop) []
+main = evalStateT (runInputT mySettings loop) []
