@@ -11,25 +11,23 @@ I'll start from the working example in the Haddocks, then try to make it get
 completions changed during the program run.
 -}
 
-import OrthoLang.Core.Types
-import OrthoLang.Core.Repl
 import System.Console.Haskeline
-
-type MockState = [String]
+import Control.Monad.State.Strict -- note: no MonadException instance for Lazy!
 
 -- list of words to complete, which we should be able to add to from inside the repl
-mock :: MockState
-mock = []
+type MyState = [String]
 
+type MyMonad = StateT MyState IO
+
+loop :: InputT MyMonad ()
+loop = do
+   minput <- getInputLine "% "
+   case minput of
+       Nothing -> return ()
+       Just "quit" -> return ()
+       Just input -> do
+         outputStrLn $ "words: " ++ show (words input)
+         loop
 
 main :: IO ()
-main = runInputT defaultSettings loop
-   where
-       loop :: InputT IO ()
-       loop = do
-           minput <- getInputLine "% "
-           case minput of
-               Nothing -> return ()
-               Just "quit" -> return ()
-               Just input -> do outputStrLn $ "Input was: " ++ input
-                                loop
+main = evalStateT (runInputT defaultSettings loop) []
