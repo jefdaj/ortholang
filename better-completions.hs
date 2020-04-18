@@ -13,6 +13,7 @@ completions changed during the program run.
 
 import System.Console.Haskeline
 import Control.Monad.State.Strict -- note: no MonadException instance for Lazy!
+import Data.List (nub)
 
 -- list of words to complete, which we should be able to add to from inside the repl
 type MyState = [String]
@@ -26,7 +27,10 @@ loop = do
        Nothing -> return ()
        Just "quit" -> return ()
        Just input -> do
-         outputStrLn $ "words: " ++ show (words input)
+         oldWords <- lift $ get
+         let newWords = nub $ oldWords ++ words input
+         outputStrLn $ "state: " ++ show newWords
+         lift $ put newWords
          loop
 
 main :: IO ()
