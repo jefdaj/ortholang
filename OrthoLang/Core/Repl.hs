@@ -100,7 +100,7 @@ mkRepl promptFns hdl (_, cfg, ref, ids, dRef) = do
   let st = (emptyScript, cfg, ref, ids, dRef)
   st' <- case cfgScript cfg of
           Nothing -> welcome hdl >> return st
-          Just path -> cmdLoad st hdl path >> cmdShow st hdl []
+          Just path -> cmdLoad st hdl path -- >> cmdShow st hdl []
   runReplM (replSettings2 cfg) (loop promptFns hdl) st'
 
 -- There are four types of input we might get, in the order checked for:
@@ -121,6 +121,10 @@ mkRepl promptFns hdl (_, cfg, ref, ids, dRef) = do
 -- The weird list of prompt functions allows mocking stdin for golded testing.
 -- (No need to mock print because stdout can be captured directly)
 --
+-- The `(Maybe String)` is for signaling the end of user input. `Nothing` comes
+-- through if the user actually types :quit during their REPL session, or when
+-- the last input promptFn from a Golden test has been used.
+--
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
 loop :: [String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
@@ -128,7 +132,7 @@ loop [] _ = return Nothing
 loop (promptFn:promptFns) hdl = do
   st@(_, cfg, _, _, _)  <- lift $ get
   mLine <- promptFn $ shortPrompt cfg
-  st' <- liftIO $ step st hdl mLine -- TODO what kind of lift is appropriate here?
+  st' <- liftIO $ step st hdl mLine
   lift $ put st'
   loop promptFns hdl
 

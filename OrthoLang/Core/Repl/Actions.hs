@@ -13,6 +13,7 @@ import OrthoLang.Core.Eval   (evalScript)
 import OrthoLang.Core.Parse  (isExpr, parseExpr, parseStatement, parseFile)
 import OrthoLang.Core.Pretty (pPrint, render, pPrintHdl, writeScript)
 import OrthoLang.Util        (absolutize, stripWhiteSpace, justOrDie, headOrDie)
+import OrthoLang.Core.Repl.Messages (cmdShow)
 
 import Control.Exception.Safe     (Exception, Typeable, throw)
 import Control.Monad              (when)
@@ -47,9 +48,7 @@ cmdLoad st@(scr, cfg, ref, ids, dRef) hdl path = do
       new <- parseFile (scr, cfg', ref, ids, dRef) path' -- TODO insert ids
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
-        -- TODO put this back? not sure if it makes repl better
-        Right s -> return st -- cmdShow (s, cfg', ref, ids, dRef) hdl ""
-        -- Right s -> return (s, cfg', ref, ids, dRef)
+        Right s -> clear >> cmdShow (s, cfg', ref, ids, dRef) hdl ""
 
 cmdReload :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdReload st@(_, cfg, _, _, _) hdl _ = case cfgScript cfg of
@@ -103,7 +102,7 @@ cmdNeeds st@(scr, cfg, _, _, _) hdl var = do
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdDrop (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { cfgScript = Nothing }, ref, ids, dRef) -- TODO drop ids too?
+cmdDrop (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { cfgScript = Nothing }, ref, ids, dRef)
 cmdDrop st@(scr, cfg, ref, ids, dRef) hdl var = do
   let v = Var (RepID Nothing) var
   case lookup v scr of
