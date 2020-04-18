@@ -1,35 +1,42 @@
 module OrthoLang.Core.Repl.Actions
+  (
+
+  -- * Repl commands
+    cmdDrop
+  , cmdLoad
+  , cmdNeededBy
+  , cmdNeeds
+  , cmdReload
+  , cmdWrite
+
+  -- * Implementation details
+  , clear
+  , depsOnly
+  , removeSelfReferences
+  , replaceVar
+  , rmRef
+  , runStatement
+  , saveScript
+  , updateVars
+
+  )
   where
 
-import Prelude                  hiding (print)
-
-import qualified Data.Map.Strict as M
-
-import OrthoLang.Core.Repl.Help   (help, renderTypeSig)
+import Prelude hiding (print)
 
 import OrthoLang.Core.Types
-import OrthoLang.Core.Config (showConfigField, setConfigField)
-import OrthoLang.Core.Eval   (evalScript)
-import OrthoLang.Core.Parse  (isExpr, parseExpr, parseStatement, parseFile)
-import OrthoLang.Core.Pretty (pPrint, render, pPrintHdl, writeScript)
-import OrthoLang.Util        (absolutize, stripWhiteSpace, justOrDie, headOrDie)
+import OrthoLang.Core.Eval          (evalScript)
+import OrthoLang.Core.Parse         (isExpr, parseStatement, parseFile)
+import OrthoLang.Core.Pretty        (pPrintHdl, writeScript)
 import OrthoLang.Core.Repl.Messages (cmdShow)
+import OrthoLang.Util               (absolutize, justOrDie)
 
-import Control.Exception.Safe     (Exception, Typeable, throw)
-import Control.Monad              (when)
-import Control.Monad.IO.Class     (liftIO)
-import Data.Char                  (isSpace)
-import Data.IORef                 (readIORef)
-import Data.List                  (isPrefixOf, isSuffixOf, filter, delete)
-import Data.List.Utils            (delFromAL)
-import Development.Shake.FilePath (takeFileName)
-import System.Console.ANSI        (clearScreen, cursorUp)
-import System.Directory           (doesFileExist)
-import System.FilePath.Posix      ((</>))
-import System.IO                  (Handle, hPutStrLn, stdout)
-import System.Process             (runCommand, waitForProcess)
-import System.Console.Haskeline hiding (catch)
-import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
+import Control.Monad       (when)
+import Data.List           (filter, delete)
+import Data.List.Utils     (delFromAL)
+import System.Console.ANSI (clearScreen, cursorUp)
+import System.Directory    (doesFileExist)
+import System.IO           (Handle, hPutStrLn)
 
 clear :: IO ()
 clear = clearScreen >> cursorUp 1000
@@ -82,15 +89,8 @@ cmdNeededBy :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeededBy st@(scr, cfg, _, _, _) hdl var = do
   case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    -- Just e  -> prettyAssigns hdl (\(v,_) -> elem v $ (Var Nothing var):depsOf e) scr
     Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
   return st
-
--- TODO move to Pretty.hs
--- prettyAssigns :: Handle -> (Assign -> Bool) -> Script -> IO ()
--- prettyAssigns hdl fn scr = do
-  -- txt <- renderIO $ pPrint $ filter fn scr
-  -- hPutStrLn hdl txt
 
 cmdNeeds :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdNeeds st@(scr, cfg, _, _, _) hdl var = do
@@ -139,15 +139,15 @@ replaceVar a1@(v1, _) = map $ \a2@(v2, _) -> if v1 == v2 then a1 else a2
 -- by replacing the reference with its value at that point
 -- TODO forbid this in scripts though
 removeSelfReferences :: Script -> Assign -> Assign
-removeSelfReferences s a@(v, e) = if not (v `elem` depsOf e) then a else (v, dereference s v e)
+removeSelfReferences s a@(v, e) = if not (v `elem` depsOf e) then a else (v, rmRef s v e)
 
 -- does the actual work of removing self-references
-dereference :: Script -> Var -> Expr -> Expr
-dereference scr var e@(Ref _ _ _ v2)
-  | var == v2 = justOrDie "failed to dereference variable!" $ lookup var scr
+rmRef :: Script -> Var -> Expr -> Expr
+rmRef scr var e@(Ref _ _ _ v2)
+  | var == v2 = justOrDie "failed to rmRef variable!" $ lookup var scr
   | otherwise = e
-dereference _   _   e@(Lit _ _) = e
-dereference _   _   (Com _) = error "implement this! or rethink?"
-dereference scr var (Bop  t ms vs s e1 e2) = Bop  t ms (delete var vs) s (dereference scr var e1) (dereference scr var e2)
-dereference scr var (Fun  t ms vs s es   ) = Fun  t ms (delete var vs) s (map (dereference scr var) es)
-dereference scr var (Lst t vs   es   ) = Lst t (delete var vs)   (map (dereference scr var) es)
+rmRef _   _   e@(Lit _ _) = e
+rmRef scr var (Bop  t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)
+rmRef scr var (Fun  t ms vs s es   ) = Fun t ms (delete var vs) s (map (rmRef scr var) es)
+rmRef scr var (Lst t vs       es   ) = Lst t    (delete var vs)   (map (rmRef scr var) es)
+rmRef _   _   (Com _) = error "implement this! or rethink?"

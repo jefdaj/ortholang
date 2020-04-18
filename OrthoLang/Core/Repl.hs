@@ -16,81 +16,46 @@ module OrthoLang.Core.Repl
 
   -- * Used in tests
   , mkRepl
+  , help
   , ReplM
   , promptArrow
 
   -- * Implementation details
-  , help
-  , clear
   , cmdBang
   , cmdConfig
-  , cmdDrop
-  , cmdHelp
-  , cmdLoad
-  , cmdNeededBy
-  , cmdNeeds
   , cmdQuit
-  , cmdReload
-  , cmdShow
-  , cmdType
-  , cmdWrite
   , cmds
-  , depsOnly
-  , dereference
   , loop
-  , myComplete
-  , nakedCompletions
-  , prompt
-  , quotedCompletions
-  , removeSelfReferences
   , replSettings2
-  , replaceVar
   , runCmd
-  , runReplM
-  , runStatement
-  , saveScript
-  , shortPrompt
-  , showAssignType
-  , showExprType
   , step
-  , updateVars
-
   )
   where
 
-import Prelude                  hiding (print)
-
-import qualified Data.Map.Strict as M
+import Prelude hiding (print)
 
 import OrthoLang.Core.Types
-import OrthoLang.Core.Config (showConfigField, setConfigField)
-import OrthoLang.Core.Eval   (evalScript)
-import OrthoLang.Core.Repl.Help   (help, renderTypeSig)
-import OrthoLang.Core.Pretty (pPrintHdl)
-import OrthoLang.Util        (stripWhiteSpace, headOrDie)
-
 import OrthoLang.Core.Repl.Actions
 import OrthoLang.Core.Repl.Messages
 
+import OrthoLang.Core.Config    (showConfigField, setConfigField)
+import OrthoLang.Core.Pretty    (pPrintHdl)
+import OrthoLang.Core.Repl.Help (help)
+import OrthoLang.Util           (stripWhiteSpace, headOrDie)
+
 import Control.Exception.Safe     (Exception, Typeable, throw)
 import Control.Monad.IO.Class     (liftIO)
+import Control.Monad.State.Strict (lift, get, put)
 import Data.Char                  (isSpace)
 import Data.List                  (isPrefixOf, filter)
+import System.Console.Haskeline   (Settings(..), InputT, getInputLine)
 import System.FilePath.Posix      ((</>))
 import System.IO                  (Handle, hPutStrLn, stdout)
 import System.Process             (runCommand, waitForProcess)
-import System.Console.Haskeline hiding (catch)
-import Control.Monad.State.Strict (lift, get, put)
 
-prompt :: String -> InputT ReplM (Maybe String)
-prompt = getInputLine
-
--------------------
--- main interface --
---------------------
-
+-- | Main entry point for running the REPL
 runRepl :: GlobalEnv -> IO ()
-runRepl = mkRepl (repeat prompt) stdout
+runRepl = mkRepl (repeat getInputLine) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in OrthoLang/Core/Repl/Tests.hs
@@ -136,17 +101,6 @@ loop (promptFn:promptFns) hdl = do
   lift $ put st'
   loop promptFns hdl
 
--- TODO move to Types.hs
--- TODO use this pattern for other errors? or remove?
-
-data QuitRepl = QuitRepl
-  deriving Typeable
-
-instance Exception QuitRepl
-
-instance Show QuitRepl where
-  show QuitRepl = "Bye for now!"
-
 -- Attempts to process a line of input, but prints an error and falls back to
 -- the current state if anything goes wrong. This should eventually be the only
 -- place exceptions are caught.
@@ -158,10 +112,6 @@ step st hdl mLine = case mLine of
     ('#':_  ) -> return st
     (':':cmd) -> runCmd st hdl cmd
     statement -> runStatement st hdl statement
-
---------------------------
--- dispatch to commands --
---------------------------
 
 -- TODO can this use tab completion?
 runCmd :: GlobalEnv -> Handle -> String -> IO GlobalEnv
@@ -175,6 +125,8 @@ runCmd st@(_, cfg, _, _, _) hdl line = case matches of
 
 cmds :: Config -> [(String, ReplCmd)]
 cmds cfg =
+  if cfgSecure cfg then [] else [("!", cmdBang)] -- TODO :shell instead?
+  ++
   [ ("help"     , cmdHelp    )
   , ("load"     , cmdLoad    )
   , ("write"    , cmdWrite   ) -- TODO do more people expect 'save' or 'write'?
@@ -187,16 +139,26 @@ cmds cfg =
   , ("quit"     , cmdQuit    )
   , ("config"   , cmdConfig  )
   ]
-  ++ if cfgSecure cfg then [] else [("!", cmdBang)]
 
 -- TODO does this one need to be a special case now?
 cmdQuit :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdQuit _ _ _ = throw QuitRepl
--- cmdQuit _ _ _ = ioError $ userError "Bye for now!"
+
+-- TODO move to Types.hs
+-- TODO use this pattern for other errors? or remove?
+
+data QuitRepl = QuitRepl
+  deriving Typeable
+
+instance Exception QuitRepl
+
+instance Show QuitRepl where
+  show QuitRepl = "Bye for now!"
 
 cmdBang :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 
+-- TODO move most of this to Config?
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
 cmdConfig :: GlobalEnv -> Handle -> String -> IO GlobalEnv
@@ -214,6 +176,7 @@ cmdConfig st@(scr, cfg, ref, ids, dRef) hdl s = do
                  cfg' <- iocfg'
                  return (scr, cfg', ref, ids, dRef)
 
+-- TODO move to Config? Types?
 replSettings2 :: Config -> Settings ReplM
 replSettings2 cfg = Settings
   { complete       = myComplete $ cmds cfg

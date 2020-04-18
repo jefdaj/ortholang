@@ -1,25 +1,40 @@
 module OrthoLang.Core.Repl.Messages
+  (
+
+  -- * Repl commands
+    cmdHelp
+  , cmdShow
+  , cmdType
+
+  -- * Implementation details
+  , myComplete
+  , nakedCompletions
+  , promptArrow
+  , quotedCompletions
+  , shortPrompt
+  , showAssignType
+  , showExprType
+  , welcome
+
+  )
   where
 
+import Prelude hiding (print)
 import OrthoLang.Core.Types
-import System.IO                  (Handle, hPutStrLn, stdout)
-import Prelude                  hiding (print)
-import System.Console.Haskeline hiding (catch)
-
+import System.Console.Haskeline
 import qualified Data.Map.Strict as M
 
-import OrthoLang.Core.Repl.Help   (help, renderTypeSig)
-
-import OrthoLang.Core.Types
-import OrthoLang.Core.Parse  (parseExpr)
-import OrthoLang.Core.Pretty (pPrint, render, pPrintHdl)
-import OrthoLang.Util        (stripWhiteSpace, headOrDie)
+import OrthoLang.Core.Parse     (parseExpr)
+import OrthoLang.Core.Pretty    (pPrint, render, pPrintHdl)
+import OrthoLang.Core.Repl.Help (help, renderTypeSig)
+import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 
 import Control.Monad.IO.Class     (liftIO)
 import Control.Monad.State.Strict (get)
 import Data.IORef                 (readIORef)
 import Data.List                  (isPrefixOf, isSuffixOf, filter)
-import Development.Shake.FilePath (takeFileName)
+import System.FilePath            (takeFileName)
+import System.IO                  (Handle, hPutStrLn)
 
 welcome :: Handle -> IO ()
 welcome hdl = hPutStrLn hdl
@@ -85,12 +100,26 @@ cmdShow st@(scr, cfg, _, _, _) hdl var = do
 -- tab completion --
 --------------------
 
+-- this is mostly lifted from Haskeline's completeFile
+-- TODO clean up cfg, cmds stuff
+myComplete :: [(String, ReplCmd)] -> CompletionFunc ReplM
+myComplete cmds
+  = completeQuotedWord   escChars quotes quotedCompletions
+  $ completeWordWithPrev escChars (quotes ++ filenameWordBreakChars)
+  $ nakedCompletions cmds
+  where
+    escChars = Just '\\'
+    quotes = "\"\""
+
 -- complete things in quotes: filenames, seqids
 quotedCompletions :: String -> ReplM [Completion]
 quotedCompletions wordSoFar = do
   (_, _, _, idRef, _) <- get
   files  <- listFiles wordSoFar
-  seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $ fmap M.elems $ fmap (M.unions . M.elems . hSeqIDs) $ liftIO $ readIORef idRef
+  seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $
+            fmap M.elems $
+            fmap (M.unions . M.elems . hSeqIDs) $
+            liftIO $ readIORef idRef
   let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
   return $ files ++ seqIDs'
 
@@ -107,14 +136,3 @@ nakedCompletions cmds lineReveresed wordSoFar = do
       typeExts = map tExtOf $ concatMap mTypes $ cfgModules cfg
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
   return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
-
--- this is mostly lifted from Haskeline's completeFile
--- TODO clean up cfg, cmds stuff
-myComplete :: [(String, ReplCmd)] -> CompletionFunc ReplM
-myComplete cmds
-  = completeQuotedWord   escChars quotes quotedCompletions
-  $ completeWordWithPrev escChars (quotes ++ filenameWordBreakChars)
-  $ nakedCompletions cmds
-  where
-    escChars = Just '\\'
-    quotes = "\"\""
