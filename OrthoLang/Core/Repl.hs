@@ -9,12 +9,7 @@
 -- https://github.com/goldfirere/glambda
 
 -- TODO prompt to remove any bindings dependent on one the user is changing
---      hey! just store a list of vars referenced as you go too. much easier!
---      will still have to do that recursively.. don't try until after lab meeting
-
 -- TODO you should be able to write comments in the REPL
--- TODO why doesn't prettyShow work anymore? what changed??
--- TODO should be able to :reload the current script, if any
 
 module OrthoLang.Core.Repl
   -- ( mkRepl
@@ -22,76 +17,47 @@ module OrthoLang.Core.Repl
   -- )
   where
 
-import qualified Data.Map.Strict as M
+import Prelude                  hiding (print)
 import System.Console.Haskeline hiding (catch)
 
-import Control.Monad            (when)
-import Control.Monad.IO.Class   (liftIO, MonadIO)
-import Control.Monad.State.Lazy (get, put)
-import Data.Char                (isSpace)
-import Data.List                (isPrefixOf, isSuffixOf, filter, delete)
-import Data.List.Utils          (delFromAL)
-import Prelude           hiding (print)
-import OrthoLang.Core.Help      (help, renderTypeSig)
-import OrthoLang.Core.Eval       (evalScript)
-import OrthoLang.Core.Parse      (isExpr, parseExpr, parseStatement, parseFile)
+import qualified Data.Map.Strict as M
+
 import OrthoLang.Core.Types
-import OrthoLang.Core.Pretty     (pPrint, render, pPrintHdl, writeScript)
-import OrthoLang.Util       (absolutize, stripWhiteSpace, justOrDie, headOrDie)
-import OrthoLang.Core.Config     (showConfigField, setConfigField)
-import System.Process           (runCommand, waitForProcess)
-import System.IO                (Handle, hPutStrLn, stdout)
-import System.Directory         (doesFileExist)
-import System.FilePath.Posix    ((</>))
-import Control.Exception.Safe   (Typeable, throw, try)
-import System.Console.ANSI      (clearScreen, cursorUp)
-import Data.IORef               (readIORef)
+import OrthoLang.Core.Config (showConfigField, setConfigField)
+import OrthoLang.Core.Eval   (evalScript)
+import OrthoLang.Core.Help   (help, renderTypeSig)
+import OrthoLang.Core.Parse  (isExpr, parseExpr, parseStatement, parseFile)
+import OrthoLang.Core.Pretty (pPrint, render, pPrintHdl, writeScript)
+import OrthoLang.Util        (absolutize, stripWhiteSpace, justOrDie, headOrDie)
+
+import Control.Exception.Safe     (Typeable, throw)
+import Control.Monad              (when)
+import Control.Monad.IO.Class     (liftIO)
+import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
+import Data.Char                  (isSpace)
+import Data.IORef                 (readIORef)
+import Data.List                  (isPrefixOf, isSuffixOf, filter, delete)
+import Data.List.Utils            (delFromAL)
 import Development.Shake.FilePath (takeFileName)
-import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
-import Control.Monad.State.Strict (StateT, execStateT, evalStateT, lift)
--- import Control.Monad.Fail
+import System.Console.ANSI        (clearScreen, cursorUp)
+import System.Directory           (doesFileExist)
+import System.FilePath.Posix      ((</>))
+import System.IO                  (Handle, hPutStrLn, stdout)
+import System.Process             (runCommand, waitForProcess)
 
 -----------------
 -- Repl monad --
 ----------------
 
--- type ReplM a = StateT GlobalEnv (MaybeT (InputT IO)) a
 type ReplM  = StateT GlobalEnv IO
 
--- TODO use useFile(Handle) for stdin?
--- TODO use getExternalPrint to safely print during Tasty tests!
--- runReplM :: Settings IO -> ReplM a -> GlobalEnv -> IO (Maybe GlobalEnv)
--- runReplM settings replm state =
---   runInputT settings $ runMaybeT $ execStateT replm state
-
-myComplete2 :: CompletionFunc ReplM
-myComplete2 = undefined
-
-replSettings2 :: Config -> Settings ReplM
-replSettings2 cfg = Settings
-  { complete       = myComplete2
-  , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
-  , autoAddHistory = True
-  }
-
--- the (Maybe String) part is completely unnecessary (could be `a`),
--- but I'm trying to fit it into the existing code for ReplM
--- runReplM :: InputT ReplM (Maybe String) -> GlobalEnv -> IO (Maybe String)
--- TODO think through the mock function since that's the complicated part now
 runReplM :: GlobalEnv -> InputT ReplM (Maybe String) -> IO GlobalEnv
 runReplM st@(_, cfg, _, _, _) myLoop = execStateT (runInputT settings myLoop) st
   where
     settings = replSettings2 cfg
 
--- prompt :: String -> ReplM (Maybe String)
--- prompt :: MonadException m => String -> InputT m (Maybe String)
--- prompt = getInputLine
-
 prompt :: String -> InputT ReplM (Maybe String)
 prompt = getInputLine
-
--- instance MonadFail (InputT ReplM) where
-  -- fail = undefined
 
 -------------------
 -- main interface --
@@ -160,10 +126,6 @@ shortPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command
 --
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
--- loop :: [(String -> ReplM (Maybe String))] -> Handle -> ReplM ()
--- loop [] hdl = get >>= \st -> liftIO (runCmd st hdl "quit") >> return ()
--- loop :: [String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
--- loop :: [Handle -> String -> String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
 loop :: [String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
 loop [] _ = return Nothing
 loop (promptFn:promptFns) hdl = do
@@ -172,16 +134,6 @@ loop (promptFn:promptFns) hdl = do
   st' <- liftIO $ step st hdl mLine -- TODO what kind of lift is appropriate here?
   lift $ put st'
   loop promptFns hdl
-
-  -- st' <- liftIO $ try $ step st hdl line
-  -- case st' of
-    -- Right s -> lift (put s) >> loop promptFns hdl
-    -- Left (SomeException e) -> do
-      -- liftIO $ hPutStrLn hdl $ show e
-      -- return () -- TODO *only* return if it's QuitRepl; ignore otherwise
-
--- handler :: Handle -> SomeException -> IO (Maybe a)
--- handler hdl e = hPutStrLn hdl ("error! " ++ show e) >> return Nothing
 
 -- TODO move to Types.hs
 -- TODO use this pattern for other errors? or remove?
@@ -434,8 +386,9 @@ cmdConfig st@(scr, cfg, ref, ids, dRef) hdl s = do
 --------------------
 
 -- complete things in quotes: filenames, seqids
-quotedCompletions :: MonadIO m => GlobalEnv -> String -> m [Completion]
-quotedCompletions (_, _, _, idRef, _) wordSoFar = do
+quotedCompletions :: String -> ReplM [Completion]
+quotedCompletions wordSoFar = do
+  (_, _, _, idRef, _) <- get
   files  <- listFiles wordSoFar
   seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $ fmap M.elems $ fmap (M.unions . M.elems . hSeqIDs) $ liftIO $ readIORef idRef
   let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
@@ -443,28 +396,29 @@ quotedCompletions (_, _, _, idRef, _) wordSoFar = do
 
 -- complete everything else: fn names, var names, :commands, types
 -- these can be filenames too, but only if the line starts with a :command
-nakedCompletions :: MonadIO m => GlobalEnv -> String -> String -> m [Completion]
-nakedCompletions (scr, cfg, _, _, _) lineReveresed wordSoFar = do
+nakedCompletions :: String -> String -> ReplM [Completion]
+nakedCompletions lineReveresed wordSoFar = do
+  (scr, cfg, _, _, _) <- get
+  let wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
+      fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
+      varNames = map ((\(Var _ v) -> v) . fst) scr
+      cmdNames = map ((':':) . fst) (cmds cfg)
+      typeExts = map tExtOf $ concatMap mTypes $ cfgModules cfg
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
   return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
-  where
-    wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
-    fnNames  = concatMap (map fName . mFunctions) (cfgModules cfg)
-    varNames = map ((\(Var _ v) -> v) . fst) scr
-    cmdNames = map ((':':) . fst) (cmds cfg)
-    typeExts = map tExtOf $ concatMap mTypes $ cfgModules cfg
 
 -- this is mostly lifted from Haskeline's completeFile
-myComplete :: MonadIO m => GlobalEnv -> CompletionFunc m
-myComplete s = completeQuotedWord   (Just '\\') "\"\"" (quotedCompletions s)
-             $ completeWordWithPrev (Just '\\') ("\"\'" ++ filenameWordBreakChars)
-                                    (nakedCompletions s)
+myComplete :: CompletionFunc ReplM
+myComplete
+  = completeQuotedWord   escChars quotes quotedCompletions
+  $ completeWordWithPrev escChars (quotes ++ filenameWordBreakChars) nakedCompletions
+  where
+    escChars = Just '\\'
+    quotes = "\"\""
 
--- This is separate from the Config because it shouldn't need changing.
--- TODO do we actually need the script here? only if we're recreating it every loop i guess
-replSettings :: GlobalEnv -> Settings IO
-replSettings s@(_, cfg, _, _, _) = Settings
-  { complete       = myComplete s
+replSettings2 :: Config -> Settings ReplM
+replSettings2 cfg = Settings
+  { complete       = myComplete
   , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
   , autoAddHistory = True
   }
