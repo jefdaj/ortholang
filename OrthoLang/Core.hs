@@ -213,7 +213,6 @@ import OrthoLang.Core.Sanitize
 import OrthoLang.Core.Types
 import OrthoLang.Core.Parse
 import OrthoLang.Core.Parse.Util
-import OrthoLang.Core.Help
 import OrthoLang.Core.Repl hiding (runCmd) -- TODO disambiguate
 
 import OrthoLang.Util -- TODO remove?

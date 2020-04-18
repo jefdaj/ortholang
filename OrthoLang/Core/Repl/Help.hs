@@ -1,4 +1,4 @@
-module OrthoLang.Core.Help
+module OrthoLang.Core.Repl.Help
   (
 
   -- * Functions used in Core.Repl

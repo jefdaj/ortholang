@@ -1,10 +1,4 @@
 module OrthoLang.Core.Repl.Messages
-  -- (
-
-  -- * Used in Repl
-    -- cmdHelp
-
-  -- )
   where
 
 import OrthoLang.Core.Types
@@ -14,28 +8,18 @@ import System.Console.Haskeline hiding (catch)
 
 import qualified Data.Map.Strict as M
 
-import OrthoLang.Core.Types
-import OrthoLang.Core.Config (showConfigField, setConfigField)
-import OrthoLang.Core.Eval   (evalScript)
-import OrthoLang.Core.Help   (help, renderTypeSig)
-import OrthoLang.Core.Parse  (isExpr, parseExpr, parseStatement, parseFile)
-import OrthoLang.Core.Pretty (pPrint, render, pPrintHdl, writeScript)
-import OrthoLang.Util        (absolutize, stripWhiteSpace, justOrDie, headOrDie)
+import OrthoLang.Core.Repl.Help   (help, renderTypeSig)
 
-import Control.Exception.Safe     (Typeable, throw)
-import Control.Monad              (when)
+import OrthoLang.Core.Types
+import OrthoLang.Core.Parse  (parseExpr)
+import OrthoLang.Core.Pretty (pPrint, render, pPrintHdl)
+import OrthoLang.Util        (stripWhiteSpace, headOrDie)
+
 import Control.Monad.IO.Class     (liftIO)
-import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
-import Data.Char                  (isSpace)
+import Control.Monad.State.Strict (get)
 import Data.IORef                 (readIORef)
-import Data.List                  (isPrefixOf, isSuffixOf, filter, delete)
-import Data.List.Utils            (delFromAL)
+import Data.List                  (isPrefixOf, isSuffixOf, filter)
 import Development.Shake.FilePath (takeFileName)
-import System.Console.ANSI        (clearScreen, cursorUp)
-import System.Directory           (doesFileExist)
-import System.FilePath.Posix      ((</>))
-import System.IO                  (Handle, hPutStrLn, stdout)
-import System.Process             (runCommand, waitForProcess)
 
 welcome :: Handle -> IO ()
 welcome hdl = hPutStrLn hdl
