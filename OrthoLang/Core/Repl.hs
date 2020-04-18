@@ -55,8 +55,7 @@ import Control.Monad.State.Strict (StateT, execStateT, evalStateT, lift)
 ----------------
 
 type ReplM a = StateT GlobalEnv (MaybeT (InputT IO)) a
-type IOEnv = StateT GlobalEnv IO
-type ReplM2 = InputT IOEnv
+type ReplM2  = StateT GlobalEnv IO
 
 -- TODO use useFile(Handle) for stdin?
 -- TODO use getExternalPrint to safely print during Tasty tests!
@@ -73,8 +72,14 @@ replSettings2 cfg = Settings
   , autoAddHistory = True
   }
 
-runReplM2 :: Settings IOEnv -> InputT IOEnv a -> GlobalEnv -> IO a
-runReplM2 mySettings replm state = evalStateT (runInputT mySettings replm) state
+-- the (Maybe String) part is completely unnecessary (could be `a`),
+-- but I'm trying to fit it into the existing code for ReplM
+-- runReplM2 :: InputT ReplM2 (Maybe String) -> GlobalEnv -> IO (Maybe String)
+-- TODO think through the mock function since that's the complicated part now
+runReplM2 :: GlobalEnv -> InputT ReplM2 () -> IO ()
+runReplM2 st@(_, cfg, _, _, _) myLoop = evalStateT (runInputT settings myLoop) st
+  where
+    settings = replSettings2 cfg
 
 prompt :: String -> ReplM (Maybe String)
 prompt = lift . lift . getInputLine
@@ -86,14 +91,13 @@ prompt = lift . lift . getInputLine
 clear :: IO ()
 clear = clearScreen >> cursorUp 1000
 
-runRepl :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
+runRepl :: GlobalEnv -> IO ()
 runRepl = mkRepl (repeat prompt) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in OrthoLang/Core/Repl/Tests.hs
-mkRepl :: [(String -> ReplM (Maybe String))] -> Handle
-       -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
-mkRepl promptFns hdl cfg ref ids dRef = do
+mkRepl :: [(String -> ReplM (Maybe String))] -> Handle -> GlobalEnv -> IO ()
+mkRepl promptFns hdl st@(_, cfg, ref, ids, dRef) = do
   -- load initial script if any
   st <- case cfgScript cfg of
           Nothing -> do
@@ -104,7 +108,7 @@ mkRepl promptFns hdl cfg ref ids dRef = do
             return  (emptyScript, cfg, ref, ids, dRef)
           Just path -> cmdLoad (emptyScript, cfg, ref, ids, dRef) hdl path
   -- run repl with initial state
-  _ <- runReplM (replSettings st) (loop promptFns hdl) st
+  runReplM (replSettings st) (loop promptFns hdl) st
   return ()
 
 -- promptArrow = " --‣ "

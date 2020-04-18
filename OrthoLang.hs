@@ -60,9 +60,10 @@ main = withFileLogging "ortholang.log" $ do
     exitSuccess
 
   -- TODO typecheck only option here
+  let initialState = (emptyScript, cfg, ref, ids, dRef)
   if (cfgInteractive cfg)
-    then runRepl cfg ref ids dRef -- TODO take an entire state here too?
-    else evalFile (emptyScript, cfg, ref, ids, dRef) stdout
+    then runRepl  initialState
+    else evalFile initialState stdout
 
   -- TODO is it a problem that --test never reaches this?
   debug "finished main"

@@ -48,12 +48,12 @@ mockPrompt handle stdinStr promptStr = do
 -- TODO why did this get messed up??
 -- For golden testing the repl. Takes stdin as a string and returns stdout.
 -- TODO also capture stderr! Care about both equally here
-mockRepl :: [String] -> FilePath -> Config -> LocksRef -> IDsRef -> DigestsRef -> IO ()
-mockRepl stdinLines path cfg ref ids dRef = do
+mockRepl :: [String] -> FilePath -> GlobalEnv -> IO ()
+mockRepl stdinLines path st@(_, cfg, ref, ids, dRef) = do
   tmpPath <- emptySystemTempFile "mockrepl"
   withFile tmpPath WriteMode $ \handle -> do
     -- putStrLn ("stdin: \"" ++ unlines stdinLines ++ "\"")
-    _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle cfg ref ids dRef
+    _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle st
     -- putStrLn $ "stdout: \"" ++ out ++ "\""
     return ()
   out <- readFileStrict ref tmpPath
@@ -70,7 +70,7 @@ goldenRepl cfg ref ids dRef goldenFile = do
       cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
       tstOut = cfgTmpDir cfg' <.> "txt"
       stdin  = extractPrompted ("ortholang" ++ promptArrow) txt -- TODO pass the prompt here
-      action = mockRepl stdin tstOut cfg' ref ids dRef
+      action = mockRepl stdin tstOut (emptyScript, cfg', ref, ids, dRef)
                -- uncomment to update repl golden files:
                -- >> copyFile tstOut ("/home/jefdaj/ortholang/tests/repl" </> takeBaseName goldenFile <.> "txt")
   return $ goldenVsFile desc goldenFile tstOut action
@@ -110,7 +110,7 @@ goldenReplTree cfg ref ids dRef ses = do
       tmpOut = cfgTmpDir cfg </> name ++ ".out"
       cmd    = (shell "tree -aI '*.lock|*.database'") { cwd = Just $ tmpDir }
       action = do
-                 _ <- mockRepl stdin tmpOut cfg' ref ids dRef
+                 _ <- mockRepl stdin tmpOut (emptyScript, cfg', ref, ids, dRef)
                  createDirectoryIfMissing True tmpDir
                  out <- readCreateProcess cmd ""
                  -- uncomment to update golden repl trees
