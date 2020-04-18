@@ -48,19 +48,33 @@ import System.Console.ANSI      (clearScreen, cursorUp)
 import Data.IORef               (readIORef)
 import Development.Shake.FilePath (takeFileName)
 import Control.Monad.Trans.Maybe      (MaybeT(..), runMaybeT)
-import Control.Monad.State.Lazy       (StateT, execStateT, lift)
+import Control.Monad.State.Strict (StateT, execStateT, evalStateT, lift)
 
 -----------------
 -- Repl monad --
 ----------------
 
 type ReplM a = StateT GlobalEnv (MaybeT (InputT IO)) a
+type IOEnv = StateT GlobalEnv IO
+type ReplM2 = InputT IOEnv
 
 -- TODO use useFile(Handle) for stdin?
 -- TODO use getExternalPrint to safely print during Tasty tests!
 runReplM :: Settings IO -> ReplM a -> GlobalEnv -> IO (Maybe GlobalEnv)
 runReplM settings replm state =
   runInputT settings $ runMaybeT $ execStateT replm state
+
+myComplete2 = undefined
+
+replSettings2 :: Config -> Settings ReplM2
+replSettings2 cfg = Settings
+  { complete       = myComplete2
+  , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
+  , autoAddHistory = True
+  }
+
+runReplM2 :: Settings IOEnv -> InputT IOEnv a -> GlobalEnv -> IO a
+runReplM2 mySettings replm state = evalStateT (runInputT mySettings replm) state
 
 prompt :: String -> ReplM (Maybe String)
 prompt = lift . lift . getInputLine
