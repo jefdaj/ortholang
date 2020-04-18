@@ -62,6 +62,7 @@ runRepl = mkRepl (repeat getInputLine) stdout
 -- TODO separate script from rest of GlobalEnv
 mkRepl :: [String -> InputT ReplM (Maybe String)] -> Handle -> GlobalEnv -> IO ()
 mkRepl promptFns hdl (_, cfg, ref, ids, dRef) = do
+  clear
   let st = (emptyScript, cfg, ref, ids, dRef)
   st' <- case cfgScript cfg of
           Nothing -> welcome hdl >> return st
