@@ -1,4 +1,4 @@
-module OrthoLang.Core.Repl.Help
+module OrthoLang.Interpreter.Repl.Help
   (
 
   -- * Functions used in Core.Repl
@@ -11,10 +11,10 @@ module OrthoLang.Core.Repl.Help
   )
   where
 
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Types
 
-import OrthoLang.Core.Config (getDoc)
-import OrthoLang.Core.Pretty -- (pPrint, render)
+import OrthoLang.Interpreter.Config (getDoc)
+import OrthoLang.Interpreter.Pretty -- (pPrint, render)
 
 import Data.List.Split       (splitOn)
 import Data.Maybe            (fromJust, catMaybes)

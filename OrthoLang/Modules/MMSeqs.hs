@@ -19,7 +19,7 @@ module OrthoLang.Modules.MMSeqs
 --      (that can be done but requires a separate script with a few steps)
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 import OrthoLang.Locks
 
 import OrthoLang.Modules.Blast   (bht)

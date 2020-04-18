@@ -6,10 +6,10 @@ import Control.Logging
 
 import Data.IORef            (newIORef)
 import Data.Version          (showVersion)
-import OrthoLang.Core        (runRepl, evalFile)
-import OrthoLang.Core.Config (getUsage, loadConfig, dispatch)
+import OrthoLang.Interpreter        (runRepl, evalFile)
+import OrthoLang.Interpreter.Config (getUsage, loadConfig, dispatch)
 import OrthoLang.Locks  (initLocks)
-import OrthoLang.Core.Types  (Config(..), emptyDigests, emptyScript, emptyIDs)
+import OrthoLang.Interpreter.Types  (Config(..), emptyDigests, emptyScript, emptyIDs)
 import OrthoLang.Modules     (modules)
 import OrthoLang.Test        (runTests)
 import Paths_OrthoLang       (version)

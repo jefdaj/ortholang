@@ -6,20 +6,20 @@ a higher-order RulesFn for use in the fOldRules field of a Function.
 This is in the process of being cleaned up and removed in favor of NewRules.
 -}
 
-module OrthoLang.Core.Compile.Map2
+module OrthoLang.Interpreter.Compile.Map2
   ( map3of3
   , rFun3
   )
   where
 
 import Development.Shake
-import OrthoLang.Core.Types
-import OrthoLang.Core.Paths
+import OrthoLang.Interpreter.Types
+import OrthoLang.Interpreter.Paths
 import OrthoLang.Util (digest)
 import Control.Monad (forM_)
-import OrthoLang.Core.Actions (readStrings, writeStrings, debugA)
+import OrthoLang.Interpreter.Actions (readStrings, writeStrings, debugA)
 import System.FilePath ((</>))
-import OrthoLang.Core.Compile.Basic (rExpr, debugRules)
+import OrthoLang.Interpreter.Compile.Basic (rExpr, debugRules)
 import Data.Maybe (fromJust)
 
 debugA' :: String -> String -> Action ()

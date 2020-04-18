@@ -1,4 +1,4 @@
-module OrthoLang.Core.Parse.Basic
+module OrthoLang.Interpreter.Parse.Basic
   (
   -- * Utilities
     putAssign
@@ -31,7 +31,7 @@ module OrthoLang.Core.Parse.Basic
 -- TODO hold up, is Logging missing a bunch of NOINLINE statements?
 
 import OrthoLang.Debug
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Types
 import qualified Data.Map.Strict as M
 
 import Control.Applicative    ((<|>), many)
@@ -42,7 +42,7 @@ import Text.Parsec            (getState, putState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
 import Text.Parsec.Prim       (ParsecT, Stream)
-import OrthoLang.Core.Parse.Util (ParseM, debugParser)
+import OrthoLang.Interpreter.Parse.Util (ParseM, debugParser)
 import Control.Monad.Reader   (ask)
 
 --------------

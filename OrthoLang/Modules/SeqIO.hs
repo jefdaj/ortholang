@@ -4,7 +4,7 @@ module OrthoLang.Modules.SeqIO where
 
 import Development.Shake
 
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import System.FilePath             ((</>), (<.>), takeDirectory, takeFileName)
 import System.Directory            (createDirectoryIfMissing)

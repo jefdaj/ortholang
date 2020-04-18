@@ -1,6 +1,6 @@
 {-|
 This module expands macros and checks that the resulting types make sense.
-There's some basic typechecking during the 'OrthoLang.Core.Parse' step too, but
+There's some basic typechecking during the 'OrthoLang.Interpreter.Parse' step too, but
 it assumes every 'Function' is right about its return type. After
 'MacroExpansion's have been applied we can ensure that inputs and outputs
 actually match up.
@@ -11,7 +11,7 @@ the script.
 TODO wait, why can't macro fns be typechecked during parsing? Seems like they could!
 -}
 
-module OrthoLang.Core.Expand
+module OrthoLang.Interpreter.Expand
   (
   
   -- * Expand all macros in a script
@@ -26,7 +26,7 @@ module OrthoLang.Core.Expand
   where
 
 import OrthoLang.Debug (trace)
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Types
 
 expandMacros :: Config -> Script -> Script
 expandMacros = eScript

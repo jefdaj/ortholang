@@ -6,7 +6,7 @@ Attempt to compose OrthoLang functions. Work in progress, but promising!
 TODO Can this be an applicative?
 -}
 
-module OrthoLang.Core.Compile.Compose
+module OrthoLang.Interpreter.Compile.Compose
   ( compose1
   )
   where
@@ -14,9 +14,9 @@ module OrthoLang.Core.Compile.Compose
 import Prelude hiding (error)
 import OrthoLang.Debug (error)
 
-import OrthoLang.Core.Types
-import OrthoLang.Core.Parse.Expr (typecheckFn) -- TODO move somewhere else
-import OrthoLang.Core.Compile.NewRules
+import OrthoLang.Interpreter.Types
+import OrthoLang.Interpreter.Parse.Expr (typecheckFn) -- TODO move somewhere else
+import OrthoLang.Interpreter.Compile.NewRules
 import Control.DeepSeq
 
 -- | `compose fn1 fn2` is kind of like `fn2 . fn1` in Haskell

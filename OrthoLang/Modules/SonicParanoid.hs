@@ -4,7 +4,7 @@ module OrthoLang.Modules.SonicParanoid
 -- TODO when sonicparanoid fails, delete the whole hash dir to avoid crashing next time
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 import OrthoLang.Locks
 
 import OrthoLang.Modules.SeqIO (fna, faa)

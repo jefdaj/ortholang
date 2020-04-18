@@ -6,7 +6,7 @@
 -- TODO fix bug where a non-function with args parses to varname with args dropped
 --       (example: 'this = load_that cool')
 
-module OrthoLang.Core.Parse
+module OrthoLang.Interpreter.Parse
   (
   -- * Parsec stuff
     ParseError
@@ -43,9 +43,9 @@ module OrthoLang.Core.Parse
   )
   where
 
-import OrthoLang.Core.Parse.Basic
-import OrthoLang.Core.Parse.Expr
-import OrthoLang.Core.Parse.Script
-import OrthoLang.Core.Parse.Util
+import OrthoLang.Interpreter.Parse.Basic
+import OrthoLang.Interpreter.Parse.Expr
+import OrthoLang.Interpreter.Parse.Script
+import OrthoLang.Interpreter.Parse.Util
 
 import Text.Parsec (ParseError)

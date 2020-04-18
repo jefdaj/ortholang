@@ -1,4 +1,4 @@
-module OrthoLang.Core.Compile
+module OrthoLang.Interpreter.Compile
   ( aSimpleScript
   , aSimpleScriptNoFix
   , aSimpleScriptPar
@@ -35,10 +35,10 @@ module OrthoLang.Core.Compile
   )
   where
 
-import OrthoLang.Core.Compile.Basic
-import OrthoLang.Core.Compile.Simple
-import OrthoLang.Core.Compile.Map
-import OrthoLang.Core.Compile.Map2
--- import OrthoLang.Core.Compile.Repeat
-import OrthoLang.Core.Compile.Compose
-import OrthoLang.Core.Compile.NewRules
+import OrthoLang.Interpreter.Compile.Basic
+import OrthoLang.Interpreter.Compile.Simple
+import OrthoLang.Interpreter.Compile.Map
+import OrthoLang.Interpreter.Compile.Map2
+-- import OrthoLang.Interpreter.Compile.Repeat
+import OrthoLang.Interpreter.Compile.Compose
+import OrthoLang.Interpreter.Compile.NewRules

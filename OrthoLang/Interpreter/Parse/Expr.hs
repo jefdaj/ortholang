@@ -1,4 +1,4 @@
-module OrthoLang.Core.Parse.Expr
+module OrthoLang.Interpreter.Parse.Expr
   (
   -- * Lists
     pList
@@ -34,10 +34,10 @@ module OrthoLang.Core.Parse.Expr
 
 import Prelude hiding (error)
 import OrthoLang.Debug
-import OrthoLang.Core.Types
-import OrthoLang.Core.Pretty ()
-import OrthoLang.Core.Parse.Basic
-import OrthoLang.Core.Parse.Util
+import OrthoLang.Interpreter.Types
+import OrthoLang.Interpreter.Pretty ()
+import OrthoLang.Interpreter.Parse.Basic
+import OrthoLang.Interpreter.Parse.Util
 import OrthoLang.Util (headOrDie)
 
 import qualified Text.Parsec.Expr as E

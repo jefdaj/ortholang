@@ -11,7 +11,7 @@ Overall script parsing strategy:
    (which can be simplified by removing comment code)
 -}
 
-module OrthoLang.Core.Parse.Script
+module OrthoLang.Interpreter.Parse.Script
   (
   -- * Preprocessing
     stripComments
@@ -35,11 +35,11 @@ module OrthoLang.Core.Parse.Script
   where
 
 import OrthoLang.Debug
-import OrthoLang.Core.Parse.Basic
-import OrthoLang.Core.Parse.Expr
-import OrthoLang.Core.Parse.Util
-import OrthoLang.Core.Types
--- import OrthoLang.Core.Paths (scriptDigests)
+import OrthoLang.Interpreter.Parse.Basic
+import OrthoLang.Interpreter.Parse.Expr
+import OrthoLang.Interpreter.Parse.Util
+import OrthoLang.Interpreter.Types
+-- import OrthoLang.Interpreter.Paths (scriptDigests)
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (when)

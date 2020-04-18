@@ -1,7 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module OrthoLang.Core.Sanitize
+module OrthoLang.Interpreter.Sanitize
   -- ( hashIDsFile
   ( hashIDsFile
   -- , writeIDs
@@ -34,12 +34,12 @@ import qualified Data.Map.Strict   as M
 -- import qualified Text.Regex as R
 
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Types
 
 import OrthoLang.Util    (digest, digestLength, headOrDie)
 import OrthoLang.Locks   (withWriteLock')
-import OrthoLang.Core.Actions (trackWrite', readFileStrict', readList, writeCachedLines, runCmd, CmdDesc(..))
-import OrthoLang.Core.Paths   (toPath, fromPath, addDigest)
+import OrthoLang.Interpreter.Actions (trackWrite', readFileStrict', readList, writeCachedLines, runCmd, CmdDesc(..))
+import OrthoLang.Interpreter.Paths   (toPath, fromPath, addDigest)
 import Data.Char             (isSpace)
 import Data.Maybe            (catMaybes, mapMaybe, fromJust)
 import Data.List             (isPrefixOf, intersperse, nub)

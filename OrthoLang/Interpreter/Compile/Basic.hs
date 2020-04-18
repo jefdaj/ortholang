@@ -1,6 +1,6 @@
 {-|
 This module "compiles" an expression it by translating it into a set of Shake
-build rules. To actually run the rules, use 'OrthoLang.Core.Eval.eval'.
+build rules. To actually run the rules, use 'OrthoLang.Interpreter.Eval.eval'.
 
 TODO add more descriptive runtime error for canonicalizePath failing b/c no file
 
@@ -13,7 +13,7 @@ TODO pass tmpDir as a config option somehow, and verbosity
 TODO why doesn't turning down the verbosity actually work?
 -}
 
-module OrthoLang.Core.Compile.Basic
+module OrthoLang.Interpreter.Compile.Basic
   (
 
   -- * Expression compilers
@@ -50,16 +50,16 @@ import Prelude hiding (error)
 
 import OrthoLang.Debug
 import Development.Shake
-import OrthoLang.Core.Types
-import OrthoLang.Core.Pretty
+import OrthoLang.Interpreter.Types
+import OrthoLang.Interpreter.Pretty
 
 import Data.List              (isPrefixOf)
 import Data.Maybe             (fromJust)
-import OrthoLang.Core.Actions (traceA, debugA, need', readLit, writeLit, writeLits, writePaths, symlink)
-import OrthoLang.Core.Paths   (exprPath, toPath, fromPath, varPath, Path)
+import OrthoLang.Interpreter.Actions (traceA, debugA, need', readLit, writeLit, writeLits, writePaths, symlink)
+import OrthoLang.Interpreter.Paths   (exprPath, toPath, fromPath, varPath, Path)
 import OrthoLang.Util         (resolveSymlinks, stripWhiteSpace, removeIfExists)
 
--- import OrthoLang.Core.Paths (insertNewRulesDigest)
+-- import OrthoLang.Interpreter.Paths (insertNewRulesDigest)
 
 
 debugC :: String -> String -> a -> a

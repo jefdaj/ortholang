@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module OrthoLang.Core.Pretty
+module OrthoLang.Interpreter.Pretty
   ( prettyShow
   -- , prettyResult (moved to Eval)
   , writeScript
@@ -19,8 +19,8 @@ module OrthoLang.Core.Pretty
 import Prelude hiding ((<>))
 import Data.Scientific            (Scientific(), toBoundedInteger)
 -- import Development.Shake.FilePath ((</>))
-import OrthoLang.Core.Types
-import OrthoLang.Core.Config (showConfig)
+import OrthoLang.Interpreter.Types
+import OrthoLang.Interpreter.Config (showConfig)
 import Text.PrettyPrint.HughesPJClass
 import System.Console.Terminal.Size (Window(..), size)
 import System.IO (Handle, hPutStrLn)

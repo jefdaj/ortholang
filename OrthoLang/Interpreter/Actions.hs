@@ -7,7 +7,7 @@ and some other stuff. Eventually, it would be nice if all IO happened here.
 TODO rename to be shorter (no "safe", "wrapped", etc)
 -}
 
-module OrthoLang.Core.Actions
+module OrthoLang.Interpreter.Actions
 
   -- read files
   ( readLit
@@ -61,15 +61,15 @@ module OrthoLang.Core.Actions
 import Prelude hiding (readList, error)
 import OrthoLang.Debug
 import Development.Shake hiding (doesFileExist)
-import OrthoLang.Core.Types
--- import OrthoLang.Core.Config (debug)
+import OrthoLang.Interpreter.Types
+-- import OrthoLang.Interpreter.Config (debug)
 
 import Control.Monad              (when)
 import Data.List                  (sort, nub, isPrefixOf, isInfixOf, isSuffixOf)
 import Data.List.Split            (splitOneOf)
 import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
--- import OrthoLang.Core.Debug        (debug)
-import OrthoLang.Core.Paths        (Path, toPath, fromPath, checkLit, isGeneric, fromGeneric,
+-- import OrthoLang.Interpreter.Debug        (debug)
+import OrthoLang.Interpreter.Paths        (Path, toPath, fromPath, checkLit, isGeneric, fromGeneric,
                                    checkLits, cacheDir, pathString, isURL,
                                    stringPath, toGeneric, sharedPath, addDigest)
 import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,

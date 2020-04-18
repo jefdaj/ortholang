@@ -28,7 +28,7 @@ other output file\>.args@ too.
 TODO can this be used to implement 'replace_each' in a way that allows fn calls?
 -}
 
-module OrthoLang.Core.Compile.Map
+module OrthoLang.Interpreter.Compile.Map
   ( rMap
   , rMapTmp
   , rMapTmps
@@ -39,17 +39,17 @@ module OrthoLang.Core.Compile.Map
 import Prelude hiding (error)
 import OrthoLang.Debug
 import Development.Shake
-import OrthoLang.Core.Compile.Basic
-import OrthoLang.Core.Compile.Simple
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Compile.Basic
+import OrthoLang.Interpreter.Compile.Simple
+import OrthoLang.Interpreter.Types
 import Text.PrettyPrint.HughesPJClass
 
 import Data.List                  (intersperse)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>), replaceBaseName)
-import OrthoLang.Core.Actions      (readPaths, writePaths, symlink,
+import OrthoLang.Interpreter.Actions      (readPaths, writePaths, symlink,
                                    readLit, writeLits, traceA, debugA, need')
-import OrthoLang.Core.Paths        (cacheDir, toPath, fromPath, exprPath,
+import OrthoLang.Interpreter.Paths        (cacheDir, toPath, fromPath, exprPath,
                                    Path, unsafeExprPathExplicit, argHashes)
 import OrthoLang.Util         (digest, resolveSymlinks, unlessExists,
                                    popFrom, insertAt)

@@ -15,7 +15,7 @@ module OrthoLang.Modules.Load
   where
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import qualified Data.Map.Strict as M
 
@@ -77,7 +77,7 @@ loadList = mkLoad False "load_list" (Exactly $ ListOf str)
 {-|
 Converts user-specified strs (which may represent relative or absolute paths)
 to properly formatted OrthoLang Paths. Used to sanitize inputs to the load_* functions
-Note the weird name keeps it from conflicting with 'OrthoLang.Core.Paths.toPath'
+Note the weird name keeps it from conflicting with 'OrthoLang.Interpreter.Paths.toPath'
 -}
 
 {-|

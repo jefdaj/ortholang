@@ -7,7 +7,7 @@ because there are still some undefined parts of OrthoLang!
 module OrthoLang.Modules (modules)
   where
 
-import OrthoLang.Core.Types (Module)
+import OrthoLang.Interpreter.Types (Module)
 -- TODO ensure nothing is undefined: import Control.DeepSeq
 
 import qualified OrthoLang.Modules.AllVsAll      as AllVsAll

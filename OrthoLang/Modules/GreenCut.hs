@@ -2,7 +2,7 @@ module OrthoLang.Modules.GreenCut
   where
 
 -- import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 import OrthoLang.Modules.Blast (bht)
 
 olModule :: Module

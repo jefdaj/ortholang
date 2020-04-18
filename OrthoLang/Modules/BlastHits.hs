@@ -4,7 +4,7 @@ module OrthoLang.Modules.BlastHits where
 -- TODO rename all extract_ functions to not have the extract part? or replace it with list_?
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import OrthoLang.Modules.Blast    (bht)
 import OrthoLang.Modules.CRBBlast (crb)

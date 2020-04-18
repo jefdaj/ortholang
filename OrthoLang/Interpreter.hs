@@ -3,7 +3,7 @@ This is a work in progress. It exports everything used by the current code,
 and I'm working on simplifying that down to a more principled module API.
 -}
 
-module OrthoLang.Core
+module OrthoLang.Interpreter
   (
 
   -- * New module API
@@ -203,19 +203,19 @@ module OrthoLang.Core
   where
 
 import OrthoLang.Debug
-import OrthoLang.Core.Actions
-import OrthoLang.Core.Expand
-import OrthoLang.Core.Compile
-import OrthoLang.Core.Compile.NewRules
-import OrthoLang.Core.Paths
-import OrthoLang.Core.Pretty
-import OrthoLang.Core.Sanitize
-import OrthoLang.Core.Types
-import OrthoLang.Core.Parse
-import OrthoLang.Core.Parse.Util
-import OrthoLang.Core.Repl hiding (runCmd) -- TODO disambiguate
+import OrthoLang.Interpreter.Actions
+import OrthoLang.Interpreter.Expand
+import OrthoLang.Interpreter.Compile
+import OrthoLang.Interpreter.Compile.NewRules
+import OrthoLang.Interpreter.Paths
+import OrthoLang.Interpreter.Pretty
+import OrthoLang.Interpreter.Sanitize
+import OrthoLang.Interpreter.Types
+import OrthoLang.Interpreter.Parse
+import OrthoLang.Interpreter.Parse.Util
+import OrthoLang.Interpreter.Repl hiding (runCmd) -- TODO disambiguate
 
 import OrthoLang.Util -- TODO remove?
 
-import OrthoLang.Core.Eval (evalFile)
-import OrthoLang.Core.Repl (runRepl)
+import OrthoLang.Interpreter.Eval (evalFile)
+import OrthoLang.Interpreter.Repl (runRepl)

@@ -8,7 +8,7 @@ import Prelude hiding (length)
 import qualified Prelude as P
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import OrthoLang.Modules.Blast    (bht)
 import OrthoLang.Modules.CRBBlast (crb)

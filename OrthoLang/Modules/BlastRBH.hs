@@ -2,8 +2,8 @@ module OrthoLang.Modules.BlastRBH where
 
 import Development.Shake
 
-import OrthoLang.Core
-import OrthoLang.Core.Compile as C
+import OrthoLang.Interpreter
+import OrthoLang.Interpreter.Compile as C
 import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs, mkBlastFromFa, aMkBlastFromDb)
 import OrthoLang.Modules.BlastDB (blastdb)
 import OrthoLang.Modules.SeqIO   (fna, faa)

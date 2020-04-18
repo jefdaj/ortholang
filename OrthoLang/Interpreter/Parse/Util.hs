@@ -6,7 +6,7 @@ Parse utilities. Some are from the Parsec tutorial here:
 Most aren't needed in production, but they help with debugging.
 -}
 
-module OrthoLang.Core.Parse.Util
+module OrthoLang.Interpreter.Parse.Util
   (
   -- * Parse utilities
     parseAndShow
@@ -25,7 +25,7 @@ module OrthoLang.Core.Parse.Util
   where
 
 import OrthoLang.Debug
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Types
 import OrthoLang.Util (headOrDie)
 
 import Development.Shake.FilePath (makeRelative)

@@ -5,7 +5,7 @@ module OrthoLang.Modules.Sets where
 -- TODO remove long form of diff?
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import qualified Data.Set as Set
 
@@ -15,12 +15,12 @@ import Data.Set                    (Set, union, difference, intersection, fromLi
                                     toList)
 import Data.IORef                  (readIORef)
 import Development.Shake.FilePath  ((</>))
-import OrthoLang.Core (rExpr, debugRules)
-import OrthoLang.Core       (readStrings, readPaths, writeStrings, traceA, hashContent)
--- import OrthoLang.Core         (debugRules, traceA)
-import OrthoLang.Core         (exprPath, toPath, fromPath)
-import OrthoLang.Core          (resolveSymlinks)
-import OrthoLang.Core      (unhashIDs)
+import OrthoLang.Interpreter (rExpr, debugRules)
+import OrthoLang.Interpreter       (readStrings, readPaths, writeStrings, traceA, hashContent)
+-- import OrthoLang.Interpreter         (debugRules, traceA)
+import OrthoLang.Interpreter         (exprPath, toPath, fromPath)
+import OrthoLang.Interpreter          (resolveSymlinks)
+import OrthoLang.Interpreter      (unhashIDs)
 import Data.Maybe (fromJust)
 
 olModule :: Module

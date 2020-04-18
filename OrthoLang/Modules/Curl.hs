@@ -7,7 +7,7 @@ module OrthoLang.Modules.Curl
   )
   where
 
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import Control.Monad.IO.Class     (liftIO)
 -- import Data.List                  (isInfixOf)

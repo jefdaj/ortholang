@@ -4,7 +4,7 @@
 module OrthoLang.Test.Versions where
 
 import OrthoLang.Debug
-import OrthoLang.Core
+import OrthoLang.Interpreter
 import Paths_OrthoLang             (getDataFileName)
 
 import Development.Shake.FilePath ((<.>), (</>))

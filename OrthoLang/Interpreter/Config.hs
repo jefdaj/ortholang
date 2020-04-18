@@ -2,7 +2,7 @@
 
 -- TODO show cfgShare
 
-module OrthoLang.Core.Config where
+module OrthoLang.Interpreter.Config where
 
 -- TODO absolutize in the setters too? or unify them with initial loaders?
 
@@ -17,7 +17,7 @@ import Development.Shake           (newResourceIO)
                                    -- removeFiles, liftIO)
 import OrthoLang.Debug
 import Paths_OrthoLang             (getDataFileName)
-import OrthoLang.Core.Types        (Config(..), Module(..))
+import OrthoLang.Interpreter.Types        (Config(..), Module(..))
 import OrthoLang.Util         (absolutize, justOrDie)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
                                    longOption, getAllArgs)

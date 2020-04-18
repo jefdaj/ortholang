@@ -1,7 +1,7 @@
 module OrthoLang.Modules.SetsTable
   where
 
-import OrthoLang.Core
+import OrthoLang.Interpreter
 import OrthoLang.Modules.Plots (rPlotListOfLists)
 
 olModule :: Module

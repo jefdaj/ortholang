@@ -107,7 +107,7 @@ file contents always have the same canonical path, which is necessary for
 set deduplication to work.
 -}
 
-module OrthoLang.Core.Paths
+module OrthoLang.Interpreter.Paths
   (
   -- * Convert to\/from paths
     Path()
@@ -156,14 +156,14 @@ module OrthoLang.Core.Paths
   where
 
 import OrthoLang.Errors
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Types
 
 import Data.Maybe                     (maybeToList)
 import Data.List                      (intersperse, isInfixOf, isPrefixOf)
 import Data.List.Split                (splitOn)
 import Data.String.Utils              (replace)
 import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
-import OrthoLang.Core.Pretty          (render, pPrint)
+import OrthoLang.Interpreter.Pretty          (render, pPrint)
 import OrthoLang.Util            (digest, digestLength)
 import Path                           (parseAbsFile, fromAbsFile)
 -- import Text.PrettyPrint.HughesPJClass (Pretty)

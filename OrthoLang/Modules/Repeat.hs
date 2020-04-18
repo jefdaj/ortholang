@@ -12,7 +12,7 @@ module OrthoLang.Modules.Repeat where
 -- TODO which parts of this should go in Core/Repeat.hs?
 -- TODO debug transformations too!
 
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import OrthoLang.Modules.Replace (rReplaceEach)
 import Data.Scientific           (Scientific(), toBoundedInteger)

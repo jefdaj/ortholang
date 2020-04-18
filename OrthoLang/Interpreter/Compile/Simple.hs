@@ -1,4 +1,4 @@
-module OrthoLang.Core.Compile.Simple
+module OrthoLang.Interpreter.Compile.Simple
   (
 
   -- * Used in Core
@@ -17,20 +17,20 @@ module OrthoLang.Core.Compile.Simple
   )
   where
 
-import OrthoLang.Core.Compile.Basic
-import OrthoLang.Core.Compile.NewRules
+import OrthoLang.Interpreter.Compile.Basic
+import OrthoLang.Interpreter.Compile.NewRules
 
 import Prelude hiding (error)
 import OrthoLang.Debug
 import Development.Shake
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Types
 
-import OrthoLang.Core.Paths (cacheDir, exprPath, toPath,
+import OrthoLang.Interpreter.Paths (cacheDir, exprPath, toPath,
                             fromPath, Path)
 
 import Data.List                  (intersperse)
 import Development.Shake.FilePath ((</>))
-import OrthoLang.Core.Actions      (runCmd, CmdDesc(..), traceA, need')
+import OrthoLang.Interpreter.Actions      (runCmd, CmdDesc(..), traceA, need')
 import OrthoLang.Util         (resolveSymlinks, digest)
 import System.Exit                (ExitCode(..))
 

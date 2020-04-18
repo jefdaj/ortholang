@@ -3,7 +3,7 @@ module OrthoLang.Modules.Sample where
 -- TODO single sample works, but why doesn't the salt change when repeating??
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import Data.Scientific       (formatScientific, FPFormat(..))
 import System.Random         (StdGen)

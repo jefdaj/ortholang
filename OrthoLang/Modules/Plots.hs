@@ -8,7 +8,7 @@ module OrthoLang.Modules.Plots where
  -}
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath  (takeBaseName, (</>))

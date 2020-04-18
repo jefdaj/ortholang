@@ -8,7 +8,7 @@
 -- TODO prompt to remove any bindings dependent on one the user is changing
 -- TODO you should be able to write comments in the REPL
 
-module OrthoLang.Core.Repl
+module OrthoLang.Interpreter.Repl
   (
 
   -- * Used in main
@@ -34,13 +34,13 @@ module OrthoLang.Core.Repl
 
 import Prelude hiding (print)
 
-import OrthoLang.Core.Types
-import OrthoLang.Core.Repl.Actions
-import OrthoLang.Core.Repl.Messages
+import OrthoLang.Interpreter.Types
+import OrthoLang.Interpreter.Repl.Actions
+import OrthoLang.Interpreter.Repl.Messages
 
-import OrthoLang.Core.Config    (showConfigField, setConfigField)
-import OrthoLang.Core.Pretty    (pPrintHdl)
-import OrthoLang.Core.Repl.Help (help)
+import OrthoLang.Interpreter.Config    (showConfigField, setConfigField)
+import OrthoLang.Interpreter.Pretty    (pPrintHdl)
+import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 
 import Control.Exception.Safe     (Exception, Typeable, throw)

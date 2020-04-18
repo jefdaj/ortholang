@@ -1,4 +1,4 @@
-module OrthoLang.Core.Repl.Messages
+module OrthoLang.Interpreter.Repl.Messages
   (
 
   -- * Repl commands
@@ -20,13 +20,13 @@ module OrthoLang.Core.Repl.Messages
   where
 
 import Prelude hiding (print)
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Types
 import System.Console.Haskeline
 import qualified Data.Map.Strict as M
 
-import OrthoLang.Core.Parse     (parseExpr)
-import OrthoLang.Core.Pretty    (pPrint, render, pPrintHdl)
-import OrthoLang.Core.Repl.Help (help, renderTypeSig)
+import OrthoLang.Interpreter.Parse     (parseExpr)
+import OrthoLang.Interpreter.Pretty    (pPrint, render, pPrintHdl)
+import OrthoLang.Interpreter.Repl.Help (help, renderTypeSig)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 
 import Control.Monad.IO.Class     (liftIO)

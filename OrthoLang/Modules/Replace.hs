@@ -42,7 +42,7 @@ module OrthoLang.Modules.Replace where
  -}
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 import Data.Maybe (fromJust)
 
 olModule :: Module
@@ -64,7 +64,7 @@ olModule = Module
 
 {- This does the filename mangling by setting a "replace ID" in each variable
  - in a script. If it's anything other than Nothing it gets used by
- - OrthoLang.Core to set the rep dir.
+ - OrthoLang.Interpreter to set the rep dir.
  -
  - TODO should it go in Types, or maybe Paths?
  -}

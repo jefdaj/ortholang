@@ -3,7 +3,7 @@ module OrthoLang.Modules.Permute where
 -- TODO put this in Core because with the salts it's not separable
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 import Development.Shake.FilePath (makeRelative)
 import Data.Maybe (fromJust)
 

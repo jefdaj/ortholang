@@ -1,6 +1,6 @@
 {-|
 A work in progress. If this goes well, it will replace
-'OrthoLang.Core.Compile.Basic.rNamedFunction' for all function calls.
+'OrthoLang.Interpreter.Compile.Basic.rNamedFunction' for all function calls.
 
 The big change is that it decodes dependencies from expression paths rather
 than explicitly making a Shake pattern for each file. That lets Shake discover
@@ -21,7 +21,7 @@ TODO can API-facing Rules be entirely eliminated? Maybe just NewActions + Macros
 -- TODO versions of the newFn* functions that take custom typecheckers and lists of args?
 --      do it because it lets you keep the same custom typechecker behavior as the current fns
 
-module OrthoLang.Core.Compile.NewRules
+module OrthoLang.Interpreter.Compile.NewRules
   (
 
   -- * Functions from external scripts
@@ -75,17 +75,17 @@ import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
-import OrthoLang.Core.Actions       (runCmd, CmdDesc(..))
-import OrthoLang.Core.Sanitize (readIDs)
-import OrthoLang.Core.Types
+import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..))
+import OrthoLang.Interpreter.Sanitize (readIDs)
+import OrthoLang.Interpreter.Types
 import System.Exit (ExitCode(..))
 
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName)
-import OrthoLang.Core.Actions     (need')
-import OrthoLang.Core.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest)
+import OrthoLang.Interpreter.Actions     (need')
+import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest)
 import qualified Data.Map.Strict as M
 import Data.IORef                 (atomicModifyIORef')
 
@@ -140,7 +140,7 @@ aNewRulesS3 :: String -> (CmdDesc -> CmdDesc) -> NewAction3
 aNewRulesS3 sname opts o i1 i2 i3 = aNewRulesS sname opts o [i1, i2, i3]
 
 {-|
-Approximate rewrite of 'OrthoLang.Core.Compile.Simple.aSimpleScript'.
+Approximate rewrite of 'OrthoLang.Interpreter.Compile.Simple.aSimpleScript'.
 Use the safer versions above if possible; this one does not check number of arguments.
 Use cmdOpts to update the 'CmdDesc' with any non-default options needed.
 
@@ -254,7 +254,7 @@ aReloadIDsDir loadCacheDir = do
   mapM_ aLoadIDs idPaths
 
 {-|
-This is called from 'OrthoLang.Core.Sanitize.hashIDsFile' the first time a
+This is called from 'OrthoLang.Interpreter.Sanitize.hashIDsFile' the first time a
 sequence file is loaded, and from 'rReloadIDs' during subsequent program runs.
 -}
 aLoadIDs :: FilePath -> Action ()
@@ -280,7 +280,7 @@ aLoadIDs idsPath' = do
 
 {-|
 This gathers all the 'fNewRules' 'Development.Shake.Rules' together for use in
-'OrthoLang.Core.Eval.eval'. The old-style rules in use throughout OrthoLang now
+'OrthoLang.Interpreter.Eval.eval'. The old-style rules in use throughout OrthoLang now
 require the compilers to return exact paths. These new ones use proper patterns
 instead, so they can be added once per program run rather than once per
 expression. They should also allow Shake to infer mapping patterns, but that
@@ -431,7 +431,7 @@ type MacroExpansion = Script -> Expr -> Expr
 {-|
 Macros are straighforward to implement: use any 'MacroExpansion' to create one
 directly.  The only type checking planned so far is that
-'OrthoLang.Core.Compile.Basic.rMacro' will prevent macro expansions from
+'OrthoLang.Interpreter.Compile.Basic.rMacro' will prevent macro expansions from
 changing the return type of their input 'Expr'.
 -}
 newMacro :: String -> [TypeSig] -> TypeSig -> MacroExpansion -> [FnTag] -> Function

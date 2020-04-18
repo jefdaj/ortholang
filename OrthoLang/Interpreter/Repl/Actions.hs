@@ -1,4 +1,4 @@
-module OrthoLang.Core.Repl.Actions
+module OrthoLang.Interpreter.Repl.Actions
   (
 
   -- * Repl commands
@@ -24,11 +24,11 @@ module OrthoLang.Core.Repl.Actions
 
 import Prelude hiding (print)
 
-import OrthoLang.Core.Types
-import OrthoLang.Core.Eval          (evalScript)
-import OrthoLang.Core.Parse         (isExpr, parseStatement, parseFile)
-import OrthoLang.Core.Pretty        (pPrintHdl, writeScript)
-import OrthoLang.Core.Repl.Messages (cmdShow)
+import OrthoLang.Interpreter.Types
+import OrthoLang.Interpreter.Eval          (evalScript)
+import OrthoLang.Interpreter.Parse         (isExpr, parseStatement, parseFile)
+import OrthoLang.Interpreter.Pretty        (pPrintHdl, writeScript)
+import OrthoLang.Interpreter.Repl.Messages (cmdShow)
 import OrthoLang.Util               (absolutize, justOrDie)
 
 import Control.Monad       (when)

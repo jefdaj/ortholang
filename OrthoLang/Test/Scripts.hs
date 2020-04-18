@@ -4,7 +4,7 @@ import qualified Control.Concurrent.Thread.Delay as D
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Lazy.Char8      as B8
 
-import OrthoLang.Core
+import OrthoLang.Interpreter
 import OrthoLang.Locks (withWriteLockEmpty)
 import OrthoLang.Util   (justOrDie, rmAll)
 
@@ -29,7 +29,7 @@ import Test.Tasty.Hspec      (testSpecs, shouldReturn)
 import qualified Data.Text.Lazy as T
 import Text.Pretty.Simple (pShowNoColor)
 
-import OrthoLang.Core.Pretty (renderIO)
+import OrthoLang.Interpreter.Pretty (renderIO)
 import Text.PrettyPrint.HughesPJClass (pPrint)
 
 -- | These work, but the tmpfiles vary so they require a check script.

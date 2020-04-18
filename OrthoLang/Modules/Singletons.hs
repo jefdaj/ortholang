@@ -16,7 +16,7 @@ module OrthoLang.Modules.Singletons
   where
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 import Control.Monad (forM)
 import Data.Maybe (fromJust)
 

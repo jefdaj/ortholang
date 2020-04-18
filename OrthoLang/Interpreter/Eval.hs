@@ -17,7 +17,7 @@
 --      but then again interpret and eval are kind of the same thing here right?
 --      it's either interpret or compile + eval
 
-module OrthoLang.Core.Eval
+module OrthoLang.Interpreter.Eval
   ( eval
   , evalFile
   , evalScript
@@ -29,10 +29,10 @@ import OrthoLang.Errors (oneLineShakeErrors)
 import Development.Shake
 import Text.PrettyPrint.HughesPJClass hiding ((<>))
 
-import OrthoLang.Core.Types
-import OrthoLang.Core.Expand (expandMacros)
-import OrthoLang.Core.Pretty (renderIO)
--- import OrthoLang.Core.Config (debug)
+import OrthoLang.Interpreter.Types
+import OrthoLang.Interpreter.Expand (expandMacros)
+import OrthoLang.Interpreter.Pretty (renderIO)
+-- import OrthoLang.Interpreter.Config (debug)
 
 -- import Control.Applicative ((<>))
 import qualified Data.HashMap.Strict as M
@@ -41,13 +41,13 @@ import Data.Typeable (TypeRep)
 -- import Data.List (isPrefixOf)
 
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
-import OrthoLang.Core.Compile         (compileScript, rExpr, newRules)
-import OrthoLang.Core.Parse            (parseFileIO)
-import OrthoLang.Core.Pretty           (prettyNum)
-import OrthoLang.Core.Paths            (Path, toPath, fromPath)
+import OrthoLang.Interpreter.Compile         (compileScript, rExpr, newRules)
+import OrthoLang.Interpreter.Parse            (parseFileIO)
+import OrthoLang.Interpreter.Pretty           (prettyNum)
+import OrthoLang.Interpreter.Paths            (Path, toPath, fromPath)
 import OrthoLang.Locks            (withReadLock')
-import OrthoLang.Core.Sanitize         (unhashIDs, unhashIDsFile)
-import OrthoLang.Core.Actions          (readLits, readPaths)
+import OrthoLang.Interpreter.Sanitize         (unhashIDs, unhashIDsFile)
+import OrthoLang.Interpreter.Actions          (readLits, readPaths)
 -- import OrthoLang.Util             (ignoreErrors)
 import System.IO                      (Handle)
 import System.FilePath                ((</>), takeFileName)

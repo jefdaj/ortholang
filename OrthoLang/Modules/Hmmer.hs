@@ -2,7 +2,7 @@ module OrthoLang.Modules.Hmmer
   where
 
 import Development.Shake
-import OrthoLang.Core
+import OrthoLang.Interpreter
 
 import Data.Scientific          (formatScientific, FPFormat(..))
 import OrthoLang.Modules.Muscle (aln)
