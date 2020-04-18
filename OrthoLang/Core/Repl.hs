@@ -131,7 +131,7 @@ cmds cfg =
   [ ("help"     , cmdHelp    )
   , ("load"     , cmdLoad    )
   , ("write"    , cmdWrite   ) -- TODO do more people expect 'save' or 'write'?
-  , ("needs"    , cmdNeeds   )
+  , ("neededfor", cmdNeededFor)
   , ("neededfor", cmdNeededBy)
   , ("drop"     , cmdDrop    )
   , ("type"     , cmdType    )

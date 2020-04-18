@@ -12,7 +12,7 @@ v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 
-ortholang —▶ :needs v1
+ortholang —▶ :neededfor v1
 v1 = "one"
 v3 = [v1, v2]
 

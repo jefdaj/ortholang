@@ -5,7 +5,7 @@ module OrthoLang.Core.Repl.Actions
     cmdDrop
   , cmdLoad
   , cmdNeededBy
-  , cmdNeeds
+  , cmdNeededFor
   , cmdReload
   , cmdWrite
 
@@ -92,8 +92,8 @@ cmdNeededBy st@(scr, cfg, _, _, _) hdl var = do
     Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
   return st
 
-cmdNeeds :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdNeeds st@(scr, cfg, _, _, _) hdl var = do
+cmdNeededFor :: GlobalEnv -> Handle -> String -> IO GlobalEnv
+cmdNeededFor st@(scr, cfg, _, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
   case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
