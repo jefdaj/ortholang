@@ -129,6 +129,8 @@ library
                     OrthoLang.Core.Pretty,
                     OrthoLang.Core.Help,
                     OrthoLang.Core.Repl,
+                    OrthoLang.Core.Repl.Actions,
+                    OrthoLang.Core.Repl.Messages,
                     OrthoLang.Core.Sanitize,
                     OrthoLang.Core.Types,
                     OrthoLang.Debug,

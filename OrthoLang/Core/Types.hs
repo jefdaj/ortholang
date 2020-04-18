@@ -87,6 +87,9 @@ module OrthoLang.Core.Types
   -- , RulesR2
   -- , runRulesR2
   -- , ParseEnv
+  , ReplM
+  , runReplM
+  , ReplCmd
   )
   where
 
@@ -108,6 +111,10 @@ import Data.Maybe (fromJust, catMaybes)
 import Control.Monad.Reader -- TODO only specific imports
 -- import Control.Monad.State.Lazy       -- (StateT, execStateT, lift)
 import Data.Typeable hiding (typeOf)
+import System.Console.Haskeline hiding (catch)
+import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
+import System.FilePath.Posix      ((</>))
+import System.IO                  (Handle, hPutStrLn, stdout)
 
 newtype Path = Path FilePath deriving (Eq, Ord, Show, Typeable)
 
@@ -692,3 +699,16 @@ typeSigMatches (Some g _)        t                = any (\s -> typeSigMatches s 
 --   where
 --     sameLength = length as == length bs
 --     allMatch   = all (\(s,t) -> typeSigMatches s t) (zip as bs)
+
+-----------------
+-- Repl monad --
+----------------
+
+type ReplM = StateT GlobalEnv IO
+
+runReplM :: Settings ReplM -> InputT ReplM (Maybe String) -> GlobalEnv -> IO ()
+runReplM settings myLoop st@(_, cfg, _, _, _) = do
+  _ <- execStateT (runInputT settings myLoop) st
+  return ()
+
+type ReplCmd = GlobalEnv -> Handle -> String -> IO GlobalEnv
