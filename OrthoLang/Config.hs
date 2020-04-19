@@ -154,39 +154,41 @@ getUsage = getDoc ["usage"] >>= parseUsageOrExit
  -}
 
 -- This is mainly for use in the REPL so no need to return usable data
-showConfigField :: Config -> String -> String
-showConfigField cfg key = case lookup key fields of
-  Nothing -> "no such config setting: " ++ key
-  Just (getter, _) -> getter cfg
+-- TODO just show the whole config; no need for fields
+-- TODO oh and there's a display function for that!
+-- showConfigField :: Config -> String -> String
+-- showConfigField cfg key = case lookup key fields of
+--   Nothing -> "no such config setting: " ++ key
+--   Just (getter, _) -> getter cfg
 
 setConfigField :: Config -> String -> String -> Either String (IO Config)
 setConfigField cfg key val = case lookup key fields of
   Nothing -> Left $ "no such config setting: " ++ key
-  Just (_, setter) -> setter cfg val
+  Just setter -> setter cfg val
 
 -- TODO add modules? maybe not much need
 -- TODO add interactive?
 -- TODO these show* functions could be Pretty instances, or just directly showable
 -- TODO remove anything that can't be shown
-fields :: [(String, (Config -> String,
-                     Config -> String -> Either String (IO Config)))]
+-- TODO remove show functions and show directly (possibly using Configurator.display)
+fields :: [(String, (Config -> String -> Either String (IO Config)))]
 fields =
-  [ ("script" , (show . cfgScript , setScript ))
-  , ("tmpdir" , (show . cfgTmpDir , setTmpdir ))
-  , ("workdir", (show . cfgWorkDir, setWorkdir))
-  , ("debug"  , (show . cfgDebug  , setDebug  ))
-  , ("wrapper", (show . cfgWrapper, setWrapper))
-  , ("report" , (show . cfgReport , setReport ))
-  , ("width"  , (show . cfgWidth  , setWidth  ))
-  , ("output" , (show . cfgOutFile, setOutFile))
-  , ("threads", (show . cfgThreads, setThreads))
+  [ ("script" , setScript )
+  , ("tmpdir" , setTmpdir )
+  , ("workdir", setWorkdir)
+  , ("debug"  , setDebug  )
+  , ("wrapper", setWrapper)
+  , ("report" , setReport )
+  , ("width"  , setWidth  )
+  , ("output" , setOutFile)
+  , ("threads", setThreads)
   -- TODO add share?
   ]
 
-showConfig :: Config -> String
-showConfig cfg = unlines $ map showField fields
-  where
-    showField (name, (getter, _)) = name ++ " = " ++ getter cfg
+-- showConfig :: Config -> String
+-- showConfig cfg = unlines $ map showField fields
+--   where
+--     showField (name, (getter, _)) = name ++ " = " ++ getter cfg
 
 setDebug :: Config -> String -> Either String (IO Config)
 setDebug cfg val = case maybeRead ("\"" ++ val ++ "\"") of

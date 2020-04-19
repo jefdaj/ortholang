@@ -20,13 +20,16 @@ import Prelude hiding ((<>))
 import Data.Scientific            (Scientific(), toBoundedInteger)
 -- import Development.Shake.FilePath ((</>))
 import OrthoLang.Types
-import OrthoLang.Config (showConfig)
+-- import OrthoLang.Config (showConfig)
 import Text.PrettyPrint.HughesPJClass
 import System.Console.Terminal.Size (Window(..), size)
 import System.IO (Handle, hPutStrLn)
 -- import Control.Monad.Trans (liftIO)
 -- import Data.String.Utils          (replace)
 import Test.Tasty.Golden (writeBinaryFile)
+
+import qualified Data.Text.Lazy as T
+import Text.Pretty.Simple (pShowNoColor)
 
 getWidth :: IO Int
 getWidth = do
@@ -127,7 +130,7 @@ pNested e = pPrint e
 
 -- TODO update this by mapping over the fields
 instance Pretty Config where
-  pPrint = text . showConfig
+  pPrint = text . T.unpack . pShowNoColor
 
 -- TODO change this to something useful
 instance Pretty Function where

@@ -39,7 +39,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter.Repl.Actions
 import OrthoLang.Interpreter.Repl.Messages
 
-import OrthoLang.Config    (showConfigField, setConfigField)
+import OrthoLang.Config    (setConfigField)
 import OrthoLang.Interpreter.Pretty    (pPrintHdl)
 import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
@@ -170,8 +170,12 @@ cmdConfig st@(scr, cfg, ref, ids, dRef) hdl s = do
     then pPrintHdl cfg hdl cfg >> return st -- TODO Pretty instance
     else if (length ws  > 2)
       then hPutStrLn hdl "too many variables" >> return st
+      -- TODO any better way to handle this?
+      -- TODO make repl tests for these
       else if (length ws == 1)
-        then hPutStrLn hdl (showConfigField cfg $ headOrDie "cmdConfig failed" ws) >> return st
+        -- TODO use pretty print or display here instead
+        -- TODO remove modules, since they're never used and can't show/read
+        then pPrintHdl cfg hdl cfg >> return st
         else case setConfigField cfg (headOrDie "cmdConfig failed" ws) (last ws) of
                Left err -> hPutStrLn hdl err >> return st
                Right iocfg' -> do
