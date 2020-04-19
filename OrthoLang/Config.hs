@@ -19,7 +19,6 @@ import Data.List                  (isPrefixOf)
 import Data.Maybe                 (isNothing)
 import Data.Text                  (pack)
 import Development.Shake          (newResourceIO)
-import GHC.Conc                   (getNumProcessors)
 import Paths_OrthoLang            (getDataFileName)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption, getAllArgs)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
@@ -52,7 +51,7 @@ loadField args cfg key
 
 defaultConfig :: FilePath -> FilePath -> IO Config
 defaultConfig td wd = do
-  cp <- getNumProcessors
+  -- cp <- getNumProcessors
   return Config
     { script      = Nothing
     , interactive = False
@@ -69,7 +68,7 @@ defaultConfig td wd = do
     , secure      = False
     , progressbar      = True
     -- , cfgParLock     = par
-    , cfgThreads     = cp
+    -- , cfgThreads     = cp
     , showhidden     = False
     }
 
@@ -174,7 +173,7 @@ fields =
   , ("report" , setReport )
   , ("width"  , setWidth  )
   , ("output" , setOutFile)
-  , ("threads", setThreads)
+  -- , ("threads", setThreads)
   -- TODO add share?
   ]
 
@@ -238,10 +237,10 @@ setReport cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   v       -> Right $ return $ cfg { report = v }
 
 -- TODO remove?
-setThreads :: Config -> String -> Either String (IO Config)
-setThreads cfg val = case maybeRead val of
-  Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { cfgThreads = v }
+-- setThreads :: Config -> String -> Either String (IO Config)
+-- setThreads cfg val = case maybeRead val of
+  -- Nothing -> Left  $ "invalid: " ++ val
+  -- Just v  -> Right $ return $ cfg { cfgThreads = v }
 
 -- standard int
 setWidth :: Config -> String -> Either String (IO Config)

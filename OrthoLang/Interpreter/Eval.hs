@@ -68,6 +68,8 @@ import qualified System.Progress as P
 import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
 import System.Time.Utils (renderSecs)
 
+import GHC.Conc                   (getNumProcessors)
+
 -- import qualified Data.Text.Lazy as T
 -- import Text.Pretty.Simple (pShowNoColor)
 
@@ -151,11 +153,12 @@ myShake :: Config -> LocksRef -> IDsRef -> DigestsRef
         -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
 myShake cfg ref ids dr pm delay rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
+  nproc <- getNumProcessors
   let tDir = tmpdir cfg
       shakeOpts = shakeOptions
         { shakeFiles     = tDir
         , shakeVerbosity = Quiet -- TODO can you make it  but sent only to the logfile?
-        , shakeThreads   = 8 -- max 1 (cfgThreads cfg - 1)
+        , shakeThreads   = nproc
         , shakeReport    = [tDir </> "profile.html"] ++ maybeToList (report cfg)
         , shakeAbbreviations = [(tDir, "$TMPDIR"), (workdir cfg, "$WORKDIR")]
         , shakeChange    = ChangeModtimeAndDigestInput
@@ -283,13 +286,14 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 eval :: Handle -> Config -> LocksRef -> IDsRef -> DigestsRef -> Type -> Rules ResPath -> IO ()
 eval hdl cfg ref ids dr rtype p = do
   start <- getCurrentTime
+  nproc <- getNumProcessors
   let ep = EvalProgress
              { epTitle = takeFileName $ fromMaybe "ortholang" $ script cfg
              , epStart  = start
              , epUpdate = start
              , epDone    = 0
              , epTotal   = 0
-             , epThreads = cfgThreads cfg
+             , epThreads = nproc
              , epWidth = fromMaybe 80 $ termcolumns cfg
              , epArrowShaft = '—'
              , epArrowHead = '▶'

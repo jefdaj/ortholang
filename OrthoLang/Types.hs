@@ -493,8 +493,7 @@ data Config = Config
 
   -- TODO remove these
   , cfgModules  :: [Module]
-  -- , cfgParLock  :: Resource
-  , cfgThreads  :: Int
+  -- , cfgThreads  :: Int
   , showhidden  :: Bool
   }
   deriving (Show, Typeable)
