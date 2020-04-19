@@ -493,7 +493,7 @@ data Config = Config
 
   -- TODO remove these
   , cfgModules  :: [Module]
-  , cfgParLock  :: Resource
+  -- , cfgParLock  :: Resource
   , cfgThreads  :: Int
   , showhidden  :: Bool
   }

@@ -52,7 +52,6 @@ loadField args cfg key
 
 defaultConfig :: FilePath -> FilePath -> IO Config
 defaultConfig td wd = do
-  par <- newResourceIO "parallel" 8 -- TODO set to number of nodes
   cp <- getNumProcessors
   return Config
     { script      = Nothing
@@ -69,7 +68,7 @@ defaultConfig td wd = do
     , termcolumns       = Nothing
     , secure      = False
     , progressbar      = True
-    , cfgParLock     = par
+    -- , cfgParLock     = par
     , cfgThreads     = cp
     , showhidden     = False
     }

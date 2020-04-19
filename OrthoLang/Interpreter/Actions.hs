@@ -93,6 +93,7 @@ import Network.Download (openURIString)
 -- import Control.Exception (try)
 import Control.Exception.Safe (catchAny)
 import Data.Scientific            (Scientific())
+import Data.IORef (readIORef)
 
 ---------------
 -- debugging --
@@ -566,8 +567,10 @@ runCmd desc = do
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory stdoutPath
   dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
+  (lRef :: LocksRef) <- fmap fromJust getShakeExtra
+  (disk, par, _) <- liftIO $ readIORef lRef
   let parLockFn = if cmdParallel desc
-                    then \f -> withResource (cfgParLock cfg) 1 f
+                    then \f -> withResource par 1 f
                     else id
       -- TODO any problem locking the whole dir?
       -- TODO and if not, can the other locks inside that be removed?
@@ -584,7 +587,6 @@ runCmd desc = do
   writeLockFn $ withReadLocks' inPaths' $ do
     -- TODO remove opts?
     -- TODO always assume disk is 1?
-    Just (disk, _) <- (getShakeExtra :: Action (Maybe LocksRef))
     Exit code <- withResource disk (length inPaths + 1) $ case wrapper cfg of
       Nothing -> command (cmdOptions desc) (cmdBinary desc) (cmdArguments desc)
       Just w  -> command (Shell:cmdOptions desc) w [escape $ unwords (cmdBinary desc:cmdArguments desc)]
@@ -646,8 +648,9 @@ handleCmdError bin n stderrPath rmPatterns = do
 hashContent :: Path -> Action String
 hashContent path = do
   -- alwaysRerun -- TODO does this help?
-  cfg <- fmap fromJust getShakeExtra
-  Just (disk, _) <- (getShakeExtra :: Action (Maybe LocksRef))
+  cfg  <- fmap fromJust getShakeExtra
+  (lRef :: LocksRef) <- fmap fromJust getShakeExtra
+  (disk, _, _) <- liftIO $ readIORef lRef
   let loc = "core.actions.hashContent"
       path' = fromPath loc cfg path
   need' loc [path']

@@ -47,15 +47,20 @@ import Control.Exception.Safe     (catch, throwM)
 import System.IO.Error            (isDoesNotExistError)
 import Text.Regex.Posix           ((=~))
 
-import qualified Control.Logging as L
-import qualified Data.Text as T
+-- import qualified Control.Logging as L
+-- import qualified Data.Text as T
+
+-- import Data.IORef (readIORef)
 
 -- import Control.Concurrent.Thread.Delay (delay)
+
+-- TODO move these to Types?
 
 -- TODO parametarize FilePath and re-export with OrthoLangPath in Types.hs?
 -- type Locks = (Resource, IORef (Map FilePath (RWLock, FileProgress)))
 type Locks    = Map FilePath (RWLock, FileProgress)
-type LocksRef = (Resource, IORef Locks)
+
+type LocksRef = IORef (Resource, Resource, Locks) -- TODO put in a Locks record
 
 -- TODO should there also be Failed?
 data FileProgress = ReadOnly | Success Int | Attempt Int
@@ -78,56 +83,57 @@ initLocks = do
   -- only approximately related to the number of files open,
   -- but keeps them in check at least
   -- TODO how high is high enough to allow all sonicparanoid but not hit the OS limit?
-  disk  <- newResourceIO "disk" 1000
-  locks <- newIORef Map.empty
-  return (disk, locks)
+  rDisk <- newResourceIO "disk" 1000
+  rPar  <- newResourceIO "parallel" 8 -- TODO set to number of nodes
+  lRef  <- newIORef (rDisk, rPar, Map.empty)
+  return lRef
 
 getReadLock :: LocksRef -> FilePath -> IO RWLock
-getReadLock (_, ref) path = do
+getReadLock lRef path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
   debugLock $ "getReadLock getting lock for '" ++ path ++ "'"
-  atomicModifyIORef' ref $ \c -> case Map.lookup path c of
-    Nothing -> (Map.insert path (l, ReadOnly) c, l) -- TODO error here too sometimes?
+  atomicModifyIORef' lRef $ \(d,p,c) -> case Map.lookup path c of
+    Nothing -> ((d,p,Map.insert path (l, ReadOnly) c), l) -- TODO error here too sometimes?
     Just (l', Attempt n) ->
       trace "locks.getReadLock"
         ("Attempt to read file not written successfully yet: '" ++ path ++ "'")
-        (Map.insert path (l', Attempt (n+1)) c, l')
-    Just (l', ReadOnly ) -> (c, l')
-    Just (l', Success _) -> (c, l')
+        ((d,p,Map.insert path (l', Attempt (n+1)) c), l')
+    Just (l', ReadOnly ) -> ((d,p,c), l')
+    Just (l', Success _) -> ((d,p,c), l')
 
 getWriteLock :: LocksRef -> FilePath -> IO RWLock
-getWriteLock (_, ref) path = do
+getWriteLock lRef path = do
   l <- RWLock.new -- TODO how to avoid creating extra locks here?
   debugLock $ "getReadLock getting lock for '" ++ path ++ "'"
-  atomicModifyIORef' ref $ \c -> case Map.lookup path c of
-    Nothing -> (Map.insert path (l, Attempt 1) c, l)
+  atomicModifyIORef' lRef $ \(d,p,c) -> case Map.lookup path c of
+    Nothing -> ((d,p,Map.insert path (l, Attempt 1) c), l)
     -- TODO hey should this be l' in the insert???
     -- Just (l', Success n) -> if whitelisted path
     --                           then (Map.insert path (l, Success (n+1)) c, l')
     --                           else warn "getWriteLock" $ "Attempt to re-write successful file: '" ++ path ++ "'"
-    Just (l', Success n) -> (Map.insert path (l', Attempt (n+1)) c, l')
-    Just (l', Attempt n) -> (Map.insert path (l', Attempt (n+1)) c, l')
+    Just (l', Success n) -> ((d,p,Map.insert path (l', Attempt (n+1)) c), l')
+    Just (l', Attempt n) -> ((d,p,Map.insert path (l', Attempt (n+1)) c), l')
     Just (l', ReadOnly ) -> trace "getWriteLock"
                               ("Attempt to write read-only file: '" ++ path ++ "'")
-                              (c, l')
+                              ((d,p,c), l')
 
 -- TODO milder error that doesn't crash here
 markDone :: LocksRef -> FilePath -> IO ()
-markDone (_, ref) path = do
+markDone lRef path = do
   debugLock $ "markDone '" ++ path ++ "'"
-  atomicModifyIORef' ref $ \c -> case Map.lookup path c of
+  atomicModifyIORef' lRef $ \(d,p,c) -> case Map.lookup path c of
     Nothing -> trace "markDone"
                  ("markDone called on nonexistent lock path '" ++ path ++ "'")
-                 (c, ())
-    Just (l, ReadOnly ) -> trace "markDone"
+                 ((d,p,c), ())
+    Just (_, ReadOnly ) -> trace "markDone"
                              ("markDone called on read-only lock path '" ++ path ++ "'")
-                             (c, ())
+                             ((d,p,c), ())
     Just (l, Success n) -> if whitelisted path
-                             then (Map.insert path (l, Success (n+1)) c, ())
+                             then ((d,p,Map.insert path (l, Success (n+1)) c), ())
                              else trace "markDone"
                                     ("markDone called on already-finished lock path '" ++ path ++ "'")
-                                    (Map.insert path (l, Success (n+1)) c, ())
-    Just (l, Attempt n) -> (Map.insert path (l, Success (n+1)) c, ())
+                                    ((d,p,Map.insert path (l, Success (n+1)) c), ())
+    Just (l, Attempt n) -> ((d,p,Map.insert path (l, Success (n+1)) c), ())
 
 -- describes some paths we don't want to see duplicate write errors for
 whitelisted :: FilePath -> Bool
