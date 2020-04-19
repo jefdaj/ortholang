@@ -63,7 +63,7 @@ aOrthofinder [out, faListPath] = do
       faListPath' = fromPath loc cfg faListPath
       loc = "modules.orthofinder.aOrthofinder"
       out''       = traceA loc out' [out', faListPath']
-      tmpDir = cfgTmpDir cfg </> "cache" </> "orthofinder" </> digest faListPath
+      tmpDir = tmpdir cfg </> "cache" </> "orthofinder" </> digest faListPath
       statsPath = toPath loc cfg $ tmpDir
                     </> "OrthoFinder" </> "Results_"
                     </> "Comparative_Genomics_Statistics" </> "Statistics_Overall.tsv"

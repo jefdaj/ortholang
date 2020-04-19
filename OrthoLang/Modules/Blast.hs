@@ -102,7 +102,7 @@ aMkBlastFromDb bCmd [o, e, q, p] = do
   prefix <- readPath loc p'
   let eDec    = formatScientific Fixed Nothing (read eStr) -- format as decimal
       prefix' = fromPath loc cfg prefix
-      -- cDir    = cfgTmpDir cfg </> takeDirectory prefix' -- TODO remove?
+      -- cDir    = tmpdir cfg </> takeDirectory prefix' -- TODO remove?
       ptn     = prefix' ++ "*"
       -- args    = [ "-db", takeFileName prefix'
       --           , "-evalue", eDec

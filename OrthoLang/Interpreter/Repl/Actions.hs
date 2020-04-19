@@ -51,14 +51,14 @@ cmdLoad st@(scr, cfg, ref, ids, dRef) hdl path = do
   if not dfe
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
-      let cfg' = cfg { cfgScript = Just path' } -- TODO why the False??
+      let cfg' = cfg { script = Just path' } -- TODO why the False??
       new <- parseFile (scr, cfg', ref, ids, dRef) path' -- TODO insert ids
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
         Right s -> clear >> cmdShow (s, cfg', ref, ids, dRef) hdl ""
 
 cmdReload :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdReload st@(_, cfg, _, _, _) hdl _ = case cfgScript cfg of
+cmdReload st@(_, cfg, _, _, _) hdl _ = case script cfg of
   Nothing -> cmdDrop st hdl ""
   Just s  -> cmdLoad st hdl s
 
@@ -66,7 +66,7 @@ cmdWrite :: GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdWrite st@(scr, cfg, locks, ids, dRef) hdl line = case words line of
   [path] -> do
     saveScript cfg scr path
-    return (scr, cfg { cfgScript = Just path }, locks, ids, dRef)
+    return (scr, cfg { script = Just path }, locks, ids, dRef)
   [var, path] -> case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just e  -> saveScript cfg (depsOnly e scr) path >> return st
@@ -102,7 +102,7 @@ cmdNeededFor st@(scr, cfg, _, _, _) hdl var = do
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdDrop (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { cfgScript = Nothing }, ref, ids, dRef)
+cmdDrop (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { script = Nothing }, ref, ids, dRef)
 cmdDrop st@(scr, cfg, ref, ids, dRef) hdl var = do
   let v = Var (RepID Nothing) var
   case lookup v scr of

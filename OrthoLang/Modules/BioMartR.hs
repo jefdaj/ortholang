@@ -241,7 +241,7 @@ rBioMartR fn scr expr@(Fun rtn salt _ _ [ss]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let loc = "modules.biomartr.rBioMartR"
-      bmTmp   = cfgTmpDir cfg </> "cache" </> "biomartr"
+      bmTmp   = tmpdir cfg </> "cache" </> "biomartr"
       tmp'    = toPath loc cfg bmTmp
       out     = exprPath cfg dRef scr expr
       out'    = fromPath loc cfg out

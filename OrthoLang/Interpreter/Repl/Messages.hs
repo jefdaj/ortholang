@@ -47,7 +47,7 @@ promptArrow = " —▶ "
 shortPrompt :: Config -> String
 shortPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command didn't print anything
   where
-    name = case cfgScript cfg of
+    name = case script cfg of
       Nothing -> "ortholang"
       Just s  -> takeFileName s
 

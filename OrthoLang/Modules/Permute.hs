@@ -51,7 +51,7 @@ aPermute comboFn (ExprPath out) iPath = do
   let loc = "modules.permute.aPermute"
   (ListOf lt@(ListOf et)) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out)
   elements <- readStrings loc et iPath
-  let mkOut p = unsafeExprPathExplicit cfg dRef "list" lt Nothing [digest $ makeRelative (cfgTmpDir cfg) p]
+  let mkOut p = unsafeExprPathExplicit cfg dRef "list" lt Nothing [digest $ makeRelative (tmpdir cfg) p]
       oPaths  = map mkOut elements
       oPaths' = map (fromPath loc cfg) oPaths
       combos  = comboFn elements

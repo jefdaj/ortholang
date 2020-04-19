@@ -123,10 +123,10 @@ aSimple' outPath actFn mTmpDir argPaths = do
       outPath'   = fromPath loc cfg outPath
       out = traceA loc outPath' (outPath':tmpDir':argPaths')
       (tmpDir, tmpDir') = case mTmpDir of
-                  Nothing  -> (toPath loc cfg $ cfgTmpDir cfg, cfgTmpDir cfg)
+                  Nothing  -> (toPath loc cfg $ tmpdir cfg, tmpdir cfg)
                   Just dir -> let d = fromPath loc cfg dir </> hashes in (toPath loc cfg d, d)
   need' loc argPaths'
-  argPaths'' <- liftIO $ mapM (fmap (toPath loc cfg) . resolveSymlinks (Just $ cfgTmpDir cfg)) argPaths'
+  argPaths'' <- liftIO $ mapM (fmap (toPath loc cfg) . resolveSymlinks (Just $ tmpdir cfg)) argPaths'
   let o' = debugC loc ("outPath': " ++ outPath' ++ "\"") outPath
       as = debugC loc ("argsPaths'': " ++ show argPaths'') argPaths''
   actFn tmpDir (o':as)

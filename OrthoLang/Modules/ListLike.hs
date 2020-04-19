@@ -70,7 +70,7 @@ rLength :: RulesFn
 rLength scr e@(Fun _ _ _ _ [l]) = do
   (ExprPath lPath) <- rExpr scr l
   -- TODO once all modules are converted, add back phantom types!
-  -- let relPath = makeRelative (cfgTmpDir cfg) lPath
+  -- let relPath = makeRelative (tmpdir cfg) lPath
   -- (ExprPath outPath) = unsafeExprPathExplicit cfg True num "length" [relPath]
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules

@@ -50,9 +50,9 @@ parseAndShow p s str' = case runParseM p s str' of
 -- runParseM :: ParseM a -> (Config, Script) -> String -> Either ParseError a
 -- runParseM p s@(cfg, _) = P.runParser p s desc
 --   where
---     desc = case cfgScript cfg of
+--     desc = case script cfg of
 --              Nothing -> "repl"
---              Just f  -> makeRelative (cfgWorkDir cfg) f
+--              Just f  -> makeRelative (workdir cfg) f
 
 parseWithLeftOver :: ParseM a -> (Config, Script) -> String -> Either String (a,String)
 parseWithLeftOver p s = runParseM ((,) <$> p <*> leftOver) s
@@ -112,9 +112,9 @@ runParseM op (cfg, scr) input = case runExcept (runReaderT (runPT op scr sn inpu
   Right (Left  e) -> Left (show e) -- Parsec error; convert to String
   Right (Right r) -> Right r
   where
-    sn = case cfgScript cfg of
+    sn = case script cfg of
            Nothing -> "repl"
-           Just f  -> makeRelative (cfgWorkDir cfg) f
+           Just f  -> makeRelative (workdir cfg) f
 
 parseFail :: String -> ParseM a
 parseFail = lift . lift . throwE

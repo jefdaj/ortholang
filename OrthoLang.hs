@@ -48,20 +48,20 @@ main = withFileLogging "ortholang.log" $ do
     exitSuccess
 
   cfg <- loadConfig modules args
-  setEnv "TMPDIR" $ cfgTmpDir cfg -- for subprocesses like R
+  setEnv "TMPDIR" $ tmpdir cfg -- for subprocesses like R
   ref <- initLocks
-  setCurrentDirectory $ cfgWorkDir cfg
+  setCurrentDirectory $ workdir cfg
   ids <- newIORef emptyIDs
   dRef <- newIORef emptyDigests
 
   dispatch args "test" $ do
     -- args is used here to set up the Tasty environment vars
-    runTests args (cfg {cfgWidth = Just 100}) ref ids dRef
+    runTests args (cfg {termcolumns = Just 100}) ref ids dRef
     exitSuccess
 
   -- TODO typecheck only option here
   let initialState = (emptyScript, cfg, ref, ids, dRef)
-  if (cfgInteractive cfg)
+  if (interactive cfg)
     then runRepl  initialState
     else evalFile initialState stdout
 

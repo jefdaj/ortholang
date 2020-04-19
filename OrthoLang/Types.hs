@@ -470,25 +470,33 @@ num = Type
 -- TODO rename cfg prefix to just c?
 -- TODO remove anything non-printable
 -- TODO read defaults from a config file
+
+{-|
+Options loaded from files + CLI, and edited in the REPL.
+Field names Haskell naming conventions to simplify the config file.
+They should be consistent the Docopts flags in docs/usage.txt
+-}
 data Config = Config
-  { cfgScript  :: Maybe FilePath
-  , cfgInteractive :: Bool
-  , cfgTmpDir  :: FilePath
-  , cfgWorkDir :: FilePath
-  , cfgDebug   :: Maybe String
-  , cfgModules :: [Module]
-  , cfgWrapper :: Maybe FilePath
-  , cfgOutFile :: Maybe FilePath
-  , cfgShare   :: Maybe FilePath
-  , cfgReport  :: Maybe String
-  , cfgTestPtn :: [String] -- [] means run all tests
-  , cfgWidth   :: Maybe Int -- for testing
-  , cfgSecure  :: Bool
-  , cfgNoProg  :: Bool
-  , cfgParLock :: Resource
-  , cfgOS      :: String
-  , cfgThreads :: Int
-  , cfgDevMode :: Bool
+  { script      :: Maybe FilePath
+  , interactive :: Bool
+  , tmpdir      :: FilePath
+  , workdir     :: FilePath
+  , debugregex  :: Maybe String
+  , wrapper     :: Maybe FilePath
+  , outfile     :: Maybe FilePath
+  , sharedir    :: Maybe FilePath
+  , report      :: Maybe String
+  , testpattern :: [String] -- [] means run all tests
+  , termcolumns :: Maybe Int -- for testing
+  , secure      :: Bool
+  , progressbar :: Bool
+
+  -- TODO remove these
+  , cfgModules  :: [Module]
+  , cfgParLock  :: Resource
+  , cfgOS       :: String
+  , cfgThreads  :: Int
+  , showhidden  :: Bool
   }
   deriving (Show, Typeable)
 

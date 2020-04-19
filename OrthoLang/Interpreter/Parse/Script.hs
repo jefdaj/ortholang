@@ -104,7 +104,7 @@ pAssign = debugParser "pAssign" $ do
   cfg <- ask
   scr <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
-  when ((not $ cfgInteractive cfg) && (hasKeyAL v scr) && (vName /= "result")) $ do
+  when ((not $ interactive cfg) && (hasKeyAL v scr) && (vName /= "result")) $ do
     fail $ "duplicate variable \"" ++ vName ++ "\""
   e <- lexeme pExpr
 

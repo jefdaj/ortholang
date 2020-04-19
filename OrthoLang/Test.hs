@@ -42,9 +42,9 @@ mkTestConfig cfg dir =
   -- let dir' = replace ":" "_" dir -- ':' messes with BLASTDB paths, and probably others
   -- in cfg
   cfg
-    { cfgScript  = Nothing
-    , cfgTmpDir  = dir
-    , cfgWorkDir = dir
+    { script  = Nothing
+    , tmpdir  = dir
+    , workdir = dir
     }
 
 dbg :: String -> IO ()

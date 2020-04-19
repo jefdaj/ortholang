@@ -83,7 +83,7 @@ rSetFold fn scr e@(Fun _ _ _ _ [lol]) = do
   dRef <- fmap fromJust getShakeExtraRules
   let loc = "modules.sets.rSetFold"
       oPath      = fromPath loc cfg $ exprPath cfg dRef scr e
-      oPath'     = cfgTmpDir cfg </> oPath
+      oPath'     = tmpdir cfg </> oPath
       oPath''    = debugRules "rSetFold" e oPath
       (ListOf t) = typeOf lol
   oPath %> \_ -> aSetFold fn t oPath' setsPath
@@ -116,7 +116,7 @@ canonicalLinks :: Config -> Type -> [FilePath] -> IO [FilePath]
 canonicalLinks cfg rtn =
   if rtn `elem` [str, num]
     then return
-    else \ps -> mapM (resolveSymlinks (Just $ cfgTmpDir cfg)) ps
+    else \ps -> mapM (resolveSymlinks (Just $ tmpdir cfg)) ps
 
 -- TODO would resolving symlinks be enough? if so, much less disk IO!
 -- see https://stackoverflow.com/a/8316542/429898

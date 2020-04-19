@@ -151,17 +151,17 @@ myShake :: Config -> LocksRef -> IDsRef -> DigestsRef
         -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
 myShake cfg ref ids dr pm delay rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
-  let tDir = cfgTmpDir cfg
+  let tDir = tmpdir cfg
       shakeOpts = shakeOptions
         { shakeFiles     = tDir
         , shakeVerbosity = Quiet -- TODO can you make it  but sent only to the logfile?
         , shakeThreads   = 8 -- max 1 (cfgThreads cfg - 1)
-        , shakeReport    = [tDir </> "profile.html"] ++ maybeToList (cfgReport cfg)
-        , shakeAbbreviations = [(tDir, "$TMPDIR"), (cfgWorkDir cfg, "$WORKDIR")]
+        , shakeReport    = [tDir </> "profile.html"] ++ maybeToList (report cfg)
+        , shakeAbbreviations = [(tDir, "$TMPDIR"), (workdir cfg, "$WORKDIR")]
         , shakeChange    = ChangeModtimeAndDigestInput
         -- , shakeCommandOptions = [EchoStdout True]
         , shakeProgress = updateLoop delay . updateProgress pm
-        -- , shakeShare = cfgShare cfg -- TODO why doesn't this work?
+        -- , shakeShare = sharedir cfg -- TODO why doesn't this work?
         -- , shakeCloud = ["localhost"] -- TODO why doesn't this work?
         -- , shakeLineBuffering = True
         -- , shakeStaunch = True -- TODO is this a good idea?
@@ -230,7 +230,7 @@ myShake cfg ref ids dr pm delay rules = do
         }
 
   oneLineShakeErrors "core.eval.myShake" $ (shake shakeOpts . alternatives) rules
-  -- removeIfExists $ cfgTmpDir cfg </> ".shake.lock"
+  -- removeIfExists $ tmpdir cfg </> ".shake.lock"
   --
 {- This seems to be separately required to show the final result of eval.
  - It can't be moved to Pretty.hs either because that causes an import cycle.
@@ -284,13 +284,13 @@ eval :: Handle -> Config -> LocksRef -> IDsRef -> DigestsRef -> Type -> Rules Re
 eval hdl cfg ref ids dr rtype p = do
   start <- getCurrentTime
   let ep = EvalProgress
-             { epTitle = takeFileName $ fromMaybe "ortholang" $ cfgScript cfg
+             { epTitle = takeFileName $ fromMaybe "ortholang" $ script cfg
              , epStart  = start
              , epUpdate = start
              , epDone    = 0
              , epTotal   = 0
              , epThreads = cfgThreads cfg
-             , epWidth = fromMaybe 80 $ cfgWidth cfg
+             , epWidth = fromMaybe 80 $ termcolumns cfg
              , epArrowShaft = '—'
              , epArrowHead = '▶'
              }
@@ -299,7 +299,7 @@ eval hdl cfg ref ids dr rtype p = do
                 { progressDelay = delay
                 , progressHandle = hdl
                 , progressInitial = ep
-                , progressRender = if cfgNoProg cfg then (const "") else renderProgress
+                , progressRender = if progressbar cfg then (const "") else renderProgress
                 }
   eval' delay pOpts p -- TODO ignoreErrors again?
   where
@@ -320,11 +320,11 @@ eval hdl cfg ref ids dr rtype p = do
          - TODO move this logic to the top level?
          -}
         -- ids' <- liftIO $ readIORef ids
-        when (cfgInteractive cfg) (printShort cfg ref ids pm rtype path)
+        when (interactive cfg) (printShort cfg ref ids pm rtype path)
         completeProgress pm
-        case cfgOutFile cfg of
+        case outfile cfg of
           Just out -> writeResult cfg ref ids (toPath loc cfg path) out
-          Nothing  -> when (not $ cfgInteractive cfg)
+          Nothing  -> when (not $ interactive cfg)
                         -- TODO printLong should work more like printShort but no line limit?
                         -- (printLong cfg ref ids pm rtype path)
                         (printShort cfg ref ids pm rtype path)
@@ -381,7 +381,7 @@ evalScript hdl (scr, c, ref, ids, dRef) =
 
 -- TODO should there be a new idsref for this? how about digestsref?
 evalFile :: GlobalEnv -> Handle -> IO ()
-evalFile st@(_, cfg, ref, ids, dRef) hdl = case cfgScript cfg of
+evalFile st@(_, cfg, ref, ids, dRef) hdl = case script cfg of
   Nothing  -> putStrLn "no script during eval. that's not right!"
   Just scr -> do
     s <- parseFileIO st scr -- TODO just take a GlobalEnv?

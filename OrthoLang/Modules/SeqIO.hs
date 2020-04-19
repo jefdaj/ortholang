@@ -175,7 +175,7 @@ aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
   cfg <- fmap fromJust getShakeExtra
   let faPath'   = fromPath loc cfg faPath
       ftPath'   = fromPath loc cfg ftPath
-      exprDir'  = cfgTmpDir cfg </> "exprs"
+      exprDir'  = tmpdir cfg </> "exprs"
       tmpDir'   = fromPath loc cfg $ cacheDir cfg "seqio"
       outDir'   = exprDir' </> "load_" ++ tExtOf rtn
       outPath'  = fromPath loc cfg outPath
@@ -354,7 +354,7 @@ aConcat cType [outPath, inList] = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
   cfg <- fmap fromJust getShakeExtra
-  let tmpDir'   = cfgTmpDir cfg </> "cache" </> "concat"
+  let tmpDir'   = tmpdir cfg </> "cache" </> "concat"
       emptyPath = tmpDir' </> ("empty" ++ tExtOf cType) <.> "txt"
       emptyStr  = "<<empty" ++ tExtOf cType ++ ">>"
       inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
@@ -405,8 +405,8 @@ aSplit :: String -> String -> ([Path] -> Action ())
 aSplit name ext [outPath, faPath] = do
   cfg <- fmap fromJust getShakeExtra
   let faPath'   = fromPath loc cfg faPath
-      exprDir'  = cfgTmpDir cfg </> "exprs"
-      tmpDir'   = cfgTmpDir cfg </> "cache" </> name -- TODO is there a fn for this?
+      exprDir'  = tmpdir cfg </> "exprs"
+      tmpDir'   = tmpdir cfg </> "cache" </> name -- TODO is there a fn for this?
       prefix'   = tmpDir' </> digest faPath ++ "/"
       outDir'   = exprDir' </> "load_" ++ ext
       outPath'  = fromPath loc cfg outPath

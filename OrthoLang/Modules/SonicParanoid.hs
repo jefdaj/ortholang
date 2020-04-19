@@ -31,7 +31,7 @@ spr = Type
   , tDesc = "SonicParanoid results"
   , tShow = defaultShow
   -- , tShow = \cfg ref path -> do
-  --     path' <- resolveSymlinks (Just $ cfgTmpDir cfg) path
+  --     path' <- resolveSymlinks (Just $ tmpdir cfg) path
   --     let dir = takeDirectory $ takeDirectory path'
   --         species = dir </> "species.txt"
   --     nSpecies <- fmap (length . lines) $ readFileStrict ref species
@@ -60,11 +60,11 @@ sonicparanoid = let name = "sonicparanoid" in Function
 aSonicParanoid :: [Path] -> Action ()
 aSonicParanoid [out, faListPath] = do
   cfg <- fmap fromJust getShakeExtra
-  let cDir    = cfgTmpDir cfg </> "cache" </> "sonicparanoid"
+  let cDir    = tmpdir cfg </> "cache" </> "sonicparanoid"
       sharedDir   = cDir </> "shared"
       tmpDir      = cDir </> digest faListPath
       -- mmseqsDir   = sharedDir </> "mmseqs2_db"
-      dbDir       = cfgTmpDir cfg </> "cache" </> "mmseqs" </> "createdb" -- this is shared with the MMSeqs module TODO make explicit
+      dbDir       = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" -- this is shared with the MMSeqs module TODO make explicit
       -- outDir      = tmpDir </> "result" -- TODO copy input files here?
       inDir       = tmpDir </> "input_links" -- TODO can you prevent it duplicating this to input?
 
@@ -110,7 +110,7 @@ aSonicParanoid [out, faListPath] = do
     --   , "-o", tmpDir
     --   , "-m", "fast" -- TODO set this based on fn name
     --   , "-noidx" -- TODO optional?
-    --   , "-d" -- TODO set based on cfgDebug
+    --   , "-d" -- TODO set based on debugregex
     --   , "-op" -- write ortholog pairs
     --   -- , "-ka" -- TODO is this good?
     --   ]

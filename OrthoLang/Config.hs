@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- TODO show cfgShare
+-- TODO show sharedir
 
 module OrthoLang.Config where
 
@@ -57,24 +57,24 @@ defaultConfig td wd = do
   os' <- getOS
   cp <- getNumProcessors
   return Config
-    { cfgScript      = Nothing
-    , cfgInteractive = False
-    , cfgTmpDir      = td
-    , cfgWorkDir     = wd
-    , cfgDebug       = Nothing
+    { script      = Nothing
+    , interactive = False
+    , tmpdir      = td
+    , workdir     = wd
+    , debugregex       = Nothing
     , cfgModules     = [] -- TODO fix this
-    , cfgWrapper     = Nothing
-    , cfgOutFile     = Nothing
-    , cfgShare       = Nothing
-    , cfgReport      = Nothing
-    , cfgTestPtn     = [] -- [] means run all tests
-    , cfgWidth       = Nothing
-    , cfgSecure      = False
-    , cfgNoProg      = True
+    , wrapper     = Nothing
+    , outfile     = Nothing
+    , sharedir       = Nothing
+    , report      = Nothing
+    , testpattern     = [] -- [] means run all tests
+    , termcolumns       = Nothing
+    , secure      = False
+    , progressbar      = True
     , cfgParLock     = par
     , cfgOS          = os'
     , cfgThreads     = cp
-    , cfgDevMode     = False
+    , showhidden     = False
     }
 
 loadConfig :: [Module] -> Arguments -> IO Config
@@ -99,18 +99,18 @@ loadConfig mods args = do
   let ctp = getAllArgs args (longOption "test")
   let int = isNothing csc' || (isPresent args $ longOption "interactive")
   let res = def
-              { cfgScript  = csc'
-              , cfgInteractive = int
-              , cfgDebug   = dbg
+              { script  = csc'
+              , interactive = int
+              , debugregex   = dbg
               , cfgModules = mods
-              , cfgWrapper = cls
-              , cfgReport  = rep
-              , cfgTestPtn = ctp
-              , cfgWidth   = Nothing -- not used except in testing
-              , cfgSecure  = isPresent args $ longOption "secure"
-              , cfgNoProg  = isPresent args $ longOption "noprogress"
-              , cfgOutFile = out
-              , cfgShare   = shr
+              , wrapper = cls
+              , report  = rep
+              , testpattern = ctp
+              , termcolumns   = Nothing -- not used except in testing
+              , secure  = isPresent args $ longOption "secure"
+              , progressbar  = isPresent args $ longOption "noprogress"
+              , outfile = out
+              , sharedir   = shr
               }
   debug' $ show res
   updateDebug dbg
@@ -150,7 +150,7 @@ getUsage = getDoc ["usage"] >>= parseUsageOrExit
  - might change in the future though, because turns out getters and setters are
  - horrible!
  -
- - Note that cfgSecure is purposely not avialable here.
+ - Note that secure is purposely not avialable here.
  -}
 
 -- This is mainly for use in the REPL so no need to return usable data
@@ -195,7 +195,7 @@ setDebug cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ do
     updateDebug $ Just v
-    return $ cfg { cfgDebug = Just v }
+    return $ cfg { debugregex = Just v }
 
 -- this is run during setDebug, and once in loadConfig
 updateDebug :: Maybe String -> IO ()
@@ -214,35 +214,35 @@ updateDebug regex = case regex of
 
 -- standard string
 setScript :: Config -> String -> Either String (IO Config)
-setScript cfg "Nothing" = Right $ return $ cfg { cfgScript = Nothing }
+setScript cfg "Nothing" = Right $ return $ cfg { script = Nothing }
 setScript cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { cfgScript = Just v }
+  Just v  -> Right $ return $ cfg { script = Just v }
 
 -- standard string
 setTmpdir :: Config -> String -> Either String (IO Config)
 setTmpdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { cfgTmpDir = v }
+  Just v  -> Right $ return $ cfg { tmpdir = v }
 
 -- standard string
 setWorkdir :: Config -> String -> Either String (IO Config)
 setWorkdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { cfgWorkDir = v }
+  Just v  -> Right $ return $ cfg { workdir = v }
 
 -- standard string
 setWrapper :: Config -> String -> Either String (IO Config)
-setWrapper cfg "Nothing" = Right $ return $ cfg { cfgWrapper = Nothing }
+setWrapper cfg "Nothing" = Right $ return $ cfg { wrapper = Nothing }
 setWrapper cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { cfgWrapper = Just v }
+  Just v  -> Right $ return $ cfg { wrapper = Just v }
 
 -- standard string
 setReport :: Config -> String -> Either String (IO Config)
 setReport cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
-  v       -> Right $ return $ cfg { cfgReport = v }
+  v       -> Right $ return $ cfg { report = v }
 
 -- TODO remove?
 setThreads :: Config -> String -> Either String (IO Config)
@@ -252,17 +252,17 @@ setThreads cfg val = case maybeRead val of
 
 -- standard int
 setWidth :: Config -> String -> Either String (IO Config)
-setWidth cfg "Nothing" = Right $ return $ cfg { cfgWidth = Nothing }
+setWidth cfg "Nothing" = Right $ return $ cfg { termcolumns = Nothing }
 setWidth cfg val = case maybeRead val of
   Nothing -> Left  $ "invalid: " ++ val
-  Just n  -> Right $ return $ cfg { cfgWidth = Just n }
+  Just n  -> Right $ return $ cfg { termcolumns = Just n }
 
 -- standard string
 setOutFile :: Config -> String -> Either String (IO Config)
-setOutFile cfg "Nothing" = Right $ return $ cfg { cfgOutFile = Nothing }
+setOutFile cfg "Nothing" = Right $ return $ cfg { outfile = Nothing }
 setOutFile cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { cfgOutFile = Just v }
+  Just v  -> Right $ return $ cfg { outfile = Just v }
 
 -- TODO add: progressbar, hiddenfns, etc (Bools)
 -- TODO add logfile and have it update that (move from main)

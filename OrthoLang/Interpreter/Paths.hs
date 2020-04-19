@@ -191,15 +191,15 @@ when the tmpDir is moved later or whatever.
 TODO rewrite with a more elegant [(fn, string)] if there's time
 -}
 toGeneric :: Config -> String -> String
-toGeneric cfg txt = replace (cfgWorkDir cfg) "$WORKDIR"
-                  $ replace (cfgTmpDir  cfg) "$TMPDIR"
+toGeneric cfg txt = replace (workdir cfg) "$WORKDIR"
+                  $ replace (tmpdir  cfg) "$TMPDIR"
                   $ txt
 
 -- | Replace generic path placeholders with current paths
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
 fromGeneric :: DebugLocation -> Config -> String -> String
-fromGeneric loc cfg txt = replace "$WORKDIR" (cfgWorkDir cfg)
-                    $ replace "$TMPDIR"  (cfgTmpDir  cfg)
+fromGeneric loc cfg txt = replace "$WORKDIR" (workdir cfg)
+                    $ replace "$TMPDIR"  (tmpdir  cfg)
                     $ checkPath (loc ++ ".fromGeneric") txt -- TODO take loc arg?
 
 isGeneric :: FilePath -> Bool
@@ -220,13 +220,13 @@ toPath loc cfg s = Path $ checkPath loc' $ toGeneric cfg $ normalize s
                   else case parseAbsFile p of
                     Just p' -> fromAbsFile p'
                     Nothing -> if isAbsolute p then p
-                               else cfgWorkDir cfg </> p
+                               else workdir cfg </> p
 
 fromPath :: DebugLocation -> Config -> Path -> FilePath
 fromPath loc cfg (Path path) = fromGeneric (loc ++ ".fromPath") cfg path
 
 sharedPath :: Config -> Path -> Maybe FilePath
-sharedPath cfg (Path path) = fmap (\sd -> replace "$TMPDIR" sd path) (cfgShare cfg)
+sharedPath cfg (Path path) = fmap (\sd -> replace "$TMPDIR" sd path) (sharedir cfg)
 
 -- | weird, but needed for writing cutpaths to files in Actions.hs
 pathString :: Path -> String
@@ -244,7 +244,7 @@ cacheDir :: Config -> String -> Path
 cacheDir cfg modName = toPath loc cfg path
   where
     loc = "core.paths.cacheDir"
-    path = cfgTmpDir cfg </> "cache" </> modName
+    path = tmpdir cfg </> "cache" </> modName
 
 -- TODO cacheDirUniq or Explicit?
 
@@ -298,13 +298,13 @@ exprPathExplicit :: Config -> String -> Maybe Salt -> [String] -> Path
 exprPathExplicit cfg prefix mSalt hashes = toPath loc cfg path
   where
     loc = "core.paths.exprPathExplicit"
-    dir  = cfgTmpDir cfg </> "exprs" </> prefix
+    dir  = tmpdir cfg </> "exprs" </> prefix
     base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Salt n) -> show n) mSalt)
     path = dir </> base </> "result" -- <.> tExtOf rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
 varPath :: Config -> Var -> Expr -> Path
-varPath cfg (Var (RepID rep) var) expr = toPath loc cfg $ cfgTmpDir cfg </> repDir </> base
+varPath cfg (Var (RepID rep) var) expr = toPath loc cfg $ tmpdir cfg </> repDir </> base
   where
     loc = "core.paths.varPath"
     base = if var == "result" then var else var <.> tExtOf (typeOf expr)
@@ -467,4 +467,4 @@ listDigestsInPath cfg
   . dropWhile (/= "exprs")
   . map (filter (/= '/'))
   . splitPath
-  . makeRelative (cfgTmpDir cfg)
+  . makeRelative (tmpdir cfg)

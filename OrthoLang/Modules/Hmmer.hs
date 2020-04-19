@@ -132,7 +132,7 @@ aHmmsearch [out, e, hm, fa] = do
       eMin   = formatScientific Fixed Nothing (read "1e-307")
       eDec'  = if eDec < eMin then eMin else eDec
 
-      tmpDir = cfgTmpDir cfg </> "cache" </> "hmmsearch"
+      tmpDir = tmpdir cfg </> "cache" </> "hmmsearch"
       tmpOut = tmpDir </> takeFileName out'
   liftIO $ createDirectoryIfMissing True tmpDir
   -- wrappedCmdWrite False True cfg ref out'' [e', hm', fa'] [tmpOut] []

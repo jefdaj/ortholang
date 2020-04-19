@@ -71,8 +71,8 @@ goldenRepl cfg ref ids dRef goldenFile = do
   txt <- readFileStrict ref goldenFile -- TODO have to handle unicode here with the new prompt?
   let name   = takeBaseName goldenFile
       desc   = "repl output matches " ++ name <.> "txt"
-      cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
-      tstOut = cfgTmpDir cfg' <.> "txt"
+      cfg'   = cfg { tmpdir = (tmpdir cfg </> name) }
+      tstOut = tmpdir cfg' <.> "txt"
       stdin  = extractPrompted ("ortholang" ++ promptArrow) txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut (emptyScript, cfg', ref, ids, dRef)
                -- uncomment to update repl golden files:
@@ -105,13 +105,13 @@ goldenReplTree cfg ref ids dRef ses = do
   txt <- readFileStrict ref ses
   let name   = takeBaseName ses
       desc   = name <.> "txt" ++ " creates expected tmpfiles"
-      cfg'   = cfg { cfgTmpDir = (cfgTmpDir cfg </> name) }
+      cfg'   = cfg { tmpdir = (tmpdir cfg </> name) }
       -- tree   = replaceExtension (takeDi) "txt"
       tree   = joinPath $ (init $ init $ splitDirectories ses)
                       ++ ["tmpfiles", replaceExtension (takeBaseName ses) "txt"]
       stdin  = extractPrompted promptArrow txt
-      tmpDir = cfgTmpDir cfg'
-      tmpOut = cfgTmpDir cfg </> name ++ ".out"
+      tmpDir = tmpdir cfg'
+      tmpOut = tmpdir cfg </> name ++ ".out"
       cmd    = (shell "tree -aI '*.lock|*.database'") { cwd = Just $ tmpDir }
       action = do
                  _ <- mockRepl stdin tmpOut (emptyScript, cfg', ref, ids, dRef)

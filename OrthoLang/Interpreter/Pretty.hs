@@ -43,7 +43,7 @@ getWidth = do
 renderIO :: Config -> Doc -> IO String
 renderIO cfg doc = do
   currentWidth <- getWidth
-  let renderWidth = case cfgWidth cfg of
+  let renderWidth = case termcolumns cfg of
                       Nothing -> currentWidth
                       Just w  -> w
   let s = style {lineLength = renderWidth, ribbonsPerLine = 0.2}

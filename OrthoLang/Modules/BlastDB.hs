@@ -172,7 +172,7 @@ aLoadDB oPath sPath = do
       loc = "modules.blastdb.aLoadDB"
       oPath'' = traceA loc oPath' [oPath', sPath']
   pattern <- readLit loc sPath'
-  let pattern' = makeRelative (cfgTmpDir cfg) pattern -- TODO is this right??
+  let pattern' = makeRelative (tmpdir cfg) pattern -- TODO is this right??
   writeLit loc oPath'' pattern'
 
 loadFnaDb :: Function
@@ -415,7 +415,7 @@ listPrefixFiles prefix = getDirectoryFilesIO pDir [pName] >>= return . map (pDir
 aMakeblastdbAll :: Type -> Path -> [Path] -> Action ()
 aMakeblastdbAll dbType cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
-  -- let relDb = makeRel_ ative (cfgTmpDir cfg) dbOut
+  -- let relDb = makeRel_ ative (tmpdir cfg) dbOut
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.blastdb.aMakeblastdbAll"
       out'     = fromPath loc cfg out
@@ -427,7 +427,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   -- The idea was to hash content here, but it took a long time.
   -- So now it gets hashed only once, in another thread, by a load_* function,
   -- and from then on we pick the hash out of the filename.
-  fasHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ cfgTmpDir cfg) fasPath'
+  fasHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ tmpdir cfg) fasPath'
 
   let dbDir  = cDir' </> fasHash
       dbOut  = dbDir </> "result"
@@ -447,7 +447,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   faPaths <- readPaths loc fasPath'
   let noQuoting  = unwords $ map (fromPath loc cfg) faPaths
       quoteOuter = "\"" ++ noQuoting ++ "\""
-      fixedPaths = if isJust (cfgWrapper cfg) then quoteOuter else noQuoting
+      fixedPaths = if isJust (wrapper cfg) then quoteOuter else noQuoting
       -- quoteInner = "\"" ++ unwords
       --              (map (\p -> "\"" ++ fromPath loc cfg p ++ "\"") faPaths)
       --              ++ "\""

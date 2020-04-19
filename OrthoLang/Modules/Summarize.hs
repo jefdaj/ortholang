@@ -58,7 +58,7 @@ aSummary summaryFn iPath out = do
   need' loc [iPath]
   iLists <- readLits loc iPath
   cfg <- fmap fromJust getShakeExtra
-  iElems <- mapM (readLits loc . (\p -> cfgTmpDir cfg </> p)) iLists
+  iElems <- mapM (readLits loc . (\p -> tmpdir cfg </> p)) iLists
   let oElems = summaryFn iElems
       out' = traceA loc out [out, iPath]
   writeLits loc out' oElems

@@ -230,7 +230,7 @@ download cfg url = do
   es <- openURIString url
   case es of
     Left _ -> return Nothing
-    Right s -> fmap Just $ writeTempFile (cfgTmpDir cfg) "download.txt" s
+    Right s -> fmap Just $ writeTempFile (tmpdir cfg) "download.txt" s
 
 ----------------
 -- read files --
@@ -301,7 +301,7 @@ readLitPaths loc path = do
   let toAbs line = if isURL line then line
                    else if isGeneric line then fromGeneric loc' cfg line
                    else if isAbsolute line then line
-                   else cfgWorkDir cfg </> line
+                   else workdir cfg </> line
   ls <- readList loc' path
   let ls'  = map toAbs ls
       ls'' = map (toPath loc cfg) ls'
@@ -492,7 +492,7 @@ trackWrite' fs = do
 
 setReadOnly :: Config -> FilePath -> IO ()
 setReadOnly cfg path = do
-  path' <- resolveSymlinks (Just $ cfgTmpDir cfg) path
+  path' <- resolveSymlinks (Just $ tmpdir cfg) path
   -- TODO skip if path' outside tmpdir
   setFileMode path' 444
 
@@ -585,7 +585,7 @@ runCmd desc = do
     -- TODO remove opts?
     -- TODO always assume disk is 1?
     Just (disk, _) <- (getShakeExtra :: Action (Maybe LocksRef))
-    Exit code <- withResource disk (length inPaths + 1) $ case cfgWrapper cfg of
+    Exit code <- withResource disk (length inPaths + 1) $ case wrapper cfg of
       Nothing -> command (cmdOptions desc) (cmdBinary desc) (cmdArguments desc)
       Just w  -> command (Shell:cmdOptions desc) w [escape $ unwords (cmdBinary desc:cmdArguments desc)]
     -- Exit _ <- command [] "sync" [] -- TODO is this needed?
@@ -608,7 +608,7 @@ runCmd desc = do
 -- TODO does this do directories?
 -- TODO does this work on absolute paths?
 matchPattern :: Config -> String -> Action [FilePath]
-matchPattern cfg ptn = liftIO $ globDir1 (compile ptn) (cfgTmpDir cfg)
+matchPattern cfg ptn = liftIO $ globDir1 (compile ptn) (tmpdir cfg)
 
 handleCmdError :: String -> ExitCode -> FilePath -> [String] -> Action a
 handleCmdError bin n stderrPath rmPatterns = do
@@ -653,7 +653,7 @@ hashContent path = do
   need' loc [path']
   -- Stdout out <- withReadLock' path' $ command [] "md5sum" [path']
   -- out <- wrappedCmdOut False True [path'] [] [] "md5sum" [path'] -- TODO runCmd here
-  Stdout out <- withReadLock' path' $ withResource disk 1 $ case cfgWrapper cfg of
+  Stdout out <- withReadLock' path' $ withResource disk 1 $ case wrapper cfg of
     Nothing -> command [] "md5sum" [path']
     Just w  -> command [Shell] w ["md5sum", path']
   -- liftIO $ putStrLn $ "out: " ++ out
@@ -708,7 +708,7 @@ TODO check that the Path is in TMPDIR, not WORKDIR!
 tmpLink :: Config -> FilePath -> FilePath -> FilePath
 tmpLink cfg src dst = dots </> tmpRel dst
   where
-    tmpRel  = makeRelative $ cfgTmpDir cfg
+    tmpRel  = makeRelative $ tmpdir cfg
     dots    = foldr1 (</>) $ take (nSeps - 1) $ repeat ".."
     nSeps   = length $ splitOneOf pathSeparators $ tmpRel src
 

@@ -65,7 +65,7 @@ mkRepl :: [String -> InputT ReplM (Maybe String)] -> Handle -> GlobalEnv -> IO (
 mkRepl promptFns hdl (_, cfg, ref, ids, dRef) = do
   clear
   let st = (emptyScript, cfg, ref, ids, dRef)
-  st' <- case cfgScript cfg of
+  st' <- case script cfg of
           Nothing -> welcome hdl >> return st
           Just path -> cmdLoad st hdl path -- >> cmdShow st hdl []
   runReplM (replSettings2 cfg) (loop promptFns hdl) st'
@@ -127,7 +127,7 @@ runCmd st@(_, cfg, _, _, _) hdl line = case matches of
 
 cmds :: Config -> [(String, ReplCmd)]
 cmds cfg =
-  if cfgSecure cfg then [] else [("!", cmdBang)] -- TODO :shell instead?
+  if secure cfg then [] else [("!", cmdBang)] -- TODO :shell instead?
   ++
   [ ("help"     , cmdHelp    )
   , ("load"     , cmdLoad    )
@@ -186,6 +186,6 @@ cmdConfig st@(scr, cfg, ref, ids, dRef) hdl s = do
 replSettings2 :: Config -> Settings ReplM
 replSettings2 cfg = Settings
   { complete       = myComplete $ cmds cfg
-  , historyFile    = Just $ cfgTmpDir cfg </> "history.txt"
+  , historyFile    = Just $ tmpdir cfg </> "history.txt"
   , autoAddHistory = True
   }

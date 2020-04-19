@@ -102,7 +102,7 @@ mkOutTest cfg ref ids dRef sDir name gld = goldenDiff desc gld scriptAct
     desc = name ++ ".ol prints expected output"
 
 withTmpDirLock :: Config -> LocksRef -> IO a -> IO a
-withTmpDirLock cfg ref act = withWriteLockEmpty ref (cfgTmpDir cfg </> "lock") act
+withTmpDirLock cfg ref act = withWriteLockEmpty ref (tmpdir cfg </> "lock") act
 
 mkTreeTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> FilePath -> String -> TestTree
 mkTreeTest cfg ref ids dRef sDir name t = goldenDiff desc t treeAct
@@ -114,7 +114,7 @@ mkTreeTest cfg ref ids dRef sDir name t = goldenDiff desc t treeAct
     ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt|jobs|out|err'"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
     treeCmd = "tree -a --dirsfirst --charset=ascii " ++ ignores ++ " | " ++ sedCmd
-    wholeCmd = (shell treeCmd) { cwd = Just $ cfgTmpDir cfg }
+    wholeCmd = (shell treeCmd) { cwd = Just $ tmpdir cfg }
     treeAct = do
       _ <- runScript cfg ref ids dRef
       out <- withTmpDirLock cfg ref $ fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
@@ -127,16 +127,16 @@ mkTripTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> String -> FilePath -
 mkTripTest cfg ref ids dRef name cut parse = goldenDiff desc parse tripAct
   where
     desc = name ++ ".ol unchanged by round-trip to file"
-    -- tripShow  = cfgTmpDir cfg </> "round-trip.show"
+    -- tripShow  = tmpdir cfg </> "round-trip.show"
     tripSetup = do
       scr1 <- parseFileIO (emptyScript, cfg, ref, ids, dRef) $
-                justOrDie "failed to get cfgScript in mkTripTest" $ cfgScript cfg
+                justOrDie "failed to get script in mkTripTest" $ script cfg
       -- this is useful for debugging
       -- writeScript cut scr1
       writeBinaryFile parse $ T.unpack $ pShowNoColor scr1
-    -- tripAct = withWriteLock'IO (cfgTmpDir cfg <.> "lock") $ do
+    -- tripAct = withWriteLock'IO (tmpdir cfg <.> "lock") $ do
     tripAct = withTmpDirLock cfg ref $ do
-      -- _    <- withFileLock (cfgTmpDir cfg) tripSetup
+      -- _    <- withFileLock (tmpdir cfg) tripSetup
       _ <- tripSetup
       scr2 <- parseFileIO (emptyScript, cfg, ref, ids, dRef) cut
       return $ B8.pack $ T.unpack $ pShowNoColor scr2
@@ -154,11 +154,11 @@ mkExpandTest cfg ref ids dRef name cut expand = goldenDiff desc expand expAct
 mkShareTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> FilePath -> String -> TestTree
 mkShareTest cfg ref ids dRef sDir name gld = goldenDiff desc gld shareAct
   where
-    cfg' = cfg { cfgShare = Just sDir }
+    cfg' = cfg { sharedir = Just sDir }
     shareAct = do
       _ <- runScript cfg ref ids dRef
       _ <- copyToShared cfg sDir ref
-      withTmpDirLock cfg ref $ rmAll [cfgTmpDir cfg] -- to see if it can use the shared one instead
+      withTmpDirLock cfg ref $ rmAll [tmpdir cfg] -- to see if it can use the shared one instead
       out <- runScript cfg' ref ids dRef
       return $ B8.pack out
     desc = name ++ ".ol re-uses shared tmpfiles"
@@ -175,7 +175,7 @@ mkAbsTest cfg ref ids name dRef sDir = testSpecs $ it desc $
     desc = name ++ ".ol expr files free of absolute paths"
     grepArgs = ["-r", "--exclude=*.out", "--exclude=*.err",
                 "--exclude=*.ini", "--exclude=*.log",
-                cfgTmpDir cfg, cfgTmpDir cfg </> "exprs"]
+                tmpdir cfg, tmpdir cfg </> "exprs"]
     absGrep = do
       _ <- runScript cfg ref ids dRef
       (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "grep" grepArgs ""
@@ -185,7 +185,7 @@ copyToShared :: Config -> FilePath -> LocksRef -> IO ()
 copyToShared cfg sDir ref = withTmpDirLock cfg ref $ do
   createDirectoryIfMissing True $ sDir </> "cache"
   createDirectoryIfMissing True $ sDir </> "exprs"
-  let rsync p = readProcess "rsync" ["-qraz", cfgTmpDir cfg </> p ++ "/", sDir </> p ++ "/"] ""
+  let rsync p = readProcess "rsync" ["-qraz", tmpdir cfg </> p ++ "/", sDir </> p ++ "/"] ""
   mapM_ rsync ["cache", "exprs"]
 
 {-|
@@ -197,9 +197,9 @@ runScript cfg ref ids dRef = withTmpDirLock cfg ref $ do
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
   (out, ()) <- hCapture [stdout, stderr] $ evalFile (emptyScript, cfg, ref, ids, dRef) stdout
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
-  result <- doesFileExist $ cfgTmpDir cfg </> "vars" </> "result"
+  result <- doesFileExist $ tmpdir cfg </> "vars" </> "result"
   when (not result) (fail out)
-  writeBinaryFile (cfgTmpDir cfg </> "output" <.> "txt") $ toGeneric cfg out
+  writeBinaryFile (tmpdir cfg </> "output" <.> "txt") $ toGeneric cfg out
   return $ toGeneric cfg out
 
 mkScriptTests
@@ -222,7 +222,7 @@ mkScriptTests sDir (name, cut, parse, expand, out, tre, mchk) cfg ref ids dRef =
   return $ testGroup (removePrefix name) tests
   where
     name' = replace ":" "_" name -- ':' messes with BLASTDB paths
-    cfg' = cfg { cfgScript = Just cut, cfgTmpDir = (cfgTmpDir cfg </> name') }
+    cfg' = cfg { script = Just cut, tmpdir = (tmpdir cfg </> name') }
 
 {-|
 "Check scripts" for handling the tricky cases where tmpfile names vary. They
@@ -238,7 +238,7 @@ mkCheckTest cfg ref ids dRef sDir name scr = testSpecs $ it desc $ runCheck `sho
     desc = name ++ ".ol output + tmpfiles checked by script"
     runCheck = do
       _ <- runScript cfg ref ids dRef -- TODO any reason to reuse ids here?
-      (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "bash" [scr, cfgTmpDir cfg] ""
+      (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "bash" [scr, tmpdir cfg] ""
       return $ toGeneric cfg $ out ++ err
 
 testFilePath :: FilePath -> FilePath -> FilePath -> FilePath -> FilePath
@@ -289,7 +289,7 @@ mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkTests cfg ref ids dRef = do
   testDir <- getDataFileName "tests"
   exDir   <- getDataFileName "examples"
-  let sDir = cfgTmpDir cfg </> "sharedir"
+  let sDir = tmpdir cfg </> "sharedir"
   groups  <- mapM (\mn -> mkTestsPrefix cfg ref ids dRef testDir mn sDir $ Just mn) $
                map (simplify . mName) modules
   exGroup <- mkExampleTests cfg ref ids dRef exDir sDir testDir
