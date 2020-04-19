@@ -9,30 +9,24 @@ module OrthoLang.Interpreter.Config where
 import qualified Data.Configurator as C
 import qualified Data.Configurator.Types as C
 
--- import Data.Configurator.Types    (Config, Worth(..))
+import OrthoLang.Debug (debug)
+import OrthoLang.Types (Config(..), Module(..))
+import OrthoLang.Util  (absolutize, justOrDie)
+
+import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRegex)
+import Control.Monad              (when)
+import Data.List                  (isPrefixOf)
 import Data.Maybe                 (isNothing)
 import Data.Text                  (pack)
-import Development.Shake           (newResourceIO)
--- import Development.Shake          (command, Action, CmdOption(..), Exit(..),
-                                   -- removeFiles, liftIO)
-import OrthoLang.Debug
-import Paths_OrthoLang             (getDataFileName)
-import OrthoLang.Types        (Config(..), Module(..))
-import OrthoLang.Util         (absolutize, justOrDie)
-import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent,
-                                   longOption, getAllArgs)
+import Development.Shake          (newResourceIO)
+import GHC.Conc                   (getNumProcessors)
+import Paths_OrthoLang            (getDataFileName)
+import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption, getAllArgs)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
-import Text.Read.HT               (maybeRead)
-import System.FilePath            ((</>), (<.>))
 import System.Directory           (doesFileExist)
+import System.FilePath            ((</>), (<.>))
 import System.Info                (os)
-
-import Control.Logging (LogLevel(..), setLogLevel, setDebugSourceRegex)
-import Control.Monad         (when)
-import Data.List (isPrefixOf)
-import GHC.Conc (getNumProcessors)
-
-import Data.Maybe (listToMaybe, fromJust)
+import Text.Read.HT               (maybeRead)
 
 {- The logging module keeps its own state in an IORef, so no need to include
  - this in the main OrthoLang config below.
@@ -172,6 +166,8 @@ setConfigField cfg key val = case lookup key fields of
 
 -- TODO add modules? maybe not much need
 -- TODO add interactive?
+-- TODO these show* functions could be Pretty instances, or just directly showable
+-- TODO remove anything that can't be shown
 fields :: [(String, (Config -> String,
                      Config -> String -> Either String (IO Config)))]
 fields =

@@ -17,7 +17,7 @@ import OrthoLang.Interpreter.Config (getDoc)
 import OrthoLang.Interpreter.Pretty -- (pPrint, render)
 
 import Data.List.Split       (splitOn)
-import Data.Maybe            (fromJust, catMaybes)
+import Data.Maybe            (catMaybes)
 import OrthoLang.Util        (headOrDie)
 import System.FilePath.Posix ((</>))
 
