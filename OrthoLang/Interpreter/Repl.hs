@@ -39,7 +39,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter.Repl.Actions
 import OrthoLang.Interpreter.Repl.Messages
 
-import OrthoLang.Interpreter.Config    (showConfigField, setConfigField)
+import OrthoLang.Config    (showConfigField, setConfigField)
 import OrthoLang.Interpreter.Pretty    (pPrintHdl)
 import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)

@@ -62,7 +62,7 @@ import Prelude hiding (readList, error)
 import OrthoLang.Debug
 import Development.Shake hiding (doesFileExist)
 import OrthoLang.Types
--- import OrthoLang.Interpreter.Config (debug)
+-- import OrthoLang.Config (debug)
 
 import Control.Monad              (when)
 import Data.List                  (sort, nub, isPrefixOf, isInfixOf, isSuffixOf)

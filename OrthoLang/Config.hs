@@ -2,7 +2,7 @@
 
 -- TODO show cfgShare
 
-module OrthoLang.Interpreter.Config where
+module OrthoLang.Config where
 
 -- TODO absolutize in the setters too? or unify them with initial loaders?
 
@@ -205,6 +205,9 @@ updateDebug regex = case regex of
     setLogLevel LevelDebug
     setDebugSourceRegex r
     debug' $ "set debug regex to " ++ show regex
+
+-- TODO this seems ok, it just needs a generic "set everything" function
+--      it's basically all files (strings) right? oh and booleans
 
 setScript :: Config -> String -> Either String (IO Config)
 setScript cfg "Nothing" = Right $ return $ cfg { cfgScript = Nothing }
