@@ -208,49 +208,61 @@ updateDebug regex = case regex of
     setDebugSourceRegex r
     debug' $ "set debug regex to " ++ show regex
 
--- TODO this seems ok, it just needs a generic "set everything" function
---      it's basically all files (strings) right? oh and booleans
+-- TODO this seems ok, it just needs to be refactored a bit to have one parser per type:
+--      string, boolean, int
+--      then for strings have it strip off optional quotes
 
+-- standard string
 setScript :: Config -> String -> Either String (IO Config)
 setScript cfg "Nothing" = Right $ return $ cfg { cfgScript = Nothing }
 setScript cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgScript = Just v }
 
+-- standard string
 setTmpdir :: Config -> String -> Either String (IO Config)
 setTmpdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgTmpDir = v }
 
+-- standard string
 setWorkdir :: Config -> String -> Either String (IO Config)
 setWorkdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgWorkDir = v }
 
+-- standard string
 setWrapper :: Config -> String -> Either String (IO Config)
 setWrapper cfg "Nothing" = Right $ return $ cfg { cfgWrapper = Nothing }
 setWrapper cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgWrapper = Just v }
 
+-- standard string
 setReport :: Config -> String -> Either String (IO Config)
 setReport cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   v       -> Right $ return $ cfg { cfgReport = v }
 
+-- TODO remove?
 setThreads :: Config -> String -> Either String (IO Config)
 setThreads cfg val = case maybeRead val of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgThreads = v }
 
+-- standard int
 setWidth :: Config -> String -> Either String (IO Config)
 setWidth cfg "Nothing" = Right $ return $ cfg { cfgWidth = Nothing }
 setWidth cfg val = case maybeRead val of
   Nothing -> Left  $ "invalid: " ++ val
   Just n  -> Right $ return $ cfg { cfgWidth = Just n }
 
+-- standard string
 setOutFile :: Config -> String -> Either String (IO Config)
 setOutFile cfg "Nothing" = Right $ return $ cfg { cfgOutFile = Nothing }
 setOutFile cfg val = case maybeRead ("\"" ++ val ++ "\"") of
   Nothing -> Left  $ "invalid: " ++ val
   Just v  -> Right $ return $ cfg { cfgOutFile = Just v }
+
+-- TODO add: progressbar, hiddenfns, etc (Bools)
+-- TODO add logfile and have it update that (move from main)

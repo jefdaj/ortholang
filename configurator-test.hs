@@ -6,12 +6,13 @@ import qualified Data.Text.Lazy    as T
 
 import Text.Pretty.Simple (pShowNoColor)
 
+-- this will stay in Types.hs; the rest goes in Config.hs except anything reallly needed in Main
 data Config = Config
   { interactive    :: Bool
-  , debugregex     :: Maybe String
+  , debugregex     :: Maybe String -- TODO not needed during repl right?
   , testpattern    :: Maybe String
-  , termwidth      :: Int
-  , shellaccess    :: Bool
+  , termwidth      :: Int  -- TODO does this ever need editing live? couldn't hurt
+  , shellaccess    :: Bool -- TODO make this the only one you can't edit live?
   , progressbar    :: Bool
   , showhiddenfns  :: Bool
   , tmpdir         :: FilePath
@@ -27,6 +28,7 @@ data Config = Config
 
 -- TODO try adding a docopt stage on top of this, since cli options should override the config file
 -- TODO try adding a main and sub-configs
+-- TODO use the current setup for live parsing. it's actually pretty close to ideal
 
 readConfigFile :: FilePath -> IO Config
 readConfigFile cfgFile = do
@@ -74,5 +76,5 @@ readConfigFile cfgFile = do
 
 main :: IO ()
 main = do
-  cfg <- readConfigFile "configurator-test.cfg"
+  cfg <- readConfigFile "examples/ortholang.cfg"
   putStrLn $ T.unpack $ pShowNoColor cfg
