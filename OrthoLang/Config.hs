@@ -25,7 +25,6 @@ import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOpt
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Directory           (doesFileExist)
 import System.FilePath            ((</>), (<.>))
-import System.Info                (os)
 import Text.Read.HT               (maybeRead)
 
 {- The logging module keeps its own state in an IORef, so no need to include
@@ -54,7 +53,6 @@ loadField args cfg key
 defaultConfig :: FilePath -> FilePath -> IO Config
 defaultConfig td wd = do
   par <- newResourceIO "parallel" 8 -- TODO set to number of nodes
-  os' <- getOS
   cp <- getNumProcessors
   return Config
     { script      = Nothing
@@ -72,7 +70,6 @@ defaultConfig td wd = do
     , secure      = False
     , progressbar      = True
     , cfgParLock     = par
-    , cfgOS          = os'
     , cfgThreads     = cp
     , showhidden     = False
     }
@@ -115,9 +112,6 @@ loadConfig mods args = do
   debug' $ show res
   updateDebug dbg
   return res
-
-getOS :: IO String
-getOS = return $ if os == "darwin" then "mac" else os
 
 -- TODO any way to recover if missing? probably not
 -- TODO use a safe read function with locks here?

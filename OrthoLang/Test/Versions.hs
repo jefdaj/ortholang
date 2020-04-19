@@ -14,10 +14,15 @@ import Test.Tasty.Golden          (goldenVsString)
 import qualified Data.ByteString.Lazy.Char8 as C8
 import System.FilePath.Posix      (takeBaseName)
 
+import qualified System.Info as I
+
+os :: String
+os = if I.os == "darwin" then "mac" else os
+
 -- TODO blastdbget makeblastdb cut blast tar hmmsearch orthogroups.py?
 --      greencut psiblast? seqiostuff sonicparanoid
-versionScripts :: String -> [(String, FilePath)]
-versionScripts os = map (\(a,b) -> (a, os ++ ":" ++ b))
+versionScripts :: [(String, FilePath)]
+versionScripts = map (\(a,b) -> (a, os ++ ":" ++ b))
   [ ("bash"         , "bash.sh")
   , ("curl"         , "curl.sh")
   , ("cut"          , "cut.sh")
@@ -66,14 +71,14 @@ mkTests cfg _ _ _ = do
   testDir <- getDataFileName $ "tests"
   debug "test.versions" $ "test dir is " ++ testDir
   return $ testGroup "check dependency versions"
-         $ map (mkTestVersion cfg testDir) (versionScripts $ cfgOS cfg)
+         $ map (mkTestVersion cfg testDir) (versionScripts)
 
 mkTestVersion :: Config -> FilePath -> (TestName, String) -> TestTree
 mkTestVersion cfg dir (name, cmd) = goldenVsString desc gld act
   where
     desc = "found expected version of " ++ name
     gld = dir </> "versions" </> takeBaseName cmd <.> "txt"
-    msg = "tested " ++ name ++ " " ++ cfgOS cfg ++ " version"
+    msg = "tested " ++ name ++ " " ++ os ++ " version"
     act = do
       (_, out, err) <- time "test.versions" msg $ readCreateProcessWithExitCode (shell cmd) ""
       -- helpful for updating tests
