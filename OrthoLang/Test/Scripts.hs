@@ -155,7 +155,7 @@ mkExpandTest cfg ref ids dRef name cut expand = goldenDiff desc expand expAct
 mkShareTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> FilePath -> String -> TestTree
 mkShareTest cfg ref ids dRef sDir name gld = goldenDiff desc gld shareAct
   where
-    cfg' = cfg { sharedir = Just sDir }
+    cfg' = cfg { shared = Just sDir }
     shareAct = do
       _ <- runScript cfg ref ids dRef
       _ <- copyToShared cfg sDir ref

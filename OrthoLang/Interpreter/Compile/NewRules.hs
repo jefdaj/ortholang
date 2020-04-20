@@ -233,7 +233,7 @@ rReloadIDs = "reloadids" ~> do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
   -- find ids in shared load cache, if any
-  case sharedir cfg of
+  case shared cfg of
     Nothing -> return ()
     Just sd -> aReloadIDsDir sd
   -- find ids in regular load cache

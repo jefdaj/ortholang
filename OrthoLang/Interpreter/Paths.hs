@@ -226,7 +226,7 @@ fromPath :: DebugLocation -> Config -> Path -> FilePath
 fromPath loc cfg (Path path) = fromGeneric (loc ++ ".fromPath") cfg path
 
 sharedPath :: Config -> Path -> Maybe FilePath
-sharedPath cfg (Path path) = fmap (\sd -> replace "$TMPDIR" sd path) (sharedir cfg)
+sharedPath cfg (Path path) = fmap (\sd -> replace "$TMPDIR" sd path) (shared cfg)
 
 -- | weird, but needed for writing cutpaths to files in Actions.hs
 pathString :: Path -> String

@@ -21,13 +21,13 @@ module OrthoLang.Interpreter.Repl
   , promptArrow
 
   -- * Implementation details
+  , cmds
   , cmdBang
   , cmdConfig
   , cmdQuit
-  , cmds
-  , loop
-  , replSettings2
   , runCmd
+  , loop
+  , replSettings
   , step
 
   )
@@ -50,7 +50,6 @@ import Control.Monad.State.Strict (lift, get, put)
 import Data.Char                  (isSpace)
 import Data.List                  (isPrefixOf, filter)
 import System.Console.Haskeline   (Settings(..), InputT, getInputLine)
-import System.FilePath.Posix      ((</>))
 import System.IO                  (Handle, hPutStrLn, stdout)
 import System.Process             (runCommand, waitForProcess)
 
@@ -68,7 +67,7 @@ mkRepl mods promptFns hdl (_, cfg, ref, ids, dRef) = do
   st' <- case script cfg of
           Nothing -> welcome hdl >> return st
           Just path -> cmdLoad mods st hdl path -- >> cmdShow st hdl []
-  runReplM (replSettings2 mods cfg) (loop mods promptFns hdl) st'
+  runReplM (replSettings mods cfg) (loop mods promptFns hdl) st'
 
 -- There are four types of input we might get, in the order checked for:
 -- TODO update this to reflect 3/4 merged
@@ -123,23 +122,27 @@ runCmd mods st@(_, cfg, _, _, _) hdl line = case matches of
   _         -> hPutStrLn hdl ("ambiguous command: " ++ cmd) >> return st
   where
     (cmd, args) = break isSpace line
-    matches = filter ((isPrefixOf cmd) . fst) (cmds mods cfg)
+    matches = filter ((isPrefixOf cmd) . fst) (cmds cfg)
 
-cmds :: [Module] -> Config -> [(String, ReplCmd)]
-cmds mods cfg =
-  if secure cfg then [] else [("!", cmdBang)] -- TODO :shell instead?
+cmds :: Config -> [(String, ReplCmd)]
+cmds cfg =
+  if shellaccess cfg then [] else [("!", cmdBang)] -- TODO :shell instead?
   ++
-  [ ("help"     , cmdHelp     )
-  , ("load"     , cmdLoad     )
-  , ("write"    , cmdWrite    ) -- TODO do more people expect 'save' or 'write'?
-  , ("neededfor", cmdNeededFor)
-  , ("neededfor", cmdNeededBy )
-  , ("drop"     , cmdDrop     )
+  [
+  -- repl control commands
+    ("quit"     , cmdQuit     )
+  , ("config"   , cmdConfig   )
+  -- script info commands
+  , ("help"     , cmdHelp     )
   , ("type"     , cmdType     )
   , ("show"     , cmdShow     )
+  , ("neededfor", cmdNeededFor)
+  , ("neededby" , cmdNeededBy )
+  -- script edit commands
+  , ("load"     , cmdLoad     )
+  , ("write"    , cmdWrite    ) -- TODO do more people expect 'save' or 'write'?
+  , ("drop"     , cmdDrop     )
   , ("reload"   , cmdReload   )
-  , ("quit"     , cmdQuit     )
-  , ("config"   , cmdConfig   )
   ]
 
 -- TODO does this one need to be a special case now?
@@ -183,9 +186,9 @@ cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
                  return (scr, cfg', ref, ids, dRef)
 
 -- TODO move to Config? Types?
-replSettings2 :: [Module] -> Config -> Settings ReplM
-replSettings2 mods cfg = Settings
-  { complete       = myComplete mods $ cmds mods cfg
-  , historyFile    = Just $ tmpdir cfg </> "history.txt"
+replSettings :: [Module] -> Config -> Settings ReplM
+replSettings mods cfg = Settings
+  { complete       = myComplete mods $ cmds cfg
+  , historyFile    = history cfg
   , autoAddHistory = True
   }

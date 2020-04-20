@@ -52,12 +52,6 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- utility functions --
 -----------------------
 
--- exGlobals :: LocksRef -> IDsRef -> IO GlobalEnv
--- exGlobals lRef iRef = do
---   dir  <- absolutize "." -- doesn't matter since it will be removed from Paths
---   cfg  <- defaultConfig dir dir
---   return (emptyScript, cfg, lRef, iRef)
-
 -- TODO does this generally need to be recursive, digests of the exprs inside it too?
 -- digestExample :: GlobalEnv -> (String, Expr) -> (String, Expr, DigestMap)
 -- digestExample st (s, e) = let p = exprPath cfg dRef scr e

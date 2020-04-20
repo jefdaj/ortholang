@@ -489,11 +489,12 @@ data Config = Config
   , debugregex  :: Maybe String
   , wrapper     :: Maybe FilePath
   , outfile     :: Maybe FilePath
-  , sharedir    :: Maybe FilePath
-  , report      :: Maybe String
+  , shared      :: Maybe String -- can be a filepath or url
+  , report      :: Maybe FilePath
+  , history     :: Maybe FilePath
   , testpattern :: [String] -- [] means run all tests
   , termcolumns :: Maybe Int -- for testing
-  , secure      :: Bool
+  , shellaccess :: Bool
   , progressbar :: Bool
   , showhidden  :: Bool
   }

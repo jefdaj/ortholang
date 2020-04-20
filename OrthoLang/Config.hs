@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-
--- TODO show sharedir
+{-# LANGUAGE NamedFieldPuns #-}
 
 module OrthoLang.Config where
 
@@ -10,15 +9,14 @@ import qualified Data.Configurator as C
 import qualified Data.Configurator.Types as C
 
 import OrthoLang.Debug (debug)
-import OrthoLang.Types (Config(..), Module(..))
+import OrthoLang.Types (Config(..))
 import OrthoLang.Util  (absolutize, justOrDie)
 
 import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRegex)
 import Control.Monad              (when)
-import Data.List                  (isPrefixOf)
-import Data.Maybe                 (isNothing)
+import Data.List                  (isPrefixOf, isInfixOf)
+import Data.Maybe                 (isNothing, catMaybes)
 import Data.Text                  (pack)
-import Development.Shake          (newResourceIO)
 import Paths_OrthoLang            (getDataFileName)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption, getAllArgs)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
@@ -44,66 +42,73 @@ dispatch args arg act = when (isPresent args $ longOption arg) $ do
 debug' :: String -> IO ()
 debug' = debug "config"
 
-loadField :: Arguments -> C.Config -> String -> IO (Maybe String)
-loadField args cfg key
+loadMaybe :: Arguments -> C.Config -> String -> IO (Maybe String)
+loadMaybe args cfg key
   | isPresent args (longOption key) = return $ getArg args $ longOption key
   | otherwise = C.lookup cfg $ pack key
 
-defaultConfig :: FilePath -> FilePath -> IO Config
-defaultConfig td wd = do
-  return Config
-    { script      = Nothing
-    , interactive = False
-    , tmpdir      = td
-    , workdir     = wd
-    , debugregex  = Nothing
-    , wrapper     = Nothing
-    , outfile     = Nothing
-    , sharedir    = Nothing
-    , report      = Nothing
-    , testpattern = [] -- [] means run all tests (TODO insert "all" here?
-    , termcolumns = Nothing
-    , secure      = False
-    , progressbar = True
-    , showhidden  = False
-    }
+loadMaybeAbs :: Arguments -> C.Config -> String -> IO (Maybe FilePath)
+loadMaybeAbs args cfg key = do
+  mPath <- loadMaybe args cfg key
+  case mPath of
+    Nothing -> return Nothing
+    Just p -> absolutize p >>= return . Just
+
+loadAbs :: Arguments -> C.Config -> String -> IO FilePath
+loadAbs args cfg key = fmap (justOrDie msg) $ loadMaybeAbs args cfg key
+  where
+    msg = "failed to parse --" ++ key
+
+-- TODO deduplicate with the one in Paths.hs
+isURL :: String -> Bool
+isURL s = "://" `isInfixOf` take 10 s
 
 loadConfig :: Arguments -> IO Config
 loadConfig args = do
   debug' $ "docopt arguments: " ++ show args
-  let path = justOrDie "parse --config arg failed!" $ getArg args $ longOption "config"
-  cfg <- C.load [C.Optional path]
-  csc <- loadField args cfg "script"
-  csc' <- case csc of
-            Nothing -> return Nothing
-            Just s  -> absolutize s >>= return . Just
-  dbg <- loadField args cfg "debug"
-  ctd <- mapM absolutize =<< loadField args cfg "tmpdir"
-  cwd <- mapM absolutize =<< loadField args cfg "workdir"
-  let ctd' = justOrDie "parse --tmpdir arg failed!" ctd
-      cwd' = justOrDie "parse --workdir arg failed!" cwd
-  def <- defaultConfig ctd' cwd'
-  rep <- mapM absolutize =<< loadField args cfg "report"
-  cls <- mapM absolutize =<< loadField args cfg "wrapper"
-  out <- mapM absolutize =<< loadField args cfg "output"
-  shr <- mapM (\p -> if "http" `isPrefixOf` p then return p else absolutize p) =<< loadField args cfg "shared"
-  let ctp = getAllArgs args (longOption "test")
-  let int = isNothing csc' || (isPresent args $ longOption "interactive")
-  let res = def
-              { script  = csc'
-              , interactive = int
-              , debugregex   = dbg
-              , wrapper = cls
-              , report  = rep
-              , testpattern = ctp
-              , termcolumns   = Nothing -- not used except in testing
-              , secure  = isPresent args $ longOption "secure"
-              , progressbar  = isPresent args $ longOption "noprogress"
-              , outfile = out
-              , sharedir   = shr
+  defaultCfg <- getDataFileName "default.cfg"
+  userCfg    <- absolutize "~/.ortholang/ortholang.cfg"
+  userCfgExists <- doesFileExist userCfg
+  let extraCfgs = catMaybes
+        [ if userCfgExists then Just userCfg else Nothing
+        , getArg args $ longOption "config"
+        ]
+  cfg <- C.load $ C.Required defaultCfg : fmap C.Optional extraCfgs -- TODO reverse list?
+  debugregex <- loadMaybe args cfg "debugregex"
+  tmpdir  <- loadAbs args cfg "tmpdir"
+  workdir <- loadAbs args cfg "workdir"
+  script  <- loadMaybeAbs args cfg "script"
+  report  <- loadMaybeAbs args cfg "report"
+  wrapper <- loadMaybeAbs args cfg "wrapper"
+  history <- loadMaybeAbs args cfg "history"
+  outfile <- loadMaybeAbs args cfg "outfile"
+  shared  <- loadMaybe args cfg "shared"
+               >>= mapM (\p -> if isURL p then return p else absolutize p)
+  let testpattern = getAllArgs args (longOption "test")
+  let interactive = isNothing script || (isPresent args $ longOption "interactive")
+  let termcolumns = Nothing -- not used except in testing
+  let shellaccess = isPresent args $ longOption "shellaccess" -- TODO clean up
+  let progressbar = isPresent args $ longOption "progressbar" -- TODO clean up
+  let showhidden  = isPresent args $ longOption "showhidden" -- TODO clean up
+  let res = Config
+              { script
+              , interactive
+              , debugregex
+              , wrapper
+              , history
+              , report
+              , testpattern
+              , termcolumns
+              , shellaccess
+              , progressbar
+              , outfile
+              , shared
+              , tmpdir
+              , workdir
+              , showhidden
               }
   debug' $ show res
-  updateDebug dbg
+  updateDebug debugregex
   return res
 
 -- TODO any way to recover if missing? probably not
@@ -166,9 +171,8 @@ fields =
   , ("debug"  , setDebug  )
   , ("wrapper", setWrapper)
   , ("report" , setReport )
-  , ("width"  , setWidth  )
-  , ("output" , setOutFile)
-  -- , ("threads", setThreads)
+  , ("termcolumns", setWidth  )
+  , ("outfile" , setOutFile)
   -- TODO add share?
   ]
 

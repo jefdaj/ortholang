@@ -176,6 +176,7 @@ resolveSymlinks mPrefix path = do
 -- kind of silly that haskell doesn't have this built in, but whatever
 -- TODO also follow symlinks? is there a time that would be bad?
 -- https://www.schoolofhaskell.com/user/dshevchenko/cookbook/transform-relative-path-to-an-absolute-path
+-- TODO return Nothing if the file doesn't exist?
 absolutize :: String -> IO String
 absolutize aPath = do
   aPath' <- if "~" `isPrefixOf` aPath

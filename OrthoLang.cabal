@@ -7,7 +7,8 @@ version:            0.9.4
 -- license:            AGPL-3
 license-file:       LICENSE
 build-type:         Simple
-data-files:         examples/scripts/*.ol,
+data-files:         default.cfg,
+                    examples/scripts/*.ol,
                     examples/gene-lists/*.txt,
                     examples/genome-lists/*.txt,
                     examples/sequences/*.fa,
@@ -107,6 +108,7 @@ common shared-properties
 library
   import:           shared-properties
   exposed-modules:  Paths_OrthoLang,
+                    OrthoLang.Config,
                     OrthoLang.Interpreter,
                     OrthoLang.Interpreter.Actions,
                     OrthoLang.Interpreter.Expand,
@@ -117,7 +119,6 @@ library
                     OrthoLang.Interpreter.Compile.Map2,
                     OrthoLang.Interpreter.Compile.NewRules,
                     OrthoLang.Interpreter.Compile.Simple,
-                    OrthoLang.Interpreter.Config,
                     OrthoLang.Interpreter.Eval,
                     OrthoLang.Locks,
                     OrthoLang.Interpreter.Parse,
