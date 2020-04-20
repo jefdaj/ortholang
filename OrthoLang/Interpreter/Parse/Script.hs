@@ -101,10 +101,11 @@ pAssign = debugParser "pAssign" $ do
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   -- TODO use lookAhead here to decide whether to commit to it?
-  cfg <- ask
   scr <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
-  when ((not $ interactive cfg) && (hasKeyAL v scr) && (vName /= "result")) $ do
+  -- "result" can be silently overwritten, but assigning another variable twice is an error
+  -- TODO is that the best way to do it?
+  when (hasKeyAL v scr && vName /= "result") $ do
     fail $ "duplicate variable \"" ++ vName ++ "\""
   e <- lexeme pExpr
 
@@ -138,16 +139,16 @@ pStatement = debugParser "pStatement" (try pAssign <|> pResult)
 -------------
 
 -- TODO move to a separate "files/io" module along with some debug fns?
-parseFileIO :: GlobalEnv -> FilePath -> IO Script
-parseFileIO st scr = do
-  mscr1 <- parseFile st scr
+parseFileIO :: [Module] -> GlobalEnv -> FilePath -> IO Script
+parseFileIO mods st scr = do
+  mscr1 <- parseFile mods st scr
   case mscr1 of
     Left  e -> fail $ show e
     Right s -> return s
 
 -- TODO need GlobalEnv here? or just Config?
-parseStatement :: (Config, Script) -> String -> Either String Assign
-parseStatement = parseWithEof pStatement
+parseStatement :: [Module] -> Config -> Script -> String -> Either String Assign
+parseStatement mods = parseWithEof mods pStatement
 
 {-|
 The name doesn't do a good job of explaining this, but it's expected to be
@@ -158,8 +159,8 @@ TODO clarify that
 TODO error if it has leftover?
 
 -}
-parseString :: Config -> String -> Either String Script
-parseString c s = parseWithEof pScript (c, emptyScript) s
+parseString :: [Module] -> Config -> String -> Either String Script
+parseString ms c s = parseWithEof ms pScript c emptyScript s -- config not needed? pass modules here instead?
   -- where
   --   addDigests :: Script -> Script
   --   addDigests scr = scr {sDigests = scriptDigests c scr}
@@ -189,15 +190,9 @@ pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   optional spaces
   scr <- many pStatement
-  -- (cfg, scr) <- getState
-  -- scr <- getState
-  -- let (as, ds) = unzip ads 
-  -- let ds'  = M.union (sDigests scr) $ exprDigests cfg scr $ map snd as
-      -- scr  = emptyScript {sAssigns = as, sDigests = ds'}
-  cfg <- ask
+  -- cfg <- ask -- not used at all
   -- let scr  = emptyScript {sAssigns = as}
   let scr' = lastResultOnly scr
-      -- ds   = scriptDigests cfg scr'
       -- scr'' = scr' {sDigests = trace ("pScript ds: " ++ show ds) ds}
   -- putState scr'
   -- putDigests "pScript" $ map snd as -- TODO is this the only place it needs to be done?
@@ -208,8 +203,8 @@ pScript = debugParser "pScript" $ do
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
 -- TODO should we really care what the current script is when loading a new one?
-parseFile :: GlobalEnv -> FilePath -> IO (Either String Script)
-parseFile (_, cfg, ref, _, _) path = do
+parseFile :: [Module] -> GlobalEnv -> FilePath -> IO (Either String Script)
+parseFile mods (_, cfg, ref, _, _) path = do -- only passed on, so modules could be passed here instead?
   debug "core.parse.script.parseFile" $ "parseFile \"" ++ path ++ "\""
   txt <- readScriptWithIncludes ref path
-  return $ (parseString cfg . stripComments) txt
+  return $ (parseString mods cfg . stripComments) txt

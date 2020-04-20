@@ -51,29 +51,25 @@ loadField args cfg key
 
 defaultConfig :: FilePath -> FilePath -> IO Config
 defaultConfig td wd = do
-  -- cp <- getNumProcessors
   return Config
     { script      = Nothing
     , interactive = False
     , tmpdir      = td
     , workdir     = wd
-    , debugregex       = Nothing
-    , cfgModules     = [] -- TODO fix this
+    , debugregex  = Nothing
     , wrapper     = Nothing
     , outfile     = Nothing
-    , sharedir       = Nothing
+    , sharedir    = Nothing
     , report      = Nothing
-    , testpattern     = [] -- [] means run all tests
-    , termcolumns       = Nothing
+    , testpattern = [] -- [] means run all tests (TODO insert "all" here?
+    , termcolumns = Nothing
     , secure      = False
-    , progressbar      = True
-    -- , cfgParLock     = par
-    -- , cfgThreads     = cp
-    , showhidden     = False
+    , progressbar = True
+    , showhidden  = False
     }
 
-loadConfig :: [Module] -> Arguments -> IO Config
-loadConfig mods args = do
+loadConfig :: Arguments -> IO Config
+loadConfig args = do
   debug' $ "docopt arguments: " ++ show args
   let path = justOrDie "parse --config arg failed!" $ getArg args $ longOption "config"
   cfg <- C.load [C.Optional path]
@@ -97,7 +93,6 @@ loadConfig mods args = do
               { script  = csc'
               , interactive = int
               , debugregex   = dbg
-              , cfgModules = mods
               , wrapper = cls
               , report  = rep
               , testpattern = ctp

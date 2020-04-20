@@ -2,6 +2,7 @@ module OrthoLang.Test.Help where
 
 import OrthoLang.Types
 import OrthoLang.Interpreter (help)
+import OrthoLang.Modules (modules)
 import qualified Data.ByteString.Lazy.Char8 as B8
 
 import Data.Char              (toLower)
@@ -25,12 +26,12 @@ helpTopics = sort $ nub $ map (map toLower) $ ts ++ gs ++ es ++ fs ++ ms
     fs = map fName  $ nub $ concatMap mFunctions modules
 
 mkHelpTest :: Config -> FilePath -> String -> TestTree
-mkHelpTest cfg hDir topic = goldenDiff desc gld helpAct
+mkHelpTest _ hDir topic = goldenDiff desc gld helpAct
   where
     desc = "help for '" ++ topic ++ "' looks right"
     gld = hDir </> topic <.> "txt"
     helpAct = do
-      txt <- help cfg topic
+      txt <- help modules topic
       return $ B8.pack txt
 
 mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree

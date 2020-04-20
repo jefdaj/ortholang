@@ -100,12 +100,11 @@ For now, I think all binary operators at the same precedence should work.
 but it gets more complicated I'll write out an actual table here with a
 prefix function too etc. See the jake wheat tutorial.
 -}
-operatorTable :: Config -> [[E.Operator String Script (ReaderT Config (Except String)) Expr]]
-operatorTable cfg = [map binary bops]
+operatorTable :: [Module] -> [[E.Operator String Script (ReaderT [Module] (Except String)) Expr]]
+operatorTable mods = [map binary bops] -- modules would work
   where
     binary f = E.Infix (pBop f) E.AssocLeft
     bops = filter (isJust . fOpChar) (concat $ map mFunctions mods)
-    mods = cfgModules cfg
 
 {-|
 This is an annoying extra type, but I can't figure out how to implement pBop without it.
@@ -184,8 +183,8 @@ TODO get function names from modules
 -}
 pFunName :: ParseM String
 pFunName = do
-  cfg <- ask
-  (choice $ map (try . str') $ listFunctionNames cfg) <?> "fn name"
+  mods <- ask
+  (choice $ map (try . str') $ listFunctionNames mods) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
 
@@ -223,8 +222,8 @@ TODO hey is this where it's missing the dmap?
 -}
 pFunArgs :: String -> [Expr] -> ParseM Expr
 pFunArgs name args = debugParser "pFun" $ do
-  cfg <- ask
-  case findFun cfg name of
+  mods <- ask
+  case findFun mods name of
     Left err -> parseFail err
     Right fn -> typecheckArgs fn args -- TODO why no full7942??
 
@@ -380,17 +379,17 @@ pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
 pExpr :: ParseM Expr
 pExpr = debugParser "pExpr" $ do
   -- debugParseM "expr"
-  cfg <- ask
-  E.buildExpressionParser (operatorTable cfg) pTerm <?> "expression"
+  mods <- ask
+  E.buildExpressionParser (operatorTable mods) pTerm <?> "expression"
   -- return $ unsafePerformIO (insertNewRulesDigest st res >> return res) -- TODO move to compiler
   -- putDigests "pExpr" [e]
   -- return e
 
 -- TODO is this incorrectly counting assignment statements of 'result = ...'?
 --      (maybe because it only parses the varname and returns?)
-isExpr :: (Config, Script) -> String -> Bool
-isExpr state line = isRight $ parseWithEof pExpr state line
+isExpr :: [Module] -> Config -> Script -> String -> Bool
+isExpr mods cfg scr line = isRight $ parseWithEof mods pExpr cfg scr line
 
 -- TODO make this return the "result" assignment directly?
-parseExpr :: (Config, Script) -> String -> Either String Expr
-parseExpr = runParseM pExpr
+parseExpr :: [Module] -> Config -> Script -> String -> Either String Expr
+parseExpr mods = runParseM mods pExpr

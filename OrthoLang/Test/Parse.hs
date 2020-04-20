@@ -35,6 +35,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Test.Parse.Arbitrary
 import OrthoLang.Test.Parse.Examples
+import OrthoLang.Modules     (modules)
 import Test.Tasty.QuickCheck
 
 -- TODO parsing doesn't actually require the hashed seqids ref
@@ -66,14 +67,15 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- digestExamples :: GlobalEnv -> [(String, Expr)] -> IO [(String, Expr, DigestMap)]
 -- digestExamples st = mapM (digestExample st)
 
+-- TODO take mods as an arg to match the ones in Parse.Util?
 regularParse :: ParseM a -> Config -> String -> Either String a
-regularParse p cfg = parseWithEof p (cfg, emptyScript)
+regularParse p cfg = parseWithEof modules p cfg emptyScript
 
 takeVar :: String -> Var
 takeVar = Var (RepID Nothing) . takeWhile (flip elem $ vNonFirstChars)
 
 parsedItAll :: ParseM a -> Config -> String -> Bool
-parsedItAll p cfg str' = case parseWithLeftOver p (cfg, emptyScript) str' of
+parsedItAll p cfg str' = case parseWithLeftOver modules p cfg emptyScript str' of
   Right (_, "") -> True
   _ -> False
 
@@ -134,16 +136,16 @@ wsProps :: Config -> LocksRef -> IDsRef -> TestTree
 wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
   [ testProperty "after variables" $
     \(ExVar v@(Var _ s)) (ExSpace w) ->
-      parseWithLeftOver pVar (cfg, emptyScript) (s ++ w) == Right (v, "")
+      parseWithLeftOver modules pVar cfg emptyScript (s ++ w) == Right (v, "")
   , testProperty "after symbols" $
     \(ExSymbol c) (ExSpace w) ->
-      parseWithLeftOver (pSym c) (cfg, emptyScript) (c:w) == Right ((), "")
+      parseWithLeftOver modules (pSym c) cfg emptyScript (c:w) == Right ((), "")
   , testProperty "after equals signs in assignment statements" $
     \(ExAssign a) (ExSpace w) ->
-      parseWithLeftOver pVarEq (cfg, emptyScript) (a ++ w) == Right (takeVar a, "")
+      parseWithLeftOver modules pVarEq cfg emptyScript (a ++ w) == Right (takeVar a, "")
   , testProperty "after quoted strings" $
     \(ExQuoted q) (ExSpace w) ->
-      parseWithLeftOver pQuoted (cfg, emptyScript) (q ++ w) == Right (read q, "")
+      parseWithLeftOver modules pQuoted cfg emptyScript (q ++ w) == Right (read q, "")
   , testProperty "after numbers" $
     \(ExNum n) (ExSpace w) -> parsedItAll pNum cfg (n ++ w)
   ]
@@ -152,12 +154,12 @@ wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
 acProps :: Config -> LocksRef -> IDsRef -> TestTree
 acProps cfg ref ids = testGroup "parse randomly generated cut code"
   [ testProperty "variable names" $
-      \(ExVar v@(Var _ s)) -> parseWithLeftOver pVar (cfg, emptyScript) s == Right (v, "")
+      \(ExVar v@(Var _ s)) -> parseWithLeftOver modules pVar cfg emptyScript s == Right (v, "")
   , testProperty "symbols (reserved characters)" $
-      \(ExSymbol c) -> parseWithLeftOver (pSym c) (cfg, emptyScript) [c] == Right ((), "")
+      \(ExSymbol c) -> parseWithLeftOver modules (pSym c) cfg emptyScript [c] == Right ((), "")
   , testProperty "variables with equal signs after" $
       \(ExAssign a) ->
-        parseWithLeftOver pVarEq (cfg, emptyScript) a == Right (takeVar a, "")
+        parseWithLeftOver modules pVarEq cfg emptyScript a == Right (takeVar a, "")
   , testProperty "quoted strings" $
       \(ExQuoted q) -> regularParse pQuoted cfg q == Right (read q)
   , testProperty "positive numbers" $

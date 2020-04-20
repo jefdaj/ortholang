@@ -3,6 +3,7 @@ module OrthoLang.Test.Repl where
 -- TODO could the mock repl be implemented more cleanly with Haskeline's Behaviors?
 
 import OrthoLang.Types
+import OrthoLang.Modules     (modules)
 import OrthoLang.Interpreter (mkRepl, toGeneric, promptArrow)
 import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Util         (readFileStrict)
@@ -57,7 +58,7 @@ mockRepl stdinLines path st@(_, cfg, ref, ids, dRef) = do
   tmpPath <- emptySystemTempFile "mockrepl"
   withFile tmpPath WriteMode $ \handle -> do
     -- putStrLn ("stdin: \"" ++ unlines stdinLines ++ "\"")
-    _ <- hCapture_ [stdout, stderr] $ mkRepl (map (mockPrompt handle) stdinLines) handle st
+    _ <- hCapture_ [stdout, stderr] $ mkRepl modules (map (mockPrompt handle) stdinLines) handle st
     -- putStrLn $ "stdout: \"" ++ out ++ "\""
     return ()
   out <- readFileStrict ref tmpPath

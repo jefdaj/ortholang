@@ -43,8 +43,8 @@ clear = clearScreen >> cursorUp 1000
 
 -- TODO this is totally duplicating code from putAssign; factor out
 -- TODO should it be an error for the new script not to play well with an existing one?
-cmdLoad :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdLoad st@(scr, cfg, ref, ids, dRef) hdl path = do
+cmdLoad :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
+cmdLoad mods st@(scr, cfg, ref, ids, dRef) hdl path = do
   clear
   path' <- absolutize path
   dfe   <- doesFileExist path'
@@ -52,18 +52,18 @@ cmdLoad st@(scr, cfg, ref, ids, dRef) hdl path = do
     then hPutStrLn hdl ("no such file: " ++ path') >> return st
     else do
       let cfg' = cfg { script = Just path' } -- TODO why the False??
-      new <- parseFile (scr, cfg', ref, ids, dRef) path' -- TODO insert ids
+      new <- parseFile mods (scr, cfg', ref, ids, dRef) path' -- TODO insert ids
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
-        Right s -> clear >> cmdShow (s, cfg', ref, ids, dRef) hdl ""
+        Right s -> clear >> cmdShow mods (s, cfg', ref, ids, dRef) hdl ""
 
-cmdReload :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdReload st@(_, cfg, _, _, _) hdl _ = case script cfg of
-  Nothing -> cmdDrop st hdl ""
-  Just s  -> cmdLoad st hdl s
+cmdReload :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
+cmdReload mods st@(_, cfg, _, _, _) hdl _ = case script cfg of
+  Nothing -> cmdDrop mods st hdl ""
+  Just s  -> cmdLoad mods st hdl s
 
-cmdWrite :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdWrite st@(scr, cfg, locks, ids, dRef) hdl line = case words line of
+cmdWrite :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
+cmdWrite mods st@(scr, cfg, locks, ids, dRef) hdl line = case words line of
   [path] -> do
     saveScript cfg scr path
     return (scr, cfg { script = Just path }, locks, ids, dRef)
@@ -85,15 +85,15 @@ saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
-cmdNeededBy :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdNeededBy st@(scr, cfg, _, _, _) hdl var = do
+cmdNeededBy :: ReplCmd
+cmdNeededBy _ st@(scr, cfg, _, _, _) hdl var = do
   case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
   return st
 
-cmdNeededFor :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdNeededFor st@(scr, cfg, _, _, _) hdl var = do
+cmdNeededFor :: ReplCmd
+cmdNeededFor _ st@(scr, cfg, _, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
   case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
@@ -101,21 +101,21 @@ cmdNeededFor st@(scr, cfg, _, _, _) hdl var = do
   return st
 
 -- TODO factor out the variable lookup stuff
-cmdDrop :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdDrop (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { script = Nothing }, ref, ids, dRef)
-cmdDrop st@(scr, cfg, ref, ids, dRef) hdl var = do
+cmdDrop :: ReplCmd
+cmdDrop _ (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { script = Nothing }, ref, ids, dRef)
+cmdDrop _ st@(scr, cfg, ref, ids, dRef) hdl var = do
   let v = Var (RepID Nothing) var
   case lookup v scr of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just _  -> return (delFromAL scr v, cfg, ref, ids, dRef)
 
 -- TODO insert ids
-runStatement :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-runStatement st@(scr, cfg, ref, ids, dRef) hdl line = case parseStatement (cfg, scr) line of
+runStatement :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
+runStatement mods st@(scr, cfg, ref, ids, dRef) hdl line = case parseStatement mods cfg scr line of
   Left  e -> hPutStrLn hdl e >> return st
   Right r -> do
     let st' = (updateVars scr r, cfg, ref, ids, dRef)
-    when (isExpr (cfg, scr) line) (evalScript hdl st')
+    when (isExpr mods cfg scr line) (evalScript mods hdl st')
     return st'
 
 -- this is needed to avoid assigning a variable literally to itself,

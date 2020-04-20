@@ -149,9 +149,9 @@ renderBar total nThreads fraction shaftChar headChar = shaft ++ heads ++ blank
 
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
-myShake :: Config -> LocksRef -> IDsRef -> DigestsRef
+myShake :: [Module] -> Config -> LocksRef -> IDsRef -> DigestsRef
         -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
-myShake cfg ref ids dr pm delay rules = do
+myShake mods cfg ref ids dr pm delay rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
   nproc <- getNumProcessors
   let tDir = tmpdir cfg
@@ -170,7 +170,7 @@ myShake cfg ref ids dr pm delay rules = do
         -- , shakeStaunch = True -- TODO is this a good idea?
         -- , shakeColor = True
         -- TODO shakeShare to implement shared cache on the demo site!
-        , shakeExtra = shakeEnv cfg ref ids dr
+        , shakeExtra = shakeEnv mods cfg ref ids dr
 
         -- This prints annoying errors whenever a file is accessed unexpectedly
         -- TODO remove ignore patterns as you solve them
@@ -283,8 +283,8 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO require a return type just for showing the result?
 -- TODO take a variable instead?
 -- TODO add a top-level retry here? seems like it would solve the read issues
-eval :: Handle -> Config -> LocksRef -> IDsRef -> DigestsRef -> Type -> Rules ResPath -> IO ()
-eval hdl cfg ref ids dr rtype p = do
+eval :: [Module] -> Handle -> Config -> LocksRef -> IDsRef -> DigestsRef -> Type -> Rules ResPath -> IO ()
+eval mods hdl cfg ref ids dr rtype p = do
   start <- getCurrentTime
   nproc <- getNumProcessors
   let ep = EvalProgress
@@ -307,9 +307,9 @@ eval hdl cfg ref ids dr rtype p = do
                 }
   eval' delay pOpts p -- TODO ignoreErrors again?
   where
-    eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake cfg ref ids dr pm delay $ do
+    eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake mods cfg ref ids dr pm delay $ do
       let loc = "core.eval.eval.eval'"
-      newRules
+      newRules mods
       (ResPath path) <- rpath
       want ["eval"]
       "eval" ~> do
@@ -333,10 +333,11 @@ eval hdl cfg ref ids dr rtype p = do
                         -- (printLong cfg ref ids pm rtype path)
                         (printShort cfg ref ids pm rtype path)
 
-shakeEnv :: Config -> LocksRef -> IDsRef -> DigestsRef -> M.HashMap TypeRep Dynamic
-shakeEnv cfg lRef iRef dRef =
+shakeEnv :: [Module] -> Config -> LocksRef -> IDsRef -> DigestsRef -> M.HashMap TypeRep Dynamic
+shakeEnv mods cfg lRef iRef dRef =
   M.fromList $ map (\v -> (dynTypeRep v, v))
-    [ toDyn cfg
+    [ toDyn mods
+    , toDyn cfg
     , toDyn lRef
     , toDyn iRef
     , toDyn dRef
@@ -374,19 +375,19 @@ printShort cfg ref idsref pm rtype path = do
   -- liftIO $ putStrLn $ "done rendering with unhashIDs"
 
 -- TODO get the type of result and pass to eval
-evalScript :: Handle -> GlobalEnv -> IO ()
-evalScript hdl (scr, c, ref, ids, dRef) =
-  let scr'  = expandMacros c scr
+evalScript :: [Module] -> Handle -> GlobalEnv -> IO ()
+evalScript mods hdl (scr, c, ref, ids, dRef) =
+  let scr'  = expandMacros mods scr
       scr'' = trace "ortholang.core.eval.evalScript" ("after macro expansion: " ++ unlines (map show scr')) scr'
       res = case lookupResult scr'' of
               Nothing -> fromJust $ lookupResult $ ensureResult scr''
               Just r  -> r
-  in eval hdl c ref ids dRef (typeOf res) (compileScript $ seq scr'' scr'')
+  in eval mods hdl c ref ids dRef (typeOf res) (compileScript $ seq scr'' scr'')
 
 -- TODO should there be a new idsref for this? how about digestsref?
-evalFile :: GlobalEnv -> Handle -> IO ()
-evalFile st@(_, cfg, ref, ids, dRef) hdl = case script cfg of
+evalFile :: [Module] -> GlobalEnv -> Handle -> IO ()
+evalFile mods st@(_, cfg, ref, ids, dRef) hdl = case script cfg of
   Nothing  -> putStrLn "no script during eval. that's not right!"
   Just scr -> do
-    s <- parseFileIO st scr -- TODO just take a GlobalEnv?
-    evalScript hdl (s, cfg, ref, ids, dRef)
+    s <- parseFileIO mods st scr -- TODO just take a GlobalEnv?
+    evalScript mods hdl (s, cfg, ref, ids, dRef)

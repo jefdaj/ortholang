@@ -110,9 +110,10 @@ rNamedFunction _ _ n = error "rNamedFunction" $ "bad argument: " ++ n
 rNamedFunction' :: Script -> Expr -> String -> Rules ExprPath
 rNamedFunction' scr expr name = do
   cfg  <- fmap fromJust getShakeExtraRules
+  mods <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let loc = "core.compile.basic.rNamedFunction'"
-  case findFunction cfg name of
+  case findFunction mods name of
     Nothing -> error "rNamedFunction" $ "no such function \"" ++ name ++ "\""
     Just f  -> case fNewRules f of
                  NewNotImplemented -> if "load_" `isPrefixOf` fName f

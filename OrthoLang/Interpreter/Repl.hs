@@ -55,20 +55,20 @@ import System.IO                  (Handle, hPutStrLn, stdout)
 import System.Process             (runCommand, waitForProcess)
 
 -- | Main entry point for running the REPL
-runRepl :: GlobalEnv -> IO ()
-runRepl = mkRepl (repeat getInputLine) stdout
+runRepl :: [Module] -> GlobalEnv -> IO ()
+runRepl mods = mkRepl mods (repeat getInputLine) stdout
 
 -- Like runRepl, but allows overriding the prompt function for golden testing.
 -- Used by mockRepl in OrthoLang/Core/Repl/Tests.hs
 -- TODO separate script from rest of GlobalEnv
-mkRepl :: [String -> InputT ReplM (Maybe String)] -> Handle -> GlobalEnv -> IO ()
-mkRepl promptFns hdl (_, cfg, ref, ids, dRef) = do
+mkRepl :: [Module] -> [String -> InputT ReplM (Maybe String)] -> Handle -> GlobalEnv -> IO ()
+mkRepl mods promptFns hdl (_, cfg, ref, ids, dRef) = do
   clear
   let st = (emptyScript, cfg, ref, ids, dRef)
   st' <- case script cfg of
           Nothing -> welcome hdl >> return st
-          Just path -> cmdLoad st hdl path -- >> cmdShow st hdl []
-  runReplM (replSettings2 cfg) (loop promptFns hdl) st'
+          Just path -> cmdLoad mods st hdl path -- >> cmdShow st hdl []
+  runReplM (replSettings2 mods cfg) (loop mods promptFns hdl) st'
 
 -- There are four types of input we might get, in the order checked for:
 -- TODO update this to reflect 3/4 merged
@@ -94,57 +94,57 @@ mkRepl promptFns hdl (_, cfg, ref, ids, dRef) = do
 --
 -- TODO replace list of prompts with pipe-style read/write from here?
 --      http://stackoverflow.com/a/14027387
-loop :: [String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
-loop [] _ = return Nothing
-loop (promptFn:promptFns) hdl = do
+loop :: [Module] -> [String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
+loop _ [] _ = return Nothing
+loop mods (promptFn:promptFns) hdl = do
   st@(_, cfg, _, _, _)  <- lift $ get
   mLine <- promptFn $ shortPrompt cfg
-  st' <- liftIO $ step st hdl mLine
+  st' <- liftIO $ step mods st hdl mLine
   lift $ put st'
-  loop promptFns hdl
+  loop mods promptFns hdl
 
 -- Attempts to process a line of input, but prints an error and falls back to
 -- the current state if anything goes wrong. This should eventually be the only
 -- place exceptions are caught.
-step :: GlobalEnv -> Handle -> Maybe String -> IO GlobalEnv
-step st hdl mLine = case mLine of
+step :: [Module] -> GlobalEnv -> Handle -> Maybe String -> IO GlobalEnv
+step mods st hdl mLine = case mLine of
   Nothing -> return st
   Just line -> case stripWhiteSpace line of
     ""        -> return st
     ('#':_  ) -> return st
-    (':':cmd) -> runCmd st hdl cmd
-    statement -> runStatement st hdl statement
+    (':':cmd) -> runCmd       mods st hdl cmd
+    statement -> runStatement mods st hdl statement
 
 -- TODO can this use tab completion?
-runCmd :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-runCmd st@(_, cfg, _, _, _) hdl line = case matches of
-  [(_, fn)] -> fn st hdl $ stripWhiteSpace args
+runCmd :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
+runCmd mods st@(_, cfg, _, _, _) hdl line = case matches of
+  [(_, fn)] -> fn mods st hdl $ stripWhiteSpace args
   []        -> hPutStrLn hdl ("unknown command: "   ++ cmd) >> return st
   _         -> hPutStrLn hdl ("ambiguous command: " ++ cmd) >> return st
   where
     (cmd, args) = break isSpace line
-    matches = filter ((isPrefixOf cmd) . fst) (cmds cfg)
+    matches = filter ((isPrefixOf cmd) . fst) (cmds mods cfg)
 
-cmds :: Config -> [(String, ReplCmd)]
-cmds cfg =
+cmds :: [Module] -> Config -> [(String, ReplCmd)]
+cmds mods cfg =
   if secure cfg then [] else [("!", cmdBang)] -- TODO :shell instead?
   ++
-  [ ("help"     , cmdHelp    )
-  , ("load"     , cmdLoad    )
-  , ("write"    , cmdWrite   ) -- TODO do more people expect 'save' or 'write'?
+  [ ("help"     , cmdHelp     )
+  , ("load"     , cmdLoad     )
+  , ("write"    , cmdWrite    ) -- TODO do more people expect 'save' or 'write'?
   , ("neededfor", cmdNeededFor)
-  , ("neededfor", cmdNeededBy)
-  , ("drop"     , cmdDrop    )
-  , ("type"     , cmdType    )
-  , ("show"     , cmdShow    )
-  , ("reload"   , cmdReload  )
-  , ("quit"     , cmdQuit    )
-  , ("config"   , cmdConfig  )
+  , ("neededfor", cmdNeededBy )
+  , ("drop"     , cmdDrop     )
+  , ("type"     , cmdType     )
+  , ("show"     , cmdShow     )
+  , ("reload"   , cmdReload   )
+  , ("quit"     , cmdQuit     )
+  , ("config"   , cmdConfig   )
   ]
 
 -- TODO does this one need to be a special case now?
-cmdQuit :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdQuit _ _ _ = throw QuitRepl
+cmdQuit :: ReplCmd
+cmdQuit _ _ _ _ = throw QuitRepl
 
 -- TODO move to Types.hs
 -- TODO use this pattern for other errors? or remove?
@@ -157,14 +157,14 @@ instance Exception QuitRepl
 instance Show QuitRepl where
   show QuitRepl = "Bye for now!"
 
-cmdBang :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdBang st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
+cmdBang :: ReplCmd
+cmdBang _ st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 
 -- TODO move most of this to Config?
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
-cmdConfig :: GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdConfig st@(scr, cfg, ref, ids, dRef) hdl s = do
+cmdConfig :: ReplCmd
+cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
   let ws = words s
   if (length ws == 0)
     then pPrintHdl cfg hdl cfg >> return st -- TODO Pretty instance
@@ -183,9 +183,9 @@ cmdConfig st@(scr, cfg, ref, ids, dRef) hdl s = do
                  return (scr, cfg', ref, ids, dRef)
 
 -- TODO move to Config? Types?
-replSettings2 :: Config -> Settings ReplM
-replSettings2 cfg = Settings
-  { complete       = myComplete $ cmds cfg
+replSettings2 :: [Module] -> Config -> Settings ReplM
+replSettings2 mods cfg = Settings
+  { complete       = myComplete mods $ cmds mods cfg
   , historyFile    = Just $ tmpdir cfg </> "history.txt"
   , autoAddHistory = True
   }

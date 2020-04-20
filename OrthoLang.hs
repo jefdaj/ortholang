@@ -47,7 +47,7 @@ main = withFileLogging "ortholang.log" $ do
     putStrLn $ "OrthoLang " ++ showVersion version
     exitSuccess
 
-  cfg <- loadConfig modules args
+  cfg <- loadConfig args
   setEnv "TMPDIR" $ tmpdir cfg -- for subprocesses like R
   ref <- initLocks
   setCurrentDirectory $ workdir cfg
@@ -62,8 +62,8 @@ main = withFileLogging "ortholang.log" $ do
   -- TODO typecheck only option here
   let initialState = (emptyScript, cfg, ref, ids, dRef)
   if (interactive cfg)
-    then runRepl  initialState
-    else evalFile initialState stdout
+    then runRepl  modules initialState
+    else evalFile modules initialState stdout
 
   -- TODO is it a problem that --test never reaches this?
   debug "finished main"

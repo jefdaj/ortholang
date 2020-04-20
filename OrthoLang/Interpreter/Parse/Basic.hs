@@ -96,8 +96,7 @@ TODO this must be succeding on 'loaner... right?
 -}
 pEnd :: ParseM ()
 pEnd = debugParser "pEnd" $ do
-  -- (cfg, _) <- getState
-  cfg <- ask
+  cfg <- ask -- modules would work here
   try $ lookAhead $ choice
     [ eof
     , void $ choice $ map pSym $ operatorChars cfg ++ ")],"

@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 {-|
 A work in progress. If this goes well, it will replace
 'OrthoLang.Interpreter.Compile.Basic.rNamedFunction' for all function calls.
@@ -285,20 +287,20 @@ require the compilers to return exact paths. These new ones use proper patterns
 instead, so they can be added once per program run rather than once per
 expression. They should also allow Shake to infer mapping patterns, but that
 isn't implemented yet.
+
+TODO get modules via getShakeExtraRules here?
 -}
-newRules :: Rules ()
-newRules = do
-  cfg <- fmap fromJust $ getShakeExtraRules
-  let fns   = concatMap mFunctions $ cfgModules cfg
-      fnRules = catRules $ map fNewRules fns
-  sequence_ $ rReloadIDs : fnRules
+newRules :: [Module] -> Rules ()
+newRules mods = sequence_ $ rReloadIDs : fnRules
   where
+    fns     = concatMap mFunctions mods
+    fnRules = catRules $ map fNewRules fns
     catRules [] = []
     catRules ((NewRules r):xs) = r : catRules xs
     catRules (_:xs) = catRules xs
 
--- TODO any need to look up prefixOf to get the canonical name?
 {-|
+TODO any need to look up prefixOf to get the canonical name?
 -}
 newPattern :: Config -> Bool -> String -> Int -> FilePattern
 newPattern cfg useSalt name nArgs =
@@ -319,8 +321,9 @@ rNewRules
   -> (ExprPath -> t)
   -> Rules ()
 rNewRules nArgs applyFn oSig name aFn = do
-  cfg <- fmap fromJust $ getShakeExtraRules
-  let useSalt = elem Stochastic $ fTags $ fromRight $ findFun cfg name
+  cfg  <- fmap fromJust $ getShakeExtraRules
+  mods <- fmap fromJust $ getShakeExtraRules
+  let useSalt = elem Stochastic $ fTags $ fromRight $ findFun mods name
       ptn = newPattern cfg useSalt name nArgs
       ptn' = traceShow "rNewrules" ptn
   ptn' %> \p -> do

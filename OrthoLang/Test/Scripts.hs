@@ -6,6 +6,7 @@ import qualified Data.ByteString.Lazy.Char8      as B8
 
 import OrthoLang.Types
 import OrthoLang.Interpreter
+import OrthoLang.Modules     (modules)
 import OrthoLang.Locks (withWriteLockEmpty)
 import OrthoLang.Util   (justOrDie, rmAll)
 
@@ -129,7 +130,7 @@ mkTripTest cfg ref ids dRef name cut parse = goldenDiff desc parse tripAct
     desc = name ++ ".ol unchanged by round-trip to file"
     -- tripShow  = tmpdir cfg </> "round-trip.show"
     tripSetup = do
-      scr1 <- parseFileIO (emptyScript, cfg, ref, ids, dRef) $
+      scr1 <- parseFileIO modules (emptyScript, cfg, ref, ids, dRef) $
                 justOrDie "failed to get script in mkTripTest" $ script cfg
       -- this is useful for debugging
       -- writeScript cut scr1
@@ -138,7 +139,7 @@ mkTripTest cfg ref ids dRef name cut parse = goldenDiff desc parse tripAct
     tripAct = withTmpDirLock cfg ref $ do
       -- _    <- withFileLock (tmpdir cfg) tripSetup
       _ <- tripSetup
-      scr2 <- parseFileIO (emptyScript, cfg, ref, ids, dRef) cut
+      scr2 <- parseFileIO modules (emptyScript, cfg, ref, ids, dRef) cut
       return $ B8.pack $ T.unpack $ pShowNoColor scr2
 
 mkExpandTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> String -> FilePath -> FilePath -> TestTree
@@ -146,8 +147,8 @@ mkExpandTest cfg ref ids dRef name cut expand = goldenDiff desc expand expAct
   where
     desc = name ++ ".ol expands macros as expected"
     expAct = withTmpDirLock cfg ref $ do
-      scr <- parseFileIO (emptyScript, cfg, ref, ids, dRef) cut
-      let scr' = expandMacros cfg scr
+      scr <- parseFileIO modules (emptyScript, cfg, ref, ids, dRef) cut
+      let scr' = expandMacros modules scr
       txt <- renderIO cfg $ pPrint scr'
       return $ B8.pack txt
 
@@ -195,7 +196,7 @@ times is fast. So it's OK to run it once for each test in a group.
 runScript :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO String
 runScript cfg ref ids dRef = withTmpDirLock cfg ref $ do
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
-  (out, ()) <- hCapture [stdout, stderr] $ evalFile (emptyScript, cfg, ref, ids, dRef) stdout
+  (out, ()) <- hCapture [stdout, stderr] $ evalFile modules (emptyScript, cfg, ref, ids, dRef) stdout
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
   result <- doesFileExist $ tmpdir cfg </> "vars" </> "result"
   when (not result) (fail out)

@@ -545,7 +545,7 @@ operatorChars mods = catMaybes $ map fOpChar $ listFunctions mods
 -- Parse monad --
 -----------------
 
-type ParseM a = ParsecT String Script (ReaderT Config (Except String)) a
+type ParseM a = ParsecT String Script (ReaderT [Module] (Except String)) a
 
 -- we sanitize the input fasta files to prevent various bugs,
 -- then use this hash -> seqid map to put the original ids back at the end
@@ -717,4 +717,4 @@ runReplM settings myLoop st@(_, cfg, _, _, _) = do
   _ <- execStateT (runInputT settings myLoop) st
   return ()
 
-type ReplCmd = GlobalEnv -> Handle -> String -> IO GlobalEnv
+type ReplCmd = [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
