@@ -14,7 +14,8 @@ import OrthoLang.Util  (absolutize, justOrDie)
 
 import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRegex)
 import Control.Monad              (when)
-import Data.List                  (isPrefixOf, isInfixOf)
+import Data.Char                  (toLower)
+import Data.List                  (isInfixOf)
 import Data.Maybe                 (isNothing, catMaybes)
 import Data.Text                  (pack)
 import Paths_OrthoLang            (getDataFileName)
@@ -128,7 +129,6 @@ getDoc docPaths = do
   return doc
 
 getUsage :: IO Docopt
--- getUsage = getDoc ["usage"] >>= parseUsageOrExit . fromJust
 getUsage = getDoc ["usage"] >>= parseUsageOrExit
 
 -- hasArg :: Arguments -> String -> Bool
@@ -142,17 +142,10 @@ getUsage = getDoc ["usage"] >>= parseUsageOrExit
  - might change in the future though, because turns out getters and setters are
  - horrible!
  -
- - Note that secure is purposely not avialable here.
+ - Note that shellacces is purposely not available to change here.
  -}
 
--- This is mainly for use in the REPL so no need to return usable data
--- TODO just show the whole config; no need for fields
--- TODO oh and there's a display function for that!
--- showConfigField :: Config -> String -> String
--- showConfigField cfg key = case lookup key fields of
---   Nothing -> "no such config setting: " ++ key
---   Just (getter, _) -> getter cfg
-
+-- TODO is this still necessary? probably not...
 setConfigField :: Config -> String -> String -> Either String (IO Config)
 setConfigField cfg key val = case lookup key fields of
   Nothing -> Left $ "no such config setting: " ++ key
@@ -165,21 +158,18 @@ setConfigField cfg key val = case lookup key fields of
 -- TODO remove show functions and show directly (possibly using Configurator.display)
 fields :: [(String, (Config -> String -> Either String (IO Config)))]
 fields =
-  [ ("script" , setScript )
-  , ("tmpdir" , setTmpdir )
-  , ("workdir", setWorkdir)
+  [ ("tmpdir" , setPath      $ \c p -> c { tmpdir  = p}) -- TODO error on "nothing"?
+  , ("workdir", setPath      $ \c p -> c { workdir = p}) -- TODO error on "nothing"?
+  , ("script" , setMaybePath $ \c p -> c { script  = p})
+  , ("wrapper", setMaybePath $ \c p -> c { wrapper = p})
+  , ("report" , setMaybePath $ \c p -> c { report  = p})
+  , ("outfile", setMaybePath $ \c p -> c { outfile = p})
+  , ("shared" , setMaybePath $ \c p -> c { shared  = p}) -- TODO custom URL thing
+  , ("termcolumns", setMaybeInt $ \c n -> c { termcolumns = n})
   , ("debug"  , setDebug  )
-  , ("wrapper", setWrapper)
-  , ("report" , setReport )
-  , ("termcolumns", setWidth  )
-  , ("outfile" , setOutFile)
-  -- TODO add share?
+  -- TODO add: progressbar, hiddenfns, etc (Bools)
+  -- TODO add logfile and have it update that (move from main)
   ]
-
--- showConfig :: Config -> String
--- showConfig cfg = unlines $ map showField fields
---   where
---     showField (name, (getter, _)) = name ++ " = " ++ getter cfg
 
 setDebug :: Config -> String -> Either String (IO Config)
 setDebug cfg val = case maybeRead ("\"" ++ val ++ "\"") of
@@ -199,61 +189,50 @@ updateDebug regex = case regex of
     setDebugSourceRegex r
     debug' $ "set debug regex to " ++ show regex
 
--- TODO this seems ok, it just needs to be refactored a bit to have one parser per type:
---      string, boolean, int
---      then for strings have it strip off optional quotes
+setMaybePath :: (Config -> Maybe String -> Config) -- ^ fn to apply if the input string validates
+             ->  Config -> String                  -- ^ actual config and input string
+             -> Either String (IO Config)
+setMaybePath fn cfg p = fmap (\mp -> mapM absolutize mp >>= return .fn cfg) $ parseMaybePath p
 
--- standard string
-setScript :: Config -> String -> Either String (IO Config)
-setScript cfg "Nothing" = Right $ return $ cfg { script = Nothing }
-setScript cfg val = case maybeRead ("\"" ++ val ++ "\"") of
-  Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { script = Just v }
+setPath :: (Config -> FilePath -> Config) -- TODO IO here? or just for debug?
+        ->  Config -> String
+        -> Either String (IO Config)
+setPath fn cfg s = fmap (\p -> absolutize p >>= return . fn cfg) $ parsePath s
 
--- standard string
-setTmpdir :: Config -> String -> Either String (IO Config)
-setTmpdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
-  Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { tmpdir = v }
+-- from https://stackoverflow.com/a/3743602
+sq :: String -> String
+sq s@[_]                     = s
+sq ('"':s)  | last s == '"'  = init s
+            | otherwise      = s
+sq ('\'':s) | last s == '\'' = init s
+            | otherwise      = s
+sq s                         = s
 
--- standard string
-setWorkdir :: Config -> String -> Either String (IO Config)
-setWorkdir cfg val = case maybeRead ("\"" ++ val ++ "\"") of
-  Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { workdir = v }
+-- note that if you write a quoted empty string it gets parsed as Nothing here,
+-- but the actual empty string (no path given) will be interpreted as reading
+-- the config value rather than changing it
+parseMaybePath :: String -> Either String (Maybe FilePath)
+parseMaybePath input
+  | map toLower input `elem` ["\"\"", "''", "nothing"] = Right Nothing
+  | otherwise = fmap Just $ parsePath input
 
--- standard string
-setWrapper :: Config -> String -> Either String (IO Config)
-setWrapper cfg "Nothing" = Right $ return $ cfg { wrapper = Nothing }
-setWrapper cfg val = case maybeRead ("\"" ++ val ++ "\"") of
-  Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { wrapper = Just v }
+parsePath :: String -> Either String FilePath
+parsePath input = case maybeRead ("\"" ++ sq input ++ "\"") of
+                    Nothing -> Left $ "invalid path: '" ++ input ++ "'"
+                    Just "" -> Left $ "invalid path: \"\""
+                    Just p  -> Right p
 
--- standard string
-setReport :: Config -> String -> Either String (IO Config)
-setReport cfg val = case maybeRead ("\"" ++ val ++ "\"") of
-  Nothing -> Left  $ "invalid: " ++ val
-  v       -> Right $ return $ cfg { report = v }
+setMaybeInt :: (Config -> Maybe Int -> Config) -- ^ fn to apply if the input string validates
+            ->  Config -> String               -- ^ actual config and input string
+            -> Either String (IO Config)
+setMaybeInt fn cfg p = fmap (return . fn cfg) $ parseMaybeInt p
 
--- TODO remove?
--- setThreads :: Config -> String -> Either String (IO Config)
--- setThreads cfg val = case maybeRead val of
-  -- Nothing -> Left  $ "invalid: " ++ val
-  -- Just v  -> Right $ return $ cfg { cfgThreads = v }
+parseMaybeInt :: String -> Either String (Maybe Int)
+parseMaybeInt input
+  | map toLower input `elem` ["\"\"", "''", "nothing"] = Right Nothing
+  | otherwise = fmap Just $ parseInt input
 
--- standard int
-setWidth :: Config -> String -> Either String (IO Config)
-setWidth cfg "Nothing" = Right $ return $ cfg { termcolumns = Nothing }
-setWidth cfg val = case maybeRead val of
-  Nothing -> Left  $ "invalid: " ++ val
-  Just n  -> Right $ return $ cfg { termcolumns = Just n }
-
--- standard string
-setOutFile :: Config -> String -> Either String (IO Config)
-setOutFile cfg "Nothing" = Right $ return $ cfg { outfile = Nothing }
-setOutFile cfg val = case maybeRead ("\"" ++ val ++ "\"") of
-  Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ return $ cfg { outfile = Just v }
-
--- TODO add: progressbar, hiddenfns, etc (Bools)
--- TODO add logfile and have it update that (move from main)
+parseInt :: String -> Either String Int
+parseInt input = case maybeRead input of
+                   Nothing -> Left $ "invalid int: '" ++ input ++ "'"
+                   Just n  -> Right n
