@@ -28,39 +28,39 @@ module OrthoLang.Interpreter.Expand
 import OrthoLang.Debug (trace)
 import OrthoLang.Types
 
-expandMacros :: Config -> Script -> Script
+expandMacros :: [Module] -> Script -> Script
 expandMacros = eScript
 
-eScript :: Config -> Script -> Script
-eScript cfg scr = map (eAssign cfg scr) scr
+eScript :: [Module] -> Script -> Script
+eScript mods scr = map (eAssign mods scr) scr
 
-eAssign :: Config -> Script -> Assign -> Assign
-eAssign cfg scr (v, e) = (v, eExpr cfg scr e)
+eAssign :: [Module] -> Script -> Assign -> Assign
+eAssign mods scr (v, e) = (v, eExpr mods scr e)
 
 -- | This one is recursive in case one macro expression is hidden inside the
 --   result of another
-eExpr :: Config -> Script -> Expr -> Expr
-eExpr cfg scr e = if e' == e then e' else eExpr' cfg scr e'
+eExpr :: [Module] -> Script -> Expr -> Expr
+eExpr mods scr e = if e' == e then e' else eExpr' mods scr e'
   where
-    e' = eExpr' cfg scr e
+    e' = eExpr' mods scr e
 
-eExpr' :: Config -> Script -> Expr -> Expr
-eExpr' cfg scr e@(Fun r s ds name es) =
-  let e' = Fun r s ds name $ map (eExpr cfg scr) es
-  in case findFun cfg name of
+eExpr' :: [Module] -> Script -> Expr -> Expr
+eExpr' mods scr e@(Fun r s ds name es) =
+  let e' = Fun r s ds name $ map (eExpr mods scr) es
+  in case findFun mods name of
        Left err -> error err
        Right fn -> case fNewRules fn of
                      -- TODO is another typechecking step necessary? maybe doesn't add anything
-                     -- (NewMacro m) -> case typecheck cfg (m scr e) of
+                     -- (NewMacro m) -> case typecheck mods (m scr e) of
                      --                   Left err -> error err
                      --                   Right e' -> e'
                      (NewMacro m) -> let e'' = m scr e
                                      in trace "core.expand.eExpr'"
                                               ("expanded macro: " ++ show e ++ " -> " ++ show e'') e''
                      _ -> e'
-eExpr' cfg scr (Bop r ms vs n e1 e2) = Bop r ms vs n (eExpr cfg scr e1) (eExpr cfg scr e2)
-eExpr' cfg scr (Lst r vs es) = Lst r vs $ map (eExpr cfg scr) es
+eExpr' mods scr (Bop r ms vs n e1 e2) = Bop r ms vs n (eExpr mods scr e1) (eExpr mods scr e2)
+eExpr' mods scr (Lst r vs es) = Lst r vs $ map (eExpr mods scr) es
 eExpr' _ _ e = e
 
--- typecheck :: Config -> Expr -> Either String Expr
--- typecheck cfg expr = undefined
+-- typecheck :: [Module] -> Expr -> Either String Expr
+-- typecheck mods expr = undefined

@@ -47,7 +47,7 @@ module OrthoLang.Types
   -- , Assoc(..) -- we reuse this from Parsec
   -- , OrthoLangFixity(..)
   -- parse monad
-  -- , ParseM
+  , ParseM
   -- repl monad
   -- , print
   -- misc
@@ -115,6 +115,11 @@ import System.Console.Haskeline hiding (catch)
 import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
 import System.FilePath.Posix      ((</>))
 import System.IO                  (Handle, hPutStrLn, stdout)
+
+-- for ParseM (TODO clean up)
+import Text.Parsec hiding (Empty)
+import Control.Monad.Reader
+import Control.Monad.Trans.Except
 
 newtype Path = Path FilePath deriving (Eq, Ord, Show, Typeable)
 
@@ -490,62 +495,57 @@ data Config = Config
   , termcolumns :: Maybe Int -- for testing
   , secure      :: Bool
   , progressbar :: Bool
-
-  -- TODO remove these
-  , cfgModules  :: [Module]
-  -- , cfgThreads  :: Int
   , showhidden  :: Bool
   }
   deriving (Show, Typeable)
 
 -- note: only lists the first name of each function,
 --       which for binary operators will be the single-char one
-listFunctionNames :: Config -> [String]
-listFunctionNames cfg = map fName $ concat $ map mFunctions $ cfgModules cfg
+listFunctionNames :: [Module] -> [String]
+listFunctionNames mods = map fName $ concatMap mFunctions mods
 
-findModule :: Config -> String -> Maybe Module
-findModule cfg name = find (\m -> mName m == name) (cfgModules cfg)
+findModule :: [Module] -> String -> Maybe Module
+findModule mods name = find (\m -> mName m == name) mods
 
 -- used by the compiler and repl
 -- TODO find bops by char or name too
 -- TODO filter to get a list and assert length == 1fs
 -- TODO remove in favor of findFun below?
-findFunction :: Config -> String -> Maybe Function
-findFunction cfg name = find (\f -> fName f == name || fmap (\c -> [c]) (fOpChar f) == Just name) fs
+findFunction :: [Module] -> String -> Maybe Function
+findFunction mods name = find (\f -> fName f == name || fmap (\c -> [c]) (fOpChar f) == Just name) fs
   where
-    ms = cfgModules cfg
-    fs = concatMap mFunctions ms
+    fs = concatMap mFunctions mods
 
-findFun :: Config -> String -> Either String Function
-findFun cfg name =
-  let fns = concat $ map mFunctions $ cfgModules cfg
+findFun :: [Module] -> String -> Either String Function
+findFun mods name =
+  let fns = concat $ map mFunctions mods
   in case filter (\f -> fName f == name) fns of
        []     -> Left $ "no function found with name \"" ++ name ++ "\""
        (f:[]) -> Right f
        _      -> Left $ "function name collision! multiple fns match \"" ++ name ++ "\""
 
-findType :: Config -> String -> Maybe Type
-findType cfg ext = find (\t -> tExtOf t == ext) ts
+findType :: [Module] -> String -> Maybe Type
+findType mods ext = find (\t -> tExtOf t == ext) ts
   where
-    ms = cfgModules cfg
-    ts = concatMap mTypes ms
+    ts = concatMap mTypes mods
 
-findGroup :: Config -> String -> Maybe TypeGroup
-findGroup cfg ext = find (\g -> tgExt g == ext) ts
+findGroup :: [Module] -> String -> Maybe TypeGroup
+findGroup mods ext = find (\g -> tgExt g == ext) ts
   where
-    ms = cfgModules cfg
-    ts = concatMap mGroups ms
+    ts = concatMap mGroups mods
 
-listFunctions :: Config -> [Function]
-listFunctions cfg = concatMap mFunctions $ cfgModules cfg
+listFunctions :: [Module] -> [Function]
+listFunctions mods = concatMap mFunctions mods
 
 -- Now with guard against accidentally including parts of prefix fn names!
-operatorChars :: Config -> [Char]
-operatorChars cfg = catMaybes $ map fOpChar $ listFunctions cfg
+operatorChars :: [Module] -> [Char]
+operatorChars mods = catMaybes $ map fOpChar $ listFunctions mods
 
 -----------------
 -- Parse monad --
 -----------------
+
+type ParseM a = ParsecT String Script (ReaderT Config (Except String)) a
 
 -- we sanitize the input fasta files to prevent various bugs,
 -- then use this hash -> seqid map to put the original ids back at the end
