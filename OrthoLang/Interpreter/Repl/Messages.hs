@@ -58,7 +58,7 @@ shortPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command
 -- TODO why does this one have a weird path before the :help text?
 -- TODO bop help by mapping to the prefixOf version
 cmdHelp :: ReplCmd
-cmdHelp ms st@(_, cfg, _, _, _) hdl line = do
+cmdHelp ms st hdl line = do
   doc <- help ms line
   hPutStrLn hdl doc >> return st
 
