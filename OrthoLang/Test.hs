@@ -13,13 +13,13 @@ import OrthoLang.Types
 
 import OrthoLang.Test.Repl   (mkTestGroup)
 import Paths_OrthoLang       (getDataFileName)
-import System.Console.Docopt (Arguments, longOption, getAllArgs)
 import System.Directory      (getTemporaryDirectory, createDirectoryIfMissing, setCurrentDirectory)
 import System.Environment    (setEnv, withArgs)
 import System.FilePath.Posix ((</>))
 import System.IO.Temp        (withTempDirectory)
 import System.Process        (readCreateProcessWithExitCode, shell)
 import Test.Tasty            (TestTree, defaultMain)
+import System.Console.Docopt (Arguments, getArg, isPresent, longOption)
 -- import Data.List.Utils       (replace)
 
 -- we just need <each of these>.mkTests
@@ -63,16 +63,14 @@ runTests args cfg ref ids dRef = withArgs [] $ do
     setCurrentDirectory wd -- TODO issue with this in the stack tests?
     dbg $ "working dir is " ++ wd
     -- TODO check exit code?
-
     -- each test can be multithreaded, but running more than one at a time
     -- confuses the stdout/stderr capturing
     setEnv "TASTY_NUM_THREADS" "1"
-
-    case getAllArgs args (longOption "test") of
-      [] -> return ()
-      ps -> do
-        setEnv "TASTY_PATTERN" $ unwords ps
-        setEnv "TASTY_TIMEOUT" "5m" -- TODO configure this?
+    setEnv "TASTY_TIMEOUT" "5m" -- TODO configure this?
+    -- TODO can you also just export this before running ortholang?
+    case getArg args $ longOption "test" of
+      Nothing -> return ()
+      Just ptn -> setEnv "TASTY_PATTERN" ptn
     let exSrc = wd </> "examples"
         exDst = tmpSubDir </> "examples"
     (_,_,_) <- readCreateProcessWithExitCode

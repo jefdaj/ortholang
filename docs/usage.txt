@@ -8,8 +8,7 @@ Options:
   --help FNORTYPE    Print possibly-helpful info about a function or filetype.
   --version          Print version number and exit.
   --debug REGEX      Log debugging messages matching REGEX.
-  --test PATTERN     Run tests matching PATTERN.
-                     Can be used more than once to run multiple sets of tests.
+  --test PATTERN     Run tests matching PATTERN. See github.com/feuerbach/tasty for syntax.
   --interactive      Start the interpreter, and load SCRIPT if any. This is
                      the default if no arguments are given.
   --typecheck        Don't run the script yet, just print any type errors.

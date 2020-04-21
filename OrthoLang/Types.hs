@@ -492,10 +492,6 @@ data Config = Config
   , shared      :: Maybe String -- can be a filepath or url
   , report      :: Maybe FilePath
   , history     :: Maybe FilePath
-
-  -- TODO remove and parse separately in OrthoLang.Test module
-  -- , testpattern :: [String] -- TODO should default to ["all"] for now
- 
   , termcolumns :: Maybe Int -- for testing
   , shellaccess :: Bool
   , progressbar :: Bool

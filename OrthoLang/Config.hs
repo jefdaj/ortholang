@@ -85,10 +85,6 @@ loadConfig args = do
   outfile <- loadMaybeAbs args cfg "outfile"
   shared  <- loadMaybe args cfg "shared"
                >>= mapM (\p -> if isURL p then return p else absolutize p)
-
-  -- TODO parse this separately and only use inside Test?
-  -- let testpattern = getAllArgs args (longOption "test")
-
   let interactive = isNothing script || (isPresent args $ longOption "interactive")
   let termcolumns = Nothing -- not used except in testing
   let shellaccess = isPresent args $ longOption "shellaccess" -- TODO clean up
@@ -101,7 +97,6 @@ loadConfig args = do
               , wrapper
               , history
               , report
-              -- , testpattern
               , termcolumns
               , shellaccess
               , progressbar
@@ -171,20 +166,16 @@ type ConfigSetter = Config -> String -> Either String (IO Config)
 
 configFields :: [(String, (ConfigShower, ConfigSetter))]
 configFields =
-  [ ("tmpdir"     , (show . tmpdir     , mkSetter parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {tmpdir  =  a})))
-  , ("workdir"    , (show . workdir    , mkSetter parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {workdir =  a})))
-  , ("script"     , (show . script     , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {script  = ma})))
-  , ("wrapper"    , (show . wrapper    , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {wrapper  = ma})))
-  , ("report"     , (show . report     , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {report  = ma})))
-  , ("outfile"    , (show . outfile    , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {outfile = ma})))
-  , ("shared"     , (show . shared     , mkSetter parseMaybeString (\c ms ->  absPathOrUrl ms     >>= \ma -> return $ c {shared  = ma})))
-  , ("termcolumns", (show . termcolumns, mkSetter parseMaybeInt (\c mi -> return $ c {termcolumns = mi})))
-  , ("debugregex" , (show . debugregex , mkSetter parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr}))))
-  -- , ("testpattern", mkSetter parseStrings (\c ps -> return (c {testpattern = ps})))
+  [ ("tmpdir"     , (show . tmpdir     , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {tmpdir  =  a})))
+  , ("workdir"    , (show . workdir    , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {workdir =  a})))
+  , ("script"     , (show . script     , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {script  = ma})))
+  , ("wrapper"    , (show . wrapper    , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {wrapper  = ma})))
+  , ("report"     , (show . report     , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {report  = ma})))
+  , ("outfile"    , (show . outfile    , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {outfile = ma})))
+  , ("shared"     , (show . shared     , mkSet parseMaybeString (\c ms ->  absPathOrUrl ms     >>= \ma -> return $ c {shared  = ma})))
+  , ("termcolumns", (show . termcolumns, mkSet parseMaybeInt (\c mi -> return $ c {termcolumns = mi})))
+  , ("debugregex" , (show . debugregex , mkSet parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr}))))
   ]
-
-parseStrings :: String -> Either String [String]
-parseStrings = undefined
 
 absPathOrUrl :: Maybe String -> IO (Maybe String)
 absPathOrUrl = undefined
@@ -192,7 +183,6 @@ absPathOrUrl = undefined
 --   -- TODO add: progressbar, hiddenfns, etc (Bools)
 --   -- TODO bools: progressbar, hiddenfns, secure (with error message)
 --   -- TODO add logfile and have it update that (move from main)
---   -- TODO testpattern, which is a string with no path stuff
 --   -- TODO make logfile work
 --   -- TODO debugregex should have a "nothing" setting
 --   ]
@@ -214,12 +204,12 @@ updateDebug regex = case regex of
     setDebugSourceRegex r
     debug' $ "set debug regex to " ++ show regex
 
-mkSetter :: (String -> Either String a) -- ^ parser function
-         -> (Config -> a -> IO Config)  -- ^ setter function
-         -> Config                      -- ^ current config
-         -> String                      -- ^ new field value
-         -> Either String (IO Config)
-mkSetter parser setter cfg value =
+mkSet :: (String -> Either String a) -- ^ parser function
+      -> (Config -> a -> IO Config)  -- ^ setter function
+      -> Config                      -- ^ current config
+      -> String                      -- ^ new field value
+      -> Either String (IO Config)
+mkSet parser setter cfg value =
   case parser value of
     Left  err -> Left err
     Right val -> Right (setter cfg val)
