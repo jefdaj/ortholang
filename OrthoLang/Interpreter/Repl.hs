@@ -39,7 +39,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter.Repl.Actions
 import OrthoLang.Interpreter.Repl.Messages
 
-import OrthoLang.Config    (showConfig, setConfigField)
+import OrthoLang.Config    (showConfig, showConfigField, setConfigField)
 import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 
@@ -177,7 +177,7 @@ cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
       else if (length ws == 1)
         -- TODO use pretty print or display here instead
         -- TODO remove modules, since they're never used and can't show/read
-        then hPutStrLn hdl (showConfig cfg) >> return st -- TODO just the one field
+        then hPutStrLn hdl (showConfigField cfg $ head ws) >> return st -- TODO just the one field
         else case setConfigField cfg (headOrDie "cmdConfig failed" ws) (last ws) of
                Left err -> hPutStrLn hdl err >> return st
                Right iocfg' -> do

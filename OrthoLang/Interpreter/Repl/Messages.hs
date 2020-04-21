@@ -21,6 +21,7 @@ module OrthoLang.Interpreter.Repl.Messages
 
 import Prelude hiding (print)
 import OrthoLang.Types
+import OrthoLang.Config (configFields) -- TODO move back to Interpreter
 import System.Console.Haskeline
 import qualified Data.Map.Strict as M
 
@@ -129,10 +130,11 @@ quotedCompletions wordSoFar = do
 nakedCompletions :: [Module] -> [(String, ReplCmd)] -> String -> String -> ReplM [Completion]
 nakedCompletions mods cmds lineReveresed wordSoFar = do
   (scr, _, _, _, _) <- get
-  let wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts
+  let wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts ++ cfgFields
       fnNames  = concatMap (map fName . mFunctions) mods
       varNames = map ((\(Var _ v) -> v) . fst) scr
       cmdNames = map ((':':) . fst) cmds
       typeExts = map tExtOf $ concatMap mTypes mods
+      cfgFields = map fst configFields
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
   return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)

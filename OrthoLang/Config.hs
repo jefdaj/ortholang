@@ -83,8 +83,7 @@ loadConfig args = do
   wrapper <- loadMaybeAbs args cfg "wrapper"
   history <- loadMaybeAbs args cfg "history"
   outfile <- loadMaybeAbs args cfg "outfile"
-  shared  <- loadMaybe args cfg "shared"
-               >>= mapM (\p -> if isURL p then return p else absolutize p)
+  shared  <- loadMaybe args cfg "shared" >>= mapM absPathOrUrl
   let interactive = isNothing script || (isPresent args $ longOption "interactive")
   let termcolumns = Nothing -- not used except in testing
   let shellaccess = isPresent args $ longOption "shellaccess" -- TODO clean up
@@ -145,13 +144,21 @@ getUsage = getDoc ["usage"] >>= parseUsageOrExit
 
 -- TODO move to Pretty?
 showConfig :: Config -> String
-showConfig cfg = init $ unlines $ map (\(s, (g, _)) -> s ++ " = " ++ g cfg) configFields
+showConfig cfg = init $ unlines $ map (showConfigField cfg . fst) configFields
 
--- TODO is this still necessary? probably not...
+showConfigField :: Config -> String -> String
+showConfigField cfg fieldName = case lookup fieldName configFields of
+  Nothing -> "no such config setting: " ++ fieldName
+  Just (shower, _) -> fieldName ++ " = " ++ shower cfg
+
 setConfigField :: Config -> String -> String -> Either String (IO Config)
 setConfigField cfg key val = case lookup key configFields of
   Nothing -> Left $ "no such config setting: " ++ key
-  Just (_, setter) -> setter cfg val
+  Just (_, setter) -> case setter cfg val of
+      Left err -> Left err
+      Right io -> Right (io >>= \cfg' -> do
+        putStrLn $ showConfigField cfg' key
+        return cfg')
 
 -- TODO add modules? maybe not much need
 -- TODO add interactive?
@@ -172,13 +179,13 @@ configFields =
   , ("wrapper"    , (show . wrapper    , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {wrapper  = ma})))
   , ("report"     , (show . report     , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {report  = ma})))
   , ("outfile"    , (show . outfile    , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {outfile = ma})))
-  , ("shared"     , (show . shared     , mkSet parseMaybeString (\c ms ->  absPathOrUrl ms     >>= \ma -> return $ c {shared  = ma})))
+  , ("shared"     , (show . shared     , mkSet parseMaybeString (\c ms -> (mapM absPathOrUrl ms) >>= \ma -> return $ c {shared  = ma})))
   , ("termcolumns", (show . termcolumns, mkSet parseMaybeInt (\c mi -> return $ c {termcolumns = mi})))
   , ("debugregex" , (show . debugregex , mkSet parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr}))))
   ]
 
-absPathOrUrl :: Maybe String -> IO (Maybe String)
-absPathOrUrl = undefined
+absPathOrUrl :: String -> IO String
+absPathOrUrl p = if isURL p then return p else absolutize p
 
 --   -- TODO add: progressbar, hiddenfns, etc (Bools)
 --   -- TODO bools: progressbar, hiddenfns, secure (with error message)
