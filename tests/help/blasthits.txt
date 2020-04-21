@@ -1,1 +1,1 @@
-No help topics found for 'blasthits'.
+doc for modules/BlastHits not written yet

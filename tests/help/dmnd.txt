@@ -1,4 +1,4 @@
-The .dmnd extension is for DIAMOND database files.
+The dmnd extension is for DIAMOND database files.
 
 doc for types/dmnd not written yet
 

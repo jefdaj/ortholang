@@ -1,1 +1,6 @@
 No help topics found for 'test'.
+Did you mean one of these?
+newrulestest1
+newrulestest2
+newrulestest3
+test

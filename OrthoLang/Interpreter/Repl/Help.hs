@@ -3,6 +3,7 @@ module OrthoLang.Interpreter.Repl.Help
 
   -- * Functions used in Core.Repl
     help -- also used in Test.Repl
+  , helpTopics
   , renderTypeSig
 
   -- * HelpDoc typeclass (TODO don't export?)
@@ -17,31 +18,48 @@ import OrthoLang.Interpreter.Config (getDoc)
 import OrthoLang.Interpreter.Pretty -- (pPrint, render)
 import OrthoLang.Util (headOrDie)
 
+import Data.Char             (toLower)
+import Data.List             (nub, sort, isInfixOf)
 import Data.List.Split       (splitOn)
 import Data.Maybe            (catMaybes)
 import System.FilePath.Posix ((</>))
 
 help :: [Module] -> String -> IO String
-help mods line = case words line of
+help mods line = case words (map toLower line) of
   [w] -> head $ catMaybes
            [ fmap fHelp $ findFunction mods w
            , fmap mHelp $ findModule   mods w
            , fmap (extHelp mods) $ findType  mods w
-           , Just $ fallbackHelp w
+           , Just $ return $ fallbackHelp mods w
            ]
   _ -> getDoc ["repl"]
 
--- TODO suggest anything that contains wrd as an infix
-fallbackHelp :: String -> IO String
-fallbackHelp wrd = return $ "No help topics found for '" ++ wrd ++ "'."
+-- TODO make sure lowercase names of everything are unique! got about 10 overlaps here...
+-- TODO include something notfound?
+-- TODO add bop infix operators (by mapping them to prefix equivalents)
+helpTopics :: [Module] -> [String]
+helpTopics mods = sort $ nub $ map (map toLower) $ ts ++ gs ++ es ++ fs ++ ms
+  where
+    ms = map mName mods
+    ts = map ext $ nub $ concatMap mTypes     mods
+    gs = map ext $ nub $ concatMap mGroups    mods
+    es = map ext $ nub $ concatMap mEncodings mods
+    fs = map fName $ nub $ concatMap mFunctions mods
+
+fallbackHelp :: [Module] -> String -> String
+fallbackHelp mods wrd = init $ unlines $ nohelp : didyou : suggestions
+  where
+    nohelp = "No help topics found for '" ++ wrd ++ "'."
+    didyou = "Did you mean one of these?"
+    suggestions = filter (map toLower wrd `isInfixOf`) $ helpTopics mods
 
 mHelp :: Module -> IO String
-mHelp m = getDoc ["modules" </> mName m]
+mHelp m = getDoc ["modules" </> map toLower (mName m)]
 
 -- TODO move somewhere better
 fHelp :: Function -> IO String
 fHelp f = do
-  doc <- getDoc ["functions" </> fName f]
+  doc <- getDoc ["functions" </> map toLower (fName f)]
   let msg = "\n" ++ renderTypeSig f ++ "\n\n" ++ doc
   return msg
 
@@ -50,7 +68,7 @@ fHelp f = do
 extHelp :: Ext a => [Module] -> a -> IO String
 extHelp mods e = do
   doc <- getDoc ["types" </> ext e]
-  let msg = "The ." ++ ext e ++ " extension is for " ++ desc e ++ " files.\n\n"
+  let msg = "The " ++ ext e ++ " extension is for " ++ desc e ++ " files.\n\n"
             ++ doc ++ "\n\n"
             ++ tFnList
   return msg

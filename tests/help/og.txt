@@ -1,1 +1,15 @@
 No help topics found for 'og'.
+Did you mean one of these?
+histogram
+og
+orthogroup_containing
+orthogroups
+orthogroups_containing
+ortholog_in_all
+ortholog_in_all_str
+ortholog_in_any
+ortholog_in_any_str
+ortholog_in_max
+ortholog_in_max_str
+ortholog_in_min
+ortholog_in_min_str

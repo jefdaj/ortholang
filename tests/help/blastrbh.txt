@@ -1,1 +1,1 @@
-No help topics found for 'blastrbh'.
+doc for modules/BlastRBH not written yet

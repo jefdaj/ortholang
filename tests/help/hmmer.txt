@@ -1,1 +1,1 @@
-No help topics found for 'hmmer'.
+doc for modules/HMMER not written yet

@@ -102,6 +102,7 @@ import OrthoLang.Util  (readFileStrict, readFileLazy)
 
 import Development.Shake              (Rules, Action, Resource)
 -- import Control.Monad.IO.Class (liftIO)
+import Data.Char                      (toLower)
 import Data.List                      (nub, find, isPrefixOf)
 -- import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
 import Data.IORef                     (IORef)
@@ -531,33 +532,38 @@ listFunctionNames :: [Module] -> [String]
 listFunctionNames mods = map fName $ concatMap mFunctions mods
 
 findModule :: [Module] -> String -> Maybe Module
-findModule mods name = find (\m -> mName m == name) mods
+findModule mods name = find (\m -> map toLower (mName m) == map toLower name) mods
 
 -- used by the compiler and repl
 -- TODO find bops by char or name too
 -- TODO filter to get a list and assert length == 1fs
 -- TODO remove in favor of findFun below?
 findFunction :: [Module] -> String -> Maybe Function
-findFunction mods name = find (\f -> fName f == name || fmap (\c -> [c]) (fOpChar f) == Just name) fs
+findFunction mods name = find (\f -> map toLower (fName f) == n
+                      || fmap (\c -> [toLower c]) (fOpChar f) == Just n) fs
   where
+    n = map toLower name
     fs = concatMap mFunctions mods
 
 findFun :: [Module] -> String -> Either String Function
 findFun mods name =
-  let fns = concat $ map mFunctions mods
-  in case filter (\f -> fName f == name) fns of
+  let n   = map toLower name
+      fns = concat $ map mFunctions mods
+  in case filter (\f -> map toLower (fName f) == n) fns of
        []     -> Left $ "no function found with name \"" ++ name ++ "\""
        (f:[]) -> Right f
        _      -> Left $ "function name collision! multiple fns match \"" ++ name ++ "\""
 
 findType :: [Module] -> String -> Maybe Type
-findType mods e = find (\t -> ext t == e) ts
+findType mods e = find (\t -> ext t == e') ts
   where
+    e' = map toLower e
     ts = concatMap mTypes mods
 
 findGroup :: [Module] -> String -> Maybe TypeGroup
-findGroup mods e = find (\g -> ext g == e) ts
+findGroup mods e = find (\g -> ext g == e') ts
   where
+    e' = map toLower e
     ts = concatMap mGroups mods
 
 listFunctions :: [Module] -> [Function]

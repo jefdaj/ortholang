@@ -1,4 +1,4 @@
-The .mms extension is for MMSeqs2 sequence database files.
+The mms extension is for MMSeqs2 sequence database files.
 
 doc for types/mms not written yet
 

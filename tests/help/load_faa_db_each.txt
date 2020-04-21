@@ -1,4 +1,4 @@
 
 [list of str (string)s] -> list of faa (FASTA (amino acid)) encoded as blastdbs
 
-No matching function, filetype, or module found.
+doc for functions/load_faa_db_each not written yet

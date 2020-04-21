@@ -1,4 +1,4 @@
 
 [fna (FASTA (nucleic acid))] -> fna (FASTA (nucleic acid)) encoded as blastdb
 
-No matching function, filetype, or module found.
+doc for functions/makeblastdb_fna not written yet

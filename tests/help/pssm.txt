@@ -1,4 +1,4 @@
-The .pssm extension is for PSI-BLAST position-specific substitution matrix as ASCII files.
+The pssm extension is for PSI-BLAST position-specific substitution matrix as ASCII files.
 
 doc for types/pssm not written yet
 

@@ -19,6 +19,7 @@ module OrthoLang.Interpreter.Repl
   -- * Used in tests
   , mkRepl
   , help
+  , helpTopics
   , ReplM
   , promptArrow
 
@@ -38,6 +39,7 @@ module OrthoLang.Interpreter.Repl
 import Prelude hiding (print)
 
 import OrthoLang.Types
+import OrthoLang.Interpreter.Repl.Help
 import OrthoLang.Interpreter.Repl.Actions
 import OrthoLang.Interpreter.Repl.Messages
 

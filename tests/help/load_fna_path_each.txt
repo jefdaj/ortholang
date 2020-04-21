@@ -1,4 +1,4 @@
 
 [list of str (string)s] -> fna (FASTA (nucleic acid)).list
 
-No matching function, filetype, or module found.
+doc for functions/load_fna_path_each not written yet

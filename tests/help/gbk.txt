@@ -1,4 +1,4 @@
-The .gbk extension is for genbank files.
+The gbk extension is for genbank files.
 
 doc for types/gbk not written yet
 

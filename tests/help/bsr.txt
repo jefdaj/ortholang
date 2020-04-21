@@ -1,4 +1,4 @@
-The .bsr extension is for BUSCO results files.
+The bsr extension is for BUSCO results files.
 
 doc for types/bsr not written yet
 

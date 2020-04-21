@@ -1,1 +1,16 @@
 No help topics found for 'll'.
+Did you mean one of these?
+all
+all-vs-all
+diamond_makedb_all
+ll
+makeblastdb_faa_all
+makeblastdb_fna_all
+mmseqs_createdb_all
+ortholog_in_all
+ortholog_in_all_str
+psiblast_all
+psiblast_pssm_all
+psiblast_pssms_all
+psiblast_train_all
+reciprocal_best_all

@@ -1,4 +1,4 @@
-The .spr extension is for SonicParanoid results files.
+The spr extension is for SonicParanoid results files.
 
 doc for types/spr not written yet
 

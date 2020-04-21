@@ -1,4 +1,4 @@
 
 [list of faa (FASTA (amino acid))s] -> list of dmnd (DIAMOND database)s
 
-No matching function, filetype, or module found.
+doc for functions/diamond_makedb_each not written yet

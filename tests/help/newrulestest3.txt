@@ -1,4 +1,4 @@
 
 [str (string), str (string), str (string)] -> str (string)
 
-No matching function, filetype, or module found.
+doc for functions/newrulestest3 not written yet

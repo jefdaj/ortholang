@@ -1,4 +1,4 @@
-The .search extension is for intermediate table describing biomartr searches files.
+The search extension is for intermediate table describing biomartr searches files.
 
 doc for types/search not written yet
 

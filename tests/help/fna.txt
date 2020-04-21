@@ -1,4 +1,4 @@
-The .fna extension is for FASTA (nucleic acid) files.
+The fna extension is for FASTA (nucleic acid) files.
 
 doc for types/fna not written yet
 

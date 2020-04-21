@@ -1,1 +1,5 @@
 No help topics found for 'gz'.
+Did you mean one of these?
+faa.gz
+fna.gz
+gz

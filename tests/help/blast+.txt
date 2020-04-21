@@ -1,1 +1,1 @@
-No help topics found for 'blast+'.
+doc for modules/BLAST+ not written yet

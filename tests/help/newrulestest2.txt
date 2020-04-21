@@ -1,4 +1,4 @@
 
 [str (string), faa (FASTA (amino acid)), faa (FASTA (amino acid))] -> faa (FASTA (amino acid))
 
-No matching function, filetype, or module found.
+doc for functions/newrulestest2 not written yet

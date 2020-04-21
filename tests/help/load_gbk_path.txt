@@ -1,4 +1,4 @@
 
 [str (string)] -> gbk (genbank)
 
-No matching function, filetype, or module found.
+doc for functions/load_gbk_path not written yet

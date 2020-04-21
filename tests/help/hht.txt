@@ -1,4 +1,4 @@
-The .hht extension is for HMMER hits table files.
+The hht extension is for HMMER hits table files.
 
 doc for types/hht not written yet
 

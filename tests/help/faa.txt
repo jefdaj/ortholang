@@ -1,4 +1,4 @@
-The .faa extension is for FASTA (amino acid) files.
+The faa extension is for FASTA (amino acid) files.
 
 doc for types/faa not written yet
 

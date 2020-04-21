@@ -1,7 +1,6 @@
-The .str extension is for string files.
+The str extension is for string files.
 
-No matching function, filetype, or module found.
-
+doc for types/str not written yet
 
 You can create them with these functions:
 

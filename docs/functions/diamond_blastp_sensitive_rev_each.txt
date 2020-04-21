@@ -1,0 +1,1 @@
+doc for functions/diamond_blastp_sensitive_rev_each not written yet

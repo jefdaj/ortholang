@@ -1,4 +1,4 @@
-The .aln extension is for multiple sequence alignment files.
+The aln extension is for multiple sequence alignment files.
 
 doc for types/aln not written yet
 

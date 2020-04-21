@@ -1,4 +1,4 @@
-The .blh extension is for BUSCO lineage HMMs files.
+The blh extension is for BUSCO lineage HMMs files.
 
 doc for types/blh not written yet
 

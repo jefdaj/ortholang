@@ -1,1 +1,1 @@
-No help topics found for 'blastdb'.
+doc for modules/BlastDB not written yet

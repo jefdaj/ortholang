@@ -1,4 +1,4 @@
 
 [str (string), gbk (genbank)] -> faa (FASTA (amino acid))
 
-No matching function, filetype, or module found.
+doc for functions/gbk_to_faa_rawids not written yet

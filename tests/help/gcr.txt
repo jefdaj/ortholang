@@ -1,7 +1,6 @@
-The .gcr extension is for GreenCut results files.
+The gcr extension is for GreenCut results files.
 
-No matching function, filetype, or module found.
-
+doc for types/gcr not written yet
 
 You can create them with these functions:
 

@@ -1,1 +1,7 @@
 No help topics found for 'lit'.
+Did you mean one of these?
+lit
+split_faa
+split_faa_each
+split_fna
+split_fna_each

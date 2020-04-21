@@ -1,4 +1,4 @@
-The .png extension is for plot image files.
+The png extension is for plot image files.
 
 doc for types/png not written yet
 

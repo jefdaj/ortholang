@@ -1,1 +1,1 @@
-No help topics found for 'diamond'.
+doc for modules/Diamond not written yet

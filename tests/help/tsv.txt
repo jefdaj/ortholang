@@ -1,4 +1,4 @@
-The .tsv extension is for set membership table (spreadsheet) files.
+The tsv extension is for set membership table (spreadsheet) files.
 
 doc for types/tsv not written yet
 

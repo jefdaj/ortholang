@@ -1,1 +1,1 @@
-No help topics found for 'range'.
+doc for modules/Range not written yet

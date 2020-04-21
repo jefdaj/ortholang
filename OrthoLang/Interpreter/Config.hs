@@ -8,7 +8,7 @@ import qualified Data.Configurator.Types as C
 
 import OrthoLang.Debug (debug)
 import OrthoLang.Types (Config(..))
-import OrthoLang.Util  (absolutize, justOrDie, retryIncSuffix)
+import OrthoLang.Util  (absolutize, headOrDie, justOrDie, retryIncSuffix)
 
 import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRegex, setLogFile)
 import Control.Monad              (when)
@@ -107,8 +107,7 @@ getDoc :: [FilePath] -> IO String -- TODO IO (Maybe String)?
 getDoc docPaths = do
   paths' <- mapM (\p -> getDataFileName ("docs" </> p <.> "txt") >>= absolutize) $ docPaths
   tests <- mapM doesFileExist paths'
-  -- let path' = listToMaybe [p | (p, t) <- zip paths' tests, t] -- TODO remove head?
-  let path' = head [p | (p, t) <- zip paths' tests, t] -- TODO remove head?
+  let path' = headOrDie ("no doc found for " ++ show docPaths) [p | (p, t) <- zip paths' tests, t]
   -- putStrLn $ "path':" ++ path'
   -- this should only happen during development:
   -- written <- doesFileExist path'

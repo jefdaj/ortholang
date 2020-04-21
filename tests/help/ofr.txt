@@ -1,4 +1,4 @@
-The .ofr extension is for OrthoFinder results files.
+The ofr extension is for OrthoFinder results files.
 
 doc for types/ofr not written yet
 

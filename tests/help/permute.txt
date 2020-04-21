@@ -1,1 +1,1 @@
-No help topics found for 'permute'.
+doc for modules/Permute not written yet

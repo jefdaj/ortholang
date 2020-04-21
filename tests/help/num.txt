@@ -1,4 +1,4 @@
-The .num extension is for number in scientific notation files.
+The num extension is for number in scientific notation files.
 
 doc for types/num not written yet
 

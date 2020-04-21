@@ -45,6 +45,7 @@ module OrthoLang.Interpreter
 
   -- * Things used in Test
   , help
+  , helpTopics
   , spaceChars
   , escapeChars
   , literalChars

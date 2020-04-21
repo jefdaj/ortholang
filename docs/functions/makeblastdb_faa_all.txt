@@ -1,0 +1,1 @@
+doc for functions/makeblastdb_faa_all not written yet

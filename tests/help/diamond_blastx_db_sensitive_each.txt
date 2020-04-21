@@ -2,4 +2,4 @@
 [num (number in scientific notation), fna (FASTA (nucleic acid)),
  list of dmnd (DIAMOND database)s] -> list of bht (tab-separated table of blast hits (outfmt 6))s
 
-No matching function, filetype, or module found.
+doc for functions/diamond_blastx_db_sensitive_each not written yet

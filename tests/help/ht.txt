@@ -1,1 +1,7 @@
 No help topics found for 'ht'.
+Did you mean one of these?
+bht
+concat_bht
+concat_bht_each
+hht
+ht

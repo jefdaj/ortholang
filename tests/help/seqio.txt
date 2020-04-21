@@ -1,1 +1,1 @@
-No help topics found for 'seqio'.
+doc for modules/SeqIO not written yet

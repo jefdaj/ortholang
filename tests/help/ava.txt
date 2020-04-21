@@ -1,4 +1,4 @@
-The .ava extension is for all-vs-all hit table listing files.
+The ava extension is for all-vs-all hit table listing files.
 
 doc for types/ava not written yet
 

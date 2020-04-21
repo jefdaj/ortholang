@@ -1,0 +1,1 @@
+doc for functions/makeblastdb_fna_each not written yet

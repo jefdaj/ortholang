@@ -1,4 +1,4 @@
-The .bst extension is for BUSCO scores table files.
+The bst extension is for BUSCO scores table files.
 
 doc for types/bst not written yet
 
