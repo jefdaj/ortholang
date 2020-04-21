@@ -24,10 +24,10 @@ code0=$?
 [[ $code0 == 0 ]] || exit $code0
 
 bin-run() {
-  rm -f ortholang.log
+  rm -f $LOGFILE
   ./result/bin/ortholang $@ 2>&1 | tee -a $LOGFILE
   code="$?"
-  [[ $code == 0 ]] || cat ortholang.log | tee -a "$LOGFILE"
+  [[ $code == 0 ]] || cat $LOGFILE | tee -a "$LOGFILE"
   return $code
 }
 
