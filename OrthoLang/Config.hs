@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module OrthoLang.Config where
 
@@ -55,6 +55,13 @@ loadMaybeAbs args cfg key = do
     Nothing -> return Nothing
     Just p -> absolutize p >>= return . Just
 
+loadMaybeInt :: Arguments -> C.Config -> String -> IO (Maybe Int)
+loadMaybeInt args cfg key = do
+  mInt <- loadMaybe args cfg key
+  case mInt of
+    Nothing -> return Nothing
+    Just s  -> return $ maybeRead s
+
 loadAbs :: Arguments -> C.Config -> String -> IO FilePath
 loadAbs args cfg key = fmap (justOrDie msg) $ loadMaybeAbs args cfg key
   where
@@ -76,35 +83,20 @@ loadConfig args = do
         ]
   cfg <- C.load $ C.Required defaultCfg : fmap C.Optional extraCfgs -- TODO reverse list?
   debugregex <- loadMaybe args cfg "debugregex"
-  tmpdir  <- loadAbs args cfg "tmpdir"
-  workdir <- loadAbs args cfg "workdir"
+  tmpdir  <- loadAbs      args cfg "tmpdir"
+  workdir <- loadAbs      args cfg "workdir"
   script  <- loadMaybeAbs args cfg "script"
   report  <- loadMaybeAbs args cfg "report"
   wrapper <- loadMaybeAbs args cfg "wrapper"
   history <- loadMaybeAbs args cfg "history"
   outfile <- loadMaybeAbs args cfg "outfile"
-  shared  <- loadMaybe args cfg "shared" >>= mapM absPathOrUrl
+  shared  <- loadMaybe    args cfg "shared" >>= mapM absPathOrUrl
+  termcolumns <- loadMaybe args cfg "termcolumns" >>= return . fmap read
   let interactive = isNothing script || (isPresent args $ longOption "interactive")
-  let termcolumns = Nothing -- not used except in testing
   let shellaccess = isPresent args $ longOption "shellaccess" -- TODO clean up
   let progressbar = isPresent args $ longOption "progressbar" -- TODO clean up
   let showhidden  = isPresent args $ longOption "showhidden" -- TODO clean up
-  let res = Config
-              { script
-              , interactive
-              , debugregex
-              , wrapper
-              , history
-              , report
-              , termcolumns
-              , shellaccess
-              , progressbar
-              , outfile
-              , shared
-              , tmpdir
-              , workdir
-              , showhidden
-              }
+  let res = Config { .. }
   debug' $ show res
   updateDebug debugregex
   return res
@@ -222,6 +214,12 @@ sq ('\'':s) | last s == '\'' = init s
             | otherwise      = s
 sq s                         = s
 
+parseString :: String -> Either String FilePath
+parseString input = case maybeRead ("\"" ++ sq input ++ "\"") of
+                    Nothing -> Left $ "invalid: '" ++ input ++ "'"
+                    Just "" -> Left $ "invalid: \"\""
+                    Just p  -> Right p
+
 -- note that if you write a quoted empty string it gets parsed as Nothing here,
 -- but the actual empty string (no path given) will be interpreted as reading
 -- the config value rather than changing it
@@ -230,26 +228,15 @@ parseMaybeString input
   | map toLower input `elem` ["\"\"", "''", "nothing"] = Right Nothing
   | otherwise = fmap Just $ parseString input
 
-parseString :: String -> Either String FilePath
-parseString input = case maybeRead ("\"" ++ sq input ++ "\"") of
-                    Nothing -> Left $ "invalid: '" ++ input ++ "'"
-                    Just "" -> Left $ "invalid: \"\""
-                    Just p  -> Right p
-
-setMaybeInt :: (Config -> Maybe Int -> Config) -- ^ fn to apply if the input string validates
-            ->  Config -> String               -- ^ actual config and input string
-            -> Either String (IO Config)
-setMaybeInt fn cfg p = fmap (return . fn cfg) $ parseMaybeInt p
+parseInt :: String -> Either String Int
+parseInt input = case maybeRead input of
+                   Nothing -> Left $ "invalid: '" ++ input ++ "'"
+                   Just n  -> Right n
 
 parseMaybeInt :: String -> Either String (Maybe Int)
 parseMaybeInt input
   | map toLower input `elem` ["\"\"", "''", "nothing"] = Right Nothing
   | otherwise = fmap Just $ parseInt input
-
-parseInt :: String -> Either String Int
-parseInt input = case maybeRead input of
-                   Nothing -> Left $ "invalid: '" ++ input ++ "'"
-                   Just n  -> Right n
 
 parseBool :: String -> Either String Bool
 parseBool []     = Left $ "invalid: ''"
