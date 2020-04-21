@@ -486,6 +486,7 @@ data Config = Config
   , interactive :: Bool
   , tmpdir      :: FilePath
   , workdir     :: FilePath
+  , logfile     :: FilePath
   , debugregex  :: Maybe String
   , wrapper     :: Maybe FilePath
   , outfile     :: Maybe FilePath

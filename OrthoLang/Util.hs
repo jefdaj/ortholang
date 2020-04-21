@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module OrthoLang.Util
   (
 
@@ -24,6 +26,7 @@ module OrthoLang.Util
   -- error handling
   , ignoreErrors
   , retryIgnore
+  , retryIncSuffix
 
   -- misc
   , stripWhiteSpace
@@ -57,7 +60,7 @@ import System.Directory       (doesPathExist, removePathForcibly,
                                getHomeDirectory, makeAbsolute, removeFile,
                                pathIsSymbolicLink)
 import System.FilePath        ((</>), takeDirectory, addTrailingPathSeparator,
-                               normalise)
+                               normalise, takeExtension, dropExtension)
 import System.IO.Error        (isDoesNotExistError, catchIOError,
                                isAlreadyExistsError, ioError)
 import System.Path.NameManip  (guess_dotdot, absolute_path)
@@ -221,6 +224,14 @@ retryIgnore fn = ignoreErrors $ recoverAll limitedBackoff fn
     -- This isn't as bad as it sounds. It just prints an error message instead
     -- of crashing the rest of the program. The error will still be visible.
     limitedBackoff = exponentialBackoff 50 <> limitRetries 5
+
+-- | Run an IO action, incrementing the filepath suffix if and retrying if it fails
+-- TODO should there be a max number of retries?
+retryIncSuffix :: FilePath -> Int -> (FilePath -> IO a) -> IO a
+retryIncSuffix path n io = catch (io path') $ (\(_ :: IOError) -> io')
+  where
+    path' = if n < 2 then path else dropExtension path ++ show n ++ takeExtension path
+    io' = retryIncSuffix path (n+1) io
 
 ----------
 -- misc --

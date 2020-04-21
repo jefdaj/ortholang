@@ -10,9 +10,9 @@ import qualified Data.Configurator.Types as C
 
 import OrthoLang.Debug (debug)
 import OrthoLang.Types (Config(..))
-import OrthoLang.Util  (absolutize, justOrDie)
+import OrthoLang.Util  (absolutize, justOrDie, retryIncSuffix)
 
-import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRegex)
+import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRegex, setLogFile)
 import Control.Monad              (when)
 import Data.Char                  (toUpper, toLower)
 import Data.List                  (isInfixOf)
@@ -85,6 +85,7 @@ loadConfig args = do
   debugregex  <- loadMaybe    args cfg "debugregex"
   tmpdir      <- loadAbs      args cfg "tmpdir"
   workdir     <- loadAbs      args cfg "workdir"
+  logfile     <- loadAbs      args cfg "logfile"
   script      <- loadMaybeAbs args cfg "script"
   report      <- loadMaybeAbs args cfg "report"
   wrapper     <- loadMaybeAbs args cfg "wrapper"
@@ -156,6 +157,7 @@ configFields :: [(String, (Config -> String, ConfigSetter))]
 configFields =
   [ ("tmpdir"     , (show . tmpdir     , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {tmpdir  =  a})))
   , ("workdir"    , (show . workdir    , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {workdir =  a})))
+  , ("logfile"    , (show . logfile    , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> updateLog a >>= \a' -> return (c {logfile =  a'}))))
   , ("script"     , (show . script     , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {script  = ma})))
   , ("wrapper"    , (show . wrapper    , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {wrapper  = ma})))
   , ("report"     , (show . report     , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {report  = ma})))
@@ -184,6 +186,18 @@ updateDebug regex = case regex of
     setLogLevel LevelDebug
     setDebugSourceRegex r
     debug' $ "set debug regex to " ++ show regex
+
+{-|
+This will throw "resource busy (file is locked)" if you re-open a previous log file,
+so we try that and add a numeric suffix if needed to ensure we can keep logging.
+Returns the first path that worked.
+-}
+updateLog :: FilePath -> IO FilePath
+updateLog path = retryIncSuffix path 1 $ \p -> do
+  debug' $ "changing logfile to '" ++ p ++ "'"
+  setLogFile p
+  debug' $ "changed logfile to '" ++ p ++ "'"
+  return p
 
 mkSet :: (String -> Either String a) -- ^ parser function
       -> (Config -> a -> IO Config)  -- ^ setter function
