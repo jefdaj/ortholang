@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 -- TODO no welcome if going to load a file + clear the screen anyway
 -- TODO could simplify to the same code everywhere except you pass the handle (file vs stdout)?
 
@@ -51,6 +53,7 @@ import Data.List                  (isPrefixOf, filter)
 import System.Console.Haskeline   (Settings(..), InputT, getInputLine)
 import System.IO                  (Handle, hPutStrLn, stdout)
 import System.Process             (runCommand, waitForProcess)
+import Control.Exception.Safe     (catch)
 
 -- | Main entry point for running the REPL
 runRepl :: [Module] -> GlobalEnv -> IO ()
@@ -66,7 +69,9 @@ mkRepl mods promptFns hdl (_, cfg, ref, ids, dRef) = do
   st' <- case script cfg of
           Nothing -> welcome hdl >> return st
           Just path -> cmdLoad mods st hdl path -- >> cmdShow st hdl []
-  runReplM (replSettings mods cfg) (loop mods promptFns hdl) st'
+  catch
+    (runReplM (replSettings mods cfg) (loop mods promptFns hdl) st')
+    (\(_ :: QuitRepl) -> return ())
 
 -- There are four types of input we might get, in the order checked for:
 -- TODO update this to reflect 3/4 merged
