@@ -39,8 +39,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter.Repl.Actions
 import OrthoLang.Interpreter.Repl.Messages
 
-import OrthoLang.Config    (setConfigField)
-import OrthoLang.Interpreter.Pretty    (pPrintHdl)
+import OrthoLang.Config    (showConfig, setConfigField)
 import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 
@@ -170,7 +169,7 @@ cmdConfig :: ReplCmd
 cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
   let ws = words s -- TODO only split on the first + second space, passing the rest as one string (for patterns)
   if (length ws == 0)
-    then pPrintHdl cfg hdl cfg >> return st -- TODO Pretty instance
+    then hPutStrLn hdl (showConfig cfg) >> return st -- TODO Pretty instance?
     else if (length ws  > 2)
       then hPutStrLn hdl "too many variables" >> return st
       -- TODO any better way to handle this?
@@ -178,7 +177,7 @@ cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
       else if (length ws == 1)
         -- TODO use pretty print or display here instead
         -- TODO remove modules, since they're never used and can't show/read
-        then pPrintHdl cfg hdl cfg >> return st
+        then hPutStrLn hdl (showConfig cfg) >> return st -- TODO just the one field
         else case setConfigField cfg (headOrDie "cmdConfig failed" ws) (last ws) of
                Left err -> hPutStrLn hdl err >> return st
                Right iocfg' -> do

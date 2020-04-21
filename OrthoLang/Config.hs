@@ -16,7 +16,7 @@ import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRege
 import Control.Monad              (when)
 import Data.Char                  (toLower)
 import Data.List                  (isInfixOf)
-import Data.Maybe                 (isNothing, catMaybes, fromJust)
+import Data.Maybe                 (isNothing, catMaybes)
 import Data.Text                  (pack)
 import Paths_OrthoLang            (getDataFileName)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption, getAllArgs)
@@ -148,11 +148,15 @@ getUsage = getDoc ["usage"] >>= parseUsageOrExit
  - Note that shellacces is purposely not available to change here.
  -}
 
+-- TODO move to Pretty?
+showConfig :: Config -> String
+showConfig cfg = init $ unlines $ map (\(s, (g, _)) -> s ++ " = " ++ g cfg) configFields
+
 -- TODO is this still necessary? probably not...
 setConfigField :: Config -> String -> String -> Either String (IO Config)
-setConfigField cfg key val = case lookup key fields of
+setConfigField cfg key val = case lookup key configFields of
   Nothing -> Left $ "no such config setting: " ++ key
-  Just setter -> setter cfg val
+  Just (_, setter) -> setter cfg val
 
 -- TODO add modules? maybe not much need
 -- TODO add interactive?
@@ -162,19 +166,20 @@ setConfigField cfg key val = case lookup key fields of
 --
 
 -- | Takes the current config and a new value. Does some IO, then returns the new Config or an error.
+type ConfigShower = Config -> String
 type ConfigSetter = Config -> String -> Either String (IO Config)
 
-fields :: [(String, ConfigSetter)]
-fields =
-  [ ("tmpdir" , mkSetter parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {tmpdir  =  a}))
-  , ("workdir", mkSetter parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {workdir =  a}))
-  , ("script" , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {script  = ma}))
-  , ("wrapper", mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {wrapper  = ma}))
-  , ("report" , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {report  = ma}))
-  , ("outfile", mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {outfile = ma}))
-  , ("shared" , mkSetter parseMaybeString (\c ms ->  absPathOrUrl ms     >>= \ma -> return $ c {shared  = ma}))
-  , ("termcolumns", mkSetter parseMaybeInt (\c mi -> return $ c {termcolumns = mi}))
-  , ("debugregex", mkSetter parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr})))
+configFields :: [(String, (ConfigShower, ConfigSetter))]
+configFields =
+  [ ("tmpdir"     , (show . tmpdir     , mkSetter parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {tmpdir  =  a})))
+  , ("workdir"    , (show . workdir    , mkSetter parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {workdir =  a})))
+  , ("script"     , (show . script     , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {script  = ma})))
+  , ("wrapper"    , (show . wrapper    , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {wrapper  = ma})))
+  , ("report"     , (show . report     , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {report  = ma})))
+  , ("outfile"    , (show . outfile    , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {outfile = ma})))
+  , ("shared"     , (show . shared     , mkSetter parseMaybeString (\c ms ->  absPathOrUrl ms     >>= \ma -> return $ c {shared  = ma})))
+  , ("termcolumns", (show . termcolumns, mkSetter parseMaybeInt (\c mi -> return $ c {termcolumns = mi})))
+  , ("debugregex" , (show . debugregex , mkSetter parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr}))))
   -- , ("testpattern", mkSetter parseStrings (\c ps -> return (c {testpattern = ps})))
   ]
 
@@ -192,7 +197,7 @@ absPathOrUrl = undefined
 --   -- TODO debugregex should have a "nothing" setting
 --   ]
 
--- fields have 4 parts: field name, validator, setter, post-set io callback
+-- configFields have 4 parts: field name, validator, setter, post-set io callback
 -- field name is a string
 -- validator is string -> either string a
 -- setter is config -> a -> config
