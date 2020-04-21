@@ -101,7 +101,7 @@ module OrthoLang.Interpreter
 --   -- , askLocks
 --   , defaultShow
 --   , depsOf
---   , tExtOf
+--   , ext
 --   , extractExprs
 --   , lookupIDsFile
 --   -- , lookupHashesFile

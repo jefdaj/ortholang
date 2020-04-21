@@ -100,7 +100,7 @@ instance Pretty Expr where
   pPrint (Ref _ _ _ v)    = pPrint v
   pPrint (Fun _ _ _ s es) = text s <+> sep (map pNested es)
   pPrint (Lst _ _ es)  = pList es
-  pPrint (Com (CompiledExpr t (ExprPath p) _)) = text $ "Compiled " ++ tExtOf t ++ " " ++ p
+  pPrint (Com (CompiledExpr t (ExprPath p) _)) = text $ "Compiled " ++ ext t ++ " " ++ p
 
   -- this is almost right except it breaks lines too early (always nesting),
   -- which looks super weird for short bops:

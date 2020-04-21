@@ -193,7 +193,7 @@ rMkBlastFromFa d@(_, _, _, sType) st (Fun rtn salt deps _ [e, q, s])
   where
     rules = fOldRules $ mkBlastFromDb d
     name1 = fName $ mkBlastFromDb d
-    name2 = "makeblastdb_" ++ tExtOf sType
+    name2 = "makeblastdb_" ++ ext sType
     dbExpr = Fun (EncodedAs blastdb sType) salt (depsOf s) name2 [s] 
 rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 
@@ -241,6 +241,6 @@ rMkBlastFromFaEach d@(_, _, _, sType) st (Fun rtn salt deps _   [e, q, ss])
   where
     rules = rMkBlastFromDbEach d
     ss'   = Fun (ListOf (EncodedAs blastdb sType)) salt (depsOf ss) fn1 [ss]
-    fn1   = "makeblastdb_" ++ tExtOf sType ++ "_each"
+    fn1   = "makeblastdb_" ++ ext sType ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
 rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"

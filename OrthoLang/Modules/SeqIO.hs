@@ -177,7 +177,7 @@ aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
       ftPath'   = fromPath loc cfg ftPath
       exprDir'  = tmpdir cfg </> "exprs"
       tmpDir'   = fromPath loc cfg $ cacheDir cfg "seqio"
-      outDir'   = exprDir' </> "load_" ++ tExtOf rtn
+      outDir'   = exprDir' </> "load_" ++ ext rtn
       outPath'  = fromPath loc cfg outPath
       loc = "modules.seqio.aGenbankToFasta"
       outPath'' = traceA loc outPath' [outPath', faPath']
@@ -327,8 +327,7 @@ mkConcat cType = Function
   , fOldRules = rSimple $ aConcat cType
   }
   where
-    ext  = tExtOf cType
-    name = "concat_" ++ ext
+    name = "concat_" ++ ext cType
 
 mkConcatEach :: Type -> Function
 mkConcatEach cType = Function
@@ -340,8 +339,7 @@ mkConcatEach cType = Function
   , fOldRules = rMap 1 $ aConcat cType
   }
   where
-    ext  = tExtOf cType
-    name = "concat_" ++ ext ++ "_each"
+    name = "concat_" ++ ext cType ++ "_each"
 
 {- This is just a fancy `cat`, with handling for a couple cases:
  - * some args are empty and their <<emptywhatever>> should be removed
@@ -355,8 +353,8 @@ aConcat cType [outPath, inList] = do
   -- ... there's gotta be a simpler way right?
   cfg <- fmap fromJust getShakeExtra
   let tmpDir'   = tmpdir cfg </> "cache" </> "concat"
-      emptyPath = tmpDir' </> ("empty" ++ tExtOf cType) <.> "txt"
-      emptyStr  = "<<empty" ++ tExtOf cType ++ ">>"
+      emptyPath = tmpDir' </> ("empty" ++ ext cType) <.> "txt"
+      emptyStr  = "<<empty" ++ ext cType ++ ">>"
       inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
       loc = "ortholang.modules.seqio.aConcat"
   liftIO $ createDirectoryIfMissing True tmpDir'
@@ -382,11 +380,10 @@ splitFasta faType = Function
   , fInputs = [Exactly faType]
   , fOutput =  Exactly (ListOf faType)
   , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aSplit name ext
+  , fOldRules = rSimple $ aSplit name $ ext faType
   }
   where
-    ext  = tExtOf faType
-    name = "split_" ++ ext
+    name = "split_" ++ ext faType
 
 splitFastaEach :: Type -> Function
 splitFastaEach faType = Function
@@ -395,20 +392,19 @@ splitFastaEach faType = Function
   , fInputs = [Exactly (ListOf faType)]
   , fOutput =  Exactly (ListOf (ListOf faType))
   , fNewRules = NewNotImplemented
-  , fOldRules = rMap 1 $ aSplit name ext -- TODO is 1 wrong?
+  , fOldRules = rMap 1 $ aSplit name $ ext faType -- TODO is 1 wrong?
   }
   where
-    ext  = tExtOf faType
-    name = "split_" ++ ext ++ "_each"
+    name = "split_" ++ ext faType ++ "_each"
 
 aSplit :: String -> String -> ([Path] -> Action ())
-aSplit name ext [outPath, faPath] = do
+aSplit name e [outPath, faPath] = do
   cfg <- fmap fromJust getShakeExtra
   let faPath'   = fromPath loc cfg faPath
       exprDir'  = tmpdir cfg </> "exprs"
       tmpDir'   = tmpdir cfg </> "cache" </> name -- TODO is there a fn for this?
       prefix'   = tmpDir' </> digest faPath ++ "/"
-      outDir'   = exprDir' </> "load_" ++ ext
+      outDir'   = exprDir' </> "load_" ++ e
       outPath'  = fromPath loc cfg outPath
       loc = "modules.seqio.aSplit"
       outPath'' = traceA loc outPath' [outPath', faPath']

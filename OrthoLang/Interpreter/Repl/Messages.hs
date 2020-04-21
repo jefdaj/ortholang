@@ -134,7 +134,7 @@ nakedCompletions mods cmds lineReveresed wordSoFar = do
       fnNames  = concatMap (map fName . mFunctions) mods
       varNames = map ((\(Var _ v) -> v) . fst) scr
       cmdNames = map ((':':) . fst) cmds
-      typeExts = map tExtOf $ concatMap mTypes mods
+      typeExts = map ext $ concatMap mTypes mods
       cfgFields = map fst configFields
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
   return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)

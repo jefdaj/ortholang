@@ -108,8 +108,7 @@ aLoadHash hashSeqIDs t src = do
   need' loc [src']
   md5 <- hashContent src
   let tmpDir'   = fromPath loc cfg $ cacheDir cfg "load"
-      ext = tExtOf t -- TODO safe because always an exact type?
-      hashPath' = tmpDir' </> md5 <.> ext
+      hashPath' = tmpDir' </> md5 <.> ext t
       hashPath  = toPath loc cfg hashPath'
   if not hashSeqIDs
     then symlink hashPath src

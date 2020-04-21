@@ -330,7 +330,7 @@ readStrings loc etype p =
          cfg <- fmap fromJust getShakeExtra
          (fmap . map) (fromPath loc' cfg) (readPaths loc' p)
        where
-         etype' = trace "core.actions.readStrings" ("readStrings (each " ++ tExtOf etype ++ ") from " ++ p) etype
+         etype' = trace "core.actions.readStrings" ("readStrings (each " ++ ext etype ++ ") from " ++ p) etype
 
 {- OrthoLang requires empty lists to contain the text <<emptylist>> so we can
  - distinguish them from the empty files that might result from a cmd
@@ -459,7 +459,7 @@ to/from String, and then within the function you treat them as Strings.
 writeStrings :: DebugLocation -> Type -> FilePath -> [String] -> Action ()
 writeStrings loc etype out whatevers = do
   let loc' = loc ++ ".writeStrings"
-  debugA' loc' $ first50 (take 3 whatevers) ++ " (each " ++ tExtOf etype ++ ") -> " ++ last50 out
+  debugA' loc' $ first50 (take 3 whatevers) ++ " (each " ++ ext etype ++ ") -> " ++ last50 out
   if etype `elem` [str, num]
     then writeLits loc' out whatevers
     else do

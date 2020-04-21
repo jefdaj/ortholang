@@ -15,28 +15,25 @@ import OrthoLang.Types
 
 import OrthoLang.Interpreter.Config (getDoc)
 import OrthoLang.Interpreter.Pretty -- (pPrint, render)
+import OrthoLang.Util (headOrDie)
 
 import Data.List.Split       (splitOn)
 import Data.Maybe            (catMaybes)
-import OrthoLang.Util        (headOrDie)
 import System.FilePath.Posix ((</>))
 
 help :: [Module] -> String -> IO String
 help mods line = case words line of
-  [w] -> headOrDie "failed to look up cmdHelp content" $ catMaybes
+  [w] -> head $ catMaybes
            [ fmap fHelp $ findFunction mods w
            , fmap mHelp $ findModule   mods w
-           , fmap (tHelp mods) $ findType mods w
-           -- TODO fix this , fmap (tHelp cfg) $ findGroup cfg w
-           , Just $ getDoc ["notfound"] -- TODO remove?
+           , fmap (extHelp mods) $ findType  mods w
+           , Just $ fallbackHelp w
            ]
   _ -> getDoc ["repl"]
 
--- class HelpDoc a where
---   helpDoc :: a -> IO (Maybe String)
-
--- instance HelpDoc Module where
---   helpDoc = mHelp
+-- TODO suggest anything that contains wrd as an infix
+fallbackHelp :: String -> IO String
+fallbackHelp wrd = return $ "No help topics found for '" ++ wrd ++ "'."
 
 mHelp :: Module -> IO String
 mHelp m = getDoc ["modules" </> mName m]
@@ -49,34 +46,35 @@ fHelp f = do
   return msg
 
 -- TODO move somewhere better
-tHelp :: [Module] -> Type -> IO String
-tHelp mods t = do
-  doc <- getDoc ["types" </> tExtOf t]
-  let msg = "The ." ++ tExtOf t ++ " extension is for " ++ descOf t ++ " files.\n\n"
+-- TODO think of something better than either here!
+extHelp :: Ext a => [Module] -> a -> IO String
+extHelp mods e = do
+  doc <- getDoc ["types" </> ext e]
+  let msg = "The ." ++ ext e ++ " extension is for " ++ desc e ++ " files.\n\n"
             ++ doc ++ "\n\n"
             ++ tFnList
   return msg
   where
-    outputs = listFunctionTypesWithOutput mods t
-    inputs  = listFunctionTypesWithInput  mods t
+    outputs = listFunctionTypesWithOutput mods e
+    inputs  = listFunctionTypesWithInput  mods e
     tFnList = unlines
                  $ ["You can create them with these functions:"] ++ outputs
                 ++ ["", "And use them with these functions:"   ] ++ inputs
 
 -- TODO move somewhere better
-listFunctionTypesWithInput :: [Module] -> Type -> [String]
-listFunctionTypesWithInput mods cType = filter matches descs
+listFunctionTypesWithInput :: Ext e => [Module] -> e -> [String]
+listFunctionTypesWithInput mods thing = filter matches descs
   where
     -- TODO match more carefully because it should have to be an entire word
-    matches d = (tExtOf cType) `elem` (words $ headOrDie "listFuncionTypesWithInput failed" $
+    matches d = (ext thing) `elem` (words $ headOrDie "listFuncionTypesWithInput failed" $
                                        splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions mods)
 
 -- TODO move somewhere better
-listFunctionTypesWithOutput :: [Module] -> Type -> [String]
-listFunctionTypesWithOutput mods cType = filter matches descs
+listFunctionTypesWithOutput :: Ext e => [Module] -> e -> [String]
+listFunctionTypesWithOutput mods thing = filter matches descs
   where
-    matches d = (tExtOf cType) `elem` (words $ unwords $ tail $
+    matches d = (ext thing) `elem` (words $ unwords $ tail $
                                        splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions mods)
 

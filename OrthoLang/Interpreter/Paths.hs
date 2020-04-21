@@ -300,14 +300,14 @@ exprPathExplicit cfg prefix mSalt hashes = toPath loc cfg path
     loc = "core.paths.exprPathExplicit"
     dir  = tmpdir cfg </> "exprs" </> prefix
     base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Salt n) -> show n) mSalt)
-    path = dir </> base </> "result" -- <.> tExtOf rtype
+    path = dir </> base </> "result" -- <.> ext rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
 varPath :: Config -> Var -> Expr -> Path
 varPath cfg (Var (RepID rep) var) expr = toPath loc cfg $ tmpdir cfg </> repDir </> base
   where
     loc = "core.paths.varPath"
-    base = if var == "result" then var else var <.> tExtOf (typeOf expr)
+    base = if var == "result" then var else var <.> ext (typeOf expr)
     repDir = case rep of
                Nothing -> "vars"
                Just r  -> "reps" </> r -- TODO digest other stuff too, like the expr?

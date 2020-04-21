@@ -103,7 +103,7 @@ rMkBlastFromFaRevEach (bCmd, qType, _, _) scr (Fun rtn salt deps _ [e, s, qs]) =
       subjDbExpr = Fun dbType salt (depsOf sList) dbFnName [sList]
       editedExpr = Fun rtn salt deps editedName [e, subjDbExpr, qs]
       editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
-      dbFnName   = "makeblastdb_" ++ tExtOf qType ++ "_all"
+      dbFnName   = "makeblastdb_" ++ ext qType ++ "_all"
       dbType     = EncodedAs blastdb qType
   rMap 3 revDbAct scr editedExpr
 rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"

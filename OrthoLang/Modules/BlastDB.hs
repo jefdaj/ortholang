@@ -432,7 +432,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   let dbDir  = cDir' </> fasHash
       dbOut  = dbDir </> "result"
       dbOut' = toPath loc cfg dbOut
-      out''  = traceA loc out' [tExtOf dbType, out', dbOut, fasPath']
+      out''  = traceA loc out' [ext dbType, out', dbOut, fasPath']
       dbPtn  = dbDir </> "*" -- TODO does this actually help?
       dbg = debugA' loc
 
@@ -555,8 +555,8 @@ mkMakeblastdbEach faType = Function
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
   }
   where
-    name = "makeblastdb_" ++ tExtOf faType ++ "_each" -- TODO change scripts to match!
-    -- desc = name ++ " : " ++ ext ++ ".list -> " ++ tExtOf dbType ++ ".list"
+    name = "makeblastdb_" ++ ext faType ++ "_each" -- TODO change scripts to match!
+    -- desc = name ++ " : " ++ ext ++ ".list -> " ++ ext dbType ++ ".list"
     -- ext  = if dbType == ndb then "fa" else "faa"
 
 -- (ListOf (Some fa "a fasta file")) (ListOf (Encoded blastdb (Some fa "a fasta file")))

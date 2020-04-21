@@ -25,6 +25,7 @@ module OrthoLang.Types
   , listFunctionNames
   , operatorChars
   -- , WrapperConfig(..)
+  , Ext(..)
   , Type(..)
   , Encoding(..)
   , TypeGroup(..)
@@ -55,8 +56,6 @@ module OrthoLang.Types
   , str, num -- TODO load these from modules
   , lit
   , typeOf
-  , tExtOf
-  , descOf
   , depsOf
   , rDepsOf
   , defaultShow
@@ -207,7 +206,7 @@ data CompiledExpr = CompiledExpr Type ExprPath (Rules ExprPath)
 -- TODO can this be made into a Path?
 -- TODO is show ever really needed?
 instance Show CompiledExpr where
-  show (CompiledExpr t p _) = "CompiledExpr " ++ tExtOf t ++ " " ++ show p ++ " <<Rules ExprPath>>"
+  show (CompiledExpr t p _) = "CompiledExpr " ++ ext t ++ " " ++ show p ++ " <<Rules ExprPath>>"
 
 -- CompiledExprs are compared by the expressions they were compiled from.
 instance Eq CompiledExpr where
@@ -234,7 +233,7 @@ setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt" "not implemented for comp
 
 -- TODO add names to the Bops themselves... or associate with prefix versions?
 prefixOf :: Expr -> String
-prefixOf (Lit rtn _     ) = tExtOf rtn
+prefixOf (Lit rtn _     ) = ext rtn
 prefixOf (Fun _ _ _ name _) = name
 prefixOf (Lst _ _ _    ) = "list"
 prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
@@ -309,7 +308,7 @@ instance Eq Type where
 
 -- TODO don't call this Show! maybe Pretty?
 instance Show Type where
-  show = tExtOf
+  show = ext
 
 -- ^ tarballs, blast dbs, etc. where both format and wrapped type matter
 -- TODO can it be unified with Type using typeclasses or something? redesign this part
@@ -366,6 +365,34 @@ data TypeGroup = TypeGroup
 instance Eq TypeGroup where
   (TypeGroup {tgExt = e1}) == (TypeGroup {tgExt = e2}) = e1 == e2
 
+-- | types which have a file extension
+class Ext a where
+  ext  :: a -> String
+  desc :: a -> String
+
+-- note that traceShow in here can cause an infinite loop
+-- and that there will be an issue if it's called on Empty alone
+instance Ext Type where
+  ext Empty             = "empty" -- special case for empty lists with no element type
+  ext (ListOf        t) = ext t ++ ".list"
+  ext (ScoresOf      t) = ext t ++ ".scores"
+  ext (EncodedAs   e t) = ext t ++ "." ++ ext e
+  ext (Type {tExt = e}) = e
+
+  desc Empty           = "empty list" -- for lists with nothing in them yet
+  desc (ListOf      t) = "list of " ++ desc t
+  desc (ScoresOf    t) = "scores for " ++ desc t
+  desc (EncodedAs e t) = desc t ++ " encoded as " ++ desc e
+  desc (Type {tDesc = d}) = d
+
+instance Ext TypeGroup where
+  ext  = tgExt
+  desc = tgDesc
+
+instance Ext Encoding where
+  ext  = enExt
+  desc = enDesc
+
 -- TODO either use this in the core compilers or remove it
 lit :: TypeGroup
 lit = TypeGroup
@@ -405,23 +432,21 @@ typeOf (Com (CompiledExpr t _ _)) = t
 -- firstNonEmpty (x:[]) = typeOf x -- catches (ListOf Empty)
 -- firstNonEmpty (_:xs) = firstNonEmpty xs
 
--- note that traceShow in here can cause an infinite loop
--- and that there will be an issue if it's called on Empty alone
-tExtOf :: Type -> String
-tExtOf Empty        = "empty" -- special case for empty lists with no element type
-tExtOf (ListOf   t) = tExtOf t ++ ".list"
-tExtOf (ScoresOf t) = tExtOf t ++ ".scores"
-tExtOf (EncodedAs e t) = tExtOf t ++ "." ++ enExt e
-tExtOf (Type {tExt = e}) = e
+-- ext :: Type -> String
+-- ext Empty        = "empty" -- special case for empty lists with no element type
+-- ext (ListOf   t) = ext t ++ ".list"
+-- ext (ScoresOf t) = ext t ++ ".scores"
+-- ext (EncodedAs e t) = ext t ++ "." ++ enExt e
+-- ext (Type {tExt = e}) = e
 
 -- TODO equivalent needed for type groups, right?
 -- TODO is this needed for anything other than repl :help? if not, could use IO to load docs
-descOf :: Type -> String
-descOf Empty           = "empty list" -- for lists with nothing in them yet
-descOf (ListOf      t) = "list of " ++ descOf t
-descOf (ScoresOf    t) = "scores for " ++ descOf t
-descOf (EncodedAs e t) = descOf t ++ " encoded as " ++ enDesc e
-descOf (Type {tDesc = d}) = d
+-- desc :: Type -> String
+-- desc Empty           = "empty list" -- for lists with nothing in them yet
+-- desc (ListOf      t) = "list of " ++ desc t
+-- desc (ScoresOf    t) = "scores for " ++ desc t
+-- desc (EncodedAs e t) = desc t ++ " encoded as " ++ enDesc e
+-- desc (Type {tDesc = d}) = d
 
 varOf :: Expr -> [Var]
 varOf (Ref _ _ _ v) = [v]
@@ -526,12 +551,12 @@ findFun mods name =
        _      -> Left $ "function name collision! multiple fns match \"" ++ name ++ "\""
 
 findType :: [Module] -> String -> Maybe Type
-findType mods ext = find (\t -> tExtOf t == ext) ts
+findType mods e = find (\t -> ext t == e) ts
   where
     ts = concatMap mTypes mods
 
 findGroup :: [Module] -> String -> Maybe TypeGroup
-findGroup mods ext = find (\g -> tgExt g == ext) ts
+findGroup mods e = find (\g -> ext g == e) ts
   where
     ts = concatMap mGroups mods
 
@@ -643,7 +668,7 @@ data NewRules
   | NewNotImplemented -- TODO remove
 
 mkTypeDesc :: String -> [Type] -> Type -> String
-mkTypeDesc n is o = unwords $ [n, ":"] ++ map tExtOf is ++ ["->", tExtOf o]
+mkTypeDesc n is o = unwords $ [n, ":"] ++ map ext is ++ ["->", ext o]
 
 -- TODO does eq make sense here?
 data Module = Module

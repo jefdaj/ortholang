@@ -20,7 +20,7 @@ helpTopics :: [String]
 helpTopics = sort $ nub $ map (map toLower) $ ts ++ gs ++ es ++ fs ++ ms
   where
     ms = map mName modules
-    ts = map tExtOf $ nub $ concatMap mTypes     modules
+    ts = map ext $ nub $ concatMap mTypes     modules
     gs = map tgExt  $ nub $ concatMap mGroups    modules
     es = map enExt  $ nub $ concatMap mEncodings modules
     fs = map fName  $ nub $ concatMap mFunctions modules
