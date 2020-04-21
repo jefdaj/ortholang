@@ -14,12 +14,12 @@ import OrthoLang.Util  (absolutize, justOrDie)
 
 import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRegex)
 import Control.Monad              (when)
-import Data.Char                  (toLower)
+import Data.Char                  (toUpper, toLower)
 import Data.List                  (isInfixOf)
 import Data.Maybe                 (isNothing, catMaybes)
 import Data.Text                  (pack)
 import Paths_OrthoLang            (getDataFileName)
-import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption, getAllArgs)
+import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Directory           (doesFileExist)
 import System.FilePath            ((</>), (<.>))
@@ -167,8 +167,9 @@ setConfigField cfg key val = case lookup key configFields of
 -- TODO remove show functions and show directly (possibly using Configurator.display)
 --
 
--- | Takes the current config and a new value. Does some IO, then returns the new Config or an error.
 type ConfigShower = Config -> String
+
+-- | Takes the current config and a new value. Does some IO, then returns the new Config or an error.
 type ConfigSetter = Config -> String -> Either String (IO Config)
 
 configFields :: [(String, (ConfigShower, ConfigSetter))]
@@ -182,23 +183,13 @@ configFields =
   , ("shared"     , (show . shared     , mkSet parseMaybeString (\c ms -> (mapM absPathOrUrl ms) >>= \ma -> return $ c {shared  = ma})))
   , ("termcolumns", (show . termcolumns, mkSet parseMaybeInt (\c mi -> return $ c {termcolumns = mi})))
   , ("debugregex" , (show . debugregex , mkSet parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr}))))
+  , ("showhidden" , (show . showhidden , mkSet parseBool (\c b -> return (c {showhidden = b}))))
+  , ("shellaccess" , (show . shellaccess , mkSet parseBool (\c _ -> putStrLn "Can't change shellaccess while running" >> return c)))
+  , ("progressbar" , (show . progressbar , mkSet parseBool (\c b -> return (c {progressbar = b}))))
   ]
 
 absPathOrUrl :: String -> IO String
 absPathOrUrl p = if isURL p then return p else absolutize p
-
---   -- TODO add: progressbar, hiddenfns, etc (Bools)
---   -- TODO bools: progressbar, hiddenfns, secure (with error message)
---   -- TODO add logfile and have it update that (move from main)
---   -- TODO make logfile work
---   -- TODO debugregex should have a "nothing" setting
---   ]
-
--- configFields have 4 parts: field name, validator, setter, post-set io callback
--- field name is a string
--- validator is string -> either string a
--- setter is config -> a -> config
--- callback is a -> io ()
 
 -- this is run during setDebug, and once in loadConfig
 updateDebug :: Maybe String -> IO ()
@@ -259,3 +250,13 @@ parseInt :: String -> Either String Int
 parseInt input = case maybeRead input of
                    Nothing -> Left $ "invalid: '" ++ input ++ "'"
                    Just n  -> Right n
+
+parseBool :: String -> Either String Bool
+parseBool []     = Left $ "invalid: ''"
+parseBool "''"   = Right False
+parseBool "\"\"" = Right False
+parseBool input = let noquotes' = sq input
+                      capitalized = toUpper (head noquotes'):map toLower (tail noquotes')
+                  in case maybeRead capitalized of
+                       Nothing -> Left $ "invalid: '" ++ input ++ "'"
+                       Just b  -> Right b
