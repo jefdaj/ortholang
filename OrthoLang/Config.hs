@@ -82,20 +82,20 @@ loadConfig args = do
         , getArg args $ longOption "config"
         ]
   cfg <- C.load $ C.Required defaultCfg : fmap C.Optional extraCfgs -- TODO reverse list?
-  debugregex <- loadMaybe args cfg "debugregex"
-  tmpdir  <- loadAbs      args cfg "tmpdir"
-  workdir <- loadAbs      args cfg "workdir"
-  script  <- loadMaybeAbs args cfg "script"
-  report  <- loadMaybeAbs args cfg "report"
-  wrapper <- loadMaybeAbs args cfg "wrapper"
-  history <- loadMaybeAbs args cfg "history"
-  outfile <- loadMaybeAbs args cfg "outfile"
-  shared  <- loadMaybe    args cfg "shared" >>= mapM absPathOrUrl
-  termcolumns <- loadMaybe args cfg "termcolumns" >>= return . fmap read
+  debugregex  <- loadMaybe    args cfg "debugregex"
+  tmpdir      <- loadAbs      args cfg "tmpdir"
+  workdir     <- loadAbs      args cfg "workdir"
+  script      <- loadMaybeAbs args cfg "script"
+  report      <- loadMaybeAbs args cfg "report"
+  wrapper     <- loadMaybeAbs args cfg "wrapper"
+  history     <- loadMaybeAbs args cfg "history"
+  outfile     <- loadMaybeAbs args cfg "outfile"
+  shared      <- loadMaybe    args cfg "shared" >>= mapM absPathOrUrl
+  termcolumns <- loadMaybeInt args cfg "termcolumns"
   let interactive = isNothing script || (isPresent args $ longOption "interactive")
-  let shellaccess = isPresent args $ longOption "shellaccess" -- TODO clean up
-  let progressbar = isPresent args $ longOption "progressbar" -- TODO clean up
-  let showhidden  = isPresent args $ longOption "showhidden" -- TODO clean up
+      shellaccess = isPresent args $ longOption "shellaccess"
+      progressbar = isPresent args $ longOption "progressbar"
+      showhidden  = isPresent args $ longOption "showhidden"
   let res = Config { .. }
   debug' $ show res
   updateDebug debugregex
@@ -123,10 +123,6 @@ getUsage = getDoc ["usage"] >>= parseUsageOrExit
 -- hasArg :: Arguments -> String -> Bool
 -- hasArg as a = isPresent as $ longOption a
 
--------------------------
--- getters and setters --
--------------------------
-
 {- These are done the simple, repetitive way for now to avoid lenses.  That
  - might change in the future though, because turns out getters and setters are
  - horrible!
@@ -152,19 +148,11 @@ setConfigField cfg key val = case lookup key configFields of
         putStrLn $ showConfigField cfg' key
         return cfg')
 
--- TODO add modules? maybe not much need
--- TODO add interactive?
--- TODO these show* functions could be Pretty instances, or just directly showable
--- TODO remove anything that can't be shown
--- TODO remove show functions and show directly (possibly using Configurator.display)
---
-
-type ConfigShower = Config -> String
-
 -- | Takes the current config and a new value. Does some IO, then returns the new Config or an error.
 type ConfigSetter = Config -> String -> Either String (IO Config)
 
-configFields :: [(String, (ConfigShower, ConfigSetter))]
+-- | Association list of field name -> (getter, setter)
+configFields :: [(String, (Config -> String, ConfigSetter))]
 configFields =
   [ ("tmpdir"     , (show . tmpdir     , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {tmpdir  =  a})))
   , ("workdir"    , (show . workdir    , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {workdir =  a})))
@@ -176,9 +164,12 @@ configFields =
   , ("termcolumns", (show . termcolumns, mkSet parseMaybeInt (\c mi -> return $ c {termcolumns = mi})))
   , ("debugregex" , (show . debugregex , mkSet parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr}))))
   , ("showhidden" , (show . showhidden , mkSet parseBool (\c b -> return (c {showhidden = b}))))
-  , ("shellaccess" , (show . shellaccess , mkSet parseBool (\c _ -> putStrLn "Can't change shellaccess while running" >> return c)))
+  , ("shellaccess" , (show . shellaccess , mkSet parseBool (\c _ -> putStrLn securityMessage >> return c)))
   , ("progressbar" , (show . progressbar , mkSet parseBool (\c b -> return (c {progressbar = b}))))
   ]
+
+securityMessage :: String
+securityMessage = "For security reasons, you can't change this from inside the REPL."
 
 absPathOrUrl :: String -> IO String
 absPathOrUrl p = if isURL p then return p else absolutize p
