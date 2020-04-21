@@ -20,9 +20,6 @@ import System.Environment    (setEnv)
 import System.Exit           (exitSuccess)
 import System.IO             (stdout)
 
--- debug :: Text -> IO ()
--- debug = debugS "ortholang.main"
-
 -- TODO does this work everywhere?
 -- forceUtf8 = do
 --   _ <- setLocale LC_ALL $ Just "en_US.UTF-8"
@@ -30,40 +27,42 @@ import System.IO             (stdout)
 --   hSetBuffering stdin  LineBuffering
 --   hSetBuffering stdout LineBuffering
 
--- TODO any good way to configure logging from the beginning, before docopt?
--- TODO switch to stderr? withStderrLogging dumps to console,
---      but lets you run main from ghci more than once
 main:: IO ()
-main = withFileLogging "ortholang.log" $ do
-  setLogTimeFormat "[%Y-%m-%d %H:%M:%S %q]"
-  debugS' "ortholang.main" "starting main"
+main = do
 
-  usage <- getUsage
-  args  <- parseArgsOrExit usage =<< getArgs
+  -- warning: logging to file doesn't work in this section
+  (args, cfg) <- withStderrLogging $ do
+    setLogTimeFormat "[%Y-%m-%d %H:%M:%S %q]"
+    usage <- getUsage
+    args  <- parseArgsOrExit usage =<< getArgs
+    dispatch args "help" $ exitWithUsage usage
+    dispatch args "version" $ do
+      putStrLn $ "OrthoLang " ++ showVersion version
+      exitSuccess
+    cfg <- loadConfig args
+    return (args, cfg)
 
-  dispatch args "help" $ exitWithUsage usage
+  -- from here on, logging to file is ok
+  withFileLogging (logfile cfg) $ do
+    setLogTimeFormat "[%Y-%m-%d %H:%M:%S %q]"
+    debugS' "ortholang.main" "started logging"
 
-  dispatch args "version" $ do
-    putStrLn $ "OrthoLang " ++ showVersion version
-    exitSuccess
+    setEnv "TMPDIR" $ tmpdir cfg -- for subprocesses like R
+    ref <- initLocks
+    setCurrentDirectory $ workdir cfg
+    ids <- newIORef emptyIDs
+    dRef <- newIORef emptyDigests
 
-  cfg <- loadConfig args
-  setEnv "TMPDIR" $ tmpdir cfg -- for subprocesses like R
-  ref <- initLocks
-  setCurrentDirectory $ workdir cfg
-  ids <- newIORef emptyIDs
-  dRef <- newIORef emptyDigests
+    dispatch args "test" $ do
+      -- args is used here to set up the Tasty environment vars
+      runTests args (cfg {termcolumns = Just 100}) ref ids dRef
+      exitSuccess
 
-  dispatch args "test" $ do
-    -- args is used here to set up the Tasty environment vars
-    runTests args (cfg {termcolumns = Just 100}) ref ids dRef
-    exitSuccess
+    -- TODO typecheck only option here
+    let initialState = (emptyScript, cfg, ref, ids, dRef)
+    if (interactive cfg)
+      then runRepl  modules initialState
+      else evalFile modules initialState stdout
 
-  -- TODO typecheck only option here
-  let initialState = (emptyScript, cfg, ref, ids, dRef)
-  if (interactive cfg)
-    then runRepl  modules initialState
-    else evalFile modules initialState stdout
-
-  -- TODO is it a problem that --test never reaches this?
-  debug "finished main"
+    -- TODO is it a problem that --test never reaches this?
+    debug "finished main"

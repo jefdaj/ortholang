@@ -31,7 +31,7 @@ import Text.Read.HT               (maybeRead)
  -}
 dispatch :: Arguments -> String -> IO () -> IO ()
 dispatch args arg act = when (isPresent args $ longOption arg) $ do
-  debug' $ "handling --" ++ arg
+  -- debug' $ "handling --" ++ arg
   act
 
 {- The base debugging function used in other modules too. This is admittedly a
@@ -73,7 +73,7 @@ isURL s = "://" `isInfixOf` take 10 s
 
 loadConfig :: Arguments -> IO Config
 loadConfig args = do
-  debug' $ "docopt arguments: " ++ show args
+  -- debug' $ "docopt arguments: " ++ show args
   defaultCfg <- getDataFileName "default.cfg"
   userCfg    <- absolutize "~/.ortholang/ortholang.cfg"
   userCfgExists <- doesFileExist userCfg
@@ -98,7 +98,7 @@ loadConfig args = do
       progressbar = isPresent args $ longOption "progressbar"
       showhidden  = isPresent args $ longOption "showhidden"
   let res = Config { .. }
-  debug' $ show res
+  -- debug' $ show res
   updateDebug debugregex
   return res
 
