@@ -17,7 +17,7 @@ import System.FilePath.Posix      (takeBaseName)
 import qualified System.Info as I
 
 os :: String
-os = if I.os == "darwin" then "mac" else os
+os = if I.os == "darwin" then "mac" else I.os
 
 -- TODO blastdbget makeblastdb cut blast tar hmmsearch orthogroups.py?
 --      greencut psiblast? seqiostuff sonicparanoid
@@ -74,7 +74,7 @@ mkTests cfg _ _ _ = do
          $ map (mkTestVersion cfg testDir) (versionScripts)
 
 mkTestVersion :: Config -> FilePath -> (TestName, String) -> TestTree
-mkTestVersion cfg dir (name, cmd) = goldenVsString desc gld act
+mkTestVersion _ dir (name, cmd) = goldenVsString desc gld act
   where
     desc = "found expected version of " ++ name
     gld = dir </> "versions" </> takeBaseName cmd <.> "txt"
