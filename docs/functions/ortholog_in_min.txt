@@ -1,1 +1,0 @@
-doc for functions/ortholog_in_min not written yet

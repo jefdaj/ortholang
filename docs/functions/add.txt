@@ -1,1 +1,0 @@
-doc for functions/add not written yet

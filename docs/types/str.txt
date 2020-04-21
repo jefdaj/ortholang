@@ -1,1 +1,0 @@
-doc for types/str not written yet

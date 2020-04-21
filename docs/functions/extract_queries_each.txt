@@ -1,1 +1,0 @@
-doc for functions/extract_queries_each not written yet

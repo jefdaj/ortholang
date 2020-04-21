@@ -18,6 +18,7 @@ module OrthoLang.Types
   , Config(..)
   , findType
   , findGroup
+  , findEncoding
   , findModule
   , findFunction -- TODO remove?
   , findFun
@@ -486,7 +487,7 @@ str = Type
 num :: Type
 num = Type
   { tExt  = "num"
-  , tDesc = "number in scientific notation"
+  , tDesc = "number in regular or scientific notation"
   , tShow = \_ ls f -> do
       txt <- withReadLock ls f $ readFileStrict ls f
       return $ init txt -- TODO prettyNum?
@@ -565,6 +566,12 @@ findGroup mods e = find (\g -> ext g == e') ts
   where
     e' = map toLower e
     ts = concatMap mGroups mods
+
+findEncoding :: [Module] -> String -> Maybe Encoding
+findEncoding mods e = find (\g -> ext g == e') ts
+  where
+    e' = map toLower e
+    ts = concatMap mEncodings mods
 
 listFunctions :: [Module] -> [Function]
 listFunctions mods = concatMap mFunctions mods

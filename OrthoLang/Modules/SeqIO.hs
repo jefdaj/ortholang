@@ -67,21 +67,21 @@ gbk = Type
 fa :: TypeGroup
 fa = TypeGroup
   { tgExt = "fa"
-  , tgDesc  = "FASTA (nucleic OR amino acid)"
+  , tgDesc  = "FASTA nucleic OR amino acid"
   , tgMembers = [Exactly fna, Exactly faa]
   }
 
 faa :: Type
 faa = Type
   { tExt  = "faa"
-  , tDesc = "FASTA (amino acid)"
+  , tDesc = "FASTA amino acid"
   , tShow = defaultShow
   }
 
 fna :: Type
 fna = Type
   { tExt  = "fna"
-  , tDesc = "FASTA (nucleic acid)"
+  , tDesc = "FASTA nucleic acid"
   , tShow = defaultShow
   }
 

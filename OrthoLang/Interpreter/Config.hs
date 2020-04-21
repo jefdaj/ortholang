@@ -14,7 +14,7 @@ import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRege
 import Control.Monad              (when)
 import Data.Char                  (toUpper, toLower)
 import Data.List                  (isInfixOf)
-import Data.Maybe                 (isNothing, catMaybes)
+import Data.Maybe                 (isNothing, catMaybes, fromJust)
 import Data.Text                  (pack)
 import Paths_OrthoLang            (getDataFileName)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption)
@@ -101,26 +101,16 @@ loadConfig args = do
   mapM_ setDebugSourceRegex debugregex
   return res
 
--- TODO any way to recover if missing? probably not
--- TODO use a safe read function with locks here?
-getDoc :: [FilePath] -> IO String -- TODO IO (Maybe String)?
-getDoc docPaths = do
-  paths' <- mapM (\p -> getDataFileName ("docs" </> p <.> "txt") >>= absolutize) $ docPaths
-  tests <- mapM doesFileExist paths'
-  let path' = headOrDie ("no doc found for " ++ show docPaths) [p | (p, t) <- zip paths' tests, t]
-  -- putStrLn $ "path':" ++ path'
-  -- this should only happen during development:
-  -- written <- doesFileExist path'
-  -- when (not written) $ writeFile path' $ "write " ++ docPath ++ " doc here"
-  -- mapM readFile path'
-  doc <- readFile path'
-  return doc
+getDoc :: String -> IO (Maybe String)
+getDoc name = do
+  path <- getDataFileName $ "docs" </> name <.> "txt"
+  exists <- doesFileExist path
+  if not exists
+    then return Nothing
+    else readFile path >>= return . Just
 
 getUsage :: IO Docopt
-getUsage = getDoc ["usage"] >>= parseUsageOrExit
-
--- hasArg :: Arguments -> String -> Bool
--- hasArg as a = isPresent as $ longOption a
+getUsage = getDoc "usage" >>= parseUsageOrExit . fromJust
 
 {- These are done the simple, repetitive way for now to avoid lenses.  That
  - might change in the future though, because turns out getters and setters are

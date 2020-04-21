@@ -1,1 +1,0 @@
-doc for functions/psiblast_train_all not written yet

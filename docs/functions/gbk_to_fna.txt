@@ -1,1 +1,0 @@
-doc for functions/gbk_to_fna not written yet

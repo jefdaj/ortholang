@@ -1,1 +1,0 @@
-doc for functions/psiblast_each_pssm_db not written yet

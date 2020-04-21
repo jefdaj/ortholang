@@ -1,1 +1,0 @@
-doc for functions/extract_scored not written yet

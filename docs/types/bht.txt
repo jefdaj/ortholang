@@ -1,1 +1,0 @@
-doc for types/bht not written yet

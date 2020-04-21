@@ -1,1 +1,0 @@
-doc for types/faa.blastdb not written yet

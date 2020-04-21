@@ -1,1 +1,0 @@
-doc for functions/filter_bitscore_each not written yet

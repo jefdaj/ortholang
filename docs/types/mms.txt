@@ -1,1 +1,0 @@
-doc for types/mms not written yet

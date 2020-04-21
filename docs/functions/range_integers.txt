@@ -1,1 +1,0 @@
-doc for functions/range_integers not written yet

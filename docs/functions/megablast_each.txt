@@ -1,1 +1,0 @@
-doc for functions/megablast_each not written yet

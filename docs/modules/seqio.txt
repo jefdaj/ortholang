@@ -1,1 +1,0 @@
-doc for modules/SeqIO not written yet

@@ -1,1 +1,0 @@
-doc for functions/extract_hmm_targets not written yet

@@ -1,1 +1,0 @@
-doc for functions/makeblastdb_nucl_each not written yet

@@ -1,1 +1,0 @@
-doc for functions/split_faa_each not written yet

@@ -1,1 +1,0 @@
-doc for functions/extract_targets not written yet

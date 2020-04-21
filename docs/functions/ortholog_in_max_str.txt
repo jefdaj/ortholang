@@ -1,1 +1,0 @@
-doc for functions/ortholog_in_max_str not written yet

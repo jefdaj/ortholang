@@ -1,1 +1,0 @@
-doc for functions/busco_transcriptome not written yet

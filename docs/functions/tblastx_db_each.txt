@@ -1,1 +1,0 @@
-doc for functions/tblastx_db_each not written yet

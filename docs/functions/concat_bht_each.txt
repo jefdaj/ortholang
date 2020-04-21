@@ -1,1 +1,0 @@
-doc for functions/concat_bht_each not written yet

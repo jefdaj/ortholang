@@ -1,1 +1,0 @@
-doc for functions/reciprocal_best_all not written yet
