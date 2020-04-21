@@ -1,9 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module OrthoLang.Config where
-
--- TODO put this back inside the Interpreter module
+module OrthoLang.Interpreter.Config where
 
 import qualified Data.Configurator as C
 import qualified Data.Configurator.Types as C

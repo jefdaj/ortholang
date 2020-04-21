@@ -108,8 +108,8 @@ common shared-properties
 library
   import:           shared-properties
   exposed-modules:  Paths_OrthoLang,
-                    OrthoLang.Config,
                     OrthoLang.Interpreter,
+                    OrthoLang.Interpreter.Config,
                     OrthoLang.Interpreter.Actions,
                     OrthoLang.Interpreter.Expand,
                     OrthoLang.Interpreter.Compile,

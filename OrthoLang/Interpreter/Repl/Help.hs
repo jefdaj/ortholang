@@ -13,7 +13,7 @@ module OrthoLang.Interpreter.Repl.Help
 
 import OrthoLang.Types
 
-import OrthoLang.Config (getDoc)
+import OrthoLang.Interpreter.Config (getDoc)
 import OrthoLang.Interpreter.Pretty -- (pPrint, render)
 
 import Data.List.Split       (splitOn)

@@ -41,7 +41,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter.Repl.Actions
 import OrthoLang.Interpreter.Repl.Messages
 
-import OrthoLang.Config    (showConfig, showConfigField, setConfigField)
+import OrthoLang.Interpreter.Config    (showConfig, showConfigField, setConfigField)
 import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 

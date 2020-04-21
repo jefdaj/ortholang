@@ -20,7 +20,7 @@ import Prelude hiding ((<>))
 import Data.Scientific            (Scientific(), toBoundedInteger)
 -- import Development.Shake.FilePath ((</>))
 import OrthoLang.Types
--- import OrthoLang.Config (showConfig)
+-- import OrthoLang.Interpreter.Config (showConfig)
 import Text.PrettyPrint.HughesPJClass
 import System.Console.Terminal.Size (Window(..), size)
 import System.IO (Handle, hPutStrLn)

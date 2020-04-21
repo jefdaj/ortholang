@@ -21,7 +21,7 @@ module OrthoLang.Interpreter.Repl.Messages
 
 import Prelude hiding (print)
 import OrthoLang.Types
-import OrthoLang.Config (configFields) -- TODO move back to Interpreter
+import OrthoLang.Interpreter.Config (configFields) -- TODO move back to Interpreter
 import System.Console.Haskeline
 import qualified Data.Map.Strict as M
 
