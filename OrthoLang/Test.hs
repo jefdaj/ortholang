@@ -5,6 +5,9 @@ module OrthoLang.Test
   )
   where
 
+-- TODO learn how to set multiple test patterns here, then plumb them through Config testpatterns
+--      wait, no need for the plumbing! repl and tests are separate. remove testpatterns from Config
+
 import OrthoLang.Debug
 import OrthoLang.Types
 

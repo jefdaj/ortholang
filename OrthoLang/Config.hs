@@ -3,7 +3,7 @@
 
 module OrthoLang.Config where
 
--- TODO absolutize in the setters too? or unify them with initial loaders?
+-- TODO put this back inside the Interpreter module
 
 import qualified Data.Configurator as C
 import qualified Data.Configurator.Types as C
@@ -16,7 +16,7 @@ import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRege
 import Control.Monad              (when)
 import Data.Char                  (toLower)
 import Data.List                  (isInfixOf)
-import Data.Maybe                 (isNothing, catMaybes)
+import Data.Maybe                 (isNothing, catMaybes, fromJust)
 import Data.Text                  (pack)
 import Paths_OrthoLang            (getDataFileName)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption, getAllArgs)
@@ -85,7 +85,10 @@ loadConfig args = do
   outfile <- loadMaybeAbs args cfg "outfile"
   shared  <- loadMaybe args cfg "shared"
                >>= mapM (\p -> if isURL p then return p else absolutize p)
-  let testpattern = getAllArgs args (longOption "test")
+
+  -- TODO parse this separately and only use inside Test?
+  -- let testpattern = getAllArgs args (longOption "test")
+
   let interactive = isNothing script || (isPresent args $ longOption "interactive")
   let termcolumns = Nothing -- not used except in testing
   let shellaccess = isPresent args $ longOption "shellaccess" -- TODO clean up
@@ -98,7 +101,7 @@ loadConfig args = do
               , wrapper
               , history
               , report
-              , testpattern
+              -- , testpattern
               , termcolumns
               , shellaccess
               , progressbar
@@ -156,27 +159,44 @@ setConfigField cfg key val = case lookup key fields of
 -- TODO these show* functions could be Pretty instances, or just directly showable
 -- TODO remove anything that can't be shown
 -- TODO remove show functions and show directly (possibly using Configurator.display)
-fields :: [(String, (Config -> String -> Either String (IO Config)))]
+--
+
+-- | Takes the current config and a new value. Does some IO, then returns the new Config or an error.
+type ConfigSetter = Config -> String -> Either String (IO Config)
+
+fields :: [(String, ConfigSetter)]
 fields =
-  [ ("tmpdir" , setPath      $ \c p -> c { tmpdir  = p}) -- TODO error on "nothing"?
-  , ("workdir", setPath      $ \c p -> c { workdir = p}) -- TODO error on "nothing"?
-  , ("script" , setMaybePath $ \c p -> c { script  = p})
-  , ("wrapper", setMaybePath $ \c p -> c { wrapper = p})
-  , ("report" , setMaybePath $ \c p -> c { report  = p})
-  , ("outfile", setMaybePath $ \c p -> c { outfile = p})
-  , ("shared" , setMaybePath $ \c p -> c { shared  = p}) -- TODO custom URL thing
-  , ("termcolumns", setMaybeInt $ \c n -> c { termcolumns = n})
-  , ("debug"  , setDebug  )
-  -- TODO add: progressbar, hiddenfns, etc (Bools)
-  -- TODO add logfile and have it update that (move from main)
+  [ ("tmpdir" , mkSetter parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {tmpdir  =  a}))
+  , ("workdir", mkSetter parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {workdir =  a}))
+  , ("script" , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {script  = ma}))
+  , ("wrapper", mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {wrapper  = ma}))
+  , ("report" , mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {report  = ma}))
+  , ("outfile", mkSetter parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {outfile = ma}))
+  , ("shared" , mkSetter parseMaybeString (\c ms ->  absPathOrUrl ms     >>= \ma -> return $ c {shared  = ma}))
+  , ("termcolumns", mkSetter parseMaybeInt (\c mi -> return $ c {termcolumns = mi}))
+  , ("debugregex", mkSetter parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr})))
+  -- , ("testpattern", mkSetter parseStrings (\c ps -> return (c {testpattern = ps})))
   ]
 
-setDebug :: Config -> String -> Either String (IO Config)
-setDebug cfg val = case maybeRead ("\"" ++ val ++ "\"") of
-  Nothing -> Left  $ "invalid: " ++ val
-  Just v  -> Right $ do
-    updateDebug $ Just v
-    return $ cfg { debugregex = Just v }
+parseStrings :: String -> Either String [String]
+parseStrings = undefined
+
+absPathOrUrl :: Maybe String -> IO (Maybe String)
+absPathOrUrl = undefined
+
+--   -- TODO add: progressbar, hiddenfns, etc (Bools)
+--   -- TODO bools: progressbar, hiddenfns, secure (with error message)
+--   -- TODO add logfile and have it update that (move from main)
+--   -- TODO testpattern, which is a string with no path stuff
+--   -- TODO make logfile work
+--   -- TODO debugregex should have a "nothing" setting
+--   ]
+
+-- fields have 4 parts: field name, validator, setter, post-set io callback
+-- field name is a string
+-- validator is string -> either string a
+-- setter is config -> a -> config
+-- callback is a -> io ()
 
 -- this is run during setDebug, and once in loadConfig
 updateDebug :: Maybe String -> IO ()
@@ -189,17 +209,18 @@ updateDebug regex = case regex of
     setDebugSourceRegex r
     debug' $ "set debug regex to " ++ show regex
 
-setMaybePath :: (Config -> Maybe String -> Config) -- ^ fn to apply if the input string validates
-             ->  Config -> String                  -- ^ actual config and input string
-             -> Either String (IO Config)
-setMaybePath fn cfg p = fmap (\mp -> mapM absolutize mp >>= return .fn cfg) $ parseMaybePath p
-
-setPath :: (Config -> FilePath -> Config) -- TODO IO here? or just for debug?
-        ->  Config -> String
-        -> Either String (IO Config)
-setPath fn cfg s = fmap (\p -> absolutize p >>= return . fn cfg) $ parsePath s
+mkSetter :: (String -> Either String a) -- ^ parser function
+         -> (Config -> a -> IO Config)  -- ^ setter function
+         -> Config                      -- ^ current config
+         -> String                      -- ^ new field value
+         -> Either String (IO Config)
+mkSetter parser setter cfg value =
+  case parser value of
+    Left  err -> Left err
+    Right val -> Right (setter cfg val)
 
 -- from https://stackoverflow.com/a/3743602
+-- TODO error if quotes are mismatched? like "this' or 'this"
 sq :: String -> String
 sq s@[_]                     = s
 sq ('"':s)  | last s == '"'  = init s
@@ -211,15 +232,15 @@ sq s                         = s
 -- note that if you write a quoted empty string it gets parsed as Nothing here,
 -- but the actual empty string (no path given) will be interpreted as reading
 -- the config value rather than changing it
-parseMaybePath :: String -> Either String (Maybe FilePath)
-parseMaybePath input
+parseMaybeString :: String -> Either String (Maybe String)
+parseMaybeString input
   | map toLower input `elem` ["\"\"", "''", "nothing"] = Right Nothing
-  | otherwise = fmap Just $ parsePath input
+  | otherwise = fmap Just $ parseString input
 
-parsePath :: String -> Either String FilePath
-parsePath input = case maybeRead ("\"" ++ sq input ++ "\"") of
-                    Nothing -> Left $ "invalid path: '" ++ input ++ "'"
-                    Just "" -> Left $ "invalid path: \"\""
+parseString :: String -> Either String FilePath
+parseString input = case maybeRead ("\"" ++ sq input ++ "\"") of
+                    Nothing -> Left $ "invalid: '" ++ input ++ "'"
+                    Just "" -> Left $ "invalid: \"\""
                     Just p  -> Right p
 
 setMaybeInt :: (Config -> Maybe Int -> Config) -- ^ fn to apply if the input string validates
@@ -234,5 +255,5 @@ parseMaybeInt input
 
 parseInt :: String -> Either String Int
 parseInt input = case maybeRead input of
-                   Nothing -> Left $ "invalid int: '" ++ input ++ "'"
+                   Nothing -> Left $ "invalid: '" ++ input ++ "'"
                    Just n  -> Right n

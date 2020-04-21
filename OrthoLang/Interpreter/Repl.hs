@@ -168,7 +168,7 @@ cmdBang _ st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 -- TODO wow much staircase get rid of it
 cmdConfig :: ReplCmd
 cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
-  let ws = words s
+  let ws = words s -- TODO only split on the first + second space, passing the rest as one string (for patterns)
   if (length ws == 0)
     then pPrintHdl cfg hdl cfg >> return st -- TODO Pretty instance
     else if (length ws  > 2)
