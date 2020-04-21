@@ -99,7 +99,8 @@ loadConfig args = do
       showhidden  = isPresent args $ longOption "showhidden"
   let res = Config { .. }
   -- debug' $ show res
-  updateDebug debugregex
+  setLogLevel LevelDebug
+  mapM_ setDebugSourceRegex debugregex
   return res
 
 -- TODO any way to recover if missing? probably not
