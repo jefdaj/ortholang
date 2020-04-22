@@ -33,8 +33,6 @@ ava = Type
 mkAva :: String -> Function
 mkAva name = let name' = name ++ "_ava" in Function
   { fOpChar = Nothing, fName = name'
-  -- , fTypeDesc  = mkTypeDesc  name' [num, ListOf faa] ava
-  -- , fTypeCheck = defaultTypeCheck name' [num, ListOf faa] ava
   , fInputs = [Exactly num, Exactly (ListOf faa)]
   , fOutput = Exactly ava
   , fTags = []

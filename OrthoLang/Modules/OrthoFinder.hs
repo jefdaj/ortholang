@@ -45,8 +45,6 @@ ofr = Type
 orthofinder :: Function
 orthofinder = let name = "orthofinder" in Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = mkTypeDesc  name [ListOf faa] ofr
-  -- , fTypeCheck = defaultTypeCheck name [ListOf faa] ofr
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly ofr
   , fTags = [Stochastic]

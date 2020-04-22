@@ -45,8 +45,6 @@ spr = Type
 sonicparanoid :: Function
 sonicparanoid = let name = "sonicparanoid" in Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = mkTypeDesc  name [ListOf faa] spr -- TODO or fna
-  -- , fTypeCheck = defaultTypeCheck name [ListOf faa] spr -- TODO or fna
   , fInputs = [Exactly $ ListOf faa]
   , fOutput = Exactly spr
   , fTags = [Stochastic]

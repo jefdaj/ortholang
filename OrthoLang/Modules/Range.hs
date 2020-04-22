@@ -30,8 +30,6 @@ olModule = Module
 mkRangeFn :: String -> Int -> Function
 mkRangeFn name nArgs =  Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name (take nArgs $ repeat num) (ListOf num)
-  -- , fTypeDesc  = mkTypeDesc name  (take nArgs $ repeat num) (ListOf num)
   , fInputs = take nArgs $ repeat (Exactly num)
   , fOutput = ListSigs (Exactly num)
   , fTags = []

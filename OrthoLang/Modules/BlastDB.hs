@@ -132,8 +132,6 @@ pdb = EncodedAs blastdb faa
 mkLoadDB :: String -> Type -> Function
 mkLoadDB name faType = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str] rtn
-  -- , fTypeDesc  = mkTypeDesc name [str] rtn
   , fInputs = [Exactly str]
   , fOutput =  Exactly (EncodedAs blastdb faType)
   , fTags = []
@@ -143,8 +141,6 @@ mkLoadDB name faType = Function
 mkLoadDBEach :: String -> Type -> Function
 mkLoadDBEach name faType = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [ListOf str] (ListOf rtn)
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf str] (ListOf rtn)
   , fInputs = [Exactly (ListOf str)]
   , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
   ,fTags = []
@@ -195,8 +191,6 @@ loadFaaDbEach = mkLoadDBEach "load_faa_db_each" faa
 blastdblist :: Function
 blastdblist = let name = "blastdblist" in Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
-  -- , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fInputs = [Exactly str]
   , fOutput =  Exactly (ListOf str)
   , fTags = [ReadsURL]
@@ -277,8 +271,6 @@ aFilterList oPath listTmp fPath = do
 mkBlastdbget :: String -> Type -> Function
 mkBlastdbget name faType = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str] dbType -- TODO are there protein ones too?
-  -- , fTypeDesc  = mkTypeDesc name  [str] dbType -- TODO are there protein ones too?
   , fInputs = [Exactly str]
   , fOutput =  Exactly (EncodedAs blastdb faType)
   , fTags = []
@@ -349,8 +341,6 @@ aBlastdbget dbPrefix tmpDir nPath = do
 makeblastdbFnaAll :: Function
 makeblastdbFnaAll = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = tMakeblastdbAll name ndb
-  -- , fTypeDesc  = name ++ " : fa.list -> ndb"
   , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
   , fOutput =  Exactly ndb
   , fTags = []
@@ -362,8 +352,6 @@ makeblastdbFnaAll = Function
 makeblastdbFaaAll :: Function
 makeblastdbFaaAll = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = tMakeblastdbAll name pdb
-  -- , fTypeDesc  = name ++ " : faa.list -> pdb"
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly pdb
   , fTags = []
@@ -509,8 +497,6 @@ aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show 
 makeblastdbFna :: Function
 makeblastdbFna = Function
   { fOpChar = Nothing, fName = "makeblastdb_fna"
-  -- , fTypeCheck = tMakeblastdb ndb
-  -- , fTypeDesc  = "makeblastdb_fna : fa -> ndb"
   , fInputs = [Exactly fna] -- TODO can't do it from faa right?
   , fOutput =  Exactly ndb
   ,fTags = []
@@ -520,8 +506,6 @@ makeblastdbFna = Function
 makeblastdbFaa :: Function
 makeblastdbFaa = Function
   { fOpChar = Nothing, fName = "makeblastdb_faa"
-  -- , fTypeCheck = tMakeblastdb pdb
-  -- , fTypeDesc  = "makeblastdb_faa : faa -> pdb"
   , fInputs = [Exactly faa] -- TODO can't do it from faa right?
   , fOutput =  Exactly pdb
   ,fTags = []
@@ -547,8 +531,6 @@ rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
 mkMakeblastdbEach :: Type -> Function
 mkMakeblastdbEach faType = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = tMakeblastdbEach dbType
-  -- , fTypeDesc  = d
   , fInputs = [Exactly (ListOf faType)]
   , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
   , fTags = []

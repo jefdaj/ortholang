@@ -391,8 +391,6 @@ newFn
 newFn name mChar iSigs oSig rFn aFn tags = Function
   { fOpChar    = mChar
   , fName      = name
-  -- , fTypeDesc  = mkTypeDesc name dTypes oType
-  -- , fTypeCheck = tFn
   , fInputs    = iSigs
   , fOutput    = oSig
   , fTags      = tags
@@ -441,8 +439,6 @@ newMacro :: String -> [TypeSig] -> TypeSig -> MacroExpansion -> [FnTag] -> Funct
 newMacro name iSigs oSig mFn tags = Function
   { fOpChar    = Nothing
   , fName      = name
-  -- , fTypeDesc  = mkTypeDesc name dTypes oType
-  -- , fTypeCheck = tFn
   , fInputs    = iSigs
   , fOutput    = oSig
   , fTags      = tags

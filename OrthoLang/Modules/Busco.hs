@@ -77,8 +77,6 @@ buscoCache cfg = cacheDir cfg "busco"
 buscoListLineages :: Function
 buscoListLineages = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str] (ListOf str)
-  -- , fTypeDesc  = mkTypeDesc name  [str] (ListOf str)
   , fInputs = [Exactly str]
   , fOutput = Exactly (ListOf str)
   , fTags = [] -- TODO make it read a URL?
@@ -185,8 +183,6 @@ aBuscoListLineages listTmp = do
 buscoFetchLineage :: Function
 buscoFetchLineage  = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str] blh
-  -- , fTypeDesc  = mkTypeDesc name  [str] blh
   , fInputs = [Exactly str]
   , fOutput = Exactly blh
   , fTags = [ReadsURL]
@@ -246,8 +242,6 @@ rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show 
 mkBusco :: String -> String -> Type -> Function
 mkBusco name mode inType = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [blh, inType] bsr
-  -- , fTypeDesc  = mkTypeDesc name  [blh, inType] bsr
   , fInputs = [Exactly blh, Exactly inType]
   , fOutput = Exactly bsr
   , fTags = [Stochastic] -- TODO double check stochasticity
@@ -299,8 +293,6 @@ aBusco _ as = error $ "bad argument to aBusco: " ++ show as
 mkBuscoEach :: String -> String -> Type -> Function
 mkBuscoEach name mode inType = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [blh, (ListOf inType)] (ListOf bsr)
-  -- , fTypeDesc  = mkTypeDesc name  [blh, (ListOf inType)] (ListOf bsr)
   , fInputs = [Exactly blh, Exactly (ListOf inType)]
   , fOutput = Exactly (ListOf bsr)
   , fTags = [Stochastic] -- TODO double check stochasticity
@@ -320,8 +312,6 @@ buscoTranscriptomeEach = mkBuscoEach "busco_transcriptome_each" "tran" fna
 buscoPercentComplete :: Function
 buscoPercentComplete  = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [bsr] num
-  -- , fTypeDesc  = mkTypeDesc name  [bsr] num
   , fInputs = [Exactly bsr]
   , fOutput = Exactly num
   , fTags = [Stochastic] -- TODO double check stochasticity
@@ -334,8 +324,6 @@ buscoPercentComplete  = Function
 buscoPercentCompleteEach :: Function
 buscoPercentCompleteEach  = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [ListOf bsr] (ListOf num)
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf bsr] (ListOf num)
   , fInputs = [Exactly (ListOf bsr)]
   , fOutput =  Exactly (ListOf num)
   , fTags = [Stochastic] -- TODO double check stochasticity
@@ -352,8 +340,6 @@ buscoPercentCompleteEach  = Function
 buscoScoresTable :: Function
 buscoScoresTable  = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [ListOf bsr] bst
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf bsr] bst
   , fInputs = [Exactly (ListOf bsr)]
   , fOutput = Exactly bst
   , fTags = [] -- TODO not deterministic, right?
@@ -405,8 +391,6 @@ rBuscoScoresTable _ e = error $ "bad argument to rBuscoScoresTable: " ++ show e
 buscoFilterCompleteness :: Function
 buscoFilterCompleteness  = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
-  -- , fTypeDesc  = mkTypeDesc name  [num, bst, ListOf faa] (ListOf faa) -- TODO or fna?
   , fInputs = [Exactly num, Exactly bst, Exactly (ListOf faa)]
   , fOutput = Exactly (ListOf faa)
   , fTags = []

@@ -51,8 +51,6 @@ dmnd = Type
 diamondmakedb :: Function
 diamondmakedb = let name = "diamond_makedb" in Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = mkTypeDesc name  [faa] dmnd 
-  -- , fTypeCheck = defaultTypeCheck name [faa] dmnd
   , fInputs = [Exactly faa]
   , fOutput = Exactly dmnd
   , fTags = [Stochastic] -- TODO double check: is it deterministic?
@@ -68,8 +66,6 @@ diamondmakedb = let name = "diamond_makedb" in Function
 diamondmakedbEach :: Function
 diamondmakedbEach = let name = "diamond_makedb_each" in Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf faa] (ListOf dmnd) 
-  -- , fTypeCheck = defaultTypeCheck name [ListOf faa] (ListOf dmnd)
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly (ListOf dmnd)
   , fTags = [Stochastic] -- TODO double check: is it deterministic?
@@ -83,8 +79,6 @@ diamondmakedbEach = let name = "diamond_makedb_each" in Function
 diamondmakedbAll :: Function
 diamondmakedbAll = let name = "diamond_makedb_all" in Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf faa] dmnd 
-  -- , fTypeCheck = defaultTypeCheck name [ListOf faa] dmnd
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly dmnd
   , fTags = [Stochastic] -- TODO double check: is it deterministic?
@@ -188,8 +182,6 @@ rFlip23 _ _ e = error $ "bad argument to rFlip23: " ++ show e
 mkDiamondBlast :: DiamondBlastDesc -> Function
 mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" ++ name in Function
   { fOpChar = Nothing, fName = name'
-  -- , fTypeDesc  = mkTypeDesc name' [num, qType, sType] rType 
-  -- , fTypeCheck = defaultTypeCheck name [num, qType, sType] rType
   , fInputs = [Exactly num, Exactly qType, Exactly sType]
   , fOutput = Exactly rType
   , fTags = [Stochastic] -- TODO double check: is it deterministic?

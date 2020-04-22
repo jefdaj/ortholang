@@ -106,7 +106,6 @@ module OrthoLang.Interpreter
 --   , extractExprs
 --   , lookupIDsFile
 --   -- , lookupHashesFile
---   , mkTypeDesc
 --   , num
 --   , saltOf
 --   , setSalt

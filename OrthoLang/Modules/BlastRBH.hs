@@ -56,8 +56,6 @@ blastDescsRev = filter isReversible blastDescs
 mkBlastFromFaRev :: BlastDesc -> Function
 mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [num, sType, qType] bht
-  -- , fTypeDesc  = mkTypeDesc name  [num, sType, qType] bht
   , fInputs = [Exactly num, Exactly sType, Exactly qType]
   , fOutput = Exactly bht
   ,fTags = []
@@ -82,8 +80,6 @@ rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 mkBlastFromFaRevEach :: BlastDesc -> Function
 mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [num, sType, ListOf qType] (ListOf bht)
-  -- , fTypeDesc  = mkTypeDesc name  [num, sType, ListOf qType] (ListOf bht)
   , fInputs = [Exactly num, Exactly sType, Exactly (ListOf qType)]
   , fOutput = Exactly (ListOf bht)
   ,fTags = []
@@ -124,8 +120,6 @@ aMkBlastFromDbRev _ _ = fail "bad argument to aMkBlastFromDbRev"
 reciprocalBest :: Function
 reciprocalBest = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [bht, bht] bht
-  -- , fTypeDesc  = mkTypeDesc name  [bht, bht] bht
   , fInputs = [Exactly bht, Exactly bht] -- TODO any ht would work right?
   , fOutput = Exactly bht
   ,fTags = []
@@ -166,8 +160,6 @@ aReciprocalBest args = error $ "bad argument to aReciprocalBest: " ++ show args
 reciprocalBestAll :: Function
 reciprocalBestAll = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [ListOf bht, ListOf bht] bht
-  -- , fTypeDesc  = mkTypeDesc name  [ListOf bht, ListOf bht] bht
   , fInputs = [Exactly (ListOf bht), Exactly (ListOf bht)] -- TODO any ht would work right?
   , fOutput = Exactly bht
   ,fTags = []
@@ -195,8 +187,6 @@ aReciprocalBestAll ps = error $ "bad argument to aReciprocalBestAll: " ++ show p
 mkBlastRbh :: BlastDesc -> Function
 mkBlastRbh d@(bCmd, qType, sType, _) = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [num, qType, sType] bht
-  -- , fTypeDesc  = mkTypeDesc name  [num, qType, sType] bht
   , fInputs = [Exactly num, Exactly qType, Exactly sType]
   , fOutput = Exactly bht
   ,fTags = []
@@ -221,8 +211,6 @@ rMkBlastRbh _ _ _ = fail "bad argument to rMkBlastRbh"
 mkBlastRbhEach :: BlastDesc -> Function
 mkBlastRbhEach d@(bCmd, qType, sType, _) = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [num, qType, ListOf sType] (ListOf bht)
-  -- , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf sType] (ListOf bht)
   , fInputs = [Exactly num, Exactly qType, Exactly (ListOf sType)] -- TODO any ht would work right?
   , fOutput = Exactly (ListOf bht)
   ,fTags = []

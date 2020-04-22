@@ -37,9 +37,6 @@ ll = TypeGroup
 length :: Function
 length = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [Some ll "something list-like"] num
-  -- , fTypeDesc  = mkTypeDesc       name [Some ll "something list-like"] num
-  , fInputs = [Some ll "something list-like"]
   , fOutput = Exactly num
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rLength
@@ -56,8 +53,6 @@ length = Function
 lengthEach :: Function
 lengthEach = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = mkTypeDesc       name [ListOf (Some ll "something list-like")] (ListOf num)
-  -- , fTypeCheck = defaultTypeCheck name [ListOf (Some ll "something list-like")] (ListOf num)
   , fInputs = [ListSigs (Some ll "something list-like")]
   , fOutput = Exactly (ListOf num)
   ,fTags = []

@@ -77,8 +77,6 @@ mkBlastFromDb :: BlastDesc -> Function
 mkBlastFromDb d@(bCmd, qType, _, sType) = Function
   { fOpChar = Nothing
   , fName = bCmd ++ "_db"
-  -- , fTypeCheck = defaultTypeCheck name [num, qType, dbType] bht
-  -- , fTypeDesc  = mkTypeDesc name  [num, qType, dbType] bht
   , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs blastdb sType)]
   , fOutput = Exactly bht
   , fTags = []
@@ -177,8 +175,6 @@ mkBlastFromFa :: BlastDesc -> Function
 mkBlastFromFa d@(bCmd, qType, sType, _) = Function
   { fOpChar = Nothing
   , fName = bCmd
-  -- , fTypeCheck = defaultTypeCheck bCmd [num, qType, sType] bht
-  -- , fTypeDesc  = mkTypeDesc bCmd  [num, qType, sType] bht
   , fInputs = [Exactly num, Exactly qType, Exactly sType]
   , fOutput = Exactly bht
   ,fTags = []
@@ -204,8 +200,6 @@ rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 mkBlastFromDbEach :: BlastDesc -> Function
 mkBlastFromDbEach d@(bCmd, qType, _, sType) = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [num, qType, ListOf dbType] (ListOf bht)
-  -- , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf dbType] (ListOf bht)
   , fInputs = [Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb sType))]
   , fOutput = Exactly (ListOf bht)
   ,fTags = []
@@ -224,8 +218,6 @@ rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 mkBlastFromFaEach :: BlastDesc -> Function
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
   { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [num, qType, ListOf faType] (ListOf bht)
-  -- , fTypeDesc  = mkTypeDesc name  [num, qType, ListOf faType] (ListOf bht)
   , fInputs = [Exactly num, Exactly qType, Exactly (ListOf faType)]
   , fOutput = Exactly (ListOf bht)
   ,fTags = []

@@ -64,7 +64,6 @@ module OrthoLang.Types
   -- module stuff (in flux)
   , Function(..)
   , FnTag(..)
-  , mkTypeDesc
   , Module(..)
   , saltOf
   , setSalt
@@ -667,10 +666,6 @@ data Function = Function
   { fName      :: String      -- ^ main (prefix) function name
   , fOpChar    :: Maybe Char  -- ^ infix operator symbol, if any
 
-  -- TODO remove these
-  -- , fTypeCheck :: TypeChecker -- ^ checks input types, returning an error message or return type
-  -- , fTypeDesc  :: String      -- ^ human-readable description
-
   -- TODO write these, then remove the old descs + typecheckers above
   , fInputs :: [TypeSig] -- ^ new input (argument) types TODO any way to make it a variable length tuple?
   , fOutput ::  TypeSig  -- ^ new output (return) type
@@ -694,9 +689,6 @@ data NewRules
   = NewRules (Rules ())
   | NewMacro (Script -> Expr -> Expr) -- type alias in NewRules.hs for now
   | NewNotImplemented -- TODO remove
-
-mkTypeDesc :: String -> [Type] -> Type -> String
-mkTypeDesc n is o = unwords $ [n, ":"] ++ map ext is ++ ["->", ext o]
 
 -- TODO does eq make sense here?
 data Module = Module
