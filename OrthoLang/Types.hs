@@ -806,7 +806,7 @@ renderIO cfg doc = do
   let renderWidth = case termcolumns cfg of
                       Nothing -> currentWidth
                       Just w  -> w
-  let s = PP.style {PP.lineLength = renderWidth, PP.ribbonsPerLine = 0.2}
+  let s = PP.style {PP.lineLength = renderWidth, PP.ribbonsPerLine = 1.0}
   -- let s = style {lineLength = renderWidth}
   return $ PP.renderStyle s doc
 
