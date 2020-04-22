@@ -1,140 +1,123 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-
 module OrthoLang.Types
   (
-  -- * Types and Newtypes
-    Path(..)
-  , Action1
+    Action1
   , Action2
   , Action3
-  , RulesFn
-  -- , typecheckFn
-  -- , TypeChecker
-  -- * Basic data structures
   , Assign
-  , Expr(..)
+  , CacheDir(..)
   , CompiledExpr(..)
   , Config(..)
-  , findType
-  , findGroup
-  , findEncoding
-  , findModule
-  , findFunction -- TODO remove?
-  , findFun
-  , listFunctions
-  , listFunctionNames
-  , operatorChars
-  -- , WrapperConfig(..)
-  , Ext(..)
-  , Type(..)
-  , Encoding(..)
-  , TypeGroup(..)
-  , TypeSig(..)
-  , RepID(..)
-  , Salt(..)
-  , Var(..)
-  , Script
-  , emptyScript
-  , emptyDigests
-  , LocksRef
-  , IDs(..)
-  , emptyIDs
   , DigestMap
   , DigestsRef
-  , IDsRef
+  , Encoding(..)
+  , Expr(..)
+  , ExprPath(..)
+  , Ext(..)
+  , FnTag(..)
+  , Function(..)
   , GlobalEnv
-  , ensureResult
-  , lookupResult
-  -- , Assoc(..) -- we reuse this from Parsec
-  -- , OrthoLangFixity(..)
-  -- parse monad
+  , IDs(..)
+  , IDsRef
+  , LocksRef
+  , Module(..)
+  , NewRules(..)
   , ParseM
-  -- repl monad
-  -- , print
-  -- misc
-  -- , prettyShow
-  , str, num -- TODO load these from modules
-  , lit
-  , typeOf
-  , depsOf
-  , rDepsOf
+  , runParseM
+  , parseFail
+  , Path(..)
+  , PathDigest(..)
+  , RepID(..)
+  , ReplCmd
+  , ReplM
+  , ResPath(..)
+  , RulesEnv
+  , RulesFn
+  , RulesR
+  , Salt(..)
+  , Script
+  , Type(..)
+  , TypeGroup(..)
+  , TypeSig(..)
+  , Var(..)
+  , VarPath(..)
   , defaultShow
   , defaultShowN -- same but lets you pick how many lines to show
-  -- module stuff (in flux)
-  , Function(..)
-  , FnTag(..)
-  , Module(..)
+  , depsOf
+  , emptyDigests
+  , emptyIDs
+  , emptyScript
+  , ensureResult
+  , extractExprs
+  , findEncoding
+  , findFun
+  , findFunction -- TODO remove?
+  , findGroup
+  , findModule
+  , findType
+  , listFunctionNames
+  , listFunctions
+  , lit
+  , lookupResult
+  , num
+  , operatorChars
+  , prefixOf
+  , rDepsOf
+  , runReplM
+  , runRulesR
   , saltOf
   , setSalt
-  , prefixOf
-  -- * Wrappers to prevent confusing the various paths
-  , CacheDir(..)
-  , ExprPath(..)
-  , VarPath(..)
-  , ResPath(..)
-  , PathDigest(..)
-  -- * Misc experimental stuff
-  , extractExprs
+  , str
+  , typeOf
   , typeSigMatches
-  -- , typeSigsMatch
-  -- new rules infrastructure
-  , RulesEnv
-  , RulesR
-  , runRulesR
-  , NewRules(..)
-  , ReplM
-  , runReplM
-  , ReplCmd
   )
   where
 
-import qualified Data.Map.Strict as M
--- import Text.Parsec (Parsec)
 
-import Prelude hiding (error)
-import OrthoLang.Debug
+-- still crashes, but prints a message to the logfile first
+import Prelude  hiding (error)
+import OrthoLang.Debug (error)
+
 import OrthoLang.Locks (LocksRef, withReadLock)
 import OrthoLang.Util  (readFileStrict, readFileLazy)
 
-import Development.Shake              (Rules, Action, Resource)
--- import Control.Monad.IO.Class (liftIO)
-import Data.Char                      (toLower)
-import Data.List                      (nub, find, isPrefixOf)
--- import System.Console.Haskeline       (InputT, getInputLine, runInputT, Settings)
-import Data.IORef                     (IORef)
-import Data.Maybe (fromJust, catMaybes)
-
-import Control.Monad.Reader -- TODO only specific imports
--- import Control.Monad.State.Lazy       -- (StateT, execStateT, lift)
-import Data.Typeable hiding (typeOf)
-import System.Console.Haskeline hiding (catch)
+import Control.Monad.Reader       (ReaderT, runReaderT)
 import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
+import Control.Monad.Trans.Except (Except)
+import Data.Char                  (toLower)
+import Data.IORef                 (IORef)
+import Data.List                  (nub, find, isPrefixOf)
+import Data.Map.Strict            (Map, empty)
+import Data.Maybe                 (fromJust, catMaybes)
+import Development.Shake          (Rules, Action, Resource)
+import System.Console.Haskeline   (Settings, InputT, runInputT)
 import System.FilePath.Posix      ((</>))
 import System.IO                  (Handle, hPutStrLn, stdout)
+import Text.Parsec                (ParsecT)
 
--- for ParseM (TODO clean up)
+import Development.Shake.FilePath (makeRelative)
+import Text.Parsec.Combinator     (manyTill, eof, anyToken)
 import Text.Parsec hiding (Empty)
-import Control.Monad.Reader
 import Control.Monad.Trans.Except
+import Control.Monad.Trans
+import Control.Monad.Reader (runReaderT)
 
 
 -----------
 -- paths --
 -----------
 
-newtype Path = Path FilePath deriving (Eq, Ord, Show, Typeable)
+newtype Path = Path FilePath deriving (Eq, Ord, Read, Show)
 
 -- Note that each ActionN takes N+1 Paths, because the first is the output
--- TODO take the output last instead?
+-- TODO put the output last instead?
 type Action1 = Path -> Path -> Action ()
 type Action2 = Path -> Path -> Path -> Action ()
 type Action3 = Path -> Path -> Path -> Path -> Action ()
 
-newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/cache/<modname>
-newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
-newtype VarPath  = VarPath  FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/vars/<varname>.<type>
-newtype ResPath  = ResPath  FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/vars/result[.<hash>.<type>]
-newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord, Typeable)
+newtype CacheDir = CacheDir FilePath deriving (Eq, Ord, Read, Show) -- ~/.ortholang/cache/<modname>
+newtype ExprPath = ExprPath FilePath deriving (Eq, Ord, Read, Show) -- ~/.ortholang/exprs/<fnname>/<h1>/<h2>/../result
+newtype VarPath  = VarPath  FilePath deriving (Eq, Ord, Read, Show) -- ~/.ortholang/vars/<varname>.<type>
+newtype ResPath  = ResPath  FilePath deriving (Eq, Ord, Read, Show) -- ~/.ortholang/vars/result[.<hash>.<type>]
 
 
 -----------
@@ -150,19 +133,20 @@ type RulesR a = ReaderT RulesEnv Rules a
 runRulesR :: RulesEnv -> RulesR a -> Rules a
 runRulesR env act = runReaderT act env
 
+
 -----------------
 -- expressions --
 -----------------
 
 -- A digest identifying which replace_* call the variable is part of.
 -- TODO This isn't very elegant; can it be removed?
-newtype RepID = RepID (Maybe String) deriving (Eq, Show, Read, Typeable)
+newtype RepID = RepID (Maybe String) deriving (Eq, Show, Read)
 
 -- A number that can be incremented to change the expression's hash, causing repeat evaluation.
-newtype Salt = Salt Int deriving (Eq, Show, Read, Typeable)
+newtype Salt = Salt Int deriving (Eq, Show, Read)
 
 data Var = Var RepID String
-  deriving (Eq, Show, Read, Typeable)
+  deriving (Eq, Show, Read)
 
 -- the common fields are:
 -- * return type
@@ -179,7 +163,7 @@ data Expr
   | Fun Type (Maybe Salt) [Var] String [Expr] -- TODO is the Eq instance wrong?
   | Lst Type [Var] [Expr] -- TODO maybe salt?
   | Com CompiledExpr -- wrapper around previously-compiled rules (see below)
-  deriving (Eq, Show, Typeable)
+  deriving (Eq, Show)
 
 -- An expression that has already been compiled to Rules, wrapped so it can be
 -- passed to another function. Because Rules can't be shown or compared, we
@@ -251,7 +235,7 @@ emptyScript :: Script
 emptyScript = []
 
 emptyDigests :: DigestMap
-emptyDigests = M.empty
+emptyDigests = empty
 
 ensureResult :: Script -> Script
 ensureResult as = if null as then noRes else scr'
@@ -304,6 +288,16 @@ extractExprs scr (Ref _ _ _ v ) = case lookup v scr of
 extractExprs _   (Fun _ _ _ _ _) = error "extractExprs" explainFnBug
 extractExprs scr (Bop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
 extractExprs  _   e               = error "extractExprs" $ "bad arg: " ++ show e
+
+-- TODO will this get printed, or will there just be a parse error?
+explainFnBug :: String
+explainFnBug =
+  "You've stumbled on an outstanding bug. Sorry about that! \
+  \The problem is that when doing transformations involving lists \
+  \like repeat or map, OrthoLang can't \"see\" through future function calls; \
+  \it can only manipulate lists whose elements are known *before* running the \
+  \program. If you want Jeff to consider rewriting some things to fix that, \
+  \drop him a line!"
 
 
 -----------
@@ -512,7 +506,7 @@ data Config = Config
   , showhidden  :: Bool
   , showvartypes :: Bool
   }
-  deriving (Show, Typeable)
+  deriving (Show)
 
 
 -------------
@@ -528,8 +522,6 @@ data Module = Module
   , mEncodings :: [Encoding]
   , mFunctions :: [Function]
   }
-  -- deriving (Eq, Read)
-  deriving (Typeable)
 
 -- TODO what about prettyShow in Pretty.hs?
 instance Show Module where
@@ -595,6 +587,20 @@ operatorChars mods = catMaybes $ map fOpChar $ listFunctions mods
 
 type ParseM a = ParsecT String Script (ReaderT [Module] (Except String)) a
 
+-- TODO is cfg still needed? if so, add mods
+-- originally based on https://stackoverflow.com/a/54089987/429898
+runParseM :: [Module] -> ParseM a -> Config -> Script -> String -> Either String a
+runParseM ms op cfg scr input = case runExcept (runReaderT (runPT op scr sn input) ms) of
+  Left s          -> Left s        -- parseFail; return the String
+  Right (Left  e) -> Left (show e) -- Parsec error; convert to String
+  Right (Right r) -> Right r
+  where
+    sn = case script cfg of
+           Nothing -> "repl"
+           Just f  -> makeRelative (workdir cfg) f
+
+parseFail :: String -> ParseM a
+parseFail = lift . lift . throwE
 
 ------------
 -- seqids --
@@ -607,19 +613,21 @@ type ParseM a = ParsecT String Script (ReaderT [Module] (Except String)) a
 -- TODO use bytestring-tries rather than maps with string keys?
 -- TODO should this be ActionIDs in general? aka all the stuff that might be needed in Action
 data IDs = IDs
-  { hFiles  :: M.Map String String
-  , hSeqIDs :: M.Map String (M.Map String String)
+  { hFiles  :: Map String String
+  , hSeqIDs :: Map String (Map String String)
   }
   deriving (Show)
 
 emptyIDs :: IDs
-emptyIDs = IDs M.empty M.empty
+emptyIDs = IDs empty empty
 
 -- this lets me cheat and not bother threading the ID map through all the monad stuff
 -- TODO go back and do it right
 type IDsRef = IORef IDs
 
-type DigestMap = M.Map PathDigest (Type, Path)
+newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
+
+type DigestMap = Map PathDigest (Type, Path)
 type DigestsRef = IORef DigestMap
 
 
@@ -634,7 +642,7 @@ data FnTag
   | ReadsURL   -- do not repeat, do not cache/share?
   | Broken     -- remove from functions list when loading
   | Hidden     -- remove from user-facing lists
-  deriving (Eq, Read, Show, Typeable)
+  deriving (Eq, Read, Show)
 
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
@@ -660,16 +668,6 @@ data NewRules
   = NewRules (Rules ())
   | NewMacro (Script -> Expr -> Expr) -- type alias in NewRules.hs for now
   | NewNotImplemented -- TODO remove
-
--- TODO will this get printed, or will there just be a parse error?
-explainFnBug :: String
-explainFnBug =
-  "You've stumbled on an outstanding bug. Sorry about that! \
-  \The problem is that when doing transformations involving lists \
-  \like repeat or map, OrthoLang can't \"see\" through future function calls; \
-  \it can only manipulate lists whose elements are known *before* running the \
-  \program. If you want Jeff to consider rewriting some things to fix that, \
-  \drop him a line!"
 
 -- this mostly checks equality, but also has to deal with how an empty list can
 -- be any kind of list

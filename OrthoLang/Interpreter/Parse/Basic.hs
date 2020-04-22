@@ -42,7 +42,7 @@ import Text.Parsec            (getState, putState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
 import Text.Parsec.Prim       (ParsecT, Stream)
-import OrthoLang.Interpreter.Parse.Util (ParseM, debugParser)
+import OrthoLang.Interpreter.Parse.Util (debugParser)
 import Control.Monad.Reader   (ask)
 
 --------------

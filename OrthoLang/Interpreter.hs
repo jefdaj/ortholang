@@ -49,7 +49,7 @@ module OrthoLang.Interpreter
   , spaceChars
   , escapeChars
   , literalChars
-  , ParseM
+  -- , ParseM
   -- , ReplM
   -- , DigestsRef
   , toGeneric
