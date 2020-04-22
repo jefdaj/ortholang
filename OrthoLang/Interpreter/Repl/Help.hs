@@ -19,7 +19,6 @@ module OrthoLang.Interpreter.Repl.Help
 import OrthoLang.Types
 
 import OrthoLang.Interpreter.Config (getDoc)
-import OrthoLang.Interpreter.Pretty -- (pPrint, render)
 import OrthoLang.Util (headOrDie)
 import OrthoLang.Debug (trace)
 

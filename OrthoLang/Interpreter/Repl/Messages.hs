@@ -26,7 +26,7 @@ import System.Console.Haskeline
 import qualified Data.Map.Strict as M
 
 import OrthoLang.Interpreter.Parse     (parseExpr)
-import OrthoLang.Interpreter.Pretty    (pPrint, render, pPrintHdl)
+-- import OrthoLang.Interpreter.Pretty    (pPrint, render, pPrintHdl)
 import OrthoLang.Interpreter.Repl.Help (help, renderTypeSig)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 

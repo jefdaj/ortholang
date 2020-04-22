@@ -124,7 +124,6 @@ library
                     OrthoLang.Interpreter.Parse.Script,
                     OrthoLang.Interpreter.Parse.Util,
                     OrthoLang.Interpreter.Paths,
-                    OrthoLang.Interpreter.Pretty,
                     OrthoLang.Interpreter.Repl,
                     OrthoLang.Interpreter.Repl.Help,
                     OrthoLang.Interpreter.Repl.Messages,

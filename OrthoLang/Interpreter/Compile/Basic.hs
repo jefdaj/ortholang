@@ -51,7 +51,6 @@ import Prelude hiding (error)
 import OrthoLang.Debug
 import Development.Shake
 import OrthoLang.Types
-import OrthoLang.Interpreter.Pretty
 
 import Data.List              (isPrefixOf)
 import Data.Maybe             (fromJust)

@@ -31,8 +31,8 @@ import Test.Tasty.Hspec      (testSpecs, shouldReturn)
 import qualified Data.Text.Lazy as T
 import Text.Pretty.Simple (pShowNoColor)
 
-import OrthoLang.Interpreter.Pretty (renderIO)
-import Text.PrettyPrint.HughesPJClass (pPrint)
+-- import OrthoLang.Interpreter.Pretty (renderIO)
+-- import Text.PrettyPrint.HughesPJClass (pPrint)
 
 -- | These work, but the tmpfiles vary so they require a check script.
 tmpfilesVary :: [FilePath]

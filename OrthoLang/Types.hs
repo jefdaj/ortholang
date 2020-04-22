@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module OrthoLang.Types
   (
     Action1
@@ -67,13 +69,23 @@ module OrthoLang.Types
   , str
   , typeOf
   , typeSigMatches
+  , Pretty
+  , prettyNum -- TODO remove
+  , prettyShow
+  , render
+  , renderIO
+  , pPrint
+  , pPrintHdl
   )
   where
 
 
 -- still crashes, but prints a message to the logfile first
-import Prelude  hiding (error)
+import Prelude  hiding (error, (<>))
 import OrthoLang.Debug (error)
+
+import qualified Data.Text.Lazy   as T
+import qualified Text.PrettyPrint as PP
 
 import OrthoLang.Locks (LocksRef, withReadLock)
 import OrthoLang.Util  (readFileStrict, readFileLazy)
@@ -93,6 +105,12 @@ import System.Console.Haskeline   (Settings, InputT, runInputT)
 import System.FilePath.Posix      ((</>))
 import System.IO                  (Handle, hPutStrLn, stdout)
 import Text.Parsec                (ParsecT, runPT)
+
+import System.Console.Terminal.Size   (Window(..), size)
+import Text.PrettyPrint.HughesPJClass (Pretty, pPrint, prettyShow)
+import Text.PrettyPrint               (Doc, (<>), (<+>), render)
+import Data.Scientific                (Scientific(), toBoundedInteger)
+import Text.Pretty.Simple             (pShowNoColor)
 
 
 -----------
@@ -141,6 +159,9 @@ newtype Salt = Salt Int deriving (Eq, Show, Read)
 data Var = Var RepID String
   deriving (Eq, Show, Read)
 
+instance Pretty Var where
+  pPrint (Var _ s) = PP.text s -- TODO show the salt?
+
 -- the common fields are:
 -- * return type
 -- * salt, which can be changed to force re-evaluation of an expr + all depends
@@ -178,6 +199,42 @@ instance Show CompiledExpr where
 instance Eq CompiledExpr where
   (CompiledExpr _ p1 _) == (CompiledExpr _ p2 _) = p1 == p2
 
+-- TODO actual Eq instance, or what? how do we compare types?
+instance Pretty Expr where
+  pPrint e@(Lit _ s)
+    | typeOf e == num = prettyNum s
+    | otherwise = PP.text $ show s
+  pPrint (Ref _ _ _ v)    = pPrint v
+  pPrint (Fun _ _ _ s es) = PP.text s <+> PP.sep (map pNested es)
+  pPrint (Lst _ _ es)  = pList es
+  pPrint (Com (CompiledExpr t (ExprPath p) _)) = PP.text $ "Compiled " ++ ext t ++ " " ++ p
+
+  -- this is almost right except it breaks lines too early (always nesting),
+  -- which looks super weird for short bops:
+  -- pPrint (Bop _ _ _ c e1 e2) = pPrint e1 $$ nest (-2) (PP.text c) $$ pPrint e2
+
+  -- this one is a little better: the first line is right and *then* it starts doing that
+  -- TODO ask on stackoverflow if there's any better way, but later
+  pPrint (Bop _ _ _ c e1 e2) = PP.sep $ PP.punctuate (PP.text $ " " ++ c) [pPrint e1, pPrint e2]
+
+pList :: (Pretty a) => [a] -> Doc
+pList es = PP.text "[" <> PP.sep (PP.punctuate (PP.text ",") (map pPrint es)) <> PP.text "]"
+
+prettyNum :: String -> Doc
+prettyNum s = PP.text $
+  case toBoundedInteger n of
+    Just i  -> show (i :: Int)
+    Nothing -> show n -- as decimal
+  where
+    n = read s :: Scientific
+
+-- this adds parens around nested function calls
+-- without it things can get really messy!
+pNested :: Expr -> Doc
+pNested e@(Fun  _ _ _ _ _  ) = PP.parens $ pPrint e
+pNested e@(Bop  _ _ _ _ _ _) = PP.parens $ pPrint e
+pNested e = pPrint e
+
 -- TODO is this not actually needed? seems "show expr" handles it?
 saltOf :: Expr -> Maybe Salt
 saltOf (Lit _ _)                = Nothing
@@ -205,6 +262,17 @@ setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt" "not implemented for comp
 -- TODO have a separate Assign for "result"?
 type Assign = (Var, Expr)
 type Script = [Assign]
+
+-- TODO newtype to prevent the overlap?
+instance {-# OVERLAPPING #-} Pretty Assign where
+  pPrint (v, e) = pPrint v <+> PP.text "=" <+> pPrint e
+  -- this adds type info, but makes the pretty-print not valid source code
+  -- pPrint (v, e) = PP.text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
+
+-- TODO is totally ignoring the sDigests part OK here?
+instance {-# OVERLAPPING #-} Pretty Script where
+  pPrint [] = PP.empty
+  pPrint as = PP.vcat $ map pPrint as
 
 emptyScript :: Script
 emptyScript = []
@@ -311,6 +379,15 @@ instance Eq Type where
 instance Show Type where
   show = ext
 
+instance Pretty Type where
+  pPrint Empty           = error "type.prettytype" "should never need to print Empty"
+  pPrint (ListOf  Empty) = PP.text "empty list"
+  pPrint (ListOf      t) = PP.text "list of" <+> pPrint t <> PP.text "s"
+  pPrint (ScoresOf    t) = PP.text "list of" <+> pPrint t <> PP.text "s with scores"
+  pPrint (EncodedAs e t) = pPrint t <+> PP.text "encoded as" <+> PP.text (enExt e)
+  -- pPrint (Some (TypeGroup {tgExt = t, tgDesc = d}) s) = PP.text t <+> PP.parens (PP.text d) <+> parens (PP.text s) -- TODO refine this
+  pPrint (Type            { tExt = t,  tDesc = d}   ) = PP.text t <+> PP.parens (PP.text d)
+
 -- ^ tarballs, blast dbs, etc. where both format and wrapped type matter
 -- TODO can it be unified with Type using typeclasses or something? redesign this part
 data Encoding = Encoding
@@ -324,6 +401,9 @@ instance Show Encoding where
 
 instance Eq Encoding where
   (Encoding {enExt = e1}) == (Encoding {enExt = e2}) = e1 == e2
+
+instance Pretty Encoding where
+  pPrint e = PP.text $ enExt e
 
 {-|
 These are used to specify the input + output types of functions.
@@ -344,6 +424,14 @@ data TypeSig
 
   deriving (Eq, Show)
 
+instance Pretty TypeSig where
+  pPrint (ListSigs s)     = pPrint s <> PP.text ".list"
+  pPrint (ScoresSigs s)   = pPrint s <> PP.text ".scores"
+  pPrint (EncodedSig e s) = pPrint s <> PP.text ("." ++ enExt e)
+  pPrint (AnyType _)      = PP.text "anytype" -- TODO does this make sense? might have to do variables
+  pPrint (Some g _)       = pPrint g
+  pPrint (Exactly t)      = pPrint t
+
 {-|
 These are kind of like simpler, less extensible typeclasses. They're just a
 list of types that can be treated similarly in some circumstances, for example
@@ -360,6 +448,9 @@ data TypeGroup = TypeGroup
 --      maybe we need to assert no duplicates while loading modules?
 instance Eq TypeGroup where
   (TypeGroup {tgExt = e1}) == (TypeGroup {tgExt = e2}) = e1 == e2
+
+instance Pretty TypeGroup where
+  pPrint g = PP.text $ tgExt g
 
 -- | types which have a file extension
 class Ext a where
@@ -483,6 +574,10 @@ data Config = Config
   }
   deriving (Show)
 
+-- TODO update this by mapping over the fields
+instance Pretty Config where
+  pPrint = PP.text . T.unpack . pShowNoColor
+
 
 -------------
 -- modules --
@@ -501,6 +596,10 @@ data Module = Module
 -- TODO what about prettyShow in Pretty.hs?
 instance Show Module where
   show = mName
+
+-- TODO change this to something useful
+instance Pretty Module where
+  pPrint fn = PP.text $ "Module \"" ++ mName fn ++ "\""
 
 -- note: only lists the first name of each function,
 --       which for binary operators will be the single-char one
@@ -602,6 +701,9 @@ newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
 type DigestMap = Map PathDigest (Type, Path)
 type DigestsRef = IORef DigestMap
 
+instance Pretty DigestMap where
+  pPrint m = PP.text $ show m
+
 
 ---------------
 -- functions --
@@ -635,6 +737,13 @@ instance Eq Function where
           && fInputs f1 == fInputs f2
           && fOutput f1 == fOutput f2
           && fTags   f1 == fTags   f2
+
+instance Show Function where
+  show = prettyShow
+
+-- TODO change this to something useful
+instance Pretty Function where
+  pPrint fn = PP.text $ "Function \"" ++ fName fn ++ "\""
 
 data NewRules
   = NewRules (Rules ())
@@ -675,3 +784,33 @@ runReplM settings myLoop st@(_, cfg, _, _, _) = do
   return ()
 
 type ReplCmd = [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
+
+
+---------------------
+-- pretty-printing --
+---------------------
+
+-- TODO move to config?
+getWidth :: IO Int
+getWidth = do
+  s <- size
+  return $ case s of
+    Nothing -> 120
+    Just (Window {width = w}) -> w
+
+-- Render with my custom style (just width so far)
+-- Needs to have the optional constant width for the REPL tests
+renderIO :: Config -> Doc -> IO String
+renderIO cfg doc = do
+  currentWidth <- getWidth
+  let renderWidth = case termcolumns cfg of
+                      Nothing -> currentWidth
+                      Just w  -> w
+  let s = PP.style {PP.lineLength = renderWidth, PP.ribbonsPerLine = 0.2}
+  -- let s = style {lineLength = renderWidth}
+  return $ PP.renderStyle s doc
+
+-- Print something pretty to a handle, rendering with custom style from Pretty.hs
+-- TODO move to Pretty.hs?
+pPrintHdl :: Pretty a => Config -> Handle -> a -> IO ()
+pPrintHdl cfg hdl thing = renderIO cfg (pPrint thing) >>= hPutStrLn hdl

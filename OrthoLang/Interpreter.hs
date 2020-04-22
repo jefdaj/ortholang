@@ -41,7 +41,7 @@ module OrthoLang.Interpreter
   , runRepl
   , evalFile
   , expandMacros
-  , prettyShow
+  -- , prettyShow
 
   -- * Things used in Test
   , help
@@ -85,7 +85,7 @@ module OrthoLang.Interpreter
 --   , LocksRef
 --   , Module(..)
 --   , Path(..)
-  , Pretty
+  -- , Pretty
 --   , RepID(..)
 --   , ResPath(..)
 --   , RulesFn
@@ -208,7 +208,6 @@ import OrthoLang.Interpreter.Expand
 import OrthoLang.Interpreter.Compile
 import OrthoLang.Interpreter.Compile.NewRules
 import OrthoLang.Interpreter.Paths
-import OrthoLang.Interpreter.Pretty
 import OrthoLang.Interpreter.Sanitize
 import OrthoLang.Interpreter.Parse
 import OrthoLang.Interpreter.Parse.Util

@@ -31,7 +31,7 @@ import Text.PrettyPrint.HughesPJClass hiding ((<>))
 
 import OrthoLang.Types
 import OrthoLang.Interpreter.Expand (expandMacros)
-import OrthoLang.Interpreter.Pretty (renderIO)
+-- import OrthoLang.Interpreter.Pretty (renderIO)
 -- import OrthoLang.Interpreter.Config (debug)
 
 -- import Control.Applicative ((<>))
@@ -43,7 +43,6 @@ import Data.Typeable (TypeRep)
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
 import OrthoLang.Interpreter.Compile         (compileScript, rExpr, newRules)
 import OrthoLang.Interpreter.Parse            (parseFileIO)
-import OrthoLang.Interpreter.Pretty           (prettyNum)
 import OrthoLang.Interpreter.Paths            (Path, toPath, fromPath)
 import OrthoLang.Locks            (withReadLock')
 import OrthoLang.Interpreter.Sanitize         (unhashIDs, unhashIDsFile)
@@ -69,6 +68,8 @@ import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
 import System.Time.Utils (renderSecs)
 
 import GHC.Conc                   (getNumProcessors)
+
+
 
 -- import qualified Data.Text.Lazy as T
 -- import Text.Pretty.Simple (pShowNoColor)

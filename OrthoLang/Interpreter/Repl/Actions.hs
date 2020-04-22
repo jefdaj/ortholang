@@ -27,7 +27,6 @@ import Prelude hiding (print)
 import OrthoLang.Types
 import OrthoLang.Interpreter.Eval          (evalScript)
 import OrthoLang.Interpreter.Parse         (isExpr, parseStatement, parseFile)
-import OrthoLang.Interpreter.Pretty        (pPrintHdl, writeScript)
 import OrthoLang.Interpreter.Repl.Messages (cmdShow)
 import OrthoLang.Util               (absolutize, justOrDie)
 
@@ -37,6 +36,8 @@ import Data.List.Utils     (delFromAL)
 import System.Console.ANSI (clearScreen, cursorUp)
 import System.Directory    (doesFileExist)
 import System.IO           (Handle, hPutStrLn)
+
+import Test.Tasty.Golden (writeBinaryFile)
 
 clear :: IO ()
 clear = clearScreen >> cursorUp 1000
@@ -78,6 +79,13 @@ depsOnly expr scr = deps ++ [res]
   where
     deps = filter (\(v,_) -> (elem v $ depsOf expr)) scr
     res  = (Var (RepID Nothing) "result", expr)
+
+-- TODO move to a "files/io" module along with debug fns?
+-- TODO use safe write here?
+writeScript :: Config -> Script -> FilePath -> IO ()
+writeScript cfg scr path = do
+  txt <- renderIO cfg $ pPrint scr
+  writeBinaryFile path txt
 
 -- TODO where should this go?
 saveScript :: Config -> Script -> FilePath -> IO ()
