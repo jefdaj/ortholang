@@ -7,7 +7,6 @@ module OrthoLang.Types
   , Action1
   , Action2
   , Action3
-  , ActionFn
   , RulesFn
   -- , typecheckFn
   -- , TypeChecker
@@ -128,9 +127,6 @@ newtype Path = Path FilePath deriving (Eq, Ord, Show, Typeable)
 type Action1 = Path -> Path -> Action ()
 type Action2 = Path -> Path -> Path -> Action ()
 type Action3 = Path -> Path -> Path -> Path -> Action ()
-
--- TODO remove when able in favor of well-typed versions above
-type ActionFn    = Config -> CacheDir -> [ExprPath] -> Action ()
 
 type RulesFn     = Script -> Expr -> Rules ExprPath
 -- type TypeChecker = [Type] -> Either String Type

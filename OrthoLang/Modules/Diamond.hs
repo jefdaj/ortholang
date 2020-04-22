@@ -105,8 +105,6 @@ rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
 --------------------
 
 -- type RulesFn     = RulesFn
--- type ActionFn    = Config -> CacheDir -> [ExprPath] -> Action ()
-type ActionFn2 = [Path] -> Action ()
 type DiamondBlastDesc = (String, [String] -> RulesFn, [String], Type, Type, Type)
 
 -- TODO can some of these be replaced by a numeric sensitivity arg?
@@ -188,7 +186,7 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" +
   , fNewRules = NewNotImplemented, fOldRules = rFn dCmd
   }
 
-aDiamondFromDb :: [String] -> ActionFn2
+aDiamondFromDb :: [String] -> [Path] -> Action ()
 aDiamondFromDb dCmd [o, e, q, db] = do
   -- wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ dCmd
   cfg <- fmap fromJust getShakeExtra
