@@ -82,9 +82,6 @@ module OrthoLang.Types
   , RulesR
   , runRulesR
   , NewRules(..)
-  -- , RulesR2
-  -- , runRulesR2
-  -- , ParseEnv
   , ReplM
   , runReplM
   , ReplCmd
@@ -120,6 +117,11 @@ import Text.Parsec hiding (Empty)
 import Control.Monad.Reader
 import Control.Monad.Trans.Except
 
+
+-----------
+-- paths --
+-----------
+
 newtype Path = Path FilePath deriving (Eq, Ord, Show, Typeable)
 
 -- Note that each ActionN takes N+1 Paths, because the first is the output
@@ -128,42 +130,29 @@ type Action1 = Path -> Path -> Action ()
 type Action2 = Path -> Path -> Path -> Action ()
 type Action3 = Path -> Path -> Path -> Path -> Action ()
 
-type RulesFn     = Script -> Expr -> Rules ExprPath
--- type TypeChecker = [Type] -> Either String Type
-
 newtype CacheDir = CacheDir FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/cache/<modname>
 newtype ExprPath = ExprPath FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/exprs/<fnname>/<hash>.<type>
 newtype VarPath  = VarPath  FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/vars/<varname>.<type>
 newtype ResPath  = ResPath  FilePath deriving (Read, Show, Eq, Typeable) -- ~/.ortholang/vars/result[.<hash>.<type>]
 newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord, Typeable)
 
--- this isn't really needed, but makes passing globalenv around easier
--- TODO use it? or remove it
+
+-----------
+-- rules --
+-----------
+
+type RulesFn = Script -> Expr -> Rules ExprPath
+
 -- for now, same as GlobalEnv. but not sure if refs are needed
 type RulesEnv = (Config, LocksRef, IDsRef, DigestsRef) -- TODO remove locks? ids? put script back?
 type RulesR a = ReaderT RulesEnv Rules a
 
--- the problem with this is it seems like the digests map wouldn't
--- persist/share between invocations of runRulesR2, and we want all actions to
--- get the whole thing! better to pass it around like before, but via ioref for now
--- type RulesEnv2 = (Config, LocksRef, IDsRef)
--- type RulesR2 a = ReaderT RulesEnv2 (StateT DigestMap Rules) a
-
 runRulesR :: RulesEnv -> RulesR a -> Rules a
 runRulesR env act = runReaderT act env
 
--- runRulesR2 :: RulesEnv -> RulesR2 a -> Rules a
--- runRulesR2 env act = execStateT M.empty (runReaderT act env)
--- runRulesR2 env act = runReaderT env (execStateT emptyDigests act)
--- runRulesR2 env act = execStateT emptyDigests undefined -- (runReaderT act env)
-
--- runRulesR2 :: RulesEnv2 -> RulesR2 a -> Rules (a, DigestMap)
--- runRulesR2 env act = runStateT (runReaderT act env) emptyDigests -- (runReaderT act env)
-
--- Filename extension, which in OrthoLang is equivalent to variable type
--- TODO can this be done better with phantom types?
--- data Ext = ListOf Ext | Ext String
-  -- deriving (Eq, Show, Read)
+-----------------
+-- expressions --
+-----------------
 
 -- A digest identifying which replace_* call the variable is part of.
 -- TODO This isn't very elegant; can it be removed?
@@ -197,11 +186,14 @@ data Expr
 -- also carry around the original Expr. TODO is the expr necessary? helpful?
 -- The CompiledExpr constructor is just here so we can customize the Show and Eq instances.
 -- The extra ExprPath is weird, but seems to be required since we can't get at the second one.
+-- TODO can it be removed? seems like a crutch/kludge
+-- TODO but try re-implementing map first and see if it's useful for that
 data CompiledExpr = CompiledExpr Type ExprPath (Rules ExprPath)
 
 -- TODO is it a bad idea to hide the compiled-ness?
 -- TODO can this be made into a Path?
 -- TODO is show ever really needed?
+-- TODO remove show instance!
 instance Show CompiledExpr where
   show (CompiledExpr t p _) = "CompiledExpr " ++ ext t ++ " " ++ show p ++ " <<Rules ExprPath>>"
 
@@ -229,6 +221,7 @@ setSalt r (Fun t ms ds s es)    = Fun  t (fmap (const $ Salt r) ms) ds s es
 setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt" "not implemented for compiled rules" -- TODO should it be?
 
 -- TODO add names to the Bops themselves... or associate with prefix versions?
+-- TODO rewrite this to be the proper thing for bops, which is how you currently use it
 prefixOf :: Expr -> String
 prefixOf (Lit rtn _     ) = ext rtn
 prefixOf (Fun _ _ _ name _) = name
@@ -246,16 +239,13 @@ prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    x   -> error "prefixOf" $ "unknown Bop: \"" ++ x ++ "\""
 
 
+-------------
+-- scripts --
+-------------
+
 -- TODO have a separate Assign for "result"?
 type Assign = (Var, Expr)
 type Script = [Assign]
-  -- { sAssigns :: [Assign]  -- ^ Structured representation of the code suitable for printing, transforming, etc.
-  -- , sDigests :: DigestMap -- ^ Map suitable for auto-discovery of dependencies from expression paths
-  -- }
-
--- TODO is totally ignoring sDigests OK here?
--- instance Show Script where
-  -- show scr = show scr
 
 emptyScript :: Script
 emptyScript = []
@@ -276,6 +266,49 @@ lookupResult scr = if null matches
   else Just (snd $ last matches)
   where
     matches = filter (\(Var _ v, _) -> v == "result") scr
+
+typeOf :: Expr -> Type
+typeOf (Lit   t _      ) = t
+typeOf (Ref   t _ _ _    ) = t
+typeOf (Bop   t _ _ _ _ _) = t
+typeOf (Fun   t _ _ _ _  ) = t
+typeOf (Lst  t _ _    ) = ListOf t
+typeOf (Com (CompiledExpr t _ _)) = t
+
+varOf :: Expr -> [Var]
+varOf (Ref _ _ _ v) = [v]
+varOf _                = [ ]
+
+depsOf :: Expr -> [Var]
+depsOf (Lit  _ _         ) = []
+depsOf (Ref  _ _ vs v      ) = v:vs -- TODO redundant?
+depsOf (Bop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
+depsOf (Fun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
+depsOf (Lst _ vs   es   ) = nub $ vs ++ concatMap varOf es
+depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
+
+rDepsOf :: Script -> Var -> [Var]
+rDepsOf scr var = map fst rDeps
+  where
+    rDeps = filter (\(_,e) -> isRDep e) scr
+    isRDep expr = elem var $ depsOf expr
+
+-- TODO what if it's a function call?
+-- do we have to make a rule that you can't use those?
+-- (uuuugly! but not a show-stopper for now)
+extractExprs :: Script -> Expr -> [Expr]
+extractExprs  _  (Lst _ _ es) = es
+extractExprs scr (Ref _ _ _ v ) = case lookup v scr of
+                                       Nothing -> error "extractExprs" $ "no such var " ++ show v
+                                       Just e  -> extractExprs scr e
+extractExprs _   (Fun _ _ _ _ _) = error "extractExprs" explainFnBug
+extractExprs scr (Bop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
+extractExprs  _   e               = error "extractExprs" $ "bad arg: " ++ show e
+
+
+-----------
+-- types --
+-----------
 
 -- TODO tExt etc aren't well defined for the other constructors... is that a problem?
 -- TODO how to make the record fields not partial functions?
@@ -341,11 +374,6 @@ data TypeSig
   | Exactly Type          -- ^ one regular Type wrapped for use in type signatures
 
   deriving (Eq, Show)
-
---instance Show TypeSig where
---  show AnyType = "AnyType"
---  show (Some g s) = "Some " ++ tgExt g ++ " " ++ show s
---  show (Exactly t) = "Exactly " ++ show t
 
 {-|
 These are kind of like simpler, less extensible typeclasses. They're just a
@@ -415,6 +443,7 @@ lit = TypeGroup
 defaultShow :: Config -> LocksRef -> FilePath -> IO String
 defaultShow = defaultShowN 5
 
+-- TODO remove? or make part of a typeclass
 defaultShowN :: Int -> Config -> LocksRef -> FilePath -> IO String
 defaultShowN nLines _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
   where
@@ -423,59 +452,6 @@ defaultShowN nLines _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy 
                   in if length nPlusOne > nLines
                     then init nPlusOne ++ ["..."]
                     else nPlusOne
-
-typeOf :: Expr -> Type
-typeOf (Lit   t _      ) = t
-typeOf (Ref   t _ _ _    ) = t
-typeOf (Bop   t _ _ _ _ _) = t
-typeOf (Fun   t _ _ _ _  ) = t
-typeOf (Lst  t _ _    ) = ListOf t
-typeOf (Com (CompiledExpr t _ _)) = t
--- typeOf (Lst _ _ _ ts     ) = ListOf $ firstNonEmpty $ map typeOf ts
--- typeOf (Lst _ _ _ []     ) = Empty
--- typeOf (Lst _ _ _ []     ) = ListOf Empty
-
--- Works around a bug where if the first element is an empty list but others
--- have elements, it would call the whole thing an "emptylist.list".
--- Note no typechecking happens here; heterogenous lists won't be noticed.
--- firstNonEmpty :: [Expr] -> Type
--- firstNonEmpty    []  = Empty
--- firstNonEmpty (x:[]) = typeOf x -- catches (ListOf Empty)
--- firstNonEmpty (_:xs) = firstNonEmpty xs
-
--- ext :: Type -> String
--- ext Empty        = "empty" -- special case for empty lists with no element type
--- ext (ListOf   t) = ext t ++ ".list"
--- ext (ScoresOf t) = ext t ++ ".scores"
--- ext (EncodedAs e t) = ext t ++ "." ++ enExt e
--- ext (Type {tExt = e}) = e
-
--- TODO equivalent needed for type groups, right?
--- TODO is this needed for anything other than repl :help? if not, could use IO to load docs
--- desc :: Type -> String
--- desc Empty           = "empty list" -- for lists with nothing in them yet
--- desc (ListOf      t) = "list of " ++ desc t
--- desc (ScoresOf    t) = "scores for " ++ desc t
--- desc (EncodedAs e t) = desc t ++ " encoded as " ++ enDesc e
--- desc (Type {tDesc = d}) = d
-
-varOf :: Expr -> [Var]
-varOf (Ref _ _ _ v) = [v]
-varOf _                = [ ]
-
-depsOf :: Expr -> [Var]
-depsOf (Lit  _ _         ) = []
-depsOf (Ref  _ _ vs v      ) = v:vs -- TODO redundant?
-depsOf (Bop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
-depsOf (Fun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
-depsOf (Lst _ vs   es   ) = nub $ vs ++ concatMap varOf es
-depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
-
-rDepsOf :: Script -> Var -> [Var]
-rDepsOf scr var = map fst rDeps
-  where
-    rDeps = filter (\(_,e) -> isRDep e) scr
-    isRDep expr = elem var $ depsOf expr
 
 -- TODO move to modules as soon as parsing works again
 -- TODO keep literals in the core along with refs and stuff? seems reasonable
@@ -501,6 +477,7 @@ num = Type
       txt <- withReadLock ls f $ readFileStrict ls f
       return $ init txt -- TODO prettyNum?
   }
+
 
 ------------
 -- config --
@@ -536,6 +513,27 @@ data Config = Config
   , showvartypes :: Bool
   }
   deriving (Show, Typeable)
+
+
+-------------
+-- modules --
+-------------
+
+-- TODO does eq make sense here?
+data Module = Module
+  { mName      :: String
+  , mDesc      :: String
+  , mTypes     :: [Type]
+  , mGroups    :: [TypeGroup]
+  , mEncodings :: [Encoding]
+  , mFunctions :: [Function]
+  }
+  -- deriving (Eq, Read)
+  deriving (Typeable)
+
+-- TODO what about prettyShow in Pretty.hs?
+instance Show Module where
+  show = mName
 
 -- note: only lists the first name of each function,
 --       which for binary operators will be the single-char one
@@ -590,25 +588,27 @@ listFunctions mods = concatMap mFunctions mods
 operatorChars :: [Module] -> [Char]
 operatorChars mods = catMaybes $ map fOpChar $ listFunctions mods
 
------------------
--- Parse monad --
------------------
+
+------------
+-- parser --
+------------
 
 type ParseM a = ParsecT String Script (ReaderT [Module] (Except String)) a
+
+
+------------
+-- seqids --
+------------
 
 -- we sanitize the input fasta files to prevent various bugs,
 -- then use this hash -> seqid map to put the original ids back at the end
 -- hFiles is for making paths generic
 -- hSeqIDs is the main one, and stores hash -> seqid maps indexed by their (generic) hFiles path
--- hSeqHashes is for reverse lookups of the seqid_... hash from actual seqid (for example from gene lists)
--- hExprs is for decoding exprs/<hash>/<hash>/... paths
 -- TODO use bytestring-tries rather than maps with string keys?
 -- TODO should this be ActionIDs in general? aka all the stuff that might be needed in Action
 data IDs = IDs
   { hFiles  :: M.Map String String
   , hSeqIDs :: M.Map String (M.Map String String)
-  -- , hSeqHashes :: M.Map String (M.Map String String)
-  -- , hExprs  :: DigestMap
   }
   deriving (Show)
 
@@ -622,30 +622,10 @@ type IDsRef = IORef IDs
 type DigestMap = M.Map PathDigest (Type, Path)
 type DigestsRef = IORef DigestMap
 
--- TODO config always first? or make a record + ask* fns
-type GlobalEnv = (Script, Config, LocksRef, IDsRef, DigestsRef)
 
--- eODO does this need rewriting for externalPrint?
--- print :: (String -> IO ()) -> String -> ReplM ()
--- print pFn = liftIO . pFn
--- print pFn = lift . lift . pFn
-
---------------------------------
--- Module stuff (all in flux) --
---------------------------------
-
--- TODO replace current Type with something like this:
--- TODO does eq make sense here?
--- data Type = Type
---   { tName :: String
---   , tExt  :: String
---   , tDesc :: String
---   }
---   deriving (Eq, Show, Read)
-
--- TODO should there be any more fundamental difference between fns and bops?
--- data OrthoLangFixity = Prefix | Infix
---   deriving (Eq, Show, Read)
+---------------
+-- functions --
+---------------
 
 data FnTag
   = Stochastic -- do repeat, do cache/share
@@ -659,19 +639,14 @@ data FnTag
 -- TODO does eq make sense here? should i just be comparing names??
 -- TODO pretty instance like "union: [set, set] -> set"? just "union" for now
 data Function = Function
-  { fName      :: String      -- ^ main (prefix) function name
-  , fOpChar    :: Maybe Char  -- ^ infix operator symbol, if any
-
-  -- TODO write these, then remove the old descs + typecheckers above
-  , fInputs :: [TypeSig] -- ^ new input (argument) types TODO any way to make it a variable length tuple?
-  , fOutput ::  TypeSig  -- ^ new output (return) type
-
-  , fTags      :: [FnTag]     -- ^ function tags (TODO implement these)
-  , fOldRules  :: RulesFn     -- ^ old-style rules (TODO deprecate, then remove)
-  , fNewRules  :: NewRules    -- ^ new-style rules (TODO write them all, then remove the Maybe)
+  { fName     :: String     -- ^ main (prefix) function name
+  , fOpChar   :: Maybe Char -- ^ infix operator symbol, if any
+  , fInputs   :: [TypeSig]  -- ^ new input (argument) types TODO any way to make it a variable length tuple?
+  , fOutput   ::  TypeSig   -- ^ new output (return) type
+  , fTags     :: [FnTag]    -- ^ function tags (TODO implement these)
+  , fOldRules :: RulesFn    -- ^ old-style rules (TODO deprecate, then remove)
+  , fNewRules :: NewRules   -- ^ new-style rules (TODO write them all, then remove the Maybe)
   }
-  -- , fHidden    :: Bool -- hide "internal" functions like reverse blast
-  -- deriving (Eq, Read)
 
 -- TODO is this safe enough?
 instance Eq Function where
@@ -685,34 +660,6 @@ data NewRules
   = NewRules (Rules ())
   | NewMacro (Script -> Expr -> Expr) -- type alias in NewRules.hs for now
   | NewNotImplemented -- TODO remove
-
--- TODO does eq make sense here?
-data Module = Module
-  { mName      :: String
-  , mDesc      :: String
-  , mTypes     :: [Type]
-  , mGroups    :: [TypeGroup]
-  , mEncodings :: [Encoding]
-  , mFunctions :: [Function]
-  }
-  -- deriving (Eq, Read)
-  deriving (Typeable)
-
--- TODO what about prettyShow in Pretty.hs?
-instance Show Module where
-  show = mName
-
--- TODO what if it's a function call?
--- do we have to make a rule that you can't use those?
--- (uuuugly! but not a show-stopper for now)
-extractExprs :: Script -> Expr -> [Expr]
-extractExprs  _  (Lst _ _ es) = es
-extractExprs scr (Ref _ _ _ v ) = case lookup v scr of
-                                       Nothing -> error "extractExprs" $ "no such var " ++ show v
-                                       Just e  -> extractExprs scr e
-extractExprs _   (Fun _ _ _ _ _) = error "extractExprs" explainFnBug
-extractExprs scr (Bop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
-extractExprs  _   e               = error "extractExprs" $ "bad arg: " ++ show e
 
 -- TODO will this get printed, or will there just be a parse error?
 explainFnBug :: String
@@ -741,16 +688,14 @@ typeSigMatches (ScoresSigs _)    _                = False
 typeSigMatches (EncodedSig _ _)  _                = False
 typeSigMatches (Some g _)        t                = any (\s -> typeSigMatches s t) (tgMembers g)
 
--- TODO remove?
--- typeSigsMatch :: [TypeSig] -> [Type] -> Bool
--- typeSigsMatch as bs = sameLength && allMatch
---   where
---     sameLength = length as == length bs
---     allMatch   = all (\(s,t) -> typeSigMatches s t) (zip as bs)
+----------
+-- repl --
+----------
 
------------------
--- Repl monad --
-----------------
+-- TODO config always first? or make a record + ask* fns
+-- TODO can script be removed?
+-- TODO rename ReplEnv? EvalEnv?
+type GlobalEnv = (Script, Config, LocksRef, IDsRef, DigestsRef)
 
 type ReplM = StateT GlobalEnv IO
 
