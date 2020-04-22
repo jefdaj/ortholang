@@ -5,7 +5,6 @@ module OrthoLang.Modules.ListLike where
 -- TODO make this the first typeclass
 
 import Prelude hiding (length)
-import qualified Prelude as P
 
 import Development.Shake
 import OrthoLang.Types
@@ -14,7 +13,6 @@ import OrthoLang.Interpreter
 import OrthoLang.Modules.Blast    (bht)
 import OrthoLang.Modules.CRBBlast (crb)
 import OrthoLang.Modules.MMSeqs   (mms)
-import Data.Scientific            (Scientific())
 import Data.Maybe (fromJust)
 
 olModule :: Module
@@ -37,6 +35,7 @@ ll = TypeGroup
 length :: Function
 length = Function
   { fOpChar = Nothing, fName = name
+  , fInputs = [Some ll "something list-like"]
   , fOutput = Exactly num
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rLength

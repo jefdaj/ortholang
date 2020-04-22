@@ -151,6 +151,7 @@ module OrthoLang.Interpreter.Paths
   -- , listScriptExprs
   , makeTmpdirRelative
   , upBy
+  , prefixOf -- TODO remove
 
   )
   where
@@ -291,6 +292,25 @@ exprPath c d s expr = traceP "exprPath" expr res
     salt   = saltOf expr
     hashes = argHashes c d s expr
     res    = unsafeExprPathExplicit c d prefix rtype salt hashes
+
+-- TODO add names to the Bops themselves... or associate with prefix versions?
+-- TODO rewrite this to be the proper thing for bops, which is how you currently use it
+prefixOf :: Expr -> String
+prefixOf (Lit rtn _     ) = ext rtn
+prefixOf (Fun _ _ _ name _) = name
+prefixOf (Lst _ _ _    ) = "list"
+prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
+prefixOf (Com (CompiledExpr _ _ _)) = error "prefixOf" "CompiledExprs don't need a prefix"
+prefixOf (Bop _ _ _ n _ _ ) = case n of
+                                   "+" -> "add"
+                                   "-" -> "subtract"
+                                   "*" -> "multiply"
+                                   "/" -> "divide"
+                                   "|" -> "any"
+                                   "&" -> "all"
+                                   "~" -> "diff"
+                                   x   -> error "prefixOf" $ "unknown Bop: \"" ++ x ++ "\""
+
 
 -- TODO remove repeat salt if fn is deterministic
 -- note this is always used with its unsafe digest wrapper (below)

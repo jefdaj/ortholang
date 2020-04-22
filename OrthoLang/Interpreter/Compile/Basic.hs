@@ -56,7 +56,7 @@ import OrthoLang.Interpreter.Pretty
 import Data.List              (isPrefixOf)
 import Data.Maybe             (fromJust)
 import OrthoLang.Interpreter.Actions (traceA, debugA, need', readLit, writeLit, writeLits, writePaths, symlink)
-import OrthoLang.Interpreter.Paths   (exprPath, toPath, fromPath, varPath, Path)
+import OrthoLang.Interpreter.Paths   (exprPath, toPath, fromPath, varPath, Path, prefixOf)
 import OrthoLang.Util         (resolveSymlinks, stripWhiteSpace, removeIfExists)
 
 -- import OrthoLang.Interpreter.Paths (insertNewRulesDigest)

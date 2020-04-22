@@ -59,7 +59,6 @@ module OrthoLang.Types
   , lookupResult
   , num
   , operatorChars
-  , prefixOf
   , rDepsOf
   , runReplM
   , runRulesR
@@ -197,24 +196,6 @@ setSalt r (Ref t ms ds v)       = Ref  t (fmap (const $ Salt r) ms) ds v
 setSalt r (Bop t ms ds s e1 e2) = Bop  t (fmap (const $ Salt r) ms) ds s e1 e2
 setSalt r (Fun t ms ds s es)    = Fun  t (fmap (const $ Salt r) ms) ds s es
 setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt" "not implemented for compiled rules" -- TODO should it be?
-
--- TODO add names to the Bops themselves... or associate with prefix versions?
--- TODO rewrite this to be the proper thing for bops, which is how you currently use it
-prefixOf :: Expr -> String
-prefixOf (Lit rtn _     ) = ext rtn
-prefixOf (Fun _ _ _ name _) = name
-prefixOf (Lst _ _ _    ) = "list"
-prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
-prefixOf (Com (CompiledExpr _ _ _)) = error "prefixOf" "CompiledExprs don't need a prefix"
-prefixOf (Bop _ _ _ n _ _ ) = case n of
-                                   "+" -> "add"
-                                   "-" -> "subtract"
-                                   "*" -> "multiply"
-                                   "/" -> "divide"
-                                   "|" -> "any"
-                                   "&" -> "all"
-                                   "~" -> "diff"
-                                   x   -> error "prefixOf" $ "unknown Bop: \"" ++ x ++ "\""
 
 
 -------------
