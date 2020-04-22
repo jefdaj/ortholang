@@ -37,7 +37,7 @@ module OrthoLang.Interpreter.Parse.Script
 import OrthoLang.Debug
 import OrthoLang.Interpreter.Parse.Basic
 import OrthoLang.Interpreter.Parse.Expr
-import OrthoLang.Interpreter.Parse.Util
+import OrthoLang.Interpreter.Parse.Util (debugParser, parseWithEof)
 import OrthoLang.Types
 -- import OrthoLang.Interpreter.Paths (scriptDigests)
 
@@ -50,7 +50,7 @@ import System.FilePath        ((</>), takeDirectory)
 import Text.Parsec            (try, getState, putState)
 import Text.Parsec.Char       (newline, spaces)
 import Text.Parsec.Combinator (optional)
-import Control.Monad.Reader   (ask)
+-- import Control.Monad.Reader   (ask)
 
 -------------------
 -- preprocessing --

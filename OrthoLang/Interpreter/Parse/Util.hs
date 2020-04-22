@@ -9,41 +9,35 @@ Most aren't needed in production, but they help with debugging.
 module OrthoLang.Interpreter.Parse.Util
   (
   -- * Parse utilities
-    parseAndShow
-  , parseWithLeftOver
-  , parseWithEof
-  , parserTrace'
-  , parserTraced'
+    parseWithEof
   , debugParser
-  -- , runParseM
+  , parseFail
 
-  -- * New parse utilities with errors
   -- , ParseM
+  -- , parseAndShow
+  -- , parseWithLeftOver
+  -- , parserTrace'
+  -- , parserTraced'
   -- , runParseM
-  -- , parseFail
+  -- , runParseM
   )
   where
 
-import OrthoLang.Debug
 import OrthoLang.Types
-import Text.Parsec.Combinator     (manyTill, eof, anyToken)
+import OrthoLang.Debug (trace)
+
 import Text.Parsec hiding (Empty)
-import Control.Monad.Trans.Except
-import Control.Monad.Trans
-import Control.Monad.Reader (runReaderT)
 
--- TODO make an empty GlobalEnv so you can run these in ghci again
+import Control.Monad.Trans        (lift)
+import Control.Monad.Trans.Except (throwE)
 
--- TODO is this ever needed in production? probably not
-parseAndShow :: (Show a) => [Module] -> ParseM a -> Config -> Script -> String -> String
-parseAndShow ms p c s str' = case runParseM ms p c s str' of
-  Left err -> show err
-  Right s2 -> show s2
+-- TODO make an empty GlobalEnv so you can run these in ghci again?
 
-parseWithLeftOver :: [Module] -> ParseM a -> Config -> Script -> String -> Either String (a,String)
-parseWithLeftOver ms p c s = runParseM ms ((,) <$> p <*> leftOver) c s
-  where
-    leftOver = manyTill anyToken eof
+-- this works, but is only needed for manual debugging:
+-- parseAndShow :: (Show a) => [Module] -> ParseM a -> Config -> Script -> String -> String
+-- parseAndShow ms p c s str' = case runParseM ms p c s str' of
+--   Left err -> show err
+--   Right s2 -> show s2
 
 parseWithEof :: [Module] -> ParseM a -> Config -> Script -> String -> Either String a
 parseWithEof ms p c s = runParseM ms (p <* eof) c s
@@ -82,3 +76,6 @@ TODO go back to removing it when not in debug mode for speed, even though order 
 -}
 debugParser :: Show a => String -> ParseM a -> ParseM a
 debugParser name pFn = parserTraced' name pFn
+
+parseFail :: String -> ParseM a
+parseFail = lift . lift . throwE

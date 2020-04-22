@@ -37,7 +37,7 @@ import OrthoLang.Debug
 import OrthoLang.Types
 import OrthoLang.Interpreter.Pretty ()
 import OrthoLang.Interpreter.Parse.Basic
-import OrthoLang.Interpreter.Parse.Util
+import OrthoLang.Interpreter.Parse.Util (debugParser, parseWithEof, parseFail)
 import OrthoLang.Util (headOrDie)
 
 import qualified Text.Parsec.Expr as E

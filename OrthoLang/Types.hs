@@ -23,7 +23,6 @@ module OrthoLang.Types
   , NewRules(..)
   , ParseM
   , runParseM
-  , parseFail
   , Path(..)
   , PathDigest(..)
   , RepID(..)
@@ -82,24 +81,19 @@ import OrthoLang.Util  (readFileStrict, readFileLazy)
 
 import Control.Monad.Reader       (ReaderT, runReaderT)
 import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
-import Control.Monad.Trans.Except (Except)
+import Control.Monad.Trans        (lift)
+import Control.Monad.Trans.Except (Except, runExcept, throwE)
 import Data.Char                  (toLower)
 import Data.IORef                 (IORef)
 import Data.List                  (nub, find, isPrefixOf)
 import Data.Map.Strict            (Map, empty)
 import Data.Maybe                 (fromJust, catMaybes)
 import Development.Shake          (Rules, Action, Resource)
+import Development.Shake.FilePath (makeRelative)
 import System.Console.Haskeline   (Settings, InputT, runInputT)
 import System.FilePath.Posix      ((</>))
 import System.IO                  (Handle, hPutStrLn, stdout)
-import Text.Parsec                (ParsecT)
-
-import Development.Shake.FilePath (makeRelative)
-import Text.Parsec.Combinator     (manyTill, eof, anyToken)
-import Text.Parsec hiding (Empty)
-import Control.Monad.Trans.Except
-import Control.Monad.Trans
-import Control.Monad.Reader (runReaderT)
+import Text.Parsec                (ParsecT, runPT)
 
 
 -----------
@@ -598,9 +592,6 @@ runParseM ms op cfg scr input = case runExcept (runReaderT (runPT op scr sn inpu
     sn = case script cfg of
            Nothing -> "repl"
            Just f  -> makeRelative (workdir cfg) f
-
-parseFail :: String -> ParseM a
-parseFail = lift . lift . throwE
 
 ------------
 -- seqids --

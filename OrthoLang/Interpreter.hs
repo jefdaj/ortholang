@@ -67,7 +67,7 @@ module OrthoLang.Interpreter
   , pExpr
   , pFun
   , pTerm
-  , parseWithLeftOver -- TODO move to Test/Parse?
+  -- , parseWithLeftOver -- TODO move to Test/Parse?
   , parseWithEof -- TODO move to Test/Parse?
 
   -- * Old module API: Types

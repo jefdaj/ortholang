@@ -47,6 +47,7 @@ import Test.Tasty.HUnit      ((@=?), testCase)
 
 import Data.Either           (isRight)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
+import Text.Parsec.Combinator     (manyTill, eof, anyToken)
 
 ------------------------
 -- utility functions --
@@ -60,6 +61,11 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 -- TODO remember to wrap in withFileLogging if running from stack repl
 -- digestExamples :: GlobalEnv -> [(String, Expr)] -> IO [(String, Expr, DigestMap)]
 -- digestExamples st = mapM (digestExample st)
+
+parseWithLeftOver :: [Module] -> ParseM a -> Config -> Script -> String -> Either String (a,String)
+parseWithLeftOver ms p c s = runParseM ms ((,) <$> p <*> leftOver) c s
+  where
+    leftOver = manyTill anyToken eof
 
 -- TODO take mods as an arg to match the ones in Parse.Util?
 regularParse :: ParseM a -> Config -> String -> Either String a

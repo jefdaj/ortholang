@@ -10,9 +10,9 @@ module OrthoLang.Interpreter.Parse
   (
   -- * Parsec stuff
     ParseError
-  , parseWithEof
-  , parseWithLeftOver
-  , parseAndShow -- TODO remove for production?
+  -- , parseWithEof
+  -- , parseWithLeftOver
+  -- , parseAndShow -- TODO remove for production?
 
   -- * Functions used elsewhere in core
   , isExpr
@@ -46,6 +46,6 @@ module OrthoLang.Interpreter.Parse
 import OrthoLang.Interpreter.Parse.Basic
 import OrthoLang.Interpreter.Parse.Expr
 import OrthoLang.Interpreter.Parse.Script
-import OrthoLang.Interpreter.Parse.Util
+-- import OrthoLang.Interpreter.Parse.Util
 
 import Text.Parsec (ParseError)
