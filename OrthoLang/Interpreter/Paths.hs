@@ -260,7 +260,7 @@ TODO rename hSomething?
 TODO does it need the config at all?
 -}
 argHashes :: Config -> DigestsRef -> Script -> Expr -> [String]
-argHashes c d s@(Script as) (Ref _ _ _ v) = case lookupVar v as of
+argHashes c d s (Ref _ _ _ v) = case lookupVar v (sAssigns s) of
                                          Nothing -> error "argHashes" $ "no such var " ++ show v
                                          Just e  -> argHashes c d s e
 argHashes _ _ _ (Lit  _     v    ) = [digest v]
@@ -280,8 +280,8 @@ exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
 exprPath c _ _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath loc c p
   where
     loc = "core.paths.exprPath"
-exprPath c d s@(Script as) (Ref _ _ _ v) = case lookupVar v as of
-                               Nothing -> error "exprPath" $ "no such var " ++ show v ++ "\n" ++ show as
+exprPath c d s (Ref _ _ _ v) = case lookupVar v (sAssigns s) of
+                               Nothing -> error "exprPath" $ "no such var " ++ show v ++ "\n" ++ show (sAssigns s)
                                Just e  -> exprPath c d s e
 exprPath c d s e@(Bop _ _ _ _ _ _) = exprPath c d s (bop2fun e)
 exprPath c d s expr = traceP "exprPath" expr res

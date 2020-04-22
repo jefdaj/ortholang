@@ -140,18 +140,18 @@ rAssign scr (Assign var expr) = do
 --      (or, is that not possible for a typechecked AST?)
 -- TODO remove permHash
 compileScript :: Script -> Rules ResPath
-compileScript scr@(Script as) = do
+compileScript scr = do
   -- TODO this can't be done all in parallel because they depend on each other,
   --      but can parts of it be parallelized? or maybe it doesn't matter because
   --      evaluating the code itself is always faster than the system commands
-  rpaths <- mapM (rAssign scr) as -- TODO is having scr be both an issue? 
+  rpaths <- mapM (rAssign scr) (sAssigns scr) -- TODO is having scr be both an issue? 
   res <- case lookupResult rpaths of
 
     -- TODO clean this up!
     Nothing -> fmap (\(ExprPath p) -> p) $ rExpr scr $
                     (\(Assign _ e) -> e) $ head $
                     filter (\(Assign (Var _ v) _) -> v == "result") $
-                    ensureResult as
+                    ensureResult (sAssigns scr)
 
     Just r  -> fmap (\(VarPath  p) -> p) $ return r
   return $ ResPath res

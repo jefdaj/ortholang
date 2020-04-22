@@ -64,20 +64,20 @@ cmdReload mods st@(_, cfg, _, _, _) hdl _ = case script cfg of
   Just s  -> cmdLoad mods st hdl s
 
 cmdWrite :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdWrite mods st@(scr@(Script as), cfg, locks, ids, dRef) hdl line = case words line of
+cmdWrite mods st@(scr, cfg, locks, ids, dRef) hdl line = case words line of
   [path] -> do
     saveScript cfg scr path
     return (scr, cfg { script = Just path }, locks, ids, dRef)
-  [var, path] -> case lookupVar (Var (RepID Nothing) var) as of
+  [var, path] -> case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just e  -> saveScript cfg (depsOnly e scr) path >> return st
   _ -> hPutStrLn hdl ("invalid save command: \"" ++ line ++ "\"") >> return st
 
 -- TODO where should this go?
 depsOnly :: Expr -> Script -> Script
-depsOnly expr (Script as) = Script $ deps ++ [res]
+depsOnly expr scr = scr {sAssigns = deps ++ [res]}
   where
-    deps = filter (\a -> (elem (aVar a) $ depsOf expr)) as
+    deps = filter (\a -> (elem (aVar a) $ depsOf expr)) (sAssigns scr)
     res  = Assign {aVar = Var (RepID Nothing) "result", aExpr = expr}
 
 -- TODO move to a "files/io" module along with debug fns?
@@ -94,38 +94,39 @@ saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
 cmdNeededBy :: ReplCmd
-cmdNeededBy _ st@(Script as, cfg, _, _, _) hdl var = do
-  case lookupVar (Var (RepID Nothing) var) as of
+cmdNeededBy _ st@(scr, cfg, _, _, _) hdl var = do
+  case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ (Var (RepID Nothing) var):depsOf e) as
+    Just e  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
   return st
 
 cmdNeededFor :: ReplCmd
-cmdNeededFor _ st@(s@(Script as), cfg, _, _, _) hdl var = do
+cmdNeededFor _ st@(scr, cfg, _, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
-  case lookupVar var' as of
+  case lookupVar var' (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just _  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ (Var (RepID Nothing) var):rDepsOf s var') as
+    Just _  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ (Var (RepID Nothing) var):rDepsOf scr var') (sAssigns scr)
   return st
 
 -- TODO factor out the variable lookup stuff
 cmdDrop :: ReplCmd
 cmdDrop _ (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { script = Nothing }, ref, ids, dRef)
-cmdDrop _ st@(Script as, cfg, ref, ids, dRef) hdl var = do
+cmdDrop _ st@(scr, cfg, ref, ids, dRef) hdl var = do
   let v = Var (RepID Nothing) var
-  case lookupVar v as of
+  case lookupVar v (sAssigns scr) of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
-    Just _  -> return (Script $ delVar as v, cfg, ref, ids, dRef)
+    Just _  -> return (scr {sAssigns = delVar (sAssigns scr) v}, cfg, ref, ids, dRef)
 
 -- this is needed to avoid assigning a variable literally to itself,
 -- which is especially a problem when auto-assigning "result"
 -- TODO is this where we can easily require the replacement var's type to match if it has deps?
 -- TODO what happens if you try that in a script? it should fail i guess?
 updateVars :: Script -> Assign -> Script
-updateVars s@(Script as) asn = Script as'
+updateVars scr asn = scr {sAssigns = as'}
   where
     res = Var (RepID Nothing) "result"
-    asn' = removeSelfReferences s asn
+    asn' = removeSelfReferences scr asn
+    as  = sAssigns scr
     as' = if aVar asn /= res && aVar asn `elem` map aVar as
             then replaceVar asn' as
             else delVar as (aVar asn) ++ [asn']
@@ -142,8 +143,8 @@ removeSelfReferences s a@(Assign {aVar=v, aExpr=e}) = if not (v `elem` depsOf e)
 
 -- does the actual work of removing self-references
 rmRef :: Script -> Var -> Expr -> Expr
-rmRef scr@(Script as) var e@(Ref _ _ _ v2)
-  | var == v2 = justOrDie "failed to rmRef variable!" $ lookupVar var as
+rmRef scr var e@(Ref _ _ _ v2)
+  | var == v2 = justOrDie "failed to rmRef variable!" $ lookupVar var (sAssigns scr)
   | otherwise = e
 rmRef _   _   e@(Lit _ _) = e
 rmRef scr var (Bop  t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)

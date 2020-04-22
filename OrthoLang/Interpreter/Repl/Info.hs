@@ -65,7 +65,7 @@ cmdHelp ms st@(_, cfg, _, _, _) hdl line = do
   hPutStrLn hdl doc
 
 cmdType :: ReplCmd
-cmdType mods st@(Script as, _, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
+cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
   where
     typeInfo = case stripWhiteSpace s of
       "" -> allTypes
@@ -73,7 +73,7 @@ cmdType mods st@(Script as, _, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return
     oneType e = case findFunction mods e of
       Just f  -> renderTypeSig f
       Nothing -> showExprType mods st e -- TODO also show the expr itself?
-    allTypes = stripWhiteSpace $ unlines $ map showAssignType as
+    allTypes = stripWhiteSpace $ unlines $ map showAssignType $ sAssigns scr
 
 -- TODO insert id?
 showExprType :: [Module] -> GlobalEnv -> String -> String
@@ -93,9 +93,9 @@ showAssignType (Assign {aVar = (Var _ v), aExpr = e}) = unwords [typedVar, "=", 
 -- TODO show the whole script, since that only shows sAssigns now anyway?
 cmdShow :: ReplInfo
 cmdShow ms st@(_, c, _, _, _) hdl s | showvartypes c = cmdType ms st hdl s
-cmdShow _ st@(Script as, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) as >> return st
-cmdShow _ st@(Script as, cfg, _, _, _) hdl var = do
-  case lookupVar (Var (RepID Nothing) var) as of
+cmdShow _ st@(scr, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) (sAssigns scr) >> return st
+cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
+  case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e -- >> hPutStrLn hdl ""
 
@@ -147,10 +147,10 @@ quotedCompletions wordSoFar = do
 -- nakedCompletions :: String -> String -> ReplM [Completion]
 nakedCompletions :: [Module] -> [(String, ReplCmd)] -> String -> String -> ReplM [Completion]
 nakedCompletions mods cmds lineReveresed wordSoFar = do
-  (Script as, _, _, _, _) <- get
+  (scr, _, _, _, _) <- get
   let wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts ++ cfgFields
       fnNames  = concatMap (map fName . mFunctions) mods
-      varNames = map ((\(Var _ v) -> v) . aVar) as
+      varNames = map ((\(Var _ v) -> v) . aVar) (sAssigns scr)
       cmdNames = map ((':':) . fst) cmds
       typeExts = map ext $ concatMap mTypes mods
       cfgFields = map fst configFields

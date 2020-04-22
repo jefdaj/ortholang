@@ -75,7 +75,7 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 ----------------
 
 stripResult :: Script -> Script
-stripResult (Script as) = Script $ filter notRes as
+stripResult scr = scr {sAssigns = filter notRes $ sAssigns scr}
   where
     notRes (Assign {aVar = Var _ "result"}) = False
     notRes _ = True
@@ -92,11 +92,11 @@ pAssign = debugParser "pAssign" $ do
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   -- TODO use lookAhead here to decide whether to commit to it?
-  (Script as) <- getState
+  s <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
   -- "result" can be silently overwritten, but assigning another variable twice is an error
   -- TODO is that the best way to do it?
-  when (hasVar v as && vName /= "result") $ do
+  when (hasVar v (sAssigns s) && vName /= "result") $ do
     fail $ "duplicate variable \"" ++ vName ++ "\""
   e <- lexeme pExpr
 
@@ -164,9 +164,9 @@ to reject multiple results.
 TODO one result *per repeat ID*, not total!
 -}
 lastResultOnly :: Script -> Script
-lastResultOnly (Script as) = Script $ otherVars ++ [lastRes]
+lastResultOnly s = s {sAssigns = otherVars ++ [lastRes]}
   where
-    (resVars, otherVars) = partition (\a -> aVar a == Var (RepID Nothing) "result") as
+    (resVars, otherVars) = partition (\a -> aVar a == Var (RepID Nothing) "result") (sAssigns s)
     -- lastRes = trace ("resVars: " ++ show resVars) $ last resVars -- should be safe because we check for no result separately?
     lastRes = last resVars -- should be safe because we check for no result separately?
 
@@ -184,7 +184,7 @@ pScript = debugParser "pScript" $ do
   as <- many pStatement
   -- cfg <- ask -- not used at all
   -- let scr  = emptyScript {sAssigns = as}
-  let scr  = Script as
+  let scr  = Script {sAssigns = as, sResult = aExpr (last as)} -- TODO is the result right?
       scr' = lastResultOnly scr
       -- scr'' = scr' {sDigests = trace ("pScript ds: " ++ show ds) ds}
   -- putState scr'

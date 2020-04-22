@@ -274,7 +274,8 @@ hasVar v as = isJust $ lookupVar v as
 delVar :: [Assign] -> Var -> [Assign]
 delVar as v = filter (\(Assign v2 _) -> v /= v2) as
 
-data Script = Script [Assign] deriving (Show, Eq) -- TODO add a result field and use it to fix result handling
+data Script = Script { sAssigns :: [Assign], sResult :: Expr }
+  deriving (Show, Eq)
 
 -- TODO newtype to prevent the overlap?
 instance Pretty Assign where
@@ -284,11 +285,11 @@ instance Pretty Assign where
 
 -- TODO is totally ignoring the sDigests part OK here?
 instance Pretty Script where
-  pPrint (Script []) = PP.empty
-  pPrint (Script as) = PP.vcat $ map pPrint as
+  pPrint (Script {sAssigns = []}) = PP.empty
+  pPrint s = PP.vcat $ map pPrint $ sAssigns s
 
 emptyScript :: Script
-emptyScript = Script []
+emptyScript = Script {sAssigns = [], sResult = undefined} -- TODO what should the empty result be?
 
 emptyDigests :: DigestMap
 emptyDigests = empty
@@ -335,9 +336,9 @@ depsOf (Lst _ vs   es   ) = nub $ vs ++ concatMap varOf es
 depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
 
 rDepsOf :: Script -> Var -> [Var]
-rDepsOf (Script as) var = map aVar rDeps
+rDepsOf s var = map aVar rDeps
   where
-    rDeps = filter (isRDep . aExpr) as
+    rDeps = filter (isRDep . aExpr) (sAssigns s)
     isRDep expr = elem var $ depsOf expr
 
 -- TODO what if it's a function call?
@@ -345,7 +346,7 @@ rDepsOf (Script as) var = map aVar rDeps
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: Script -> Expr -> [Expr]
 extractExprs  _  (Lst _ _ es) = es
-extractExprs s@(Script as) (Ref _ _ _ v ) = case lookupVar v as of
+extractExprs s (Ref _ _ _ v ) = case lookupVar v (sAssigns s) of
                                        Nothing -> error "extractExprs" $ "no such var " ++ show v
                                        Just e  -> extractExprs s e
 extractExprs _   (Fun _ _ _ _ _) = error "extractExprs" explainFnBug
