@@ -35,7 +35,7 @@ eScript :: [Module] -> Script -> Script
 eScript mods s@(Script as) = Script $ map (eAssign mods s) as
 
 eAssign :: [Module] -> Script -> Assign -> Assign
-eAssign mods scr (v, e) = (v, eExpr mods scr e)
+eAssign mods scr a@(Assign {aExpr = e}) = a {aExpr = eExpr mods scr e}
 
 -- | This one is recursive in case one macro expression is hidden inside the
 --   result of another

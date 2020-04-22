@@ -82,7 +82,7 @@ showExprType ms (s, c, _, _, _) e = case parseExpr ms c s e of
   Left  err  -> show err
 
 showAssignType :: Assign -> String
-showAssignType (Var _ v, e) = unwords [typedVar, "=", prettyExpr]
+showAssignType (Assign {aVar = (Var _ v), aExpr = e}) = unwords [typedVar, "=", prettyExpr]
   where
     -- parentheses also work:
     -- typedVar = v ++ " (" ++ show (typeOf e) ++ ")"
@@ -95,7 +95,7 @@ cmdShow :: ReplInfo
 cmdShow ms st@(_, c, _, _, _) hdl s | showvartypes c = cmdType ms st hdl s
 cmdShow _ st@(Script as, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) as >> return st
 cmdShow _ st@(Script as, cfg, _, _, _) hdl var = do
-  case lookup (Var (RepID Nothing) var) as of
+  case lookupVar (Var (RepID Nothing) var) as of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e -- >> hPutStrLn hdl ""
 
@@ -150,7 +150,7 @@ nakedCompletions mods cmds lineReveresed wordSoFar = do
   (Script as, _, _, _, _) <- get
   let wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts ++ cfgFields
       fnNames  = concatMap (map fName . mFunctions) mods
-      varNames = map ((\(Var _ v) -> v) . fst) as
+      varNames = map ((\(Var _ v) -> v) . aVar) as
       cmdNames = map ((':':) . fst) cmds
       typeExts = map ext $ concatMap mTypes mods
       cfgFields = map fst configFields

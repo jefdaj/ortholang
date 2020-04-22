@@ -43,7 +43,7 @@ import OrthoLang.Types
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (when)
 import Data.List              (partition)
-import Data.List.Utils        (hasKeyAL)
+-- import Data.List.Utils        (hasKeyAL)
 import OrthoLang.Util    (readFileStrict)
 import System.FilePath        ((</>), takeDirectory)
 import Text.Parsec            (try, getState, putState)
@@ -77,7 +77,7 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 stripResult :: Script -> Script
 stripResult (Script as) = Script $ filter notRes as
   where
-    notRes ((Var _ "result"), _) = False
+    notRes (Assign {aVar = Var _ "result"}) = False
     notRes _ = True
 
 -- TODO combine pVar and pVarEq somehow to reduce try issues?
@@ -92,19 +92,20 @@ pAssign = debugParser "pAssign" $ do
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   -- TODO use lookAhead here to decide whether to commit to it?
-  scr@(Script as) <- getState
+  (Script as) <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
   -- "result" can be silently overwritten, but assigning another variable twice is an error
   -- TODO is that the best way to do it?
-  when (hasKeyAL v as && vName /= "result") $ do
+  when (hasVar v as && vName /= "result") $ do
     fail $ "duplicate variable \"" ++ vName ++ "\""
   e <- lexeme pExpr
 
   -- TODO actually, is *this* the only place it's needed rather than in pScript?
-  putAssign  "pAssign" (v, e)
+  let asn = Assign {aVar = v, aExpr = e}
+  putAssign "pAssign" asn
   -- putDigests "pAssign" [e]
 
-  return (v, e)
+  return asn
 
 {-|
 Handles the special case of a naked top-level expression, which is treated as
@@ -119,7 +120,7 @@ TODO If the statement is literally `result`, what do we do?
 pResult :: ParseM Assign
 pResult = debugParser "pResult" $ do
   e <- pExpr
-  let res = (Var (RepID Nothing) "result", e)
+  let res = Assign {aVar = Var (RepID Nothing) "result", aExpr = e}
   return res -- TODO is there any new result digest needed?
 
 pStatement :: ParseM Assign
@@ -163,9 +164,9 @@ to reject multiple results.
 TODO one result *per repeat ID*, not total!
 -}
 lastResultOnly :: Script -> Script
-lastResultOnly scr@(Script as) = Script $ otherVars ++ [lastRes]
+lastResultOnly (Script as) = Script $ otherVars ++ [lastRes]
   where
-    (resVars, otherVars) = partition (\(v, _) -> v == Var (RepID Nothing) "result") as
+    (resVars, otherVars) = partition (\a -> aVar a == Var (RepID Nothing) "result") as
     -- lastRes = trace ("resVars: " ++ show resVars) $ last resVars -- should be safe because we check for no result separately?
     lastRes = last resVars -- should be safe because we check for no result separately?
 

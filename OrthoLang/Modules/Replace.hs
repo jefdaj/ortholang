@@ -79,7 +79,7 @@ mapExprVars fn (Lst t vs   es   ) = Lst t (map fn vs)   (map (mapExprVars fn) es
 mapExprVars _ (Com _) = error "implement this!"
 
 mapAssignVars :: (Var -> Var) -> Assign -> Assign
-mapAssignVars fn (var, expr) = (fn var, mapExprVars fn expr)
+mapAssignVars fn (Assign var expr) = Assign (fn var) (mapExprVars fn expr)
 
 mapScriptVars :: (Var -> Var) -> Script -> Script
 mapScriptVars fn (Script as) = Script $ map (mapAssignVars fn) as
@@ -142,9 +142,9 @@ rReplace' :: Script
           -> Expr -- and an expression to replace it with (which could be a ref to another variable)
           -> Rules ExprPath
 rReplace' s@(Script as) resExpr subVar@(Var _ _) subExpr = do
-  let res   = (Var (RepID Nothing) "result", resExpr)
-      sub   = (subVar, subExpr)
-      deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) as
+  let res   = Assign (Var (RepID Nothing) "result") resExpr
+      sub   = Assign subVar subExpr
+      deps  = filter (\a -> (elem (aVar a) $ depsOf resExpr ++ depsOf subExpr)) as
       newID = calcRepID s resExpr subVar subExpr
       scr'  = setRepIDs newID $ Script $ [sub] ++ deps ++ [res]
   (ResPath resPath) <- compileScript scr'

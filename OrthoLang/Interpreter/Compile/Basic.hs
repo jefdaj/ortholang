@@ -50,7 +50,7 @@ import Prelude hiding (error)
 
 import OrthoLang.Debug
 import Development.Shake
-import OrthoLang.Types
+import OrthoLang.Types hiding (aVar) -- TODO disambiguate!
 
 import Data.List              (isPrefixOf)
 import Data.Maybe             (fromJust)
@@ -127,7 +127,7 @@ rNamedFunction' scr expr name = do
                                       " but rNamedFunction found " ++ name ++ " in " ++ show expr
 
 rAssign :: Script -> Assign -> Rules (Var, VarPath)
-rAssign scr (var, expr) = do
+rAssign scr (Assign var expr) = do
   (ExprPath path) <- rExpr scr expr
   cfg <- fmap fromJust getShakeExtraRules
   let loc = "core.compile.basic.rAssign"
@@ -146,7 +146,13 @@ compileScript scr@(Script as) = do
   --      evaluating the code itself is always faster than the system commands
   rpaths <- mapM (rAssign scr) as -- TODO is having scr be both an issue? 
   res <- case lookupResult rpaths of
-    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr scr $ fromJust $ lookupResult $ ensureResult as
+
+    -- TODO clean this up!
+    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr scr $
+                    (\(Assign _ e) -> e) $ head $
+                    filter (\(Assign (Var _ v) _) -> v == "result") $
+                    ensureResult as
+
     Just r  -> fmap (\(VarPath  p) -> p) $ return r
   return $ ResPath res
   -- where

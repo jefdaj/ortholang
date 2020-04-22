@@ -380,8 +380,8 @@ evalScript :: [Module] -> Handle -> GlobalEnv -> IO ()
 evalScript mods hdl (scr, c, ref, ids, dRef) =
   let (Script as')  = expandMacros mods scr
       as'' = trace "ortholang.core.eval.evalScript" ("after macro expansion: " ++ unlines (map show as')) as'
-      res = case lookupResult as'' of
-              Nothing -> fromJust $ lookupResult $ ensureResult as''
+      res = case lookupResultAssign as'' of
+              Nothing -> fromJust $ lookupResultAssign $ ensureResult as''
               Just r  -> r
   in eval mods hdl c ref ids dRef (typeOf res) (compileScript $ Script $ seq as'' as'')
 

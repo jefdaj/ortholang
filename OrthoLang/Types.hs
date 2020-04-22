@@ -1,11 +1,12 @@
-{-# LANGUAGE FlexibleInstances #-}
-
 module OrthoLang.Types
   (
     Action1
   , Action2
   , Action3
-  , Assign
+  , Assign(..)
+  , lookupVar
+  , hasVar
+  , delVar
   , CacheDir(..)
   , CompiledExpr(..)
   , Config(..)
@@ -60,6 +61,7 @@ module OrthoLang.Types
   , listFunctions
   , lit
   , lookupResult
+  , lookupResultAssign
   , num
   , operatorChars
   , rDepsOf
@@ -99,7 +101,7 @@ import Data.Char                  (toLower)
 import Data.IORef                 (IORef)
 import Data.List                  (nub, find, isPrefixOf)
 import Data.Map.Strict            (Map, empty)
-import Data.Maybe                 (fromJust, catMaybes)
+import Data.Maybe                 (fromJust, catMaybes, isJust)
 import Development.Shake          (Rules, Action, Resource)
 import Development.Shake.FilePath (makeRelative)
 import System.Console.Haskeline   (Settings, InputT, runInputT)
@@ -260,13 +262,23 @@ setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt" "not implemented for comp
 -- scripts --
 -------------
 
--- TODO have a separate Assign for "result"?
-type Assign = (Var, Expr) -- TODO convert to data to remove overlapping instances
-data Script = Script [Assign] deriving (Show, Eq) -- TODO convert to a record to remove overlapping instances + fix result semantics
+data Assign = Assign { aVar :: Var, aExpr :: Expr }
+  deriving (Show, Eq)
+
+lookupVar :: Var -> [Assign] -> Maybe Expr
+lookupVar v as = let tuples = map (\(Assign v2 e) -> (v2,e)) as in lookup v tuples
+
+hasVar :: Var -> [Assign] -> Bool
+hasVar v as = isJust $ lookupVar v as
+
+delVar :: [Assign] -> Var -> [Assign]
+delVar as v = filter (\(Assign v2 _) -> v /= v2) as
+
+data Script = Script [Assign] deriving (Show, Eq) -- TODO add a result field and use it to fix result handling
 
 -- TODO newtype to prevent the overlap?
-instance {-# OVERLAPPING #-} Pretty Assign where
-  pPrint (v, e) = pPrint v <+> PP.text "=" <+> pPrint e
+instance Pretty Assign where
+  pPrint a = pPrint (aVar a) <+> PP.text "=" <+> pPrint (aExpr a)
   -- this adds type info, but makes the pretty-print not valid source code
   -- pPrint (v, e) = PP.text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
 
@@ -285,8 +297,8 @@ ensureResult :: [Assign] -> [Assign]
 ensureResult as = if null as then noRes else scr'
   where
     resVar = Var (RepID Nothing) "result"
-    noRes  = as ++ [(resVar, Lit str "no result")]
-    scr'   = as ++ [(resVar, snd $ last as)               ]
+    noRes  = as ++ [Assign { aVar = resVar, aExpr = Lit str "no result"}] -- TODO always use last var
+    scr'   = as ++ [Assign { aVar = resVar, aExpr = aExpr $ last as }]
 
 lookupResult :: [(Var, b)] -> Maybe b
 lookupResult scr = if null matches
@@ -294,6 +306,13 @@ lookupResult scr = if null matches
   else Just (snd $ last matches)
   where
     matches = filter (\(Var _ v, _) -> v == "result") scr
+
+lookupResultAssign :: [Assign] -> Maybe Expr
+lookupResultAssign as = if null matches
+  then (if null as then Nothing else Just (aExpr $ last as))
+  else Just (aExpr $ last matches)
+  where
+    matches = filter (\(Assign (Var _ v) _) -> v == "result") as
 
 typeOf :: Expr -> Type
 typeOf (Lit   t _      ) = t
@@ -316,9 +335,9 @@ depsOf (Lst _ vs   es   ) = nub $ vs ++ concatMap varOf es
 depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
 
 rDepsOf :: Script -> Var -> [Var]
-rDepsOf (Script as) var = map fst rDeps
+rDepsOf (Script as) var = map aVar rDeps
   where
-    rDeps = filter (\(_,e) -> isRDep e) as
+    rDeps = filter (isRDep . aExpr) as
     isRDep expr = elem var $ depsOf expr
 
 -- TODO what if it's a function call?
@@ -326,7 +345,7 @@ rDepsOf (Script as) var = map fst rDeps
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: Script -> Expr -> [Expr]
 extractExprs  _  (Lst _ _ es) = es
-extractExprs s@(Script as) (Ref _ _ _ v ) = case lookup v as of
+extractExprs s@(Script as) (Ref _ _ _ v ) = case lookupVar v as of
                                        Nothing -> error "extractExprs" $ "no such var " ++ show v
                                        Just e  -> extractExprs s e
 extractExprs _   (Fun _ _ _ _ _) = error "extractExprs" explainFnBug
@@ -702,9 +721,6 @@ newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
 
 type DigestMap = Map PathDigest (Type, Path)
 type DigestsRef = IORef DigestMap
-
-instance Pretty DigestMap where
-  pPrint m = PP.text $ show m
 
 
 ---------------
