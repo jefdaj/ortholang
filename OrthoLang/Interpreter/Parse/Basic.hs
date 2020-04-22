@@ -52,9 +52,9 @@ import Control.Monad.Reader   (ask)
 -- TODO remove if this is only used once in pScript
 putAssign :: String -> Assign -> ParseM ()
 putAssign name a = do
-  s <- getState
-  let s' = trace name ("adding assignment: " ++ show a) $ s ++ [a]
-  putState $ s'
+  (Script as) <- getState
+  let as' = trace name ("adding assignment: " ++ show a) $ as ++ [a]
+  putState $ Script as'
 
 {-|
 There's a convention in parsers that each one should consume whitespace after

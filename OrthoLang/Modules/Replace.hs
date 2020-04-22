@@ -82,7 +82,7 @@ mapAssignVars :: (Var -> Var) -> Assign -> Assign
 mapAssignVars fn (var, expr) = (fn var, mapExprVars fn expr)
 
 mapScriptVars :: (Var -> Var) -> Script -> Script
-mapScriptVars fn scr = map (mapAssignVars fn) scr
+mapScriptVars fn (Script as) = Script $ map (mapAssignVars fn) as
 
 setRepID :: RepID -> Var -> Var
 setRepID newID (Var _ name) = Var newID name
@@ -141,12 +141,12 @@ rReplace' :: Script
           -> Var  -- we also need the variable to be replaced
           -> Expr -- and an expression to replace it with (which could be a ref to another variable)
           -> Rules ExprPath
-rReplace' script resExpr subVar@(Var _ _) subExpr = do
+rReplace' s@(Script as) resExpr subVar@(Var _ _) subExpr = do
   let res   = (Var (RepID Nothing) "result", resExpr)
       sub   = (subVar, subExpr)
-      deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) script
-      newID = calcRepID script resExpr subVar subExpr
-      scr'  = setRepIDs newID $ [sub] ++ deps ++ [res]
+      deps  = filter (\(v,_) -> (elem v $ depsOf resExpr ++ depsOf subExpr)) as
+      newID = calcRepID s resExpr subVar subExpr
+      scr'  = setRepIDs newID $ Script $ [sub] ++ deps ++ [res]
   (ResPath resPath) <- compileScript scr'
   return (ExprPath resPath)
 

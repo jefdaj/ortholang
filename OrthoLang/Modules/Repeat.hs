@@ -36,8 +36,6 @@ repeatN :: Function
 repeatN = Function
   { fOpChar = Nothing, fName = "repeat"
   ,fTags = []
-  -- , fTypeCheck = tRepeatN
-  -- , fTypeDesc  = "repeat : <outputvar> <inputvar> num -> <output>.list"
   , fInputs = [AnyType "the return type", AnyType "the input type", Exactly num]
   , fOutput =  ListSigs (AnyType "the return type")
   , fNewRules = NewNotImplemented
@@ -60,7 +58,7 @@ readSciInt s = case toBoundedInteger (read s :: Scientific) of
 -- TODO is the bug here? might need to convert string -> sci -> int
 extractNum :: Script -> Expr -> Int
 extractNum _   (Lit x n) | x == num = readSciInt n
-extractNum scr (Ref _ _ _ v) = extractNum scr $ justOrDie "extractNum failed!" $ lookup v scr
+extractNum s@(Script as) (Ref _ _ _ v) = extractNum s $ justOrDie "extractNum failed!" $ lookup v as
 extractNum _ _ = error "bad argument to extractNum"
 
 -- takes a result expression to re-evaluate, a variable to repeat and start from,
@@ -69,10 +67,10 @@ extractNum _ _ = error "bad argument to extractNum"
 -- TODO error if subVar not in (depsOf resExpr)
 -- TODO is this how the salts should work?
 rRepeatN :: RulesFn
-rRepeatN scr (Fun t mSalt deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
+rRepeatN scr@(Script as) (Fun t mSalt deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
   rReplaceEach scr (Fun t mSalt deps name [resExpr, subVar, subList])
   where
-    subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookup v scr
+    subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookup v as
     nReps   = extractNum scr repsExpr
     subs    = take nReps $ zipWith setSalt [0..] (repeat subExpr) -- TODO is always starting from 0 right?
     -- subs    = zipWith setSalt (unfoldRepID salt nReps) (repeat subExpr)

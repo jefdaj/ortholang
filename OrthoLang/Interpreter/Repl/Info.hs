@@ -64,8 +64,8 @@ cmdHelp ms st@(_, cfg, _, _, _) hdl line = do
   doc <- help cfg ms line
   hPutStrLn hdl doc
 
-cmdType :: ReplInfo
-cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo
+cmdType :: ReplCmd
+cmdType mods st@(Script as, _, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
   where
     typeInfo = case stripWhiteSpace s of
       "" -> allTypes
@@ -73,7 +73,7 @@ cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo
     oneType e = case findFunction mods e of
       Just f  -> renderTypeSig f
       Nothing -> showExprType mods st e -- TODO also show the expr itself?
-    allTypes = stripWhiteSpace $ unlines $ map showAssignType scr
+    allTypes = stripWhiteSpace $ unlines $ map showAssignType as
 
 -- TODO insert id?
 showExprType :: [Module] -> GlobalEnv -> String -> String
@@ -93,9 +93,9 @@ showAssignType (Var _ v, e) = unwords [typedVar, "=", prettyExpr]
 -- TODO show the whole script, since that only shows sAssigns now anyway?
 cmdShow :: ReplInfo
 cmdShow ms st@(_, c, _, _, _) hdl s | showvartypes c = cmdType ms st hdl s
-cmdShow _ st@(s, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s -- >> hPutStrLn hdl ""
-cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
-  case lookup (Var (RepID Nothing) var) scr of
+cmdShow _ st@(Script as, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) as >> return st
+cmdShow _ st@(Script as, cfg, _, _, _) hdl var = do
+  case lookup (Var (RepID Nothing) var) as of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e -- >> hPutStrLn hdl ""
 
@@ -145,13 +145,13 @@ quotedCompletions wordSoFar = do
 -- complete everything else: fn names, var names, :commands, types
 -- these can be filenames too, but only if the line starts with a :command
 -- nakedCompletions :: String -> String -> ReplM [Completion]
-nakedCompletions :: [Module] -> [String] -> String -> String -> ReplM [Completion]
-nakedCompletions mods cmdNames lineReveresed wordSoFar = do
-  (scr, _, _, _, _) <- get
-  let wordSoFarList = fnNames ++ varNames ++ cmdNames' ++ typeExts ++ cfgFields
+nakedCompletions :: [Module] -> [(String, ReplCmd)] -> String -> String -> ReplM [Completion]
+nakedCompletions mods cmds lineReveresed wordSoFar = do
+  (Script as, _, _, _, _) <- get
+  let wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts ++ cfgFields
       fnNames  = concatMap (map fName . mFunctions) mods
-      varNames = map ((\(Var _ v) -> v) . fst) scr
-      cmdNames' = map (':':) cmdNames
+      varNames = map ((\(Var _ v) -> v) . fst) as
+      cmdNames = map ((':':) . fst) cmds
       typeExts = map ext $ concatMap mTypes mods
       cfgFields = map fst configFields
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []

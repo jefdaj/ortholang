@@ -339,9 +339,9 @@ TODO any need for digests here?
 pRef :: ParseM Expr
 pRef = debugParser "pRef" $ do
   v@(Var _ var) <- pVar
-  scr <- getState
-  case lookup v scr of
-    Nothing -> trace "pRef" ("scr before lookup of \"" ++ var ++ "': " ++ show scr) $
+  scr@(Script as) <- getState
+  case lookup v as of
+    Nothing -> trace "pRef" ("scr before lookup of \"" ++ var ++ "': " ++ show as) $
                  parseFail $ "no such variable \"" ++ var ++ "\"" ++ "\n" -- ++ show scr
     Just e -> return $ Ref (typeOf e) (saltOf e) (depsOf e) v
 

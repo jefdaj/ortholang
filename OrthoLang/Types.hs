@@ -36,7 +36,7 @@ module OrthoLang.Types
   , RulesFn
   , RulesR
   , Salt(..)
-  , Script
+  , Script(..)
   , Type(..)
   , TypeGroup(..)
   , TypeSig(..)
@@ -261,8 +261,8 @@ setSalt _ (Com (CompiledExpr _ _ _)) = error "setSalt" "not implemented for comp
 -------------
 
 -- TODO have a separate Assign for "result"?
-type Assign = (Var, Expr)
-type Script = [Assign]
+type Assign = (Var, Expr) -- TODO convert to data to remove overlapping instances
+data Script = Script [Assign] deriving (Show, Eq) -- TODO convert to a record to remove overlapping instances + fix result semantics
 
 -- TODO newtype to prevent the overlap?
 instance {-# OVERLAPPING #-} Pretty Assign where
@@ -271,17 +271,17 @@ instance {-# OVERLAPPING #-} Pretty Assign where
   -- pPrint (v, e) = PP.text (render (pPrint v) ++ "." ++ render (pPrint $ typeExt e))
 
 -- TODO is totally ignoring the sDigests part OK here?
-instance {-# OVERLAPPING #-} Pretty Script where
-  pPrint [] = PP.empty
-  pPrint as = PP.vcat $ map pPrint as -- TODO newline at the end?
+instance Pretty Script where
+  pPrint (Script []) = PP.empty
+  pPrint (Script as) = PP.vcat $ map pPrint as
 
 emptyScript :: Script
-emptyScript = []
+emptyScript = Script []
 
 emptyDigests :: DigestMap
 emptyDigests = empty
 
-ensureResult :: Script -> Script
+ensureResult :: [Assign] -> [Assign]
 ensureResult as = if null as then noRes else scr'
   where
     resVar = Var (RepID Nothing) "result"
@@ -316,9 +316,9 @@ depsOf (Lst _ vs   es   ) = nub $ vs ++ concatMap varOf es
 depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
 
 rDepsOf :: Script -> Var -> [Var]
-rDepsOf scr var = map fst rDeps
+rDepsOf (Script as) var = map fst rDeps
   where
-    rDeps = filter (\(_,e) -> isRDep e) scr
+    rDeps = filter (\(_,e) -> isRDep e) as
     isRDep expr = elem var $ depsOf expr
 
 -- TODO what if it's a function call?
@@ -326,9 +326,9 @@ rDepsOf scr var = map fst rDeps
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: Script -> Expr -> [Expr]
 extractExprs  _  (Lst _ _ es) = es
-extractExprs scr (Ref _ _ _ v ) = case lookup v scr of
+extractExprs s@(Script as) (Ref _ _ _ v ) = case lookup v as of
                                        Nothing -> error "extractExprs" $ "no such var " ++ show v
-                                       Just e  -> extractExprs scr e
+                                       Just e  -> extractExprs s e
 extractExprs _   (Fun _ _ _ _ _) = error "extractExprs" explainFnBug
 extractExprs scr (Bop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
 extractExprs  _   e               = error "extractExprs" $ "bad arg: " ++ show e

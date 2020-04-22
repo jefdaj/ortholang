@@ -75,7 +75,7 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 ----------------
 
 stripResult :: Script -> Script
-stripResult = filter notRes
+stripResult (Script as) = Script $ filter notRes as
   where
     notRes ((Var _ "result"), _) = False
     notRes _ = True
@@ -92,11 +92,11 @@ pAssign = debugParser "pAssign" $ do
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   -- TODO use lookAhead here to decide whether to commit to it?
-  scr <- getState
+  scr@(Script as) <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
   -- "result" can be silently overwritten, but assigning another variable twice is an error
   -- TODO is that the best way to do it?
-  when (hasKeyAL v scr && vName /= "result") $ do
+  when (hasKeyAL v as && vName /= "result") $ do
     fail $ "duplicate variable \"" ++ vName ++ "\""
   e <- lexeme pExpr
 
@@ -163,9 +163,9 @@ to reject multiple results.
 TODO one result *per repeat ID*, not total!
 -}
 lastResultOnly :: Script -> Script
-lastResultOnly scr = otherVars ++ [lastRes]
+lastResultOnly scr@(Script as) = Script $ otherVars ++ [lastRes]
   where
-    (resVars, otherVars) = partition (\(v, _) -> v == Var (RepID Nothing) "result") scr
+    (resVars, otherVars) = partition (\(v, _) -> v == Var (RepID Nothing) "result") as
     -- lastRes = trace ("resVars: " ++ show resVars) $ last resVars -- should be safe because we check for no result separately?
     lastRes = last resVars -- should be safe because we check for no result separately?
 
@@ -180,10 +180,11 @@ TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   optional spaces
-  scr <- many pStatement
+  as <- many pStatement
   -- cfg <- ask -- not used at all
   -- let scr  = emptyScript {sAssigns = as}
-  let scr' = lastResultOnly scr
+  let scr  = Script as
+      scr' = lastResultOnly scr
       -- scr'' = scr' {sDigests = trace ("pScript ds: " ++ show ds) ds}
   -- putState scr'
   -- putDigests "pScript" $ map snd as -- TODO is this the only place it needs to be done?
