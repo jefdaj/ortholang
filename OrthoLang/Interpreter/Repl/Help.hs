@@ -123,4 +123,7 @@ listFunctionTypesWithOutput mods thing = filter matches descs
 
 -- TODO move somewhere. Pretty?
 renderTypeSig :: Function -> String
-renderTypeSig f = render (pPrint $ fInputs f) ++ " -> " ++ render (pPrint $ fOutput f)
+renderTypeSig f = ins ++ " -> " ++ out
+  where
+   ins = unwords $ map ext (fInputs f)
+   out = render (pPrint $ fOutput f)

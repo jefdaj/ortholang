@@ -309,6 +309,8 @@ instance Eq Type where
   _                  ==                  _ = False
 
 -- TODO don't call this Show! maybe Pretty?
+-- TODO use the Ext instance for this and remove Show if possible
+-- TODO in fact, remove all the Show and Read except the ones explicitly needed
 instance Show Type where
   show = ext
 
@@ -370,6 +372,8 @@ instance Eq TypeGroup where
 -- | types which have a file extension
 class Ext a where
   ext  :: a -> String
+
+class Desc a where
   desc :: a -> String
 
 -- note that traceShow in here can cause an infinite loop
@@ -381,6 +385,8 @@ instance Ext Type where
   ext (EncodedAs   e t) = ext t ++ "." ++ ext e
   ext (Type {tExt = e}) = e
 
+-- TODO separate Desc typeclass would be more obvious, and easy
+instance Desc Type where
   desc Empty           = "empty list" -- for lists with nothing in them yet
   desc (ListOf      t) = "list of " ++ desc t
   desc (ScoresOf    t) = "scores for " ++ desc t
@@ -388,12 +394,19 @@ instance Ext Type where
   desc (Type {tDesc = d}) = d
 
 instance Ext TypeGroup where
-  ext  = tgExt
+  ext  = tgExt -- TODO move defition here
+
+instance Ext TypeSig where
+  ext = undefined -- TODO write this
+
+instance Desc TypeGroup where
   desc = tgDesc
 
 instance Ext Encoding where
-  ext  = enExt
-  desc = enDesc
+  ext = enExt -- TODO move defition here
+
+instance Desc Encoding where
+  desc = enDesc -- TODO move defition here
 
 -- TODO either use this in the core compilers or remove it
 lit :: TypeGroup
@@ -403,6 +416,7 @@ lit = TypeGroup
   , tgMembers = [Exactly str, Exactly num]
   }
 
+-- TODO make a typeclass for this... PrettyCat?
 defaultShow :: Config -> LocksRef -> FilePath -> IO String
 defaultShow = defaultShowN 5
 
