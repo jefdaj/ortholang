@@ -548,7 +548,7 @@ mkMakeblastdbEach :: Type -> Function
 mkMakeblastdbEach faType = Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = tMakeblastdbEach dbType
-  -- , fTypeDesc  = desc
+  -- , fTypeDesc  = d
   , fInputs = [Exactly (ListOf faType)]
   , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
   , fTags = []
@@ -556,7 +556,7 @@ mkMakeblastdbEach faType = Function
   }
   where
     name = "makeblastdb_" ++ ext faType ++ "_each" -- TODO change scripts to match!
-    -- desc = name ++ " : " ++ ext ++ ".list -> " ++ ext dbType ++ ".list"
+    -- d = name ++ " : " ++ ext ++ ".list -> " ++ ext dbType ++ ".list"
     -- ext  = if dbType == ndb then "fa" else "faa"
 
 -- (ListOf (Some fa "a fasta file")) (ListOf (Encoded blastdb (Some fa "a fasta file")))

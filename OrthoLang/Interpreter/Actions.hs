@@ -553,15 +553,15 @@ TODO if exit is wrong (usually non-zero), cat out stderr for user
 TODO if stdout == outfile, put it there and skip the .out file altogether, or symlink it?
 -}
 runCmd :: CmdDesc -> Action ()
-runCmd desc = do
+runCmd d = do
   cfg <- fmap fromJust getShakeExtra
-  let stdoutPath = takeDirectory (cmdOutPath desc) </> "out"
-      stderrPath = takeDirectory (cmdOutPath desc) </> "err"
+  let stdoutPath = takeDirectory (cmdOutPath d) </> "out"
+      stderrPath = takeDirectory (cmdOutPath d) </> "err"
       dbg = debugA' "runCmd"
   -- liftIO $ delay 1000000
 
-  inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns desc
-  inPaths' <- if cmdFixEmpties desc
+  inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns d
+  inPaths' <- if cmdFixEmpties d
                 then mapM (fixEmptyText) inPaths
                 else need' "core.actions.runCmd" inPaths >> return inPaths
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory stdoutPath
@@ -569,18 +569,18 @@ runCmd desc = do
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
   (lRef :: LocksRef) <- fmap fromJust getShakeExtra
   (disk, par, _) <- liftIO $ readIORef lRef
-  let parLockFn = if cmdParallel desc
+  let parLockFn = if cmdParallel d
                     then \f -> withResource par 1 f
                     else id
       -- TODO any problem locking the whole dir?
       -- TODO and if not, can the other locks inside that be removed?
-      writeDir = takeDirectory $ cmdOutPath desc
+      writeDir = takeDirectory $ cmdOutPath d
       writeLockFn fn = (if (takeBaseName $ takeDirectory writeDir) == "exprs" then withWriteLock' writeDir else id) $ do
         -- dbg $ "runCmd acquired expr dir write lock: " ++ show writeDir
-        withWriteOnce (cmdOutPath desc) $ do
-          dbg $ "runCmd acquired outpath write lock: " ++ show (cmdOutPath desc)
-          withWriteLocks' (cmdExtraOutPaths desc) $ do
-            dbg $ "runCmd acquired extra write locks: " ++ show (cmdExtraOutPaths desc)
+        withWriteOnce (cmdOutPath d) $ do
+          dbg $ "runCmd acquired outpath write lock: " ++ show (cmdOutPath d)
+          withWriteLocks' (cmdExtraOutPaths d) $ do
+            dbg $ "runCmd acquired extra write locks: " ++ show (cmdExtraOutPaths d)
             parLockFn fn
 
   -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
@@ -588,21 +588,21 @@ runCmd desc = do
     -- TODO remove opts?
     -- TODO always assume disk is 1?
     Exit code <- withResource disk (length inPaths + 1) $ case wrapper cfg of
-      Nothing -> command (cmdOptions desc) (cmdBinary desc) (cmdArguments desc)
-      Just w  -> command (Shell:cmdOptions desc) w [escape $ unwords (cmdBinary desc:cmdArguments desc)]
+      Nothing -> command (cmdOptions d) (cmdBinary d) (cmdArguments d)
+      Just w  -> command (Shell:cmdOptions d) w [escape $ unwords (cmdBinary d:cmdArguments d)]
     -- Exit _ <- command [] "sync" [] -- TODO is this needed?
     -- This is disabled because it can make the logs really big
     -- dbg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
-    trackWrite' (cmdOutPath desc:stdoutPath:stderrPath:cmdExtraOutPaths desc)
+    trackWrite' (cmdOutPath d:stdoutPath:stderrPath:cmdExtraOutPaths d)
     -- return ()
 
     -- TODO use exitWith here?
-    when (code /= cmdExitCode desc) $
-      let rmPatterns = (takeDirectory (cmdOutPath desc) </> "*"):(cmdRmPatterns desc)
-      in handleCmdError (cmdBinary desc) code stderrPath rmPatterns
+    when (code /= cmdExitCode d) $
+      let rmPatterns = (takeDirectory (cmdOutPath d) </> "*"):(cmdRmPatterns d)
+      in handleCmdError (cmdBinary d) code stderrPath rmPatterns
 
-  let sPaths = stdoutPath:stderrPath:cmdSanitizePaths desc -- TODO main outpath too?
-  -- sanitizeFilesInPlace $ cmdSanitizePaths desc
+  let sPaths = stdoutPath:stderrPath:cmdSanitizePaths d -- TODO main outpath too?
+  -- sanitizeFilesInPlace $ cmdSanitizePaths d
   sanitizeFilesInPlace sPaths
 
   return () -- TODO out, err, code here?

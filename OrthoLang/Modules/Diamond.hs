@@ -40,8 +40,8 @@ dmnd = Type
   , tShow = \_ ref path -> do
       path' <- resolveSymlinks Nothing path
       out <- withReadLock ref path' $ readProcess "diamond_dbinfo.sh" [path'] []
-      let desc = unlines $ ("DIAMOND database " ++ path) : (drop 4 $ lines out)
-      return desc
+      let d = unlines $ ("DIAMOND database " ++ path) : (drop 4 $ lines out)
+      return d
   }
 
 --------------------

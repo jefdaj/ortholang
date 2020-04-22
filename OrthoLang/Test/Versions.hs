@@ -74,9 +74,9 @@ mkTests cfg _ _ _ = do
          $ map (mkTestVersion cfg testDir) (versionScripts)
 
 mkTestVersion :: Config -> FilePath -> (TestName, String) -> TestTree
-mkTestVersion _ dir (name, cmd) = goldenVsString desc gld act
+mkTestVersion _ dir (name, cmd) = goldenVsString d gld act
   where
-    desc = "found expected version of " ++ name
+    d = "found expected version of " ++ name
     gld = dir </> "versions" </> takeBaseName cmd <.> "txt"
     msg = "tested " ++ name ++ " " ++ os ++ " version"
     act = do

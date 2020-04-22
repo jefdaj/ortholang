@@ -71,14 +71,14 @@ goldenRepl :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO TestT
 goldenRepl cfg ref ids dRef goldenFile = do
   txt <- readFileStrict ref goldenFile -- TODO have to handle unicode here with the new prompt?
   let name   = takeBaseName goldenFile
-      desc   = "repl output matches " ++ name <.> "txt"
+      d      = "repl output matches " ++ name <.> "txt"
       cfg'   = cfg { tmpdir = (tmpdir cfg </> name) }
       tstOut = tmpdir cfg' <.> "txt"
       stdin  = extractPrompted ("ortholang" ++ promptArrow) txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut (emptyScript, cfg', ref, ids, dRef)
                -- uncomment to update repl golden files:
                -- >> copyFile tstOut ("/home/jefdaj/ortholang/tests/repl" </> takeBaseName goldenFile <.> "txt")
-  return $ goldenVsFile desc goldenFile tstOut action
+  return $ goldenVsFile d goldenFile tstOut action
 
 knownFailing :: [FilePath]
 knownFailing =
@@ -105,7 +105,7 @@ goldenReplTree :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO T
 goldenReplTree cfg ref ids dRef ses = do
   txt <- readFileStrict ref ses
   let name   = takeBaseName ses
-      desc   = name <.> "txt" ++ " creates expected tmpfiles"
+      d      = name <.> "txt" ++ " creates expected tmpfiles"
       cfg'   = cfg { tmpdir = (tmpdir cfg </> name) }
       -- tree   = replaceExtension (takeDi) "txt"
       tree   = joinPath $ (init $ init $ splitDirectories ses)
@@ -121,7 +121,7 @@ goldenReplTree cfg ref ids dRef ses = do
                  -- uncomment to update golden repl trees
                  -- writeFile ("/home/jefdaj/ortholang/tests/tmpfiles" </> takeBaseName ses <.> "txt") $ toGeneric cfg out
                  return $ pack $ toGeneric cfg out
-  return $ goldenVsString desc tree action
+  return $ goldenVsString d tree action
 
 goldenReplTrees :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 goldenReplTrees cfg ref ids dRef = do

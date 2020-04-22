@@ -56,8 +56,8 @@ mms = Type
       Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
       let n = headOrDie "failed to read first word of MMSeqs2 db description" $ words out
       -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' path'
-      let desc = "MMSeqs2 database (" ++ n ++ " sequences)" -- TODO include a hash?
-      return desc
+      let d = "MMSeqs2 database (" ++ n ++ " sequences)" -- TODO include a hash?
+      return d
   }
 
 -------------------------
