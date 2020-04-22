@@ -95,6 +95,7 @@ loadConfig args = do
       shellaccess = isPresent args $ longOption "shellaccess"
       progressbar = isPresent args $ longOption "progressbar"
       showhidden  = isPresent args $ longOption "showhidden"
+      showvartypes = isPresent args $ longOption "showvartypes"
   let res = Config { .. }
   -- debug' $ show res
   setLogLevel LevelDebug
@@ -154,6 +155,7 @@ configFields =
   , ("termcolumns", (show . termcolumns, mkSet parseMaybeInt (\c mi -> return $ c {termcolumns = mi})))
   , ("debugregex" , (show . debugregex , mkSet parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr}))))
   , ("showhidden" , (show . showhidden , mkSet parseBool (\c b -> return (c {showhidden = b}))))
+  , ("showvartypes" , (show . showvartypes , mkSet parseBool (\c b -> return (c {showvartypes = b}))))
   , ("shellaccess" , (show . shellaccess , mkSet parseBool (\c _ -> putStrLn securityMessage >> return c)))
   , ("progressbar" , (show . progressbar , mkSet parseBool (\c b -> return (c {progressbar = b}))))
   ]

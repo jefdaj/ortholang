@@ -524,6 +524,7 @@ data Config = Config
   , shellaccess :: Bool
   , progressbar :: Bool
   , showhidden  :: Bool
+  , showvartypes :: Bool
   }
   deriving (Show, Typeable)
 

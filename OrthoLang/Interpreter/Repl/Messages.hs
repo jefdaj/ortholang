@@ -71,7 +71,7 @@ cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
     oneType e = case findFunction mods e of
       Just f  -> renderTypeSig f
       Nothing -> showExprType mods st e -- TODO also show the expr itself?
-    allTypes = init $ unlines $ map showAssignType scr
+    allTypes = stripWhiteSpace $ unlines $ map showAssignType scr
 
 -- TODO insert id?
 showExprType :: [Module] -> GlobalEnv -> String -> String
@@ -90,6 +90,7 @@ showAssignType (Var _ v, e) = unwords [typedVar, "=", prettyExpr]
 -- TODO factor out the variable lookup stuff
 -- TODO show the whole script, since that only shows sAssigns now anyway?
 cmdShow :: ReplCmd
+cmdShow ms st@(_, c, _, _, _) hdl s | showvartypes c = cmdType ms st hdl s
 cmdShow _ st@(s, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
 cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
   case lookup (Var (RepID Nothing) var) scr of
