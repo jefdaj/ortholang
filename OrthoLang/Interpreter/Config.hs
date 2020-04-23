@@ -8,7 +8,7 @@ import qualified Data.Configurator.Types as C
 
 import OrthoLang.Debug (debug)
 import OrthoLang.Types (Config(..))
-import OrthoLang.Util  (absolutize, headOrDie, justOrDie, retryIncSuffix)
+import OrthoLang.Util  (absolutize, headOrDie, justOrDie, retryIncSuffix, stripWhiteSpace)
 
 import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRegex, setLogFile)
 import Control.Monad              (when)
@@ -109,7 +109,7 @@ getDoc name = do
   exists <- doesFileExist path
   if not exists
     then return Nothing
-    else readFile path >>= return . Just
+    else readFile path >>= return . Just . stripWhiteSpace
 
 getUsage :: IO Docopt
 getUsage = getDoc "usage" >>= parseUsageOrExit . fromJust

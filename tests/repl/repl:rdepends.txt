@@ -2,11 +2,8 @@ Welcome to the OrthoLang interpreter!
 Type :help for a list of the available commands.
 
 ortholang —▶ v1 = "one"
-
 ortholang —▶ v2 = "two"
-
 ortholang —▶ v3 = [v1, v2]
-
 ortholang —▶ :show
 v1 = "one"
 v2 = "two"

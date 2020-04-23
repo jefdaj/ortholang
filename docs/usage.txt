@@ -28,4 +28,3 @@ Options:
   --noprogress       Do not display the progress bar.
   --shared SHARED    A shared cache (directory or url) to look up files.
   --outfile OUTFILE  Instead of printing results, save them to this file.
-                     

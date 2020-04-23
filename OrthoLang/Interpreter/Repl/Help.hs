@@ -19,7 +19,7 @@ module OrthoLang.Interpreter.Repl.Help
 import OrthoLang.Types
 
 import OrthoLang.Interpreter.Config (getDoc)
-import OrthoLang.Util (headOrDie)
+import OrthoLang.Util (headOrDie, stripWhiteSpace)
 import OrthoLang.Debug (trace)
 
 import Data.Char             (toLower)
@@ -31,7 +31,7 @@ import Data.Maybe            (catMaybes, fromJust)
 help :: Config -> [Module] -> String -> IO String
 help cfg mods line = case words (map toLower line) of
   [w] -> sequence [m, f, b] >>= \ms -> let ms' = trace "interpreter.repl.help" ("ms: " ++ show ms) ms
-                                       in (return . head . catMaybes) ms'
+                                       in (return . stripWhiteSpace . head . catMaybes) ms'
            where
              m = mHelp mods w
              f = fHelp mods w

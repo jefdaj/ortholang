@@ -96,18 +96,18 @@ goldenRepls cfg ref ids dRef = do
       group = testGroup "prints expected output"
   fmap group tests
 
-goldenReplTree :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO TestTree
-goldenReplTree cfg ref ids dRef ses = return $ mkTreeTest cfg ref ids dRef d gtAct tre
+goldenReplTree :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> TestTree
+goldenReplTree cfg ref ids dRef ses = mkTreeTest cfg' ref ids dRef name gtAct tre
   where
     tre  = replace "tests/repl" "tests/tmpfiles" ses
     name = takeBaseName ses
-    d    = name <.> "txt" ++ " creates expected tmpfiles"
-    gtAct c r i d = do
+    cfg' = cfg { tmpdir = (tmpdir cfg </> name) }
+    -- d    = name <.> "txt" ++ " creates expected tmpfiles"
+    gtAct _ r i d = do
       txt <- readFileStrict r ses
       let stdin  = extractPrompted promptArrow txt
-          tmpOut = tmpdir c </> name ++ ".out" -- TODO remove?
-          c'     = c { tmpdir = (tmpdir c </> name) }
-      mockRepl stdin tmpOut (emptyScript, c', r, i, d)
+          tmpOut = tmpdir cfg </> name ++ ".out" -- TODO remove?
+      mockRepl stdin tmpOut (emptyScript, cfg, r, i, d)
       
 -- goldenReplTree cfg ref ids dRef ses = do
 --   txt <- readFileStrict ref ses
@@ -133,6 +133,6 @@ goldenReplTree cfg ref ids dRef ses = return $ mkTreeTest cfg ref ids dRef d gtA
 goldenReplTrees :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 goldenReplTrees cfg ref ids dRef = do
   txts <- findGoldenFiles
-  let tests = mapM (goldenReplTree cfg ref ids dRef) txts
-      group = testGroup "repl creates expected tmpfiles"
-  fmap group tests
+  let tests = map (goldenReplTree cfg ref ids dRef) txts
+      group = testGroup "repl creates expected tmpfiles" tests
+  return group

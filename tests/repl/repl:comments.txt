@@ -1,0 +1,22 @@
+Welcome to the OrthoLang interpreter!
+Type :help for a list of the available commands.
+
+ortholang —▶ # this tests comment handling.
+ortholang —▶ # comments should have no effect on the script of course.
+ortholang —▶ # the next prompt should be printed without a newline first
+ortholang —▶ # pressing enter with nothing on the line at all...
+ortholang —▶ 
+ortholang —▶ # should also count as a blank comment ^
+ortholang —▶ 1 # comments after naked expressions should be ignrored
+1
+
+ortholang —▶ :show
+result = 1
+
+ortholang —▶ test = 1 # same with comments after assignment statements
+ortholang —▶ :show
+test = 1
+
+ortholang —▶ :quit
+Bye for now!
+

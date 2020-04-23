@@ -48,7 +48,7 @@ promptArrow :: String
 promptArrow = " —▶ "
 
 shortPrompt :: Config -> String
-shortPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command didn't print anything
+shortPrompt cfg = name ++ promptArrow
   where
     name = case script cfg of
       Nothing -> "ortholang"
@@ -93,11 +93,11 @@ showAssignType (Var _ v, e) = unwords [typedVar, "=", prettyExpr]
 -- TODO show the whole script, since that only shows sAssigns now anyway?
 cmdShow :: ReplInfo
 cmdShow ms st@(_, c, _, _, _) hdl s | showvartypes c = cmdType ms st hdl s
-cmdShow _ st@(s, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s
+cmdShow _ st@(s, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> hPutStrLn hdl ""
 cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
   case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> pPrintHdl cfg hdl e
+    Just e  -> pPrintHdl cfg hdl e >> hPutStrLn hdl ""
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!

@@ -2,15 +2,12 @@ Welcome to the OrthoLang interpreter!
 Type :help for a list of the available commands.
 
 ortholang —▶ v1 = "original first var"
-
 ortholang —▶ v2 = "second var"
-
 ortholang —▶ :show
 v1 = "original first var"
 v2 = "second var"
 
 ortholang —▶ v1 = "replacement first var"
-
 ortholang —▶ :show
 v1 = "replacement first var"
 v2 = "second var"
@@ -19,7 +16,6 @@ ortholang —▶ v2
 "second var"
 
 ortholang —▶ v3 = "third var, inserted after result"
-
 ortholang —▶ :show
 v1 = "replacement first var"
 v2 = "second var"

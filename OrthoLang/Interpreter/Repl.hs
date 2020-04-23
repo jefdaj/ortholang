@@ -126,7 +126,7 @@ step mods st hdl mLine = case mLine of
 
 runStatement :: ReplEdit
 runStatement mods st@(scr, cfg, ref, ids, dRef) hdl line = case parseStatement mods cfg scr line of
-  Left  e -> hPutStrLn hdl e >> return st
+  Left  e -> hPutStrLn hdl (stripWhiteSpace e) >> return st
   Right r -> do
     let st' = (updateVars scr r, cfg, ref, ids, dRef)
     when (isExpr mods cfg scr line) (evalScript mods hdl st')
@@ -188,6 +188,7 @@ autosaveScript cfg scr = case script cfg of
 withSameState :: ReplInfo -> ReplEdit
 withSameState info mods env hdl s = do
   info mods env hdl s
+  hPutStrLn hdl "" -- extra newline before next prompt makes it look nicer
   return env
 
 -- TODO does this one need to be a special case now?
@@ -215,9 +216,9 @@ cmdConfig :: ReplEdit
 cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
   let ws = words s -- TODO only split on the first + second space, passing the rest as one string (for patterns)
   if (length ws == 0)
-    then hPutStrLn hdl (showConfig cfg) >> return st -- TODO Pretty instance?
+    then hPutStrLn hdl (showConfig cfg ++ "\n") >> return st -- TODO Pretty instance?
     else if (length ws  > 2)
-      then hPutStrLn hdl "too many variables" >> return st
+      then hPutStrLn hdl "too many variables\n" >> return st
       -- TODO any better way to handle this?
       -- TODO make repl tests for these
       else if (length ws == 1)
@@ -225,7 +226,7 @@ cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
         -- TODO remove modules, since they're never used and can't show/read
         then hPutStrLn hdl (showConfigField cfg $ head ws) >> return st -- TODO just the one field
         else case setConfigField cfg (headOrDie "cmdConfig failed" ws) (last ws) of
-               Left err -> hPutStrLn hdl err >> return st
+               Left err -> hPutStrLn hdl (err ++ "\n") >> return st
                Right iocfg' -> do
                  cfg' <- iocfg'
                  return (scr, cfg', ref, ids, dRef)

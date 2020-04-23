@@ -117,7 +117,7 @@ mkTreeTest ::  Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath
            -> String -> TestTree
 mkTreeTest cfg ref ids dRef name act t = goldenDiff d t (act' >> treeAct)
   where
-    act' = act cfg ref ids dRef
+    act' = act cfg ref ids dRef -- TODO put this in named subdir?
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
     d = name ++ ".ol creates expected tmpfiles"
