@@ -27,7 +27,7 @@ module OrthoLang.Interpreter.Parse.Script
   , parseFileIO
   , parseStatement
   , parseString
-  , lastResultOnly
+  -- , lastResultOnly
   , pScript
   , parseFile
   )
@@ -42,7 +42,7 @@ import OrthoLang.Types
 
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (when)
-import Data.List              (partition)
+-- import Data.List              (partition)
 -- import Data.List.Utils        (hasKeyAL)
 import OrthoLang.Util    (readFileStrict)
 import System.FilePath        ((</>), takeDirectory)
@@ -119,9 +119,13 @@ TODO If the statement is literally `result`, what do we do?
 -}
 pResult :: ParseM Assign
 pResult = debugParser "pResult" $ do
-  e <- pExpr
-  let res = Assign {aVar = Var (RepID Nothing) "result", aExpr = e}
-  return res -- TODO is there any new result digest needed?
+  e   <- pExpr
+  scr <- getState
+  let rv   = Var (RepID Nothing) "result"
+      ra   = Assign {aVar = rv, aExpr = e}
+      scr' = scr {sAssigns = delVar (sAssigns scr) rv, sResult = Just e}
+  putState scr'
+  return ra
 
 pStatement :: ParseM Assign
 pStatement = debugParser "pStatement" (try pAssign <|> pResult)
@@ -163,12 +167,12 @@ to reject multiple results.
 
 TODO one result *per repeat ID*, not total!
 -}
-lastResultOnly :: Script -> Script
-lastResultOnly s = s {sAssigns = otherVars ++ [lastRes]}
-  where
-    (resVars, otherVars) = partition (\a -> aVar a == Var (RepID Nothing) "result") (sAssigns s)
-    -- lastRes = trace ("resVars: " ++ show resVars) $ last resVars -- should be safe because we check for no result separately?
-    lastRes = last resVars -- should be safe because we check for no result separately?
+-- lastResultOnly :: Script -> Script
+-- lastResultOnly s = s {sAssigns = otherVars ++ [lastRes]}
+--   where
+--     (resVars, otherVars) = partition (\a -> aVar a == Var (RepID Nothing) "result") (sAssigns s)
+--     -- lastRes = trace ("resVars: " ++ show resVars) $ last resVars -- should be safe because we check for no result separately?
+--     lastRes = last resVars -- should be safe because we check for no result separately?
 
 {-|
 This one is special because if it parses it replaces the whole script in
@@ -182,16 +186,10 @@ pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   optional spaces
   as <- many pStatement
-  -- cfg <- ask -- not used at all
-  -- let scr  = emptyScript {sAssigns = as}
-  let scr  = Script {sAssigns = as, sResult = aExpr (last as)} -- TODO is the result right?
-      scr' = lastResultOnly scr
-      -- scr'' = scr' {sDigests = trace ("pScript ds: " ++ show ds) ds}
-  -- putState scr'
-  -- putDigests "pScript" $ map snd as -- TODO is this the only place it needs to be done?
+  scr <- getState
+  let scr' = scr {sAssigns = as} -- TODO is this redundant?
   putState scr'
   return scr'
-  -- return $ trace (unlines $ map show $ M.toList ds') scr' -- TODO remove
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?

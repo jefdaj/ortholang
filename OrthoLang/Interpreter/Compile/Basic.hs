@@ -89,7 +89,7 @@ rExpr s e@(Lit _ _      ) = rLit s e
 rExpr s e@(Ref _ _ _ _    ) = rRef s e
 rExpr s e@(Lst _ _   es) = mapM (rExpr s) es >> rList s e
 rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO is the map part needed?
-rExpr s e@(Bop t r ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t ds [e1, e2]] >> rBop s e
+rExpr s e@(Bop t _ ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t ds [e1, e2]] >> rBop s e -- TODO remove the map part?
 rExpr _ (Com (CompiledExpr _ _ rules)) = rules
 
 -- | Temporary hack to fix Bops
@@ -139,27 +139,13 @@ rAssign scr (Assign var expr) = do
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
 -- TODO remove permHash
-compileScript :: Script -> Rules ResPath
-compileScript scr = do
-  -- TODO this can't be done all in parallel because they depend on each other,
-  --      but can parts of it be parallelized? or maybe it doesn't matter because
-  --      evaluating the code itself is always faster than the system commands
-  rpaths <- mapM (rAssign scr) (sAssigns scr) -- TODO is having scr be both an issue? 
-  res <- case lookupResult rpaths of
-
-    -- TODO clean this up!
-    Nothing -> fmap (\(ExprPath p) -> p) $ rExpr scr $
-                    (\(Assign _ e) -> e) $ head $
-                    filter (\(Assign (Var _ v) _) -> v == "result") $
-                    ensureResult (sAssigns scr)
-
-    Just r  -> fmap (\(VarPath  p) -> p) $ return r
-  return $ ResPath res
-  -- where
-    -- p here is "result" + the permutation name/hash if there is one right?
-    -- res = case permHash of
-      -- Nothing -> "result"
-      -- Just h  -> "result." ++ h
+compileScript :: Script -> Rules (Maybe ResPath)
+compileScript scr = case sResult scr of
+  Nothing -> return Nothing
+  Just re -> do
+    _ <- mapM (rAssign scr) (sAssigns scr) -- TODO can this be done in parallel? does it matter?
+    (ExprPath p) <- rExpr scr re
+    return $ Just $ ResPath p
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn

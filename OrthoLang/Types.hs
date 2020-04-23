@@ -49,7 +49,7 @@ module OrthoLang.Types
   , emptyDigests
   , emptyIDs
   , emptyScript
-  , ensureResult
+  -- , ensureResult
   , extractExprs
   , findEncoding
   , findFun
@@ -61,7 +61,7 @@ module OrthoLang.Types
   , listFunctions
   , lit
   , lookupResult
-  , lookupResultAssign
+  -- , lookupResultAssign
   , num
   , operatorChars
   , rDepsOf
@@ -274,7 +274,10 @@ hasVar v as = isJust $ lookupVar v as
 delVar :: [Assign] -> Var -> [Assign]
 delVar as v = filter (\(Assign v2 _) -> v /= v2) as
 
-data Script = Script { sAssigns :: [Assign], sResult :: Expr }
+data Script = Script
+  { sAssigns :: [Assign]   -- ^ Assignment statements in user-specified order
+  , sResult  :: Maybe Expr -- ^ This should only be Nothing if the script is empty
+  }
   deriving (Show, Eq)
 
 -- TODO newtype to prevent the overlap?
@@ -289,17 +292,17 @@ instance Pretty Script where
   pPrint s = PP.vcat $ map pPrint $ sAssigns s
 
 emptyScript :: Script
-emptyScript = Script {sAssigns = [], sResult = undefined} -- TODO what should the empty result be?
+emptyScript = Script {sAssigns = [], sResult = Nothing}
 
 emptyDigests :: DigestMap
 emptyDigests = empty
 
-ensureResult :: [Assign] -> [Assign]
-ensureResult as = if null as then noRes else scr'
-  where
-    resVar = Var (RepID Nothing) "result"
-    noRes  = as ++ [Assign { aVar = resVar, aExpr = Lit str "no result"}] -- TODO always use last var
-    scr'   = as ++ [Assign { aVar = resVar, aExpr = aExpr $ last as }]
+-- ensureResult :: [Assign] -> [Assign]
+-- ensureResult as = if null as then noRes else scr'
+--   where
+--     resVar = Var (RepID Nothing) "result"
+--     noRes  = as ++ [Assign { aVar = resVar, aExpr = Lit str "no result"}] -- TODO always use last var
+--     scr'   = as ++ [Assign { aVar = resVar, aExpr = aExpr $ last as }]
 
 lookupResult :: [(Var, b)] -> Maybe b
 lookupResult scr = if null matches
@@ -308,12 +311,13 @@ lookupResult scr = if null matches
   where
     matches = filter (\(Var _ v, _) -> v == "result") scr
 
-lookupResultAssign :: [Assign] -> Maybe Expr
-lookupResultAssign as = if null matches
-  then (if null as then Nothing else Just (aExpr $ last as))
-  else Just (aExpr $ last matches)
-  where
-    matches = filter (\(Assign (Var _ v) _) -> v == "result") as
+-- TODO shouldn't be needed anymore right?
+-- lookupResultAssign :: [Assign] -> Maybe Expr
+-- lookupResultAssign as = if null matches
+--   then (if null as then Nothing else Just (aExpr $ last as))
+--   else Just (aExpr $ last matches)
+--   where
+--     matches = filter (\(Assign (Var _ v) _) -> v == "result") as
 
 typeOf :: Expr -> Type
 typeOf (Lit   t _      ) = t

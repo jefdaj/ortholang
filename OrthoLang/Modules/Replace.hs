@@ -147,7 +147,7 @@ rReplace' scr resExpr subVar@(Var _ _) subExpr = do
       deps  = filter (\a -> (elem (aVar a) $ depsOf resExpr ++ depsOf subExpr)) (sAssigns scr)
       newID = calcRepID scr resExpr subVar subExpr
       scr'  = setRepIDs newID $ scr {sAssigns = [sub] ++ deps ++ [res]}
-  (ResPath resPath) <- compileScript scr'
+  (ResPath resPath) <- fmap fromJust $ compileScript scr' -- TODO is this right??
   return (ExprPath resPath)
 
 {- This decides the "replace ID" in rReplace' above. It's important because the
