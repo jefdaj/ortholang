@@ -573,7 +573,6 @@ data Config = Config
   , showhidden  :: Bool
   , showvartypes :: Bool
   , autosave    :: Bool
-  , autoshow    :: Bool
   }
   deriving (Show)
 
