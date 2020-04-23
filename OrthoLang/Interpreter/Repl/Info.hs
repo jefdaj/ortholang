@@ -148,10 +148,10 @@ quotedCompletions wordSoFar = do
 nakedCompletions :: [Module] -> [String] -> String -> String -> ReplM [Completion]
 nakedCompletions mods cmdNames lineReveresed wordSoFar = do
   (scr, _, _, _, _) <- get
-  let wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts ++ cfgFields
+  let wordSoFarList = fnNames ++ varNames ++ cmdNames' ++ typeExts ++ cfgFields
       fnNames  = concatMap (map fName . mFunctions) mods
       varNames = map ((\(Var _ v) -> v) . fst) scr
-      cmdNames = map (':':) cmdNames
+      cmdNames' = map (':':) cmdNames
       typeExts = map ext $ concatMap mTypes mods
       cfgFields = map fst configFields
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
