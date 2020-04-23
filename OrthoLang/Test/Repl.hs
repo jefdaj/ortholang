@@ -7,11 +7,13 @@ import OrthoLang.Modules     (modules)
 import OrthoLang.Interpreter (mkRepl, toGeneric, promptArrow)
 import Paths_OrthoLang             (getDataFileName)
 import OrthoLang.Util         (readFileStrict)
+import OrthoLang.Test.Scripts (mkTestGroup, mkTreeTest)
 
 import System.IO.Temp             (emptySystemTempFile)
 import Control.Monad.Trans        (liftIO)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.List                  (isPrefixOf)
+import Data.List.Utils            (replace)
 import System.Directory           (createDirectoryIfMissing, removeFile) --, copyFile)
 import System.FilePath            (splitDirectories, joinPath)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
@@ -22,13 +24,6 @@ import Test.Tasty                 (TestTree, testGroup)
 import Test.Tasty.Golden          (goldenVsString, goldenVsFile, findByExtension)
 
 import System.Console.Haskeline hiding (catch)
-
-mkTestGroup ::  Config -> LocksRef -> IDsRef -> DigestsRef -> String
-            -> [Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree] -> IO TestTree
-mkTestGroup cfg ref ids dRef name trees = do
-  let trees' = mapM (\t -> t cfg ref ids dRef) trees
-  trees'' <- trees'
-  return $ testGroup name trees''
 
 mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkTests cfg ref ids dRef = mkTestGroup cfg ref ids dRef "mock REPL interaction"
@@ -56,9 +51,9 @@ mockPrompt handle stdinStr promptStr = do
 mockRepl :: [String] -> FilePath -> GlobalEnv -> IO ()
 mockRepl stdinLines path st@(_, cfg, ref, ids, dRef) = do
   tmpPath <- emptySystemTempFile "mockrepl"
-  withFile tmpPath WriteMode $ \handle -> do
+  withFile tmpPath WriteMode $ \h -> do
     -- putStrLn ("stdin: \"" ++ unlines stdinLines ++ "\"")
-    _ <- hCapture_ [stdout, stderr] $ mkRepl modules (map (mockPrompt handle) stdinLines) handle st
+    _ <- hCapture_ [stdout, stderr] $ mkRepl modules (map (mockPrompt h) stdinLines) h st
     -- putStrLn $ "stdout: \"" ++ out ++ "\""
     return ()
   out <- readFileStrict ref tmpPath
@@ -82,9 +77,9 @@ goldenRepl cfg ref ids dRef goldenFile = do
 
 knownFailing :: [FilePath]
 knownFailing =
-  [ "repl_fntypes"
-  , "repl_glob"
-  , "repl_loadlist"
+  [ "repl:fntypes"
+  , "repl:glob"
+  , "repl:loadlist"
   ]
 
 findGoldenFiles :: IO [FilePath]
@@ -92,7 +87,7 @@ findGoldenFiles = do
   testDir  <- getDataFileName "tests/repl"
   txtFiles <- findByExtension [".txt"] testDir
   let txtFiles' = filter (\t -> not $ (takeBaseName t) `elem` knownFailing) txtFiles
-  return $ filter (("repl_" `isPrefixOf`) . takeBaseName) $ txtFiles'
+  return txtFiles'
 
 goldenRepls :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 goldenRepls cfg ref ids dRef = do
@@ -102,26 +97,38 @@ goldenRepls cfg ref ids dRef = do
   fmap group tests
 
 goldenReplTree :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> IO TestTree
-goldenReplTree cfg ref ids dRef ses = do
-  txt <- readFileStrict ref ses
-  let name   = takeBaseName ses
-      d      = name <.> "txt" ++ " creates expected tmpfiles"
-      cfg'   = cfg { tmpdir = (tmpdir cfg </> name) }
-      -- tree   = replaceExtension (takeDi) "txt"
-      tree   = joinPath $ (init $ init $ splitDirectories ses)
-                      ++ ["tmpfiles", replaceExtension (takeBaseName ses) "txt"]
-      stdin  = extractPrompted promptArrow txt
-      tmpDir = tmpdir cfg'
-      tmpOut = tmpdir cfg </> name ++ ".out"
-      cmd    = (shell "tree -aI '*.lock|*.database'") { cwd = Just $ tmpDir }
-      action = do
-                 _ <- mockRepl stdin tmpOut (emptyScript, cfg', ref, ids, dRef)
-                 createDirectoryIfMissing True tmpDir
-                 out <- readCreateProcess cmd ""
-                 -- uncomment to update golden repl trees
-                 -- writeFile ("/home/jefdaj/ortholang/tests/tmpfiles" </> takeBaseName ses <.> "txt") $ toGeneric cfg out
-                 return $ pack $ toGeneric cfg out
-  return $ goldenVsString d tree action
+goldenReplTree cfg ref ids dRef ses = return $ mkTreeTest cfg ref ids dRef d gtAct tre
+  where
+    tre  = replace "tests/repl" "tests/tmpfiles" ses
+    name = takeBaseName ses
+    d    = name <.> "txt" ++ " creates expected tmpfiles"
+    gtAct c r i d = do
+      txt <- readFileStrict r ses
+      let stdin  = extractPrompted promptArrow txt
+          tmpOut = tmpdir c </> name ++ ".out" -- TODO remove?
+          c'     = c { tmpdir = (tmpdir c </> name) }
+      mockRepl stdin tmpOut (emptyScript, c', r, i, d)
+      
+-- goldenReplTree cfg ref ids dRef ses = do
+--   txt <- readFileStrict ref ses
+--   let name   = takeBaseName ses
+--       d      = name <.> "txt" ++ " creates expected tmpfiles"
+--       cfg'   = cfg { tmpdir = (tmpdir cfg </> name) }
+--       -- tree   = replaceExtension (takeDi) "txt"
+--       tree   = joinPath $ (init $ init $ splitDirectories ses)
+--                       ++ ["tmpfiles", replaceExtension (takeBaseName ses) "txt"]
+--       stdin  = extractPrompted promptArrow txt
+--       tmpDir = tmpdir cfg'
+--       tmpOut = tmpdir cfg </> name ++ ".out"
+--       cmd    = (shell "tree -aI '*.lock|*.database'") { cwd = Just $ tmpDir }
+--       action = do
+--          _ <- mockRepl stdin tmpOut (emptyScript, cfg', ref, ids, dRef)
+--          createDirectoryIfMissing True tmpDir
+--          out <- readCreateProcess cmd ""
+--          -- uncomment to update golden repl trees
+--          -- writeFile ("/home/jefdaj/ortholang/tests/tmpfiles" </> takeBaseName ses <.> "txt") $ toGeneric cfg out
+--          return $ pack $ toGeneric cfg out
+--   return $ goldenVsString d tree action
 
 goldenReplTrees :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 goldenReplTrees cfg ref ids dRef = do

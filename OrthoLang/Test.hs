@@ -11,7 +11,7 @@ module OrthoLang.Test
 import OrthoLang.Debug
 import OrthoLang.Types
 
-import OrthoLang.Test.Repl   (mkTestGroup)
+import OrthoLang.Test.Scripts (mkTestGroup)
 import Paths_OrthoLang       (getDataFileName)
 import System.Directory      (getTemporaryDirectory, createDirectoryIfMissing, setCurrentDirectory)
 import System.Environment    (setEnv, withArgs)
@@ -19,7 +19,7 @@ import System.FilePath.Posix ((</>))
 import System.IO.Temp        (withTempDirectory)
 import System.Process        (readCreateProcessWithExitCode, shell)
 import Test.Tasty            (TestTree, defaultMain)
-import System.Console.Docopt (Arguments, getArg, isPresent, longOption)
+import System.Console.Docopt (Arguments, getArg, longOption)
 -- import Data.List.Utils       (replace)
 
 -- we just need <each of these>.mkTests

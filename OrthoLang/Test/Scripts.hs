@@ -16,7 +16,6 @@ import Data.List             (zip7, isPrefixOf)
 import Data.List.Split       (splitOn)
 import Data.List.Utils       (replace)
 import OrthoLang.Modules     (modules)
-import OrthoLang.Test.Repl   (mkTestGroup)
 import Paths_OrthoLang       (getDataFileName)
 import System.Directory      (doesFileExist, createDirectoryIfMissing)
 import System.FilePath.Posix (takeBaseName, (</>), (<.>))
@@ -76,6 +75,13 @@ badlyBroken =
   , "sonicparanoid:myco3" -- TODO finish writing module first
   ]
 
+mkTestGroup ::  Config -> LocksRef -> IDsRef -> DigestsRef -> String
+            -> [Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree] -> IO TestTree
+mkTestGroup cfg ref ids dRef name trees = do
+  let trees' = mapM (\t -> t cfg ref ids dRef) trees
+  trees'' <- trees'
+  return $ testGroup name trees''
+
 getTestScripts :: FilePath -> Maybe String -> IO [FilePath]
 getTestScripts testDir mPrefix = do
   paths <- findByExtension [".ol"] testDir
@@ -105,19 +111,22 @@ mkOutTest cfg ref ids dRef sDir name gld = goldenDiff d gld scriptAct
 withTmpDirLock :: Config -> LocksRef -> IO a -> IO a
 withTmpDirLock cfg ref act = withWriteLockEmpty ref (tmpdir cfg </> "lock") act
 
-mkTreeTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath -> FilePath -> String -> TestTree
-mkTreeTest cfg ref ids dRef sDir name t = goldenDiff d t treeAct
+-- TODO use this in repl tree tests too
+mkTreeTest ::  Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath
+           -> (Config -> LocksRef -> IDsRef -> DigestsRef -> IO ())
+           -> String -> TestTree
+mkTreeTest cfg ref ids dRef name act t = goldenDiff d t (act' >> treeAct)
   where
+    act' = act cfg ref ids dRef
     -- Note that Test/Repl.hs also has a matching tree command
     -- TODO refactor them to come from the same fn
     d = name ++ ".ol creates expected tmpfiles"
     -- TODO add nondeterministic expression + cache dirs here by parsing modules:
-    ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|lines|output.txt|jobs|out|err'"
+    ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|*.show|*.out|lines|output.txt|jobs|out|err'"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
     treeCmd = "tree -a --dirsfirst --charset=ascii " ++ ignores ++ " | " ++ sedCmd
     wholeCmd = (shell treeCmd) { cwd = Just $ tmpdir cfg }
     treeAct = do
-      _ <- runScript cfg ref ids dRef
       out <- withTmpDirLock cfg ref $ fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
       -- writeFile ("tests/tmpfiles" </> takeBaseName t <.> "txt") out
@@ -215,8 +224,9 @@ mkScriptTests sDir (name, cut, parse, expand, out, tre, mchk) cfg ref ids dRef =
   let tripTest  = mkTripTest  cfg' ref ids dRef name cut parse
       expTest   = mkExpandTest  cfg' ref ids dRef name cut expand
       shareTest = mkShareTest cfg' ref ids dRef sDir name out
+      runScriptU c r i d = runScript c r i d >> return ()
       outTests  = if (name `elem` stdoutVaries) then [] else [mkOutTest  cfg' ref ids dRef sDir name out]
-      treeTests = if (name `elem` tmpfilesVary) then [] else [mkTreeTest cfg' ref ids dRef sDir name tre]
+      treeTests = if (name `elem` tmpfilesVary) then [] else [mkTreeTest cfg' ref ids dRef name runScriptU tre]
       tests     = if (name `elem` badlyBroken)
                      then []
                      else [tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]
