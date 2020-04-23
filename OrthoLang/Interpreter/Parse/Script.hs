@@ -18,7 +18,7 @@ module OrthoLang.Interpreter.Parse.Script
   , stripQuotes
 
   -- * Statements
-  , stripResult
+  -- , stripResult
   , pAssign
   , pResult
   , pStatement
@@ -74,11 +74,11 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 -- statements --
 ----------------
 
-stripResult :: Script -> Script
-stripResult scr = scr {sAssigns = filter notRes $ sAssigns scr}
-  where
-    notRes (Assign {aVar = Var _ "result"}) = False
-    notRes _ = True
+-- stripResult :: Script -> Script
+-- stripResult scr = scr {sAssigns = filter notRes $ sAssigns scr}
+  -- where
+    -- notRes (Assign {aVar = Var _ "result"}) = False
+    -- notRes _ = True
 
 -- TODO combine pVar and pVarEq somehow to reduce try issues?
 
@@ -96,8 +96,13 @@ pAssign = debugParser "pAssign" $ do
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
   -- "result" can be silently overwritten, but assigning another variable twice is an error
   -- TODO is that the best way to do it?
-  when (hasVar v (sAssigns s) && vName /= "result") $ do
+
+  -- TODO this causes replacement in the REPL to fail, but we do still want it for written scripts right?
+  -- TODO either add state to parsem (two ask fns easier) and check interactive, or raise + catch an exception in the repl
+  -- TODo in the repl we'll have to ask the user a question anyway right? maybe that makes the exception easier?
+  when (hasVar v (sAssigns s) && vName /= "result" && not (interactive cfg)) $ do -- TODO no failure here when interactive, right?
     fail $ "duplicate variable \"" ++ vName ++ "\""
+
   e <- lexeme pExpr
 
   -- TODO actually, is *this* the only place it's needed rather than in pScript?
@@ -120,11 +125,12 @@ TODO If the statement is literally `result`, what do we do?
 pResult :: ParseM Assign
 pResult = debugParser "pResult" $ do
   e   <- pExpr
-  scr <- getState
-  let rv   = Var (RepID Nothing) "result"
-      ra   = Assign {aVar = rv, aExpr = e}
-      scr' = scr {sAssigns = delVar (sAssigns scr) rv, sResult = Just e}
-  putState scr'
+  -- scr <- getState
+  let rv = Var (RepID Nothing) "result" -- TODO is it always Nothing?
+      ra = Assign {aVar = rv, aExpr = e}
+  putAssign "pResult" ra
+  --     scr' = scr {sAssigns = delVar (sAssigns scr) rv, sResult = Just e}
+  -- putState scr' -- TODO use putAssign here
   return ra
 
 pStatement :: ParseM Assign
@@ -185,11 +191,11 @@ TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   optional spaces
-  as <- many pStatement
+  _ <- many pStatement
   scr <- getState
-  let scr' = scr {sAssigns = as} -- TODO is this redundant?
-  putState scr'
-  return scr'
+  -- let scr' = scr {sAssigns = as} -- TODO is this redundant?
+  -- putState scr'
+  return scr
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?

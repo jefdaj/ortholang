@@ -49,7 +49,6 @@ module OrthoLang.Types
   , emptyDigests
   , emptyIDs
   , emptyScript
-  -- , ensureResult
   , extractExprs
   , findEncoding
   , findFun
@@ -60,8 +59,6 @@ module OrthoLang.Types
   , listFunctionNames
   , listFunctions
   , lit
-  , lookupResult
-  -- , lookupResultAssign
   , num
   , operatorChars
   , rDepsOf
@@ -271,8 +268,9 @@ lookupVar v as = let tuples = map (\(Assign v2 e) -> (v2,e)) as in lookup v tupl
 hasVar :: Var -> [Assign] -> Bool
 hasVar v as = isJust $ lookupVar v as
 
-delVar :: [Assign] -> Var -> [Assign]
-delVar as v = filter (\(Assign v2 _) -> v /= v2) as
+-- TODO any need to compare more than the name? anything to do with reps?
+delVar :: [Assign] -> String -> [Assign]
+delVar as vName = filter (\(Assign {aVar = Var _ n}) -> n /= vName) as
 
 data Script = Script
   { sAssigns :: [Assign]   -- ^ Assignment statements in user-specified order
@@ -288,36 +286,14 @@ instance Pretty Assign where
 
 -- TODO is totally ignoring the sDigests part OK here?
 instance Pretty Script where
-  pPrint (Script {sAssigns = []}) = PP.empty
-  pPrint s = PP.vcat $ map pPrint $ sAssigns s
+  pPrint (Script {sResult = Nothing}) = PP.empty -- TODO enforce that sAssigns is also empty? it should be
+  pPrint (Script {sResult = Just _, sAssigns = as}) = PP.vcat $ map pPrint as
 
 emptyScript :: Script
 emptyScript = Script {sAssigns = [], sResult = Nothing}
 
 emptyDigests :: DigestMap
 emptyDigests = empty
-
--- ensureResult :: [Assign] -> [Assign]
--- ensureResult as = if null as then noRes else scr'
---   where
---     resVar = Var (RepID Nothing) "result"
---     noRes  = as ++ [Assign { aVar = resVar, aExpr = Lit str "no result"}] -- TODO always use last var
---     scr'   = as ++ [Assign { aVar = resVar, aExpr = aExpr $ last as }]
-
-lookupResult :: [(Var, b)] -> Maybe b
-lookupResult scr = if null matches
-  then (if null scr then Nothing else Just (snd $ last scr))
-  else Just (snd $ last matches)
-  where
-    matches = filter (\(Var _ v, _) -> v == "result") scr
-
--- TODO shouldn't be needed anymore right?
--- lookupResultAssign :: [Assign] -> Maybe Expr
--- lookupResultAssign as = if null matches
---   then (if null as then Nothing else Just (aExpr $ last as))
---   else Just (aExpr $ last matches)
---   where
---     matches = filter (\(Assign (Var _ v) _) -> v == "result") as
 
 typeOf :: Expr -> Type
 typeOf (Lit   t _      ) = t

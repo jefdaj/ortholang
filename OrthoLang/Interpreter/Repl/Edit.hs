@@ -115,21 +115,21 @@ cmdDrop _ st@(scr, cfg, ref, ids, dRef) hdl var = do
   let v = Var (RepID Nothing) var
   case lookupVar v (sAssigns scr) of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
-    Just _  -> return (scr {sAssigns = delVar (sAssigns scr) v}, cfg, ref, ids, dRef)
+    Just _  -> return (scr {sAssigns = delVar (sAssigns scr) var}, cfg, ref, ids, dRef)
 
 -- this is needed to avoid assigning a variable literally to itself,
 -- which is especially a problem when auto-assigning "result"
 -- TODO is this where we can easily require the replacement var's type to match if it has deps?
 -- TODO what happens if you try that in a script? it should fail i guess?
 updateVars :: Script -> Assign -> Script
-updateVars scr asn = scr {sAssigns = as'}
+updateVars scr asn@(Assign {aVar = Var _ vName}) = scr {sAssigns = as'}
   where
     res = Var (RepID Nothing) "result"
     asn' = removeSelfReferences scr asn
     as  = sAssigns scr
     as' = if aVar asn /= res && aVar asn `elem` map aVar as
             then replaceVar asn' as
-            else delVar as (aVar asn) ++ [asn']
+            else delVar as vName ++ [asn']
 
 -- replace an existing var in a script
 replaceVar :: Assign -> [Assign] -> [Assign]

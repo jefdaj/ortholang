@@ -49,11 +49,15 @@ import Control.Monad.Reader   (ask)
 -- utilites --
 --------------
 
+-- TODO remove the first string (parser name)? or use it to debug
 putAssign :: String -> Assign -> ParseM ()
-putAssign name a = do
+putAssign _ a@(Assign {aVar = Var _ vName}) = do
   scr <- getState
-  let as' = trace name ("adding assignment: " ++ show a) $ (sAssigns scr) ++ [a]
-      scr' = scr {sAssigns = as', sResult = if null (sResult scr) then Just (aExpr a) else (sResult scr) }
+  let as' = (if null (sResult scr) then (sAssigns scr) else delVar (sAssigns scr) "result") ++ [a]
+      re' =  if null (sResult scr) || vName == "result"
+               then Just (aExpr a)
+               else (sResult scr)
+      scr' = scr {sAssigns = as', sResult = re'}
   putState scr'
 
 {-|
