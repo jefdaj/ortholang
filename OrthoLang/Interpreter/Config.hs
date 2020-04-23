@@ -96,6 +96,8 @@ loadConfig args = do
       progressbar = isPresent args $ longOption "progressbar"
       showhidden  = isPresent args $ longOption "showhidden"
       showvartypes = isPresent args $ longOption "showvartypes"
+      autosave  = isPresent args $ longOption "autosave"
+      autoshow  = isPresent args $ longOption "autoshow"
   let res = Config { .. }
   -- debug' $ show res
   setLogLevel LevelDebug
@@ -158,6 +160,8 @@ configFields =
   , ("showvartypes" , (show . showvartypes , mkSet parseBool (\c b -> return (c {showvartypes = b}))))
   , ("shellaccess" , (show . shellaccess , mkSet parseBool (\c _ -> putStrLn securityMessage >> return c)))
   , ("progressbar" , (show . progressbar , mkSet parseBool (\c b -> return (c {progressbar = b}))))
+  , ("autosave" , (show . autosave , mkSet parseBool (\c b -> return (c {autosave = b}))))
+  , ("autoshow" , (show . autoshow , mkSet parseBool (\c b -> return (c {autoshow = b}))))
   ]
 
 securityMessage :: String

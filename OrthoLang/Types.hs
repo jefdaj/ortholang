@@ -571,6 +571,8 @@ data Config = Config
   , progressbar :: Bool
   , showhidden  :: Bool
   , showvartypes :: Bool
+  , autosave    :: Bool
+  , autoshow    :: Bool
   }
   deriving (Show)
 
