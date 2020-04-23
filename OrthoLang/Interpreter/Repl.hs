@@ -50,7 +50,7 @@ import OrthoLang.Interpreter.Config    (showConfig, showConfigField, setConfigFi
 import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 
-import Control.Exception.Safe     (Exception, Typeable, throw)
+import Control.Exception.Safe     (Exception, throw)
 import Control.Monad              (when)
 import Control.Monad.IO.Class     (liftIO)
 import Control.Monad.State.Strict (lift, get, put)
@@ -193,18 +193,20 @@ withSameState info mods env hdl s = do
 
 -- TODO does this one need to be a special case now?
 cmdQuit :: ReplEdit
-cmdQuit _ _ _ _ = throw QuitRepl
+cmdQuit _ _ hdl _ = do
+  hPutStrLn hdl "Bye for now!"
+  throw QuitRepl
 
 -- TODO move to Types.hs
 -- TODO use this pattern for other errors? or remove?
 
 data QuitRepl = QuitRepl
-  deriving Typeable
+  deriving Show -- TODO was the Typeable instance important too?
 
 instance Exception QuitRepl
 
-instance Show QuitRepl where
-  show QuitRepl = "Bye for now!"
+-- instance Show QuitRepl where
+  -- show QuitRepl = "Bye for now!" -- TODO get this to print
 
 cmdBang :: ReplEdit
 cmdBang _ st _ cmd = (runCommand cmd >>= waitForProcess) >> return st

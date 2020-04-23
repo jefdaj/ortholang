@@ -372,7 +372,7 @@ printShort cfg ref idsref pm rtype path = do
   -- TODO fix the bug that causes this to remove newlines after seqids:
   -- liftIO $ putStrLn $ "here are all the current ids:\n" ++ T.unpack (pShowNoColor ids)
   res' <- fmap (unhashIDs False ids) $ liftIO $ renderIO cfg res -- TODO why doesn't this handle a str.list?
-  liftIO $ P.putMsgLn pm res'
+  liftIO $ P.putMsgLn pm $ res' ++ "\n"
   -- liftIO $ putStrLn $ "done rendering with unhashIDs"
 
 -- TODO get the type of result and pass to eval

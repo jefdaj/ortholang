@@ -11,23 +11,26 @@ v3 = [v1, v2]
 
 ortholang —▶ :neededfor v1
 v1 = "one"
+
+ortholang —▶ :neededfor v2
+v2 = "two"
+
+ortholang —▶ :neededfor v3
+v1 = "one"
+v2 = "two"
 v3 = [v1, v2]
 
-ortholang —▶ :rdep v2
-unknown command: rdep
-
-ortholang —▶ :rdep v3
-unknown command: rdep
-
 ortholang —▶ v4 = v3
-
-ortholang —▶ :rdep v3
-unknown command: rdep
+ortholang —▶ :neededfor v3
+v1 = "one"
+v2 = "two"
+v3 = [v1, v2]
 
 ortholang —▶ v5 = v4
-
-ortholang —▶ :rdep v3
-unknown command: rdep
+ortholang —▶ :neededfor v3
+v1 = "one"
+v2 = "two"
+v3 = [v1, v2]
 
 ortholang —▶ :quit
 Bye for now!

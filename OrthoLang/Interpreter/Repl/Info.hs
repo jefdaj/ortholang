@@ -42,7 +42,7 @@ import System.IO                  (Handle, hPutStrLn)
 welcome :: Handle -> IO ()
 welcome hdl = hPutStrLn hdl
   "Welcome to the OrthoLang interpreter!\n\
-  \Type :help for a list of the available commands."
+  \Type :help for a list of the available commands.\n"
 
 promptArrow :: String
 promptArrow = " —▶ "
@@ -93,11 +93,11 @@ showAssignType (Var _ v, e) = unwords [typedVar, "=", prettyExpr]
 -- TODO show the whole script, since that only shows sAssigns now anyway?
 cmdShow :: ReplInfo
 cmdShow ms st@(_, c, _, _, _) hdl s | showvartypes c = cmdType ms st hdl s
-cmdShow _ st@(s, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> hPutStrLn hdl ""
+cmdShow _ st@(s, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s -- >> hPutStrLn hdl ""
 cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
   case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> pPrintHdl cfg hdl e >> hPutStrLn hdl ""
+    Just e  -> pPrintHdl cfg hdl e -- >> hPutStrLn hdl ""
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
@@ -112,7 +112,7 @@ cmdNeededFor _ st@(scr, cfg, _, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
   case lookup var' scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):rDepsOf scr var') scr
+    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
 
 
 --------------------

@@ -19,14 +19,10 @@ GCATCGTAGCTAGCTACGAT
 ortholang —▶ :show
 result = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
 
-ortholang —▶ # this should be different!
-
 ortholang —▶ samplefa = result
-
 ortholang —▶ :show
 result = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
 samplefa = result
 
 ortholang —▶ :quit
 Bye for now!
-
