@@ -12,6 +12,7 @@ module OrthoLang.Interpreter.Parse.Util
     parseWithEof
   , debugParser
   , parseFail
+  , stripComments
 
   -- , ParseM
   -- , parseAndShow
@@ -32,6 +33,14 @@ import Control.Monad.Trans        (lift)
 import Control.Monad.Trans.Except (throwE)
 
 -- TODO make an empty GlobalEnv so you can run these in ghci again?
+
+{-|
+Strips all comments from a script, leaving whitespace.
+-}
+stripComments :: String -> String
+stripComments = unlines . map stripComment . lines
+  where
+    stripComment = takeWhile (/= '#')
 
 -- this works, but is only needed for manual debugging:
 -- parseAndShow :: (Show a) => [Module] -> ParseM a -> Config -> Script -> String -> String

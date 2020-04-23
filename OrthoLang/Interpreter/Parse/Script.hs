@@ -14,8 +14,7 @@ Overall script parsing strategy:
 module OrthoLang.Interpreter.Parse.Script
   (
   -- * Preprocessing
-    stripComments
-  , readScriptWithIncludes
+    readScriptWithIncludes
   , stripQuotes
 
   -- * Statements
@@ -37,7 +36,7 @@ module OrthoLang.Interpreter.Parse.Script
 import OrthoLang.Debug
 import OrthoLang.Interpreter.Parse.Basic
 import OrthoLang.Interpreter.Parse.Expr
-import OrthoLang.Interpreter.Parse.Util (debugParser, parseWithEof)
+import OrthoLang.Interpreter.Parse.Util (debugParser, parseWithEof, stripComments)
 import OrthoLang.Types
 -- import OrthoLang.Interpreter.Paths (scriptDigests)
 
@@ -55,14 +54,6 @@ import Text.Parsec.Combinator (optional)
 -------------------
 -- preprocessing --
 -------------------
-
-{-|
-Strips all comments from a script, leaving whitespace.
--}
-stripComments :: String -> String
-stripComments = unlines . map stripComment . lines
-  where
-    stripComment = takeWhile (/= '#')
 
 -- TODO make this parser nicer like the others? or leave simple like other languages?
 readScriptWithIncludes :: LocksRef -> FilePath -> IO String

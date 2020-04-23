@@ -16,6 +16,7 @@ module OrthoLang.Interpreter.Parse
 
   -- * Functions used elsewhere in core
   , isExpr
+  , stripComments
   , parseExpr
   , parseStatement
   , parseFile
@@ -46,6 +47,6 @@ module OrthoLang.Interpreter.Parse
 import OrthoLang.Interpreter.Parse.Basic
 import OrthoLang.Interpreter.Parse.Expr
 import OrthoLang.Interpreter.Parse.Script
--- import OrthoLang.Interpreter.Parse.Util
+import OrthoLang.Interpreter.Parse.Util
 
 import Text.Parsec (ParseError)

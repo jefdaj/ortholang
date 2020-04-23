@@ -36,7 +36,7 @@ import Prelude hiding (error)
 import OrthoLang.Debug
 import OrthoLang.Types
 import OrthoLang.Interpreter.Parse.Basic
-import OrthoLang.Interpreter.Parse.Util (debugParser, parseWithEof, parseFail)
+import OrthoLang.Interpreter.Parse.Util (debugParser, parseWithEof, parseFail, stripComments)
 import OrthoLang.Util (headOrDie)
 
 import qualified Text.Parsec.Expr as E
@@ -387,7 +387,7 @@ pExpr = debugParser "pExpr" $ do
 -- TODO is this incorrectly counting assignment statements of 'result = ...'?
 --      (maybe because it only parses the varname and returns?)
 isExpr :: [Module] -> Config -> Script -> String -> Bool
-isExpr mods cfg scr line = isRight $ parseWithEof mods pExpr cfg scr line
+isExpr mods cfg scr line = isRight $ parseWithEof mods pExpr cfg scr $ stripComments line
 
 -- TODO make this return the "result" assignment directly?
 parseExpr :: [Module] -> Config -> Script -> String -> Either String Expr

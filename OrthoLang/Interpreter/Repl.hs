@@ -45,7 +45,7 @@ import OrthoLang.Interpreter.Repl.Edit
 import OrthoLang.Interpreter.Repl.Info
 
 import OrthoLang.Interpreter.Eval          (evalScript)
-import OrthoLang.Interpreter.Parse         (isExpr, parseStatement)
+import OrthoLang.Interpreter.Parse         (isExpr, parseStatement, stripComments)
 import OrthoLang.Interpreter.Config    (showConfig, showConfigField, setConfigField)
 import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
@@ -117,7 +117,7 @@ loop mods (promptFn:promptFns) hdl = do
 step :: [Module] -> GlobalEnv -> Handle -> Maybe String -> IO GlobalEnv
 step mods st hdl mLine = case mLine of
   Nothing -> return st
-  Just line -> case stripWhiteSpace line of
+  Just line -> case stripWhiteSpace (stripComments line) of
     ""        -> return st
     ('#':_  ) -> return st
     (':':cmd) -> runCmd mods st hdl cmd

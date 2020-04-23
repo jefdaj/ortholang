@@ -7,7 +7,7 @@ ortholang —▶ # the next prompt should be printed without a newline first
 ortholang —▶ # pressing enter with nothing on the line at all...
 ortholang —▶ 
 ortholang —▶ # should also count as a blank comment ^
-ortholang —▶ 1 # comments after naked expressions should be ignrored
+ortholang —▶ 1 # comments after naked expressions should be ignored
 1
 
 ortholang —▶ :show
@@ -16,7 +16,7 @@ result = 1
 ortholang —▶ test = 1 # same with comments after assignment statements
 ortholang —▶ :show
 test = 1
+result = test
 
 ortholang —▶ :quit
 Bye for now!
-
