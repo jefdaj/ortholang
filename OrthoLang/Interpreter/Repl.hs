@@ -39,6 +39,7 @@ module OrthoLang.Interpreter.Repl
 import Prelude hiding (print)
 
 import OrthoLang.Types
+import OrthoLang.Debug (debug)
 import OrthoLang.Interpreter.Repl.Help
 import OrthoLang.Interpreter.Repl.Edit
 import OrthoLang.Interpreter.Repl.Info
@@ -171,16 +172,16 @@ cmds cfg = secureCmds ++ replCmds ++ editCmds ++ infoCmds
 
 -- | Run a 'ReplEdit' command with post-edit hooks
 withPostEditHook :: ReplEdit -> ReplEdit
-withPostEditHook edit mods env hdl s = do
-  env'@(scr, cfg, _, _, _) <- edit mods env hdl s -- TODO abort on exceptions here rather than saving
-  autosaveScript cfg scr
+withPostEditHook edit mods env@(scr, _, _, _, _) hdl s = do
+  env'@(scr', cfg', _, _, _) <- edit mods env hdl s
+  when (scr /= scr') $ autosaveScript cfg' scr'
   return env'
 
 autosaveScript :: Config -> Script -> IO ()
 autosaveScript cfg scr = case script cfg of
   Nothing   -> return ()
   Just path -> when (autosave cfg) $ do
-    -- putStrLn $ "autosaving '" ++ path ++ "'..."
+    debug "interpreter.repl.autosaveScript" $ "autosaving '" ++ path ++ "'..."
     saveScript cfg scr path
 
 -- | Run a 'ReplInfo' command and return the initial state

@@ -574,7 +574,7 @@ data Config = Config
   , showvartypes :: Bool
   , autosave    :: Bool
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- TODO update this by mapping over the fields
 instance Pretty Config where
