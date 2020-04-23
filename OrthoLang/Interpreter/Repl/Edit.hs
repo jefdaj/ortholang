@@ -1,11 +1,9 @@
-module OrthoLang.Interpreter.Repl.Actions
+module OrthoLang.Interpreter.Repl.Edit
   (
 
   -- * Repl commands
     cmdDrop
   , cmdLoad
-  , cmdNeededBy
-  , cmdNeededFor
   , cmdReload
   , cmdWrite
 
@@ -15,7 +13,7 @@ module OrthoLang.Interpreter.Repl.Actions
   , removeSelfReferences
   , replaceVar
   , rmRef
-  , runStatement
+  -- , runStatement
   , saveScript
   , updateVars
 
@@ -25,12 +23,10 @@ module OrthoLang.Interpreter.Repl.Actions
 import Prelude hiding (print)
 
 import OrthoLang.Types
-import OrthoLang.Interpreter.Eval          (evalScript)
-import OrthoLang.Interpreter.Parse         (isExpr, parseStatement, parseFile)
-import OrthoLang.Interpreter.Repl.Messages (cmdShow)
+import OrthoLang.Interpreter.Repl.Info (cmdShow)
+import OrthoLang.Interpreter.Parse         (parseFile)
 import OrthoLang.Util               (absolutize, justOrDie)
 
-import Control.Monad       (when)
 import Data.List           (filter, delete)
 import Data.List.Utils     (delFromAL)
 import System.Console.ANSI (clearScreen, cursorUp)
@@ -56,7 +52,11 @@ cmdLoad mods st@(scr, cfg, ref, ids, dRef) hdl path = do
       new <- parseFile mods (scr, cfg', ref, ids, dRef) path' -- TODO insert ids
       case new of
         Left  e -> hPutStrLn hdl (show e) >> return st
-        Right s -> clear >> cmdShow mods (s, cfg', ref, ids, dRef) hdl ""
+        Right s -> do
+          clear
+          let st' = (s, cfg', ref, ids, dRef)
+          cmdShow mods st' hdl ""
+          return st'
 
 cmdReload :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
 cmdReload mods st@(_, cfg, _, _, _) hdl _ = case script cfg of
@@ -64,14 +64,21 @@ cmdReload mods st@(_, cfg, _, _, _) hdl _ = case script cfg of
   Just s  -> cmdLoad mods st hdl s
 
 cmdWrite :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
-cmdWrite mods st@(scr, cfg, locks, ids, dRef) hdl line = case words line of
-  [path] -> do
-    saveScript cfg scr path
-    return (scr, cfg { script = Just path }, locks, ids, dRef)
-  [var, path] -> case lookup (Var (RepID Nothing) var) scr of
-    Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
-    Just e  -> saveScript cfg (depsOnly e scr) path >> return st
-  _ -> hPutStrLn hdl ("invalid save command: \"" ++ line ++ "\"") >> return st
+cmdWrite _ st@(scr, cfg, locks, ids, dRef) hdl line =
+  let printErrorMsg = hPutStrLn hdl ("invalid write command: \"" ++ line ++ "\"") >> return st
+  in case words line of
+       [] -> case script cfg of
+             Nothing -> printErrorMsg
+             Just path -> do
+               saveScript cfg scr path
+               return st
+       [path] -> do
+         saveScript cfg scr path
+         return (scr, cfg { script = Just path }, locks, ids, dRef)
+       [var, path] -> case lookup (Var (RepID Nothing) var) scr of
+         Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
+         Just e  -> saveScript cfg (depsOnly e scr) path >> return st
+       _ -> printErrorMsg
 
 -- TODO where should this go?
 depsOnly :: Expr -> Script -> Script
@@ -85,46 +92,20 @@ depsOnly expr scr = deps ++ [res]
 writeScript :: Config -> Script -> FilePath -> IO ()
 writeScript cfg scr path = do
   txt <- renderIO cfg $ pPrint scr
-  writeBinaryFile path txt
+  writeBinaryFile path $ txt ++ "\n"
 
 -- TODO where should this go?
 saveScript :: Config -> Script -> FilePath -> IO ()
 saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 
 -- TODO factor out the variable lookup stuff
--- TODO except, this should work with expressions too!
-cmdNeededBy :: ReplCmd
-cmdNeededBy _ st@(scr, cfg, _, _, _) hdl var = do
-  case lookup (Var (RepID Nothing) var) scr of
-    Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
-  return st
-
-cmdNeededFor :: ReplCmd
-cmdNeededFor _ st@(scr, cfg, _, _, _) hdl var = do
-  let var' = Var (RepID Nothing) var
-  case lookup var' scr of
-    Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):rDepsOf scr var') scr
-  return st
-
--- TODO factor out the variable lookup stuff
-cmdDrop :: ReplCmd
+cmdDrop :: ReplEdit
 cmdDrop _ (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { script = Nothing }, ref, ids, dRef)
 cmdDrop _ st@(scr, cfg, ref, ids, dRef) hdl var = do
   let v = Var (RepID Nothing) var
   case lookup v scr of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just _  -> return (delFromAL scr v, cfg, ref, ids, dRef)
-
--- TODO insert ids
-runStatement :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
-runStatement mods st@(scr, cfg, ref, ids, dRef) hdl line = case parseStatement mods cfg scr line of
-  Left  e -> hPutStrLn hdl e >> return st
-  Right r -> do
-    let st' = (updateVars scr r, cfg, ref, ids, dRef)
-    when (isExpr mods cfg scr line) (evalScript mods hdl st')
-    return st'
 
 -- this is needed to avoid assigning a variable literally to itself,
 -- which is especially a problem when auto-assigning "result"

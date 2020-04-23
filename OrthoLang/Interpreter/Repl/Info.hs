@@ -1,10 +1,12 @@
-module OrthoLang.Interpreter.Repl.Messages
+module OrthoLang.Interpreter.Repl.Info
   (
 
   -- * Repl commands
     cmdHelp
   , cmdShow
   , cmdType
+  , cmdNeededBy
+  , cmdNeededFor
 
   -- * Implementation details
   , myComplete
@@ -57,13 +59,13 @@ shortPrompt cfg = "\n" ++ name ++ promptArrow -- TODO no newline if last command
 -- TODO if possible, make this open in `less`?
 -- TODO why does this one have a weird path before the :help text?
 -- TODO bop help by mapping to the prefixOf version
-cmdHelp :: ReplCmd
+cmdHelp :: ReplInfo
 cmdHelp ms st@(_, cfg, _, _, _) hdl line = do
   doc <- help cfg ms line
-  hPutStrLn hdl doc >> return st
+  hPutStrLn hdl doc
 
-cmdType :: ReplCmd
-cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
+cmdType :: ReplInfo
+cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo
   where
     typeInfo = case stripWhiteSpace s of
       "" -> allTypes
@@ -89,14 +91,29 @@ showAssignType (Var _ v, e) = unwords [typedVar, "=", prettyExpr]
 
 -- TODO factor out the variable lookup stuff
 -- TODO show the whole script, since that only shows sAssigns now anyway?
-cmdShow :: ReplCmd
+cmdShow :: ReplInfo
 cmdShow ms st@(_, c, _, _, _) hdl s | showvartypes c = cmdType ms st hdl s
-cmdShow _ st@(s, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s >> return st
+cmdShow _ st@(s, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) s
 cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
   case lookup (Var (RepID Nothing) var) scr of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e
-  return st
+
+-- TODO factor out the variable lookup stuff
+-- TODO except, this should work with expressions too!
+cmdNeededBy :: ReplInfo
+cmdNeededBy _ st@(scr, cfg, _, _, _) hdl var = do
+  case lookup (Var (RepID Nothing) var) scr of
+    Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
+    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
+
+cmdNeededFor :: ReplInfo
+cmdNeededFor _ st@(scr, cfg, _, _, _) hdl var = do
+  let var' = Var (RepID Nothing) var
+  case lookup var' scr of
+    Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
+    Just _  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):rDepsOf scr var') scr
+
 
 --------------------
 -- tab completion --
@@ -104,11 +121,11 @@ cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
 
 -- this is mostly lifted from Haskeline's completeFile
 -- TODO clean up cfg, cmds stuff
-myComplete :: [Module] -> [(String, ReplCmd)] -> CompletionFunc ReplM
-myComplete mods cmds
+myComplete :: [Module] -> [String] -> CompletionFunc ReplM
+myComplete mods cmdNames
   = completeQuotedWord   escChars quotes quotedCompletions
   $ completeWordWithPrev escChars (quotes ++ filenameWordBreakChars)
-  $ nakedCompletions mods cmds
+  $ nakedCompletions mods cmdNames
   where
     escChars = Just '\\'
     quotes = "\"\""
@@ -128,13 +145,13 @@ quotedCompletions wordSoFar = do
 -- complete everything else: fn names, var names, :commands, types
 -- these can be filenames too, but only if the line starts with a :command
 -- nakedCompletions :: String -> String -> ReplM [Completion]
-nakedCompletions :: [Module] -> [(String, ReplCmd)] -> String -> String -> ReplM [Completion]
-nakedCompletions mods cmds lineReveresed wordSoFar = do
+nakedCompletions :: [Module] -> [String] -> String -> String -> ReplM [Completion]
+nakedCompletions mods cmdNames lineReveresed wordSoFar = do
   (scr, _, _, _, _) <- get
   let wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts ++ cfgFields
       fnNames  = concatMap (map fName . mFunctions) mods
       varNames = map ((\(Var _ v) -> v) . fst) scr
-      cmdNames = map ((':':) . fst) cmds
+      cmdNames = map (':':) cmdNames
       typeExts = map ext $ concatMap mTypes mods
       cfgFields = map fst configFields
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []

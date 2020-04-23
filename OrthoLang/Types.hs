@@ -28,7 +28,8 @@ module OrthoLang.Types
   , Path(..)
   , PathDigest(..)
   , RepID(..)
-  , ReplCmd
+  , ReplInfo
+  , ReplEdit
   , ReplM
   , ResPath(..)
   , RulesEnv
@@ -272,7 +273,7 @@ instance {-# OVERLAPPING #-} Pretty Assign where
 -- TODO is totally ignoring the sDigests part OK here?
 instance {-# OVERLAPPING #-} Pretty Script where
   pPrint [] = PP.empty
-  pPrint as = PP.vcat $ map pPrint as
+  pPrint as = PP.vcat $ map pPrint as -- TODO newline at the end?
 
 emptyScript :: Script
 emptyScript = []
@@ -785,7 +786,8 @@ runReplM settings myLoop st@(_, cfg, _, _, _) = do
   _ <- execStateT (runInputT settings myLoop) st
   return ()
 
-type ReplCmd = [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
+type ReplInfo = [Module] -> GlobalEnv -> Handle -> String -> IO ()
+type ReplEdit = [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
 
 
 ---------------------

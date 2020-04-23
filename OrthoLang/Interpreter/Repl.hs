@@ -40,14 +40,17 @@ import Prelude hiding (print)
 
 import OrthoLang.Types
 import OrthoLang.Interpreter.Repl.Help
-import OrthoLang.Interpreter.Repl.Actions
-import OrthoLang.Interpreter.Repl.Messages
+import OrthoLang.Interpreter.Repl.Edit
+import OrthoLang.Interpreter.Repl.Info
 
+import OrthoLang.Interpreter.Eval          (evalScript)
+import OrthoLang.Interpreter.Parse         (isExpr, parseStatement)
 import OrthoLang.Interpreter.Config    (showConfig, showConfigField, setConfigField)
 import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 
 import Control.Exception.Safe     (Exception, Typeable, throw)
+import Control.Monad              (when)
 import Control.Monad.IO.Class     (liftIO)
 import Control.Monad.State.Strict (lift, get, put)
 import Data.Char                  (isSpace)
@@ -91,8 +94,7 @@ mkRepl mods promptFns hdl (_, cfg, ref, ids, dRef) = do
 -- TODO should the new statement go where the old one was, or at the end??
 --
 -- The weird list of prompt functions allows mocking stdin for golded testing.
--- (No need to mock print because stdout can be captured directly)
---
+-- (No need to mock print because stdout can be captured directly) --
 -- The `(Maybe String)` is for signaling the end of user input. `Nothing` comes
 -- through if the user actually types :quit during their REPL session, or when
 -- the last input promptFn from a Golden test has been used.
@@ -117,8 +119,17 @@ step mods st hdl mLine = case mLine of
   Just line -> case stripWhiteSpace line of
     ""        -> return st
     ('#':_  ) -> return st
-    (':':cmd) -> runCmd       mods st hdl cmd
-    statement -> runStatement mods st hdl statement
+    (':':cmd) -> runCmd mods st hdl cmd
+    statement -> withPostEditHook
+                   runStatement mods st hdl statement
+
+runStatement :: ReplEdit
+runStatement mods st@(scr, cfg, ref, ids, dRef) hdl line = case parseStatement mods cfg scr line of
+  Left  e -> hPutStrLn hdl e >> return st
+  Right r -> do
+    let st' = (updateVars scr r, cfg, ref, ids, dRef)
+    when (isExpr mods cfg scr line) (evalScript mods hdl st')
+    return st'
 
 -- TODO can this use tab completion?
 runCmd :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
@@ -130,29 +141,56 @@ runCmd mods st@(_, cfg, _, _, _) hdl line = case matches of
     (cmd, args) = break isSpace line
     matches = filter ((isPrefixOf cmd) . fst) (cmds cfg)
 
-cmds :: Config -> [(String, ReplCmd)]
-cmds cfg =
-  if shellaccess cfg then [] else [("!", cmdBang)] -- TODO :shell instead?
-  ++
-  [
-  -- repl control commands
-    ("quit"     , cmdQuit     )
-  , ("config"   , cmdConfig   )
-  -- script info commands
-  , ("help"     , cmdHelp     )
-  , ("type"     , cmdType     )
-  , ("show"     , cmdShow     )
-  , ("neededfor", cmdNeededFor)
-  , ("neededby" , cmdNeededBy )
-  -- script edit commands
-  , ("load"     , cmdLoad     )
-  , ("write"    , cmdWrite    ) -- TODO do more people expect 'save' or 'write'?
-  , ("drop"     , cmdDrop     )
-  , ("reload"   , cmdReload   )
-  ]
+cmds :: Config -> [(String, ReplEdit)]
+cmds cfg = secureCmds ++ replCmds ++ editCmds ++ infoCmds
+  where
+    secureCmds = if shellaccess cfg then [] else [("!", cmdBang)] -- TODO :shell instead?
+    replCmds =
+      [ ("quit"  , cmdQuit  )
+      , ("config", cmdConfig)
+      ]
+    editCmds =
+      -- post-edit hook is skipped for writes to prevent double-writing
+      -- TODO are there other hooks that do still need to be run?
+      -- TODO do more people expect 'save' or 'write'?
+      [ ("write", cmdWrite) ]
+      ++
+      map (\(n, c) -> (n, withPostEditHook c))
+        [ ("load"  , cmdLoad  )
+        , ("drop"  , cmdDrop  ) -- TODO autosave here?
+        , ("reload", cmdReload)
+        ]
+    infoCmds :: [(String, ReplEdit)]
+    infoCmds = map (\(n,c) -> (n, withSameState c))
+      [ ("help"     , cmdHelp     )
+      , ("type"     , cmdType     )
+      , ("show"     , cmdShow     )
+      , ("neededfor", cmdNeededFor)
+      , ("neededby" , cmdNeededBy )
+      ]
+
+-- | Run a 'ReplEdit' command with post-edit hooks
+withPostEditHook :: ReplEdit -> ReplEdit
+withPostEditHook edit mods env hdl s = do
+  env'@(scr, cfg, _, _, _) <- edit mods env hdl s -- TODO abort on exceptions here rather than saving
+  autosaveScript cfg scr
+  return env'
+
+autosaveScript :: Config -> Script -> IO ()
+autosaveScript cfg scr = case script cfg of
+  Nothing   -> return ()
+  Just path -> when (autosave cfg) $ do
+    -- putStrLn $ "autosaving '" ++ path ++ "'..."
+    saveScript cfg scr path
+
+-- | Run a 'ReplInfo' command and return the initial state
+withSameState :: ReplInfo -> ReplEdit
+withSameState info mods env hdl s = do
+  info mods env hdl s
+  return env
 
 -- TODO does this one need to be a special case now?
-cmdQuit :: ReplCmd
+cmdQuit :: ReplEdit
 cmdQuit _ _ _ _ = throw QuitRepl
 
 -- TODO move to Types.hs
@@ -166,13 +204,13 @@ instance Exception QuitRepl
 instance Show QuitRepl where
   show QuitRepl = "Bye for now!"
 
-cmdBang :: ReplCmd
+cmdBang :: ReplEdit
 cmdBang _ st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 
 -- TODO move most of this to Config?
 -- TODO if no args, dump whole config by pretty-printing
 -- TODO wow much staircase get rid of it
-cmdConfig :: ReplCmd
+cmdConfig :: ReplEdit
 cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
   let ws = words s -- TODO only split on the first + second space, passing the rest as one string (for patterns)
   if (length ws == 0)
@@ -193,8 +231,10 @@ cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
 
 -- TODO move to Config? Types?
 replSettings :: [Module] -> Config -> Settings ReplM
-replSettings mods cfg = Settings
-  { complete       = myComplete mods $ cmds cfg
-  , historyFile    = history cfg
-  , autoAddHistory = True
-  }
+replSettings mods cfg =
+  let cmdNames = map fst $ cmds cfg
+  in Settings
+       { complete       = myComplete mods cmdNames
+       , historyFile    = history cfg
+       , autoAddHistory = True
+       }
