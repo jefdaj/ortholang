@@ -64,8 +64,8 @@ cmdHelp ms st@(_, cfg, _, _, _) hdl line = do
   doc <- help cfg ms line
   hPutStrLn hdl doc
 
-cmdType :: ReplCmd
-cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo >> return st
+cmdType :: ReplInfo
+cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo
   where
     typeInfo = case stripWhiteSpace s of
       "" -> allTypes
@@ -93,7 +93,7 @@ showAssignType (Assign {aVar = (Var _ v), aExpr = e}) = unwords [typedVar, "=", 
 -- TODO show the whole script, since that only shows sAssigns now anyway?
 cmdShow :: ReplInfo
 cmdShow ms st@(_, c, _, _, _) hdl s | showvartypes c = cmdType ms st hdl s
-cmdShow _ st@(scr, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) (sAssigns scr) >> return st
+cmdShow _ st@(scr, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) (sAssigns scr)
 cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
   case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
@@ -103,16 +103,16 @@ cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
 -- TODO except, this should work with expressions too!
 cmdNeededBy :: ReplInfo
 cmdNeededBy _ st@(scr, cfg, _, _, _) hdl var = do
-  case lookup (Var (RepID Nothing) var) scr of
+  case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
+    Just e  -> pPrintHdl cfg hdl $ filter (\(Assign v _) -> elem v $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
 
 cmdNeededFor :: ReplInfo
 cmdNeededFor _ st@(scr, cfg, _, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
-  case lookup var' scr of
+  case lookupVar var' (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> pPrintHdl cfg hdl $ filter (\(v,_) -> elem v $ (Var (RepID Nothing) var):depsOf e) scr
+    Just e  -> pPrintHdl cfg hdl $ filter (\(Assign v _) -> elem v $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
 
 
 --------------------
@@ -145,13 +145,13 @@ quotedCompletions wordSoFar = do
 -- complete everything else: fn names, var names, :commands, types
 -- these can be filenames too, but only if the line starts with a :command
 -- nakedCompletions :: String -> String -> ReplM [Completion]
-nakedCompletions :: [Module] -> [(String, ReplCmd)] -> String -> String -> ReplM [Completion]
-nakedCompletions mods cmds lineReveresed wordSoFar = do
+nakedCompletions :: [Module] -> [String] -> String -> String -> ReplM [Completion]
+nakedCompletions mods cmdNames lineReveresed wordSoFar = do
   (scr, _, _, _, _) <- get
-  let wordSoFarList = fnNames ++ varNames ++ cmdNames ++ typeExts ++ cfgFields
+  let wordSoFarList = fnNames ++ varNames ++ cmdNames' ++ typeExts ++ cfgFields
       fnNames  = concatMap (map fName . mFunctions) mods
       varNames = map ((\(Var _ v) -> v) . aVar) (sAssigns scr)
-      cmdNames = map ((':':) . fst) cmds
+      cmdNames' = map (':':) cmdNames
       typeExts = map ext $ concatMap mTypes mods
       cfgFields = map fst configFields
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []

@@ -46,7 +46,7 @@ import Control.Monad          (when)
 -- import Data.List.Utils        (hasKeyAL)
 import OrthoLang.Util    (readFileStrict)
 import System.FilePath        ((</>), takeDirectory)
-import Text.Parsec            (try, getState, putState)
+import Text.Parsec            (try, getState)
 import Text.Parsec.Char       (newline, spaces)
 import Text.Parsec.Combinator (optional)
 -- import Control.Monad.Reader   (ask)
@@ -95,14 +95,20 @@ pAssign = debugParser "pAssign" $ do
   s <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
 
-  when (hasVar v (sAssigns s) && typeOf && vName /= "result") $ do
-    -- changing the type of a variable is a legitimate thing to do in the REPL,
-    -- but it requires dropping anything that depends on that variable first.
-    -- so in that case we still want to throw an error here, have them confirm
-    -- that it's OK, and re-parse the script without the old variable
-    --
-    -- TODO prevent overwriting a variable in non-interactive mode when they do have the same type?
-    fail $ "duplicate variable \"" ++ vName ++ "\""
+  -- I can't think of any obvious reason a user would need to define the same
+  -- variable twice in a written script, so it's prohibited here. But that's
+  -- just erring on the safe/simple side so if you have an idea for a design
+  -- pattern that requires it, reach out by email!
+  --
+  -- REPL sessions, on the other hand, might include lots of redefinition. We
+  -- can handle that by asking the user to manually confirm that they're OK
+  -- dropping anything that depends on the old definition when a variable
+  -- changes type.
+  --
+  -- TODO in either case, prevent recursive self-references!
+  cfg <- askConfig
+  when (hasVar v (sAssigns s) && vName /= "result") $ do
+    when (not $ interactive cfg) $ fail $ "duplicate variable \"" ++ vName ++ "\"" -- TODO word this better
 
   e <- lexeme pExpr
 
