@@ -41,6 +41,19 @@ dispatch args arg act = when (isPresent args $ longOption arg) $ do
 debug' :: String -> IO ()
 debug' = debug "config"
 
+-- | Returns the config file value (default: True),
+--   or False if the corresponding "no" flag is present
+loadDisabler :: Arguments -> C.Config -> String -> IO Bool
+loadDisabler args cfg key
+  | isPresent args (longOption $ "no" ++ key) = return False
+  | otherwise = C.lookupDefault True cfg $ pack key
+
+-- | Returns the config file value (default: False), or True if the flag is present
+loadEnabler :: Arguments -> C.Config -> String -> IO Bool
+loadEnabler args cfg key
+  | isPresent args (longOption key) = return True
+  | otherwise = C.lookupDefault False cfg $ pack key
+
 loadMaybe :: Arguments -> C.Config -> String -> IO (Maybe String)
 loadMaybe args cfg key
   | isPresent args (longOption key) = return $ getArg args $ longOption key
@@ -91,12 +104,13 @@ loadConfig args = do
   outfile     <- loadMaybeAbs args cfg "outfile"
   shared      <- loadMaybe    args cfg "shared" >>= mapM absPathOrUrl
   termcolumns <- loadMaybeInt args cfg "termcolumns"
-  let interactive = isNothing script || (isPresent args $ longOption "interactive")
-      shellaccess = isPresent args $ longOption "shellaccess"
-      progressbar = isPresent args $ longOption "progressbar"
-      showhidden  = isPresent args $ longOption "showhidden"
-      showvartypes = isPresent args $ longOption "showvartypes"
-      autosave  = isPresent args $ longOption "autosave"
+  shellaccess <- loadDisabler args cfg "shellaccess"
+  progressbar <- loadDisabler args cfg "progressbar"
+  showhidden  <- loadEnabler  args cfg "showhidden"
+  showtypes   <- loadEnabler  args cfg "showtypes"
+  autosave    <- loadEnabler  args cfg "autosave"    -- if True but no script, this is ignored later
+  interactDef <- loadEnabler  args cfg "interactive" -- if False but no script, this is changed below
+  let interactive = isNothing script || interactDef
   let res = Config { .. }
   -- debug' $ show res
   setLogLevel LevelDebug
@@ -156,14 +170,16 @@ configFields =
   , ("termcolumns", (show . termcolumns, mkSet parseMaybeInt (\c mi -> return $ c {termcolumns = mi})))
   , ("debugregex" , (show . debugregex , mkSet parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr}))))
   , ("showhidden" , (show . showhidden , mkSet parseBool (\c b -> return (c {showhidden = b}))))
-  , ("showvartypes" , (show . showvartypes , mkSet parseBool (\c b -> return (c {showvartypes = b}))))
-  , ("shellaccess" , (show . shellaccess , mkSet parseBool (\c _ -> putStrLn securityMessage >> return c)))
+  , ("showtypes" , (show . showtypes , mkSet parseBool (\c b -> return (c {showtypes = b}))))
+  , ("shellaccess" , (show . shellaccess , mkSet parseBool (\c b -> if b
+                                                                      then (putStrLn securityMessage >> return c)
+                                                                      else return c { shellaccess = b})))
   , ("progressbar" , (show . progressbar , mkSet parseBool (\c b -> return (c {progressbar = b}))))
   , ("autosave" , (show . autosave , mkSet parseBool (\c b -> return (c {autosave = b}))))
   ]
 
 securityMessage :: String
-securityMessage = "For security reasons, you can't change this from inside the REPL."
+securityMessage = "For security reasons, you can't enable shell access from inside the REPL."
 
 absPathOrUrl :: String -> IO String
 absPathOrUrl p = if isURL p then return p else absolutize p

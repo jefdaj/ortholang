@@ -25,7 +25,7 @@ module OrthoLang.Interpreter.Repl
 
   -- * Implementation details
   , cmds
-  , cmdBang
+  , cmdShell
   , cmdConfig
   , cmdQuit
   , runCmd
@@ -145,9 +145,12 @@ runCmd mods st@(_, cfg, _, _, _) hdl line = case matches of
 cmds :: Config -> [(String, ReplEdit)]
 cmds cfg = secureCmds ++ replCmds ++ editCmds ++ infoCmds
   where
-    secureCmds = if shellaccess cfg then [] else [("!", cmdBang)] -- TODO :shell instead?
+    secureCmds = if not (shellaccess cfg) then [] else
+      [ ("!"    , cmdShell) -- this is familiar to programmers who use ghci or vim
+      , ("shell", cmdShell) -- but an explicit name is probably easier for everyone else
+      ]
     replCmds =
-      [ ("quit"  , cmdQuit  )
+      [ ("quit"  , cmdQuit  ) -- this is both explicit and vim/ghci-like
       , ("config", cmdConfig)
       ]
     editCmds =
@@ -208,8 +211,8 @@ instance Exception QuitRepl
 -- instance Show QuitRepl where
   -- show QuitRepl = "Bye for now!" -- TODO get this to print
 
-cmdBang :: ReplEdit
-cmdBang _ st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
+cmdShell :: ReplEdit
+cmdShell _ st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 
 -- TODO move most of this to Config?
 -- TODO if no args, dump whole config by pretty-printing

@@ -574,7 +574,7 @@ data Config = Config
   , shellaccess :: Bool
   , progressbar :: Bool
   , showhidden  :: Bool
-  , showvartypes :: Bool
+  , showtypes   :: Bool
   , autosave    :: Bool
   }
   deriving (Show, Eq)

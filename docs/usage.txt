@@ -23,8 +23,12 @@ Options:
   --report HTML      Write an interactive HTML report that helps optimize
                      performance. Not sure whether this works well with SLURM
                      or not yet.
-  --secure           Make things a little more secure for webserver use.
+  --noshellaccess    Make things a little more secure for webserver use.
                      So far, it just disables shell access through the :! command.
-  --noprogress       Do not display the progress bar.
+                     [default: False]
+  --noprogressbar    Display a progress bar during long operations. [default: True]
+  --showhidden       Tab-complete hidden functions. [default: False]
+  --autosave         Auto-save the script after each edit. Requires --script, --interactive.
+                     [default: False]
   --shared SHARED    A shared cache (directory or url) to look up files.
   --outfile OUTFILE  Instead of printing results, save them to this file.

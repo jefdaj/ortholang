@@ -92,7 +92,7 @@ showAssignType (Assign {aVar = (Var _ v), aExpr = e}) = unwords [typedVar, "=", 
 -- TODO factor out the variable lookup stuff
 -- TODO show the whole script, since that only shows sAssigns now anyway?
 cmdShow :: ReplInfo
-cmdShow ms st@(_, c, _, _, _) hdl s | showvartypes c = cmdType ms st hdl s
+cmdShow ms st@(_, c, _, _, _) hdl s | showtypes c = cmdType ms st hdl s -- TODO still show the rest too
 cmdShow _ st@(scr, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) (sAssigns scr)
 cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
   case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of

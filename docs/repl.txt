@@ -12,4 +12,5 @@ There are also some extra commands specific to --interactive mode:
 :quit      to discard the current script and exit the interpreter
 :type      to print the type of an expression
 :show      to print an expression along with its type
-:!         to run the rest of the line as a shell command (disabled in --secure mode)
+:shell     to run the rest of the line as a shell command (disabled in --secure mode)
+:!         as a shorter alias for :shell
