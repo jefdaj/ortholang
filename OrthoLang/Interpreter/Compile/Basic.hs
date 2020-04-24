@@ -141,10 +141,12 @@ rAssign scr (Assign var expr) = do
 -- TODO remove permHash
 compileScript :: Script -> Rules (Maybe ResPath)
 compileScript scr = case sResult scr of
-  Nothing -> return Nothing
+  Nothing -> return Nothing -- only happens if script is empty
   Just re -> do
-    _ <- mapM (rAssign scr) (sAssigns scr) -- TODO can this be done in parallel? does it matter?
-    (ExprPath p) <- rExpr scr re
+    let assigns = sAssigns scr ++ [Assign (Var (RepID Nothing) "result") re]
+        scr' = scr {sResult = Just re}
+    _ <- mapM (rAssign scr') assigns -- TODO can this be done in parallel? does it matter?
+    (ExprPath p) <- rExpr scr' re
     return $ Just $ ResPath p
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file

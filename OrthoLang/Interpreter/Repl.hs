@@ -55,7 +55,7 @@ import Control.Monad              (when)
 import Control.Monad.IO.Class     (liftIO)
 import Control.Monad.State.Strict (lift, get, put)
 import Data.Char                  (isSpace)
-import Data.List                  (isPrefixOf, filter)
+import Data.List                  (isPrefixOf, filter, intercalate)
 import System.Console.Haskeline   (Settings(..), InputT, getInputLine)
 import System.IO                  (Handle, hPutStrLn, stdout)
 import System.Process             (runCommand, waitForProcess)
@@ -132,12 +132,13 @@ runStatement mods st@(scr, cfg, ref, ids, dRef) hdl line = case parseStatement m
     when (isExpr mods cfg scr line) (evalScript mods hdl st')
     return st'
 
--- TODO can this use tab completion?
 runCmd :: [Module] -> GlobalEnv -> Handle -> String -> IO GlobalEnv
 runCmd mods st@(_, cfg, _, _, _) hdl line = case matches of
   [(_, fn)] -> fn mods st hdl $ stripWhiteSpace args
-  []        -> hPutStrLn hdl ("unknown command: "   ++ cmd) >> return st
-  _         -> hPutStrLn hdl ("ambiguous command: " ++ cmd) >> return st
+  [] -> hPutStrLn hdl ("unknown command: "   ++ cmd) >> return st
+  cs -> let opts = intercalate ", " $ map (\c -> "'" ++ fst c ++ "'") cs
+            msg  = "ambiguous command: '" ++ cmd ++ "' could be short for " ++ opts
+        in hPutStrLn hdl msg >> return st
   where
     (cmd, args) = break isSpace line
     matches = filter ((isPrefixOf cmd) . fst) (cmds cfg)

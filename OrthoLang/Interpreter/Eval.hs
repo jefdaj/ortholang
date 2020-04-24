@@ -309,30 +309,25 @@ eval mods hdl cfg ref ids dr rtype p = do
   eval' delay pOpts p -- TODO ignoreErrors again?
   where
     eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake mods cfg ref ids dr pm delay $ do
-      let loc = "core.eval.eval.eval'"
       newRules mods
       (ResPath path) <- rpath
-      want ["eval"]
+      let loc = "core.eval.eval.eval'"
+      -- runs the actual script, links vars/result to hashed output
       "eval" ~> do
         alwaysRerun
-        need ["reloadids"] -- this re-loads any existing cache/load/*.ids files
-        -- TODO remove retry after newrules are finished
-        actionRetry 9 $ do
-          need [path] -- TODO is this done automatically in the case of result?
-        {- if --interactive, print the short version of a result
-         - if --output, save the full result (may also be --interactive)
-         - if neither, print the full result
-         - TODO move this logic to the top level?
-         -}
-        -- ids' <- liftIO $ readIORef ids
-        when (interactive cfg) (printShort cfg ref ids pm rtype path)
-        completeProgress pm
-        case outfile cfg of
-          Just out -> writeResult cfg ref ids (toPath loc cfg path) out
-          Nothing  -> when (not $ interactive cfg)
-                        -- TODO printLong should work more like printShort but no line limit?
-                        -- (printLong cfg ref ids pm rtype path)
-                        (printShort cfg ref ids pm rtype path)
+        need ["reloadids"]
+        actionRetry 9 $ need [path]
+        completeProgress pm -- TODO only when doing the progressbar?
+      -- writes unhashed output to outfile
+      "outfile" ~> case outfile cfg of
+        Nothing  -> return ()
+        Just out -> need ["eval"] >> writeResult cfg ref ids (toPath loc cfg path) out
+      -- prints unhashed output
+      "head" ~> (alwaysRerun >> need ["eval"] >> printShort cfg ref ids pm rtype path)
+      "cat"  ~> (alwaysRerun >> need ["eval"] >> printLong  cfg ref ids pm rtype path)
+      want $ case outfile cfg of
+               Nothing -> if interactive cfg then ["head"] else ["cat"]
+               Just _  -> if interactive cfg then ["outfile", "head"] else ["outfile"]
 
 shakeEnv :: [Module] -> Config -> LocksRef -> IDsRef -> DigestsRef -> M.HashMap TypeRep Dynamic
 shakeEnv mods cfg lRef iRef dRef =
@@ -351,6 +346,7 @@ writeResult cfg ref idsref path out = do
   -- dMap <- liftIO $ readIORef dRef
   -- liftIO $ putStrLn $ "here are all the current ids:\n" ++ T.unpack (pShowNoColor dMap)
   unhashIDsFile path out
+  trackWrite [out] -- TODO ' version?
 
 -- TODO what happens when the txt is a binary plot image?
 -- TODO is this where the diamond makedb error comes in?
@@ -387,7 +383,8 @@ evalScript mods hdl (scr, c, ref, ids, dRef) =
               -- Just r  -> r
   in case sResult scr' of
     Nothing -> return () -- TODO print something?
-    Just re -> eval mods hdl c ref ids dRef (typeOf re) (fmap fromJust $ compileScript scr') -- (compileScript $ scr {sAssigns = seq as'' as''})
+    Just re -> let res = (fmap fromJust $ compileScript scr')
+               in eval mods hdl c ref ids dRef (typeOf re) (res :: Rules ResPath)
 
 -- TODO should there be a new idsref for this? how about digestsref?
 evalFile :: [Module] -> GlobalEnv -> Handle -> IO ()
