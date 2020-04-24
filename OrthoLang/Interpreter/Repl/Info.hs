@@ -1,22 +1,26 @@
 module OrthoLang.Interpreter.Repl.Info
   (
 
-  -- * Repl commands
-    cmdHelp
+  -- * Basics
+    welcome
+  , promptArrow
+  , shortPrompt
+
+  -- * Help
+  , cmdHelp
   , cmdShow
   , cmdType
+  , showExprType
+  , showAssignType
+
+  -- * Dependencies
   , cmdRevDepends
   , cmdDepends
 
-  -- * Implementation details
+  -- * Tab completion
   , myComplete
   , nakedCompletions
-  , promptArrow
   , quotedCompletions
-  , shortPrompt
-  , showAssignType
-  , showExprType
-  , welcome
 
   )
   where
@@ -39,6 +43,11 @@ import Data.List                  (isPrefixOf, isSuffixOf, filter)
 import System.FilePath            (takeFileName)
 import System.IO                  (Handle, hPutStrLn)
 
+
+------------
+-- basics --
+------------
+
 welcome :: Handle -> IO ()
 welcome hdl = hPutStrLn hdl
   "Welcome to the OrthoLang interpreter!\n\
@@ -53,6 +62,11 @@ shortPrompt cfg = name ++ promptArrow
     name = case script cfg of
       Nothing -> "ortholang"
       Just s  -> takeFileName s
+
+
+----------
+-- help --
+----------
 
 -- TODO load this from a file?
 -- TODO update to include :config getting + setting
@@ -98,6 +112,11 @@ cmdShow _ (scr, cfg, _, _, _) hdl var = do
   case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e -- >> hPutStrLn hdl ""
+
+
+------------------
+-- dependencies --
+------------------
 
 cmdDepends :: ReplInfo
 cmdDepends _ (scr, cfg, _, _, _) hdl var =
