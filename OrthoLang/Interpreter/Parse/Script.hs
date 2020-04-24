@@ -94,13 +94,14 @@ pAssign = debugParser "pAssign" $ do
   -- TODO use lookAhead here to decide whether to commit to it?
   s <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
-  -- "result" can be silently overwritten, but assigning another variable twice is an error
-  -- TODO is that the best way to do it?
 
-  -- TODO this causes replacement in the REPL to fail, but we do still want it for written scripts right?
-  -- TODO either add state to parsem (two ask fns easier) and check interactive, or raise + catch an exception in the repl
-  -- TODo in the repl we'll have to ask the user a question anyway right? maybe that makes the exception easier?
-  when (hasVar v (sAssigns s) && vName /= "result" && not (interactive cfg)) $ do -- TODO no failure here when interactive, right?
+  when (hasVar v (sAssigns s) && typeOf && vName /= "result") $ do
+    -- changing the type of a variable is a legitimate thing to do in the REPL,
+    -- but it requires dropping anything that depends on that variable first.
+    -- so in that case we still want to throw an error here, have them confirm
+    -- that it's OK, and re-parse the script without the old variable
+    --
+    -- TODO prevent overwriting a variable in non-interactive mode when they do have the same type?
     fail $ "duplicate variable \"" ++ vName ++ "\""
 
   e <- lexeme pExpr

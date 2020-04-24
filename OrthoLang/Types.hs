@@ -25,7 +25,10 @@ module OrthoLang.Types
   , Module(..)
   , NewRules(..)
   , ParseM
+  , ParseEnv
   , runParseM
+  , askConfig
+  , askModules
   , Path(..)
   , PathDigest(..)
   , RepID(..)
@@ -90,7 +93,7 @@ import qualified Text.PrettyPrint as PP
 import OrthoLang.Locks (LocksRef, withReadLock)
 import OrthoLang.Util  (readFileStrict, readFileLazy)
 
-import Control.Monad.Reader       (ReaderT, runReaderT)
+import Control.Monad.Reader       (ReaderT, runReaderT, ask)
 import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
 import Control.Monad.Trans        (lift)
 import Control.Monad.Trans.Except (Except, runExcept, throwE)
@@ -661,12 +664,19 @@ operatorChars mods = catMaybes $ map fOpChar $ listFunctions mods
 -- parser --
 ------------
 
-type ParseM a = ParsecT String Script (ReaderT [Module] (Except String)) a
+type ParseEnv = (Config, [Module])
+type ParseM a = ParsecT String Script (ReaderT ParseEnv (Except String)) a
+
+askConfig :: ParseM Config
+askConfig = fmap fst $ ask
+
+askModules :: ParseM [Module]
+askModules = fmap snd $ ask
 
 -- TODO is cfg still needed? if so, add mods
 -- originally based on https://stackoverflow.com/a/54089987/429898
 runParseM :: [Module] -> ParseM a -> Config -> Script -> String -> Either String a
-runParseM ms op cfg scr input = case runExcept (runReaderT (runPT op scr sn input) ms) of
+runParseM ms op cfg scr input = case runExcept (runReaderT (runPT op scr sn input) (cfg, ms)) of
   Left s          -> Left s        -- parseFail; return the String
   Right (Left  e) -> Left (show e) -- Parsec error; convert to String
   Right (Right r) -> Right r

@@ -51,7 +51,7 @@ import Data.Maybe             (isJust, fromJust, catMaybes)
 import Text.Parsec            (try, (<?>))
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
-import Control.Monad.Reader   (ReaderT, ask)
+import Control.Monad.Reader   (ReaderT)
 import Text.Parsec            (getState)
 
 
@@ -99,7 +99,7 @@ For now, I think all binary operators at the same precedence should work.
 but it gets more complicated I'll write out an actual table here with a
 prefix function too etc. See the jake wheat tutorial.
 -}
-operatorTable :: [Module] -> [[E.Operator String Script (ReaderT [Module] (Except String)) Expr]]
+operatorTable :: [Module] -> [[E.Operator String Script (ReaderT ParseEnv (Except String)) Expr]]
 operatorTable mods = [map binary bops] -- modules would work
   where
     binary f = E.Infix (pBop f) E.AssocLeft
@@ -182,7 +182,7 @@ TODO get function names from modules
 -}
 pFunName :: ParseM String
 pFunName = do
-  mods <- ask
+  mods <- askModules
   (choice $ map (try . str') $ listFunctionNames mods) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
@@ -221,7 +221,7 @@ TODO hey is this where it's missing the dmap?
 -}
 pFunArgs :: String -> [Expr] -> ParseM Expr
 pFunArgs name args = debugParser "pFun" $ do
-  mods <- ask
+  mods <- askModules
   case findFun mods name of
     Left err -> parseFail err
     Right fn -> typecheckArgs fn args -- TODO why no full7942??
@@ -378,7 +378,7 @@ pTerm = debugParser "pTerm" $ choice [pList, pParens, pNum, pStr, pFun, pRef]
 pExpr :: ParseM Expr
 pExpr = debugParser "pExpr" $ do
   -- debugParseM "expr"
-  mods <- ask
+  mods <- askModules
   E.buildExpressionParser (operatorTable mods) pTerm <?> "expression"
   -- return $ unsafePerformIO (insertNewRulesDigest st res >> return res) -- TODO move to compiler
   -- putDigests "pExpr" [e]

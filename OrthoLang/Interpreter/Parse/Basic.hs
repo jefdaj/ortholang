@@ -100,10 +100,10 @@ TODO this must be succeding on 'loaner... right?
 -}
 pEnd :: ParseM ()
 pEnd = debugParser "pEnd" $ do
-  cfg <- ask -- modules would work here
+  mods <- askModules
   try $ lookAhead $ choice
     [ eof
-    , void $ choice $ map pSym $ operatorChars cfg ++ ")],"
+    , void $ choice $ map pSym $ operatorChars mods ++ ")],"
     , try $ void $ pVarEq
     ]
 

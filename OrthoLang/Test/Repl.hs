@@ -14,7 +14,7 @@ import Control.Monad.Trans        (liftIO)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.List                  (isPrefixOf)
 import Data.List.Utils            (replace)
-import System.Directory           (createDirectoryIfMissing, removeFile) --, copyFile)
+import System.Directory           (createDirectoryIfMissing, removeFile, copyFile)
 import System.FilePath            (splitDirectories, joinPath)
 import System.FilePath.Posix      (takeBaseName, replaceExtension, (</>), (<.>))
 import System.IO                  (stdout, stderr, withFile, hPutStrLn, IOMode(..), Handle)
@@ -72,7 +72,7 @@ goldenRepl cfg ref ids dRef goldenFile = do
       stdin  = extractPrompted ("ortholang" ++ promptArrow) txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut (emptyScript, cfg', ref, ids, dRef)
                -- uncomment to update repl golden files:
-               -- >> copyFile tstOut ("/home/jefdaj/ortholang/tests/repl" </> takeBaseName goldenFile <.> "txt")
+               >> copyFile tstOut ("/home/user/ortholang-demo/ortholang/tests/repl" </> takeBaseName goldenFile <.> "txt")
   return $ goldenVsFile d goldenFile tstOut action
 
 knownFailing :: [FilePath]
