@@ -58,7 +58,10 @@ import OrthoLang.Interpreter.Actions (traceA, debugA, need', readLit, writeLit, 
 import OrthoLang.Interpreter.Paths   (exprPath, toPath, fromPath, varPath, Path, prefixOf)
 import OrthoLang.Util         (resolveSymlinks, stripWhiteSpace, removeIfExists)
 
--- import OrthoLang.Interpreter.Paths (insertNewRulesDigest)
+-- import qualified Data.Text.Lazy   as T
+-- import Text.Pretty.Simple             (pShowNoColor)
+import Text.PrettyPrint.HughesPJClass (Pretty, pPrint, prettyShow)
+import Text.PrettyPrint               (Doc, (<>), (<+>), render)
 
 
 debugC :: String -> String -> a -> a
@@ -140,14 +143,16 @@ rAssign scr (Assign var expr) = do
 --      (or, is that not possible for a typechecked AST?)
 -- TODO remove permHash
 compileScript :: Script -> Rules (Maybe ResPath)
-compileScript scr = case sResult scr of
-  Nothing -> return Nothing -- only happens if script is empty
-  Just re -> do
-    let assigns = sAssigns scr ++ [Assign (Var (RepID Nothing) "result") re]
-        scr' = scr {sResult = Just re}
-    _ <- mapM (rAssign scr') assigns -- TODO can this be done in parallel? does it matter?
-    (ExprPath p) <- rExpr scr' re
-    return $ Just $ ResPath p
+compileScript scr =
+  let loc   = "core.compile.basic.compileScript"
+  in case sResult (trace loc ("scr:\n" ++ render (pPrint scr)) scr) of
+       Nothing -> return Nothing -- only happens if script is empty
+       Just re -> do
+         -- let assigns = sAssigns scr ++ [Assign (Var (RepID Nothing) "result") re]
+             -- scr' = scr {sResult = Just re}
+         mapM_ (rAssign scr) (sAssigns scr) -- TODO can this be done in parallel? does it matter?
+         (ExprPath p) <- rExpr scr re
+         return $ Just $ ResPath p
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn

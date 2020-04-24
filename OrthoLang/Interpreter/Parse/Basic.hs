@@ -2,6 +2,7 @@ module OrthoLang.Interpreter.Parse.Basic
   (
   -- * Utilities
     putAssign
+  , assign
 
   -- * Whitespace and endings
   , lexeme
@@ -51,14 +52,31 @@ import Control.Monad.Reader   (ask)
 
 -- TODO remove the first string (parser name)? or use it to debug
 putAssign :: String -> Assign -> ParseM ()
-putAssign _ a@(Assign {aVar = Var _ vName}) = do
+putAssign _ a = do
   scr <- getState
-  let as' = (if null (sResult scr) then (sAssigns scr) else delVar (sAssigns scr) "result") ++ [a]
-      re' =  if null (sResult scr) || vName == "result"
-               then Just (aExpr a)
-               else (sResult scr)
-      scr' = scr {sAssigns = as', sResult = re'}
+  -- let as' = (if null (sResult scr) then (sAssigns scr) else delVar (sAssigns scr) "result") ++ [a]
+  --     re' =  if null (sResult scr) || vName == "result"
+  --              then Just (aExpr a)
+  --              else (sResult scr)
+  --     scr' = scr {sAssigns = as', sResult = re'}
+  let scr' = assign scr a
   putState scr'
+
+-- Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
+-- TODO salt is Nothing rather than the expr's salt, right?
+-- TODO var is added to deps, right?
+assign :: Script -> Assign -> Script
+assign scr a@(Assign var@(Var _ vName) expr) =
+  let rv  = Var (RepID Nothing) "result"
+      rr  = Ref (typeOf expr) Nothing (var:depsOf expr) var 
+      ra  = Assign rv rr
+      as' = (if null (sResult scr)
+               then delVar (sAssigns scr) "result" -- result was assigned implicitly if at all, so replace it
+               else sAssigns scr) ++ [a]
+      r'  = if null (sResult scr) || vName == "result"
+              then Just expr 
+              else sResult scr
+  in Script {sAssigns = as', sResult = r'}
 
 {-|
 There's a convention in parsers that each one should consume whitespace after
@@ -146,8 +164,8 @@ pNum = debugParser "pNum" $ do
   spaces
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
   let sign = case neg of { Just x -> x; _ -> ' ' }
-      lit  = show (read (sign:n:ns) :: Scientific)
-      expr = Lit num lit 
+      l    = show (read (sign:n:ns) :: Scientific)
+      expr = Lit num l 
   -- putDigests "pNum" [expr]
   return expr
 
@@ -167,9 +185,9 @@ literalChars = filter valid $ map toEnum [0..127]
 -- see stackoverflow.com/questions/24106314
 -- TODO can the between part be replaced with something from Text.Parsec.Token?
 pQuoted :: ParseM String
-pQuoted = debugParser "pQuoted" ((lexeme $ between (char '\"') (char '\"') $ many (lit <|> esc)) <?> "quoted")
+pQuoted = debugParser "pQuoted" ((lexeme $ between (char '\"') (char '\"') $ many (l <|> esc)) <?> "quoted")
   where
-    lit = oneOf literalChars
+    l = oneOf literalChars
     esc = char '\\' *> oneOf escapeChars
 
 pStr :: ParseM Expr
