@@ -9,28 +9,27 @@ v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
 
-ortholang —▶ :neededfor v1
+ortholang —▶ :rdepends v1
 v1 = "one"
+v3 = [v1, v2]
 
-ortholang —▶ :neededfor v2
+ortholang —▶ :rdepends v2
 v2 = "two"
+v3 = [v1, v2]
 
-ortholang —▶ :neededfor v3
-v1 = "one"
-v2 = "two"
+ortholang —▶ :rdepends v3
 v3 = [v1, v2]
 
 ortholang —▶ v4 = v3
-ortholang —▶ :neededfor v3
-v1 = "one"
-v2 = "two"
+ortholang —▶ :rdepends v3
 v3 = [v1, v2]
+v4 = v3
 
 ortholang —▶ v5 = v4
-ortholang —▶ :neededfor v3
-v1 = "one"
-v2 = "two"
+ortholang —▶ :rdepends v3
 v3 = [v1, v2]
+v4 = v3
+v5 = v4
 
 ortholang —▶ :quit
 Bye for now!

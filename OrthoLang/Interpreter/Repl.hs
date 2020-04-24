@@ -166,11 +166,11 @@ cmds cfg = secureCmds ++ replCmds ++ editCmds ++ infoCmds
         ]
     infoCmds :: [(String, ReplEdit)]
     infoCmds = map (\(n,c) -> (n, withSameState c))
-      [ ("help"     , cmdHelp     )
-      , ("type"     , cmdType     )
-      , ("show"     , cmdShow     )
-      , ("neededfor", cmdNeededFor)
-      , ("neededby" , cmdNeededBy )
+      [ ("help"    , cmdHelp      )
+      , ("type"    , cmdType      )
+      , ("show"    , cmdShow      )
+      , ("depends" , cmdDepends   )
+      , ("rdepends", cmdRevDepends)
       ]
 
 -- | Run a 'ReplEdit' command with post-edit hooks

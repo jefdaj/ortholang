@@ -5,8 +5,8 @@ module OrthoLang.Interpreter.Repl.Info
     cmdHelp
   , cmdShow
   , cmdType
-  , cmdNeededBy
-  , cmdNeededFor
+  , cmdRevDepends
+  , cmdDepends
 
   -- * Implementation details
   , myComplete
@@ -94,25 +94,28 @@ showAssignType (Assign {aVar = (Var _ v), aExpr = e}) = unwords [typedVar, "=", 
 cmdShow :: ReplInfo
 cmdShow ms st@(_, c, _, _, _) hdl s | showtypes c = cmdType ms st hdl s -- TODO still show the rest too
 cmdShow _ st@(scr, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) (sAssigns scr)
-cmdShow _ st@(scr, cfg, _, _, _) hdl var = do
+cmdShow _ (scr, cfg, _, _, _) hdl var = do
   case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e -- >> hPutStrLn hdl ""
 
--- TODO factor out the variable lookup stuff
--- TODO except, this should work with expressions too!
-cmdNeededBy :: ReplInfo
-cmdNeededBy _ st@(scr, cfg, _, _, _) hdl var = do
+cmdDepends :: ReplInfo
+cmdDepends _ (scr, cfg, _, _, _) hdl var =
   case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> pPrintHdl cfg hdl $ filter (\(Assign v _) -> elem v $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
+    Just e  -> let vars = (Var (RepID Nothing) var) : depsOf e
+               in mapM_ (pPrintHdl cfg hdl) $ filter (\(Assign v _) -> v `elem` vars)
+                                                     (sAssigns scr)
 
-cmdNeededFor :: ReplInfo
-cmdNeededFor _ st@(scr, cfg, _, _, _) hdl var = do
+-- TODO clarify that this only works on varnames, or make it also work for expressions!
+cmdRevDepends :: ReplInfo
+cmdRevDepends _ (scr, cfg, _, _, _) hdl var =
   let var' = Var (RepID Nothing) var
-  case lookupVar var' (sAssigns scr) of
-    Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> pPrintHdl cfg hdl $ filter (\(Assign v _) -> elem v $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
+  in case lookupVar var' (sAssigns scr) of
+       Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
+       Just  _ -> let vars = var' : rDepsOf scr var'
+                  in mapM_ (pPrintHdl cfg hdl) $ filter (\(Assign v _) -> v `elem` vars)
+                                                        (sAssigns scr)
 
 
 --------------------

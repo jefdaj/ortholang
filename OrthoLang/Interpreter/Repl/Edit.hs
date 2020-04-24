@@ -93,15 +93,15 @@ saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 
 -- TODO factor out the variable lookup stuff
 -- TODO except, this should work with expressions too!
-cmdNeededBy :: ReplEdit
-cmdNeededBy _ st@(scr, cfg, _, _, _) hdl var = do
+cmdRevDepends :: ReplEdit
+cmdRevDepends _ st@(scr, cfg, _, _, _) hdl var = do
   case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
   return st
 
-cmdNeededFor :: ReplEdit
-cmdNeededFor _ st@(scr, cfg, _, _, _) hdl var = do
+cmdDepends :: ReplEdit
+cmdDepends _ st@(scr, cfg, _, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
   case lookupVar var' (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
