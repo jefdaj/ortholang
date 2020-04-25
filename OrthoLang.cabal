@@ -130,6 +130,7 @@ library
                     OrthoLang.Interpreter.Repl.Edit,
                     OrthoLang.Interpreter.Sanitize,
                     OrthoLang.Types,
+                    OrthoLang.Script,
                     OrthoLang.Debug,
                     OrthoLang.Errors,
                     OrthoLang.Util,

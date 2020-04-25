@@ -33,6 +33,7 @@ module OrthoLang.Interpreter.Parse.Basic
 
 import OrthoLang.Debug (trace)
 import OrthoLang.Types
+import OrthoLang.Script (updateVars)
 import qualified Data.Map.Strict as M
 
 import Control.Applicative    ((<|>), many)

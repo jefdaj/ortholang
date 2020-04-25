@@ -43,6 +43,7 @@ module OrthoLang.Modules.Replace where
 
 import Development.Shake
 import OrthoLang.Types
+import OrthoLang.Script (extractExprs)
 import OrthoLang.Interpreter
 import Data.Maybe (fromJust)
 

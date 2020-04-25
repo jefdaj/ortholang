@@ -23,6 +23,7 @@ module OrthoLang.Interpreter.Repl.Edit
 import Prelude hiding (print)
 
 import OrthoLang.Types
+import OrthoLang.Script (rDepsOf, updateVars)
 import OrthoLang.Interpreter.Repl.Info (cmdShow)
 import OrthoLang.Interpreter.Parse         (parseFile)
 import OrthoLang.Util               (absolutize, justOrDie)

@@ -9,6 +9,7 @@ module OrthoLang.Modules.Plots where
 
 import Development.Shake
 import OrthoLang.Types
+import OrthoLang.Script (extractExprs)
 import OrthoLang.Interpreter
 
 import System.Directory (createDirectoryIfMissing)
