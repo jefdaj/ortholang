@@ -30,7 +30,7 @@ import Development.Shake
 import Text.PrettyPrint.HughesPJClass hiding ((<>))
 
 import OrthoLang.Types
-import OrthoLang.Interpreter.Expand (expandMacros)
+import OrthoLang.Script (expandMacros)
 -- import OrthoLang.Interpreter.Pretty (renderIO)
 -- import OrthoLang.Interpreter.Config (debug)
 

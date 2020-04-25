@@ -108,7 +108,6 @@ library
                     OrthoLang.Interpreter,
                     OrthoLang.Interpreter.Config,
                     OrthoLang.Interpreter.Actions,
-                    OrthoLang.Interpreter.Expand,
                     OrthoLang.Interpreter.Compile,
                     OrthoLang.Interpreter.Compile.Basic,
                     OrthoLang.Interpreter.Compile.Compose,

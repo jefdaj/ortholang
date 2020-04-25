@@ -40,8 +40,6 @@ module OrthoLang.Interpreter
   -- * Things used in Main
   , runRepl
   , evalFile
-  , expandMacros
-  -- , prettyShow
 
   -- * Things used in Test
   , help
@@ -204,7 +202,6 @@ module OrthoLang.Interpreter
 
 import OrthoLang.Debug
 import OrthoLang.Interpreter.Actions
-import OrthoLang.Interpreter.Expand
 import OrthoLang.Interpreter.Compile
 import OrthoLang.Interpreter.Compile.NewRules
 import OrthoLang.Interpreter.Paths

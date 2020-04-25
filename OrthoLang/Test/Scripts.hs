@@ -6,6 +6,7 @@ import qualified Data.ByteString.Lazy.Char8      as B8
 
 import OrthoLang.Types
 import OrthoLang.Interpreter
+import OrthoLang.Script (expandMacros)
 import OrthoLang.Modules     (modules)
 import OrthoLang.Locks (withWriteLockEmpty)
 import OrthoLang.Util   (justOrDie, rmAll)

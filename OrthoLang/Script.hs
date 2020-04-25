@@ -11,6 +11,12 @@ module OrthoLang.Script
   -- * Used in Interpreter.Parse
     assign
 
+  -- * Used in Interpreter.Eval (between parse and compile steps)
+  , expandMacros
+  -- , eScript
+  -- , eAssign
+  -- , eExpr
+
   -- * Used in Modules.Replace
   , extractExprs
   , setRepIDs
@@ -112,6 +118,60 @@ assign scr a =
   in trace "interpreter.parse.basic.assign"
            ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
            scr''
+
+
+------------
+-- macros --
+------------
+
+{-|
+This expands macros and checks that the resulting types make sense.
+There's some basic typechecking during the 'OrthoLang.Interpreter.Parse' step too, but
+it assumes every 'Function' is right about its return type. After
+'MacroExpansion's have been applied we can ensure that inputs and outputs
+actually match up.
+
+After expansion there shouldn't be any functions implemented as macros left in
+the script.
+
+TODO wait, why can't macro fns be typechecked during parsing? Seems like they could!
+-}
+expandMacros :: [Module] -> Script -> Script
+expandMacros = eScript
+
+eScript :: [Module] -> Script -> Script
+eScript mods s = s {sAssigns = map (eAssign mods s) (sAssigns s)}
+
+eAssign :: [Module] -> Script -> Assign -> Assign
+eAssign mods scr a@(Assign {aExpr = e}) = a {aExpr = eExpr mods scr e}
+
+-- | This one is recursive in case one macro expression is hidden inside the
+--   result of another
+eExpr :: [Module] -> Script -> Expr -> Expr
+eExpr mods scr e = if e' == e then e' else eExpr' mods scr e'
+  where
+    e' = eExpr' mods scr e
+
+eExpr' :: [Module] -> Script -> Expr -> Expr
+eExpr' mods scr e@(Fun r s ds name es) =
+  let e' = Fun r s ds name $ map (eExpr mods scr) es
+  in case findFun mods name of
+       Left err -> error "script.eExpr'" err
+       Right fn -> case fNewRules fn of
+                     -- TODO is another typechecking step necessary? maybe doesn't add anything
+                     -- (NewMacro m) -> case typecheck mods (m scr e) of
+                     --                   Left err -> error err
+                     --                   Right e' -> e'
+                     (NewMacro m) -> let e'' = m scr e
+                                     in trace "script.eExpr'"
+                                              ("expanded macro: " ++ show e ++ " -> " ++ show e'') e''
+                     _ -> e'
+eExpr' mods scr (Bop r ms vs n e1 e2) = Bop r ms vs n (eExpr mods scr e1) (eExpr mods scr e2)
+eExpr' mods scr (Lst r vs es) = Lst r vs $ map (eExpr mods scr) es
+eExpr' _ _ e = e
+
+-- typecheck :: [Module] -> Expr -> Either String Expr
+-- typecheck mods expr = undefined
 
 
 -------------
