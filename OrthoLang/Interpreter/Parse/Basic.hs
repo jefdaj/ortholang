@@ -88,7 +88,6 @@ assign scr a@(Assign var@(Var _ vName) expr) =
   --
   -- was:
   -- 1) substitute the result ref for its value in the old script
-  -- let expr' = undefined
   -- 2) strip the "result" assignment from the old script
   -- 3) add the new assignment statement samplefa = load_fna ...
   -- 4) assigned a new default result = samplefa
@@ -100,10 +99,41 @@ assign scr a@(Assign var@(Var _ vName) expr) =
   -- always do (3)
   -- and always do (4) unless the current assignment was explicitly "result = " already
 
-  let scr' = updateVars scr a
+  -- the next bug:
+  --
+  -- ortholang —▶ 1 # comments after naked expressions should be ignored
+  -- 1
+  -- 
+  -- ortholang —▶ :show
+  -- result = 1
+  -- 
+  -- ortholang —▶ test = 1 # same with comments after assignment statements
+  -- ortholang —▶ :show
+  -- result = 1
+  -- test = 1
+  -- 
+  -- ## only problem is it should remove "result = 1" and insert "result = test" at the end
+  -- TODO try stripping old result and see if that fixes it
+  -- TODO if not, try also inserting the new one at the end
+
+  -- Seems like the issue here is implicit vs explicit result? When assigned
+  -- explicitly in a script, result should persist after more assignments. But
+  -- when only assigned implicitly it should be overwritten, and when in the
+  -- REPL it should always be overwritten. When saving a specific REPL var it
+  -- should be set added to the end of the script file.
+  --
+  -- The simplest way to capture this in types, though maybe not the cleanest,
+  -- seems to be to prioritize a "result" var in sAssigns over sResult, and
+  -- have sResult be optional. Then parsing behavior should vary between file and repl:
+  -- in repl, assign each naked expression to sResult. but in a file, naked expressions should be errors
+  -- in a file, never remove previous result vars, except during includes
+  -- in a file, sResult isn't set at all until it holds a ref to the result var in sAssigns
+
+  let scr'  = scr {sAssigns = delVar (sAssigns scr) "result"}
+      scr'' = updateVars scr' a
   in trace "interpreter.parse.basic.assign"
-           ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr':\n" ++ render (pPrint scr'))
-           scr'
+           ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
+           scr''
 
 {-|
 There's a convention in parsers that each one should consume whitespace after

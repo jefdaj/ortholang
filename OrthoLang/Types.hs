@@ -281,9 +281,25 @@ hasVar v as = isJust $ lookupVar v as
 delVar :: [Assign] -> String -> [Assign]
 delVar as vName = filter (\(Assign {aVar = Var _ n}) -> n /= vName) as
 
+{-
+This data type supports different in the REPL vs when parsing scripts from file...
+
+In the REPL we never have a "final" result; we want to override it implicitly
+each time the user types a new naked expression. So we strip anything called
+"result" out of sAssigns each time and put each naked expression in sResult
+instead.
+
+When parsing a file we expect at most one "result" variable. If nothing is
+given, we use the last assignment in the script. When parsing one script that
+includes another by filename, we strip the result var from the included one to
+prevent conflict.
+
+When saving a file from the REPL, the result can always be inferred: the last
+one in the script, or the particular variable that was saved.
+-}
 data Script = Script
-  { sAssigns :: [Assign]   -- ^ Assignment statements in user-specified order
-  , sResult  :: Maybe Expr -- ^ This should only be Nothing if the script is empty
+  { sAssigns :: [Assign]   -- ^ Assignment statements in user-specified order, one of which may be "result"
+  , sResult  :: Maybe Expr -- ^ Latest naked REPL expression, or the explicit result of a script
   }
   deriving (Show, Eq)
 
@@ -356,6 +372,7 @@ explainFnBug =
 -- which is especially a problem when auto-assigning "result"
 -- TODO is this where we can easily require the replacement var's type to match if it has deps?
 -- TODO what happens if you try that in a script? it should fail i guess?
+-- TODO rename because it's more like assignAndUpdateVars?
 updateVars :: Script -> Assign -> Script
 updateVars scr asn@(Assign {aVar = v@(Var _ vName), aExpr = expr}) = scr {sAssigns = as', sResult = r'}
   where
