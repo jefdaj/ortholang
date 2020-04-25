@@ -31,7 +31,7 @@ module OrthoLang.Interpreter.Parse.Basic
 
 -- TODO hold up, is Logging missing a bunch of NOINLINE statements?
 
-import OrthoLang.Debug
+import OrthoLang.Debug (trace)
 import OrthoLang.Types
 import qualified Data.Map.Strict as M
 
@@ -46,6 +46,9 @@ import Text.Parsec.Prim       (ParsecT, Stream)
 import OrthoLang.Interpreter.Parse.Util (debugParser)
 import Control.Monad.Reader   (ask)
 
+import Text.PrettyPrint               (Doc, (<>), (<+>), render)
+import Data.Scientific                (Scientific(), toBoundedInteger)
+
 --------------
 -- utilites --
 --------------
@@ -59,24 +62,48 @@ putAssign _ a = do
   --              then Just (aExpr a)
   --              else (sResult scr)
   --     scr' = scr {sAssigns = as', sResult = re'}
-  let scr' = assign scr a
+  let scr' = assign scr $ trace "interpreter.parse.basic.putAssign" ("a: " ++ show a) a
   putState scr'
 
+-- TODO move, but where?
 -- Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
 -- TODO salt is Nothing rather than the expr's salt, right?
 -- TODO var is added to deps, right?
 assign :: Script -> Assign -> Script
 assign scr a@(Assign var@(Var _ vName) expr) =
-  let rv  = Var (RepID Nothing) "result"
-      rr  = Ref (typeOf expr) Nothing (var:depsOf expr) var 
-      ra  = Assign rv rr
-      as' = (if null (sResult scr)
-               then delVar (sAssigns scr) "result" -- result was assigned implicitly if at all, so replace it
-               else sAssigns scr) ++ [a]
-      r'  = if null (sResult scr) || vName == "result"
-              then Just expr 
-              else sResult scr
-  in Script {sAssigns = as', sResult = r'}
+
+  -- let rv  = Var (RepID Nothing) "result"
+      -- rr  = Ref (typeOf expr) Nothing (depsOf expr) var 
+      -- ra  = Assign rv rr
+  -- let as' = delVar (sAssigns scr) vName ++ [a]
+  --     r'  = if null (sResult scr) || vName == "result"
+  --             then Just expr 
+  --             else sResult scr
+  --     scr' = Script {sAssigns = as', sResult = r'}
+
+  -- OK, so by example the behavior we actually wanted instead of this:
+  --
+  -- result = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
+  -- samplefa = result
+  --
+  -- was:
+  -- 1) substitute the result ref for its value in the old script
+  -- let expr' = undefined
+  -- 2) strip the "result" assignment from the old script
+  -- 3) add the new assignment statement samplefa = load_fna ...
+  -- 4) assigned a new default result = samplefa
+  --
+  -- How do we know that?
+  --
+  -- we should always do (1)
+  -- if interactive we should also always do (2), but respect the earlier "result = " in written scripts?
+  -- always do (3)
+  -- and always do (4) unless the current assignment was explicitly "result = " already
+
+  let scr' = updateVars scr a
+  in trace "interpreter.parse.basic.assign"
+           ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr':\n" ++ render (pPrint scr'))
+           scr'
 
 {-|
 There's a convention in parsers that each one should consume whitespace after

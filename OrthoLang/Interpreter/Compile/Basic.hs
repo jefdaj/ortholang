@@ -73,7 +73,7 @@ debugRules :: (Pretty a, Show b) => String -> a -> b -> b
 debugRules name input out = debugC name msg out
   where
     ren = render $ pPrint input
-    msg = "\"" ++ ren ++ "' -> " ++ show out
+    msg = "\"" ++ ren ++ "\n -> " ++ show out
 
 ------------------------------
 -- compile the OrthoLang AST --

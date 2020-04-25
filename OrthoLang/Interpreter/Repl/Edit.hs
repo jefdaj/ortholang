@@ -10,9 +10,9 @@ module OrthoLang.Interpreter.Repl.Edit
   -- * Implementation details
   , clear
   , depsOnly
-  , removeSelfReferences
-  , replaceVar
-  , rmRef
+  -- , removeSelfReferences
+  -- , replaceVar
+  -- , rmRef
   -- , runStatement
   , saveScript
   , updateVars
@@ -116,38 +116,3 @@ cmdDrop _ st@(scr, cfg, ref, ids, dRef) hdl var = do
   case lookupVar v (sAssigns scr) of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just _  -> return (scr {sAssigns = delVar (sAssigns scr) var}, cfg, ref, ids, dRef)
-
--- this is needed to avoid assigning a variable literally to itself,
--- which is especially a problem when auto-assigning "result"
--- TODO is this where we can easily require the replacement var's type to match if it has deps?
--- TODO what happens if you try that in a script? it should fail i guess?
-updateVars :: Script -> Assign -> Script
-updateVars scr asn@(Assign {aVar = Var _ vName}) = scr {sAssigns = as'}
-  where
-    res = Var (RepID Nothing) "result"
-    asn' = removeSelfReferences scr asn
-    as  = sAssigns scr
-    as' = if aVar asn /= res && aVar asn `elem` map aVar as
-            then replaceVar asn' as
-            else delVar as vName ++ [asn']
-
--- replace an existing var in a script
-replaceVar :: Assign -> [Assign] -> [Assign]
-replaceVar a1 = map $ \a2 -> if aVar a1 == aVar a2 then a1 else a2
-
--- makes it ok to assign a var to itself in the repl
--- by replacing the reference with its value at that point
--- TODO forbid this in scripts though
-removeSelfReferences :: Script -> Assign -> Assign
-removeSelfReferences s a@(Assign {aVar=v, aExpr=e}) = if not (v `elem` depsOf e) then a else a {aExpr=rmRef s v e}
-
--- does the actual work of removing self-references
-rmRef :: Script -> Var -> Expr -> Expr
-rmRef scr var e@(Ref _ _ _ v2)
-  | var == v2 = justOrDie "failed to rmRef variable!" $ lookupVar var (sAssigns scr)
-  | otherwise = e
-rmRef _   _   e@(Lit _ _) = e
-rmRef scr var (Bop  t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)
-rmRef scr var (Fun  t ms vs s es   ) = Fun t ms (delete var vs) s (map (rmRef scr var) es)
-rmRef scr var (Lst t vs       es   ) = Lst t    (delete var vs)   (map (rmRef scr var) es)
-rmRef _   _   (Com _) = error "implement this! or rethink?"
