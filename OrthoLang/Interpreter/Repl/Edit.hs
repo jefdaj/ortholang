@@ -23,7 +23,7 @@ module OrthoLang.Interpreter.Repl.Edit
 import Prelude hiding (print)
 
 import OrthoLang.Types
-import OrthoLang.Script (rDepsOf, updateVars)
+import OrthoLang.Script (rDepsOf, updateVars, depsOnly)
 import OrthoLang.Interpreter.Repl.Info (cmdShow)
 import OrthoLang.Interpreter.Parse         (parseFile)
 import OrthoLang.Util               (absolutize, justOrDie)
@@ -73,13 +73,6 @@ cmdWrite mods st@(scr, cfg, locks, ids, dRef) hdl line = case words line of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just e  -> saveScript cfg (depsOnly e scr) path >> return st
   _ -> hPutStrLn hdl ("invalid save command: \"" ++ line ++ "\"") >> return st
-
--- TODO where should this go?
-depsOnly :: Expr -> Script -> Script
-depsOnly expr scr = scr {sAssigns = deps ++ [res]}
-  where
-    deps = filter (\a -> (elem (aVar a) $ depsOf expr)) (sAssigns scr)
-    res  = Assign {aVar = Var (RepID Nothing) "result", aExpr = expr}
 
 -- TODO move to a "files/io" module along with debug fns?
 -- TODO use safe write here?

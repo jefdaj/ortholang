@@ -43,7 +43,7 @@ module OrthoLang.Modules.Replace where
 
 import Development.Shake
 import OrthoLang.Types
-import OrthoLang.Script (extractExprs)
+import OrthoLang.Script (extractExprs, setRepIDs)
 import OrthoLang.Interpreter
 import Data.Maybe (fromJust)
 
@@ -59,37 +59,6 @@ olModule = Module
       , replaceEach
       ]
   }
-
----------------------------
--- mangle variable names --
----------------------------
-
-{- This does the filename mangling by setting a "replace ID" in each variable
- - in a script. If it's anything other than Nothing it gets used by
- - OrthoLang.Interpreter to set the rep dir.
- -
- - TODO should it go in Types, or maybe Paths?
- -}
-
-mapExprVars :: (Var -> Var) -> Expr -> Expr
-mapExprVars _ e@(Lit  _ _) = e
-mapExprVars fn (Ref  t n vs v      ) = Ref  t n (map fn vs)   (fn v)
-mapExprVars fn (Bop  t n vs s e1 e2) = Bop  t n (map fn vs) s (mapExprVars fn e1) (mapExprVars fn e2)
-mapExprVars fn (Fun  t n vs s es   ) = Fun  t n (map fn vs) s (map (mapExprVars fn) es)
-mapExprVars fn (Lst t vs   es   ) = Lst t (map fn vs)   (map (mapExprVars fn) es)
-mapExprVars _ (Com _) = error "implement this!"
-
-mapAssignVars :: (Var -> Var) -> Assign -> Assign
-mapAssignVars fn (Assign var expr) = Assign (fn var) (mapExprVars fn expr)
-
-mapScriptVars :: (Var -> Var) -> Script -> Script
-mapScriptVars fn scr = scr {sAssigns = map (mapAssignVars fn) (sAssigns scr)}
-
-setRepID :: RepID -> Var -> Var
-setRepID newID (Var _ name) = Var newID name
-
-setRepIDs :: RepID -> Script -> Script
-setRepIDs newID = mapScriptVars (setRepID newID)
 
 -------------
 -- replace --

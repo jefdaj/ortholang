@@ -11,6 +11,9 @@ module OrthoLang.Script
   , replaceVar
   , removeSelfReferences
   , rmRef
+  , assign
+  , setRepIDs
+  , depsOnly
 
   )
   where
@@ -88,3 +91,112 @@ rmRef scr var (Bop  t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var
 rmRef scr var (Fun  t ms vs s es   ) = Fun t ms (delete var vs) s (map (rmRef scr var) es)
 rmRef scr var (Lst t vs       es   ) = Lst t    (delete var vs)   (map (rmRef scr var) es)
 rmRef _   _   (Com _) = error "types.rmRef" "implement this! or rethink?"
+
+-- Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
+-- TODO salt is Nothing rather than the expr's salt, right?
+-- TODO var is added to deps, right?
+assign :: Script -> Assign -> Script
+assign scr a@(Assign var@(Var _ vName) expr) =
+
+  -- let rv  = Var (RepID Nothing) "result"
+      -- rr  = Ref (typeOf expr) Nothing (depsOf expr) var 
+      -- ra  = Assign rv rr
+  -- let as' = delVar (sAssigns scr) vName ++ [a]
+  --     r'  = if null (sResult scr) || vName == "result"
+  --             then Just expr 
+  --             else sResult scr
+  --     scr' = Script {sAssigns = as', sResult = r'}
+
+  -- OK, so by example the behavior we actually wanted instead of this:
+  --
+  -- result = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
+  -- samplefa = result
+  --
+  -- was:
+  -- 1) substitute the result ref for its value in the old script
+  -- 2) strip the "result" assignment from the old script
+  -- 3) add the new assignment statement samplefa = load_fna ...
+  -- 4) assigned a new default result = samplefa
+  --
+  -- How do we know that?
+  --
+  -- we should always do (1)
+  -- if interactive we should also always do (2), but respect the earlier "result = " in written scripts?
+  -- always do (3)
+  -- and always do (4) unless the current assignment was explicitly "result = " already
+
+  -- the next bug:
+  --
+  -- ortholang —▶ 1 # comments after naked expressions should be ignored
+  -- 1
+  -- 
+  -- ortholang —▶ :show
+  -- result = 1
+  -- 
+  -- ortholang —▶ test = 1 # same with comments after assignment statements
+  -- ortholang —▶ :show
+  -- result = 1
+  -- test = 1
+  -- 
+  -- ## only problem is it should remove "result = 1" and insert "result = test" at the end
+  -- TODO try stripping old result and see if that fixes it
+  -- TODO if not, try also inserting the new one at the end
+
+  -- Seems like the issue here is implicit vs explicit result? When assigned
+  -- explicitly in a script, result should persist after more assignments. But
+  -- when only assigned implicitly it should be overwritten, and when in the
+  -- REPL it should always be overwritten. When saving a specific REPL var it
+  -- should be set added to the end of the script file.
+  --
+  -- The simplest way to capture this in types, though maybe not the cleanest,
+  -- seems to be to prioritize a "result" var in sAssigns over sResult, and
+  -- have sResult be optional. Then parsing behavior should vary between file and repl:
+  -- in repl, assign each naked expression to sResult. but in a file, naked expressions should be errors
+  -- in a file, never remove previous result vars, except during includes
+  -- in a file, sResult isn't set at all until it holds a ref to the result var in sAssigns
+  --
+  -- does only the repl version need the fancy remove-self-references logic?
+
+  let scr'  = scr {sAssigns = delVar (sAssigns scr) "result"}
+      scr'' = updateVars scr' a
+  in trace "interpreter.parse.basic.assign"
+           ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
+           scr''
+
+---------------------------
+-- mangle variable names --
+---------------------------
+
+{- This does the filename mangling by setting a "replace ID" in each variable
+ - in a script. If it's anything other than Nothing it gets used by
+ - OrthoLang.Interpreter to set the rep dir.
+ -
+ - TODO should it go in Types, or maybe Paths?
+ -}
+
+mapExprVars :: (Var -> Var) -> Expr -> Expr
+mapExprVars _ e@(Lit  _ _) = e
+mapExprVars fn (Ref  t n vs v      ) = Ref  t n (map fn vs)   (fn v)
+mapExprVars fn (Bop  t n vs s e1 e2) = Bop  t n (map fn vs) s (mapExprVars fn e1) (mapExprVars fn e2)
+mapExprVars fn (Fun  t n vs s es   ) = Fun  t n (map fn vs) s (map (mapExprVars fn) es)
+mapExprVars fn (Lst t vs   es   ) = Lst t (map fn vs)   (map (mapExprVars fn) es)
+mapExprVars _ (Com _) = error "script.mapExprVars" "implement this!"
+
+mapAssignVars :: (Var -> Var) -> Assign -> Assign
+mapAssignVars fn (Assign var expr) = Assign (fn var) (mapExprVars fn expr)
+
+mapScriptVars :: (Var -> Var) -> Script -> Script
+mapScriptVars fn scr = scr {sAssigns = map (mapAssignVars fn) (sAssigns scr)}
+
+setRepID :: RepID -> Var -> Var
+setRepID newID (Var _ name) = Var newID name
+
+setRepIDs :: RepID -> Script -> Script
+setRepIDs newID = mapScriptVars (setRepID newID)
+
+
+depsOnly :: Expr -> Script -> Script
+depsOnly expr scr = scr {sAssigns = deps ++ [res]}
+  where
+    deps = filter (\a -> (elem (aVar a) $ depsOf expr)) (sAssigns scr)
+    res  = Assign {aVar = Var (RepID Nothing) "result", aExpr = expr}
