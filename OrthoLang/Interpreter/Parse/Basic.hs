@@ -128,6 +128,8 @@ assign scr a@(Assign var@(Var _ vName) expr) =
   -- in repl, assign each naked expression to sResult. but in a file, naked expressions should be errors
   -- in a file, never remove previous result vars, except during includes
   -- in a file, sResult isn't set at all until it holds a ref to the result var in sAssigns
+  --
+  -- does only the repl version need the fancy remove-self-references logic?
 
   let scr'  = scr {sAssigns = delVar (sAssigns scr) "result"}
       scr'' = updateVars scr' a

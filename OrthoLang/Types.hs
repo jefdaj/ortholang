@@ -282,24 +282,28 @@ delVar :: [Assign] -> String -> [Assign]
 delVar as vName = filter (\(Assign {aVar = Var _ n}) -> n /= vName) as
 
 {-
-This data type supports different in the REPL vs when parsing scripts from file...
+This data type supports different behavior in the REPL vs when parsing scripts from file...
 
 In the REPL we never have a "final" result; we want to override it implicitly
 each time the user types a new naked expression. So we strip anything called
 "result" out of sAssigns each time and put each naked expression in sResult
-instead.
+instead. It gets forgotten during the next assignment unless the user gives it
+a name.
 
 When parsing a file we expect at most one "result" variable. If nothing is
-given, we use the last assignment in the script. When parsing one script that
-includes another by filename, we strip the result var from the included one to
-prevent conflict.
+given, we assume the last assignment in the script. When parsing one script
+that includes others filename, we strip the result var from the included ones
+to prevent conflict.
 
-When saving a file from the REPL, the result can always be inferred: the last
-one in the script, or the particular variable that was saved.
+When saving a file from the REPL, the result can always be inferred to be a Ref
+to the last Var in the saved script. (Even when a specific variable is saved,
+because it will be the last of its own dependencies)
+
+TODO start a OrthoLang.Script module that includes all these operations nicely packaged?
 -}
 data Script = Script
   { sAssigns :: [Assign]   -- ^ Assignment statements in user-specified order, one of which may be "result"
-  , sResult  :: Maybe Expr -- ^ Latest naked REPL expression, or the explicit result of a script
+  , sResult  :: Maybe Expr -- ^ Latest naked REPL expression, or a Ref to the explicit "result" var
   }
   deriving (Show, Eq)
 

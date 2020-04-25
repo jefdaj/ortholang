@@ -118,8 +118,7 @@ step :: [Module] -> GlobalEnv -> Handle -> Maybe String -> IO GlobalEnv
 step mods st hdl mLine = case mLine of
   Nothing -> return st
   Just line -> case stripWhiteSpace (stripComments line) of
-    ""        -> return st
-    ('#':_  ) -> return st
+    ""        -> return st -- this happens when the line is empty or a comment
     (':':cmd) -> runCmd mods st hdl cmd
     statement -> withPostEditHook
                    runStatement mods st hdl statement
