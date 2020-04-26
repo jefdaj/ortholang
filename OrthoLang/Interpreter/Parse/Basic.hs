@@ -2,7 +2,7 @@ module OrthoLang.Interpreter.Parse.Basic
   (
   -- * Utilities
     putAssign
-  , assign
+  -- , appendStatement
 
   -- * Whitespace and endings
   , lexeme
@@ -33,7 +33,7 @@ module OrthoLang.Interpreter.Parse.Basic
 
 import OrthoLang.Debug (trace)
 import OrthoLang.Types
-import OrthoLang.Script (assign)
+import OrthoLang.Script (appendStatement)
 import qualified Data.Map.Strict as M
 
 import Control.Applicative    ((<|>), many)
@@ -63,7 +63,7 @@ putAssign _ a = do
   --              then Just (aExpr a)
   --              else (sResult scr)
   --     scr' = scr {sAssigns = as', sResult = re'}
-  let scr' = assign scr $ trace "interpreter.parse.basic.putAssign" ("a: " ++ show a) a
+  let scr' = appendStatement scr $ trace "interpreter.parse.basic.putAssign" ("a: " ++ show a) a
   putState scr'
 
 {-|

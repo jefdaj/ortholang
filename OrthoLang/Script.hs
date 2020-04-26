@@ -3,13 +3,21 @@ This module gathers together all the semi-complicated 'Script' transformations
 that were littering the rest of the codebase.
 
 TODO use the standard module hierarchy? Data.OrthoLang.Script sounds good
+
+TODO result handling:
+  remove "result" var if any when including a script
+  split Parse.Basic.putAssign/assign into File and Repl versions with different result handling + errors
+  rename Parse.Script.pResult -> pNaked? seems like it would only be used in the Repl version
+  add repl test cases that include test scripts and check the result handling
 -}
 
 module OrthoLang.Script
   (
 
   -- * Used in Interpreter.Parse
-    assign
+    appendStatement -- TODO remove
+  , appendStatementFile
+  , appendStatementRepl -- TODO will this be used in the Repl directly instead?
 
   -- * Used in Interpreter.Eval (between parse and compile steps)
   , expandMacros
@@ -51,8 +59,8 @@ import OrthoLang.Util  (justOrDie)
 -- Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
 -- TODO salt is Nothing rather than the expr's salt, right?
 -- TODO var is added to deps, right?
-assign :: Script -> Assign -> Script
-assign scr a =
+appendStatement :: Script -> Assign -> Script
+appendStatement scr a =
 
   -- let rv  = Var (RepID Nothing) "result"
       -- rr  = Ref (typeOf expr) Nothing (depsOf expr) var 
@@ -118,6 +126,20 @@ assign scr a =
   in trace "interpreter.parse.basic.assign"
            ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
            scr''
+
+{-|
+Unlike the Repl version, this one throws an error (TODO which error?) when
+adding a duplicate variable.
+-}
+appendStatementFile :: Script -> Assign -> Script
+appendStatementFile = undefined
+
+{-|
+Unlike the File version, this one also works with naked 'Expr's.
+They take priority over any previously-assigned "result" variable.
+-}
+appendStatementRepl :: Script -> Either Expr Assign -> Script
+appendStatementRepl = undefined
 
 
 ------------
