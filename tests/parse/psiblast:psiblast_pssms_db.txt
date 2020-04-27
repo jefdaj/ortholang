@@ -1,86 +1,100 @@
-[ 
-    ( Var ( RepID Nothing ) "queries" 
-    , Fun faa.list Nothing [] "split_faa" 
-        [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "maga" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "cyanodb" 
-    , Fun faa.blastdb Nothing 
-        [ Var ( RepID Nothing ) "mgen" 
-        , Var ( RepID Nothing ) "maga" 
-        ] "makeblastdb_faa_all" 
-        [ Lst faa 
-            [ Var ( RepID Nothing ) "mgen" 
-            , Var ( RepID Nothing ) "maga" 
-            ] 
-            [ Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "mgen" )
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "maga" )
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "profiles" 
-    , Fun pssm.list Nothing 
-        [ Var ( RepID Nothing ) "queries" 
-        , Var ( RepID Nothing ) "cyanodb" 
-        , Var ( RepID Nothing ) "mgen" 
-        , Var ( RepID Nothing ) "maga" 
-        ] "psiblast_train_pssms_db" 
-        [ Lit num "1.0e-10" 
-        , Ref faa.list Nothing [] 
-            ( Var ( RepID Nothing ) "queries" )
-        , Ref faa.blastdb Nothing 
-            [ Var ( RepID Nothing ) "mgen" 
-            , Var ( RepID Nothing ) "maga" 
-            ] 
-            ( Var ( RepID Nothing ) "cyanodb" )
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "queries" 
+            , aExpr = Fun faa.list Nothing [] "split_faa" 
+                [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgen" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "cyanodb" 
+            , aExpr = Fun faa.blastdb Nothing 
+                [ Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "makeblastdb_faa_all" 
+                [ Lst faa 
+                    [ Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    [ Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "mgen" )
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "maga" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "profiles" 
+            , aExpr = Fun pssm.list Nothing 
+                [ Var ( RepID Nothing ) "queries" 
+                , Var ( RepID Nothing ) "cyanodb" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "psiblast_train_pssms_db" 
+                [ Lit num "1.0e-10" 
+                , Ref faa.list Nothing [] 
+                    ( Var ( RepID Nothing ) "queries" )
+                , Ref faa.blastdb Nothing 
+                    [ Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    ( Var ( RepID Nothing ) "cyanodb" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hittable" 
+            , aExpr = Fun bht 
+                ( Just ( Salt 0 ) ) 
+                [ Var ( RepID Nothing ) "profiles" 
+                , Var ( RepID Nothing ) "queries" 
+                , Var ( RepID Nothing ) "cyanodb" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "psiblast_pssms_db" 
+                [ Lit num "1.0e-10" 
+                , Ref pssm.list Nothing 
+                    [ Var ( RepID Nothing ) "queries" 
+                    , Var ( RepID Nothing ) "cyanodb" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    ( Var ( RepID Nothing ) "profiles" )
+                , Ref faa.blastdb Nothing 
+                    [ Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    ( Var ( RepID Nothing ) "cyanodb" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref bht 
+                ( Just ( Salt 0 ) ) 
+                [ Var ( RepID Nothing ) "profiles" 
+                , Var ( RepID Nothing ) "queries" 
+                , Var ( RepID Nothing ) "cyanodb" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "maga" 
+                ] 
+                ( Var ( RepID Nothing ) "hittable" )
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "hittable" 
-    , Fun bht 
-        ( Just ( Salt 0 ) ) 
-        [ Var ( RepID Nothing ) "profiles" 
-        , Var ( RepID Nothing ) "queries" 
-        , Var ( RepID Nothing ) "cyanodb" 
-        , Var ( RepID Nothing ) "mgen" 
-        , Var ( RepID Nothing ) "maga" 
-        ] "psiblast_pssms_db" 
-        [ Lit num "1.0e-10" 
-        , Ref pssm.list Nothing 
-            [ Var ( RepID Nothing ) "queries" 
+    , sResult = Just 
+        ( Ref bht 
+            ( Just ( Salt 0 ) ) 
+            [ Var ( RepID Nothing ) "profiles" 
+            , Var ( RepID Nothing ) "queries" 
             , Var ( RepID Nothing ) "cyanodb" 
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "maga" 
             ] 
-            ( Var ( RepID Nothing ) "profiles" )
-        , Ref faa.blastdb Nothing 
-            [ Var ( RepID Nothing ) "mgen" 
-            , Var ( RepID Nothing ) "maga" 
-            ] 
-            ( Var ( RepID Nothing ) "cyanodb" )
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref bht 
-        ( Just ( Salt 0 ) ) 
-        [ Var ( RepID Nothing ) "profiles" 
-        , Var ( RepID Nothing ) "queries" 
-        , Var ( RepID Nothing ) "cyanodb" 
-        , Var ( RepID Nothing ) "mgen" 
-        , Var ( RepID Nothing ) "maga" 
-        ] 
-        ( Var ( RepID Nothing ) "hittable" )
-    ) 
-] 
+            ( Var ( RepID Nothing ) "hittable" )
+        )
+    } 

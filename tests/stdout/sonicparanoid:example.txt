@@ -1,1 +1,1 @@
-"sonicparanoid example not written yet"
+sonicparanoid example not written yet

@@ -1,3 +1,7 @@
-single = "examples/sequences/Mycoplasma_genitalium_M2321_single.fna"
-mapped = ["examples/sequences/Mycoplasma_genitalium_M2321_single.fna"]
-result = [single] | mapped
+mgen5 = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
+mbov = load_faa "examples/sequences/Mycoplasma_bovis_small.fa"
+e = 1.0e-20
+hits1 = blastx e mgen5 mbov
+hits3 = mmseqs_search e mgen5 mbov
+actualList = [hits1, hits3]
+result = [length hits1, length hits3, length actualList]

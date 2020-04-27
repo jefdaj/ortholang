@@ -2,8 +2,7 @@
 |-- cache
 |   |-- hmmsearch
 |   |   |-- result
-|   |   |-- result.err
-|   |   `-- result.out
+|   |   `-- result.err
 |   |-- load
 |   |   |-- 11bbf54fc6.faa
 |   |   |-- 11bbf54fc6.faa.ids
@@ -39,15 +38,13 @@
 |   |-- hmmbuild
 |   |   `-- 92572e30a9
 |   |       |-- result
-|   |       |-- result.err
-|   |       `-- result.out
+|   |       `-- result.err
 |   |-- hmmsearch
 |   |   `-- 01b1e93729
 |   |       `-- d9556f667d
 |   |           `-- 695ad777c5
 |   |               |-- result
-|   |               |-- result.err
-|   |               `-- result.out
+|   |               `-- result.err
 |   |-- list
 |   |   |-- af2a474c38
 |   |   |   `-- result -> ../../../cache/lines/...
@@ -86,4 +83,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../exprs/diff/602d804cfc/result
 
-42 directories, 44 files
+42 directories, 41 files

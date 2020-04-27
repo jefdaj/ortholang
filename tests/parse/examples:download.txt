@@ -1,49 +1,56 @@
-[ 
-    ( Var ( RepID Nothing ) "ncbi_db_list" 
-    , Fun str.list Nothing [] "blastdblist" [ Lit str "" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "ncbi_human_db_list" 
-    , Fun str.list Nothing [] "blastdblist" [ Lit str "human" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "human_est" 
-    , Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "human_est" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "swissprot" 
-    , Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "swissprot" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "rsprotein" 
-    , Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "refseq_protein" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "rsgenomic" 
-    , Fun fna.blastdb Nothing [] "blastdbget_fna" [ Lit str "refseq_genomic" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "pcc7942p" 
-    , Fun faa.gz.list Nothing [] "get_proteomes" 
-        [ Lst str [] [ Lit str "Synechococcus elongatus PCC 7942 (refseq)" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "pcc7942n" 
-    , Fun fna.gz.list Nothing [] "get_genomes" 
-        [ Lst str [] [ Lit str "Synechococcus elongatus PCC 7942 (refseq)" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "pcc6803" 
-    , Fun faa.gz.list Nothing [] "get_proteomes" 
-        [ Lst str [] [ Lit str "Synechocystis sp. PCC 6803 (refseq)" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "samplefa" 
-    , Fun fna Nothing [] "load_fna" [ Lit str "https://molb7621.github.io/workshop/_downloads/sample.fa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref fna Nothing [] 
-        ( Var ( RepID Nothing ) "samplefa" )
-    ) 
-] 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "ncbi_db_list" 
+            , aExpr = Fun str.list Nothing [] "blastdblist" [ Lit str "" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "ncbi_human_db_list" 
+            , aExpr = Fun str.list Nothing [] "blastdblist" [ Lit str "human" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "human_est" 
+            , aExpr = Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "human_est" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "swissprot" 
+            , aExpr = Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "swissprot" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "rsprotein" 
+            , aExpr = Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "refseq_protein" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "rsgenomic" 
+            , aExpr = Fun fna.blastdb Nothing [] "blastdbget_fna" [ Lit str "refseq_genomic" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc7942p" 
+            , aExpr = Fun faa.gz.list Nothing [] "get_proteomes" 
+                [ Lst str [] [ Lit str "Synechococcus elongatus PCC 7942 (refseq)" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc7942n" 
+            , aExpr = Fun fna.gz.list Nothing [] "get_genomes" 
+                [ Lst str [] [ Lit str "Synechococcus elongatus PCC 7942 (refseq)" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc6803" 
+            , aExpr = Fun faa.gz.list Nothing [] "get_proteomes" 
+                [ Lst str [] [ Lit str "Synechocystis sp. PCC 6803 (refseq)" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "samplefa" 
+            , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "https://molb7621.github.io/workshop/_downloads/sample.fa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref fna Nothing [] 
+                ( Var ( RepID Nothing ) "samplefa" )
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref fna Nothing [] 
+            ( Var ( RepID Nothing ) "samplefa" )
+        )
+    } 

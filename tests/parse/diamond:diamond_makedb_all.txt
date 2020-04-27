@@ -1,14 +1,25 @@
-[ 
-    ( Var ( RepID Nothing ) "mycoplasma" 
-    , Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/Mycoplasma_*_small.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun dmnd 
-        ( Just ( Salt 0 ) ) 
-        [ Var ( RepID Nothing ) "mycoplasma" ] "diamond_makedb_all" 
-        [ Ref faa.list Nothing [] 
-            ( Var ( RepID Nothing ) "mycoplasma" )
-        ]
-    ) 
-] 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "mycoplasma" 
+            , aExpr = Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/Mycoplasma_*_small.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun dmnd 
+                ( Just ( Salt 0 ) ) 
+                [ Var ( RepID Nothing ) "mycoplasma" ] "diamond_makedb_all" 
+                [ Ref faa.list Nothing [] 
+                    ( Var ( RepID Nothing ) "mycoplasma" )
+                ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun dmnd 
+            ( Just ( Salt 0 ) ) 
+            [ Var ( RepID Nothing ) "mycoplasma" ] "diamond_makedb_all" 
+            [ Ref faa.list Nothing [] 
+                ( Var ( RepID Nothing ) "mycoplasma" )
+            ]
+        )
+    } 

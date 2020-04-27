@@ -1,49 +1,67 @@
-[ 
-    ( Var ( RepID Nothing ) "single" 
-    , Fun fna Nothing [] "concat_fna" 
-        [ Lst fna [] 
-            [ Fun fna Nothing [] "gbk_to_fna" 
-                [ Lit str "cds" 
-                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
-                ] 
-            , Fun fna Nothing [] "gbk_to_fna" 
-                [ Lit str "cds" 
-                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk" ]
-                ] 
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mapped" 
-    , Fun fna.list Nothing [] "concat_fna_each" 
-        [ Lst fna.list [] 
-            [ Lst fna [] 
-                [ Fun fna Nothing [] "gbk_to_fna" 
-                    [ Lit str "cds" 
-                    , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
+            , aExpr = Fun fna Nothing [] "concat_fna" 
+                [ Lst fna [] 
+                    [ Fun fna Nothing [] "gbk_to_fna" 
+                        [ Lit str "cds" 
+                        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+                        ] 
+                    , Fun fna Nothing [] "gbk_to_fna" 
+                        [ Lit str "cds" 
+                        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk" ]
+                        ] 
                     ] 
-                , Fun fna Nothing [] "gbk_to_fna" 
-                    [ Lit str "cds" 
-                    , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk" ]
-                    ] 
-                ] 
-            ]
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Bop fna.list Nothing 
-        [ Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "mapped" 
-        ] "|" 
-        ( Lst fna 
-            [ Var ( RepID Nothing ) "single" ] 
-            [ Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "single" )
-            ]
-        ) 
-        ( Ref fna.list Nothing [] 
-            ( Var ( RepID Nothing ) "mapped" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mapped" 
+            , aExpr = Fun fna.list Nothing [] "concat_fna_each" 
+                [ Lst fna.list [] 
+                    [ Lst fna [] 
+                        [ Fun fna Nothing [] "gbk_to_fna" 
+                            [ Lit str "cds" 
+                            , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+                            ] 
+                        , Fun fna Nothing [] "gbk_to_fna" 
+                            [ Lit str "cds" 
+                            , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk" ]
+                            ] 
+                        ] 
+                    ]
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop fna.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "mapped" 
+                ] "|" 
+                ( Lst fna 
+                    [ Var ( RepID Nothing ) "single" ] 
+                    [ Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "single" )
+                    ]
+                ) 
+                ( Ref fna.list Nothing [] 
+                    ( Var ( RepID Nothing ) "mapped" )
+                )
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop fna.list Nothing 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "mapped" 
+            ] "|" 
+            ( Lst fna 
+                [ Var ( RepID Nothing ) "single" ] 
+                [ Ref fna Nothing [] 
+                    ( Var ( RepID Nothing ) "single" )
+                ]
+            ) 
+            ( Ref fna.list Nothing [] 
+                ( Var ( RepID Nothing ) "mapped" )
+            )
         )
-    ) 
-] 
+    } 

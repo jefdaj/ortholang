@@ -63,12 +63,10 @@
 |   |       `-- e4e709a340
 |   |           |-- 14a1d4b191
 |   |           |   |-- result
-|   |           |   |-- result.err
-|   |           |   `-- result.out
+|   |           |   `-- result.err
 |   |           `-- 688af09c48
 |   |               |-- result
-|   |               |-- result.err
-|   |               `-- result.out
+|   |               `-- result.err
 |   |-- psiblast_db_each
 |   |   `-- 0c631e7663
 |   |       `-- ec1f6f502d
@@ -88,4 +86,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../exprs/concat_bht/c6878f4d43/result
 
-41 directories, 47 files
+41 directories, 45 files

@@ -1,34 +1,44 @@
-[ 
-    ( Var ( RepID Nothing ) "single" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "genes5" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "db" 
-    , Fun faa.blastdb Nothing 
-        [ Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "genes5" 
-        ] "makeblastdb_faa_all" 
-        [ Lst faa 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "genes5" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "db" 
+            , aExpr = Fun faa.blastdb Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "genes5" 
+                ] "makeblastdb_faa_all" 
+                [ Lst faa 
+                    [ Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "genes5" 
+                    ] 
+                    [ Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "single" )
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "genes5" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref faa.blastdb Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "genes5" 
+                ] 
+                ( Var ( RepID Nothing ) "db" )
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref faa.blastdb Nothing 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "genes5" 
             ] 
-            [ Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "single" )
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "genes5" )
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref faa.blastdb Nothing 
-        [ Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "genes5" 
-        ] 
-        ( Var ( RepID Nothing ) "db" )
-    ) 
-] 
+            ( Var ( RepID Nothing ) "db" )
+        )
+    } 

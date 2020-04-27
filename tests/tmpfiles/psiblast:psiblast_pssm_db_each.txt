@@ -23,12 +23,10 @@
 |   |-- map
 |   |   |-- 7af57e548e
 |   |   |   |-- result
-|   |   |   |-- result.err
-|   |   |   `-- result.out
+|   |   |   `-- result.err
 |   |   `-- ee2466885e
 |   |       |-- result
-|   |       |-- result.err
-|   |       `-- result.out
+|   |       `-- result.err
 |   `-- psiblast
 |-- exprs
 |   |-- list
@@ -63,8 +61,7 @@
 |   |       `-- ec1f6f502d
 |   |           `-- cf9f5098fc
 |   |               |-- result -> ../../../../../cache/lines/...
-|   |               |-- result.tmp.err
-|   |               `-- result.tmp.out
+|   |               `-- result.tmp.err
 |   `-- str
 |       |-- 1e020faf26
 |       |   `-- result -> ../../../cache/lines/...
@@ -80,4 +77,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hitlists.bht.list
 
-36 directories, 44 files
+36 directories, 41 files

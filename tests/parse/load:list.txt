@@ -1,22 +1,37 @@
-[ 
-    ( Var ( RepID Nothing ) "small" 
-    , Fun str.list Nothing [] "load_list" [ Lit str "examples/genome-lists/proteomes-small.txt" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "refseq" 
-    , Fun str.list Nothing [] "load_list" [ Lit str "examples/genome-lists/proteomes-refseq.txt" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Bop str.list Nothing 
-        [ Var ( RepID Nothing ) "small" 
-        , Var ( RepID Nothing ) "refseq" 
-        ] "|" 
-        ( Ref str.list Nothing [] 
-            ( Var ( RepID Nothing ) "small" )
-        ) 
-        ( Ref str.list Nothing [] 
-            ( Var ( RepID Nothing ) "refseq" )
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "small" 
+            , aExpr = Fun str.list Nothing [] "load_list" [ Lit str "examples/genome-lists/proteomes-small.txt" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "refseq" 
+            , aExpr = Fun str.list Nothing [] "load_list" [ Lit str "examples/genome-lists/proteomes-refseq.txt" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop str.list Nothing 
+                [ Var ( RepID Nothing ) "small" 
+                , Var ( RepID Nothing ) "refseq" 
+                ] "|" 
+                ( Ref str.list Nothing [] 
+                    ( Var ( RepID Nothing ) "small" )
+                ) 
+                ( Ref str.list Nothing [] 
+                    ( Var ( RepID Nothing ) "refseq" )
+                )
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop str.list Nothing 
+            [ Var ( RepID Nothing ) "small" 
+            , Var ( RepID Nothing ) "refseq" 
+            ] "|" 
+            ( Ref str.list Nothing [] 
+                ( Var ( RepID Nothing ) "small" )
+            ) 
+            ( Ref str.list Nothing [] 
+                ( Var ( RepID Nothing ) "refseq" )
+            )
         )
-    ) 
-] 
+    } 

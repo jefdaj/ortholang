@@ -31,12 +31,10 @@
 |   |-- map
 |   |   |-- 15ce1b4311
 |   |   |   |-- result -> ../../../cache/lines/...
-|   |   |   |-- result.tmp.err
-|   |   |   `-- result.tmp.out
+|   |   |   `-- result.tmp.err
 |   |   `-- fd7ea89a47
 |   |       |-- result -> ../../../cache/lines/...
-|   |       |-- result.tmp.err
-|   |       `-- result.tmp.out
+|   |       `-- result.tmp.err
 |   `-- psiblast
 |-- exprs
 |   |-- length
@@ -85,4 +83,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../exprs/length/3a80442424/result
 
-40 directories, 45 files
+40 directories, 43 files

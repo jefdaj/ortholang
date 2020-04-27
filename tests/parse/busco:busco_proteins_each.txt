@@ -1,34 +1,57 @@
-[ 
-    ( Var ( RepID Nothing ) "odb9_firmicutes" 
-    , Fun blh Nothing [] "busco_fetch_lineage" [ Lit str "v2/datasets/firmicutes_odb9" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "maga" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun bsr.list 
-        ( Just ( Salt 0 ) ) 
-        [ Var ( RepID Nothing ) "odb9_firmicutes" 
-        , Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "busco_proteins_each" 
-        [ Ref blh Nothing [] 
-            ( Var ( RepID Nothing ) "odb9_firmicutes" )
-        , Lst faa 
-            [ Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] 
-            [ Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "maga" )
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "mgen" )
-            ] 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "odb9_firmicutes" 
+            , aExpr = Fun blh Nothing [] "busco_fetch_lineage" [ Lit str "v2/datasets/firmicutes_odb9" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgen" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun bsr.list 
+                ( Just ( Salt 0 ) ) 
+                [ Var ( RepID Nothing ) "odb9_firmicutes" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "busco_proteins_each" 
+                [ Ref blh Nothing [] 
+                    ( Var ( RepID Nothing ) "odb9_firmicutes" )
+                , Lst faa 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] 
+                    [ Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "maga" )
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "mgen" )
+                    ] 
+                ] 
+            } 
         ] 
-    ) 
-] 
+    , sResult = Just 
+        ( Fun bsr.list 
+            ( Just ( Salt 0 ) ) 
+            [ Var ( RepID Nothing ) "odb9_firmicutes" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "busco_proteins_each" 
+            [ Ref blh Nothing [] 
+                ( Var ( RepID Nothing ) "odb9_firmicutes" )
+            , Lst faa 
+                [ Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                [ Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "maga" )
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "mgen" )
+                ] 
+            ] 
+        )
+    } 

@@ -1,5 +1,9 @@
-[ 
-    ( Var ( RepID Nothing ) "result" 
-    , Lit str "not implemented yet" 
-    ) 
-]
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lit str "not implemented yet" 
+            } 
+        ]
+    , sResult = Just ( Lit str "not implemented yet" )
+    } 

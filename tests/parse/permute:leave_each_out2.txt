@@ -1,11 +1,23 @@
-[ 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun num.list.list Nothing [] "leave_each_out" 
-        [ Lst num [] 
-            [ Lit num "1.0" 
-            , Lit num "2.0" 
-            , Lit num "3.0" 
-            ] 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun num.list.list Nothing [] "leave_each_out" 
+                [ Lst num [] 
+                    [ Lit num "1.0" 
+                    , Lit num "2.0" 
+                    , Lit num "3.0" 
+                    ] 
+                ]
+            } 
         ]
-    ) 
-]
+    , sResult = Just 
+        ( Fun num.list.list Nothing [] "leave_each_out" 
+            [ Lst num [] 
+                [ Lit num "1.0" 
+                , Lit num "2.0" 
+                , Lit num "3.0" 
+                ] 
+            ]
+        )
+    } 

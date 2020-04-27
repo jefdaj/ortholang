@@ -1,5 +1,10 @@
-[ 
-    ( Var ( RepID Nothing ) "result" 
-    , Bop num Nothing [] "+" ( Lit num "1.0" ) ( Lit num "1.0" )
-    ) 
-]
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop num Nothing [] "+" ( Lit num "1.0" ) ( Lit num "1.0" )
+            } 
+        ]
+    , sResult = Just 
+        ( Bop num Nothing [] "+" ( Lit num "1.0" ) ( Lit num "1.0" ) )
+    } 

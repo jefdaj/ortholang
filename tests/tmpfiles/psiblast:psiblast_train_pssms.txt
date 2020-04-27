@@ -86,28 +86,23 @@
 |   |       |-- 5c7b244e49
 |   |       |   `-- 688af09c48
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- 7db9341d21
 |   |       |   `-- 688af09c48
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- cf21782837
 |   |       |   `-- 688af09c48
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- d3e63113ca
 |   |       |   `-- 688af09c48
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       `-- ecc64d578a
 |   |           `-- 688af09c48
 |   |               |-- result -> ../../../../../cache/lines/...
-|   |               |-- result.tmp.err
-|   |               `-- result.tmp.out
+|   |               `-- result.tmp.err
 |   |-- split_faa
 |   |   `-- 2c7651beca
 |   |       `-- result -> ../../../cache/lines/...
@@ -122,4 +117,4 @@
     |-- queries.faa.list -> ../exprs/split_faa/2c7651beca/result
     `-- result -> ../vars/pssms.pssm.list
 
-70 directories, 52 files
+70 directories, 47 files

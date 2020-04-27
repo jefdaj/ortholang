@@ -1,9 +1,13 @@
-[ 
-    ( Var ( RepID Nothing ) "e" 
-    , Lit num "1.0e-20" 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Lit str "example not written yet" 
-    ) 
-] 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "e" 
+            , aExpr = Lit num "1.0e-20" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lit str "example not written yet" 
+            } 
+        ] 
+    , sResult = Just ( Lit str "example not written yet" )
+    } 

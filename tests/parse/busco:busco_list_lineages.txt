@@ -1,21 +1,35 @@
-[ 
-    ( Var ( RepID Nothing ) "blins" 
-    , Fun str.list Nothing [] "busco_list_lineages" [ Lit str "bac" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "ball" 
-    , Fun str.list Nothing [] "busco_list_lineages" [ Lit str "" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Lst str.list 
-        [ Var ( RepID Nothing ) "blins" 
-        , Var ( RepID Nothing ) "ball" 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "blins" 
+            , aExpr = Fun str.list Nothing [] "busco_list_lineages" [ Lit str "bac" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "ball" 
+            , aExpr = Fun str.list Nothing [] "busco_list_lineages" [ Lit str "" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lst str.list 
+                [ Var ( RepID Nothing ) "blins" 
+                , Var ( RepID Nothing ) "ball" 
+                ] 
+                [ Ref str.list Nothing [] 
+                    ( Var ( RepID Nothing ) "blins" )
+                , Ref str.list Nothing [] 
+                    ( Var ( RepID Nothing ) "ball" )
+                ] 
+            } 
         ] 
-        [ Ref str.list Nothing [] 
-            ( Var ( RepID Nothing ) "blins" )
-        , Ref str.list Nothing [] 
-            ( Var ( RepID Nothing ) "ball" )
-        ] 
-    ) 
-] 
+    , sResult = Just 
+        ( Lst str.list 
+            [ Var ( RepID Nothing ) "blins" 
+            , Var ( RepID Nothing ) "ball" 
+            ] 
+            [ Ref str.list Nothing [] 
+                ( Var ( RepID Nothing ) "blins" )
+            , Ref str.list Nothing [] 
+                ( Var ( RepID Nothing ) "ball" )
+            ] 
+        )
+    } 

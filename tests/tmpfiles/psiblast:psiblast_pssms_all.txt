@@ -127,32 +127,27 @@
 |   |       |   `-- c7fe98886d
 |   |       |       `-- 0
 |   |       |           |-- result
-|   |       |           |-- result.err
-|   |       |           `-- result.out
+|   |       |           `-- result.err
 |   |       |-- 45045ba7ba
 |   |       |   `-- c7fe98886d
 |   |       |       `-- 0
 |   |       |           |-- result
-|   |       |           |-- result.err
-|   |       |           `-- result.out
+|   |       |           `-- result.err
 |   |       |-- 55eb633d2c
 |   |       |   `-- c7fe98886d
 |   |       |       `-- 0
 |   |       |           |-- result
-|   |       |           |-- result.err
-|   |       |           `-- result.out
+|   |       |           `-- result.err
 |   |       |-- 9b142cd11f
 |   |       |   `-- c7fe98886d
 |   |       |       `-- 0
 |   |       |           |-- result
-|   |       |           |-- result.err
-|   |       |           `-- result.out
+|   |       |           `-- result.err
 |   |       `-- bd314e3ce2
 |   |           `-- c7fe98886d
 |   |               `-- 0
 |   |                   |-- result
-|   |                   |-- result.err
-|   |                   `-- result.out
+|   |                   `-- result.err
 |   |-- psiblast_train_pssms_db
 |   |   |-- 01b1e93729
 |   |   |   `-- b0433b036e
@@ -162,28 +157,23 @@
 |   |       |-- 5c7b244e49
 |   |       |   `-- e482f2d2ab
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- 7db9341d21
 |   |       |   `-- e482f2d2ab
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- cf21782837
 |   |       |   `-- e482f2d2ab
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- d3e63113ca
 |   |       |   `-- e482f2d2ab
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       `-- ecc64d578a
 |   |           `-- e482f2d2ab
 |   |               |-- result -> ../../../../../cache/lines/...
-|   |               |-- result.tmp.err
-|   |               `-- result.tmp.out
+|   |               `-- result.tmp.err
 |   |-- split_faa
 |   |   `-- 2c7651beca
 |   |       `-- result -> ../../../cache/lines/...
@@ -203,4 +193,4 @@
     |-- result -> ../vars/tablemgen.bht
     `-- tablemgen.bht -> ../exprs/concat_bht/44c93f0d10/0/result
 
-108 directories, 95 files
+108 directories, 85 files

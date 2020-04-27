@@ -1,29 +1,29 @@
-["examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa",
- "examples/sequences/Mycoplasma_agalactiae_protein_refseq.faa",
- "examples/sequences/Mycoplasma_agalactiae_small.faa",
- "examples/sequences/Mycoplasma_arthritidis_protein_refseq.faa",
- "examples/sequences/Mycoplasma_capricolum_protein_refseq.faa",
- "examples/sequences/Mycoplasma_conjunctivae_protein_refseq.faa",
- "examples/sequences/Mycoplasma_crocodyli_protein_refseq.faa",
- "examples/sequences/Mycoplasma_gallisepticum_protein_refseq.faa",
- "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa",
- "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa",
- "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa",
- "examples/sequences/Mycoplasma_genitalium_single.faa",
- "examples/sequences/Mycoplasma_genitalium_small.faa",
- "examples/sequences/Mycoplasma_hyopneumoniae_J_protein_refseq.faa",
- "examples/sequences/Mycoplasma_hyopneumoniae_protein_refseq.faa",
- "examples/sequences/Mycoplasma_hyopneumoniae_small.faa",
- "examples/sequences/Mycoplasma_mobile_protein_refseq.faa",
- "examples/sequences/Mycoplasma_mycoides_protein_refseq.faa",
- "examples/sequences/Mycoplasma_penetrans_protein_refseq.faa",
- "examples/sequences/Mycoplasma_pulmonis_protein_refseq.faa",
- "examples/sequences/Mycoplasma_synoviae_protein_refseq.faa",
- "examples/sequences/PCC_6803_genes.faa",
- "examples/sequences/PCC_6803_genes_10.faa",
- "examples/sequences/PCC_7002_genes.faa",
- "examples/sequences/PCC_7122_genes.faa",
- "examples/sequences/PCC_7942_gene.faa",
- "examples/sequences/PCC_7942_genes.faa",
- "examples/sequences/PCC_7942_genes_10.faa",
- "examples/sequences/PCC_7942_genes_50.faa"]
+examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa
+examples/sequences/Mycoplasma_agalactiae_protein_refseq.faa
+examples/sequences/Mycoplasma_agalactiae_small.faa
+examples/sequences/Mycoplasma_arthritidis_protein_refseq.faa
+examples/sequences/Mycoplasma_capricolum_protein_refseq.faa
+examples/sequences/Mycoplasma_conjunctivae_protein_refseq.faa
+examples/sequences/Mycoplasma_crocodyli_protein_refseq.faa
+examples/sequences/Mycoplasma_gallisepticum_protein_refseq.faa
+examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa
+examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa
+examples/sequences/Mycoplasma_genitalium_protein_refseq.faa
+examples/sequences/Mycoplasma_genitalium_single.faa
+examples/sequences/Mycoplasma_genitalium_small.faa
+examples/sequences/Mycoplasma_hyopneumoniae_J_protein_refseq.faa
+examples/sequences/Mycoplasma_hyopneumoniae_protein_refseq.faa
+examples/sequences/Mycoplasma_hyopneumoniae_small.faa
+examples/sequences/Mycoplasma_mobile_protein_refseq.faa
+examples/sequences/Mycoplasma_mycoides_protein_refseq.faa
+examples/sequences/Mycoplasma_penetrans_protein_refseq.faa
+examples/sequences/Mycoplasma_pulmonis_protein_refseq.faa
+examples/sequences/Mycoplasma_synoviae_protein_refseq.faa
+examples/sequences/PCC_6803_genes.faa
+examples/sequences/PCC_6803_genes_10.faa
+examples/sequences/PCC_7002_genes.faa
+examples/sequences/PCC_7122_genes.faa
+examples/sequences/PCC_7942_gene.faa
+examples/sequences/PCC_7942_genes.faa
+examples/sequences/PCC_7942_genes_10.faa
+examples/sequences/PCC_7942_genes_50.faa

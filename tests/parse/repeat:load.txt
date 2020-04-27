@@ -1,45 +1,70 @@
-[ 
-    ( Var ( RepID Nothing ) "maga" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "fwdHits" 
-    , Fun bht Nothing 
-        [ Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "blastp" 
-        [ Lit num "1.0e-5" 
-        , Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "maga" )
-        , Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "mgen" )
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgen" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "fwdHits" 
+            , aExpr = Fun bht Nothing 
+                [ Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "blastp" 
+                [ Lit num "1.0e-5" 
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "maga" )
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "mgen" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun num Nothing 
+                [ Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "length" 
+                [ Fun bht.list Nothing 
+                    [ Var ( RepID Nothing ) "fwdHits" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] "repeat" 
+                    [ Ref bht Nothing 
+                        [ Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mgen" 
+                        ] 
+                        ( Var ( RepID Nothing ) "fwdHits" )
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "mgen" )
+                    , Lit num "10.0" 
+                    ] 
+                ]
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun num Nothing 
-        [ Var ( RepID Nothing ) "fwdHits" 
-        , Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "length" 
-        [ Fun bht.list Nothing 
+    , sResult = Just 
+        ( Fun num Nothing 
             [ Var ( RepID Nothing ) "fwdHits" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
-            ] "repeat" 
-            [ Ref bht Nothing 
-                [ Var ( RepID Nothing ) "maga" 
+            ] "length" 
+            [ Fun bht.list Nothing 
+                [ Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
+                ] "repeat" 
+                [ Ref bht Nothing 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] 
+                    ( Var ( RepID Nothing ) "fwdHits" )
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "mgen" )
+                , Lit num "10.0" 
                 ] 
-                ( Var ( RepID Nothing ) "fwdHits" )
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "mgen" )
-            , Lit num "10.0" 
-            ] 
-        ]
-    ) 
-] 
+            ]
+        )
+    } 

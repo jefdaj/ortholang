@@ -1,7 +1,1 @@
-Database: ea1568d48b
-6 sequences; 8,937 total bases
-Longest sequence: 2,511 bases
-BLASTDB Version: 4
-Volumes:
 $TMPDIR/cache/makeblastdb/ea1568d48b/result
-

@@ -1,1 +1,3 @@
-[[2, 3], [1, 3], [1, 2]]
+$TMPDIR/exprs/list/ea11b49459/a629005e3c/result
+$TMPDIR/exprs/list/ee383407c9/a629005e3c/result
+$TMPDIR/exprs/list/ee383407c9/ea11b49459/result

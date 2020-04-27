@@ -2,7 +2,7 @@
 
 # Usage:
 # 1) nix-shell
-# 2) ./scripts/dev/update-test.sh
+# 2) ./scripts/dev/update-tests.sh
 # 3) while that runs, periodically:
 #      git diff tests
 #      check that the changes make sense

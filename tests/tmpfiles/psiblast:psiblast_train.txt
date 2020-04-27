@@ -33,8 +33,7 @@
 |   |       `-- ec1f6f502d
 |   |           `-- 4f0bccea88
 |   |               |-- result -> ../../../../../cache/lines/...
-|   |               |-- result.tmp.err
-|   |               `-- result.tmp.out
+|   |               `-- result.tmp.err
 |   `-- str
 |       |-- 1e020faf26
 |       |   `-- result -> ../../../cache/lines/...
@@ -46,4 +45,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/pssm.pssm
 
-23 directories, 23 files
+23 directories, 22 files

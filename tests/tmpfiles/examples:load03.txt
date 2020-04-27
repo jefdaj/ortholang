@@ -20,7 +20,6 @@
 |   |   |-- ef6a5b45d9.faa
 |   |   `-- ef6a5b45d9.faa.ids
 |   `-- seqio
-|       `-- b4b6f1db24.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- concat_faa
 |   |   `-- 667205f624
@@ -65,4 +64,4 @@
     |-- result -> ../vars/sequences_of_interest.faa
     `-- sequences_of_interest.faa -> ../exprs/extract_seqs/c40578b533/b4b6f1db24/result
 
-36 directories, 29 files
+36 directories, 28 files

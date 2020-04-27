@@ -1,1 +1,3 @@
-[[1, 1, 1], [1, 1, 1], [1, 1]]
+$TMPDIR/cache/lines/f99426adea.txt
+$TMPDIR/cache/lines/f99426adea.txt
+$TMPDIR/cache/lines/ab760f8666.txt

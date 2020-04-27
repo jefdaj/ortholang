@@ -1,139 +1,152 @@
-[ 
-    ( Var ( RepID Nothing ) "xvar" 
-    , Lit num "1.0" 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "yvar" 
-    , Bop num Nothing 
-        [ Var ( RepID Nothing ) "xvar" ] "*" ( Lit num "1200.0" ) 
-        ( Ref num Nothing [] 
-            ( Var ( RepID Nothing ) "xvar" )
-        )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "scores" 
-    , Fun num.scores Nothing 
-        [ Var ( RepID Nothing ) "yvar" 
-        , Var ( RepID Nothing ) "xvar" 
-        ] "score_repeats" 
-        [ Ref num Nothing 
-            [ Var ( RepID Nothing ) "xvar" ] 
-            ( Var ( RepID Nothing ) "yvar" )
-        , Ref num Nothing [] 
-            ( Var ( RepID Nothing ) "xvar" )
-        , Lst num [] 
-            [ Lit num "1.0" 
-            , Lit num "2.0" 
-            , Lit num "3.0" 
-            , Lit num "4.0" 
-            , Lit num "5.0" 
-            , Lit num "2.0" 
-            , Lit num "2.0" 
-            , Lit num "4.0" 
-            , Lit num "1.0" 
-            , Lit num "3.0" 
-            , Lit num "1.0" 
-            , Lit num "1.0" 
-            , Lit num "1.0" 
-            , Lit num "1.0" 
-            ] 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "xvar" 
+            , aExpr = Lit num "1.0" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "yvar" 
+            , aExpr = Bop num Nothing 
+                [ Var ( RepID Nothing ) "xvar" ] "*" ( Lit num "1200.0" ) 
+                ( Ref num Nothing [] 
+                    ( Var ( RepID Nothing ) "xvar" )
+                )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "scores" 
+            , aExpr = Fun num.scores Nothing 
+                [ Var ( RepID Nothing ) "yvar" 
+                , Var ( RepID Nothing ) "xvar" 
+                ] "score_repeats" 
+                [ Ref num Nothing 
+                    [ Var ( RepID Nothing ) "xvar" ] 
+                    ( Var ( RepID Nothing ) "yvar" )
+                , Ref num Nothing [] 
+                    ( Var ( RepID Nothing ) "xvar" )
+                , Lst num [] 
+                    [ Lit num "1.0" 
+                    , Lit num "2.0" 
+                    , Lit num "3.0" 
+                    , Lit num "4.0" 
+                    , Lit num "5.0" 
+                    , Lit num "2.0" 
+                    , Lit num "2.0" 
+                    , Lit num "4.0" 
+                    , Lit num "1.0" 
+                    , Lit num "3.0" 
+                    , Lit num "1.0" 
+                    , Lit num "1.0" 
+                    , Lit num "1.0" 
+                    , Lit num "1.0" 
+                    ] 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "xvars" 
+            , aExpr = Fun num.list Nothing 
+                [ Var ( RepID Nothing ) "scores" 
+                , Var ( RepID Nothing ) "yvar" 
+                , Var ( RepID Nothing ) "xvar" 
+                ] "extract_scored" 
+                [ Ref num.scores Nothing 
+                    [ Var ( RepID Nothing ) "yvar" 
+                    , Var ( RepID Nothing ) "xvar" 
+                    ] 
+                    ( Var ( RepID Nothing ) "scores" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "yvars" 
+            , aExpr = Fun num.list Nothing 
+                [ Var ( RepID Nothing ) "scores" 
+                , Var ( RepID Nothing ) "yvar" 
+                , Var ( RepID Nothing ) "xvar" 
+                ] "extract_scores" 
+                [ Ref num.scores Nothing 
+                    [ Var ( RepID Nothing ) "yvar" 
+                    , Var ( RepID Nothing ) "xvar" 
+                    ] 
+                    ( Var ( RepID Nothing ) "scores" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "plots" 
+            , aExpr = Lst png 
+                [ Var ( RepID Nothing ) "xvars" 
+                , Var ( RepID Nothing ) "scores" 
+                , Var ( RepID Nothing ) "yvar" 
+                , Var ( RepID Nothing ) "xvar" 
+                , Var ( RepID Nothing ) "yvars" 
+                ] 
+                [ Fun png Nothing 
+                    [ Var ( RepID Nothing ) "xvars" 
+                    , Var ( RepID Nothing ) "scores" 
+                    , Var ( RepID Nothing ) "yvar" 
+                    , Var ( RepID Nothing ) "xvar" 
+                    ] "histogram" 
+                    [ Lit str "histogram of xvar inputs" 
+                    , Ref num.list Nothing 
+                        [ Var ( RepID Nothing ) "scores" 
+                        , Var ( RepID Nothing ) "yvar" 
+                        , Var ( RepID Nothing ) "xvar" 
+                        ] 
+                        ( Var ( RepID Nothing ) "xvars" )
+                    ] 
+                , Fun png Nothing 
+                    [ Var ( RepID Nothing ) "yvars" 
+                    , Var ( RepID Nothing ) "scores" 
+                    , Var ( RepID Nothing ) "yvar" 
+                    , Var ( RepID Nothing ) "xvar" 
+                    ] "histogram" 
+                    [ Lit str "histogram of yvar scores" 
+                    , Ref num.list Nothing 
+                        [ Var ( RepID Nothing ) "scores" 
+                        , Var ( RepID Nothing ) "yvar" 
+                        , Var ( RepID Nothing ) "xvar" 
+                        ] 
+                        ( Var ( RepID Nothing ) "yvars" )
+                    ] 
+                , Fun png Nothing [] "histogram" 
+                    [ Lit str "histogram of unnamed (inline) nums" 
+                    , Lst num [] 
+                        [ Lit num "1.0" 
+                        , Lit num "2.0" 
+                        , Lit num "3.0" 
+                        , Lit num "4.0" 
+                        , Lit num "5.0" 
+                        , Lit num "2.0" 
+                        , Lit num "2.0" 
+                        , Lit num "4.0" 
+                        , Lit num "1.0" 
+                        , Lit num "3.0" 
+                        , Lit num "1.0" 
+                        , Lit num "1.0" 
+                        , Lit num "1.0" 
+                        , Lit num "1.0" 
+                        ] 
+                    ] 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref png.list Nothing 
+                [ Var ( RepID Nothing ) "xvars" 
+                , Var ( RepID Nothing ) "scores" 
+                , Var ( RepID Nothing ) "yvar" 
+                , Var ( RepID Nothing ) "xvar" 
+                , Var ( RepID Nothing ) "yvars" 
+                ] 
+                ( Var ( RepID Nothing ) "plots" )
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "xvars" 
-    , Fun num.list Nothing 
-        [ Var ( RepID Nothing ) "scores" 
-        , Var ( RepID Nothing ) "yvar" 
-        , Var ( RepID Nothing ) "xvar" 
-        ] "extract_scored" 
-        [ Ref num.scores Nothing 
-            [ Var ( RepID Nothing ) "yvar" 
-            , Var ( RepID Nothing ) "xvar" 
-            ] 
-            ( Var ( RepID Nothing ) "scores" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "yvars" 
-    , Fun num.list Nothing 
-        [ Var ( RepID Nothing ) "scores" 
-        , Var ( RepID Nothing ) "yvar" 
-        , Var ( RepID Nothing ) "xvar" 
-        ] "extract_scores" 
-        [ Ref num.scores Nothing 
-            [ Var ( RepID Nothing ) "yvar" 
-            , Var ( RepID Nothing ) "xvar" 
-            ] 
-            ( Var ( RepID Nothing ) "scores" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "plots" 
-    , Lst png 
-        [ Var ( RepID Nothing ) "xvars" 
-        , Var ( RepID Nothing ) "scores" 
-        , Var ( RepID Nothing ) "yvar" 
-        , Var ( RepID Nothing ) "xvar" 
-        , Var ( RepID Nothing ) "yvars" 
-        ] 
-        [ Fun png Nothing 
+    , sResult = Just 
+        ( Ref png.list Nothing 
             [ Var ( RepID Nothing ) "xvars" 
             , Var ( RepID Nothing ) "scores" 
             , Var ( RepID Nothing ) "yvar" 
             , Var ( RepID Nothing ) "xvar" 
-            ] "histogram" 
-            [ Lit str "histogram of xvar inputs" 
-            , Ref num.list Nothing 
-                [ Var ( RepID Nothing ) "scores" 
-                , Var ( RepID Nothing ) "yvar" 
-                , Var ( RepID Nothing ) "xvar" 
-                ] 
-                ( Var ( RepID Nothing ) "xvars" )
+            , Var ( RepID Nothing ) "yvars" 
             ] 
-        , Fun png Nothing 
-            [ Var ( RepID Nothing ) "yvars" 
-            , Var ( RepID Nothing ) "scores" 
-            , Var ( RepID Nothing ) "yvar" 
-            , Var ( RepID Nothing ) "xvar" 
-            ] "histogram" 
-            [ Lit str "histogram of yvar scores" 
-            , Ref num.list Nothing 
-                [ Var ( RepID Nothing ) "scores" 
-                , Var ( RepID Nothing ) "yvar" 
-                , Var ( RepID Nothing ) "xvar" 
-                ] 
-                ( Var ( RepID Nothing ) "yvars" )
-            ] 
-        , Fun png Nothing [] "histogram" 
-            [ Lit str "histogram of unnamed (inline) nums" 
-            , Lst num [] 
-                [ Lit num "1.0" 
-                , Lit num "2.0" 
-                , Lit num "3.0" 
-                , Lit num "4.0" 
-                , Lit num "5.0" 
-                , Lit num "2.0" 
-                , Lit num "2.0" 
-                , Lit num "4.0" 
-                , Lit num "1.0" 
-                , Lit num "3.0" 
-                , Lit num "1.0" 
-                , Lit num "1.0" 
-                , Lit num "1.0" 
-                , Lit num "1.0" 
-                ] 
-            ] 
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref png.list Nothing 
-        [ Var ( RepID Nothing ) "xvars" 
-        , Var ( RepID Nothing ) "scores" 
-        , Var ( RepID Nothing ) "yvar" 
-        , Var ( RepID Nothing ) "xvar" 
-        , Var ( RepID Nothing ) "yvars" 
-        ] 
-        ( Var ( RepID Nothing ) "plots" )
-    ) 
-] 
+            ( Var ( RepID Nothing ) "plots" )
+        )
+    } 

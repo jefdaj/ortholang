@@ -1,45 +1,56 @@
-[ 
-    ( Var ( RepID Nothing ) "query" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mgendb" 
-    , Fun faa.blastdb Nothing [] "makeblastdb_faa" 
-        [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "magadb" 
-    , Fun faa.blastdb Nothing [] "makeblastdb_faa" 
-        [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "pssm" 
-    , Fun pssm.list Nothing 
-        [ Var ( RepID Nothing ) "query" 
-        , Var ( RepID Nothing ) "mgendb" 
-        , Var ( RepID Nothing ) "magadb" 
-        ] "psiblast_train_db_each" 
-        [ Lit num "1.0e-2" 
-        , Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "query" )
-        , Lst faa.blastdb 
-            [ Var ( RepID Nothing ) "mgendb" 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "query" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgendb" 
+            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+                [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "magadb" 
+            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+                [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pssm" 
+            , aExpr = Fun pssm.list Nothing 
+                [ Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "magadb" 
+                ] "psiblast_train_db_each" 
+                [ Lit num "1.0e-2" 
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "query" )
+                , Lst faa.blastdb 
+                    [ Var ( RepID Nothing ) "mgendb" 
+                    , Var ( RepID Nothing ) "magadb" 
+                    ] 
+                    [ Ref faa.blastdb Nothing [] 
+                        ( Var ( RepID Nothing ) "mgendb" )
+                    , Ref faa.blastdb Nothing [] 
+                        ( Var ( RepID Nothing ) "magadb" )
+                    ] 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref pssm.list Nothing 
+                [ Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "magadb" 
+                ] 
+                ( Var ( RepID Nothing ) "pssm" )
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref pssm.list Nothing 
+            [ Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "mgendb" 
             , Var ( RepID Nothing ) "magadb" 
             ] 
-            [ Ref faa.blastdb Nothing [] 
-                ( Var ( RepID Nothing ) "mgendb" )
-            , Ref faa.blastdb Nothing [] 
-                ( Var ( RepID Nothing ) "magadb" )
-            ] 
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref pssm.list Nothing 
-        [ Var ( RepID Nothing ) "query" 
-        , Var ( RepID Nothing ) "mgendb" 
-        , Var ( RepID Nothing ) "magadb" 
-        ] 
-        ( Var ( RepID Nothing ) "pssm" )
-    ) 
-] 
+            ( Var ( RepID Nothing ) "pssm" )
+        )
+    } 

@@ -29,8 +29,7 @@
 |   |-- hmmbuild
 |   |   `-- 92572e30a9
 |   |       |-- result
-|   |       |-- result.err
-|   |       `-- result.out
+|   |       `-- result.err
 |   |-- list
 |   |   `-- fe26b625e5
 |   |       `-- result -> ../../../cache/lines/...
@@ -62,4 +61,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hits_hmm.hmm
 
-31 directories, 31 files
+31 directories, 30 files

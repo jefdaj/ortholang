@@ -1,5 +1,9 @@
-[ 
-    ( Var ( RepID Nothing ) "result" 
-    , Lit str "orthogroups example not written yet" 
-    ) 
-]
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lit str "orthogroups example not written yet" 
+            } 
+        ]
+    , sResult = Just ( Lit str "orthogroups example not written yet" )
+    } 

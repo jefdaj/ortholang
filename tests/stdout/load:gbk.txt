@@ -1,7 +1,1 @@
-[LOCUS       CP003770              579977 bp    DNA     circular BCT 31-JAN-2014
-DEFINITION  Mycoplasma genitalium M2321, complete genome.
-ACCESSION   CP003770
-VERSION     CP003770.1
-DBLINK      BioProject: PRJNA39739
-...
-]
+$TMPDIR/cache/load/28ce925871.gbk

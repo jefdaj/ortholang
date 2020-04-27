@@ -33,15 +33,13 @@
 |   |       `-- 28e026e5bd
 |   |           `-- 4f0bccea88
 |   |               |-- result
-|   |               |-- result.err
-|   |               `-- result.out
+|   |               `-- result.err
 |   |-- psiblast_train_db
 |   |   `-- 01b1e93729
 |   |       `-- ec1f6f502d
 |   |           `-- 4f0bccea88
 |   |               |-- result -> ../../../../../cache/lines/...
-|   |               |-- result.tmp.err
-|   |               `-- result.tmp.out
+|   |               `-- result.tmp.err
 |   `-- str
 |       |-- 1e020faf26
 |       |   `-- result -> ../../../cache/lines/...
@@ -53,4 +51,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hits.bht
 
-27 directories, 26 files
+27 directories, 24 files

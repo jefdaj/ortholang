@@ -1,34 +1,38 @@
-[ 
-    ( Var ( RepID Nothing ) "pcc6803" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/PCC_6803_genes.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "pcc7942" 
-    , Fun faa Nothing [] "concat_faa" 
-        [ Lst faa [] 
-            [ Fun faa Nothing [] "gbk_to_faa" 
-                [ Lit str "cds" 
-                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_chr.gbk" ]
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "pcc6803" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/PCC_6803_genes.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc7942" 
+            , aExpr = Fun faa Nothing [] "concat_faa" 
+                [ Lst faa [] 
+                    [ Fun faa Nothing [] "gbk_to_faa" 
+                        [ Lit str "cds" 
+                        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_chr.gbk" ]
+                        ] 
+                    , Fun faa Nothing [] "gbk_to_faa" 
+                        [ Lit str "cds" 
+                        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_pANL.gbk" ]
+                        ] 
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits" 
+            , aExpr = Fun bht Nothing 
+                [ Var ( RepID Nothing ) "pcc7942" ] "blastp_db" 
+                [ Lit num "1.0e-50" 
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "pcc7942" )
+                , Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "swissprot" ]
                 ] 
-            , Fun faa Nothing [] "gbk_to_faa" 
-                [ Lit str "cds" 
-                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_pANL.gbk" ]
-                ] 
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "hits" 
-    , Fun bht Nothing 
-        [ Var ( RepID Nothing ) "pcc7942" ] "blastp_db" 
-        [ Lit num "1.0e-50" 
-        , Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "pcc7942" )
-        , Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "swissprot" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lit str "nothing so far" 
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Lit str "nothing so far" 
-    ) 
-] 
+    , sResult = Just ( Lit str "nothing so far" )
+    } 

@@ -1,14 +1,2 @@
-[Database: 4477d5b52f
-1 sequences; 380 total residues
-Longest sequence: 380 residues
-BLASTDB Version: 4
-Volumes:
-$TMPDIR/cache/makeblastdb/4477d5b52f/result
-,
- Database: 1da708833c
-5 sequences; 2,593 total residues
-Longest sequence: 836 residues
-BLASTDB Version: 4
-Volumes:
-$TMPDIR/cache/makeblastdb/1da708833c/result
-]
+$TMPDIR/cache/lines/27ad287209.txt
+$TMPDIR/cache/lines/a8d71d6c43.txt

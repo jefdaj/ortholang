@@ -1,150 +1,183 @@
-[ 
-    ( Var ( RepID Nothing ) "fnaSmall" 
-    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "faaSmall" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "fnaSmallIDs" 
-    , Fun str.list Nothing 
-        [ Var ( RepID Nothing ) "fnaSmall" ] "extract_ids" 
-        [ Ref fna Nothing [] 
-            ( Var ( RepID Nothing ) "fnaSmall" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "faaSmallIDs" 
-    , Fun str.list Nothing 
-        [ Var ( RepID Nothing ) "faaSmall" ] "extract_ids" 
-        [ Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "faaSmall" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "fnaSmallSeqs" 
-    , Fun fna Nothing 
-        [ Var ( RepID Nothing ) "fnaSmall" 
-        , Var ( RepID Nothing ) "fnaSmallIDs" 
-        ] "extract_seqs" 
-        [ Ref fna Nothing [] 
-            ( Var ( RepID Nothing ) "fnaSmall" )
-        , Ref str.list Nothing 
-            [ Var ( RepID Nothing ) "fnaSmall" ] 
-            ( Var ( RepID Nothing ) "fnaSmallIDs" )
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "fnaSmall" 
+            , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faaSmall" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "fnaSmallIDs" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "fnaSmall" ] "extract_ids" 
+                [ Ref fna Nothing [] 
+                    ( Var ( RepID Nothing ) "fnaSmall" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faaSmallIDs" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "faaSmall" ] "extract_ids" 
+                [ Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "faaSmall" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "fnaSmallSeqs" 
+            , aExpr = Fun fna Nothing 
+                [ Var ( RepID Nothing ) "fnaSmall" 
+                , Var ( RepID Nothing ) "fnaSmallIDs" 
+                ] "extract_seqs" 
+                [ Ref fna Nothing [] 
+                    ( Var ( RepID Nothing ) "fnaSmall" )
+                , Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "fnaSmall" ] 
+                    ( Var ( RepID Nothing ) "fnaSmallIDs" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faaSmallSeqs" 
+            , aExpr = Fun faa Nothing 
+                [ Var ( RepID Nothing ) "faaSmall" 
+                , Var ( RepID Nothing ) "faaSmallIDs" 
+                ] "extract_seqs" 
+                [ Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "faaSmall" )
+                , Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "faaSmall" ] 
+                    ( Var ( RepID Nothing ) "faaSmallIDs" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "fnaSmallAll" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "fnaSmallSeqs" 
+                , Var ( RepID Nothing ) "fnaSmall" 
+                , Var ( RepID Nothing ) "fnaSmallIDs" 
+                ] "extract_ids" 
+                [ Ref fna Nothing 
+                    [ Var ( RepID Nothing ) "fnaSmall" 
+                    , Var ( RepID Nothing ) "fnaSmallIDs" 
+                    ] 
+                    ( Var ( RepID Nothing ) "fnaSmallSeqs" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faaSmallAll" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "faaSmallSeqs" 
+                , Var ( RepID Nothing ) "faaSmall" 
+                , Var ( RepID Nothing ) "faaSmallIDs" 
+                ] "extract_ids" 
+                [ Ref faa Nothing 
+                    [ Var ( RepID Nothing ) "faaSmall" 
+                    , Var ( RepID Nothing ) "faaSmallIDs" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faaSmallSeqs" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "fnaDiff" 
+            , aExpr = Bop str.list Nothing 
+                [ Var ( RepID Nothing ) "fnaSmallAll" 
+                , Var ( RepID Nothing ) "fnaSmallSeqs" 
+                , Var ( RepID Nothing ) "fnaSmall" 
+                , Var ( RepID Nothing ) "fnaSmallIDs" 
+                ] "~" 
+                ( Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "fnaSmallSeqs" 
+                    , Var ( RepID Nothing ) "fnaSmall" 
+                    , Var ( RepID Nothing ) "fnaSmallIDs" 
+                    ] 
+                    ( Var ( RepID Nothing ) "fnaSmallAll" )
+                ) 
+                ( Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "fnaSmall" ] 
+                    ( Var ( RepID Nothing ) "fnaSmallIDs" )
+                )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faaDiff" 
+            , aExpr = Bop str.list Nothing 
+                [ Var ( RepID Nothing ) "faaSmallAll" 
+                , Var ( RepID Nothing ) "faaSmallSeqs" 
+                , Var ( RepID Nothing ) "faaSmall" 
+                , Var ( RepID Nothing ) "faaSmallIDs" 
+                ] "~" 
+                ( Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "faaSmallSeqs" 
+                    , Var ( RepID Nothing ) "faaSmall" 
+                    , Var ( RepID Nothing ) "faaSmallIDs" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faaSmallAll" )
+                ) 
+                ( Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "faaSmall" ] 
+                    ( Var ( RepID Nothing ) "faaSmallIDs" )
+                )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop str.list Nothing 
+                [ Var ( RepID Nothing ) "fnaDiff" 
+                , Var ( RepID Nothing ) "fnaSmallAll" 
+                , Var ( RepID Nothing ) "fnaSmallSeqs" 
+                , Var ( RepID Nothing ) "fnaSmall" 
+                , Var ( RepID Nothing ) "fnaSmallIDs" 
+                , Var ( RepID Nothing ) "faaDiff" 
+                , Var ( RepID Nothing ) "faaSmallAll" 
+                , Var ( RepID Nothing ) "faaSmallSeqs" 
+                , Var ( RepID Nothing ) "faaSmall" 
+                , Var ( RepID Nothing ) "faaSmallIDs" 
+                ] "|" 
+                ( Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "fnaSmallAll" 
+                    , Var ( RepID Nothing ) "fnaSmallSeqs" 
+                    , Var ( RepID Nothing ) "fnaSmall" 
+                    , Var ( RepID Nothing ) "fnaSmallIDs" 
+                    ] 
+                    ( Var ( RepID Nothing ) "fnaDiff" )
+                ) 
+                ( Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "faaSmallAll" 
+                    , Var ( RepID Nothing ) "faaSmallSeqs" 
+                    , Var ( RepID Nothing ) "faaSmall" 
+                    , Var ( RepID Nothing ) "faaSmallIDs" 
+                    ] 
+                    ( Var ( RepID Nothing ) "faaDiff" )
+                )
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "faaSmallSeqs" 
-    , Fun faa Nothing 
-        [ Var ( RepID Nothing ) "faaSmall" 
-        , Var ( RepID Nothing ) "faaSmallIDs" 
-        ] "extract_seqs" 
-        [ Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "faaSmall" )
-        , Ref str.list Nothing 
-            [ Var ( RepID Nothing ) "faaSmall" ] 
-            ( Var ( RepID Nothing ) "faaSmallIDs" )
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "fnaSmallAll" 
-    , Fun str.list Nothing 
-        [ Var ( RepID Nothing ) "fnaSmallSeqs" 
-        , Var ( RepID Nothing ) "fnaSmall" 
-        , Var ( RepID Nothing ) "fnaSmallIDs" 
-        ] "extract_ids" 
-        [ Ref fna Nothing 
-            [ Var ( RepID Nothing ) "fnaSmall" 
-            , Var ( RepID Nothing ) "fnaSmallIDs" 
-            ] 
-            ( Var ( RepID Nothing ) "fnaSmallSeqs" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "faaSmallAll" 
-    , Fun str.list Nothing 
-        [ Var ( RepID Nothing ) "faaSmallSeqs" 
-        , Var ( RepID Nothing ) "faaSmall" 
-        , Var ( RepID Nothing ) "faaSmallIDs" 
-        ] "extract_ids" 
-        [ Ref faa Nothing 
-            [ Var ( RepID Nothing ) "faaSmall" 
-            , Var ( RepID Nothing ) "faaSmallIDs" 
-            ] 
-            ( Var ( RepID Nothing ) "faaSmallSeqs" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "fnaDiff" 
-    , Bop str.list Nothing 
-        [ Var ( RepID Nothing ) "fnaSmallAll" 
-        , Var ( RepID Nothing ) "fnaSmallSeqs" 
-        , Var ( RepID Nothing ) "fnaSmall" 
-        , Var ( RepID Nothing ) "fnaSmallIDs" 
-        ] "~" 
-        ( Ref str.list Nothing 
-            [ Var ( RepID Nothing ) "fnaSmallSeqs" 
-            , Var ( RepID Nothing ) "fnaSmall" 
-            , Var ( RepID Nothing ) "fnaSmallIDs" 
-            ] 
-            ( Var ( RepID Nothing ) "fnaSmallAll" )
-        ) 
-        ( Ref str.list Nothing 
-            [ Var ( RepID Nothing ) "fnaSmall" ] 
-            ( Var ( RepID Nothing ) "fnaSmallIDs" )
-        )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "faaDiff" 
-    , Bop str.list Nothing 
-        [ Var ( RepID Nothing ) "faaSmallAll" 
-        , Var ( RepID Nothing ) "faaSmallSeqs" 
-        , Var ( RepID Nothing ) "faaSmall" 
-        , Var ( RepID Nothing ) "faaSmallIDs" 
-        ] "~" 
-        ( Ref str.list Nothing 
-            [ Var ( RepID Nothing ) "faaSmallSeqs" 
-            , Var ( RepID Nothing ) "faaSmall" 
-            , Var ( RepID Nothing ) "faaSmallIDs" 
-            ] 
-            ( Var ( RepID Nothing ) "faaSmallAll" )
-        ) 
-        ( Ref str.list Nothing 
-            [ Var ( RepID Nothing ) "faaSmall" ] 
-            ( Var ( RepID Nothing ) "faaSmallIDs" )
-        )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Bop str.list Nothing 
-        [ Var ( RepID Nothing ) "fnaDiff" 
-        , Var ( RepID Nothing ) "fnaSmallAll" 
-        , Var ( RepID Nothing ) "fnaSmallSeqs" 
-        , Var ( RepID Nothing ) "fnaSmall" 
-        , Var ( RepID Nothing ) "fnaSmallIDs" 
-        , Var ( RepID Nothing ) "faaDiff" 
-        , Var ( RepID Nothing ) "faaSmallAll" 
-        , Var ( RepID Nothing ) "faaSmallSeqs" 
-        , Var ( RepID Nothing ) "faaSmall" 
-        , Var ( RepID Nothing ) "faaSmallIDs" 
-        ] "|" 
-        ( Ref str.list Nothing 
-            [ Var ( RepID Nothing ) "fnaSmallAll" 
+    , sResult = Just 
+        ( Bop str.list Nothing 
+            [ Var ( RepID Nothing ) "fnaDiff" 
+            , Var ( RepID Nothing ) "fnaSmallAll" 
             , Var ( RepID Nothing ) "fnaSmallSeqs" 
             , Var ( RepID Nothing ) "fnaSmall" 
             , Var ( RepID Nothing ) "fnaSmallIDs" 
-            ] 
-            ( Var ( RepID Nothing ) "fnaDiff" )
-        ) 
-        ( Ref str.list Nothing 
-            [ Var ( RepID Nothing ) "faaSmallAll" 
+            , Var ( RepID Nothing ) "faaDiff" 
+            , Var ( RepID Nothing ) "faaSmallAll" 
             , Var ( RepID Nothing ) "faaSmallSeqs" 
             , Var ( RepID Nothing ) "faaSmall" 
             , Var ( RepID Nothing ) "faaSmallIDs" 
-            ] 
-            ( Var ( RepID Nothing ) "faaDiff" )
+            ] "|" 
+            ( Ref str.list Nothing 
+                [ Var ( RepID Nothing ) "fnaSmallAll" 
+                , Var ( RepID Nothing ) "fnaSmallSeqs" 
+                , Var ( RepID Nothing ) "fnaSmall" 
+                , Var ( RepID Nothing ) "fnaSmallIDs" 
+                ] 
+                ( Var ( RepID Nothing ) "fnaDiff" )
+            ) 
+            ( Ref str.list Nothing 
+                [ Var ( RepID Nothing ) "faaSmallAll" 
+                , Var ( RepID Nothing ) "faaSmallSeqs" 
+                , Var ( RepID Nothing ) "faaSmall" 
+                , Var ( RepID Nothing ) "faaSmallIDs" 
+                ] 
+                ( Var ( RepID Nothing ) "faaDiff" )
+            )
         )
-    ) 
-] 
+    } 

@@ -1,94 +1,107 @@
-[ 
-    ( Var ( RepID Nothing ) "pcc6803" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/PCC_6803_genes.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "pcc7942" 
-    , Fun faa Nothing [] "concat_faa" 
-        [ Lst faa [] 
-            [ Fun faa Nothing [] "gbk_to_faa" 
-                [ Lit str "cds" 
-                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_chr.gbk" ]
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "pcc6803" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/PCC_6803_genes.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc7942" 
+            , aExpr = Fun faa Nothing [] "concat_faa" 
+                [ Lst faa [] 
+                    [ Fun faa Nothing [] "gbk_to_faa" 
+                        [ Lit str "cds" 
+                        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_chr.gbk" ]
+                        ] 
+                    , Fun faa Nothing [] "gbk_to_faa" 
+                        [ Lit str "cds" 
+                        , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_pANL.gbk" ]
+                        ] 
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "cutoff" 
+            , aExpr = Lit num "1.0e-10" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "cutoff" 
+                , Var ( RepID Nothing ) "pcc7942" 
+                , Var ( RepID Nothing ) "pcc6803" 
+                ] "extract_queries" 
+                [ Fun bht Nothing 
+                    [ Var ( RepID Nothing ) "cutoff" 
+                    , Var ( RepID Nothing ) "pcc7942" 
+                    , Var ( RepID Nothing ) "pcc6803" 
+                    ] "blastp" 
+                    [ Ref num Nothing [] 
+                        ( Var ( RepID Nothing ) "cutoff" )
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "pcc7942" )
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "pcc6803" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "cutoffs" 
+            , aExpr = Lst num [] 
+                [ Lit num "1.0e-5" 
+                , Lit num "1.0e-10" 
+                , Lit num "1.0e-20" 
+                , Lit num "1.0e-50" 
+                , Lit num "1.0e-100" 
                 ] 
-            , Fun faa Nothing [] "gbk_to_faa" 
-                [ Lit str "cds" 
-                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_pANL.gbk" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "lengths" 
+            , aExpr = Fun num.list Nothing 
+                [ Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "cutoff" 
+                , Var ( RepID Nothing ) "pcc7942" 
+                , Var ( RepID Nothing ) "pcc6803" 
+                , Var ( RepID Nothing ) "cutoffs" 
+                ] "replace_each" 
+                [ Fun num Nothing 
+                    [ Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "cutoff" 
+                    , Var ( RepID Nothing ) "pcc7942" 
+                    , Var ( RepID Nothing ) "pcc6803" 
+                    ] "length" 
+                    [ Ref str.list Nothing 
+                        [ Var ( RepID Nothing ) "cutoff" 
+                        , Var ( RepID Nothing ) "pcc7942" 
+                        , Var ( RepID Nothing ) "pcc6803" 
+                        ] 
+                        ( Var ( RepID Nothing ) "hits" )
+                    ]
+                , Ref num Nothing [] 
+                    ( Var ( RepID Nothing ) "cutoff" )
+                , Ref num.list Nothing [] 
+                    ( Var ( RepID Nothing ) "cutoffs" )
                 ] 
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "cutoff" 
-    , Lit num "1.0e-10" 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "hits" 
-    , Fun str.list Nothing 
-        [ Var ( RepID Nothing ) "cutoff" 
-        , Var ( RepID Nothing ) "pcc7942" 
-        , Var ( RepID Nothing ) "pcc6803" 
-        ] "extract_queries" 
-        [ Fun bht Nothing 
-            [ Var ( RepID Nothing ) "cutoff" 
-            , Var ( RepID Nothing ) "pcc7942" 
-            , Var ( RepID Nothing ) "pcc6803" 
-            ] "blastp" 
-            [ Ref num Nothing [] 
-                ( Var ( RepID Nothing ) "cutoff" )
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "pcc7942" )
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "pcc6803" )
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "cutoffs" 
-    , Lst num [] 
-        [ Lit num "1.0e-5" 
-        , Lit num "1.0e-10" 
-        , Lit num "1.0e-20" 
-        , Lit num "1.0e-50" 
-        , Lit num "1.0e-100" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref num.list Nothing 
+                [ Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "cutoff" 
+                , Var ( RepID Nothing ) "pcc7942" 
+                , Var ( RepID Nothing ) "pcc6803" 
+                , Var ( RepID Nothing ) "cutoffs" 
+                ] 
+                ( Var ( RepID Nothing ) "lengths" )
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "lengths" 
-    , Fun num.list Nothing 
-        [ Var ( RepID Nothing ) "hits" 
-        , Var ( RepID Nothing ) "cutoff" 
-        , Var ( RepID Nothing ) "pcc7942" 
-        , Var ( RepID Nothing ) "pcc6803" 
-        , Var ( RepID Nothing ) "cutoffs" 
-        ] "replace_each" 
-        [ Fun num Nothing 
+    , sResult = Just 
+        ( Ref num.list Nothing 
             [ Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "cutoff" 
             , Var ( RepID Nothing ) "pcc7942" 
             , Var ( RepID Nothing ) "pcc6803" 
-            ] "length" 
-            [ Ref str.list Nothing 
-                [ Var ( RepID Nothing ) "cutoff" 
-                , Var ( RepID Nothing ) "pcc7942" 
-                , Var ( RepID Nothing ) "pcc6803" 
-                ] 
-                ( Var ( RepID Nothing ) "hits" )
-            ]
-        , Ref num Nothing [] 
-            ( Var ( RepID Nothing ) "cutoff" )
-        , Ref num.list Nothing [] 
-            ( Var ( RepID Nothing ) "cutoffs" )
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref num.list Nothing 
-        [ Var ( RepID Nothing ) "hits" 
-        , Var ( RepID Nothing ) "cutoff" 
-        , Var ( RepID Nothing ) "pcc7942" 
-        , Var ( RepID Nothing ) "pcc6803" 
-        , Var ( RepID Nothing ) "cutoffs" 
-        ] 
-        ( Var ( RepID Nothing ) "lengths" )
-    ) 
-] 
+            , Var ( RepID Nothing ) "cutoffs" 
+            ] 
+            ( Var ( RepID Nothing ) "lengths" )
+        )
+    } 

@@ -1,44 +1,54 @@
-[ 
-    ( Var ( RepID Nothing ) "var1" 
-    , Lit num "1.5" 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "var2" 
-    , Lit str "nothing depends on var2 so far" 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "var3" 
-    , Bop num Nothing 
-        [ Var ( RepID Nothing ) "var1" ] "*" ( Lit num "2.0e-3" ) 
-        ( Ref num Nothing [] 
-            ( Var ( RepID Nothing ) "var1" )
-        )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "var4" 
-    , Bop num Nothing 
-        [ Var ( RepID Nothing ) "var3" 
-        , Var ( RepID Nothing ) "var1" 
-        ] "-" 
-        ( Bop num Nothing 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "var1" 
+            , aExpr = Lit num "1.5" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "var2" 
+            , aExpr = Lit str "nothing depends on var2 so far" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "var3" 
+            , aExpr = Bop num Nothing 
+                [ Var ( RepID Nothing ) "var1" ] "*" ( Lit num "2.0e-3" ) 
+                ( Ref num Nothing [] 
+                    ( Var ( RepID Nothing ) "var1" )
+                )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "var4" 
+            , aExpr = Bop num Nothing 
+                [ Var ( RepID Nothing ) "var3" 
+                , Var ( RepID Nothing ) "var1" 
+                ] "-" 
+                ( Bop num Nothing 
+                    [ Var ( RepID Nothing ) "var3" 
+                    , Var ( RepID Nothing ) "var1" 
+                    ] "*" 
+                    ( Ref num Nothing 
+                        [ Var ( RepID Nothing ) "var1" ] 
+                        ( Var ( RepID Nothing ) "var3" )
+                    ) ( Lit num "5.0" )
+                ) 
+                ( Ref num Nothing [] 
+                    ( Var ( RepID Nothing ) "var1" )
+                )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref num Nothing 
+                [ Var ( RepID Nothing ) "var3" 
+                , Var ( RepID Nothing ) "var1" 
+                ] 
+                ( Var ( RepID Nothing ) "var4" )
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref num Nothing 
             [ Var ( RepID Nothing ) "var3" 
             , Var ( RepID Nothing ) "var1" 
-            ] "*" 
-            ( Ref num Nothing 
-                [ Var ( RepID Nothing ) "var1" ] 
-                ( Var ( RepID Nothing ) "var3" )
-            ) ( Lit num "5.0" )
-        ) 
-        ( Ref num Nothing [] 
-            ( Var ( RepID Nothing ) "var1" )
+            ] 
+            ( Var ( RepID Nothing ) "var4" )
         )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref num Nothing 
-        [ Var ( RepID Nothing ) "var3" 
-        , Var ( RepID Nothing ) "var1" 
-        ] 
-        ( Var ( RepID Nothing ) "var4" )
-    ) 
-] 
+    } 

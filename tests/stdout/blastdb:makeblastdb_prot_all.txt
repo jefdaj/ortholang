@@ -1,7 +1,1 @@
-Database: 8948446e38
-6 sequences; 2,973 total residues
-Longest sequence: 836 residues
-BLASTDB Version: 4
-Volumes:
 $TMPDIR/cache/makeblastdb/8948446e38/result
-

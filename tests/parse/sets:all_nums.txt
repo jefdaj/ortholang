@@ -1,82 +1,104 @@
-[ 
-    ( Var ( RepID Nothing ) "set1" 
-    , Lst num [] 
-        [ Lit num "1.0" 
-        , Lit num "2.0" 
-        , Lit num "3.0" 
-        , Lit num "4.0" 
-        , Lit num "5.0" 
-        , Lit num "6.0" 
-        , Lit num "7.0" 
-        , Lit num "8.0" 
-        , Lit num "9.0" 
-        , Lit num "10.0" 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "set1" 
+            , aExpr = Lst num [] 
+                [ Lit num "1.0" 
+                , Lit num "2.0" 
+                , Lit num "3.0" 
+                , Lit num "4.0" 
+                , Lit num "5.0" 
+                , Lit num "6.0" 
+                , Lit num "7.0" 
+                , Lit num "8.0" 
+                , Lit num "9.0" 
+                , Lit num "10.0" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "set2" 
+            , aExpr = Lst num [] 
+                [ Lit num "5.0" 
+                , Lit num "6.0" 
+                , Lit num "7.0" 
+                , Lit num "8.0" 
+                , Lit num "9.0" 
+                , Lit num "10.0" 
+                , Lit num "11.0" 
+                , Lit num "12.0" 
+                , Lit num "13.0" 
+                , Lit num "14.0" 
+                , Lit num "15.0" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "res1" 
+            , aExpr = Fun num.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                ] "all" 
+                [ Lst num.list 
+                    [ Var ( RepID Nothing ) "set1" 
+                    , Var ( RepID Nothing ) "set2" 
+                    ] 
+                    [ Ref num.list Nothing [] 
+                        ( Var ( RepID Nothing ) "set1" )
+                    , Ref num.list Nothing [] 
+                        ( Var ( RepID Nothing ) "set2" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "res2" 
+            , aExpr = Bop num.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                ] "&" 
+                ( Ref num.list Nothing [] 
+                    ( Var ( RepID Nothing ) "set1" )
+                ) 
+                ( Ref num.list Nothing [] 
+                    ( Var ( RepID Nothing ) "set2" )
+                )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lst num.list 
+                [ Var ( RepID Nothing ) "res1" 
+                , Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                , Var ( RepID Nothing ) "res2" 
+                ] 
+                [ Ref num.list Nothing 
+                    [ Var ( RepID Nothing ) "set1" 
+                    , Var ( RepID Nothing ) "set2" 
+                    ] 
+                    ( Var ( RepID Nothing ) "res1" )
+                , Ref num.list Nothing 
+                    [ Var ( RepID Nothing ) "set1" 
+                    , Var ( RepID Nothing ) "set2" 
+                    ] 
+                    ( Var ( RepID Nothing ) "res2" )
+                ] 
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "set2" 
-    , Lst num [] 
-        [ Lit num "5.0" 
-        , Lit num "6.0" 
-        , Lit num "7.0" 
-        , Lit num "8.0" 
-        , Lit num "9.0" 
-        , Lit num "10.0" 
-        , Lit num "11.0" 
-        , Lit num "12.0" 
-        , Lit num "13.0" 
-        , Lit num "14.0" 
-        , Lit num "15.0" 
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "res1" 
-    , Fun num.list Nothing 
-        [ Var ( RepID Nothing ) "set1" 
-        , Var ( RepID Nothing ) "set2" 
-        ] "all" 
-        [ Lst num.list 
-            [ Var ( RepID Nothing ) "set1" 
+    , sResult = Just 
+        ( Lst num.list 
+            [ Var ( RepID Nothing ) "res1" 
+            , Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 
+            , Var ( RepID Nothing ) "res2" 
             ] 
-            [ Ref num.list Nothing [] 
-                ( Var ( RepID Nothing ) "set1" )
-            , Ref num.list Nothing [] 
-                ( Var ( RepID Nothing ) "set2" )
+            [ Ref num.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                ] 
+                ( Var ( RepID Nothing ) "res1" )
+            , Ref num.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                ] 
+                ( Var ( RepID Nothing ) "res2" )
             ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "res2" 
-    , Bop num.list Nothing 
-        [ Var ( RepID Nothing ) "set1" 
-        , Var ( RepID Nothing ) "set2" 
-        ] "&" 
-        ( Ref num.list Nothing [] 
-            ( Var ( RepID Nothing ) "set1" )
-        ) 
-        ( Ref num.list Nothing [] 
-            ( Var ( RepID Nothing ) "set2" )
         )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Lst num.list 
-        [ Var ( RepID Nothing ) "res1" 
-        , Var ( RepID Nothing ) "set1" 
-        , Var ( RepID Nothing ) "set2" 
-        , Var ( RepID Nothing ) "res2" 
-        ] 
-        [ Ref num.list Nothing 
-            [ Var ( RepID Nothing ) "set1" 
-            , Var ( RepID Nothing ) "set2" 
-            ] 
-            ( Var ( RepID Nothing ) "res1" )
-        , Ref num.list Nothing 
-            [ Var ( RepID Nothing ) "set1" 
-            , Var ( RepID Nothing ) "set2" 
-            ] 
-            ( Var ( RepID Nothing ) "res2" )
-        ] 
-    ) 
-] 
+    } 

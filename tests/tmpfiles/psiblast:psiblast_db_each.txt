@@ -57,12 +57,10 @@
 |   |       `-- e4e709a340
 |   |           |-- 688af09c48
 |   |           |   |-- result
-|   |           |   |-- result.err
-|   |           |   `-- result.out
+|   |           |   `-- result.err
 |   |           `-- c7fe98886d
 |   |               |-- result
-|   |               |-- result.err
-|   |               `-- result.out
+|   |               `-- result.err
 |   |-- psiblast_db_each
 |   |   `-- 4467ed0f79
 |   |       `-- ec1f6f502d
@@ -83,4 +81,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hitlists.bht.list
 
-38 directories, 45 files
+38 directories, 43 files

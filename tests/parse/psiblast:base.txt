@@ -1,62 +1,74 @@
-[ 
-    ( Var ( RepID Nothing ) "query" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "maga" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "magadb" 
-    , Fun faa.blastdb Nothing 
-        [ Var ( RepID Nothing ) "maga" ] "makeblastdb_faa" 
-        [ Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "maga" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "pssm" 
-    , Fun pssm Nothing 
-        [ Var ( RepID Nothing ) "query" 
-        , Var ( RepID Nothing ) "magadb" 
-        , Var ( RepID Nothing ) "maga" 
-        ] "psiblast_train_db" 
-        [ Lit num "1.0e-2" 
-        , Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "query" )
-        , Ref faa.blastdb Nothing 
-            [ Var ( RepID Nothing ) "maga" ] 
-            ( Var ( RepID Nothing ) "magadb" )
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "query" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "magadb" 
+            , aExpr = Fun faa.blastdb Nothing 
+                [ Var ( RepID Nothing ) "maga" ] "makeblastdb_faa" 
+                [ Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "maga" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pssm" 
+            , aExpr = Fun pssm Nothing 
+                [ Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "magadb" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "psiblast_train_db" 
+                [ Lit num "1.0e-2" 
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "query" )
+                , Ref faa.blastdb Nothing 
+                    [ Var ( RepID Nothing ) "maga" ] 
+                    ( Var ( RepID Nothing ) "magadb" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hittable" 
+            , aExpr = Fun bht Nothing 
+                [ Var ( RepID Nothing ) "pssm" 
+                , Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "magadb" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "psiblast_pssm_db" 
+                [ Lit num "1.0e-2" 
+                , Ref pssm Nothing 
+                    [ Var ( RepID Nothing ) "query" 
+                    , Var ( RepID Nothing ) "magadb" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    ( Var ( RepID Nothing ) "pssm" )
+                , Ref faa.blastdb Nothing 
+                    [ Var ( RepID Nothing ) "maga" ] 
+                    ( Var ( RepID Nothing ) "magadb" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref bht Nothing 
+                [ Var ( RepID Nothing ) "pssm" 
+                , Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "magadb" 
+                , Var ( RepID Nothing ) "maga" 
+                ] 
+                ( Var ( RepID Nothing ) "hittable" )
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "hittable" 
-    , Fun bht Nothing 
-        [ Var ( RepID Nothing ) "pssm" 
-        , Var ( RepID Nothing ) "query" 
-        , Var ( RepID Nothing ) "magadb" 
-        , Var ( RepID Nothing ) "maga" 
-        ] "psiblast_pssm_db" 
-        [ Lit num "1.0e-2" 
-        , Ref pssm Nothing 
-            [ Var ( RepID Nothing ) "query" 
+    , sResult = Just 
+        ( Ref bht Nothing 
+            [ Var ( RepID Nothing ) "pssm" 
+            , Var ( RepID Nothing ) "query" 
             , Var ( RepID Nothing ) "magadb" 
             , Var ( RepID Nothing ) "maga" 
             ] 
-            ( Var ( RepID Nothing ) "pssm" )
-        , Ref faa.blastdb Nothing 
-            [ Var ( RepID Nothing ) "maga" ] 
-            ( Var ( RepID Nothing ) "magadb" )
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref bht Nothing 
-        [ Var ( RepID Nothing ) "pssm" 
-        , Var ( RepID Nothing ) "query" 
-        , Var ( RepID Nothing ) "magadb" 
-        , Var ( RepID Nothing ) "maga" 
-        ] 
-        ( Var ( RepID Nothing ) "hittable" )
-    ) 
-] 
+            ( Var ( RepID Nothing ) "hittable" )
+        )
+    } 

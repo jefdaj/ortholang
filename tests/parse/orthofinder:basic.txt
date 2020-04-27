@@ -1,26 +1,35 @@
-[ 
-    ( Var ( RepID Nothing ) "smallbacteria" 
-    , Fun faa.list Nothing [] "load_faa_each" 
-        [ Lst str [] 
-            [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
-            , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "ofres" 
-    , Fun ofr 
-        ( Just ( Salt 0 ) ) 
-        [ Var ( RepID Nothing ) "smallbacteria" ] "orthofinder" 
-        [ Ref faa.list Nothing [] 
-            ( Var ( RepID Nothing ) "smallbacteria" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref ofr 
-        ( Just ( Salt 0 ) ) 
-        [ Var ( RepID Nothing ) "smallbacteria" ] 
-        ( Var ( RepID Nothing ) "ofres" )
-    ) 
-] 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "smallbacteria" 
+            , aExpr = Fun faa.list Nothing [] "load_faa_each" 
+                [ Lst str [] 
+                    [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
+                    , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "ofres" 
+            , aExpr = Fun ofr 
+                ( Just ( Salt 0 ) ) 
+                [ Var ( RepID Nothing ) "smallbacteria" ] "orthofinder" 
+                [ Ref faa.list Nothing [] 
+                    ( Var ( RepID Nothing ) "smallbacteria" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref ofr 
+                ( Just ( Salt 0 ) ) 
+                [ Var ( RepID Nothing ) "smallbacteria" ] 
+                ( Var ( RepID Nothing ) "ofres" )
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref ofr 
+            ( Just ( Salt 0 ) ) 
+            [ Var ( RepID Nothing ) "smallbacteria" ] 
+            ( Var ( RepID Nothing ) "ofres" )
+        )
+    } 

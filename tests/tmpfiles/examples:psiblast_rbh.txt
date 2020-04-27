@@ -18070,53 +18070,43 @@
 |   |       |-- 01f57ff7f7
 |   |       |   `-- cf5a5bf907
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- 167957d325
 |   |       |   `-- cf5a5bf907
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- 1d3a1cefb6
 |   |       |   `-- cf5a5bf907
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- 4c8540accd
 |   |       |   `-- cf5a5bf907
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- 70390e767c
 |   |       |   `-- cf5a5bf907
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- 73bd480d9b
 |   |       |   `-- cf5a5bf907
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- a571a8f31d
 |   |       |   `-- cf5a5bf907
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- b04c812704
 |   |       |   `-- cf5a5bf907
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       |-- d685130650
 |   |       |   `-- cf5a5bf907
 |   |       |       |-- result -> ../../../../../cache/lines/...
-|   |       |       |-- result.tmp.err
-|   |       |       `-- result.tmp.out
+|   |       |       `-- result.tmp.err
 |   |       `-- dc869384ee
 |   |           `-- cf5a5bf907
 |   |               |-- result -> ../../../../../cache/lines/...
-|   |               |-- result.tmp.err
-|   |               `-- result.tmp.out
+|   |               `-- result.tmp.err
 |   |-- sample
 |   |   `-- f9d76f3485
 |   |       `-- 580d5850ef
@@ -18141,4 +18131,4 @@
     |-- pssms.pssm.list -> ../exprs/psiblast_train_pssms/01b1e93729/c9d8eb4268/5fb2c1a99b/result
     `-- result -> ../vars/pssms.pssm.list
 
-14487 directories, 3654 files
+14487 directories, 3644 files

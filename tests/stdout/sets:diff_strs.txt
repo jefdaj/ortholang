@@ -1,1 +1,2 @@
-[["1", "2", "3", "4"], ["1", "2", "3", "4"]]
+$TMPDIR/cache/lines/b200a54f7e.txt
+$TMPDIR/cache/lines/b200a54f7e.txt

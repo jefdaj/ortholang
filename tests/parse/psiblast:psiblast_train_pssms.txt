@@ -1,31 +1,41 @@
-[ 
-    ( Var ( RepID Nothing ) "maga" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "queries" 
-    , Fun faa.list Nothing [] "split_faa" 
-        [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "pssms" 
-    , Fun pssm.list Nothing 
-        [ Var ( RepID Nothing ) "queries" 
-        , Var ( RepID Nothing ) "maga" 
-        ] "psiblast_train_pssms" 
-        [ Lit num "0.1" 
-        , Ref faa.list Nothing [] 
-            ( Var ( RepID Nothing ) "queries" )
-        , Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "maga" )
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "queries" 
+            , aExpr = Fun faa.list Nothing [] "split_faa" 
+                [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pssms" 
+            , aExpr = Fun pssm.list Nothing 
+                [ Var ( RepID Nothing ) "queries" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "psiblast_train_pssms" 
+                [ Lit num "0.1" 
+                , Ref faa.list Nothing [] 
+                    ( Var ( RepID Nothing ) "queries" )
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "maga" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref pssm.list Nothing 
+                [ Var ( RepID Nothing ) "queries" 
+                , Var ( RepID Nothing ) "maga" 
+                ] 
+                ( Var ( RepID Nothing ) "pssms" )
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref pssm.list Nothing 
-        [ Var ( RepID Nothing ) "queries" 
-        , Var ( RepID Nothing ) "maga" 
-        ] 
-        ( Var ( RepID Nothing ) "pssms" )
-    ) 
-] 
+    , sResult = Just 
+        ( Ref pssm.list Nothing 
+            [ Var ( RepID Nothing ) "queries" 
+            , Var ( RepID Nothing ) "maga" 
+            ] 
+            ( Var ( RepID Nothing ) "pssms" )
+        )
+    } 

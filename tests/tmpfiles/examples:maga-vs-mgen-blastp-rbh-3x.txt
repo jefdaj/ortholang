@@ -1,10 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   `-- da95fd390b
-|   |       `-- 9bb1dbf667
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/9bb1dbf667/result
 |   |-- load
 |   |   |-- 10ffe0cf0f.faa
 |   |   |-- 10ffe0cf0f.faa.ids
@@ -24,9 +19,6 @@
 |           |-- result.pin
 |           `-- result.psq
 |-- exprs
-|   |-- all
-|   |   `-- df467572ed
-|   |       `-- result -> ../../../cache/lines/...
 |   |-- blastp_db
 |   |   `-- b6d4e4cdf4
 |   |       |-- afa6e907a5
@@ -35,16 +27,7 @@
 |   |       `-- ccc25bfe26
 |   |           `-- 742b9bd059
 |   |               `-- result -> out
-|   |-- extract_queries
-|   |   `-- 9bb1dbf667
-|   |       |-- result -> ../../../cache/lines/...
-|   |       `-- tmp
-|   |-- extract_queries_each
-|   |   `-- bf82042158
-|   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 29438a8ebf
-|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 7666691bcd
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- bf76103a78
@@ -66,27 +49,17 @@
 |   |   `-- 584ea03280
 |   |       `-- f8a5fa3db7
 |   |           `-- result
-|   |-- repeat
-|   |   `-- 9bb1dbf667
-|   |       `-- afa6e907a5
-|   |           `-- 30b1953033
-|   |               `-- result -> ../../../../../cache/lines/...
 |   `-- str
 |       |-- 824ccbd8b2
 |       |   `-- result -> ../../../cache/lines/...
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
-|-- reps
-|   `-- 70cb57326e
-|       |-- recHits.bht -> ../../exprs/reciprocal_best/584ea03280/f8a5fa3db7/result
-|       `-- result -> ../../reps/70cb57326e/recHits.bht
 `-- vars
     |-- fwdHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/ccc25bfe26/742b9bd059/result
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
-    |-- result -> ../vars/solidHitIDs.str.list
-    |-- revHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/afa6e907a5/b62e287c6e/result
-    |-- solidHitIDs.str.list -> ../exprs/all/df467572ed/result
-    `-- solidHits.bht.list -> ../exprs/repeat/9bb1dbf667/afa6e907a5/30b1953033/result
+    |-- recHits.bht -> ../exprs/reciprocal_best/584ea03280/f8a5fa3db7/result
+    |-- result -> ../vars/recHits.bht
+    `-- revHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/afa6e907a5/b62e287c6e/result
 
-46 directories, 43 files
+30 directories, 32 files

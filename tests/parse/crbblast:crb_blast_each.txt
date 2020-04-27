@@ -1,104 +1,150 @@
-[ 
-    ( Var ( RepID Nothing ) "reference" 
-    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "small" 
-    , Fun faa.list Nothing [] "load_faa_each" 
-        [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "large" 
-    , Bop faa.list Nothing 
-        [ Var ( RepID Nothing ) "small" ] "|" 
-        ( Fun faa.list Nothing [] "load_faa_each" 
-            [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
-        ) 
-        ( Ref faa.list Nothing [] 
-            ( Var ( RepID Nothing ) "small" )
-        )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "small_hits" 
-    , Fun str.list.list Nothing 
-        [ Var ( RepID Nothing ) "reference" 
-        , Var ( RepID Nothing ) "small" 
-        ] "extract_queries_each" 
-        [ Fun crb.list 
-            ( Just ( Salt 0 ) ) 
-            [ Var ( RepID Nothing ) "reference" 
-            , Var ( RepID Nothing ) "small" 
-            ] "crb_blast_each" 
-            [ Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "reference" )
-            , Ref faa.list Nothing [] 
-                ( Var ( RepID Nothing ) "small" )
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "large_hits" 
-    , Fun str.list.list Nothing 
-        [ Var ( RepID Nothing ) "reference" 
-        , Var ( RepID Nothing ) "large" 
-        , Var ( RepID Nothing ) "small" 
-        ] "extract_queries_each" 
-        [ Fun crb.list 
-            ( Just ( Salt 0 ) ) 
-            [ Var ( RepID Nothing ) "reference" 
-            , Var ( RepID Nothing ) "large" 
-            , Var ( RepID Nothing ) "small" 
-            ] "crb_blast_each" 
-            [ Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "reference" )
-            , Ref faa.list Nothing 
-                [ Var ( RepID Nothing ) "small" ] 
-                ( Var ( RepID Nothing ) "large" )
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun num Nothing 
-        [ Var ( RepID Nothing ) "large_hits" 
-        , Var ( RepID Nothing ) "reference" 
-        , Var ( RepID Nothing ) "large" 
-        , Var ( RepID Nothing ) "small" 
-        , Var ( RepID Nothing ) "small_hits" 
-        ] "length" 
-        [ Bop str.list Nothing 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "reference" 
+            , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "small" 
+            , aExpr = Fun faa.list Nothing [] "load_faa_each" 
+                [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "large" 
+            , aExpr = Bop faa.list Nothing 
+                [ Var ( RepID Nothing ) "small" ] "|" 
+                ( Fun faa.list Nothing [] "load_faa_each" 
+                    [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
+                ) 
+                ( Ref faa.list Nothing [] 
+                    ( Var ( RepID Nothing ) "small" )
+                )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "small_hits" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "reference" 
+                , Var ( RepID Nothing ) "small" 
+                ] "extract_queries_each" 
+                [ Fun crb.list 
+                    ( Just ( Salt 0 ) ) 
+                    [ Var ( RepID Nothing ) "reference" 
+                    , Var ( RepID Nothing ) "small" 
+                    ] "crb_blast_each" 
+                    [ Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "reference" )
+                    , Ref faa.list Nothing [] 
+                        ( Var ( RepID Nothing ) "small" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "large_hits" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "reference" 
+                , Var ( RepID Nothing ) "large" 
+                , Var ( RepID Nothing ) "small" 
+                ] "extract_queries_each" 
+                [ Fun crb.list 
+                    ( Just ( Salt 0 ) ) 
+                    [ Var ( RepID Nothing ) "reference" 
+                    , Var ( RepID Nothing ) "large" 
+                    , Var ( RepID Nothing ) "small" 
+                    ] "crb_blast_each" 
+                    [ Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "reference" )
+                    , Ref faa.list Nothing 
+                        [ Var ( RepID Nothing ) "small" ] 
+                        ( Var ( RepID Nothing ) "large" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun num Nothing 
+                [ Var ( RepID Nothing ) "large_hits" 
+                , Var ( RepID Nothing ) "reference" 
+                , Var ( RepID Nothing ) "large" 
+                , Var ( RepID Nothing ) "small" 
+                , Var ( RepID Nothing ) "small_hits" 
+                ] "length" 
+                [ Bop str.list Nothing 
+                    [ Var ( RepID Nothing ) "large_hits" 
+                    , Var ( RepID Nothing ) "reference" 
+                    , Var ( RepID Nothing ) "large" 
+                    , Var ( RepID Nothing ) "small" 
+                    , Var ( RepID Nothing ) "small_hits" 
+                    ] "~" 
+                    ( Fun str.list Nothing 
+                        [ Var ( RepID Nothing ) "large_hits" 
+                        , Var ( RepID Nothing ) "reference" 
+                        , Var ( RepID Nothing ) "large" 
+                        , Var ( RepID Nothing ) "small" 
+                        ] "any" 
+                        [ Ref str.list.list Nothing 
+                            [ Var ( RepID Nothing ) "reference" 
+                            , Var ( RepID Nothing ) "large" 
+                            , Var ( RepID Nothing ) "small" 
+                            ] 
+                            ( Var ( RepID Nothing ) "large_hits" )
+                        ]
+                    ) 
+                    ( Fun str.list Nothing 
+                        [ Var ( RepID Nothing ) "small_hits" 
+                        , Var ( RepID Nothing ) "reference" 
+                        , Var ( RepID Nothing ) "small" 
+                        ] "any" 
+                        [ Ref str.list.list Nothing 
+                            [ Var ( RepID Nothing ) "reference" 
+                            , Var ( RepID Nothing ) "small" 
+                            ] 
+                            ( Var ( RepID Nothing ) "small_hits" )
+                        ]
+                    )
+                ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun num Nothing 
             [ Var ( RepID Nothing ) "large_hits" 
             , Var ( RepID Nothing ) "reference" 
             , Var ( RepID Nothing ) "large" 
             , Var ( RepID Nothing ) "small" 
             , Var ( RepID Nothing ) "small_hits" 
-            ] "~" 
-            ( Fun str.list Nothing 
+            ] "length" 
+            [ Bop str.list Nothing 
                 [ Var ( RepID Nothing ) "large_hits" 
                 , Var ( RepID Nothing ) "reference" 
                 , Var ( RepID Nothing ) "large" 
                 , Var ( RepID Nothing ) "small" 
-                ] "any" 
-                [ Ref str.list.list Nothing 
-                    [ Var ( RepID Nothing ) "reference" 
+                , Var ( RepID Nothing ) "small_hits" 
+                ] "~" 
+                ( Fun str.list Nothing 
+                    [ Var ( RepID Nothing ) "large_hits" 
+                    , Var ( RepID Nothing ) "reference" 
                     , Var ( RepID Nothing ) "large" 
                     , Var ( RepID Nothing ) "small" 
-                    ] 
-                    ( Var ( RepID Nothing ) "large_hits" )
-                ]
-            ) 
-            ( Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "small_hits" 
-                , Var ( RepID Nothing ) "reference" 
-                , Var ( RepID Nothing ) "small" 
-                ] "any" 
-                [ Ref str.list.list Nothing 
-                    [ Var ( RepID Nothing ) "reference" 
+                    ] "any" 
+                    [ Ref str.list.list Nothing 
+                        [ Var ( RepID Nothing ) "reference" 
+                        , Var ( RepID Nothing ) "large" 
+                        , Var ( RepID Nothing ) "small" 
+                        ] 
+                        ( Var ( RepID Nothing ) "large_hits" )
+                    ]
+                ) 
+                ( Fun str.list Nothing 
+                    [ Var ( RepID Nothing ) "small_hits" 
+                    , Var ( RepID Nothing ) "reference" 
                     , Var ( RepID Nothing ) "small" 
-                    ] 
-                    ( Var ( RepID Nothing ) "small_hits" )
-                ]
-            )
-        ]
-    ) 
-] 
+                    ] "any" 
+                    [ Ref str.list.list Nothing 
+                        [ Var ( RepID Nothing ) "reference" 
+                        , Var ( RepID Nothing ) "small" 
+                        ] 
+                        ( Var ( RepID Nothing ) "small_hits" )
+                    ]
+                )
+            ]
+        )
+    } 

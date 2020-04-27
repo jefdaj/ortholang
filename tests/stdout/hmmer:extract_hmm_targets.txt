@@ -1,1 +1,1 @@
-["WP_009885562.1"]
+WP_009885562.1 DNA polymerase III subunit beta [Mycoplasma genitalium]

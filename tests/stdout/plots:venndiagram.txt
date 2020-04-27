@@ -1,7 +1,7 @@
-[plot image "$TMPDIR/cache/bin/888ad0d998",
- plot image "$TMPDIR/cache/bin/7fcd6c7695",
- plot image "$TMPDIR/cache/bin/b5882b4142",
- plot image "$TMPDIR/cache/bin/0b9182723c",
- plot image "$TMPDIR/cache/bin/12cba2b66c",
- plot image "$TMPDIR/cache/bin/586ced0f80",
- plot image "$TMPDIR/cache/bin/77c30cf87d"]
+$TMPDIR/cache/bin/888ad0d998
+$TMPDIR/cache/bin/7fcd6c7695
+$TMPDIR/cache/bin/b5882b4142
+$TMPDIR/cache/bin/0b9182723c
+$TMPDIR/cache/bin/12cba2b66c
+$TMPDIR/cache/bin/586ced0f80
+$TMPDIR/cache/bin/77c30cf87d

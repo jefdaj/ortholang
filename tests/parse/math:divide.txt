@@ -1,28 +1,45 @@
-[ 
-    ( Var ( RepID Nothing ) "one_half" 
-    , Bop num Nothing [] "/" ( Lit num "1.0" ) ( Lit num "2.0" )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "three_quarters" 
-    , Bop num Nothing [] "/" ( Lit num "3.0" ) ( Lit num "4.0" )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "harder" 
-    , Bop num Nothing [] "/" ( Lit num "4.0" ) ( Lit num "89.0" )
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Lst num 
-        [ Var ( RepID Nothing ) "one_half" 
-        , Var ( RepID Nothing ) "three_quarters" 
-        , Var ( RepID Nothing ) "harder" 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "one_half" 
+            , aExpr = Bop num Nothing [] "/" ( Lit num "1.0" ) ( Lit num "2.0" )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "three_quarters" 
+            , aExpr = Bop num Nothing [] "/" ( Lit num "3.0" ) ( Lit num "4.0" )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "harder" 
+            , aExpr = Bop num Nothing [] "/" ( Lit num "4.0" ) ( Lit num "89.0" )
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lst num 
+                [ Var ( RepID Nothing ) "one_half" 
+                , Var ( RepID Nothing ) "three_quarters" 
+                , Var ( RepID Nothing ) "harder" 
+                ] 
+                [ Ref num Nothing [] 
+                    ( Var ( RepID Nothing ) "one_half" )
+                , Ref num Nothing [] 
+                    ( Var ( RepID Nothing ) "three_quarters" )
+                , Ref num Nothing [] 
+                    ( Var ( RepID Nothing ) "harder" )
+                ] 
+            } 
         ] 
-        [ Ref num Nothing [] 
-            ( Var ( RepID Nothing ) "one_half" )
-        , Ref num Nothing [] 
-            ( Var ( RepID Nothing ) "three_quarters" )
-        , Ref num Nothing [] 
-            ( Var ( RepID Nothing ) "harder" )
-        ] 
-    ) 
-] 
+    , sResult = Just 
+        ( Lst num 
+            [ Var ( RepID Nothing ) "one_half" 
+            , Var ( RepID Nothing ) "three_quarters" 
+            , Var ( RepID Nothing ) "harder" 
+            ] 
+            [ Ref num Nothing [] 
+                ( Var ( RepID Nothing ) "one_half" )
+            , Ref num Nothing [] 
+                ( Var ( RepID Nothing ) "three_quarters" )
+            , Ref num Nothing [] 
+                ( Var ( RepID Nothing ) "harder" )
+            ] 
+        )
+    } 

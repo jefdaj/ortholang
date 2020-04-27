@@ -1,26 +1,44 @@
-[ 
-    ( Var ( RepID Nothing ) "single" 
-    , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mapped" 
-    , Fun gbk.list Nothing [] "load_gbk_each" 
-        [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Bop gbk.list Nothing 
-        [ Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "mapped" 
-        ] "|" 
-        ( Lst gbk 
-            [ Var ( RepID Nothing ) "single" ] 
-            [ Ref gbk Nothing [] 
-                ( Var ( RepID Nothing ) "single" )
-            ]
-        ) 
-        ( Ref gbk.list Nothing [] 
-            ( Var ( RepID Nothing ) "mapped" )
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
+            , aExpr = Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mapped" 
+            , aExpr = Fun gbk.list Nothing [] "load_gbk_each" 
+                [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop gbk.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "mapped" 
+                ] "|" 
+                ( Lst gbk 
+                    [ Var ( RepID Nothing ) "single" ] 
+                    [ Ref gbk Nothing [] 
+                        ( Var ( RepID Nothing ) "single" )
+                    ]
+                ) 
+                ( Ref gbk.list Nothing [] 
+                    ( Var ( RepID Nothing ) "mapped" )
+                )
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop gbk.list Nothing 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "mapped" 
+            ] "|" 
+            ( Lst gbk 
+                [ Var ( RepID Nothing ) "single" ] 
+                [ Ref gbk Nothing [] 
+                    ( Var ( RepID Nothing ) "single" )
+                ]
+            ) 
+            ( Ref gbk.list Nothing [] 
+                ( Var ( RepID Nothing ) "mapped" )
+            )
         )
-    ) 
-] 
+    } 

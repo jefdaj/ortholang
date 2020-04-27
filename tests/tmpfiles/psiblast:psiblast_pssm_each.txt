@@ -37,12 +37,10 @@
 |   |-- map
 |   |   |-- 0a5a1eb63a
 |   |   |   |-- result
-|   |   |   |-- result.err
-|   |   |   `-- result.out
+|   |   |   `-- result.err
 |   |   `-- 2aaf780f30
 |   |       |-- result
-|   |       |-- result.err
-|   |       `-- result.out
+|   |       `-- result.err
 |   `-- psiblast
 |-- exprs
 |   |-- list
@@ -79,8 +77,7 @@
 |   |       `-- ec1f6f502d
 |   |           `-- e3786a6445
 |   |               |-- result -> ../../../../../cache/lines/...
-|   |               |-- result.tmp.err
-|   |               `-- result.tmp.out
+|   |               `-- result.tmp.err
 |   |-- singletons
 |   |   `-- 7627de68aa
 |   |       `-- result -> ../../../cache/lines/...
@@ -100,4 +97,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hitlists.bht.list
 
-45 directories, 55 files
+45 directories, 52 files

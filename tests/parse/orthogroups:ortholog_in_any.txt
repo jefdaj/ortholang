@@ -1,41 +1,51 @@
-[ 
-    ( Var ( RepID Nothing ) "mycoplasma" 
-    , Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "ofres" 
-    , Fun ofr 
-        ( Just ( Salt 0 ) ) 
-        [ Var ( RepID Nothing ) "mycoplasma" ] "orthofinder" 
-        [ Fun faa.list 
-            ( Just ( Salt 0 ) ) 
-            [ Var ( RepID Nothing ) "mycoplasma" ] "sample" 
-            [ Lit num "3.0" 
-            , Ref faa.list Nothing [] 
-                ( Var ( RepID Nothing ) "mycoplasma" )
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "mycoplasma" 
+            , aExpr = Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "ofres" 
+            , aExpr = Fun ofr 
+                ( Just ( Salt 0 ) ) 
+                [ Var ( RepID Nothing ) "mycoplasma" ] "orthofinder" 
+                [ Fun faa.list 
+                    ( Just ( Salt 0 ) ) 
+                    [ Var ( RepID Nothing ) "mycoplasma" ] "sample" 
+                    [ Lit num "3.0" 
+                    , Ref faa.list Nothing [] 
+                        ( Var ( RepID Nothing ) "mycoplasma" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "shared" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "ofres" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] "ortholog_in_any" 
+                [ Ref ofr 
+                    ( Just ( Salt 0 ) ) 
+                    [ Var ( RepID Nothing ) "mycoplasma" ] 
+                    ( Var ( RepID Nothing ) "ofres" )
+                , Ref faa.list Nothing [] 
+                    ( Var ( RepID Nothing ) "mycoplasma" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref str.list.list Nothing 
+                [ Var ( RepID Nothing ) "ofres" 
+                , Var ( RepID Nothing ) "mycoplasma" 
+                ] 
+                ( Var ( RepID Nothing ) "shared" )
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref str.list.list Nothing 
+            [ Var ( RepID Nothing ) "ofres" 
+            , Var ( RepID Nothing ) "mycoplasma" 
             ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "shared" 
-    , Fun str.list.list Nothing 
-        [ Var ( RepID Nothing ) "ofres" 
-        , Var ( RepID Nothing ) "mycoplasma" 
-        ] "ortholog_in_any" 
-        [ Ref ofr 
-            ( Just ( Salt 0 ) ) 
-            [ Var ( RepID Nothing ) "mycoplasma" ] 
-            ( Var ( RepID Nothing ) "ofres" )
-        , Ref faa.list Nothing [] 
-            ( Var ( RepID Nothing ) "mycoplasma" )
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref str.list.list Nothing 
-        [ Var ( RepID Nothing ) "ofres" 
-        , Var ( RepID Nothing ) "mycoplasma" 
-        ] 
-        ( Var ( RepID Nothing ) "shared" )
-    ) 
-] 
+            ( Var ( RepID Nothing ) "shared" )
+        )
+    } 

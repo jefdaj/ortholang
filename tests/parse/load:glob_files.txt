@@ -1,5 +1,10 @@
-[ 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/*.faa" ]
-    ) 
-]
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/*.faa" ]
+            } 
+        ]
+    , sResult = Just 
+        ( Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/*.faa" ] )
+    } 

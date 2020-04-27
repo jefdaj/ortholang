@@ -1,31 +1,31 @@
-[[["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["2", "3", "4"]],
- [],
- [],
- [["1", "2", "3"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["2", "3", "4"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["2", "3", "4"]],
- [["2", "3", "4"]],
- [["2", "3", "4"]],
- [],
- [],
- [],
- [],
- [],
- [],
- [["1", "2", "3"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]],
- [["1", "2", "3"], ["2", "3", "4"], ["4", "5"], ["6"]]]
+$TMPDIR/exprs/ortholog_in_any_str/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_all_str/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/e6c0faf0df/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/3f97c936b2/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/a77e4f6cf3/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/e18388d3ae/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/e6c0faf0df/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/3f97c936b2/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/a77e4f6cf3/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/e18388d3ae/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/6feafefed1/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/6858028848/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/6e521948f0/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/76bf3d901d/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/7f818dd6d4/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/1e2f225f46/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/b4ac8fe09e/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/4467ed0f79/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/4bfd61cc64/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/f8629ee1e4/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/7978ad099f/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_min_str/3743aad90a/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/76bf3d901d/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/7f818dd6d4/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/1e2f225f46/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/b4ac8fe09e/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/4467ed0f79/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/4bfd61cc64/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/f8629ee1e4/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/7978ad099f/588bf599ce/69ae4ce13a/result
+$TMPDIR/exprs/ortholog_in_max_str/3743aad90a/588bf599ce/69ae4ce13a/result

@@ -3,6 +3,7 @@ mgen = load_faa "examples/sequences/Mycoplasma_genitalium_small.faa"
 fwdHits = blastp 1.0e-5 maga mgen
 revHits = blastp 1.0e-5 mgen maga
 recHits = reciprocal_best fwdHits revHits
+result = recHits
 n_repeats = 3
 solidHits = repeat recHits mgen n_repeats
 solidHitIDs = all (extract_queries_each solidHits)

@@ -1,117 +1,187 @@
-[ 
-    ( Var ( RepID Nothing ) "maga" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_protein_refseq.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mgendb" 
-    , Fun faa.blastdb Nothing 
-        [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_faa" 
-        [ Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "mgen" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "single" 
-    , Fun str.list Nothing 
-        [ Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "extract_queries" 
-        [ Fun bht Nothing 
-            [ Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] "blastp" 
-            [ Lit num "1.0e-5" 
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "maga" )
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "mgen" )
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mapped" 
-    , Fun str.list.list Nothing 
-        [ Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "extract_queries_each" 
-        [ Fun bht.list Nothing 
-            [ Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] "blastp_each" 
-            [ Lit num "1.0e-5" 
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "maga" )
-            , Lst faa 
-                [ Var ( RepID Nothing ) "mgen" ] 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_protein_refseq.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgen" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgendb" 
+            , aExpr = Fun faa.blastdb Nothing 
+                [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_faa" 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
                 ]
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "singledb" 
-    , Fun str.list Nothing 
-        [ Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgendb" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "extract_queries" 
-        [ Fun bht Nothing 
-            [ Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mgendb" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] "blastp_db" 
-            [ Lit num "1.0e-5" 
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "maga" )
-            , Ref faa.blastdb Nothing 
-                [ Var ( RepID Nothing ) "mgen" ] 
-                ( Var ( RepID Nothing ) "mgendb" )
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mappeddb" 
-    , Fun str.list.list Nothing 
-        [ Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgendb" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "extract_queries_each" 
-        [ Fun bht.list Nothing 
-            [ Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mgendb" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] "blastp_db_each" 
-            [ Lit num "1.0e-5" 
-            , Ref faa Nothing [] 
-                ( Var ( RepID Nothing ) "maga" )
-            , Lst faa.blastdb 
-                [ Var ( RepID Nothing ) "mgendb" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
-                ] 
-                [ Ref faa.blastdb Nothing 
-                    [ Var ( RepID Nothing ) "mgen" ] 
-                    ( Var ( RepID Nothing ) "mgendb" )
+                ] "extract_queries" 
+                [ Fun bht Nothing 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] "blastp" 
+                    [ Lit num "1.0e-5" 
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "maga" )
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "mgen" )
+                    ] 
                 ]
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun num.list Nothing 
-        [ Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "mgen" 
-        , Var ( RepID Nothing ) "mapped" 
-        , Var ( RepID Nothing ) "singledb" 
-        , Var ( RepID Nothing ) "mgendb" 
-        , Var ( RepID Nothing ) "mappeddb" 
-        ] "length_each" 
-        [ Bop str.list.list Nothing 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mapped" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "extract_queries_each" 
+                [ Fun bht.list Nothing 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] "blastp_each" 
+                    [ Lit num "1.0e-5" 
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "maga" )
+                    , Lst faa 
+                        [ Var ( RepID Nothing ) "mgen" ] 
+                        [ Ref faa Nothing [] 
+                            ( Var ( RepID Nothing ) "mgen" )
+                        ]
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "singledb" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "extract_queries" 
+                [ Fun bht Nothing 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgendb" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] "blastp_db" 
+                    [ Lit num "1.0e-5" 
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "maga" )
+                    , Ref faa.blastdb Nothing 
+                        [ Var ( RepID Nothing ) "mgen" ] 
+                        ( Var ( RepID Nothing ) "mgendb" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mappeddb" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "extract_queries_each" 
+                [ Fun bht.list Nothing 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgendb" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] "blastp_db_each" 
+                    [ Lit num "1.0e-5" 
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "maga" )
+                    , Lst faa.blastdb 
+                        [ Var ( RepID Nothing ) "mgendb" 
+                        , Var ( RepID Nothing ) "mgen" 
+                        ] 
+                        [ Ref faa.blastdb Nothing 
+                            [ Var ( RepID Nothing ) "mgen" ] 
+                            ( Var ( RepID Nothing ) "mgendb" )
+                        ]
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun num.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "mapped" 
+                , Var ( RepID Nothing ) "singledb" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "mappeddb" 
+                ] "length_each" 
+                [ Bop str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "mapped" 
+                    , Var ( RepID Nothing ) "singledb" 
+                    , Var ( RepID Nothing ) "mgendb" 
+                    , Var ( RepID Nothing ) "mappeddb" 
+                    ] "|" 
+                    ( Bop str.list.list Nothing 
+                        [ Var ( RepID Nothing ) "single" 
+                        , Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mgen" 
+                        , Var ( RepID Nothing ) "mapped" 
+                        , Var ( RepID Nothing ) "singledb" 
+                        , Var ( RepID Nothing ) "mgendb" 
+                        ] "|" 
+                        ( Bop str.list.list Nothing 
+                            [ Var ( RepID Nothing ) "single" 
+                            , Var ( RepID Nothing ) "maga" 
+                            , Var ( RepID Nothing ) "mgen" 
+                            , Var ( RepID Nothing ) "mapped" 
+                            ] "|" 
+                            ( Lst str.list 
+                                [ Var ( RepID Nothing ) "single" 
+                                , Var ( RepID Nothing ) "maga" 
+                                , Var ( RepID Nothing ) "mgen" 
+                                ] 
+                                [ Ref str.list Nothing 
+                                    [ Var ( RepID Nothing ) "maga" 
+                                    , Var ( RepID Nothing ) "mgen" 
+                                    ] 
+                                    ( Var ( RepID Nothing ) "single" )
+                                ]
+                            ) 
+                            ( Ref str.list.list Nothing 
+                                [ Var ( RepID Nothing ) "maga" 
+                                , Var ( RepID Nothing ) "mgen" 
+                                ] 
+                                ( Var ( RepID Nothing ) "mapped" )
+                            )
+                        ) 
+                        ( Lst str.list 
+                            [ Var ( RepID Nothing ) "singledb" 
+                            , Var ( RepID Nothing ) "maga" 
+                            , Var ( RepID Nothing ) "mgendb" 
+                            , Var ( RepID Nothing ) "mgen" 
+                            ] 
+                            [ Ref str.list Nothing 
+                                [ Var ( RepID Nothing ) "maga" 
+                                , Var ( RepID Nothing ) "mgendb" 
+                                , Var ( RepID Nothing ) "mgen" 
+                                ] 
+                                ( Var ( RepID Nothing ) "singledb" )
+                            ]
+                        )
+                    ) 
+                    ( Ref str.list.list Nothing 
+                        [ Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mgendb" 
+                        , Var ( RepID Nothing ) "mgen" 
+                        ] 
+                        ( Var ( RepID Nothing ) "mappeddb" )
+                    )
+                ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun num.list Nothing 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
@@ -119,62 +189,71 @@
             , Var ( RepID Nothing ) "singledb" 
             , Var ( RepID Nothing ) "mgendb" 
             , Var ( RepID Nothing ) "mappeddb" 
-            ] "|" 
-            ( Bop str.list.list Nothing 
+            ] "length_each" 
+            [ Bop str.list.list Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "mapped" 
                 , Var ( RepID Nothing ) "singledb" 
                 , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "mappeddb" 
                 ] "|" 
                 ( Bop str.list.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "mapped" 
+                    , Var ( RepID Nothing ) "singledb" 
+                    , Var ( RepID Nothing ) "mgendb" 
                     ] "|" 
-                    ( Lst str.list 
+                    ( Bop str.list.list Nothing 
                         [ Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mgen" 
+                        , Var ( RepID Nothing ) "mapped" 
+                        ] "|" 
+                        ( Lst str.list 
+                            [ Var ( RepID Nothing ) "single" 
+                            , Var ( RepID Nothing ) "maga" 
+                            , Var ( RepID Nothing ) "mgen" 
+                            ] 
+                            [ Ref str.list Nothing 
+                                [ Var ( RepID Nothing ) "maga" 
+                                , Var ( RepID Nothing ) "mgen" 
+                                ] 
+                                ( Var ( RepID Nothing ) "single" )
+                            ]
+                        ) 
+                        ( Ref str.list.list Nothing 
+                            [ Var ( RepID Nothing ) "maga" 
+                            , Var ( RepID Nothing ) "mgen" 
+                            ] 
+                            ( Var ( RepID Nothing ) "mapped" )
+                        )
+                    ) 
+                    ( Lst str.list 
+                        [ Var ( RepID Nothing ) "singledb" 
+                        , Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mgendb" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
                         [ Ref str.list Nothing 
                             [ Var ( RepID Nothing ) "maga" 
+                            , Var ( RepID Nothing ) "mgendb" 
                             , Var ( RepID Nothing ) "mgen" 
                             ] 
-                            ( Var ( RepID Nothing ) "single" )
+                            ( Var ( RepID Nothing ) "singledb" )
                         ]
-                    ) 
-                    ( Ref str.list.list Nothing 
-                        [ Var ( RepID Nothing ) "maga" 
-                        , Var ( RepID Nothing ) "mgen" 
-                        ] 
-                        ( Var ( RepID Nothing ) "mapped" )
                     )
                 ) 
-                ( Lst str.list 
-                    [ Var ( RepID Nothing ) "singledb" 
-                    , Var ( RepID Nothing ) "maga" 
+                ( Ref str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
-                    [ Ref str.list Nothing 
-                        [ Var ( RepID Nothing ) "maga" 
-                        , Var ( RepID Nothing ) "mgendb" 
-                        , Var ( RepID Nothing ) "mgen" 
-                        ] 
-                        ( Var ( RepID Nothing ) "singledb" )
-                    ]
+                    ( Var ( RepID Nothing ) "mappeddb" )
                 )
-            ) 
-            ( Ref str.list.list Nothing 
-                [ Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mgendb" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] 
-                ( Var ( RepID Nothing ) "mappeddb" )
-            )
-        ]
-    ) 
-] 
+            ]
+        )
+    } 

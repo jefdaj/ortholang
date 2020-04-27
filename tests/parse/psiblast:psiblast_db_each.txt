@@ -1,55 +1,67 @@
-[ 
-    ( Var ( RepID Nothing ) "query" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mgendb" 
-    , Fun faa.blastdb Nothing [] "makeblastdb_faa" 
-        [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "magadb" 
-    , Fun faa.blastdb Nothing [] "makeblastdb_faa" 
-        [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "cyanodbs" 
-    , Lst faa.blastdb 
-        [ Var ( RepID Nothing ) "mgendb" 
-        , Var ( RepID Nothing ) "magadb" 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "query" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgendb" 
+            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+                [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "magadb" 
+            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+                [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "cyanodbs" 
+            , aExpr = Lst faa.blastdb 
+                [ Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "magadb" 
+                ] 
+                [ Ref faa.blastdb Nothing [] 
+                    ( Var ( RepID Nothing ) "mgendb" )
+                , Ref faa.blastdb Nothing [] 
+                    ( Var ( RepID Nothing ) "magadb" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hitlists" 
+            , aExpr = Fun bht.list Nothing 
+                [ Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "cyanodbs" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "magadb" 
+                ] "psiblast_db_each" 
+                [ Lit num "0.5" 
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "query" )
+                , Ref faa.blastdb.list Nothing 
+                    [ Var ( RepID Nothing ) "mgendb" 
+                    , Var ( RepID Nothing ) "magadb" 
+                    ] 
+                    ( Var ( RepID Nothing ) "cyanodbs" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref bht.list Nothing 
+                [ Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "cyanodbs" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "magadb" 
+                ] 
+                ( Var ( RepID Nothing ) "hitlists" )
+            } 
         ] 
-        [ Ref faa.blastdb Nothing [] 
-            ( Var ( RepID Nothing ) "mgendb" )
-        , Ref faa.blastdb Nothing [] 
-            ( Var ( RepID Nothing ) "magadb" )
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "hitlists" 
-    , Fun bht.list Nothing 
-        [ Var ( RepID Nothing ) "query" 
-        , Var ( RepID Nothing ) "cyanodbs" 
-        , Var ( RepID Nothing ) "mgendb" 
-        , Var ( RepID Nothing ) "magadb" 
-        ] "psiblast_db_each" 
-        [ Lit num "0.5" 
-        , Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "query" )
-        , Ref faa.blastdb.list Nothing 
-            [ Var ( RepID Nothing ) "mgendb" 
+    , sResult = Just 
+        ( Ref bht.list Nothing 
+            [ Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "cyanodbs" 
+            , Var ( RepID Nothing ) "mgendb" 
             , Var ( RepID Nothing ) "magadb" 
             ] 
-            ( Var ( RepID Nothing ) "cyanodbs" )
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref bht.list Nothing 
-        [ Var ( RepID Nothing ) "query" 
-        , Var ( RepID Nothing ) "cyanodbs" 
-        , Var ( RepID Nothing ) "mgendb" 
-        , Var ( RepID Nothing ) "magadb" 
-        ] 
-        ( Var ( RepID Nothing ) "hitlists" )
-    ) 
-] 
+            ( Var ( RepID Nothing ) "hitlists" )
+        )
+    } 

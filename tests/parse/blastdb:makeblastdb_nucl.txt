@@ -1,119 +1,179 @@
-[ 
-    ( Var ( RepID Nothing ) "single" 
-    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "genes5" 
-    , Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "singles" 
-    , Lst fna.blastdb 
-        [ Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "genes5" 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
+            , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "genes5" 
+            , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "singles" 
+            , aExpr = Lst fna.blastdb 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "genes5" 
+                ] 
+                [ Fun fna.blastdb Nothing 
+                    [ Var ( RepID Nothing ) "single" ] "makeblastdb_fna" 
+                    [ Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "single" )
+                    ]
+                , Fun fna.blastdb Nothing 
+                    [ Var ( RepID Nothing ) "genes5" ] "makeblastdb_fna" 
+                    [ Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "genes5" )
+                    ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "each" 
+            , aExpr = Fun fna.blastdb.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "genes5" 
+                ] "makeblastdb_fna_each" 
+                [ Lst fna 
+                    [ Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "genes5" 
+                    ] 
+                    [ Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "single" )
+                    , Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "genes5" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "both" 
+            , aExpr = Fun fna.blastdb Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "genes5" 
+                ] "makeblastdb_fna_all" 
+                [ Lst fna 
+                    [ Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "genes5" 
+                    ] 
+                    [ Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "single" )
+                    , Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "genes5" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun num.list Nothing 
+                [ Var ( RepID Nothing ) "singles" 
+                , Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "genes5" 
+                , Var ( RepID Nothing ) "each" 
+                , Var ( RepID Nothing ) "both" 
+                ] "length_each" 
+                [ Lst fna.blastdb.list 
+                    [ Var ( RepID Nothing ) "singles" 
+                    , Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "genes5" 
+                    , Var ( RepID Nothing ) "each" 
+                    , Var ( RepID Nothing ) "both" 
+                    ] 
+                    [ Ref fna.blastdb.list Nothing 
+                        [ Var ( RepID Nothing ) "single" 
+                        , Var ( RepID Nothing ) "genes5" 
+                        ] 
+                        ( Var ( RepID Nothing ) "singles" )
+                    , Ref fna.blastdb.list Nothing 
+                        [ Var ( RepID Nothing ) "single" 
+                        , Var ( RepID Nothing ) "genes5" 
+                        ] 
+                        ( Var ( RepID Nothing ) "each" )
+                    , Bop fna.blastdb.list Nothing 
+                        [ Var ( RepID Nothing ) "singles" 
+                        , Var ( RepID Nothing ) "single" 
+                        , Var ( RepID Nothing ) "genes5" 
+                        , Var ( RepID Nothing ) "each" 
+                        ] "|" 
+                        ( Ref fna.blastdb.list Nothing 
+                            [ Var ( RepID Nothing ) "single" 
+                            , Var ( RepID Nothing ) "genes5" 
+                            ] 
+                            ( Var ( RepID Nothing ) "singles" )
+                        ) 
+                        ( Ref fna.blastdb.list Nothing 
+                            [ Var ( RepID Nothing ) "single" 
+                            , Var ( RepID Nothing ) "genes5" 
+                            ] 
+                            ( Var ( RepID Nothing ) "each" )
+                        )
+                    , Lst fna.blastdb 
+                        [ Var ( RepID Nothing ) "both" 
+                        , Var ( RepID Nothing ) "single" 
+                        , Var ( RepID Nothing ) "genes5" 
+                        ] 
+                        [ Ref fna.blastdb Nothing 
+                            [ Var ( RepID Nothing ) "single" 
+                            , Var ( RepID Nothing ) "genes5" 
+                            ] 
+                            ( Var ( RepID Nothing ) "both" )
+                        ]
+                    ] 
+                ]
+            } 
         ] 
-        [ Fun fna.blastdb Nothing 
-            [ Var ( RepID Nothing ) "single" ] "makeblastdb_fna" 
-            [ Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "single" )
-            ]
-        , Fun fna.blastdb Nothing 
-            [ Var ( RepID Nothing ) "genes5" ] "makeblastdb_fna" 
-            [ Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "genes5" )
-            ]
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "each" 
-    , Fun fna.blastdb.list Nothing 
-        [ Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "genes5" 
-        ] "makeblastdb_fna_each" 
-        [ Lst fna 
-            [ Var ( RepID Nothing ) "single" 
-            , Var ( RepID Nothing ) "genes5" 
-            ] 
-            [ Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "single" )
-            , Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "genes5" )
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "both" 
-    , Fun fna.blastdb Nothing 
-        [ Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "genes5" 
-        ] "makeblastdb_fna_all" 
-        [ Lst fna 
-            [ Var ( RepID Nothing ) "single" 
-            , Var ( RepID Nothing ) "genes5" 
-            ] 
-            [ Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "single" )
-            , Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "genes5" )
-            ] 
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun num.list Nothing 
-        [ Var ( RepID Nothing ) "singles" 
-        , Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "genes5" 
-        , Var ( RepID Nothing ) "each" 
-        , Var ( RepID Nothing ) "both" 
-        ] "length_each" 
-        [ Lst fna.blastdb.list 
+    , sResult = Just 
+        ( Fun num.list Nothing 
             [ Var ( RepID Nothing ) "singles" 
             , Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "genes5" 
             , Var ( RepID Nothing ) "each" 
             , Var ( RepID Nothing ) "both" 
-            ] 
-            [ Ref fna.blastdb.list Nothing 
-                [ Var ( RepID Nothing ) "single" 
-                , Var ( RepID Nothing ) "genes5" 
-                ] 
-                ( Var ( RepID Nothing ) "singles" )
-            , Ref fna.blastdb.list Nothing 
-                [ Var ( RepID Nothing ) "single" 
-                , Var ( RepID Nothing ) "genes5" 
-                ] 
-                ( Var ( RepID Nothing ) "each" )
-            , Bop fna.blastdb.list Nothing 
+            ] "length_each" 
+            [ Lst fna.blastdb.list 
                 [ Var ( RepID Nothing ) "singles" 
                 , Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 , Var ( RepID Nothing ) "each" 
-                ] "|" 
-                ( Ref fna.blastdb.list Nothing 
+                , Var ( RepID Nothing ) "both" 
+                ] 
+                [ Ref fna.blastdb.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
                     ( Var ( RepID Nothing ) "singles" )
-                ) 
-                ( Ref fna.blastdb.list Nothing 
+                , Ref fna.blastdb.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
                     ( Var ( RepID Nothing ) "each" )
-                )
-            , Lst fna.blastdb 
-                [ Var ( RepID Nothing ) "both" 
-                , Var ( RepID Nothing ) "single" 
-                , Var ( RepID Nothing ) "genes5" 
-                ] 
-                [ Ref fna.blastdb Nothing 
-                    [ Var ( RepID Nothing ) "single" 
+                , Bop fna.blastdb.list Nothing 
+                    [ Var ( RepID Nothing ) "singles" 
+                    , Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "genes5" 
+                    , Var ( RepID Nothing ) "each" 
+                    ] "|" 
+                    ( Ref fna.blastdb.list Nothing 
+                        [ Var ( RepID Nothing ) "single" 
+                        , Var ( RepID Nothing ) "genes5" 
+                        ] 
+                        ( Var ( RepID Nothing ) "singles" )
+                    ) 
+                    ( Ref fna.blastdb.list Nothing 
+                        [ Var ( RepID Nothing ) "single" 
+                        , Var ( RepID Nothing ) "genes5" 
+                        ] 
+                        ( Var ( RepID Nothing ) "each" )
+                    )
+                , Lst fna.blastdb 
+                    [ Var ( RepID Nothing ) "both" 
+                    , Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
-                    ( Var ( RepID Nothing ) "both" )
-                ]
-            ] 
-        ]
-    ) 
-] 
+                    [ Ref fna.blastdb Nothing 
+                        [ Var ( RepID Nothing ) "single" 
+                        , Var ( RepID Nothing ) "genes5" 
+                        ] 
+                        ( Var ( RepID Nothing ) "both" )
+                    ]
+                ] 
+            ]
+        )
+    } 

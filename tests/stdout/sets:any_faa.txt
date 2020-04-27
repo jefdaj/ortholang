@@ -1,6 +1,2 @@
-[["examples/sequences/Mycoplasma_agalactiae_small.faa",
-  "examples/sequences/Mycoplasma_genitalium_small.faa",
-  "examples/sequences/Mycoplasma_hyopneumoniae_small.faa"],
- ["examples/sequences/Mycoplasma_agalactiae_small.faa",
-  "examples/sequences/Mycoplasma_genitalium_small.faa",
-  "examples/sequences/Mycoplasma_hyopneumoniae_small.faa"]]
+$TMPDIR/cache/lines/e6025e495b.txt
+$TMPDIR/cache/lines/e6025e495b.txt

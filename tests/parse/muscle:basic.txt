@@ -1,70 +1,82 @@
-[ 
-    ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "maga" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "hits" 
-    , Fun bht Nothing 
-        [ Var ( RepID Nothing ) "mgen" 
-        , Var ( RepID Nothing ) "maga" 
-        ] "blastp" 
-        [ Lit num "0.1" 
-        , Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "mgen" )
-        , Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "maga" )
-        ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "hits_faa" 
-    , Fun faa Nothing 
-        [ Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "hits" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "extract_seqs" 
-        [ Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "maga" )
-        , Fun str.list Nothing 
-            [ Var ( RepID Nothing ) "hits" 
-            , Var ( RepID Nothing ) "mgen" 
-            , Var ( RepID Nothing ) "maga" 
-            ] "extract_targets" 
-            [ Ref bht Nothing 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "mgen" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits" 
+            , aExpr = Fun bht Nothing 
                 [ Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
+                ] "blastp" 
+                [ Lit num "0.1" 
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "mgen" )
+                , Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "maga" )
                 ] 
-                ( Var ( RepID Nothing ) "hits" )
-            ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits_faa" 
+            , aExpr = Fun faa Nothing 
+                [ Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "extract_seqs" 
+                [ Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "maga" )
+                , Fun str.list Nothing 
+                    [ Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] "extract_targets" 
+                    [ Ref bht Nothing 
+                        [ Var ( RepID Nothing ) "mgen" 
+                        , Var ( RepID Nothing ) "maga" 
+                        ] 
+                        ( Var ( RepID Nothing ) "hits" )
+                    ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits_aln" 
+            , aExpr = Fun aln Nothing 
+                [ Var ( RepID Nothing ) "hits_faa" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "muscle" 
+                [ Ref faa Nothing 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] 
+                    ( Var ( RepID Nothing ) "hits_faa" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref aln Nothing 
+                [ Var ( RepID Nothing ) "hits_faa" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
+                ( Var ( RepID Nothing ) "hits_aln" )
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "hits_aln" 
-    , Fun aln Nothing 
-        [ Var ( RepID Nothing ) "hits_faa" 
-        , Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "hits" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] "muscle" 
-        [ Ref faa Nothing 
-            [ Var ( RepID Nothing ) "maga" 
+    , sResult = Just 
+        ( Ref aln Nothing 
+            [ Var ( RepID Nothing ) "hits_faa" 
+            , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "mgen" 
             ] 
-            ( Var ( RepID Nothing ) "hits_faa" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Ref aln Nothing 
-        [ Var ( RepID Nothing ) "hits_faa" 
-        , Var ( RepID Nothing ) "maga" 
-        , Var ( RepID Nothing ) "hits" 
-        , Var ( RepID Nothing ) "mgen" 
-        ] 
-        ( Var ( RepID Nothing ) "hits_aln" )
-    ) 
-] 
+            ( Var ( RepID Nothing ) "hits_aln" )
+        )
+    } 

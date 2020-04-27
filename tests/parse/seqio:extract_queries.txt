@@ -1,49 +1,72 @@
-[ 
-    ( Var ( RepID Nothing ) "hits" 
-    , Fun bht Nothing [] "blastp" 
-        [ Lit num "1.0e-5" 
-        , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
-        , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "hits" 
+            , aExpr = Fun bht Nothing [] "blastp" 
+                [ Lit num "1.0e-5" 
+                , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+                , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "hits" ] "extract_queries" 
+                [ Ref bht Nothing [] 
+                    ( Var ( RepID Nothing ) "hits" )
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mapped" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "hits" ] "extract_queries_each" 
+                [ Lst bht 
+                    [ Var ( RepID Nothing ) "hits" ] 
+                    [ Ref bht Nothing [] 
+                        ( Var ( RepID Nothing ) "hits" )
+                    ]
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop str.list.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "mapped" 
+                ] "|" 
+                ( Lst str.list 
+                    [ Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "hits" 
+                    ] 
+                    [ Ref str.list Nothing 
+                        [ Var ( RepID Nothing ) "hits" ] 
+                        ( Var ( RepID Nothing ) "single" )
+                    ]
+                ) 
+                ( Ref str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "hits" ] 
+                    ( Var ( RepID Nothing ) "mapped" )
+                )
+            } 
         ] 
-    ) 
-, 
-    ( Var ( RepID Nothing ) "single" 
-    , Fun str.list Nothing 
-        [ Var ( RepID Nothing ) "hits" ] "extract_queries" 
-        [ Ref bht Nothing [] 
-            ( Var ( RepID Nothing ) "hits" )
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "mapped" 
-    , Fun str.list.list Nothing 
-        [ Var ( RepID Nothing ) "hits" ] "extract_queries_each" 
-        [ Lst bht 
-            [ Var ( RepID Nothing ) "hits" ] 
-            [ Ref bht Nothing [] 
-                ( Var ( RepID Nothing ) "hits" )
-            ]
-        ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Bop str.list.list Nothing 
-        [ Var ( RepID Nothing ) "single" 
-        , Var ( RepID Nothing ) "hits" 
-        , Var ( RepID Nothing ) "mapped" 
-        ] "|" 
-        ( Lst str.list 
+    , sResult = Just 
+        ( Bop str.list.list Nothing 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "hits" 
-            ] 
-            [ Ref str.list Nothing 
+            , Var ( RepID Nothing ) "mapped" 
+            ] "|" 
+            ( Lst str.list 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "hits" 
+                ] 
+                [ Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "hits" ] 
+                    ( Var ( RepID Nothing ) "single" )
+                ]
+            ) 
+            ( Ref str.list.list Nothing 
                 [ Var ( RepID Nothing ) "hits" ] 
-                ( Var ( RepID Nothing ) "single" )
-            ]
-        ) 
-        ( Ref str.list.list Nothing 
-            [ Var ( RepID Nothing ) "hits" ] 
-            ( Var ( RepID Nothing ) "mapped" )
+                ( Var ( RepID Nothing ) "mapped" )
+            )
         )
-    ) 
-] 
+    } 

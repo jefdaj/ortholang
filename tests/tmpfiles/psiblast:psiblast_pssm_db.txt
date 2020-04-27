@@ -37,15 +37,13 @@
 |   |       `-- 4192ba8f06
 |   |           `-- e3786a6445
 |   |               |-- result
-|   |               |-- result.err
-|   |               `-- result.out
+|   |               `-- result.err
 |   |-- psiblast_train_db
 |   |   `-- 01b1e93729
 |   |       `-- ec1f6f502d
 |   |           `-- e3786a6445
 |   |               |-- result -> ../../../../../cache/lines/...
-|   |               |-- result.tmp.err
-|   |               `-- result.tmp.out
+|   |               `-- result.tmp.err
 |   `-- str
 |       |-- 1e020faf26
 |       |   `-- result -> ../../../cache/lines/...
@@ -62,4 +60,4 @@
     |-- result -> ../vars/single.bht
     `-- single.bht -> ../exprs/psiblast_pssm_db/01b1e93729/4192ba8f06/e3786a6445/result
 
-29 directories, 33 files
+29 directories, 31 files

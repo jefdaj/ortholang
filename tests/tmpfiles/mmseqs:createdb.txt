@@ -13,8 +13,7 @@
 |               |-- result_h.dbtype
 |               |-- result_h.index
 |               |-- result.index
-|               |-- result.lookup
-|               `-- result.out
+|               `-- result.lookup
 |-- exprs
 |   |-- list
 |   |   `-- 7666691bcd
@@ -33,4 +32,4 @@
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     `-- result -> ../vars/maga_db.mms
 
-15 directories, 18 files
+15 directories, 17 files

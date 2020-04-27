@@ -2,8 +2,7 @@
 |-- cache
 |   |-- hmmsearch
 |   |   |-- result
-|   |   |-- result.err
-|   |   `-- result.out
+|   |   `-- result.err
 |   |-- load
 |   |   |-- 11bbf54fc6.faa
 |   |   |-- 11bbf54fc6.faa.ids
@@ -36,15 +35,13 @@
 |   |-- hmmbuild
 |   |   `-- 92572e30a9
 |   |       |-- result
-|   |       |-- result.err
-|   |       `-- result.out
+|   |       `-- result.err
 |   |-- hmmsearch
 |   |   `-- d00a650518
 |   |       `-- d9556f667d
 |   |           `-- 695ad777c5
 |   |               |-- result
-|   |               |-- result.err
-|   |               `-- result.out
+|   |               `-- result.err
 |   |-- list
 |   |   `-- fe26b625e5
 |   |       `-- result -> ../../../cache/lines/...
@@ -79,4 +76,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../exprs/extract_hmm_targets/5a29734ae9/result
 
-39 directories, 40 files
+39 directories, 37 files

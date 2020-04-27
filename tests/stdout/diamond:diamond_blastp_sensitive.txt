@@ -1,7 +1,16 @@
-gi|290752280|emb|CBH40251.1|	gi|3844709|gb|AAC71337.1|	43.6	573	249	6	6	519	5	562	1.9e-122	429.5
-gi|290752299|emb|CBH40270.1|	gi|1045756|gb|AAC71297.1|	36.0	375	194	8	89	424	19	386	1.1e-61	227.6
-gi|290752318|emb|CBH40289.1|	gi|1045676|gb|AAC71224.1|	38.0	437	254	7	16	445	16	442	6.8e-73	264.6
-gi|290752321|emb|CBH40292.1|	gi|1045673|gb|AAC71221.1|	41.3	429	230	9	1	420	1	416	4.9e-81	291.6
-gi|290752330|emb|CBH40301.1|	gi|3844641|gb|AAC71247.1|	37.3	1246	735	21	233	1459	232	1450	5.8e-238...
-...
-
+gi|290752280|emb|CBH40251.1| ABC transporter, ATP binding protein, P59 [Mycoplasma agalactiae]	gi|3844709|gb|AAC71337.1| ABC transporter, ATP-binding protein [Mycoplasma genitalium G37]	43.6	573	249	6	6	519	5	562	1.9e-122	429.5
+gi|290752299|emb|CBH40270.1| Oligopeptide ABC transporter, ATP binding protein (OppD) [Mycoplasma agalactiae]	gi|1045756|gb|AAC71297.1| oligopeptide ABC transporter, ATP-binding protein [Mycoplasma genitalium G37]	36.0	375	194	8	89	424	19	386	1.1e-61	227.6
+gi|290752318|emb|CBH40289.1| TRNA modification GTPase (TrmE) [Mycoplasma agalactiae]	gi|1045676|gb|AAC71224.1| tRNA modification GTPase TrmE [Mycoplasma genitalium G37]	38.0	437	254	7	16	445	16	442	6.8e-73	264.6
+gi|290752321|emb|CBH40292.1| Seryl tRNA synthetase [Mycoplasma agalactiae]	gi|1045673|gb|AAC71221.1| seryl-tRNA synthetase [Mycoplasma genitalium G37]	41.3	429	230	9	1	420	1	416	4.9e-81	291.6
+gi|290752330|emb|CBH40301.1| DNA polymerase III alpha subunit [Mycoplasma agalactiae]	gi|3844641|gb|AAC71247.1| DNA polymerase III, alpha subunit, Gram-positive type [Mycoplasma genitalium G37]	37.3	1246	735	21	233	1459	232	1450	5.8e-238	814.7
+gi|290752336|emb|CBH40307.1| Proline iminopeptidase (Pip) [Mycoplasma agalactiae]	gi|3844629|gb|AAC71236.1| proline iminopeptidase [Mycoplasma genitalium G37]	38.9	283	168	3	16	294	9	290	1.7e-57	213.0
+gi|290752344|emb|CBH40315.1| Fructose bisphosphate aldolase (Fba) [Mycoplasma agalactiae]	gi|3844632|gb|AAC71239.1| fructose-1,6-bisphosphate aldolase, class II [Mycoplasma genitalium G37]	51.9	289	133	2	6	290	1	287	1.1e-82	296.6
+gi|290752347|emb|CBH40318.1| 50S ribosomal protein L1 [Mycoplasma agalactiae]	gi|3844669|gb|AAC71300.1| ribosomal protein L1 [Mycoplasma genitalium G37]	46.9	226	116	2	4	229	3	224	6.5e-51	190.7
+gi|290752358|emb|CBH40329.1| Thioredoxin reductase [Mycoplasma agalactiae]	gi|3844690|gb|AAC71320.1| thioredoxin-disulfide reductase [Mycoplasma genitalium G37]	40.1	304	174	5	3	302	12	311	9.5e-58	213.8
+gi|290752372|emb|CBH40343.1| Oligopeptide ABC transporter, ATP bindingprotein (OppD) [Mycoplasma agalactiae]	gi|1045756|gb|AAC71297.1| oligopeptide ABC transporter, ATP-binding protein [Mycoplasma genitalium G37]	45.6	390	171	6	29	379	14	401	3.6e-91	325.1
+gi|290752373|emb|CBH40344.1| Oligopeptide ABC transporter, ATP bindingprotein (OppF) [Mycoplasma agalactiae]	gi|1045757|gb|AAC71298.1| oligopeptide ABC transporter, ATP-binding protein [Mycoplasma genitalium G37]	27.2	885	495	23	1	779	1	842	2.0e-75	273.9
+gi|290752390|emb|CBH40361.1| Oligoendopeptidase F [Mycoplasma agalactiae]	gi|3844779|gb|AAC71402.1| oligoendopeptidase F [Mycoplasma genitalium G37]	27.5	612	422	12	10	607	1	604	5.4e-60	222.2
+gi|290752391|emb|CBH40362.1| Spermidine/putrescine ABC transporterATP binding protein PotA [Mycoplasma agalactiae]	gi|3844651|gb|AAC71258.1| spermidine/putrescine ABC transporter, ATP-binding protein, putative [Mycoplasma genitalium G37]	33.9	567	238	8	11	455	6	557	1.3e-74	270.4
+gi|290752440|emb|CBH40411.1| Topoisomerase IV subunit B [Mycoplasma agalactiae]	gi|1045671|gb|AAC71219.1| DNA gyrase, B subunit [Mycoplasma genitalium G37]	44.5	642	326	12	9	630	10	641	4.8e-144	501.5
+gi|290752441|emb|CBH40412.1| Topoisomerase IV subunit A [Mycoplasma agalactiae]	gi|1045672|gb|AAC71220.1| DNA gyrase, A subunit [Mycoplasma genitalium G37]	32.1	784	513	6	17	785	11	790	5.1e-117	412.1
+gi|290752446|emb|CBH40417.1| Ribose phosphate pyrophosphokinase(Phosphoribosyl pyrophosphate synthetase) [Mycoplasma agalactiae]	gi|84626144|gb|AAC71275.2| ribose-phosphate pyrophosphokinase [Mycoplasma genitalium G37]	41.1	331	184	6	1	324	5	331	5.9e-66	241.1

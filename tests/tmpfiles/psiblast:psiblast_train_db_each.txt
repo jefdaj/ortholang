@@ -23,12 +23,10 @@
 |   |-- map
 |   |   |-- 9624b207d9
 |   |   |   |-- result -> ../../../cache/lines/...
-|   |   |   |-- result.tmp.err
-|   |   |   `-- result.tmp.out
+|   |   |   `-- result.tmp.err
 |   |   `-- 9aecd2b136
 |   |       |-- result -> ../../../cache/lines/...
-|   |       |-- result.tmp.err
-|   |       `-- result.tmp.out
+|   |       `-- result.tmp.err
 |   `-- psiblast
 |-- exprs
 |   |-- list
@@ -72,4 +70,4 @@
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/pssm.pssm.list
 
-32 directories, 40 files
+32 directories, 38 files

@@ -1,4 +1,2 @@
-[["examples/sequences/Mycoplasma_agalactiae_small.faa",
-  "examples/sequences/Mycoplasma_genitalium_small.faa"],
- ["examples/sequences/Mycoplasma_agalactiae_small.faa",
-  "examples/sequences/Mycoplasma_genitalium_small.faa"]]
+$TMPDIR/cache/lines/1f847908cb.txt
+$TMPDIR/cache/lines/1f847908cb.txt

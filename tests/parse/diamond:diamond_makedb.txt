@@ -1,14 +1,25 @@
-[ 
-    ( Var ( RepID Nothing ) "mgen" 
-    , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
-    ) 
-, 
-    ( Var ( RepID Nothing ) "result" 
-    , Fun dmnd 
-        ( Just ( Salt 0 ) ) 
-        [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb" 
-        [ Ref faa Nothing [] 
-            ( Var ( RepID Nothing ) "mgen" )
-        ]
-    ) 
-] 
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "mgen" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun dmnd 
+                ( Just ( Salt 0 ) ) 
+                [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb" 
+                [ Ref faa Nothing [] 
+                    ( Var ( RepID Nothing ) "mgen" )
+                ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun dmnd 
+            ( Just ( Salt 0 ) ) 
+            [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb" 
+            [ Ref faa Nothing [] 
+                ( Var ( RepID Nothing ) "mgen" )
+            ]
+        )
+    } 

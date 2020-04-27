@@ -1,2 +1,1 @@
-DIAMOND database $TMPDIR/vars/result
-
+error: $TMPDIR/vars/result: hGetContents: invalid argument (invalid byte sequence)
