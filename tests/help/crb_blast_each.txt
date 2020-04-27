@@ -1,1 +1,1 @@
-fna fa.list -> crb.list
+crb_blast_each : fna fa.list -> crb.list

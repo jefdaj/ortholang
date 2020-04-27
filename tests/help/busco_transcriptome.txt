@@ -1,1 +1,1 @@
-blh fna -> bsr
+busco_transcriptome : blh fna -> bsr

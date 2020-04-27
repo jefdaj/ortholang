@@ -1,1 +1,1 @@
-fna -> fna.list
+split_fna : fna -> fna.list

@@ -1,1 +1,1 @@
-num.list -> num
+subtract : num.list -> num

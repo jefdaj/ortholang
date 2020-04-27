@@ -1,1 +1,1 @@
-hht -> str.list
+extract_hmm_targets : hht -> str.list

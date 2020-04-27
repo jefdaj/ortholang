@@ -1,1 +1,1 @@
-str.list -> fna.list
+load_fna_each : str.list -> fna.list

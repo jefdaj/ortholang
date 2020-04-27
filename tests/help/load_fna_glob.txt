@@ -1,1 +1,1 @@
-str -> fna.list
+load_fna_glob : str -> fna.list

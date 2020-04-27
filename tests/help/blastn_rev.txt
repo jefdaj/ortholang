@@ -1,4 +1,4 @@
-num fna fna -> bht
+blastn_rev : num fna fna -> bht
 
 Like blastn, but with the FASTA files flipped.
 

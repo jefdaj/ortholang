@@ -1,4 +1,4 @@
-num fna fna.list -> bht.list
+blastn_each : num fna fna.list -> bht.list
 
 Like blastn, but BLASTs against a list of subject sequence files.
 

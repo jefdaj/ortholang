@@ -1,1 +1,1 @@
-num num num -> num.list
+range_multiply : num num num -> num.list

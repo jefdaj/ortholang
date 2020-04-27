@@ -1,4 +1,4 @@
-num fna faa -> bht
+blastx : num fna faa -> bht
 
 BLAST nucleic acid (DNA) sequences against amino acid (protein) sequences.
 

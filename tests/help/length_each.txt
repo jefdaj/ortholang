@@ -1,1 +1,1 @@
-ll.list -> num.list
+length_each : ll.list -> num.list

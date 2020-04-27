@@ -1,3 +1,3 @@
-num fa fa -> bht
+mmseqs_search : num fa fa -> bht
 
 Find matching sequences in two fasta files, similar to BLAST.

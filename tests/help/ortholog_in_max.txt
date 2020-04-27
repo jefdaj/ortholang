@@ -1,1 +1,1 @@
-num og faa.list -> str.list.list
+ortholog_in_max : num og faa.list -> str.list.list

@@ -1,4 +1,4 @@
-num fna fna.list -> bht.list
+blastn_rbh_each : num fna fna.list -> bht.list
 
 Like blastn_rbh, but the last argument is a list of files.
 Useful when you want to find orthologs for one species in a list of others.

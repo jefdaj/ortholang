@@ -1,1 +1,1 @@
-bst.list -> bst
+concat_bst : bst.list -> bst

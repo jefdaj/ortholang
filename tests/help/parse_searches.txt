@@ -1,1 +1,1 @@
-str.list -> search
+parse_searches : str.list -> search

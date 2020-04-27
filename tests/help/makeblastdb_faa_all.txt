@@ -1,1 +1,1 @@
-faa.list -> faa.blastdb
+makeblastdb_faa_all : faa.list -> faa.blastdb

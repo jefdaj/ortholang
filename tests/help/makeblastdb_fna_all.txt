@@ -1,1 +1,1 @@
-fna.list -> fna.blastdb
+makeblastdb_fna_all : fna.list -> fna.blastdb

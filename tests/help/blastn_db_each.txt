@@ -1,4 +1,4 @@
-num fna fna.blastdb.list -> bht.list
+blastn_db_each : num fna fna.blastdb.list -> bht.list
 
 Like blastn_db, but BLASTs against a list of databases.
 Useful when you have one database per group and want to separate the hits.

@@ -1,1 +1,1 @@
-str str str -> str
+newrulestest3 : str str str -> str

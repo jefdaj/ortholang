@@ -1,1 +1,1 @@
-str gbk.list -> faa.list
+gbk_to_faa_rawids_each : str gbk.list -> faa.list

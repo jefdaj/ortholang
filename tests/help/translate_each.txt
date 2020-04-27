@@ -1,1 +1,1 @@
-fna.list -> faa.list
+translate_each : fna.list -> faa.list

@@ -1,4 +1,4 @@
-num fna fna.list -> bht.list
+blastn_rev_each : num fna fna.list -> bht.list
 
 Like blastn_rev, but BLASTs a list of sequence files against the first one.
 

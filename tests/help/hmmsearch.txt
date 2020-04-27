@@ -1,1 +1,1 @@
-num hmm faa -> hht
+hmmsearch : num hmm faa -> hht

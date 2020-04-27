@@ -1,4 +1,4 @@
-num faa faa -> bht
+blastp : num faa faa -> bht
 
 BLAST one file of amino acid (protein) sequences against another.
 

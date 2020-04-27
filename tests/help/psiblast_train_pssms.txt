@@ -1,1 +1,1 @@
-num faa.list faa -> pssm.list
+psiblast_train_pssms : num faa.list faa -> pssm.list

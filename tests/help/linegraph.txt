@@ -1,1 +1,1 @@
-str num.scores -> png
+linegraph : str num.scores -> png

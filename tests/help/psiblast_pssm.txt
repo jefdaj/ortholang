@@ -1,1 +1,1 @@
-num pssm faa -> bht
+psiblast_pssm : num pssm faa -> bht

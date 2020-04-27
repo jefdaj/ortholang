@@ -1,1 +1,1 @@
-ht -> str.list
+extract_queries : ht -> str.list

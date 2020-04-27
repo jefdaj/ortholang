@@ -1,1 +1,1 @@
-str num.scores -> png
+scatterplot : str num.scores -> png

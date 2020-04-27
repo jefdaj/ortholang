@@ -1,1 +1,1 @@
-str -> faa
+load_faa_path : str -> faa

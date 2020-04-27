@@ -1,1 +1,1 @@
-blh faa -> bsr
+busco_proteins : blh faa -> bsr

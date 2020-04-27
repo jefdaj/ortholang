@@ -1,1 +1,1 @@
-str faa faa -> faa
+newrulestest2 : str faa faa -> faa

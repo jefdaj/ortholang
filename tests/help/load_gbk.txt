@@ -1,1 +1,1 @@
-str -> gbk
+load_gbk : str -> gbk

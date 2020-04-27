@@ -1,1 +1,1 @@
-str num.list -> png
+histogram : str num.list -> png

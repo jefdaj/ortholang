@@ -1,4 +1,4 @@
-any.list.list -> any.list
+any : any.list.list -> any.list
 
 Given a list of lists, returns the unique elements from all of them.
 Like & (set union) but with a flexible number of arguments.

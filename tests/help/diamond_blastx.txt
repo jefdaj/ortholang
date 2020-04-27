@@ -1,1 +1,1 @@
-num fna faa -> bht
+diamond_blastx : num fna faa -> bht

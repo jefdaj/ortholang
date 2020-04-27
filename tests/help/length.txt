@@ -1,1 +1,1 @@
-ll -> num
+length : ll -> num

@@ -1,1 +1,1 @@
-fna fa -> crb
+crb_blast : fna fa -> crb

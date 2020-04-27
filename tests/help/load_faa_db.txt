@@ -1,1 +1,1 @@
-str -> faa.blastdb
+load_faa_db : str -> faa.blastdb

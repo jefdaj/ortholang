@@ -1,1 +1,1 @@
-num dmnd fna -> bht
+diamond_blastx_db_rev : num dmnd fna -> bht

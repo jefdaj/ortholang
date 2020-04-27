@@ -1,1 +1,1 @@
-num fna faa.list -> bht.list
+blastx_each : num fna faa.list -> bht.list

@@ -1,1 +1,1 @@
-num str.list.list str.list.list -> str.list.list
+ortholog_in_max_str : num str.list.list str.list.list -> str.list.list

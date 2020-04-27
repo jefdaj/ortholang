@@ -1,1 +1,1 @@
-str -> blh
+busco_fetch_lineage : str -> blh

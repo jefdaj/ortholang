@@ -1,1 +1,1 @@
-fna -> faa
+translate : fna -> faa

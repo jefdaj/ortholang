@@ -1,1 +1,1 @@
-str -> gbk.list
+load_gbk_glob : str -> gbk.list

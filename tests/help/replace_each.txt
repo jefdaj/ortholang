@@ -1,1 +1,1 @@
-any any any.list -> any.list
+replace_each : any any any.list -> any.list

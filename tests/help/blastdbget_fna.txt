@@ -1,1 +1,1 @@
-str -> fna.blastdb
+blastdbget_fna : str -> fna.blastdb

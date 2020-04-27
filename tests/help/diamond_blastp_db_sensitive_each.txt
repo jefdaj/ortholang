@@ -1,1 +1,1 @@
-num faa dmnd.list -> bht.list
+diamond_blastp_db_sensitive_each : num faa dmnd.list -> bht.list

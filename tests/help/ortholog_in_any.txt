@@ -1,4 +1,4 @@
-og faa.list -> str.list.list
+ortholog_in_any : og faa.list -> str.list.list
 
 Arguments:
   orthogroup finder results

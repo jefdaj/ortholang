@@ -1,1 +1,1 @@
-faa.list -> aln.list
+muscle_each : faa.list -> aln.list

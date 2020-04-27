@@ -1,1 +1,1 @@
-str gbk -> faa
+gbk_to_faa_rawids : str gbk -> faa

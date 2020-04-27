@@ -1,1 +1,1 @@
-bht bht -> bht
+reciprocal_best : bht bht -> bht

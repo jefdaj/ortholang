@@ -1,1 +1,1 @@
-num fna dmnd.list -> bht.list
+diamond_blastx_db_more_sensitive_each : num fna dmnd.list -> bht.list

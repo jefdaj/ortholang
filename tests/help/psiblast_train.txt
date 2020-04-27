@@ -1,1 +1,1 @@
-num faa faa -> pssm
+psiblast_train : num faa faa -> pssm

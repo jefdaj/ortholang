@@ -1,1 +1,1 @@
-blh faa.list -> bsr.list
+busco_proteins_each : blh faa.list -> bsr.list

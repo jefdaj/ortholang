@@ -1,1 +1,1 @@
-num faa faa.list -> bht.list
+blastp_rbh_each : num faa faa.list -> bht.list

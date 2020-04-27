@@ -1,1 +1,1 @@
-any.scores -> num.list
+extract_scores : any.scores -> num.list

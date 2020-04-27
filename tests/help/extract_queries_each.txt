@@ -1,1 +1,1 @@
-ht.list -> str.list.list
+extract_queries_each : ht.list -> str.list.list

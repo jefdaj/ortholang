@@ -1,1 +1,1 @@
-num fna fna -> bht
+tblastx_rbh : num fna fna -> bht

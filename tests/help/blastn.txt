@@ -1,4 +1,4 @@
-num fna fna -> bht
+blastn : num fna fna -> bht
 
 BLAST one file of nucleic acid (DNA) sequences against another.
 

@@ -1,1 +1,1 @@
-str -> fna
+load_fna_path : str -> fna

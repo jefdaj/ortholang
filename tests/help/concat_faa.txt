@@ -1,1 +1,1 @@
-faa.list -> faa
+concat_faa : faa.list -> faa

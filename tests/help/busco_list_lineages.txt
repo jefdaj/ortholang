@@ -1,1 +1,1 @@
-str -> str.list
+busco_list_lineages : str -> str.list

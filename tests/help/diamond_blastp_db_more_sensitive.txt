@@ -1,1 +1,1 @@
-num faa dmnd -> bht
+diamond_blastp_db_more_sensitive : num faa dmnd -> bht

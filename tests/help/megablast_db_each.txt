@@ -1,1 +1,1 @@
-num fna fna.blastdb.list -> bht.list
+megablast_db_each : num fna fna.blastdb.list -> bht.list

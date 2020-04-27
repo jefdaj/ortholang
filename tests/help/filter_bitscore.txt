@@ -1,1 +1,1 @@
-num ht -> ht
+filter_bitscore : num ht -> ht

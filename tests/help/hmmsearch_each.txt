@@ -1,1 +1,1 @@
-num hmm.list faa -> hht
+hmmsearch_each : num hmm.list faa -> hht

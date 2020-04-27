@@ -1,1 +1,1 @@
-aln.list -> hmm.list
+hmmbuild_each : aln.list -> hmm.list

@@ -1,1 +1,1 @@
-num pssm.list faa.blastdb -> bht.list
+psiblast_each_pssm_db : num pssm.list faa.blastdb -> bht.list

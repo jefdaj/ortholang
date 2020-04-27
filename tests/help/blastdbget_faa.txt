@@ -1,1 +1,1 @@
-str -> faa.blastdb
+blastdbget_faa : str -> faa.blastdb

@@ -1,4 +1,4 @@
-str -> str.list
+blastdblist : str -> str.list
 
 List NCBI BLAST databases for download with blastdbget_nucl and _prot.
 

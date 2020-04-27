@@ -1,1 +1,1 @@
-faa.list -> dmnd.list
+diamond_makedb_each : faa.list -> dmnd.list

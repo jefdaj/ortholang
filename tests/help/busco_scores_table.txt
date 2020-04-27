@@ -1,1 +1,1 @@
-bsr.list -> bst
+busco_scores_table : bsr.list -> bst

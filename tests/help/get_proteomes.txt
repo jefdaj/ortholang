@@ -1,1 +1,1 @@
-str.list -> faa.gz.list
+get_proteomes : str.list -> faa.gz.list

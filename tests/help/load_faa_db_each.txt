@@ -1,1 +1,1 @@
-str.list -> faa.blastdb.list
+load_faa_db_each : str.list -> faa.blastdb.list

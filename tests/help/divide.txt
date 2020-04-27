@@ -1,1 +1,1 @@
-num.list -> num
+divide : num.list -> num

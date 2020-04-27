@@ -1,1 +1,1 @@
-fa str.list.list -> fa.list
+extract_seqs_each : fa str.list.list -> fa.list

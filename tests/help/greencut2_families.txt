@@ -1,1 +1,1 @@
-bht bht -> gcr
+greencut2_families : bht bht -> gcr

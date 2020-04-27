@@ -1,1 +1,1 @@
-blh fna.list -> bsr.list
+busco_transcriptome_each : blh fna.list -> bsr.list

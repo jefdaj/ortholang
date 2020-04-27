@@ -1,4 +1,4 @@
-num num num num -> num.list
+range_exponent : num num num num -> num.list
 
 Arguments: base, exp_start, exp_stop, exp_step
 

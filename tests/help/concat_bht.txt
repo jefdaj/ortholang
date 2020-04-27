@@ -1,1 +1,1 @@
-bht.list -> bht
+concat_bht : bht.list -> bht

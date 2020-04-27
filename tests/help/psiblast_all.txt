@@ -1,1 +1,1 @@
-num faa faa.list -> bht
+psiblast_all : num faa faa.list -> bht

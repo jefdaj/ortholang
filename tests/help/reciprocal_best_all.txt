@@ -1,1 +1,1 @@
-bht.list bht.list -> bht
+reciprocal_best_all : bht.list bht.list -> bht

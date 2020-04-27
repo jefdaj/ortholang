@@ -1,1 +1,1 @@
-num fna fna.list -> bht.list
+megablast_each : num fna fna.list -> bht.list

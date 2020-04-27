@@ -1,4 +1,4 @@
-num faa fna.blastdb -> bht
+tblastn_db : num faa fna.blastdb -> bht
 
 Like tblastn, but BLASTs against an existing database.
 

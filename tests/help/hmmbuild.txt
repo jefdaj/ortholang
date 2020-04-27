@@ -1,1 +1,1 @@
-aln -> hmm
+hmmbuild : aln -> hmm

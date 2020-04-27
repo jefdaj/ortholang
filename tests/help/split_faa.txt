@@ -1,1 +1,1 @@
-faa -> faa.list
+split_faa : faa -> faa.list

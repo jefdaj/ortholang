@@ -1,1 +1,1 @@
-str.list -> fna.gz.list
+get_genomes : str.list -> fna.gz.list

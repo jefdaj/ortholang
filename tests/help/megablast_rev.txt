@@ -1,1 +1,1 @@
-num fna fna -> bht
+megablast_rev : num fna fna -> bht

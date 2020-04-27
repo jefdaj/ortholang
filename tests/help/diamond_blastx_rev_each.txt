@@ -1,1 +1,1 @@
-num faa fna.list -> bht.list
+diamond_blastx_rev_each : num faa fna.list -> bht.list

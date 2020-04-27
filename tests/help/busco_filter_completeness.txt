@@ -1,4 +1,4 @@
-num bst faa.list -> faa.list
+busco_filter_completeness : num bst faa.list -> faa.list
 
 Filter a list of transcriptomes or proteomes by their BUSCO completeness score.
 

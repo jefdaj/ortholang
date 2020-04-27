@@ -1,1 +1,1 @@
-fa.list -> str.list.list
+extract_ids_each : fa.list -> str.list.list

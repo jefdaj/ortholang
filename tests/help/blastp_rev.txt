@@ -1,1 +1,1 @@
-num faa faa -> bht
+blastp_rev : num faa faa -> bht

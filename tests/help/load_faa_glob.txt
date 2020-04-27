@@ -1,1 +1,1 @@
-str -> faa.list
+load_faa_glob : str -> faa.list

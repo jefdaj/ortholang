@@ -1,1 +1,1 @@
-num faa fna -> bht
+diamond_blastx_sensitive_rev : num faa fna -> bht

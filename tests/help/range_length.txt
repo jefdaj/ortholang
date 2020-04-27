@@ -1,1 +1,1 @@
-num num num -> num.list
+range_length : num num num -> num.list

@@ -1,1 +1,1 @@
-any.list -> any.list.list
+singletons : any.list -> any.list.list

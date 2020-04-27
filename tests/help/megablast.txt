@@ -1,4 +1,4 @@
-num fna fna -> bht
+megablast : num fna fna -> bht
 
 Like blastn, but faster at finding very similar matches.
 
