@@ -33,8 +33,8 @@ module OrthoLang.Interpreter.Parse.Script
   )
   where
 
-import Prelude hiding (error)
-import OrthoLang.Debug (error, debug)
+-- import Prelude hiding (error)
+import OrthoLang.Debug (debug)
 import OrthoLang.Interpreter.Parse.Basic
 import OrthoLang.Interpreter.Parse.Expr
 import OrthoLang.Interpreter.Parse.Util (debugParser, parseWithEof, stripComments)
@@ -207,11 +207,15 @@ TODO should it get automatically `put` here, or manually in the repl?
 pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   optional spaces
-  _ <- many pStatement
-  scr <- getState
-  -- let scr' = scr {sAssigns = as} -- TODO is this redundant?
-  -- putState scr'
-  return scr
+  as <- many pStatement
+  (Script {sResult = r}) <- getState
+  -- this should only be needed when the user manually wrote a script and forgot the "result" var
+  let r' = case r of
+             Nothing -> if null as then Nothing else Just (aExpr $ last as)
+             Just e -> Just e
+  let scr' = Script {sAssigns = as, sResult = r'}
+  putState scr'
+  return scr'
 
 -- TODO could generalize to other parsers/checkers like above for testing
 -- TODO is it OK that all the others take an initial script but not this?
