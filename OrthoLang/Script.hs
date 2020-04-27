@@ -11,6 +11,8 @@ TODO result handling:
   add repl test cases that include test scripts and check the result handling
 -}
 
+-- TODO still confusing, so split the appendStatement fns into multiple non-confusing smaller ones!
+
 module OrthoLang.Script
   (
 
@@ -36,9 +38,9 @@ module OrthoLang.Script
   -- * Used in Interpreter.Repl
   , rDepsOf
   , depsOnly
-  , updateVars
+  -- , appendOrUpdateAssign
   -- , replaceVar
-  -- , removeSelfReferences
+  -- , removeAssignSelfReferences
   -- , rmRef
 
   )
@@ -77,8 +79,8 @@ import OrthoLang.Util  (justOrDie)
   -- samplefa = result
   --
   -- was:
-  -- 1) substitute the result ref for its value in the old script
-  -- 2) strip the "result" assignment from the old script
+  -- 1) substitute the result ref for its value in the script
+  -- 2) strip the "result" assignment from the script
   -- 3) add the new assignment statement samplefa = load_fna ...
   -- 4) assigned a new default result = samplefa
   --
@@ -122,9 +124,9 @@ import OrthoLang.Util  (justOrDie)
   -- does only the repl version need the fancy remove-self-references logic?
 
 --   let scr'  = scr {sAssigns = delVar (sAssigns scr) "result"}
---       scr'' = updateVars scr' a
+--       scr'' = appendOrUpdateAssign scr' a
 --   in trace "interpreter.parse.basic.assign"
---            ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
+--            ("scr:\n" ++ render (pPrint scr) ++ "\nscr'':\n" ++ render (pPrint scr''))
 --            scr''
 
 {-|
@@ -135,46 +137,63 @@ Behaviors that differ from 'appendStatementRepl':
 * Throws an error (TODO which class?) instead of overwriting any existing variable other than "result"
 
 TODO where does the final auto-assign of result happen? Eval currently?
+TODO add the error
 -}
 appendStatementFile :: Script -> Assign -> Script
-appendStatementFile scr a@(Assign _ e) =
-  -- let as'   = if v == "result" then delVar (sAssigns scr) "result" else sAssigns scr
-  --     scr'  = scr {sAssigns = as'}
-  let scr' = if isResult a
-               then scr {sAssigns = delVar (sAssigns scr) "result", sResult = Just e}
-               else scr {sAssigns = sAssigns scr}
-      scr'' = updateVars scr' a -- TODO rename to imply that it also appends
+appendStatementFile scr asn =
+  let as   = sAssigns scr
+      as'  = (if isResult asn then delVar as "result" else as) ++ [asn]
+      r'   = if isResult asn then Just (aExpr asn) else sResult scr
+      scr' = scr {sAssigns = as', sResult = r'}
   in trace "ortholang.script.appendStatementFile"
-           ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
-           scr''
+           ("scr:\n" ++ render (pPrint scr) ++ "\nscr':\n" ++ render (pPrint scr'))
+           scr'
 
 {-|
 Behaviors that differ from 'appendStatementFile':
+
+* Works on naked 'Expr's as well as 'Assign's. They're auto-assign to "result",
+  overwriting the previous result if any.
 
 * Allows overwriting an existing variable, but prompts the user to confirm it
   first. It may also have to drop the var's reverse dependencies if the type is
   being changed, and it checks that none of them appear in the new expression
   (that would create a cycle).
 
-* Works on naked 'Expr's as well as 'Assign's. They're auto-assign to "result",
-  overwriting the previous result if any.
-
 TODO implement the overwriting prompt thing!
 -}
 appendStatementRepl :: Script -> Either Expr Assign -> Script
 appendStatementRepl scr (Left  e) = appendStatementRepl scr $ Right $ Assign (Var (RepID Nothing) "result") e
-appendStatementRepl scr (Right a@(Assign v e)) =
-  let scr'  = scr {sAssigns = delVar (sAssigns scr) "result"}
-      scr'' = updateVars scr' a -- TODO rename to imply that it also appends
-      scr''' = if isResult a
-                 then scr'' {sResult = Just e}
-                 else let rr = Ref (typeOf e) (saltOf e) (depsOf e) v -- TODO vName in deps too?
-                      in scr'' {sAssigns = sAssigns scr'' ++ [Assign resultVar rr], sResult = Just e}
+appendStatementRepl scr (Right asn@(Assign v _)) =
+  let asn'@(Assign (Var _ vName) e') = removeAssignSelfReferences scr asn
+      as' = delVar (sAssigns scr) "result"
+      as'' = if not (isResult asn') && v `elem` map aVar as'
+               then replaceVar asn' as' -- update an old assignment in place (repl only)
+               else as' ++ [asn'] -- append a new one (delVar only needed if it's "result")
+      r' = if isResult asn'
+             then Just e'
+             else sResult scr
+      scr' = scr {sAssigns = as'', sResult = r'}
+      scr'' = if isResult asn'
+                then scr'
+                else appendResultRef scr' asn'
   in trace "ortholang.script.appendStatementRepl"
-           ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr''':\n" ++ render (pPrint scr'''))
-           scr'''
+           ("scr:\n" ++ render (pPrint scr) ++ "\nscr'':\n" ++ render (pPrint scr''))
+           scr''
+
+
+appendResultRef :: Script -> Assign -> Script
+appendResultRef scr (Assign v e) = scr {sAssigns = sAssigns scr ++ [resAsn], sResult = Just e}
+  where
+    resRef = Ref (typeOf e) (saltOf e) (depsOf e) v -- TODO vName in deps too?
+    resAsn = Assign resultVar resRef
 
   -- Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
+
+-- TODO general algorithm:
+-- 0. make naked expr into result assign if needed (repl only)
+-- 1. remove self-references to "result" in the expr if any
+-- 2. remove "result" from assigns if any (repl version only)
 
 ------------
 -- macros --
@@ -297,38 +316,76 @@ depsOnly expr scr = scr {sAssigns = deps ++ [res]}
     deps = filter (\a -> (elem (aVar a) $ depsOf expr)) (sAssigns scr)
     res  = Assign {aVar = Var (RepID Nothing) "result", aExpr = expr}
 
--- this is needed to avoid assigning a variable literally to itself,
--- which is especially a problem when auto-assigning "result"
--- TODO is this where we can easily require the replacement var's type to match if it has deps?
--- TODO what happens if you try that in a script? it should fail i guess?
--- TODO rename because it's more like assignAndUpdateVars?
-updateVars :: Script -> Assign -> Script
-updateVars scr asn@(Assign {aVar = v@(Var _ vName), aExpr = expr}) = scr {sAssigns = as'}
-  where
-    -- res = Var (RepID Nothing) "result"
-    asn' = removeSelfReferences scr asn
-    as  = sAssigns scr
-    as' = if not (isResult asn) && aVar asn `elem` map aVar as
-            then replaceVar asn' as
-            else delVar as vName ++ [asn']
+{-|
+This is needed to avoid assigning a variable literally to itself, which is
+especially a problem when auto-assigning "result". It takes the current script
+and a new 'Assign' statement, and either updates an old assignment in the
+script or appends the new one.
 
--- replace an existing var in a script
+TODO is this where we can easily require the replacement var's type to match if it has deps?
+TODO what happens if you try that in a script? it should fail i guess?
+-}
+-- appendOrUpdateAssign :: Script -> Assign -> Script
+-- appendOrUpdateAssign scr asn@(Assign {aVar = v@(Var _ vName), aExpr = expr}) =
+--   trace "ortholang.script.appendOrUpdateAssign" 
+--         ("scr:\n" ++ render (pPrint scr) ++ "\nscr':\n" ++ render (pPrint scr'))
+--         scr'
+--   where
+--     scr' = scr {sAssigns = as', sResult = r'}
+--     asn' = removeAssignSelfReferences scr asn -- TODO prohibit self-references from appearing in scripts
+--     as  = sAssigns scr
+--     as' = if not (isResult asn') && v `elem` map aVar as 
+--             then replaceVar asn' as        -- update an old assignment in place (repl only)
+--             else delVar as vName ++ [asn'] -- append a new one (delVar only needed if it's "result")
+--     r' = if isResult asn'
+--            then Just expr
+--            else sResult scr
+
+{-|
+Update the 'Expr' in a list of 'Assign's to a new value. Used to implement
+'appendOrUpdateAssign'.
+-}
 replaceVar :: Assign -> [Assign] -> [Assign]
 replaceVar a1 = map $ \a2 -> if aVar a1 == aVar a2 then a1 else a2
 
--- makes it ok to assign a var to itself in the repl
--- by replacing the reference with its value at that point
--- TODO forbid this in scripts though
-removeSelfReferences :: Script -> Assign -> Assign
-removeSelfReferences s a@(Assign {aVar=v, aExpr=e}) = if not (v `elem` depsOf e) then a else a {aExpr=rmRef s v e}
+{-|
+This makes it ok to assign a var to itself in the repl by replacing the
+reference with its expression. For example:
 
--- does the actual work of removing self-references
+@
+ortholang —▶ myvar = 1
+ortholang —▶ :show
+myvar = 1
+result = myvar
+
+ortholang —▶ myvar = myvar + 1
+ortholang —▶ :show
+myvar = 1 + 1
+result = myvar
+@
+
+That's only allowed in the Repl of course.
+-}
+removeAssignSelfReferences :: Script -> Assign -> Assign
+removeAssignSelfReferences s a@(Assign {aVar=v, aExpr=e}) =
+  if not (v `elem` depsOf e)
+    then a
+    else a {aExpr=rmRef s v e}
+
+{-|
+Remove a particular 'Var' from an 'Expr' by substituting its value from the
+'Script'.  Used to implement 'removeAssignSelfReferences'.
+-}
 rmRef :: Script -> Var -> Expr -> Expr
-rmRef scr var e@(Ref _ _ _ v2)
+rmRef s v e = let r = rmRef' s v e
+              in trace "ortholang.script.rmRef" (render (pPrint e) ++ " -> " ++ render (pPrint r)) r
+
+rmRef' :: Script -> Var -> Expr -> Expr
+rmRef' scr var e@(Ref _ _ _ v2)
   | var == v2 = justOrDie "failed to rmRef variable!" $ lookupVar var (sAssigns scr)
   | otherwise = e
-rmRef _   _   e@(Lit _ _) = e
-rmRef scr var (Bop  t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)
-rmRef scr var (Fun  t ms vs s es   ) = Fun t ms (delete var vs) s (map (rmRef scr var) es)
-rmRef scr var (Lst t vs       es   ) = Lst t    (delete var vs)   (map (rmRef scr var) es)
-rmRef _   _   (Com _) = error "types.rmRef" "implement this! or rethink?"
+rmRef' _   _   e@(Lit _ _) = e
+rmRef' scr var (Bop  t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)
+rmRef' scr var (Fun  t ms vs s es   ) = Fun t ms (delete var vs) s (map (rmRef scr var) es)
+rmRef' scr var (Lst t vs       es   ) = Lst t    (delete var vs)   (map (rmRef scr var) es)
+rmRef' _   _   (Com _) = error "types.rmRef" "implement this! or rethink?"
