@@ -356,7 +356,7 @@ printLong _ ref idsref pm _ path = do
   ids <- liftIO $ readIORef idsref
   txt <- withReadLock' path $ readFile' path
   let txt' = unhashIDs True ids txt
-  liftIO $ P.putMsgLn pm ("\n" ++ txt')
+  liftIO $ P.putMsg pm txt'
 
 printShort :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
 printShort cfg ref idsref pm rtype path = do
