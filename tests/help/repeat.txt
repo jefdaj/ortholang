@@ -1,4 +1,5 @@
+Repeatdly re-calculate variables using different random salts
 
-[anytype, anytype, num (number in scientific notation)] -> anytype.list
+Functions:
 
-doc for functions/repeat not written yet
+repeat

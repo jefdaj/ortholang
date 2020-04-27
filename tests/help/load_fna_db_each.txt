@@ -1,4 +1,1 @@
-
-[list of str (string)s] -> list of fna (FASTA (nucleic acid)) encoded as blastdbs
-
-doc for functions/load_fna_db_each not written yet
+str.list -> list of fna (FASTA nucleic acid) encoded as blastdbs

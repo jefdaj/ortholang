@@ -1,4 +1,5 @@
+Run your own script and OrthoLang will assume the types are valid
 
-[str (string), anytype, str (string)] -> anytype
+Functions:
 
-doc for functions/cheat not written yet
+cheat

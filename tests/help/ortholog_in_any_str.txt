@@ -1,4 +1,3 @@
-
-[list of list of str (string)ss, list of list of str (string)ss] -> list of list of str (string)ss
+str.list.list str.list.list -> list of list of str (string)ss
 
 Version of ortholog_in_any that expects arguments already extracted.

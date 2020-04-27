@@ -1,7 +1,24 @@
-The faa extension is for FASTA (amino acid) files.
+No help topics found for 'faa'. Maybe you mean one of these?
 
-doc for types/faa not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+blastdbget_faa
+concat_faa
+concat_faa_each
+faa
+faa.blastdb
+faa.gz
+gbk_to_faa
+gbk_to_faa_each
+gbk_to_faa_rawids
+gbk_to_faa_rawids_each
+load_faa
+load_faa_db
+load_faa_db_each
+load_faa_each
+load_faa_glob
+load_faa_path
+load_faa_path_each
+makeblastdb_faa
+makeblastdb_faa_all
+makeblastdb_faa_each
+split_faa
+split_faa_each

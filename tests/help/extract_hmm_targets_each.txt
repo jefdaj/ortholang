@@ -1,4 +1,1 @@
-
-[list of hht (HMMER hits table)s] -> list of list of str (string)ss
-
-doc for functions/extract_hmm_targets_each not written yet
+hht.list -> list of list of str (string)ss

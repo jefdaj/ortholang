@@ -1,4 +1,1 @@
-
-[anytype.list] -> anytype.list.list
-
-doc for functions/singletons not written yet
+any.list -> anytype.list.list

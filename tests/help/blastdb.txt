@@ -1,1 +1,17 @@
-doc for modules/BlastDB not written yet
+Create, load, and download BLAST databases
+
+Functions:
+
+load_fna_db
+load_faa_db
+load_fna_db_each
+load_faa_db_each
+makeblastdb_fna_all
+makeblastdb_faa_all
+makeblastdb_fna
+makeblastdb_faa
+makeblastdb_fna_each
+makeblastdb_faa_each
+blastdbget_fna
+blastdbget_faa
+blastdblist

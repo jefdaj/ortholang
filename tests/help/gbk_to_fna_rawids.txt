@@ -1,4 +1,1 @@
-
-[str (string), gbk (genbank)] -> fna (FASTA (nucleic acid))
-
-doc for functions/gbk_to_fna_rawids not written yet
+str gbk -> fna (FASTA nucleic acid)

@@ -1,6 +1,1 @@
-
-[num (number in scientific notation),
- list of pssm (PSI-BLAST position-specific substitution matrix as ASCII)s,
- faa (FASTA (amino acid))] -> bht (tab-separated table of blast hits (outfmt 6))
-
-doc for functions/psiblast_pssms not written yet
+num pssm.list faa -> bht (tab-separated table of blast hits (outfmt 6))

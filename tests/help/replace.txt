@@ -1,4 +1,8 @@
-
-[anytype, anytype, anytype] -> anytype
-
 See what one (dependent) variable would be if you changed another (independent) variable.
+
+Replace variables in the script to see how the results change
+
+Functions:
+
+replace
+replace_each

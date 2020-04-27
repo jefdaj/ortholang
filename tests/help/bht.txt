@@ -1,7 +1,5 @@
-The bht extension is for tab-separated table of blast hits (outfmt 6) files.
+No help topics found for 'bht'. Maybe you mean one of these?
 
-doc for types/bht not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+bht
+concat_bht
+concat_bht_each

@@ -1,1 +1,3 @@
-doc for modules/Summarize not written yet
+Collapse a list of results into a single summary
+
+Functions:

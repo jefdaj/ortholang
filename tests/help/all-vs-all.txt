@@ -1,1 +1,3 @@
-doc for modules/All-Vs-All not written yet
+Creates all-vs-all hit tables from any BLAST-like search for use in ortholog finding algorithms
+
+Functions:

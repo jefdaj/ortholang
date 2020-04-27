@@ -1,5 +1,63 @@
+Iterated PsiBLAST (BLAST+) searches using position-specific substitution matrixes.
 
-[num (number in scientific notation), faa (FASTA (amino acid)),
- faa (FASTA (amino acid))] -> bht (tab-separated table of blast hits (outfmt 6))
+There are a lot of these! Some naming conventions:
 
-doc for functions/psiblast not written yet
+* A fn with `train` trains and returns one or more pssms ; one without
+`train` runs a regular blast search and returns hits.
+
+* A fn with `db` takes one or more blast databases directly; one without
+`db` auto-builds the db(s) from one or more fastas.
+
+* A fn with `all` takes a list of fastas and creates one db from it.
+
+* A fn with `each` maps over its last argument. The difference between
+`each` and `all` is that `each` returns a list of results, whereas `all`
+summarizes them into one thing.
+
+* A fn with `pssms` (plural) takes a list of pssm queries and combines
+their hits into one big table.
+
+So for example...
+
+
+```
+psiblast_train_all : num faa faa.list -> pssm
+  auto-builds one blast db from a list of fasta files
+  trains a pssm for the query fasta on it
+  returns the pssm
+```
+
+```
+psiblast_each : num faa faa.list -> bht.list
+  auto-builds one db per subject fasta
+  trains a pssm for the query fasta against each one
+  runs a final psiblast search against each one using the pssm
+  returns a list of hit tables
+```
+
+TODO individual help descriptions for each fn
+
+Functions:
+
+psiblast
+psiblast_all
+psiblast_db
+psiblast_db_each
+psiblast_each
+psiblast_each_pssm
+psiblast_each_pssm_db
+psiblast_pssm
+psiblast_pssm_all
+psiblast_pssm_db
+psiblast_pssm_db_each
+psiblast_pssm_each
+psiblast_pssms
+psiblast_pssms_all
+psiblast_pssms_db
+psiblast_train
+psiblast_train_all
+psiblast_train_db
+psiblast_train_db_each
+psiblast_train_each
+psiblast_train_pssms
+psiblast_train_pssms_db

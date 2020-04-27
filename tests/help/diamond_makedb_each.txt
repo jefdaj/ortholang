@@ -1,4 +1,1 @@
-
-[list of faa (FASTA (amino acid))s] -> list of dmnd (DIAMOND database)s
-
-doc for functions/diamond_makedb_each not written yet
+faa.list -> list of dmnd (DIAMOND database)s

@@ -1,7 +1,3 @@
-The hht extension is for HMMER hits table files.
+No help topics found for 'hht'. Maybe you mean one of these?
 
-doc for types/hht not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+hht

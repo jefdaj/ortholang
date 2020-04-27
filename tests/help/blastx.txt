@@ -1,6 +1,4 @@
-
-[num (number in scientific notation), fna (FASTA (nucleic acid)),
- faa (FASTA (amino acid))] -> bht (tab-separated table of blast hits (outfmt 6))
+num fna faa -> bht (tab-separated table of blast hits (outfmt 6))
 
 BLAST nucleic acid (DNA) sequences against amino acid (protein) sequences.
 

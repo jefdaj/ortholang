@@ -1,1 +1,8 @@
-doc for modules/Sets not written yet
+Set operations for use with lists
+
+Functions:
+
+some
+any
+all
+diff

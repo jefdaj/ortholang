@@ -1,4 +1,1 @@
-
-[faa (FASTA (amino acid))] -> list of faa (FASTA (amino acid))s
-
-doc for functions/split_faa not written yet
+faa -> list of faa (FASTA amino acid)s

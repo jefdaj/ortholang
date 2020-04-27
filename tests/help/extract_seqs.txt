@@ -1,4 +1,1 @@
-
-[fa, list of str (string)s] -> fa
-
-doc for functions/extract_seqs not written yet
+fa str.list -> fa

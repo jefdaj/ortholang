@@ -1,4 +1,1 @@
-
-[str (string)] -> blh (BUSCO lineage HMMs)
-
-doc for functions/load_lineage not written yet
+str -> blh (BUSCO lineage HMMs)

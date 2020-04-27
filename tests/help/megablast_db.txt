@@ -1,5 +1,1 @@
-
-[num (number in scientific notation), fna (FASTA (nucleic acid)),
- fna (FASTA (nucleic acid)) encoded as blastdb] -> bht (tab-separated table of blast hits (outfmt 6))
-
-doc for functions/megablast_db not written yet
+num fna fna.blastdb -> bht (tab-separated table of blast hits (outfmt 6))

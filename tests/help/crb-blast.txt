@@ -1,1 +1,6 @@
-doc for modules/CRB-BLAST not written yet
+Conditional reciprocal BLAST best hits (Aubry et al. 2014)
+
+Functions:
+
+crb_blast
+crb_blast_each

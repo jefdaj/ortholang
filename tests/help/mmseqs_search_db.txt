@@ -1,5 +1,3 @@
-
-[num (number in scientific notation), fa,
- mms (MMSeqs2 sequence database)] -> bht (tab-separated table of blast hits (outfmt 6))
+num fa mms -> bht (tab-separated table of blast hits (outfmt 6))
 
 Search a target database for sequences matching the query FASTA, similar to BLAST.

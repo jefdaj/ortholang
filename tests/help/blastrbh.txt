@@ -1,1 +1,22 @@
-doc for modules/BlastRBH not written yet
+Reciprocal BLAST+ best hits
+
+Functions:
+
+blastn_rev
+megablast_rev
+blastp_rev
+tblastx_rev
+blastn_rev_each
+megablast_rev_each
+blastp_rev_each
+tblastx_rev_each
+reciprocal_best
+reciprocal_best_all
+blastn_rbh
+megablast_rbh
+blastp_rbh
+tblastx_rbh
+blastn_rbh_each
+megablast_rbh_each
+blastp_rbh_each
+tblastx_rbh_each

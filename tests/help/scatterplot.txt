@@ -1,5 +1,1 @@
-
-[str (string),
- list of num (number in scientific notation)s with scores] -> png (plot image)
-
-doc for functions/scatterplot not written yet
+str num.scores -> png (plot image)

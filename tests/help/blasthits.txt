@@ -1,1 +1,16 @@
-doc for modules/BlastHits not written yet
+Work with BLAST hit tables
+
+Functions:
+
+extract_queries
+extract_queries_each
+extract_targets
+extract_targets_each
+filter_evalue
+filter_evalue_each
+filter_bitscore
+filter_bitscore_each
+filter_pident
+filter_pident_each
+best_hits
+best_hits_each

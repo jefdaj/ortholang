@@ -1,4 +1,1 @@
-
-[faa (FASTA (amino acid))] -> faa (FASTA (amino acid)) encoded as blastdb
-
-doc for functions/makeblastdb_faa not written yet
+faa -> faa (FASTA amino acid) encoded as blastdb

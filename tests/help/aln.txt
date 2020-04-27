@@ -1,7 +1,3 @@
-The aln extension is for multiple sequence alignment files.
+No help topics found for 'aln'. Maybe you mean one of these?
 
-doc for types/aln not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+aln

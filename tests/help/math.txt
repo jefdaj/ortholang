@@ -1,1 +1,8 @@
-doc for modules/Math not written yet
+Basic math
+
+Functions:
+
+add
+subtract
+multiply
+divide

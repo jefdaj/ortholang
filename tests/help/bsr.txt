@@ -1,7 +1,3 @@
-The bsr extension is for BUSCO results files.
+No help topics found for 'bsr'. Maybe you mean one of these?
 
-doc for types/bsr not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+bsr

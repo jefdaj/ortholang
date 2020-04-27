@@ -1,4 +1,1 @@
-
-[list of list of fna (FASTA (nucleic acid))ss] -> list of fna (FASTA (nucleic acid))s
-
-doc for functions/concat_fna_each not written yet
+fna.list.list -> list of fna (FASTA nucleic acid)s

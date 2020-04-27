@@ -1,5 +1,5 @@
-No help topics found for 'lit'.
-Did you mean one of these?
+No help topics found for 'lit'. Maybe you mean one of these?
+
 lit
 split_faa
 split_faa_each

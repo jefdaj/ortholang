@@ -1,4 +1,1 @@
-
-[str (string), faa (FASTA (amino acid)), faa (FASTA (amino acid))] -> faa (FASTA (amino acid))
-
-doc for functions/newrulestest2 not written yet
+str faa faa -> faa (FASTA amino acid)

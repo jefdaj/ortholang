@@ -1,1 +1,6 @@
-doc for modules/ListLike not written yet
+Operations on files that can be treated like lists
+
+Functions:
+
+length
+length_each

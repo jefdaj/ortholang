@@ -1,4 +1,1 @@
-
-[list of str (string)s] -> list of fna (FASTA (nucleic acid)) encoded as gzs
-
-doc for functions/get_genomes not written yet
+str.list -> list of fna (FASTA nucleic acid) encoded as gzs

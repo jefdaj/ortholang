@@ -1,7 +1,24 @@
-The fna extension is for FASTA (nucleic acid) files.
+No help topics found for 'fna'. Maybe you mean one of these?
 
-doc for types/fna not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+blastdbget_fna
+concat_fna
+concat_fna_each
+fna
+fna.blastdb
+fna.gz
+gbk_to_fna
+gbk_to_fna_each
+gbk_to_fna_rawids
+gbk_to_fna_rawids_each
+load_fna
+load_fna_db
+load_fna_db_each
+load_fna_each
+load_fna_glob
+load_fna_path
+load_fna_path_each
+makeblastdb_fna
+makeblastdb_fna_all
+makeblastdb_fna_each
+split_fna
+split_fna_each

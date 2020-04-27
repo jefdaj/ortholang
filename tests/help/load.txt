@@ -1,1 +1,6 @@
-doc for modules/Load not written yet
+Load generic lists
+
+Functions:
+
+load_list
+glob_files

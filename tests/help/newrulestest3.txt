@@ -1,4 +1,1 @@
-
-[str (string), str (string), str (string)] -> str (string)
-
-doc for functions/newrulestest3 not written yet
+str str str -> str (string)

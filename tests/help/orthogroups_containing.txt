@@ -1,4 +1,3 @@
-
-[og, list of str (string)s] -> list of list of str (string)ss
+og str.list -> list of list of str (string)ss
 
 Given a list of gene IDs, list the orthogroups that contain any of them.

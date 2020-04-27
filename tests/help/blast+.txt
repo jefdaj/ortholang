@@ -1,1 +1,30 @@
-doc for modules/BLAST+ not written yet
+Standard NCBI BLAST+ functions
+
+Functions:
+
+blastn
+megablast
+blastp
+blastx
+tblastn
+tblastx
+blastn_each
+megablast_each
+blastp_each
+blastx_each
+tblastn_each
+tblastx_each
+blastn_db
+megablast_db
+blastp_db
+blastx_db
+tblastn_db
+tblastx_db
+blastn_db_each
+megablast_db_each
+blastp_db_each
+blastx_db_each
+tblastn_db_each
+tblastx_db_each
+concat_bht
+concat_bht_each

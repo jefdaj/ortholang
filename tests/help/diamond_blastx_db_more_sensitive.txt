@@ -1,5 +1,1 @@
-
-[num (number in scientific notation), fna (FASTA (nucleic acid)),
- dmnd (DIAMOND database)] -> bht (tab-separated table of blast hits (outfmt 6))
-
-doc for functions/diamond_blastx_db_more_sensitive not written yet
+num fna dmnd -> bht (tab-separated table of blast hits (outfmt 6))

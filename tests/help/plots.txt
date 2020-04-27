@@ -1,1 +1,8 @@
-doc for modules/Plots not written yet
+Generate half-decent plots
+
+Functions:
+
+histogram
+linegraph
+scatterplot
+venndiagram

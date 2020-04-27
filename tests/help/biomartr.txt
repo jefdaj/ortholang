@@ -1,1 +1,7 @@
-doc for modules/BiomartR not written yet
+Search + download genomes and proteomes from Biomart
+
+Functions:
+
+parse_searches
+get_genomes
+get_proteomes

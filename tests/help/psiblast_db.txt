@@ -1,5 +1,1 @@
-
-[num (number in scientific notation), faa (FASTA (amino acid)),
- faa (FASTA (amino acid)) encoded as blastdb] -> bht (tab-separated table of blast hits (outfmt 6))
-
-doc for functions/psiblast_db not written yet
+num faa faa.blastdb -> bht (tab-separated table of blast hits (outfmt 6))

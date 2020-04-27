@@ -1,5 +1,1 @@
-
-[bht (tab-separated table of blast hits (outfmt 6)),
- bht (tab-separated table of blast hits (outfmt 6))] -> gcr (GreenCut results)
-
-doc for functions/greencut2_families not written yet
+bht bht -> gcr (GreenCut results)

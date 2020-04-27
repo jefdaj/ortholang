@@ -1,4 +1,1 @@
-
-[list of fna (FASTA (nucleic acid))s] -> list of fna (FASTA (nucleic acid)) encoded as blastdbs
-
-doc for functions/makeblastdb_fna_each not written yet
+fna.list -> list of fna (FASTA nucleic acid) encoded as blastdbs

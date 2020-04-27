@@ -1,6 +1,7 @@
-No help topics found for 'test'.
-Did you mean one of these?
+Test module for the 'new rules' infrastructure
+
+Functions:
+
 newrulestest1
 newrulestest2
 newrulestest3
-test

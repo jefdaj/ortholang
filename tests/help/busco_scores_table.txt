@@ -1,4 +1,1 @@
-
-[list of bsr (BUSCO results)s] -> bst (BUSCO scores table)
-
-doc for functions/busco_scores_table not written yet
+bsr.list -> bst (BUSCO scores table)

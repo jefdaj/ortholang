@@ -1,6 +1,4 @@
-
-[num (number in scientific notation), faa (FASTA (amino acid)),
- fna (FASTA (nucleic acid)) encoded as blastdb] -> bht (tab-separated table of blast hits (outfmt 6))
+num faa fna.blastdb -> bht (tab-separated table of blast hits (outfmt 6))
 
 Like tblastn, but BLASTs against an existing database.
 

@@ -1,7 +1,3 @@
-The blh extension is for BUSCO lineage HMMs files.
+No help topics found for 'blh'. Maybe you mean one of these?
 
-doc for types/blh not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+blh

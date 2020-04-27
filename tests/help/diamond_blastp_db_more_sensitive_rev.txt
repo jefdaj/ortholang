@@ -1,5 +1,1 @@
-
-[num (number in scientific notation), dmnd (DIAMOND database),
- faa (FASTA (amino acid))] -> bht (tab-separated table of blast hits (outfmt 6))
-
-doc for functions/diamond_blastp_db_more_sensitive_rev not written yet
+num dmnd faa -> bht (tab-separated table of blast hits (outfmt 6))

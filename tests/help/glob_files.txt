@@ -1,4 +1,1 @@
-
-[str (string)] -> list of str (string)s
-
-doc for functions/glob_files not written yet
+str -> list of str (string)s

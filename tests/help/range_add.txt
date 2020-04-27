@@ -1,7 +1,4 @@
-
-[num (number in scientific notation),
- num (number in scientific notation),
- num (number in scientific notation)] -> num (number in scientific notation).list
+num num num -> num (number in regular or scientific notation).list
 
 Arguments: start, stop, step
 

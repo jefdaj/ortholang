@@ -1,6 +1,1 @@
-
-[num (number in scientific notation),
- num (number in scientific notation),
- num (number in scientific notation)] -> num (number in scientific notation).list
-
-doc for functions/range_length not written yet
+num num num -> num (number in regular or scientific notation).list

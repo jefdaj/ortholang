@@ -1,4 +1,1 @@
-
-[str (string), list of gbk (genbank)s] -> list of faa (FASTA (amino acid))s
-
-doc for functions/gbk_to_faa_rawids_each not written yet
+str gbk.list -> list of faa (FASTA amino acid)s

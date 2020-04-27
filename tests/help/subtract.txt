@@ -1,4 +1,1 @@
-
-[num (number in scientific notation).list] -> num (number in scientific notation)
-
-doc for functions/subtract not written yet
+num.list -> num (number in regular or scientific notation)

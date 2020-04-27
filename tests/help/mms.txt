@@ -1,7 +1,10 @@
-The mms extension is for MMSeqs2 sequence database files.
+No help topics found for 'mms'. Maybe you mean one of these?
 
-doc for types/mms not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+hmmsearch
+hmmsearch_each
+mms
+mmseqs
+mmseqs_createdb
+mmseqs_createdb_all
+mmseqs_search
+mmseqs_search_db

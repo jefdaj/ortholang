@@ -1,5 +1,1 @@
-
-[num (number in scientific notation), fna (FASTA (nucleic acid)),
- faa (FASTA (amino acid))] -> bht (tab-separated table of blast hits (outfmt 6))
-
-doc for functions/diamond_blastx not written yet
+num fna faa -> bht (tab-separated table of blast hits (outfmt 6))

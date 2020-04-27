@@ -1,7 +1,3 @@
-The spr extension is for SonicParanoid results files.
+No help topics found for 'spr'. Maybe you mean one of these?
 
-doc for types/spr not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+spr

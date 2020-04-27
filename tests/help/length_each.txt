@@ -1,4 +1,1 @@
-
-[ll.list] -> list of num (number in scientific notation)s
-
-doc for functions/length_each not written yet
+ll.list -> list of num (number in regular or scientific notation)s

@@ -1,1 +1,10 @@
-doc for modules/HMMER not written yet
+Search sequences with hidden Markov models
+
+Functions:
+
+hmmbuild
+hmmbuild_each
+hmmsearch
+hmmsearch_each
+extract_hmm_targets
+extract_hmm_targets_each

@@ -1,4 +1,1 @@
-
-[str (string)] -> faa (FASTA (amino acid)) encoded as blastdb
-
-doc for functions/blastdbget_faa not written yet
+str -> faa (FASTA amino acid) encoded as blastdb

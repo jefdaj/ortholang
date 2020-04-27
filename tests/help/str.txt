@@ -1,7 +1,8 @@
-The str extension is for string files.
+No help topics found for 'str'. Maybe you mean one of these?
 
-doc for types/str not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+blastrbh
+ortholog_in_all_str
+ortholog_in_any_str
+ortholog_in_max_str
+ortholog_in_min_str
+str

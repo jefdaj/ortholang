@@ -1,5 +1,1 @@
-
-[num (number in scientific notation), faa (FASTA (amino acid)),
- list of faa (FASTA (amino acid))s] -> list of pssm (PSI-BLAST position-specific substitution matrix as ASCII)s
-
-doc for functions/psiblast_train_each not written yet
+num faa faa.list -> list of pssm (PSI-BLAST position-specific substitution matrix as ASCII)s

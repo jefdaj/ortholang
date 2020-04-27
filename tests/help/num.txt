@@ -1,7 +1,3 @@
-The num extension is for number in scientific notation files.
+No help topics found for 'num'. Maybe you mean one of these?
 
-doc for types/num not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+num

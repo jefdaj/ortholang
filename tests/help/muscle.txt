@@ -1,4 +1,6 @@
+Align sequences with MUSCLE
 
-[faa (FASTA (amino acid))] -> aln (multiple sequence alignment)
+Functions:
 
-doc for functions/muscle not written yet
+muscle
+muscle_each

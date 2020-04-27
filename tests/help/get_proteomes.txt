@@ -1,4 +1,1 @@
-
-[list of str (string)s] -> list of faa (FASTA (amino acid)) encoded as gzs
-
-doc for functions/get_proteomes not written yet
+str.list -> list of faa (FASTA amino acid) encoded as gzs

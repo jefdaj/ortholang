@@ -485,7 +485,12 @@ instance Ext TypeGroup where
   ext  = tgExt -- TODO move defition here
 
 instance Ext TypeSig where
-  ext = undefined -- TODO write this
+  ext (ListSigs s)     = ext s ++ ".list"
+  ext (ScoresSigs s)   = ext s ++ ".scores"
+  ext (EncodedSig e s) = ext s ++ "." ++ enExt e
+  ext (AnyType _)      = "any" -- TODO does this make sense? might have to do variables
+  ext (Some g _)       = ext g
+  ext (Exactly t)      = ext t
 
 instance Desc TypeGroup where
   desc = tgDesc

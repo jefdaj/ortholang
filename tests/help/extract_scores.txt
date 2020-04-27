@@ -1,4 +1,1 @@
-
-[anytype.scores] -> list of num (number in scientific notation)s
-
-doc for functions/extract_scores not written yet
+any.scores -> list of num (number in regular or scientific notation)s

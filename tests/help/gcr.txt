@@ -1,7 +1,3 @@
-The gcr extension is for GreenCut results files.
+No help topics found for 'gcr'. Maybe you mean one of these?
 
-doc for types/gcr not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+gcr

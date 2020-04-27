@@ -1,5 +1,1 @@
-
-[num (number in scientific notation), og,
- list of faa (FASTA (amino acid))s] -> list of list of str (string)ss
-
-doc for functions/ortholog_in_min not written yet
+num og faa.list -> list of list of str (string)ss

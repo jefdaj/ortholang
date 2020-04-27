@@ -1,4 +1,3 @@
-
-[fa] -> mms (MMSeqs2 sequence database)
+fa -> mms (MMSeqs2 sequence database)
 
 Create an MMSeqs2 sequence database from a FASTA file.

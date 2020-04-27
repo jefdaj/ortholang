@@ -1,4 +1,1 @@
-
-[str (string)] -> fna (FASTA (nucleic acid))
-
-doc for functions/load_fna_path not written yet
+str -> fna (FASTA nucleic acid)

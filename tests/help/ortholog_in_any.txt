@@ -1,5 +1,4 @@
-
-[og, list of faa (FASTA (amino acid))s] -> list of list of str (string)ss
+og faa.list -> list of list of str (string)ss
 
 Arguments:
   orthogroup finder results

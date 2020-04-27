@@ -1,4 +1,1 @@
-
-[fna (FASTA (nucleic acid))] -> fna (FASTA (nucleic acid)) encoded as blastdb
-
-doc for functions/makeblastdb_fna not written yet
+fna -> fna (FASTA nucleic acid) encoded as blastdb

@@ -1,5 +1,4 @@
-
-[og, str (string)] -> list of str (string)s
+og str -> list of str (string)s
 
 Given one gene ID, list others in the same orthogroup.
 Returns an empty list if there aren't any.

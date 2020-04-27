@@ -1,1 +1,5 @@
-doc for modules/GreenCut not written yet
+A re-implementation of the original GreenCut(2) ortholog-finding algorithm
+
+Functions:
+
+greencut2_families

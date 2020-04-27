@@ -1,4 +1,1 @@
-
-[list of faa (FASTA (amino acid))s] -> list of faa (FASTA (amino acid)) encoded as blastdbs
-
-doc for functions/makeblastdb_faa_each not written yet
+faa.list -> list of faa (FASTA amino acid) encoded as blastdbs

@@ -1,1 +1,8 @@
-doc for modules/MMSeqs not written yet
+Many-against-many sequence searching: ultra fast and sensitive search and clustering suite
+
+Functions:
+
+mmseqs_createdb_all
+mmseqs_createdb
+mmseqs_search_db
+mmseqs_search

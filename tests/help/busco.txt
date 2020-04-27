@@ -1,1 +1,16 @@
-doc for modules/Busco not written yet
+Benchmarking Universal Single-Copy Orthologs
+
+Functions:
+
+load_lineage
+busco_list_lineages
+busco_fetch_lineage
+busco_proteins
+busco_proteins_each
+busco_transcriptome
+busco_transcriptome_each
+busco_percent_complete
+busco_percent_complete_each
+busco_scores_table
+busco_filter_completeness
+concat_bst

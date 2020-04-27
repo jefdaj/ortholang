@@ -1,4 +1,1 @@
-
-[anytype, anytype, anytype.list] -> anytype.list
-
-doc for functions/replace_each not written yet
+any any any.list -> anytype.list

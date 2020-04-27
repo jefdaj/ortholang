@@ -1,5 +1,4 @@
-
-[str (string)] -> list of str (string)s
+str -> list of str (string)s
 
 List NCBI BLAST databases for download with blastdbget_nucl and _prot.
 

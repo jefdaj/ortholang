@@ -1,1 +1,7 @@
-doc for modules/Scores not written yet
+Score repeated variables for plotting
+
+Functions:
+
+score_repeats
+extract_scores
+extract_scored

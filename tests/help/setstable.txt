@@ -1,1 +1,5 @@
-doc for modules/SetsTable not written yet
+Generate set membership tables (spreadsheets) for easier list comparison
+
+Functions:
+
+sets_table

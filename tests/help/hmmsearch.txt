@@ -1,5 +1,1 @@
-
-[num (number in scientific notation), hmm (hidden markov model),
- faa (FASTA (amino acid))] -> hht (HMMER hits table)
-
-doc for functions/hmmsearch not written yet
+num hmm faa -> hht (HMMER hits table)

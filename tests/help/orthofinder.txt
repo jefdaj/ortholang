@@ -1,6 +1,9 @@
-
-[list of faa (FASTA (amino acid))s] -> ofr (OrthoFinder results)
-
 Run OrthoFinder on a list of proteomes in FASTA format.
 It produces lots of result files. Use the extract_* functions
 or look in the TMPDIR to find the specific info you want.
+
+Inference of orthologs, orthogroups, the rooted species, gene trees and gene duplcation events tree
+
+Functions:
+
+orthofinder

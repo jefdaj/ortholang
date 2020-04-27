@@ -1,4 +1,1 @@
-
-[num (number in scientific notation), ht.list] -> ht.list
-
-doc for functions/filter_pident_each not written yet
+num ht.list -> ht.list

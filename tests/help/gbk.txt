@@ -1,7 +1,16 @@
-The gbk extension is for genbank files.
+No help topics found for 'gbk'. Maybe you mean one of these?
 
-doc for types/gbk not written yet
-
-You can create them with these functions:
-
-And use them with these functions:
+gbk
+gbk_to_faa
+gbk_to_faa_each
+gbk_to_faa_rawids
+gbk_to_faa_rawids_each
+gbk_to_fna
+gbk_to_fna_each
+gbk_to_fna_rawids
+gbk_to_fna_rawids_each
+load_gbk
+load_gbk_each
+load_gbk_glob
+load_gbk_path
+load_gbk_path_each

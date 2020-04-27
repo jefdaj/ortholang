@@ -1,5 +1,1 @@
-
-[num (number in scientific notation), fna (FASTA (nucleic acid)),
- list of fna (FASTA (nucleic acid))s] -> list of bht (tab-separated table of blast hits (outfmt 6))s
-
-doc for functions/megablast_each not written yet
+num fna fna.list -> list of bht (tab-separated table of blast hits (outfmt 6))s

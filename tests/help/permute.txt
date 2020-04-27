@@ -1,1 +1,5 @@
-doc for modules/Permute not written yet
+Generate random permutations of lists
+
+Functions:
+
+leave_each_out

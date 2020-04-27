@@ -1,4 +1,1 @@
-
-[bsr (BUSCO results)] -> num (number in scientific notation)
-
-doc for functions/busco_percent_complete not written yet
+bsr -> num (number in regular or scientific notation)

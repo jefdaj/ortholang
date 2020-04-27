@@ -1,6 +1,13 @@
-
-[num (number in scientific notation), anytype.list] -> anytype.list
-
 Take a random sample from a list. Can be used to test your
 algorithm on a smaller set of genes/genomes, or as the 'permute'
 step in the permute, repeat, summarize (PRS) pattern.
+
+Random (but reproducable) sampling of list elements.
+
+WARNING: Because of the way OrthoLang caches tempfiles, calling these
+more than once will give the same sublist each time! For different
+sublists, use in combination with the 'repeat' function
+
+Functions:
+
+sample

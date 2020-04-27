@@ -1,5 +1,5 @@
-No help topics found for 'og'.
-Did you mean one of these?
+No help topics found for 'og'. Maybe you mean one of these?
+
 histogram
 og
 orthogroup_containing

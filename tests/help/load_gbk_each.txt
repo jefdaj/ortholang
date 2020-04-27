@@ -1,4 +1,1 @@
-
-[list of str (string)s] -> gbk (genbank).list
-
-doc for functions/load_gbk_each not written yet
+str.list -> gbk (genbank).list

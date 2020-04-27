@@ -1,4 +1,1 @@
-
-[str (string), list of num (number in scientific notation)s] -> png (plot image)
-
-doc for functions/histogram not written yet
+str num.list -> png (plot image)

@@ -1,5 +1,5 @@
-No help topics found for 'fa'.
-Did you mean one of these?
+No help topics found for 'fa'. Maybe you mean one of these?
+
 blastdbget_faa
 concat_faa
 concat_faa_each

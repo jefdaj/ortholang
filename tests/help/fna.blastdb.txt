@@ -1,8 +1,3 @@
-The .fna.blastdb extension is for FASTA (nucleic acid) encoded as NCBI BLAST+ sequence database files.
+No help topics found for 'fna.blastdb'. Maybe you mean one of these?
 
-No matching function, filetype, or module found.
-
-
-You can create them with these functions:
-
-And use them with these functions:
+fna.blastdb
