@@ -5,7 +5,6 @@ module OrthoLang.Modules.Permute where
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
-import Development.Shake.FilePath (makeRelative)
 import Data.Maybe (fromJust)
 
 olModule :: Module
@@ -28,40 +27,33 @@ olModule = Module
 --------------------------------------
 
 -- splits a list into a list of lists using the provided function
--- TODO produce each output list in a separate Shake monad section?
--- TODO are paths hashes unique now??
---      (if it turns out to be re-running stuff unneccesarily)
--- rPermute :: ([String] -> [[String]]) -> RulesFn
--- rPermute comboFn scr expr@(Fun _ salt _ _ [iList]) = do
---   (ExprPath iPath) <- rExpr scr iList
---   cfg  <- fmap fromJust getShakeExtraRules
---   dRef <- fmap fromJust getShakeExtraRules
---   let oList = fromPath loc cfg $ exprPath cfg dRef scr expr
---   oList %> aPermute comboFn iPath salt
---   return (ExprPath oList)
--- rPermute _ _ _ = fail "bad argument to rCombos"
-
 -- TODO once back-compilation or whatever works, also use it here?
 -- TODO do something more obvious than writing to the "list" prefix??
 aPermute :: ([String] -> [[String]]) -> NewAction1
 aPermute comboFn (ExprPath out) iPath = do
-  -- need' "ortholang.modules.permute.aPermute" [iPath]
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
   let loc = "modules.permute.aPermute"
-  (ListOf lt@(ListOf et)) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out)
-  elements <- readStrings loc et iPath
-  let mkOut p = unsafeExprPathExplicit cfg dRef "list" lt Nothing [digest $ makeRelative (tmpdir cfg) p]
-      oPaths  = map mkOut elements
-      oPaths' = map (fromPath loc cfg) oPaths
-      combos  = comboFn elements
-  -- TODO traceA instead here?
-  mapM_ (\(p,ps) -> writeStrings loc et p $
-                      trace loc
-                               ("combo: " ++ show ps) ps)
-                               (zip oPaths' combos)
-  let out' = traceA loc out [iPath, show lt, out]
-  writeStrings loc lt out' oPaths'
+  (ListOf lType@(ListOf eType)) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out)
+  elements <- readStrings loc eType iPath
+  let combos  = comboFn elements
+  oPaths <- mapM (aPermuteElem eType) combos
+  let oPaths' = map (fromPath loc cfg) oPaths
+  let out' = traceA loc out [iPath, show lType, out]
+  writeStrings loc lType out' oPaths' -- then finally a list of (list of element type)
+
+-- takes a single comboFn result (which is a list of something), writes the
+-- list, and returns the expr path to add to the main output list. also adds
+-- the expr path to the digest map
+aPermuteElem :: Type -> [String] -> Action Path
+aPermuteElem eType elements = do
+  cfg  <- fmap fromJust getShakeExtra
+  dRef <- fmap fromJust getShakeExtra
+  let loc = "modules.permute.aPermuteElem"
+      out = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) Nothing $ map digest elements
+      out' = fromPath loc cfg out
+  writeStrings loc eType out' elements
+  return out
 
 --------------------
 -- leave_each_out --
@@ -69,27 +61,12 @@ aPermute comboFn (ExprPath out) iPath = do
 
 -- TODO rename actual function to drop_each?
 
--- leaveEachOut :: Function
--- leaveEachOut = let name = "leave_each_out" in Function
---   { fOpChar = Nothing, fName = name 
---   , fTags = []
---   -- , fTypeCheck = combosTypeCheck
---   -- , fTypeDesc  = name ++ " : X.list -> X.list.list"
---   , fInputs = [ListSigs (AnyType "any type")]
---   , fOutput =  ListSigs (AnyType "any type")
---   , fNewRules = NewNotImplemented
---   , fOldRules = rPermute dropEach
---   }
-
+leaveEachOut :: Function
 leaveEachOut = newFnA1 "leave_each_out"
                  (ListSigs $            AnyType "any type")
                  (ListSigs $ ListSigs $ AnyType "any type")
                  (aPermute dropEach)
                  []
-
--- combosTypeCheck :: [Type] -> Either String Type
--- combosTypeCheck [ListOf t] = Right $ ListOf $ ListOf t
--- combosTypeCheck _ = Left "type error in leave_each_out!"
 
 -- drops the element at index n from a list
 -- (for some reason this isn't a built-in function?)

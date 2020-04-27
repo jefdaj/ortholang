@@ -70,6 +70,7 @@ module OrthoLang.Types
   , saltOf
   , setSalt
   , str
+  , isLit
   , typeOf
   , typeSigMatches
   , Pretty
@@ -99,7 +100,7 @@ import Control.Monad.Trans        (lift)
 import Control.Monad.Trans.Except (Except, runExcept, throwE)
 import Data.Char                  (toLower)
 import Data.IORef                 (IORef)
-import Data.List                  (nub, find, isPrefixOf)
+import Data.List                  (nub, find, isPrefixOf, elem)
 import Data.Map.Strict            (Map, empty)
 import Data.Maybe                 (fromJust, catMaybes, isJust)
 import Development.Shake          (Rules, Action, Resource)
@@ -542,6 +543,9 @@ num = Type
       txt <- withReadLock ls f $ readFileStrict ls f
       return $ init txt -- TODO prettyNum?
   }
+
+isLit :: Type -> Bool
+isLit t = t `elem` [str, num]
 
 
 ------------

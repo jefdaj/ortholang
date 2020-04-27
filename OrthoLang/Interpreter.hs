@@ -166,6 +166,7 @@ module OrthoLang.Interpreter
   , cacheDir
   , exprPath
   , unsafeExprPathExplicit
+  -- , argHashes
   , fromGeneric
   , fromPath
   , toPath
