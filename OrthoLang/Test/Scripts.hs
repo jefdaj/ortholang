@@ -189,13 +189,21 @@ mkAbsTest cfg ref ids name dRef sDir = testSpecs $ it d $
                 tmpdir cfg, tmpdir cfg </> "exprs"]
     absGrep = do
       _ <- runScript cfg ref ids dRef
+      mapM_ (createDirectoryIfMissing True)
+        [ tmpdir cfg </> "cache"
+        , tmpdir cfg </> "exprs"
+        ]
       (_, out, err) <- withTmpDirLock cfg ref $ readProcessWithExitCode "grep" grepArgs ""
       return $ toGeneric cfg $ out ++ err
 
 copyToShared :: Config -> FilePath -> LocksRef -> IO ()
 copyToShared cfg sDir ref = withTmpDirLock cfg ref $ do
-  createDirectoryIfMissing True $ sDir </> "cache"
-  createDirectoryIfMissing True $ sDir </> "exprs"
+  mapM_ (createDirectoryIfMissing True)
+    [ tmpdir cfg </> "cache"
+    , tmpdir cfg </> "exprs"
+    , sDir </> "cache"
+    , sDir </> "exprs"
+    ]
   let rsync p = readProcess "rsync" ["-qraz", tmpdir cfg </> p ++ "/", sDir </> p ++ "/"] ""
   mapM_ rsync ["cache", "exprs"]
 
