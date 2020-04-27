@@ -164,14 +164,15 @@ TODO implement the overwriting prompt thing!
 -}
 appendStatementRepl :: Script -> Either Expr Assign -> Script
 appendStatementRepl scr (Left  e) = appendStatementRepl scr $ Right $ Assign (Var (RepID Nothing) "result") e
-appendStatementRepl scr (Right asn@(Assign v _)) =
-  let asn'@(Assign (Var _ vName) e') = removeAssignSelfReferences scr asn
+appendStatementRepl scr (Right asn@(Assign v e)) =
+  let e' = removeResultReferences scr e
+      asn'@(Assign (Var _ vName) e'') = removeAssignSelfReferences scr (Assign v e')
       as' = delVar (sAssigns scr) "result"
       as'' = if not (isResult asn') && v `elem` map aVar as'
                then replaceVar asn' as' -- update an old assignment in place (repl only)
                else as' ++ [asn'] -- append a new one (delVar only needed if it's "result")
       r' = if isResult asn'
-             then Just e'
+             then Just e''
              else sResult scr
       scr' = scr {sAssigns = as'', sResult = r'}
       scr'' = if isResult asn'
@@ -371,6 +372,9 @@ removeAssignSelfReferences s a@(Assign {aVar=v, aExpr=e}) =
   if not (v `elem` depsOf e)
     then a
     else a {aExpr=rmRef s v e}
+
+removeResultReferences :: Script -> Expr -> Expr
+removeResultReferences scr expr = rmRef scr resultVar expr
 
 {-|
 Remove a particular 'Var' from an 'Expr' by substituting its value from the

@@ -21,8 +21,8 @@ result = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
 
 ortholang —▶ samplefa = result
 ortholang —▶ :show
-result = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
-samplefa = result
+samplefa = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
+result = samplefa
 
 ortholang —▶ :quit
 Bye for now!
