@@ -62,6 +62,7 @@ import OrthoLang.Util         (resolveSymlinks, stripWhiteSpace, removeIfExists)
 -- import Text.Pretty.Simple             (pShowNoColor)
 import Text.PrettyPrint.HughesPJClass (Pretty, pPrint, prettyShow)
 import Text.PrettyPrint               (Doc, (<>), (<+>), render)
+import System.FilePath ((</>))
 
 
 debugC :: String -> String -> a -> a
@@ -141,18 +142,21 @@ rAssign scr (Assign var expr) = do
 
 -- TODO how to fail if the var doesn't exist??
 --      (or, is that not possible for a typechecked AST?)
--- TODO remove permHash
 compileScript :: Script -> Rules (Maybe ResPath)
-compileScript scr =
+compileScript scr = do
   let loc   = "core.compile.basic.compileScript"
-  in case sResult (trace loc ("scr:\n" ++ render (pPrint scr)) scr) of
-       Nothing -> return Nothing -- only happens if script is empty
-       Just re -> do
-         -- let assigns = sAssigns scr ++ [Assign (Var (RepID Nothing) "result") re]
-             -- scr' = scr {sResult = Just re}
-         mapM_ (rAssign scr) (sAssigns scr) -- TODO can this be done in parallel? does it matter?
-         (ExprPath p) <- rExpr scr re
-         return $ Just $ ResPath p
+  mapM_ (rAssign scr) (sAssigns scr) -- TODO remove?
+  res <- case lookupVar resultVar (sAssigns (trace loc ("scr:\n" ++ render (pPrint scr)) scr)) of 
+    Nothing -> return Nothing -- only happens if script is empty
+    Just re -> do
+      (ExprPath ep') <- rExpr scr re
+      cfg  <- fmap fromJust getShakeExtraRules
+      let ep  = toPath loc cfg ep'
+          rp' = tmpdir cfg </> "vars" </> "result"
+          rp  = toPath loc cfg rp'
+      rp' %> \_ -> symlink rp ep
+      return $ Just $ rp'
+  return $ fmap ResPath res
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn

@@ -209,7 +209,7 @@ runScript cfg ref ids dRef = withTmpDirLock cfg ref $ do
   (out, ()) <- hCapture [stdout, stderr] $ evalFile modules (emptyScript, cfg, ref, ids, dRef) stdout
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
   result <- doesFileExist $ tmpdir cfg </> "vars" </> "result"
-  when (not result) (fail out)
+  when (not result) (fail $ "no result file. stdout was:\n" ++ out)
   writeBinaryFile (tmpdir cfg </> "output" <.> "txt") $ toGeneric cfg out
   return $ toGeneric cfg out
 

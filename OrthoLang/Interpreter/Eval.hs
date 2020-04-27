@@ -55,7 +55,7 @@ import Control.Monad                  (when)
 -- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
 -- import Control.Retry          (rsIterNumber)
-import Control.Exception.Safe (catchAny)
+-- import Control.Exception.Safe (catchAny)
 
 import Control.Concurrent
 -- import Data.Foldable
