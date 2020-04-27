@@ -54,7 +54,8 @@ import OrthoLang.Types hiding (aVar) -- TODO disambiguate!
 
 import Data.List              (isPrefixOf)
 import Data.Maybe             (fromJust)
-import OrthoLang.Interpreter.Actions (traceA, debugA, need', readLit, writeLit, writeLits, writePaths, symlink)
+import OrthoLang.Interpreter.Actions (traceA, debugA, need', readLit, writeLit,
+                                      writeLits, writePaths, symlink, writeCachedLines)
 import OrthoLang.Interpreter.Paths   (exprPath, toPath, fromPath, varPath, Path, prefixOf)
 import OrthoLang.Util         (resolveSymlinks, stripWhiteSpace, removeIfExists)
 
@@ -140,23 +141,22 @@ rAssign scr (Assign var expr) = do
       res' = debugRules "rAssign" (var, expr) res
   return res'
 
--- TODO how to fail if the var doesn't exist??
---      (or, is that not possible for a typechecked AST?)
-compileScript :: Script -> Rules (Maybe ResPath)
+compileScript :: Script -> Rules ResPath
 compileScript scr = do
-  let loc   = "core.compile.basic.compileScript"
-  mapM_ (rAssign scr) (sAssigns scr) -- TODO remove?
-  res <- case lookupVar resultVar (sAssigns (trace loc ("scr:\n" ++ render (pPrint scr)) scr)) of 
-    Nothing -> return Nothing -- only happens if script is empty
+  cfg <- fmap fromJust getShakeExtraRules
+  let loc = "core.compile.basic.compileScript"
+      scr' = trace loc ("scr:\n" ++ render (pPrint scr)) scr
+      rp' = tmpdir cfg </> "vars" </> "result"
+      rp  = toPath loc cfg rp'
+  mapM_ (rAssign scr') (sAssigns scr') -- TODO remove?
+  case lookupVar resultVar (sAssigns scr') of
+    Nothing -> do
+      rp' %> \_ -> writeCachedLines loc rp' ["<<emptyscript>>"]
     Just re -> do
-      (ExprPath ep') <- rExpr scr re
-      cfg  <- fmap fromJust getShakeExtraRules
-      let ep  = toPath loc cfg ep'
-          rp' = tmpdir cfg </> "vars" </> "result"
-          rp  = toPath loc cfg rp'
+      (ExprPath ep') <- rExpr scr' re
+      let ep = toPath loc cfg ep'
       rp' %> \_ -> symlink rp ep
-      return $ Just $ rp'
-  return $ fmap ResPath res
+  return $ ResPath rp'
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn

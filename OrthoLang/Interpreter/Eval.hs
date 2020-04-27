@@ -383,8 +383,7 @@ evalScript mods hdl (scr, c, ref, ids, dRef) =
               -- Just r  -> r
   in case sResult scr' of
     Nothing -> return () -- TODO print something?
-    Just re -> let res = (fmap fromJust $ compileScript scr')
-               in eval mods hdl c ref ids dRef (typeOf re) (res :: Rules ResPath)
+    Just re -> eval mods hdl c ref ids dRef (typeOf re) $ compileScript scr'
 
 -- TODO should there be a new idsref for this? how about digestsref?
 evalFile :: [Module] -> GlobalEnv -> Handle -> IO ()
