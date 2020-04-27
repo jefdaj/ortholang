@@ -48,6 +48,21 @@ mkTestConfig cfg dir =
     { script  = Nothing
     , tmpdir  = dir
     , workdir = dir
+    , interactive = False -- except for the Repl tests
+    , logfile = dir </> "log.txt"
+    , report  = Just $ dir </> "report.html" -- TODO nothing?
+    , history = Nothing -- TODO any reason to add it?
+    , termcolumns = Just 100 -- TODO wasn't this set somewhere already?
+    , shellaccess = True -- TODO test turning it off
+    , progressbar = False -- TODO any way to test the bar?
+    , showhidden = False -- TODO repl test turning it on
+    , showtypes = False -- TODO repl test turning it on
+    , autosave = False
+    , outfile = Nothing -- TODO use this for test scripts?
+    , shared = Nothing -- except for the tmpfile sharing tests
+    -- TODO change debugregex?
+    -- TODO change wrapper?
+    -- TODO change outfile?
     }
 
 dbg :: String -> IO ()

@@ -29,7 +29,7 @@ mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkTests cfg ref ids dRef = mkTestGroup cfg' ref ids dRef d [goldenRepls, goldenReplTrees]
   where
     d = "mock REPL interaction"
-    cfg' = cfg {interactive = True} -- TODO is this a problem for mock repl interaction?
+    cfg' = cfg {interactive = True}
 
 -- returns just the parts of a pasted REPL session that represent user input
 extractPrompted :: String -> String -> [String]

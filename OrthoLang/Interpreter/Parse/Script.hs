@@ -33,7 +33,8 @@ module OrthoLang.Interpreter.Parse.Script
   )
   where
 
-import OrthoLang.Debug
+import Prelude hiding (error)
+import OrthoLang.Debug (error, debug)
 import OrthoLang.Interpreter.Parse.Basic
 import OrthoLang.Interpreter.Parse.Expr
 import OrthoLang.Interpreter.Parse.Util (debugParser, parseWithEof, stripComments)
