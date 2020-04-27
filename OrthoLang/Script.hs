@@ -15,8 +15,8 @@ module OrthoLang.Script
   (
 
   -- * Used in Interpreter.Parse
-    appendStatement -- TODO remove
-  , appendStatementFile
+    -- appendStatement -- TODO remove
+    appendStatementFile
   , appendStatementRepl -- TODO will this be used in the Repl directly instead?
 
   -- * Used in Interpreter.Eval (between parse and compile steps)
@@ -59,8 +59,8 @@ import OrthoLang.Util  (justOrDie)
 -- Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
 -- TODO salt is Nothing rather than the expr's salt, right?
 -- TODO var is added to deps, right?
-appendStatement :: Script -> Assign -> Script
-appendStatement scr a =
+-- appendStatement :: Script -> Assign -> Script
+-- appendStatement scr a =
 
   -- let rv  = Var (RepID Nothing) "result"
       -- rr  = Ref (typeOf expr) Nothing (depsOf expr) var 
@@ -121,26 +121,54 @@ appendStatement scr a =
   --
   -- does only the repl version need the fancy remove-self-references logic?
 
-  let scr'  = scr {sAssigns = delVar (sAssigns scr) "result"}
-      scr'' = updateVars scr' a
-  in trace "interpreter.parse.basic.assign"
+--   let scr'  = scr {sAssigns = delVar (sAssigns scr) "result"}
+--       scr'' = updateVars scr' a
+--   in trace "interpreter.parse.basic.assign"
+--            ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
+--            scr''
+
+{-|
+Behaviors that differ from 'appendStatementRepl':
+
+* Does not auto-assign result; that's only done once at the end of the script if the explicit assignment was missing.
+* Removes all but the last "result" var to prevent conflicts between included scripts and the main one
+* Throws an error (TODO which class?) instead of overwriting any existing variable other than "result"
+
+TODO where does the final auto-assign of result happen? Eval currently?
+-}
+appendStatementFile :: Script -> Assign -> Script
+appendStatementFile scr a@(Assign (Var _ v) e) =
+  -- let as'   = if v == "result" then delVar (sAssigns scr) "result" else sAssigns scr
+  --     scr'  = scr {sAssigns = as'}
+  let scr' = if v == "result"
+               then scr {sAssigns = delVar (sAssigns scr) "result", sResult = Just e}
+               else scr {sAssigns = sAssigns scr}
+      scr'' = updateVars scr' a -- TODO rename to imply that it also appends
+  in trace "ortholang.script.appendStatementFile"
            ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
            scr''
 
 {-|
-Unlike the Repl version, this one throws an error (TODO which error?) when
-adding a duplicate variable.
--}
-appendStatementFile :: Script -> Assign -> Script
-appendStatementFile = undefined
+Behaviors that differ from 'appendStatementFile':
 
-{-|
-Unlike the File version, this one also works with naked 'Expr's.
-They take priority over any previously-assigned "result" variable.
+* Allows overwriting an existing variable, but prompts the user to confirm it
+  first. It may also have to drop the var's reverse dependencies if the type is
+  being changed, and it checks that none of them appear in the new expression
+  (that would create a cycle).
+
+* Works on naked 'Expr's as well as 'Assign's. They're auto-assign to "result",
+  overwriting the previous result if any.
+
+TODO implement the overwriting prompt thing!
 -}
 appendStatementRepl :: Script -> Either Expr Assign -> Script
-appendStatementRepl = undefined
-
+appendStatementRepl scr (Left  e) = appendStatementRepl scr $ Right $ Assign (Var (RepID Nothing) "result") e
+appendStatementRepl scr (Right a) =
+  let scr'  = scr {sAssigns = delVar (sAssigns scr) "result"}
+      scr'' = updateVars scr' a -- TODO rename to imply that it also appends
+  in trace "ortholang.script.appendStatementRepl"
+           ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
+           scr''
 
 ------------
 -- macros --

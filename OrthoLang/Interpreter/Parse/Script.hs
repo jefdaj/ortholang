@@ -18,9 +18,9 @@ module OrthoLang.Interpreter.Parse.Script
   , stripQuotes
 
   -- * Statements
-  -- , stripResult
+  -- , stripNaked
   , pAssign
-  , pResult
+  , pNaked
   , pStatement
 
   -- * Scripts
@@ -38,6 +38,7 @@ import OrthoLang.Interpreter.Parse.Basic
 import OrthoLang.Interpreter.Parse.Expr
 import OrthoLang.Interpreter.Parse.Util (debugParser, parseWithEof, stripComments)
 import OrthoLang.Types
+import OrthoLang.Script (appendStatementRepl, appendStatementFile)
 -- import OrthoLang.Interpreter.Paths (scriptDigests)
 
 import Control.Applicative    ((<|>), many)
@@ -46,7 +47,7 @@ import Control.Monad          (when)
 -- import Data.List.Utils        (hasKeyAL)
 import OrthoLang.Util    (readFileStrict)
 import System.FilePath        ((</>), takeDirectory)
-import Text.Parsec            (try, getState)
+import Text.Parsec            (try, getState, putState)
 import Text.Parsec.Char       (newline, spaces)
 import Text.Parsec.Combinator (optional)
 -- import Control.Monad.Reader   (ask)
@@ -74,8 +75,8 @@ stripQuotes s = dropWhile (== '\"') $ reverse $ dropWhile (== '\"') $ reverse s
 -- statements --
 ----------------
 
--- stripResult :: Script -> Script
--- stripResult scr = scr {sAssigns = filter notRes $ sAssigns scr}
+-- stripNaked :: Script -> Script
+-- stripNaked scr = scr {sAssigns = filter notRes $ sAssigns scr}
   -- where
     -- notRes (Assign {aVar = Var _ "result"}) = False
     -- notRes _ = True
@@ -92,7 +93,7 @@ pAssign = debugParser "pAssign" $ do
   -- optional newline
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   -- TODO use lookAhead here to decide whether to commit to it?
-  s <- getState
+  scr <- getState
   v@(Var _ vName) <- (try (optional newline *> pVarEq))
 
   -- I can't think of any obvious reason a user would need to define the same
@@ -107,17 +108,20 @@ pAssign = debugParser "pAssign" $ do
   --
   -- TODO in either case, prevent recursive self-references!
   cfg <- askConfig
-  when (hasVar v (sAssigns s) && vName /= "result") $ do
+  when (hasVar v (sAssigns scr) && vName /= "result") $ do
     when (not $ interactive cfg) $ fail $ "duplicate variable \"" ++ vName ++ "\"" -- TODO word this better
 
   e <- lexeme pExpr
 
-  -- TODO actually, is *this* the only place it's needed rather than in pScript?
-  let asn = Assign {aVar = v, aExpr = e}
-  putAssign "pAssign" asn
+  -- let asn = Assign {aVar = v, aExpr = e}
+  -- putAssign "pAssign" asn
   -- putDigests "pAssign" [e]
-
-  return asn
+  let assign = Assign {aVar = v, aExpr = e}
+      scr' = if interactive cfg
+               then appendStatementRepl scr $ Right assign
+               else appendStatementFile scr assign
+  putState scr'
+  return assign
 
 {-|
 Handles the special case of a naked top-level expression, which is treated as
@@ -129,19 +133,23 @@ TODO Prevent assignments that include the variable being assigned to
 TODO If the statement is literally `result`, what do we do?
      Maybe we need a separate type of assignment statement for this?
 -}
-pResult :: ParseM Assign
-pResult = debugParser "pResult" $ do
+pNaked :: ParseM Assign
+pNaked = debugParser "pNaked" $ do
   e   <- pExpr
-  -- scr <- getState
-  let rv = Var (RepID Nothing) "result" -- TODO is it always Nothing?
-      ra = Assign {aVar = rv, aExpr = e}
-  putAssign "pResult" ra
-  --     scr' = scr {sAssigns = delVar (sAssigns scr) rv, sResult = Just e}
-  -- putState scr' -- TODO use putAssign here
+  -- let rv = Var (RepID Nothing) "result" -- TODO is it always Nothing?
+  --     ra = Assign {aVar = rv, aExpr = e}
+  -- putAssign "pNaked" ra
+      -- scr' = scr {sAssigns = delVar (sAssigns scr) rv, sResult = Just e}
+  cfg <- askConfig
+  when (not $ interactive cfg) $ fail "naked expression in script" -- TODO better error here
+  scr <- getState
+  let scr' = appendStatementRepl scr (Left e) -- Left is not an error here
+      ra   = Assign {aVar = Var (RepID Nothing) "result", aExpr = e}
+  putState scr'
   return ra
 
 pStatement :: ParseM Assign
-pStatement = debugParser "pStatement" (try pAssign <|> pResult)
+pStatement = debugParser "pStatement" (try pAssign <|> pNaked)
 
 -------------
 -- scripts --
