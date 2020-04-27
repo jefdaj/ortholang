@@ -1,1 +1,1 @@
-num pssm.list faa.blastdb -> list of bht (tab-separated table of blast hits (outfmt 6))s
+num pssm.list faa.blastdb -> bht.list

@@ -1,1 +1,1 @@
-fa -> list of str (string)s
+fa -> str.list

@@ -1,1 +1,1 @@
-fna fa -> crb (tab-separated table of conditional reciprocal blast best hits)
+fna fa -> crb

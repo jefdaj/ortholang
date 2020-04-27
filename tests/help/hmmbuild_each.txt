@@ -1,1 +1,1 @@
-aln.list -> list of hmm (hidden markov model)s
+aln.list -> hmm.list

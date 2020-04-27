@@ -1,1 +1,1 @@
-bht bht -> gcr (GreenCut results)
+bht bht -> gcr

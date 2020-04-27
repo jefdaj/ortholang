@@ -1,1 +1,1 @@
-faa.list -> list of dmnd (DIAMOND database)s
+faa.list -> dmnd.list

@@ -1,1 +1,1 @@
-faa.list.list -> list of faa (FASTA amino acid)s
+faa.list.list -> faa.list

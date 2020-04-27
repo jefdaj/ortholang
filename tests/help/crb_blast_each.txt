@@ -1,1 +1,1 @@
-fna fa.list -> list of crb (tab-separated table of conditional reciprocal blast best hits)s
+fna fa.list -> crb.list

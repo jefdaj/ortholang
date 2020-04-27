@@ -1,1 +1,1 @@
-fna.list.list -> list of fna (FASTA nucleic acid)s
+fna.list.list -> fna.list

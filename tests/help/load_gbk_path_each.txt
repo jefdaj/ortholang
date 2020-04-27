@@ -1,1 +1,1 @@
-str.list -> gbk (genbank).list
+str.list -> gbk.list

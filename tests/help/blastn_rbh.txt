@@ -1,4 +1,4 @@
-num fna fna -> bht (tab-separated table of blast hits (outfmt 6))
+num fna fna -> bht
 
 BLAST two FASTA nucleic acid files against each other and keep only the
 reciprocal best hits.

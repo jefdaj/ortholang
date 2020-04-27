@@ -1,1 +1,1 @@
-bsr.list -> list of num (number in regular or scientific notation)s
+bsr.list -> num.list

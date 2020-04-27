@@ -1,1 +1,1 @@
-blh fna.list -> list of bsr (BUSCO results)s
+blh fna.list -> bsr.list

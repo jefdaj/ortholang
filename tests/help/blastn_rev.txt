@@ -1,4 +1,4 @@
-num fna fna -> bht (tab-separated table of blast hits (outfmt 6))
+num fna fna -> bht
 
 Like blastn, but with the FASTA files flipped.
 

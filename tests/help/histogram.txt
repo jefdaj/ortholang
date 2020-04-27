@@ -1,1 +1,1 @@
-str num.list -> png (plot image)
+str num.list -> png

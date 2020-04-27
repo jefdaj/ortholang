@@ -1,1 +1,1 @@
-aln -> hmm (hidden markov model)
+aln -> hmm

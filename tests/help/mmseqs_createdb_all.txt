@@ -1,3 +1,3 @@
-fa.list -> mms (MMSeqs2 sequence database)
+fa.list -> mms
 
 Create one MMSeqs2 sequence database from mutiple FASTA files.

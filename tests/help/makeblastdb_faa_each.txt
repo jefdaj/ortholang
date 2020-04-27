@@ -1,1 +1,1 @@
-faa.list -> list of faa (FASTA amino acid) encoded as blastdbs
+faa.list -> faa.blastdb.list

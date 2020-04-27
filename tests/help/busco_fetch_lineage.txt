@@ -1,1 +1,1 @@
-str -> blh (BUSCO lineage HMMs)
+str -> blh

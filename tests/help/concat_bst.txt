@@ -1,1 +1,1 @@
-bst.list -> bst (BUSCO scores table)
+bst.list -> bst

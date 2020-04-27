@@ -433,7 +433,7 @@ instance Pretty TypeSig where
   pPrint (ListSigs s)     = pPrint s <> PP.text ".list"
   pPrint (ScoresSigs s)   = pPrint s <> PP.text ".scores"
   pPrint (EncodedSig e s) = pPrint s <> PP.text ("." ++ enExt e)
-  pPrint (AnyType _)      = PP.text "anytype" -- TODO does this make sense? might have to do variables
+  pPrint (AnyType _)      = PP.text "any" -- TODO does this make sense? might have to do variables
   pPrint (Some g _)       = pPrint g
   pPrint (Exactly t)      = pPrint t
 

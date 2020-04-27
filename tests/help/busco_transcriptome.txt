@@ -1,1 +1,1 @@
-blh fna -> bsr (BUSCO results)
+blh fna -> bsr

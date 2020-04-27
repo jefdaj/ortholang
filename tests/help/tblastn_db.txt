@@ -1,4 +1,4 @@
-num faa fna.blastdb -> bht (tab-separated table of blast hits (outfmt 6))
+num faa fna.blastdb -> bht
 
 Like tblastn, but BLASTs against an existing database.
 

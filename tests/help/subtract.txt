@@ -1,1 +1,1 @@
-num.list -> num (number in regular or scientific notation)
+num.list -> num

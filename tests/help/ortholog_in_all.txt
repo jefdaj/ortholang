@@ -1,4 +1,4 @@
-og faa.list -> list of list of str (string)ss
+og faa.list -> str.list.list
 
 Filter a list of orthogroups to keep the ones with an ortholog in every proteome.
 These are universal genes in that group of proteomes, but not necesarily single copy.

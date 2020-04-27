@@ -1,4 +1,4 @@
-num any any.list -> anytype.scores
+num any any.list -> any.scores
 
 Shorthand for the common use case where you want to score your cut by some
 metric, for example number of hits, then vary one of the input parameters and

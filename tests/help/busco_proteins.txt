@@ -1,1 +1,1 @@
-blh faa -> bsr (BUSCO results)
+blh faa -> bsr

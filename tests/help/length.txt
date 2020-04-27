@@ -1,1 +1,1 @@
-ll -> num (number in regular or scientific notation)
+ll -> num

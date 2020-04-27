@@ -1,1 +1,1 @@
-str gbk -> fna (FASTA nucleic acid)
+str gbk -> fna

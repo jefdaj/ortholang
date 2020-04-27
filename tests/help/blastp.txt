@@ -1,4 +1,4 @@
-num faa faa -> bht (tab-separated table of blast hits (outfmt 6))
+num faa faa -> bht
 
 BLAST one file of amino acid (protein) sequences against another.
 

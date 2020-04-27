@@ -1,1 +1,1 @@
-blh faa.list -> list of bsr (BUSCO results)s
+blh faa.list -> bsr.list

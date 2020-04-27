@@ -1,1 +1,1 @@
-str -> faa (FASTA amino acid) encoded as blastdb
+str -> faa.blastdb

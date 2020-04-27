@@ -1,1 +1,1 @@
-fna.list -> fna (FASTA nucleic acid) encoded as blastdb
+fna.list -> fna.blastdb

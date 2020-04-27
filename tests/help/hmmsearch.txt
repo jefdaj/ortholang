@@ -1,1 +1,1 @@
-num hmm faa -> hht (HMMER hits table)
+num hmm faa -> hht

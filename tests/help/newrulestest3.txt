@@ -1,1 +1,1 @@
-str str str -> str (string)
+str str str -> str

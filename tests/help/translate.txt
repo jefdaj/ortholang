@@ -1,1 +1,1 @@
-fna -> faa (FASTA amino acid)
+fna -> faa

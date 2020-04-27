@@ -1,1 +1,1 @@
-str faa faa -> faa (FASTA amino acid)
+str faa faa -> faa

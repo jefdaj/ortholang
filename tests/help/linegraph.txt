@@ -1,1 +1,1 @@
-str num.scores -> png (plot image)
+str num.scores -> png

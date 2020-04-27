@@ -1,1 +1,1 @@
-num faa faa.list -> pssm (PSI-BLAST position-specific substitution matrix as ASCII)
+num faa faa.list -> pssm

@@ -1,1 +1,1 @@
-bht.list bht.list -> bht (tab-separated table of blast hits (outfmt 6))
+bht.list bht.list -> bht

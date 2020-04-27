@@ -1,1 +1,1 @@
-str.list -> search (intermediate table describing biomartr searches)
+str.list -> search

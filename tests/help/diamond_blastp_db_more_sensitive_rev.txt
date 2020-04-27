@@ -1,1 +1,1 @@
-num dmnd faa -> bht (tab-separated table of blast hits (outfmt 6))
+num dmnd faa -> bht

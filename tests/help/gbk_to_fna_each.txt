@@ -1,1 +1,1 @@
-str gbk.list -> list of fna (FASTA nucleic acid)s
+str gbk.list -> fna.list

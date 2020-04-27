@@ -1,1 +1,1 @@
-any any any.list -> anytype.list
+any any any.list -> any.list

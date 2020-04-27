@@ -1,1 +1,1 @@
-str gbk -> faa (FASTA amino acid)
+str gbk -> faa

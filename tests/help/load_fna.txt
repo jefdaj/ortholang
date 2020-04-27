@@ -1,1 +1,1 @@
-str -> fna (FASTA nucleic acid)
+str -> fna

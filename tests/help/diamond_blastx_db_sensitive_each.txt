@@ -1,1 +1,1 @@
-num fna dmnd.list -> list of bht (tab-separated table of blast hits (outfmt 6))s
+num fna dmnd.list -> bht.list

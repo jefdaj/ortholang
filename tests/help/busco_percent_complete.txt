@@ -1,1 +1,1 @@
-bsr -> num (number in regular or scientific notation)
+bsr -> num

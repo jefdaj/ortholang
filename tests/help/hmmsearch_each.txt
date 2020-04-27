@@ -1,1 +1,1 @@
-num hmm.list faa -> hht (HMMER hits table)
+num hmm.list faa -> hht

@@ -1,1 +1,1 @@
-str gbk.list -> list of faa (FASTA amino acid)s
+str gbk.list -> faa.list

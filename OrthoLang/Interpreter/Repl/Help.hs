@@ -120,9 +120,9 @@ listFunctionTypesWithOutput mods thing = filter matches descs
                                        splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions mods)
 
--- TODO move somewhere. Pretty?
+-- TODO bop version?
 renderTypeSig :: Function -> String
 renderTypeSig f = ins ++ " -> " ++ out
   where
    ins = unwords $ map ext (fInputs f)
-   out = render (pPrint $ fOutput f)
+   out = ext $ fOutput f

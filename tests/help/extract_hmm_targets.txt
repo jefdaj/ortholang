@@ -1,1 +1,1 @@
-hht -> list of str (string)s
+hht -> str.list

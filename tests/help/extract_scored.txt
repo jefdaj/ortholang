@@ -1,1 +1,1 @@
-any.scores -> anytype.list
+any.scores -> any.list

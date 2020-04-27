@@ -1,1 +1,1 @@
-faa.list -> list of aln (multiple sequence alignment)s
+faa.list -> aln.list

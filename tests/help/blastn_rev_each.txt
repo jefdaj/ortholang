@@ -1,4 +1,4 @@
-num fna fna.list -> list of bht (tab-separated table of blast hits (outfmt 6))s
+num fna fna.list -> bht.list
 
 Like blastn_rev, but BLASTs a list of sequence files against the first one.
 

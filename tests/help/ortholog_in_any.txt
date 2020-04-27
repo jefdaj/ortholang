@@ -1,4 +1,4 @@
-og faa.list -> list of list of str (string)ss
+og faa.list -> str.list.list
 
 Arguments:
   orthogroup finder results
