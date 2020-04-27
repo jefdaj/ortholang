@@ -40,6 +40,7 @@ import Prelude hiding (print)
 
 import OrthoLang.Types
 import OrthoLang.Debug (debug)
+import OrthoLang.Script (appendStatementRepl)
 import OrthoLang.Interpreter.Repl.Help
 import OrthoLang.Interpreter.Repl.Edit
 import OrthoLang.Interpreter.Repl.Info
@@ -127,7 +128,7 @@ runStatement :: ReplEdit
 runStatement mods st@(scr, cfg, ref, ids, dRef) hdl line = case parseStatement mods cfg scr line of
   Left  e -> hPutStrLn hdl (stripWhiteSpace e) >> return st
   Right r -> do
-    let st' = (updateVars scr r, cfg, ref, ids, dRef)
+    let st' = (appendStatementRepl scr (Right r), cfg, ref, ids, dRef) -- TODO specific put fn for each part of the state
     when (isExpr mods cfg scr line) (evalScript mods hdl st')
     return st'
 

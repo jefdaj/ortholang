@@ -15,7 +15,7 @@ module OrthoLang.Interpreter.Repl.Edit
   -- , rmRef
   -- , runStatement
   , saveScript
-  , updateVars
+  -- , updateVars
 
   )
   where
@@ -23,7 +23,7 @@ module OrthoLang.Interpreter.Repl.Edit
 import Prelude hiding (print)
 
 import OrthoLang.Types
-import OrthoLang.Script (rDepsOf, updateVars, depsOnly)
+import OrthoLang.Script (rDepsOf, depsOnly)
 import OrthoLang.Interpreter.Repl.Info (cmdShow)
 import OrthoLang.Interpreter.Parse         (parseFile)
 import OrthoLang.Util               (absolutize, justOrDie)

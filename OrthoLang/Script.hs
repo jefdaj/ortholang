@@ -137,10 +137,10 @@ Behaviors that differ from 'appendStatementRepl':
 TODO where does the final auto-assign of result happen? Eval currently?
 -}
 appendStatementFile :: Script -> Assign -> Script
-appendStatementFile scr a@(Assign (Var _ v) e) =
+appendStatementFile scr a@(Assign _ e) =
   -- let as'   = if v == "result" then delVar (sAssigns scr) "result" else sAssigns scr
   --     scr'  = scr {sAssigns = as'}
-  let scr' = if v == "result"
+  let scr' = if isResult a
                then scr {sAssigns = delVar (sAssigns scr) "result", sResult = Just e}
                else scr {sAssigns = sAssigns scr}
       scr'' = updateVars scr' a -- TODO rename to imply that it also appends
@@ -163,12 +163,18 @@ TODO implement the overwriting prompt thing!
 -}
 appendStatementRepl :: Script -> Either Expr Assign -> Script
 appendStatementRepl scr (Left  e) = appendStatementRepl scr $ Right $ Assign (Var (RepID Nothing) "result") e
-appendStatementRepl scr (Right a) =
+appendStatementRepl scr (Right a@(Assign v e)) =
   let scr'  = scr {sAssigns = delVar (sAssigns scr) "result"}
       scr'' = updateVars scr' a -- TODO rename to imply that it also appends
+      scr''' = if isResult a
+                 then scr'' {sResult = Just e}
+                 else let rr = Ref (typeOf e) (saltOf e) (depsOf e) v -- TODO vName in deps too?
+                      in scr'' {sAssigns = sAssigns scr'' ++ [Assign resultVar rr], sResult = Just e}
   in trace "ortholang.script.appendStatementRepl"
-           ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr'':\n" ++ render (pPrint scr''))
-           scr''
+           ("old scr:\n" ++ render (pPrint scr) ++ "\nnew scr''':\n" ++ render (pPrint scr'''))
+           scr'''
+
+  -- Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
 
 ------------
 -- macros --
@@ -297,17 +303,14 @@ depsOnly expr scr = scr {sAssigns = deps ++ [res]}
 -- TODO what happens if you try that in a script? it should fail i guess?
 -- TODO rename because it's more like assignAndUpdateVars?
 updateVars :: Script -> Assign -> Script
-updateVars scr asn@(Assign {aVar = v@(Var _ vName), aExpr = expr}) = scr {sAssigns = as', sResult = r'}
+updateVars scr asn@(Assign {aVar = v@(Var _ vName), aExpr = expr}) = scr {sAssigns = as'}
   where
-    res = Var (RepID Nothing) "result"
+    -- res = Var (RepID Nothing) "result"
     asn' = removeSelfReferences scr asn
     as  = sAssigns scr
-    as' = if v /= res && aVar asn `elem` map aVar as
+    as' = if not (isResult asn) && aVar asn `elem` map aVar as
             then replaceVar asn' as
             else delVar as vName ++ [asn']
-    r' = case sResult scr of
-           Nothing -> Just expr -- no previous result, so assign it now
-           Just _  -> if v == res then Just expr else sResult scr
 
 -- replace an existing var in a script
 replaceVar :: Assign -> [Assign] -> [Assign]

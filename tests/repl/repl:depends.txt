@@ -8,6 +8,7 @@ ortholang —▶ :show
 v1 = "one"
 v2 = "two"
 v3 = [v1, v2]
+result = v3
 
 ortholang —▶ :depends v1
 v1 = "one"

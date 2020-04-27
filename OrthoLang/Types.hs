@@ -45,6 +45,8 @@ module OrthoLang.Types
   , TypeGroup(..)
   , TypeSig(..)
   , Var(..)
+  , resultVar
+  , isResult
   , VarPath(..)
   , defaultShow
   , defaultShowN -- same but lets you pick how many lines to show
@@ -161,6 +163,12 @@ newtype Salt = Salt Int deriving (Eq, Show, Read)
 
 data Var = Var RepID String
   deriving (Eq, Show, Read)
+
+resultVar :: Var
+resultVar = Var (RepID Nothing) "result"
+
+isResult :: Assign -> Bool
+isResult (Assign v _) = v == resultVar
 
 instance Pretty Var where
   pPrint (Var _ s) = PP.text s -- TODO show the salt?
@@ -501,9 +509,10 @@ defaultShow = defaultShowN 5
 
 -- TODO remove? or make part of a typeclass
 defaultShowN :: Int -> Config -> LocksRef -> FilePath -> IO String
-defaultShowN nLines _ locks = fmap (unlines . fmtLines . lines) . (readFileLazy locks)
+defaultShowN nLines _ locks = fmap (dropNewline . unlines . fmtLines . lines) . (readFileLazy locks)
   where
-    fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l
+    dropNewline = reverse . dropWhile (== '\n') . reverse
+    fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l -- TODO base this on termcolumns cfg
     fmtLines ls = let nPlusOne = map fmtLine $ take (nLines + 1) ls
                   in if length nPlusOne > nLines
                     then init nPlusOne ++ ["..."]
