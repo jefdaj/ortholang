@@ -74,7 +74,7 @@ goldenRepl cfg ref ids dRef goldenFile = do
       stdin  = extractPrompted ("ortholang" ++ promptArrow) txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut (emptyScript, cfg', ref, ids, dRef)
                -- uncomment to update repl golden files:
-               >> copyFile tstOut ("/home/user/ortholang-demo/ortholang/tests/repl" </> takeBaseName goldenFile <.> "txt")
+               -- >> copyFile tstOut ("YOUR_ORTHOLANG_REPO_HERE/tests/repl" </> takeBaseName goldenFile <.> "txt")
   return $ goldenVsFile d goldenFile tstOut action
 
 knownFailing :: [FilePath]
