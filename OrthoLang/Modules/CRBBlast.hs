@@ -39,6 +39,7 @@ olModule = Module
 -- tlen - the length of the target transcript
 
 -- TODO remove if these are exactly blast hit tables
+-- TODO or maybe there should be a separate "reciprocal best" type?
 crb :: Type
 crb = Type
   { tExt  = "crb"
