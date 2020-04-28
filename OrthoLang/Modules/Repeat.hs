@@ -32,12 +32,16 @@ olModule = Module
 -- repeat without permutation (to test robustness) --
 -----------------------------------------------------
 
+-- the N keeps it from clashing with the Haskell repeat fn
 repeatN :: Function
 repeatN = Function
   { fOpChar = Nothing, fName = "repeat"
   ,fTags = []
-  , fInputs = [AnyType "the return type", AnyType "the input type", Exactly num]
-  , fOutput =  ListSigs (AnyType "the return type")
+  , fInputs = [ AnyType "the output type"
+              , AnyType "the input type"
+              , Exactly num
+              ]
+  , fOutput =  ListSigs (AnyType "the output type")
   , fNewRules = NewNotImplemented
   , fOldRules = rRepeatN
   }
@@ -46,16 +50,16 @@ repeatN = Function
 -- and returns a list of the result var type. start type can be whatever
 -- (Some ot "any type", num) (ListOf (Some ot "any type"))
 -- shown as "t num -> t.list, where t is any type"
-tRepeatN :: [Type] -> Either String Type 
-tRepeatN [rType, _, n] | n == num = Right $ ListOf rType
-tRepeatN _ = Left "invalid args to repeatN"
+-- tRepeatN :: [Type] -> Either String Type 
+-- tRepeatN [rType, _, n] | n == num = Right $ ListOf rType
+-- tRepeatN _ = Left "invalid args to repeatN"
 
 readSciInt :: String -> Int
 readSciInt s = case toBoundedInteger (read s :: Scientific) of
   Nothing -> error $ "Not possible to repeat something " ++ s ++ " times."
   Just n  -> n
 
--- TODO is the bug here? might need to convert string -> sci -> int
+-- TODO move to Types?
 extractNum :: Script -> Expr -> Int
 extractNum _   (Lit x n) | x == num = readSciInt n
 extractNum scr (Ref _ _ _ v) = extractNum scr $ justOrDie "extractNum failed!" $ lookupVar v (sAssigns scr)
@@ -69,8 +73,8 @@ extractNum _ _ = error "bad argument to extractNum"
 -- TODO error if subVar not in (depsOf resExpr)
 -- TODO is this how the seeds should work?
 rRepeatN :: RulesFn
-rRepeatN scr (Fun t mSeed deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
-  rReplaceEach scr (Fun t mSeed deps name [resExpr, subVar, subList])
+rRepeatN       scr (Fun t mSeed deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
+  rReplaceEach scr (Fun t mSeed deps name [resExpr, subVar              , subList ])
   where
     subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookupVar v (sAssigns scr)
     nReps   = extractNum scr repsExpr
