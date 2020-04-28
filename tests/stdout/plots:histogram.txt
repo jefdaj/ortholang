@@ -1,3 +1,3 @@
-[plot image "$TMPDIR/cache/bin/71fa3559a2",
- plot image "$TMPDIR/cache/bin/69c9483a87",
- plot image "$TMPDIR/cache/bin/5edb590efb"]
+$TMPDIR/cache/bin/71fa3559a2
+$TMPDIR/cache/bin/69c9483a87
+$TMPDIR/cache/bin/0a3d4c6e01

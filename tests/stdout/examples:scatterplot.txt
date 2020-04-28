@@ -1,2 +1,2 @@
-[plot image "$TMPDIR/cache/bin/bf4495e8d6",
- plot image "$TMPDIR/cache/bin/6c0951650a"]
+$TMPDIR/cache/bin/bf4495e8d6
+$TMPDIR/cache/bin/6c0951650a
