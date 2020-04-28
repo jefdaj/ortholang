@@ -6,6 +6,7 @@ module OrthoLang.Interpreter.Sanitize
   ( hashIDsFile
   -- , writeIDs
   , unhashIDs
+  , unhashIDsLines
   , unhashIDsFile
   , readIDs
   -- , lookupHash
@@ -42,7 +43,7 @@ import OrthoLang.Interpreter.Actions (trackWrite', readFileStrict', readList, wr
 import OrthoLang.Interpreter.Paths   (toPath, fromPath, addDigest)
 import Data.Char             (isSpace)
 import Data.Maybe            (catMaybes, mapMaybe, fromJust)
-import Data.List             (isPrefixOf, intersperse, nub)
+import Data.List             (isPrefixOf, intersperse, nub, sort)
 import Data.List.Utils       (split, subIndex)
 import System.FilePath (takeFileName, takeDirectory, (<.>))
 import System.Directory           (createDirectoryIfMissing)
@@ -130,18 +131,23 @@ hashIDsFile inFa outFa = do
 -- unhashIDs :: IDs -> String -> String
 -- unhashIDs ids txt = foldl (\acc (k, v) -> R.subRegex (R.mkRegex k) acc v) txt $ M.toList ids
 
+-- unhashIDs for when the output is a list of lines that should be sorted
+-- TODO return [String] instead?
+unhashIDsLines :: Bool -> IDs -> String -> String
+unhashIDsLines longIDs ids t = unlines $ sort $ lines $ unhashIDs longIDs ids t
+
 -- sorry in advance! this is what you get when you build it in ghci
 -- its hackier than the regex, but also faster
 -- TODO add a config setting for long or short IDs
 -- TODO does storing a bunch of seqid_ strings in the map slow it down?
 unhashIDs :: Bool -> IDs -> String -> String
 unhashIDs longIDs ids t = case findNext t of
-                   Nothing -> t
-                   Just i  -> let (before, after) = splitAt i t
-                                  after' = replaceNextFold after
-                              -- the take/drop thing is a hacky way to prevent endless cycles
-                              in before ++ take 1 after' ++ unhashIDs longIDs ids (drop 1 after')
-                              -- in before ++ unhashIDs longIDs ids after'
+  Nothing -> t
+  Just i  -> let (before, after) = splitAt i t
+                 after' = replaceNextFold after
+             -- the take/drop thing is a hacky way to prevent endless cycles
+             in before ++ take 1 after' ++ unhashIDs longIDs ids (drop 1 after')
+             -- in before ++ unhashIDs longIDs ids after'
   where
     replaceNextFold txt = foldr replacePattern txt patterns
     replacePattern (ptn, fn) txt = if ptn `isPrefixOf` txt then replaceLen txt fn else txt

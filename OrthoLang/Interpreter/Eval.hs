@@ -38,7 +38,7 @@ import OrthoLang.Script (expandMacros)
 import qualified Data.HashMap.Strict as M
 import Data.Dynamic (Dynamic, toDyn, dynTypeRep)
 import Data.Typeable (TypeRep)
--- import Data.List (isPrefixOf)
+import Data.List (sort)
 
 import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
 import OrthoLang.Interpreter.Compile         (compileScript, rExpr, newRules)
@@ -345,18 +345,21 @@ writeResult cfg ref idsref path out = do
   -- (dRef :: DigestsRef) <- fmap fromJust $ getShakeExtra
   -- dMap <- liftIO $ readIORef dRef
   -- liftIO $ putStrLn $ "here are all the current ids:\n" ++ T.unpack (pShowNoColor dMap)
-  unhashIDsFile path out
+  unhashIDsFile path out -- TODO version that sorts if it's a sortable type (str, num to start)
   trackWrite [out] -- TODO ' version?
 
 -- TODO what happens when the txt is a binary plot image?
 -- TODO is this where the diamond makedb error comes in?
 -- TODO have to tShow this right?
 printLong :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
-printLong _ ref idsref pm _ path = do
+printLong _ ref idsref pm rtype path = do
   ids <- liftIO $ readIORef idsref
   txt <- withReadLock' path $ readFile' path
-  let txt' = unhashIDs True ids txt
-  liftIO $ P.putMsg pm txt'
+  let txt' = unhashIDs True ids txt -- TODO version that sorts if it's a sortable type (str, num to start)
+      txt'' = case rtype of -- TODO will this mess anything up? can other types also be sorted?
+                (ListOf t) -> if t `elem` [str, num] then unlines $ sort $ lines txt' else txt'
+                _ -> txt'
+  liftIO $ P.putMsg pm txt''
 
 printShort :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
 printShort cfg ref idsref pm rtype path = do
