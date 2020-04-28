@@ -141,6 +141,7 @@ rAssign scr (Assign var expr) = do
       res' = debugRules "rAssign" (var, expr) res
   return res'
 
+-- note this is used both in Eval and Replace, so RepIDs might be set
 compileScript :: Script -> Rules ResPath
 compileScript scr = do
   cfg <- fmap fromJust getShakeExtraRules
@@ -149,13 +150,14 @@ compileScript scr = do
       rp' = tmpdir cfg </> "vars" </> "result"
       rp  = toPath loc cfg rp'
   mapM_ (rAssign scr') (sAssigns scr') -- TODO remove?
-  case lookupVar resultVar (sAssigns scr') of
+  -- case lookupResult (sAssigns scr') of -- TODO can't we use sResult here?
+  case sResult scr' of
     Nothing -> do
       rp' %> \_ -> writeCachedLines loc rp' ["<<emptyscript>>"]
     Just re -> do
       (ExprPath ep') <- rExpr scr' re
       let ep = toPath loc cfg ep'
-      rp' %> \_ -> symlink rp ep
+      rp' %> \_ -> need' loc [ep'] >> symlink rp ep
   return $ ResPath rp'
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file

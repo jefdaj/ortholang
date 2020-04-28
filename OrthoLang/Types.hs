@@ -5,6 +5,7 @@ module OrthoLang.Types
   , Action3
   , Assign(..)
   , lookupVar
+  -- , lookupResult
   , hasVar
   , delVar
   , CacheDir(..)
@@ -86,7 +87,7 @@ module OrthoLang.Types
 
 -- still crashes, but prints a message to the logfile first
 import Prelude  hiding (error, (<>))
-import OrthoLang.Debug (error)
+import OrthoLang.Debug (error, trace)
 
 import qualified Data.Text.Lazy   as T
 import qualified Text.PrettyPrint as PP
@@ -102,7 +103,7 @@ import Data.Char                  (toLower)
 import Data.IORef                 (IORef)
 import Data.List                  (nub, find, isPrefixOf, elem)
 import Data.Map.Strict            (Map, empty)
-import Data.Maybe                 (fromJust, catMaybes, isJust)
+import Data.Maybe                 (fromJust, catMaybes, isJust, isNothing)
 import Development.Shake          (Rules, Action, Resource)
 import Development.Shake.FilePath (makeRelative)
 import System.Console.Haskeline   (Settings, InputT, runInputT)
@@ -168,8 +169,12 @@ data Var = Var RepID String
 resultVar :: Var
 resultVar = Var (RepID Nothing) "result"
 
+-- note: it might have a different RepID than the canonical one above
+-- TODO is that true? or should it always be Nothing? that seems cleaner
 isResult :: Assign -> Bool
-isResult (Assign v _) = v == resultVar
+-- isResult (Assign v _) = v == resultVar
+isResult (Assign v@(Var _ "result") _) = True
+isResult _ = False
 
 instance Pretty Var where
   pPrint (Var _ s) = PP.text s -- TODO show the salt?
@@ -275,7 +280,21 @@ data Assign = Assign { aVar :: Var, aExpr :: Expr }
   deriving (Show, Eq)
 
 lookupVar :: Var -> [Assign] -> Maybe Expr
-lookupVar v as = let tuples = map (\(Assign v2 e) -> (v2,e)) as in lookup v tuples
+lookupVar v as = let tuples = map (\(Assign v2 e) -> (v2,e)) as
+                     res = lookup v tuples
+                 in trace "ortholang.types.lookupVar" ("v: " ++ show v ++ " res: " ++ show res) res
+
+-- like lookupVar resultVar, except it allows other repids
+-- TODO is that ever really needed?
+-- lookupResult :: [Assign] -> Maybe Expr
+-- lookupResult as = case filter (\(Assign (Var _ n) _) -> n == "result") as of
+--   [] -> Nothing
+--   [x] -> Just $ aExpr x
+--   xs -> let err = error "ortholang.types.lookupResult"
+--         in case filter (\(Assign (Var (RepID rid) _) _) -> isNothing rid) xs of
+--              [] -> err $ "multiple results but none without repid: " ++ show xs
+--              [y] -> Just $ aExpr y
+--              ys -> err $ "multiple result without repid: " ++ show ys
 
 hasVar :: Var -> [Assign] -> Bool
 hasVar v as = isJust $ lookupVar v as

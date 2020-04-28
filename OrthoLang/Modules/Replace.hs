@@ -112,11 +112,11 @@ rReplace' :: Script
           -> Expr -- and an expression to replace it with (which could be a ref to another variable)
           -> Rules ExprPath
 rReplace' scr resExpr subVar@(Var _ _) subExpr = do
-  let res   = Assign (Var (RepID Nothing) "result") resExpr
+  let res   = Assign resultVar resExpr
       sub   = Assign subVar subExpr
       deps  = filter (\a -> (elem (aVar a) $ depsOf resExpr ++ depsOf subExpr)) (sAssigns scr)
       newID = calcRepID scr resExpr subVar subExpr
-      scr'  = setRepIDs newID $ scr {sAssigns = [sub] ++ deps ++ [res]}
+      scr'  = setRepIDs newID $ Script {sAssigns = [sub] ++ deps ++ [res], sResult = Just resExpr}
   (ResPath resPath) <- compileScript scr' -- TODO is this right??
   return (ExprPath resPath)
 
@@ -126,6 +126,7 @@ rReplace' scr resExpr subVar@(Var _ _) subExpr = do
  - err on the side of uniqueness.
  -
  - TODO think carefully about whether all of these need to be in here
+ - TODO rename it RepHash?
  -}
 calcRepID :: Script -> Expr -> Var -> Expr -> RepID
 calcRepID scr resExpr subVar subExpr = RepID $ Just $ digest

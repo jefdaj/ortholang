@@ -289,10 +289,13 @@ mapExprVars fn (Lst t vs   es   ) = Lst t (map fn vs)   (map (mapExprVars fn) es
 mapExprVars _ (Com _) = error "script.mapExprVars" "implement this!"
 
 mapAssignVars :: (Var -> Var) -> Assign -> Assign
-mapAssignVars fn (Assign var expr) = Assign (fn var) (mapExprVars fn expr)
+mapAssignVars fn a@(Assign var expr) = Assign (fn var) (mapExprVars fn expr)
 
 mapScriptVars :: (Var -> Var) -> Script -> Script
-mapScriptVars fn scr = scr {sAssigns = map (mapAssignVars fn) (sAssigns scr)}
+mapScriptVars fn scr = scr
+  { sAssigns = map (mapAssignVars fn) (sAssigns scr)
+  , sResult  = fmap (mapExprVars fn) (sResult scr)
+  }
 
 setRepID :: RepID -> Var -> Var
 setRepID newID (Var _ name) = Var newID name
