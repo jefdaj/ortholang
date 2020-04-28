@@ -69,7 +69,7 @@ cmdWrite mods st@(scr, cfg, locks, ids, dRef) hdl line = case words line of
   [path] -> do
     saveScript cfg scr path
     return (scr, cfg { script = Just path }, locks, ids, dRef)
-  [var, path] -> case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
+  [var, path] -> case lookupExpr var (sAssigns scr) of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just e  -> saveScript cfg (depsOnly e scr) path >> return st
   _ -> hPutStrLn hdl ("invalid save command: \"" ++ line ++ "\"") >> return st
@@ -89,7 +89,7 @@ saveScript cfg scr path = absolutize path >>= \p -> writeScript cfg scr p
 -- TODO except, this should work with expressions too!
 cmdRevDepends :: ReplEdit
 cmdRevDepends _ st@(scr, cfg, _, _, _) hdl var = do
-  case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
+  case lookupExpr var (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
   return st
@@ -97,7 +97,7 @@ cmdRevDepends _ st@(scr, cfg, _, _, _) hdl var = do
 cmdDepends :: ReplEdit
 cmdDepends _ st@(scr, cfg, _, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
-  case lookupVar var' (sAssigns scr) of
+  case lookupExpr var (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just _  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ (Var (RepID Nothing) var):rDepsOf scr var') (sAssigns scr)
   return st
@@ -107,6 +107,6 @@ cmdDrop :: ReplEdit
 cmdDrop _ (_, cfg, ref, ids, dRef) _ [] = clear >> return (emptyScript, cfg { script = Nothing }, ref, ids, dRef)
 cmdDrop _ st@(scr, cfg, ref, ids, dRef) hdl var = do
   let v = Var (RepID Nothing) var
-  case lookupVar v (sAssigns scr) of
+  case lookupExpr var (sAssigns scr) of
     Nothing -> hPutStrLn hdl ("Var \"" ++ var ++ "' not found") >> return st
     Just _  -> return (scr {sAssigns = delVar (sAssigns scr) var}, cfg, ref, ids, dRef)

@@ -110,7 +110,7 @@ cmdShow :: ReplInfo
 cmdShow ms st@(_, c, _, _, _) hdl s | showtypes c = cmdType ms st hdl s -- TODO still show the rest too
 cmdShow _ st@(scr, c, _, _, _) hdl [] = mapM_ (pPrintHdl c hdl) (sAssigns scr)
 cmdShow _ (scr, cfg, _, _, _) hdl var = do
-  case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
+  case lookupExpr var (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> pPrintHdl cfg hdl e -- >> hPutStrLn hdl ""
 
@@ -121,7 +121,7 @@ cmdShow _ (scr, cfg, _, _, _) hdl var = do
 
 cmdDepends :: ReplInfo
 cmdDepends _ (scr, cfg, _, _, _) hdl var =
-  case lookupVar (Var (RepID Nothing) var) (sAssigns scr) of
+  case lookupExpr var (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
     Just e  -> let vars = (Var (RepID Nothing) var) : depsOf e
                in mapM_ (pPrintHdl cfg hdl) $ filter (\(Assign v _) -> v `elem` vars)
@@ -131,7 +131,7 @@ cmdDepends _ (scr, cfg, _, _, _) hdl var =
 cmdRevDepends :: ReplInfo
 cmdRevDepends _ (scr, cfg, _, _, _) hdl var =
   let var' = Var (RepID Nothing) var
-  in case lookupVar var' (sAssigns scr) of
+  in case lookupExpr var (sAssigns scr) of
        Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
        Just  _ -> let vars = var' : rDepsOf scr var'
                   in mapM_ (pPrintHdl cfg hdl) $ filter (\(Assign v _) -> v `elem` vars)

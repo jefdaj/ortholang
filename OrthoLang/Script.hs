@@ -30,6 +30,7 @@ module OrthoLang.Script
   -- * Used in Modules.Replace
   , extractExprs
   , setRepIDs
+  , calcRepID
   -- , mapExprVars
   -- , mapAssignVars
   -- , mapScriptVars
@@ -51,7 +52,7 @@ import OrthoLang.Debug (trace, error)
 
 import OrthoLang.Types
 import Data.List       (filter, delete)
-import OrthoLang.Util  (justOrDie)
+import OrthoLang.Util  (justOrDie, digest)
 
 
 -----------
@@ -259,8 +260,8 @@ eExpr' _ _ e = e
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: Script -> Expr -> [Expr]
 extractExprs _ (Lst _ _ _ es) = es
-extractExprs s (Ref _ _ _ v ) = case lookupVar v (sAssigns s) of
-                                       Nothing -> error "types.extractExprs" $ "no such var " ++ show v
+extractExprs s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
+                                       Nothing -> error "types.extractExprs" $ "no such var '" ++ vName ++ "'"
                                        Just e  -> extractExprs s e
 extractExprs _   (Fun _ _ _ _ _) = error "types.extractExprs" explainFnBug
 extractExprs scr (Bop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
@@ -276,10 +277,11 @@ explainFnBug =
   \program. If you want Jeff to consider rewriting some things to fix that, \
   \drop him a line!"
 
-{- This does the filename mangling by setting a "replace ID" in each variable
- - in a script. If it's anything other than Nothing it gets used by
- - OrthoLang.Interpreter to set the rep dir.
- -}
+{-|
+This does the filename mangling by setting a "replace ID" in each variable in a
+script. If it's anything other than Nothing it gets used by
+'OrthoLang.Interpreter' to set the rep dir.
+-}
 mapExprVars :: (Var -> Var) -> Expr -> Expr
 mapExprVars _ e@(Lit  _ _) = e
 mapExprVars fn (Ref t n vs v      ) = Ref t n (map fn vs)   (fn v)
@@ -303,22 +305,42 @@ setRepID newID (Var _ name) = Var newID name
 setRepIDs :: RepID -> Script -> Script
 setRepIDs newID = mapScriptVars (setRepID newID)
 
+{-|
+This decides the "replace ID" in `OrthoLang.Modules.Replace.rReplace'`. It's
+important because the hash needs to be unique whenever we would want to return
+different results, but the same between things that we actually want
+deduplicated. So far we err on the side of uniqueness.
+
+TODO think carefully about whether all of these need to be in here
+TODO rename it RepHash?
+-}
+calcRepID :: Script -> Expr -> Var -> Expr -> RepID
+calcRepID scr resExpr subVar subExpr =
+  RepID $ Just $ digest
+    [ digest scr -- TODO only the parts the others actually depend on?
+    , digest resExpr
+    , digest subVar -- TODO look up expr in scr and use that?
+    , digest subExpr
+    ]
+
 
 ----------
 -- repl --
 ----------
 
+-- TODO also include the expr assigned to the var itself?
 rDepsOf :: Script -> Var -> [Var]
 rDepsOf s var = map aVar rDeps
   where
     rDeps = filter (isRDep . aExpr) (sAssigns s)
     isRDep expr = elem var $ depsOf expr
 
+-- TODO also include the expr assigned to the var itself?
 depsOnly :: Expr -> Script -> Script
-depsOnly expr scr = scr {sAssigns = deps ++ [res]}
+depsOnly expr scr = scr {sAssigns = deps ++ [res], sResult = Just expr}
   where
     deps = filter (\a -> (elem (aVar a) $ depsOf expr)) (sAssigns scr)
-    res  = Assign {aVar = Var (RepID Nothing) "result", aExpr = expr}
+    res  = Assign {aVar = resultVar, aExpr = expr}
 
 {-|
 This is needed to avoid assigning a variable literally to itself, which is
@@ -388,8 +410,8 @@ rmRef s v e = let r = rmRef' s v e
               in trace "ortholang.script.rmRef" (render (pPrint e) ++ " -> " ++ render (pPrint r)) r
 
 rmRef' :: Script -> Var -> Expr -> Expr
-rmRef' scr var e@(Ref _ _ _ v2)
-  | var == v2 = justOrDie "failed to rmRef variable!" $ lookupVar var (sAssigns scr)
+rmRef' scr var e@(Ref _ _ _ v2@(Var _ vName))
+  | var == v2 = justOrDie "failed to rmRef variable!" $ lookupExpr vName (sAssigns scr)
   | otherwise = e
 rmRef' _   _   e@(Lit _ _) = e
 rmRef' scr var (Bop t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)

@@ -4,8 +4,8 @@ module OrthoLang.Types
   , Action2
   , Action3
   , Assign(..)
-  , lookupVar
-  -- , lookupResult
+  , lookupExpr -- TODO rename to include script
+  , lookupRepID -- TODO rename to include script
   , hasVar
   , delVar
   , CacheDir(..)
@@ -177,7 +177,8 @@ isResult (Assign v@(Var _ "result") _) = True
 isResult _ = False
 
 instance Pretty Var where
-  pPrint (Var _ s) = PP.text s -- TODO show the seed?
+  pPrint (Var (RepID  Nothing) s) = PP.text s
+  pPrint (Var (RepID (Just r)) s) = PP.text s <+> pPrint r
 
 -- the common fields are:
 -- * return type
@@ -195,6 +196,10 @@ data Expr
   | Lst Type (Maybe Seed) [Var] [Expr]
   | Com CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
+
+-- TODO remove?
+-- repOf :: Var -> RepID
+-- repOf (Var r _) = r
 
 -- An expression that has already been compiled to Rules, wrapped so it can be
 -- passed to another function. Because Rules can't be shown or compared, we
@@ -279,12 +284,18 @@ setSeed _ (Com (CompiledExpr _ _ _)) = error "types.setSeed" "not implemented fo
 data Assign = Assign { aVar :: Var, aExpr :: Expr }
   deriving (Show, Eq)
 
-lookupVar :: Var -> [Assign] -> Maybe Expr
-lookupVar v as = let tuples = map (\(Assign v2 e) -> (v2,e)) as
-                     res = lookup v tuples
-                 in trace "ortholang.types.lookupVar" ("v: " ++ show v ++ " res: " ++ show res) res
+-- note the RepID itself is also a Maybe
+lookupRepID :: String -> [Assign] -> Maybe RepID
+lookupRepID v as = let tuples = map (\(Assign (Var r v2) _) -> (v2,r)) as
+                       res = lookup v tuples
+                   in trace "ortholang.types.lookupRepID" ("v: " ++ v ++ " res: " ++ show res) res
 
--- like lookupVar resultVar, except it allows other repids
+lookupExpr :: String -> [Assign] -> Maybe Expr
+lookupExpr v as = let tuples = map (\(Assign (Var _ v2) e) -> (v2,e)) as
+                      res = lookup v tuples
+                  in trace "ortholang.types.lookupExpr" ("v: " ++ v ++ " res: " ++ show res) res
+
+-- like lookupExpr resultVar, except it allows other repids
 -- TODO is that ever really needed?
 -- lookupResult :: [Assign] -> Maybe Expr
 -- lookupResult as = case filter (\(Assign (Var _ n) _) -> n == "result") as of
@@ -296,8 +307,8 @@ lookupVar v as = let tuples = map (\(Assign v2 e) -> (v2,e)) as
 --              [y] -> Just $ aExpr y
 --              ys -> err $ "multiple result without repid: " ++ show ys
 
-hasVar :: Var -> [Assign] -> Bool
-hasVar v as = isJust $ lookupVar v as
+hasVar :: String -> [Assign] -> Bool
+hasVar v as = isJust $ lookupExpr v as
 
 -- TODO any need to compare more than the name? anything to do with reps?
 delVar :: [Assign] -> String -> [Assign]

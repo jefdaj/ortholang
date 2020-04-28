@@ -62,7 +62,7 @@ readSciInt s = case toBoundedInteger (read s :: Scientific) of
 -- TODO move to Types?
 extractNum :: Script -> Expr -> Int
 extractNum _   (Lit x n) | x == num = readSciInt n
-extractNum scr (Ref _ _ _ v) = extractNum scr $ justOrDie "extractNum failed!" $ lookupVar v (sAssigns scr)
+extractNum scr (Ref _ _ _ (Var _ v)) = extractNum scr $ justOrDie "extractNum failed!" $ lookupExpr v (sAssigns scr)
 extractNum _ _ = error "bad argument to extractNum"
 
 -- OK, so this is expanding subList to a list of load_faa ... calls and passing those to rReplaceEach
@@ -73,10 +73,10 @@ extractNum _ _ = error "bad argument to extractNum"
 -- TODO error if subVar not in (depsOf resExpr)
 -- TODO is this how the seeds should work?
 rRepeatN :: RulesFn
-rRepeatN       scr (Fun t mSeed deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
+rRepeatN       scr (Fun t mSeed deps name [resExpr, subVar@(Ref _ _ _ (Var _ v)), repsExpr]) =
   rReplaceEach scr (Fun t mSeed deps name [resExpr, subVar              , subList ])
   where
-    subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookupVar v (sAssigns scr)
+    subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookupExpr v (sAssigns scr)
     nReps   = extractNum scr repsExpr
     subs    = take nReps $ zipWith setSeed [0..] (repeat subExpr) -- TODO is always starting from 0 right?
     -- subs    = zipWith setSeed (unfoldRepID seed nReps) (repeat subExpr)

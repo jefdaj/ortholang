@@ -57,7 +57,7 @@ import Data.Maybe             (fromJust)
 import OrthoLang.Interpreter.Actions (traceA, debugA, need', readLit, writeLit,
                                       writeLits, writePaths, symlink, writeCachedLines)
 import OrthoLang.Interpreter.Paths   (exprPath, toPath, fromPath, varPath, Path, prefixOf)
-import OrthoLang.Util         (resolveSymlinks, stripWhiteSpace, removeIfExists)
+import OrthoLang.Util         (resolveSymlinks, stripWhiteSpace, removeIfExists, justOrDie)
 
 -- import qualified Data.Text.Lazy   as T
 -- import Text.Pretty.Simple             (pShowNoColor)
@@ -141,24 +141,39 @@ rAssign scr (Assign var expr) = do
       res' = debugRules "rAssign" (var, expr) res
   return res'
 
+-- TODO remove this? move it to Types?
+emptyScriptMsg :: Script
+emptyScriptMsg = Script {sAssigns = [asn], sResult = Just msg}
+  where
+    msg = Lit str "<<emptyscript>>"
+    asn = Assign resultVar msg -- TODO is Nothing OK here?
+
+-- AHA! this needs to adjust the result path for repids
 -- note this is used both in Eval and Replace, so RepIDs might be set
 compileScript :: Script -> Rules ResPath
 compileScript scr = do
   cfg <- fmap fromJust getShakeExtraRules
   let loc = "core.compile.basic.compileScript"
       scr' = trace loc ("scr:\n" ++ render (pPrint scr)) scr
-      rp' = tmpdir cfg </> "vars" </> "result"
-      rp  = toPath loc cfg rp'
   mapM_ (rAssign scr') (sAssigns scr') -- TODO remove?
   -- case lookupResult (sAssigns scr') of -- TODO can't we use sResult here?
-  case sResult scr' of
-    Nothing -> do
-      rp' %> \_ -> writeCachedLines loc rp' ["<<emptyscript>>"]
+  rp <- case sResult scr' of
+    Nothing -> compileScript emptyScriptMsg 
     Just re -> do
+      let rid = justOrDie "lookupRepID falied in compileScript" $
+                          lookupRepID "result" $ sAssigns scr
+          rp  = varPath cfg (Var rid "result") re
+          rp' = fromPath loc cfg rp
       (ExprPath ep') <- rExpr scr' re
       let ep = toPath loc cfg ep'
       rp' %> \_ -> need' loc [ep'] >> symlink rp ep
-  return $ ResPath rp'
+      return $ ResPath rp'
+  return rp
+
+-- TODO move to Paths
+-- resPath :: Config -> RepID -> ResPath
+-- resPath cfg (RepID  Nothing) = ResPath $ tmpdir cfg </> "vars" </> "result"
+-- resPath cfg (RepID (Just r)) = ResPath $ tmpdir cfg </> "reps" </> r </> "result"
 
 -- | Write a literal value (a 'str' or 'num') from OrthoLang source code to file
 rLit :: RulesFn

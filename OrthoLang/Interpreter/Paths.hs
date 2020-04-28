@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 -- TODO rename this module to TmpFiles?
+-- TODO remove from Interpreter to main lib?
 
 {-|
 OrthoLang makes heavy use of tmpfiles, and this module controls where they go
@@ -158,13 +159,14 @@ module OrthoLang.Interpreter.Paths
 
 import OrthoLang.Errors
 import OrthoLang.Types
+import OrthoLang.Util (digest, digestLength)
+import OrthoLang.Debug
 
 import Data.Maybe                     (maybeToList)
 import Data.List                      (intersperse, isInfixOf, isPrefixOf)
 import Data.List.Split                (splitOn)
 import Data.String.Utils              (replace)
 import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
-import OrthoLang.Util            (digest, digestLength)
 import Path                           (parseAbsFile, fromAbsFile)
 -- import Text.PrettyPrint.HughesPJClass (Pretty)
 
@@ -175,7 +177,6 @@ import qualified Data.Map.Strict as M
 import Control.Monad              (when)
 import Data.Either                (partitionEithers)
 import Development.Shake.FilePath (makeRelative, splitPath)
-import OrthoLang.Debug
 import Data.IORef (readIORef, atomicModifyIORef')
 import System.IO.Unsafe (unsafePerformIO)
 import Control.Exception (throw, throwIO)
@@ -260,8 +261,8 @@ TODO rename hSomething?
 TODO does it need the config at all?
 -}
 argHashes :: Config -> DigestsRef -> Script -> Expr -> [String]
-argHashes c d s (Ref _ _ _ v) = case lookupVar v (sAssigns s) of
-                                         Nothing -> error "argHashes" $ "no such var " ++ show v
+argHashes c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
+                                         Nothing -> error "argHashes" $ "no such var '" ++ vName ++ "'"
                                          Just e  -> argHashes c d s e
 argHashes _ _ _ (Lit _     v      ) = [digest v]
 argHashes c d s (Fun _ _ _ _ es   ) = map (digest . exprPath c d s) es
@@ -280,8 +281,8 @@ exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
 exprPath c _ _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath loc c p
   where
     loc = "core.paths.exprPath"
-exprPath c d s (Ref _ _ _ v) = case lookupVar v (sAssigns s) of
-                               Nothing -> error "exprPath" $ "no such var " ++ show v ++ "\n" ++ show (sAssigns s)
+exprPath c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
+                               Nothing -> error "exprPath" $ "no such var '" ++ vName ++ "'\n" ++ show (sAssigns s)
                                Just e  -> exprPath c d s e
 exprPath c d s e@(Bop _ _ _ _ _ _) = exprPath c d s (bop2fun e)
 exprPath c d s expr = traceP "exprPath" expr res
@@ -322,6 +323,7 @@ exprPathExplicit cfg prefix mSeed hashes = toPath loc cfg path
     path = dir </> base </> "result" -- <.> ext rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
+-- TODO pass the Type directly rather than an Expr here?
 varPath :: Config -> Var -> Expr -> Path
 varPath cfg (Var (RepID rep) var) expr = toPath loc cfg $ tmpdir cfg </> repDir </> base
   where

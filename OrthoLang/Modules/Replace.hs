@@ -47,7 +47,7 @@ module OrthoLang.Modules.Replace where
 
 import Development.Shake
 import OrthoLang.Types
-import OrthoLang.Script (extractExprs, setRepIDs)
+import OrthoLang.Script (extractExprs, setRepIDs, calcRepID)
 import OrthoLang.Interpreter
 import Data.Maybe (fromJust)
 
@@ -121,25 +121,12 @@ rReplace' scr resExpr subVar@(Var _ _) subExpr = do
       sub   = Assign subVar subExpr
       deps  = filter (\a -> (elem (aVar a) $ depsOf resExpr ++ depsOf subExpr)) (sAssigns scr)
       newID = calcRepID scr resExpr subVar subExpr
-      scr'  = setRepIDs newID $ Script {sAssigns = [sub] ++ deps ++ [res], sResult = Just rRef}
-  (ResPath resPath) <- compileScript scr' -- TODO is this right??
+      scr'  = setRepIDs newID $ Script
+                { sAssigns = [sub] ++ deps ++ [res] -- TODO put sub deps before it?
+                , sResult = Just rRef
+                }
+  (ResPath resPath) <- compileScript scr' -- TODO aha! this needs to adjust for RepIDs
   return (ExprPath resPath)
-
-{- This decides the "replace ID" in rReplace' above. It's important because the
- - hash needs to be unique whenever we would want to return different results,
- - but the same between things that we actually want deduplicated. So far we
- - err on the side of uniqueness.
- -
- - TODO think carefully about whether all of these need to be in here
- - TODO rename it RepHash?
- -}
-calcRepID :: Script -> Expr -> Var -> Expr -> RepID
-calcRepID scr resExpr subVar subExpr = RepID $ Just $ digest
-  [ show scr
-  , show resExpr
-  , show subVar
-  , show subExpr
-  ]
 
 {- Helper function to write the final list when the results are literals
  - TODO factor out, and maybe unify with rListLits

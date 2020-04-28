@@ -109,7 +109,7 @@ pAssign = debugParser "pAssign" $ do
   --
   -- TODO in either case, prevent recursive self-references!
   cfg <- askConfig
-  when (hasVar v (sAssigns scr) && vName /= "result") $ do
+  when (hasVar vName (sAssigns scr) && vName /= "result") $ do
     when (not $ interactive cfg) $ fail $ "duplicate variable \"" ++ vName ++ "\"" -- TODO word this better
 
   e <- lexeme pExpr
