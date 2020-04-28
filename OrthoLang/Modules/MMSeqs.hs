@@ -177,9 +177,9 @@ mmseqsSearchDb = let name = "mmseqs_search_db" in Function
  - suffix later when needed.
  -}
 rMmseqsSearchDb :: RulesFn
-rMmseqsSearchDb scr e@(Fun _ salt _ _ [n, q, s]) = do
+rMmseqsSearchDb scr e@(Fun _ seed _ _ [n, q, s]) = do
   (ExprPath ePath) <- rExpr scr n
-  (ExprPath qPath) <- rExpr scr $ Fun mms salt (depsOf q) "mmseqs_createdb" [q]
+  (ExprPath qPath) <- rExpr scr $ Fun mms seed (depsOf q) "mmseqs_createdb" [q]
   (ExprPath sPath) <- rExpr scr s -- note: the subject should already have been converted to a db
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
@@ -276,9 +276,9 @@ mmseqsSearch = let name = "mmseqs_search" in Function
 -- tMmseqsSearch n types = fail $ n ++ " requires a number and two fasta files. Instead, got: " ++ show types
 
 rMmseqsSearch :: RulesFn
-rMmseqsSearch st (Fun rtn salt deps name [e, q, s])
-  = rules st (Fun rtn salt deps name [e, q, sDb])
+rMmseqsSearch st (Fun rtn seed deps name [e, q, s])
+  = rules st (Fun rtn seed deps name [e, q, sDb])
   where
     rules = fOldRules mmseqsSearchDb
-    sDb = Fun mms salt (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
+    sDb = Fun mms seed (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
 rMmseqsSearch _ _ = fail "bad argument to rMmseqsSearch"

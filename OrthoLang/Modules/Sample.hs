@@ -1,6 +1,6 @@
 module OrthoLang.Modules.Sample where
 
--- TODO single sample works, but why doesn't the salt change when repeating??
+-- TODO single sample works, but why doesn't the seed change when repeating??
 
 import Development.Shake
 import OrthoLang.Types
@@ -27,7 +27,7 @@ olModule = Module
 sample :: Function
 sample = Function
   { fOpChar = Nothing, fName = name
-  ,fTags = [Stochastic]
+  ,fTags = [Nondeterministic]
   -- , fTypeCheck = tSample
   -- , fTypeDesc  = name ++ " : num X.list -> X.list"
   , fInputs = [Exactly num, ListSigs (AnyType "any type")]
@@ -45,7 +45,7 @@ tSample [n, ListOf x] | n == num = Right $ ListOf x
 tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
-rSample scr expr@(Fun _ (Just salt) _ _ [n, lst]) = do
+rSample scr expr@(Fun _ (Just seed) _ _ [n, lst]) = do
   (ExprPath nPath' ) <- rExpr scr n
   (ExprPath inPath') <- rExpr scr lst
   cfg  <- fmap fromJust getShakeExtraRules
@@ -56,12 +56,12 @@ rSample scr expr@(Fun _ (Just salt) _ _ [n, lst]) = do
       outPath  = exprPath cfg dRef scr expr
       outPath' = fromPath loc cfg outPath
       (ListOf t) = typeOf lst
-  outPath' %> \_ -> aSample salt t outPath nPath inPath
+  outPath' %> \_ -> aSample seed t outPath nPath inPath
   return $ ExprPath outPath'
 rSample _ _ = fail "bad argument to rSample"
 
-aSample :: Salt -> Type -> Action2
-aSample salt t outPath nPath lstPath = do
+aSample :: Seed -> Type -> Action2
+aSample seed t outPath nPath lstPath = do
   cfg <- fmap fromJust getShakeExtra
   let nPath'   = fromPath loc cfg nPath
       lstPath' = fromPath loc cfg lstPath
@@ -69,13 +69,13 @@ aSample salt t outPath nPath lstPath = do
       loc = "ortholang.modules.sample.aSample"
   nStr <- readLit loc nPath'
   lst  <- readStrings loc t lstPath'
-  debugA loc ("salt: " ++ show salt)
+  debugA loc ("seed: " ++ show seed)
   let n         = read $ formatScientific Fixed (Just 0) $ read nStr
-      elements' = randomSample salt n lst
+      elements' = randomSample seed n lst
   writeStrings loc t outPath' elements'
 
-randomSample :: Salt -> Int -> [String] -> [String]
-randomSample (Salt s) n lst = take n $ shuffle lst randGen
+randomSample :: Seed -> Int -> [String] -> [String]
+randomSample (Seed s) n lst = take n $ shuffle lst randGen
   where
     shuffle xs = shuffle' xs $ length xs
     -- according to the docs, and string is OK as a random seed

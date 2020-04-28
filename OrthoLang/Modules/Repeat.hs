@@ -2,11 +2,11 @@ module OrthoLang.Modules.Repeat where
 
 {- They're named similarly, but repeat and replace mean different things. The
  - Replace module copies the script and replaces a variable in each version of
- - it without changing the salts, so many times no real work will need to be
+ - it without changing the seeds, so many times no real work will need to be
  - redone to get the new answer. Repeat (this module) is used when you want to
  - redo the same work multiple times. It's implemented by duplicating a
- - specific expression, changing its salt in each version, and passing those to
- - replace_each. So far this is the only thing the salts are ever used for.
+ - specific expression, changing its seed in each version, and passing those to
+ - replace_each. So far this is the only thing the seeds are ever used for.
  -}
 
 -- TODO which parts of this should go in Core/Repeat.hs?
@@ -21,7 +21,7 @@ import Data.Scientific           (Scientific(), toBoundedInteger)
 olModule :: Module
 olModule = Module
   { mName = "Repeat"
-  , mDesc = "Repeatdly re-calculate variables using different random salts"
+  , mDesc = "Repeatdly re-calculate variables using different random seeds"
   , mTypes = []
   , mGroups = []
   , mEncodings = []
@@ -65,15 +65,15 @@ extractNum _ _ = error "bad argument to extractNum"
 -- and a number of reps. returns a list of the result var re-evaluated that many times
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
 -- TODO error if subVar not in (depsOf resExpr)
--- TODO is this how the salts should work?
+-- TODO is this how the seeds should work?
 rRepeatN :: RulesFn
-rRepeatN scr (Fun t mSalt deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
-  rReplaceEach scr (Fun t mSalt deps name [resExpr, subVar, subList])
+rRepeatN scr (Fun t mSeed deps name [resExpr, subVar@(Ref _ _ _ v), repsExpr]) =
+  rReplaceEach scr (Fun t mSeed deps name [resExpr, subVar, subList])
   where
     subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookupVar v (sAssigns scr)
     nReps   = extractNum scr repsExpr
-    subs    = take nReps $ zipWith setSalt [0..] (repeat subExpr) -- TODO is always starting from 0 right?
-    -- subs    = zipWith setSalt (unfoldRepID salt nReps) (repeat subExpr)
-    -- subs'   = trace ("rRepeatN salts: " ++ show (map saltOf subs)) subs
-    subList = Lst (typeOf subExpr) (depsOf subExpr) subs -- TODO salt right?
+    subs    = take nReps $ zipWith setSeed [0..] (repeat subExpr) -- TODO is always starting from 0 right?
+    -- subs    = zipWith setSeed (unfoldRepID seed nReps) (repeat subExpr)
+    -- subs'   = trace ("rRepeatN seeds: " ++ show (map seedOf subs)) subs
+    subList = Lst (typeOf subExpr) (depsOf subExpr) subs -- TODO seed right?
 rRepeatN _ _ = fail "bad argument to rRepeatN"

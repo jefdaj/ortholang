@@ -43,11 +43,11 @@ withSingleton e = Lst (typeOf e) (depsOf e) [e]
 -- | Take a list and wrap it in a singleton list, making a list of lists
 -- TODO could it be implemented using 'withSingleton' above?
 withSingletons :: Expr -> Expr
-withSingletons e = Fun (ListOf $ typeOf e) (saltOf e) (depsOf e) "singletons" [e]
+withSingletons e = Fun (ListOf $ typeOf e) (seedOf e) (depsOf e) "singletons" [e]
 
 -- | Take a function call with one arg, and make the arg a singleton list
 withSingletonArg :: Expr -> Expr
-withSingletonArg (Fun rtn salt deps name [s]) = Fun rtn salt deps name [withSingleton s]
+withSingletonArg (Fun rtn seed deps name [s]) = Fun rtn seed deps name [withSingleton s]
 withSingletonArg e = error $ "bad argument to withSingletonArg: " ++ show e
 
 -- Only used for the makeblastdb_*_each functions so far

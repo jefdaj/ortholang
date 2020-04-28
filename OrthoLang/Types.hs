@@ -40,7 +40,7 @@ module OrthoLang.Types
   , RulesEnv
   , RulesFn
   , RulesR
-  , Salt(..)
+  , Seed(..)
   , Script(..)
   , Type(..)
   , TypeGroup(..)
@@ -68,8 +68,8 @@ module OrthoLang.Types
   , operatorChars
   , runReplM
   , runRulesR
-  , saltOf
-  , setSalt
+  , seedOf
+  , setSeed
   , str
   , isLit
   , typeOf
@@ -161,7 +161,7 @@ runRulesR env act = runReaderT act env
 newtype RepID = RepID (Maybe String) deriving (Eq, Show, Read)
 
 -- A number that can be incremented to change the expression's hash, causing repeat evaluation.
-newtype Salt = Salt Int deriving (Eq, Show, Read)
+newtype Seed = Seed Int deriving (Eq, Show, Read)
 
 data Var = Var RepID String
   deriving (Eq, Show, Read)
@@ -177,22 +177,22 @@ isResult (Assign v@(Var _ "result") _) = True
 isResult _ = False
 
 instance Pretty Var where
-  pPrint (Var _ s) = PP.text s -- TODO show the salt?
+  pPrint (Var _ s) = PP.text s -- TODO show the seed?
 
 -- the common fields are:
 -- * return type
--- * salt, which can be changed to force re-evaluation of an expr + all depends
+-- * seed, which can be changed to force re-evaluation of an expr + all depends
 --   (it should start at 0 and be incremented, though that doesn't really matter)
 -- TODO start from 1 instead of 0?
 -- TODO test that it works correctly! in particular, it should go thru refs!
---      (do we need to add salts of subepxressions or something? or use randoms?)
+--      (do we need to add seeds of subepxressions or something? or use randoms?)
 -- * list of dependencies (except lits don't have any)
 data Expr
   = Lit Type String
-  | Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
-  | Bop Type (Maybe Salt) [Var] String  Expr Expr -- TODO remove salt?
-  | Fun Type (Maybe Salt) [Var] String [Expr] -- TODO is the Eq instance wrong?
-  | Lst Type [Var] [Expr] -- TODO maybe salt?
+  | Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
+  | Bop Type (Maybe Seed) [Var] String  Expr Expr -- TODO remove seed?
+  | Fun Type (Maybe Seed) [Var] String [Expr] -- TODO is the Eq instance wrong?
+  | Lst Type [Var] [Expr] -- TODO maybe seed?
   | Com CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
 
@@ -253,23 +253,23 @@ pNested e@(Bop  _ _ _ _ _ _) = PP.parens $ pPrint e
 pNested e = pPrint e
 
 -- TODO is this not actually needed? seems "show expr" handles it?
-saltOf :: Expr -> Maybe Salt
-saltOf (Lit _ _)                = Nothing
-saltOf (Lst _ _ _)              = Nothing -- TODO was the salt important?
-saltOf (Com (CompiledExpr _ _ _)) = Nothing -- TODO this makes sense right?
-saltOf (Ref _ ms _ _)     = ms
-saltOf (Bop _ ms _ _ _ _) = ms
-saltOf (Fun _ ms _ _ _)   = ms
+seedOf :: Expr -> Maybe Seed
+seedOf (Lit _ _)                = Nothing
+seedOf (Lst _ _ _)              = Nothing -- TODO was the seed important?
+seedOf (Com (CompiledExpr _ _ _)) = Nothing -- TODO this makes sense right?
+seedOf (Ref _ ms _ _)     = ms
+seedOf (Bop _ ms _ _ _ _) = ms
+seedOf (Fun _ ms _ _ _)   = ms
 
 -- TODO this needs to be recursive?
 -- TODO would a recursive version be able to replace addPrefixes in ReplaceEach?
-setSalt :: Int -> Expr -> Expr
-setSalt r e@(Lit t s)     = e
-setSalt r e@(Lst t ds es) = e
-setSalt r (Ref t ms ds v)       = Ref  t (fmap (const $ Salt r) ms) ds v
-setSalt r (Bop t ms ds s e1 e2) = Bop  t (fmap (const $ Salt r) ms) ds s e1 e2
-setSalt r (Fun t ms ds s es)    = Fun  t (fmap (const $ Salt r) ms) ds s es
-setSalt _ (Com (CompiledExpr _ _ _)) = error "types.setSalt" "not implemented for compiled rules" -- TODO should it be?
+setSeed :: Int -> Expr -> Expr
+setSeed r e@(Lit t s)     = e
+setSeed r e@(Lst t ds es) = e
+setSeed r (Ref t ms ds v)       = Ref  t (fmap (const $ Seed r) ms) ds v
+setSeed r (Bop t ms ds s e1 e2) = Bop  t (fmap (const $ Seed r) ms) ds s e1 e2
+setSeed r (Fun t ms ds s es)    = Fun  t (fmap (const $ Seed r) ms) ds s es
+setSeed _ (Com (CompiledExpr _ _ _)) = error "types.setSeed" "not implemented for compiled rules" -- TODO should it be?
 
 
 -------------
@@ -748,7 +748,7 @@ type DigestsRef = IORef DigestMap
 ---------------
 
 data FnTag
-  = Stochastic -- do repeat, do cache/share
+  = Nondeterministic -- do repeat, do cache/share
   | ReadsDirs  -- do not repeat, do not cache/share
   | ReadsFile  -- do not repeat, do cache/share TODO ReadsFiles
   | ReadsURL   -- do not repeat, do not cache/share?

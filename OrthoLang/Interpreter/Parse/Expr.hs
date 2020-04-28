@@ -134,13 +134,13 @@ mkBop bop = return $ \e1 e2 ->
        Right r1 ->
          case typecheckFn [fromJust $ fOpChar bop] (fOutput bop) (bopInputs $ fInputs bop) [typeOf e1, typeOf e2] of
            Left  msg -> error "mkBop" msg -- TODO can't `fail` because not in monad here?
-           -- TODO is the salt thing right here?
-           Right _ -> let salt = if Stochastic `elem` (fTags bop) then (Just $ Salt 0) else Nothing
-                      in Bop r1 salt (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
+           -- TODO is the seed thing right here?
+           Right _ -> let seed = if Nondeterministic `elem` (fTags bop) then (Just $ Seed 0) else Nothing
+                      in Bop r1 seed (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
 
         -- TODO is naming it after the opchar wrong now?
 -- TODO how to putState with these? is it needed at all?
---         let expr = Bop rtn (Salt 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
+--         let expr = Bop rtn (Seed 0) (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
 --             p    = exprPath cfg dRef scr expr
 --             dKey = pathDigest p
 --             dVal = (typeOf expr, p)
@@ -232,9 +232,9 @@ typecheckArgs :: Function -> [Expr] -> ParseM Expr
 typecheckArgs fn args = case typecheckFn (fName fn) (fOutput fn) (fInputs fn) (map typeOf args) of
   Left  msg -> parseFail msg
   Right rtn -> do
-    -- TODO is the salt thing right here?
-    let salt = if Stochastic `elem` (fTags fn) then Just (Salt 0) else Nothing
-        expr = Fun rtn salt deps (fName fn) args
+    -- TODO is the seed thing right here?
+    let seed = if Nondeterministic `elem` (fTags fn) then Just (Seed 0) else Nothing
+        expr = Fun rtn seed deps (fName fn) args
         deps = foldr1 union $ map depsOf args
         -- TODO hey should ParseM be ReaderT Config, StateT Script ... instead of StateT both?
     -- putDigests "typecheckArgs" (expr:args)
@@ -343,7 +343,7 @@ pRef = debugParser "pRef" $ do
   case lookupVar v (sAssigns scr) of
     Nothing -> trace "pRef" ("scr before lookup of \"" ++ var ++ "': " ++ show (sAssigns scr)) $
                  parseFail $ "no such variable \"" ++ var ++ "\"" ++ "\n" -- ++ show scr
-    Just e -> return $ Ref (typeOf e) (saltOf e) (depsOf e) v
+    Just e -> return $ Ref (typeOf e) (seedOf e) (depsOf e) v
 
 -- debugParseM :: String -> String -> 
 -- debugParseM name msg = 

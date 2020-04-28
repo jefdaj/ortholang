@@ -14,7 +14,7 @@ TMPDIR
 |   |-- crb-blast
 |   |-- seqio
 |   `-- ...
-|-- exprs: hashed result of every expression, organized by fn + arg hashes + salt
+|-- exprs: hashed result of every expression, organized by fn + arg hashes + seed
 |   |-- all
 |   |-- any
 |   |-- concat_fastas
@@ -56,16 +56,16 @@ TMPDIR\/exprs\/gbk_to_fna\/289379af7a.fna
 @
 
 For most functions, the full path is determined by fn name + argument digests
-+ repeat salt, like this:
++ repeat seed, like this:
 
 @
-TMPDIR\/exprs\/fn_name\/\<digest1\>\/\<digest2\>\/\<digest3\>\/\<salt\>\/result
+TMPDIR\/exprs\/fn_name\/\<digest1\>\/\<digest2\>\/\<digest3\>\/\<seed\>\/result
 @
 
-The repeat salt is a number (0, 1, ...) that causes OrthoLang to re-generate
+The repeat seed is a number (0, 1, ...) that causes OrthoLang to re-generate
 the result multiple times by changing the path when a user calls one of the
 repeat functions. Note: deterministic functions will soon have their repeat
-salts removed.
+seeds removed.
 
 The last directory with 'result' is a per-call tmpdir for executing scripts
 and cleaning up anything they generate if they fail before trying again.
@@ -80,7 +80,7 @@ expression!) from its path and tell Shake to 'need' them.
 
 That works for fn calls, but not for literals or lists since they have no
 depdendencies and an indeterminate number of dependencies respectively. So
-their paths are chosen by content. There's also no need for salts or
+their paths are chosen by content. There's also no need for seeds or
 per-call tmpdirs:
 
 @
@@ -288,9 +288,9 @@ exprPath c d s expr = traceP "exprPath" expr res
   where
     prefix = prefixOf expr
     rtype  = typeOf expr
-    salt   = saltOf expr
+    seed   = seedOf expr
     hashes = argHashes c d s expr
-    res    = unsafeExprPathExplicit c d prefix rtype salt hashes
+    res    = unsafeExprPathExplicit c d prefix rtype seed hashes
 
 -- TODO add names to the Bops themselves... or associate with prefix versions?
 -- TODO rewrite this to be the proper thing for bops, which is how you currently use it
@@ -311,14 +311,14 @@ prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    x   -> error "prefixOf" $ "unknown Bop: \"" ++ x ++ "\""
 
 
--- TODO remove repeat salt if fn is deterministic
+-- TODO remove repeat seed if fn is deterministic
 -- note this is always used with its unsafe digest wrapper (below)
-exprPathExplicit :: Config -> String -> Maybe Salt -> [String] -> Path
-exprPathExplicit cfg prefix mSalt hashes = toPath loc cfg path
+exprPathExplicit :: Config -> String -> Maybe Seed -> [String] -> Path
+exprPathExplicit cfg prefix mSeed hashes = toPath loc cfg path
   where
     loc = "core.paths.exprPathExplicit"
     dir  = tmpdir cfg </> "exprs" </> prefix
-    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Salt n) -> show n) mSalt)
+    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Seed n) -> show n) mSeed)
     path = dir </> base </> "result" -- <.> ext rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
@@ -396,9 +396,9 @@ addDigest dRef rtype path = atomicModifyIORef' dRef $ \ds ->
   (M.insert (pathDigest path) (rtype, path) ds, ())
 
 -- TODO should the safe version still exist? should one be renamed?
-unsafeExprPathExplicit :: Config -> DigestsRef -> String -> Type -> Maybe Salt -> [String] -> Path
-unsafeExprPathExplicit cfg dRef prefix rtype mSalt hashes =
-  let path = exprPathExplicit cfg prefix mSalt hashes
+unsafeExprPathExplicit :: Config -> DigestsRef -> String -> Type -> Maybe Seed -> [String] -> Path
+unsafeExprPathExplicit cfg dRef prefix rtype mSeed hashes =
+  let path = exprPathExplicit cfg prefix mSeed hashes
   in path `seq` unsafePerformIO $ addDigest dRef rtype path >> return path
 
 pathDigest :: Path -> PathDigest
@@ -480,7 +480,7 @@ listDigestsInPath :: Config -> FilePath -> [PathDigest]
 listDigestsInPath cfg
   = map PathDigest
   . reverse
-  . dropWhile (\s -> length s < digestLength) -- drop "result" or "<salt>/result"
+  . dropWhile (\s -> length s < digestLength) -- drop "result" or "<seed>/result"
   . reverse
   . drop 2 -- TODO drop "exprs", "<fnname>"
   . dropWhile (/= "exprs")

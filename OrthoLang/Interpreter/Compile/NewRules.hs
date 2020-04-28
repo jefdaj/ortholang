@@ -303,14 +303,14 @@ newRules mods = sequence_ $ rReloadIDs : fnRules
 TODO any need to look up prefixOf to get the canonical name?
 -}
 newPattern :: Config -> Bool -> String -> Int -> FilePattern
-newPattern cfg useSalt name nArgs =
+newPattern cfg useSeed name nArgs =
   tmpdir cfg </> "exprs" </> name </> (foldl1 (</>) (take nStars $ repeat "*")) </> "result"
   where
-    nStars = if useSalt then nArgs+1 else nArgs
+    nStars = if useSeed then nArgs+1 else nArgs
 
 -- TODO need to addDigest in here somehow?
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
--- TODO one less * if not using repeat salt
+-- TODO one less * if not using repeat seed
 {-|
 -}
 rNewRules
@@ -323,8 +323,8 @@ rNewRules
 rNewRules nArgs applyFn oSig name aFn = do
   cfg  <- fmap fromJust $ getShakeExtraRules
   mods <- fmap fromJust $ getShakeExtraRules
-  let useSalt = elem Stochastic $ fTags $ fromRight $ findFun mods name
-      ptn = newPattern cfg useSalt name nArgs
+  let useSeed = elem Nondeterministic $ fTags $ fromRight $ findFun mods name
+      ptn = newPattern cfg useSeed name nArgs
       ptn' = traceShow "rNewrules" ptn
   ptn' %> \p -> do
     -- TODO if adding rules works anywhere in an action it'll be here right?

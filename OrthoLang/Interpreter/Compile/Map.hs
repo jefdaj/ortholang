@@ -217,8 +217,8 @@ aMapArgs mapIndex eType regularArgs' tmp' mappedArg = do
 aMapElem :: Type
          -> Maybe ([Path] -> IO Path)
          -> (Path -> [Path] -> Action ())
-         -> String -> Maybe Salt -> FilePath -> Action ()
-aMapElem eType tmpFn actFn singleName mSalt out = do
+         -> String -> Maybe Seed -> FilePath -> Action ()
+aMapElem eType tmpFn actFn singleName mSeed out = do
   let argsPath = replaceBaseName out "args"
       loc = "ortholang.core.compile.map.aMapElem"
   args <- readPaths loc argsPath
@@ -238,7 +238,7 @@ aMapElem eType tmpFn actFn singleName mSalt out = do
   let out' = traceA loc (toPath loc cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
       hashes  = map (digest . toPath loc cfg) args'' -- TODO make it match exprPath
-      single  = unsafeExprPathExplicit cfg dRef singleName eType mSalt hashes
+      single  = unsafeExprPathExplicit cfg dRef singleName eType mSeed hashes
       single' = fromPath loc cfg single
       args''' = single:map (toPath loc cfg) args''
   -- TODO any risk of single' being made after we test for it here?

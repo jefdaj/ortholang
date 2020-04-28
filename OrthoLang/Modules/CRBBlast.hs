@@ -52,7 +52,7 @@ blastCRB = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly fna, Some fa "any fasta file"]
   , fOutput = Exactly crb
-  , fTags = [Stochastic]
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented
   , fOldRules = rSimpleTmp name aCRBBlast
   }
@@ -66,7 +66,7 @@ blastCRBEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly fna, ListSigs (Some fa "any fasta file")]
   , fOutput = Exactly (ListOf crb)
-  , fTags = [Stochastic]
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"
   }
   where

@@ -47,7 +47,7 @@ orthofinder = let name = "orthofinder" in Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly ofr
-  , fTags = [Stochastic]
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented
   , fOldRules = rSimple aOrthofinder
   }

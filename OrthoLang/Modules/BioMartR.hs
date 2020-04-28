@@ -227,10 +227,10 @@ aParseSearches sList out = do
 
 -- TODO rewrite in expression editing style, inserting parse_searches
 rBioMartR :: String -> RulesFn
-rBioMartR fn scr expr@(Fun rtn salt _ _ [ss]) = do
+rBioMartR fn scr expr@(Fun rtn seed _ _ [ss]) = do
   (ExprPath bmFn  ) <- rExpr scr (Lit str fn)
   -- (ExprPath sTable) <- rParseSearches s ss
-  (ExprPath sTable) <- rExpr scr $ Fun rtn salt (depsOf ss) "parse_searches" [ss]
+  (ExprPath sTable) <- rExpr scr $ Fun rtn seed (depsOf ss) "parse_searches" [ss]
   -- TODO separate tmpDirs for genomes, proteomes, etc?
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules

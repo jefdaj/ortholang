@@ -243,11 +243,11 @@ orthologInAny = let name = "ortholog_in_any" in Function
   }
 
 mkOrthologsStrRules :: String -> RulesFn
-mkOrthologsStrRules name st (Fun rType salt deps _  [groups , faas]) =
-  rExpr st $ Fun rType salt deps (name ++ "_str")   [groups', faas']
+mkOrthologsStrRules name st (Fun rType seed deps _  [groups , faas]) =
+  rExpr st $ Fun rType seed deps (name ++ "_str")   [groups', faas']
   where
-    groups' = Fun sll salt (depsOf groups) "orthogroups"      [groups]
-    faas'   = Fun sll salt (depsOf faas  ) "extract_ids_each" [faas]
+    groups' = Fun sll seed (depsOf groups) "orthogroups"      [groups]
+    faas'   = Fun sll seed (depsOf faas  ) "extract_ids_each" [faas]
 mkOrthologsStrRules _ _ _ = error "bad arguments to mkOrthologsStrRules"
 
 -- TODO can this be removed somehow?
@@ -404,11 +404,11 @@ orthologInMin = let name = "ortholog_in_min" in Function
   }
 
 mkOrthologsStrFracRules :: String -> RulesFn
-mkOrthologsStrFracRules name st (Fun rType salt deps _ [frac, groups , faas]) =
-  rExpr st $ Fun rType salt deps (name ++ "_str")  [frac, groups', faas']
+mkOrthologsStrFracRules name st (Fun rType seed deps _ [frac, groups , faas]) =
+  rExpr st $ Fun rType seed deps (name ++ "_str")  [frac, groups', faas']
   where
-    groups' = Fun sll salt (depsOf groups) "orthogroups"      [groups]
-    faas'   = Fun sll salt (depsOf faas  ) "extract_ids_each" [faas]
+    groups' = Fun sll seed (depsOf groups) "orthogroups"      [groups]
+    faas'   = Fun sll seed (depsOf faas  ) "extract_ids_each" [faas]
 mkOrthologsStrFracRules _ _ _ = error "bad arguments to mkOrthologStrFracRules"
 
 ---------------------

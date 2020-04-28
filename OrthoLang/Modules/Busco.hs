@@ -244,7 +244,7 @@ mkBusco name mode inType = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly blh, Exactly inType]
   , fOutput = Exactly bsr
-  , fTags = [Stochastic] -- TODO double check stochasticity
+  , fTags = [Nondeterministic] -- TODO double check nondeterminism
   , fNewRules = NewNotImplemented
   , fOldRules = rSimple $ aBusco mode
   }
@@ -295,7 +295,7 @@ mkBuscoEach name mode inType = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly blh, Exactly (ListOf inType)]
   , fOutput = Exactly (ListOf bsr)
-  , fTags = [Stochastic] -- TODO double check stochasticity
+  , fTags = [Nondeterministic] -- TODO double check nondeterminism
   , fNewRules = NewNotImplemented
   , fOldRules = rMap 2 $ aBusco mode
   }
@@ -314,7 +314,7 @@ buscoPercentComplete  = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly bsr]
   , fOutput = Exactly num
-  , fTags = [Stochastic] -- TODO double check stochasticity
+  , fTags = [Nondeterministic] -- TODO double check nondeterminism
   , fNewRules = NewNotImplemented
   , fOldRules = rSimpleScript "busco_percent_complete.sh"
   }
@@ -326,7 +326,7 @@ buscoPercentCompleteEach  = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf bsr)]
   , fOutput =  Exactly (ListOf num)
-  , fTags = [Stochastic] -- TODO double check stochasticity
+  , fTags = [Nondeterministic] -- TODO double check nondeterminism
   , fNewRules = NewNotImplemented
   , fOldRules = rMapSimpleScript 1 "busco_percent_complete.sh"
   }

@@ -87,7 +87,7 @@ module OrthoLang.Interpreter
 --   , RepID(..)
 --   , ResPath(..)
 --   , RulesFn
---   , Salt(..)
+--   , Seed(..)
 --   , Script
 --   , Type(..)
 --   , Encoding(..)
@@ -105,8 +105,8 @@ module OrthoLang.Interpreter
 --   , lookupIDsFile
 --   -- , lookupHashesFile
 --   , num
---   , saltOf
---   , setSalt
+--   , seedOf
+--   , setSeed
 --   , str
 --   , lit
 --   , typeOf

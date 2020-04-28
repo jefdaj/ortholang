@@ -84,12 +84,12 @@ scoreRepeats = Function
 -- tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
 rScoreRepeats :: RulesFn
-rScoreRepeats scr expr@(Fun (ScoresOf t) salt deps _ as@(_:_:subList:[])) = do
+rScoreRepeats scr expr@(Fun (ScoresOf t) seed deps _ as@(_:_:subList:[])) = do
   inputs <- rExpr scr subList
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let loc = "modules.scores.rScoreRepeats"
-      repEachExpr = Fun (ListOf t) salt deps "replace_each" as
+      repEachExpr = Fun (ListOf t) seed deps "replace_each" as
       outPath  = exprPath cfg dRef scr expr
       outPath' = debugRules loc expr $ fromPath loc cfg outPath
   scores <- rExpr scr repEachExpr

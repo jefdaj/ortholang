@@ -39,7 +39,7 @@ err = error "core.compile.compose.mCompose1"
 When this function recieves the initial expression it should be named after the
 macro function, but have the proper input 'Expr's for f1. We fix that by
 creating an f1 'Expr' around them and inserting it as the only input to f2, and
-changing the name of f2. The 'Salt' and 'Var's depended on should be correct
+changing the name of f2. The 'Seed' and 'Var's depended on should be correct
 for both already. This checks that the first `Function`'s return type matches
 the second `Function`'s only input, but otherwise assumes the 'Expr' is set up
 properly. For example, it doesn't check the names.
@@ -47,7 +47,7 @@ properly. For example, it doesn't check the names.
 TODO try to factor some of this boilerplate out and make a generic mCompose
 -}
 mCompose1 :: Function -> Function -> MacroExpansion
-mCompose1 f1 f2 _ (Fun r2 salt deps _ es)
+mCompose1 f1 f2 _ (Fun r2 seed deps _ es)
 
   -- first check that f2 expects one input
   | length (fInputs f2) /= 1 =
@@ -70,8 +70,8 @@ mCompose1 f1 f2 _ (Fun r2 salt deps _ es)
                        show r2' ++ " /= " ++ show r2
 
             -- if types look OK, make the composed function
-            else let e1 = Fun r1 salt deps (fName f1) es
-                 in Fun r2 salt deps (fName f2) [e1]
+            else let e1 = Fun r1 seed deps (fName f1) es
+                 in Fun r2 seed deps (fName f2) [e1]
 
 -- oh, and the very first check is that mCompose1 was given a Fun
 mCompose1 _ _ _ e = err $ "bad argument: " ++ show e

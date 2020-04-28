@@ -47,7 +47,7 @@ sonicparanoid = let name = "sonicparanoid" in Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly $ ListOf faa]
   , fOutput = Exactly spr
-  , fTags = [Stochastic]
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented
   , fOldRules = rSimple aSonicParanoid
   }

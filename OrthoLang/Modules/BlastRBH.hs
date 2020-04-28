@@ -64,9 +64,9 @@ mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in Functi
 
 -- flips the query and subject arguments and reuses the regular compiler above
 rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d scr (Fun rtn salt deps name [e, q, s]) = rules scr expr
+rMkBlastFromFaRev d scr (Fun rtn seed deps name [e, q, s]) = rules scr expr
   where
-    expr  = Fun rtn salt deps name_norev [e, s, q]
+    expr  = Fun rtn seed deps name_norev [e, s, q]
     rules = fOldRules $ mkBlastFromFa d
     name_norev  = replace "_rev" "" name
     -- name_norev' = debugNames "rMkBlastFromFaRev" b expr name_norev
@@ -93,11 +93,11 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = Function
 -- expression over the new action fn.
 -- TODO check if all this is right, since it's confusing!
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
-rMkBlastFromFaRevEach (bCmd, qType, _, _) scr (Fun rtn salt deps _ [e, s, qs]) = do
+rMkBlastFromFaRevEach (bCmd, qType, _, _) scr (Fun rtn seed deps _ [e, s, qs]) = do
   let revDbAct   = aMkBlastFromDbRev bCmd
       sList      = Lst (typeOf s) (depsOf s) [s]
-      subjDbExpr = Fun dbType salt (depsOf sList) dbFnName [sList]
-      editedExpr = Fun rtn salt deps editedName [e, subjDbExpr, qs]
+      subjDbExpr = Fun dbType seed (depsOf sList) dbFnName [sList]
+      editedExpr = Fun rtn seed deps editedName [e, subjDbExpr, qs]
       editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
       dbFnName   = "makeblastdb_" ++ ext qType ++ "_all"
       dbType     = EncodedAs blastdb qType
@@ -197,11 +197,11 @@ mkBlastRbh d@(bCmd, qType, sType, _) = Function
 
 -- TODO this only works with symmetric fns so far... either fix or restrict to those!
 rMkBlastRbh :: BlastDesc -> RulesFn
-rMkBlastRbh (bCmd, _, _, _) s (Fun _ salt deps _ [e, l, r]) = rExpr s main
+rMkBlastRbh (bCmd, _, _, _) s (Fun _ seed deps _ [e, l, r]) = rExpr s main
   where
-    main  = Fun bht salt deps "reciprocal_best" [lHits, rHits]
-    lHits = Fun bht salt deps  bCmd            [e, l, r]
-    rHits = Fun bht salt deps (bCmd ++ "_rev") [e, l, r]
+    main  = Fun bht seed deps "reciprocal_best" [lHits, rHits]
+    lHits = Fun bht seed deps  bCmd            [e, l, r]
+    rHits = Fun bht seed deps (bCmd ++ "_rev") [e, l, r]
 rMkBlastRbh _ _ _ = fail "bad argument to rMkBlastRbh"
 
 ----------------------
@@ -220,9 +220,9 @@ mkBlastRbhEach d@(bCmd, qType, sType, _) = Function
     name = bCmd ++ "_rbh_each"
 
 rMkBlastRbhEach :: BlastDesc -> RulesFn
-rMkBlastRbhEach (bCmd, _, _, _) s (Fun _ salt deps _ [e, l, rs]) = rExpr s main
+rMkBlastRbhEach (bCmd, _, _, _) s (Fun _ seed deps _ [e, l, rs]) = rExpr s main
   where
-    main  = Fun (ListOf bht) salt deps "reciprocal_best_each" [lHits, rHits]
-    lHits = Fun (ListOf bht) salt deps (bCmd ++ "_each"    )  [e, l, rs]
-    rHits = Fun (ListOf bht) salt deps (bCmd ++ "_rev_each")  [e, l, rs]
+    main  = Fun (ListOf bht) seed deps "reciprocal_best_each" [lHits, rHits]
+    lHits = Fun (ListOf bht) seed deps (bCmd ++ "_each"    )  [e, l, rs]
+    rHits = Fun (ListOf bht) seed deps (bCmd ++ "_rev_each")  [e, l, rs]
 rMkBlastRbhEach _ _ _ = fail "bad argument to rMkBlastRbh"

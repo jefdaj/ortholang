@@ -141,9 +141,9 @@ some = Function
   }
 
 rSome :: RulesFn
-rSome s (Fun rtn salt deps _ lol) = rExpr s diffExpr
+rSome s (Fun rtn seed deps _ lol) = rExpr s diffExpr
   where
-    anyExpr  = Fun rtn salt deps "any" lol
-    allExpr  = Fun rtn salt deps "all" lol
-    diffExpr = Bop rtn salt deps "~" anyExpr allExpr
+    anyExpr  = Fun rtn seed deps "any" lol
+    allExpr  = Fun rtn seed deps "all" lol
+    diffExpr = Bop rtn seed deps "~" anyExpr allExpr
 rSome _ _ = fail "bad argument to rSome"

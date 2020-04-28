@@ -58,8 +58,8 @@ import OrthoLang.Util  (justOrDie)
 -- parse --
 -----------
 
--- Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
--- TODO salt is Nothing rather than the expr's salt, right?
+-- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
+-- TODO seed is Nothing rather than the expr's seed, right?
 -- TODO var is added to deps, right?
 -- appendStatement :: Script -> Assign -> Script
 -- appendStatement scr a =
@@ -186,10 +186,10 @@ appendStatementRepl scr (Right asn@(Assign v e)) =
 appendResultRef :: Script -> Assign -> Script
 appendResultRef scr (Assign v e) = scr {sAssigns = sAssigns scr ++ [resAsn], sResult = Just e}
   where
-    resRef = Ref (typeOf e) (saltOf e) (depsOf e) v -- TODO vName in deps too?
+    resRef = Ref (typeOf e) (seedOf e) (depsOf e) v -- TODO vName in deps too?
     resAsn = Assign resultVar resRef
 
-  -- Ref Type (Maybe Salt) [Var] Var -- do refs need a salt? yes! (i think?)
+  -- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
 
 -- TODO general algorithm:
 -- 0. make naked expr into result assign if needed (repl only)

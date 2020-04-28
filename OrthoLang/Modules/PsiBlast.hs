@@ -241,18 +241,18 @@ aPsiblastDb writingPssm args oPath ePath qPath dbPath = do
 -- TODO do the first arg in BlastDB.hs and import here?
 -- TODO fix passing dbprefix as db itself
 withPdbSubjects :: Expr -> Expr
-withPdbSubjects (Fun rtn salt deps name [a1, a2, xs ])
-  =             (Fun rtn salt deps name [a1, a2, dbs])
+withPdbSubjects (Fun rtn seed deps name [a1, a2, xs ])
+  =             (Fun rtn seed deps name [a1, a2, dbs])
   where
-    dbs = Fun  (ListOf pdb) salt (depsOf xs) "makeblastdb_faa_each" [xs]
+    dbs = Fun  (ListOf pdb) seed (depsOf xs) "makeblastdb_faa_each" [xs]
 withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
 
 -- Wraps a single faa or an faa.list in makeblastdb_faa
 withPdbSubject :: Expr -> Expr
-withPdbSubject (Fun rtn salt deps name [a1, a2, x ])
-  =            (Fun rtn salt deps name [a1, a2, db])
+withPdbSubject (Fun rtn seed deps name [a1, a2, x ])
+  =            (Fun rtn seed deps name [a1, a2, db])
   where
-    db  = Fun  (ListOf pdb) salt (depsOf fas) "makeblastdb_faa_all" [fas]
+    db  = Fun  (ListOf pdb) seed (depsOf fas) "makeblastdb_faa_all" [fas]
     fas = case typeOf x of
             (ListOf _) -> x -- no need to wrap since already a list
             _          -> withSingleton x
@@ -261,10 +261,10 @@ withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 -- Wrap the faa query argument of a psiblast Function in psiblast_train_db
 -- TODO sometimes tries to use path to path of db as path to db... where to fix?
 withPssmQuery :: Expr -> Expr
-withPssmQuery (Fun rtn salt deps name [n, q, s])
-  =           (Fun rtn salt deps name [n, p, s])
+withPssmQuery (Fun rtn seed deps name [n, q, s])
+  =           (Fun rtn seed deps name [n, p, s])
   where
-    p = Fun pssm salt deps "psiblast_train_db" [n, q, s]
+    p = Fun pssm seed deps "psiblast_train_db" [n, q, s]
 withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 
 -------------------------------
@@ -295,17 +295,17 @@ psiblastEach = Function
     name = "psiblast_each"
 
 rPsiblastEach :: RulesFn
-rPsiblastEach st (Fun rtn salt deps name [e, fa, fas])
+rPsiblastEach st (Fun rtn seed deps name [e, fa, fas])
   -- = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
   = (rMap 3 aPsiblastSearchDb') st expr'
   where
-    ps    = Fun (ListOf pdb) salt deps "psiblast_train_db_each" [e, fa, dbs]
-    dbs   = Fun (ListOf pdb) salt (depsOf fas) "makeblastdb_faa_each" [fas]
-    expr' = Fun rtn salt deps name [e, ps, dbs]
+    ps    = Fun (ListOf pdb) seed deps "psiblast_train_db_each" [e, fa, dbs]
+    dbs   = Fun (ListOf pdb) seed (depsOf fas) "makeblastdb_faa_each" [fas]
+    expr' = Fun rtn seed deps name [e, ps, dbs]
 rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 
 psiblastAll :: Function
-psiblastAll = compose1 "psiblast_all" [Stochastic] psiblastEach (mkConcat bht) -- TODO name the mkConcat?
+psiblastAll = compose1 "psiblast_all" [Nondeterministic] psiblastEach (mkConcat bht) -- TODO name the mkConcat?
 
 psiblastDb :: Function
 psiblastDb = Function
@@ -516,7 +516,7 @@ psiblastEachPssmDb = Function
     name = "psiblast_each_pssm_db"
 
 psiblastPssmsDb :: Function
-psiblastPssmsDb = compose1 "psiblast_pssms_db" [Stochastic] psiblastEachPssmDb (mkConcat bht) -- TODO name the mkConcat?
+psiblastPssmsDb = compose1 "psiblast_pssms_db" [Nondeterministic] psiblastEachPssmDb (mkConcat bht) -- TODO name the mkConcat?
 
 -- TODO withPdbSubject fails with rMap? psiblastTrainPssms and psiblastEachPssm
 -- TODO OK this is weird, why does it fail but psiblastPssms below can use it correctly?
@@ -534,11 +534,11 @@ psiblastEachPssm = Function
 
 -- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
 psiblastPssms :: Function
-psiblastPssms = compose1 "psiblast_pssms" [Stochastic] psiblastEachPssm (mkConcat bht)
+psiblastPssms = compose1 "psiblast_pssms" [Nondeterministic] psiblastEachPssm (mkConcat bht)
 
 -- TODO wait, this is the same as above?
 psiblastPssmsAll :: Function
-psiblastPssmsAll = compose1 "psiblast_pssms_all" [Stochastic] psiblastEachPssm (mkConcat bht)
+psiblastPssmsAll = compose1 "psiblast_pssms_all" [Nondeterministic] psiblastEachPssm (mkConcat bht)
 
 -- TODO think how to write this!
 --      it needs the effect of map3of3 psiblast_pssms_all ^
@@ -547,4 +547,4 @@ psiblastPssmsAll = compose1 "psiblast_pssms_all" [Stochastic] psiblastEachPssm (
 -- TODO test this
 -- TODO wait this is the same as above too??
 psiblastPssmsEach :: Function
-psiblastPssmsEach = compose1 "psiblast_pssms_each" [Stochastic] psiblastEachPssm (mkConcat bht)
+psiblastPssmsEach = compose1 "psiblast_pssms_each" [Nondeterministic] psiblastEachPssm (mkConcat bht)

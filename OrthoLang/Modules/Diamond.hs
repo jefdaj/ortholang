@@ -53,7 +53,7 @@ diamondmakedb = let name = "diamond_makedb" in Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly faa]
   , fOutput = Exactly dmnd
-  , fTags = [Stochastic] -- TODO double check: is it deterministic?
+  , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
   , fNewRules = NewNotImplemented, fOldRules = rSimpleScriptPar "diamond_makedb.sh"
   }
 
@@ -68,7 +68,7 @@ diamondmakedbEach = let name = "diamond_makedb_each" in Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly (ListOf dmnd)
-  , fTags = [Stochastic] -- TODO double check: is it deterministic?
+  , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
   , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "diamond_makedb.sh"
   }
  
@@ -81,7 +81,7 @@ diamondmakedbAll = let name = "diamond_makedb_all" in Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly dmnd
-  , fTags = [Stochastic] -- TODO double check: is it deterministic?
+  , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
   , fNewRules = NewNotImplemented, fOldRules = rDiamondmakedbAll
   }
 
@@ -171,7 +171,7 @@ variants =
 
 -- TODO make into a more general utility?
 rFlip23 :: RulesFn -> RulesFn
-rFlip23 rFn scr (Fun rtn salt deps ids args) = rFn scr (Fun rtn salt deps ids $ fn args)
+rFlip23 rFn scr (Fun rtn seed deps ids args) = rFn scr (Fun rtn seed deps ids $ fn args)
   where
     fn (one:two:three:rest) = (one:three:two:rest)
     fn as = error $ "bad argument to rFlip23: " ++ show as
@@ -182,7 +182,7 @@ mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" +
   { fOpChar = Nothing, fName = name'
   , fInputs = [Exactly num, Exactly qType, Exactly sType]
   , fOutput = Exactly rType
-  , fTags = [Stochastic] -- TODO double check: is it deterministic?
+  , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
   , fNewRules = NewNotImplemented, fOldRules = rFn dCmd
   }
 
@@ -216,22 +216,22 @@ aDiamondFromDb _ _ = error $ "bad argument to aDiamondFromDb"
 -- inserts a "makedb" call and reuses the _db compiler from above
 -- based on the version in Blast.hs but a little simpler
 rDiamondFromFa :: [String] -> RulesFn
-rDiamondFromFa dCmd st (Fun rtn salt deps _ [e, q, s])
-  = rules st (Fun rtn salt deps name1 [e, q, dbExpr])
+rDiamondFromFa dCmd st (Fun rtn seed deps _ [e, q, s])
+  = rules st (Fun rtn seed deps name1 [e, q, dbExpr])
   where
     rules  = rSimple $ aDiamondFromDb dCmd
     name1  = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd
-    dbExpr = Fun dmnd salt (depsOf s) "diamond_makedb" [s]
+    dbExpr = Fun dmnd seed (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"
 
 -- same, but inserts a "makedb_each" call and maps over it
 rDiamondFromFaEach :: [String] -> RulesFn
-rDiamondFromFaEach dCmd st (Fun rtn salt deps name [e, q, ss])
-  = rules st (Fun rtn salt deps name_db [e, q, dbsExpr])
+rDiamondFromFaEach dCmd st (Fun rtn seed deps name [e, q, ss])
+  = rules st (Fun rtn seed deps name_db [e, q, dbsExpr])
   where
     rules   = rMap 3 $ aDiamondFromDb dCmd
     name_db = replace "_each" "_db_each" name
-    dbsExpr = Fun (ListOf dmnd) salt (depsOf ss) "diamond_makedb_each" [ss]
+    dbsExpr = Fun (ListOf dmnd) seed (depsOf ss) "diamond_makedb_each" [ss]
 rDiamondFromFaEach _ _ _ = fail "bad argument to rDiamondFromFa"
 
 -- TODO this is passing the dmnd and faa args backward to diamond.sh, but why?
@@ -241,12 +241,12 @@ rDiamondFromFaEach _ _ _ = fail "bad argument to rDiamondFromFa"
 --        diamond_blastp_rev_db_each e (diamond_makedb s) qs
 --        ...
 rDiamondFromFaRevEach :: [String] -> RulesFn
-rDiamondFromFaRevEach dCmd st (Fun rtn salt deps name [e, s, qs])
-  = rules st (Fun rtn salt deps name' [e, dbExpr, qs])
+rDiamondFromFaRevEach dCmd st (Fun rtn seed deps name [e, s, qs])
+  = rules st (Fun rtn seed deps name' [e, dbExpr, qs])
   where
     rules   = rFlip23 . rMap 2 $ aDiamondFromDb dCmd
     -- name1   = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd ++ "_db_each" -- TODO is this right? get explicitly?
     name'  = replace "_rev_each" "_db_rev_each" name
-    -- dbsExpr = Fun (ListOf dmnd) salt (depsOf ss) "diamond_makedb_each" [ss]
-    dbExpr = Fun dmnd salt (depsOf s) "diamond_makedb" [s]
+    -- dbsExpr = Fun (ListOf dmnd) seed (depsOf ss) "diamond_makedb_each" [ss]
+    dbExpr = Fun dmnd seed (depsOf s) "diamond_makedb" [s]
 rDiamondFromFaRevEach _ _ _ = fail "bad argument to rDiamondFromFa"

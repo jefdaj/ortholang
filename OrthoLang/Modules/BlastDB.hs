@@ -555,11 +555,11 @@ mkMakeblastdbEach faType = Function
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
-rMakeblastdbEach scr (Fun (ListOf dbType) salt deps name [e]) = do
+rMakeblastdbEach scr (Fun (ListOf dbType) seed deps name [e]) = do
   cfg <- fmap fromJust getShakeExtraRules
   let tmpDir = makeblastdbCache cfg 
       act1 = aMakeblastdbAll dbType tmpDir -- TODO should be i right? not ids?
-      expr' = Fun (ListOf dbType) salt deps name [withSingletons e]
+      expr' = Fun (ListOf dbType) seed deps name [withSingletons e]
   (rMap 1 act1) scr expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 

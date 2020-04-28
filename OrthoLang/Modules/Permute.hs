@@ -1,6 +1,6 @@
 module OrthoLang.Modules.Permute where
 
--- TODO put this in Core because with the salts it's not separable
+-- TODO put this in Core because with the seeds it's not separable
 
 import Development.Shake
 import OrthoLang.Types

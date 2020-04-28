@@ -102,7 +102,7 @@ rBop :: RulesFn
 rBop s e@(Bop t ms ds _ e1 e2) = rExpr s es >> rExpr s fn
   where
     es = Lst t ds [e1, e2] -- TODO (ListOf t)?
-    fn = Fun t ms ds (prefixOf e) [es] -- TODO is the salt right?
+    fn = Fun t ms ds (prefixOf e) [es] -- TODO is the seed right?
 rBop _ e = error "rBop" $ "called with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- | This is in the process of being replaced with fNewRules,
@@ -121,7 +121,7 @@ rNamedFunction' scr expr name = do
     Nothing -> error "rNamedFunction" $ "no such function \"" ++ name ++ "\""
     Just f  -> case fNewRules f of
                  NewNotImplemented -> if "load_" `isPrefixOf` fName f
-                                        then (fOldRules f) scr $ setSalt 0 expr
+                                        then (fOldRules f) scr $ setSeed 0 expr
                                         else (fOldRules f) scr expr
                  -- note that the rules themselves should have been added by 'newRules'
                  NewRules _ -> let p   = fromPath loc cfg $ exprPath cfg dRef scr expr
@@ -279,7 +279,7 @@ rListPaths scr e@(Lst _ _ exprs) = do
   let loc = "core.compile.basic.rListPaths"
       paths'   = map (\(ExprPath p) -> toPath loc cfg p) paths
       -- hash     = digest $ concat $ map digest paths'
-      -- outPath  = unsafeExprPathExplicit cfg "list" (ListOf rtn) salt [hash]
+      -- outPath  = unsafeExprPathExplicit cfg "list" (ListOf rtn) seed [hash]
       outPath  = exprPath cfg dRef scr e
       outPath' = debugRules loc e $ fromPath loc cfg outPath
   outPath' %> \_ -> aListPaths paths' outPath
