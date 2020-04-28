@@ -20,7 +20,7 @@ Script
                 [ Var ( RepID Nothing ) "faas1" 
                 , Var ( RepID Nothing ) "faas2" 
                 ] "length_each" 
-                [ Lst faa.list 
+                [ Lst faa.list Nothing 
                     [ Var ( RepID Nothing ) "faas1" 
                     , Var ( RepID Nothing ) "faas2" 
                     ] 

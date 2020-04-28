@@ -7,7 +7,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "mapped" 
             , aExpr = Fun gbk.list Nothing [] "load_gbk_each" 
-                [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ] ]
+                [ Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ] ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
@@ -15,7 +15,7 @@ Script
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst gbk 
+                ( Lst gbk Nothing 
                     [ Var ( RepID Nothing ) "single" ] 
                     [ Ref gbk Nothing [] 
                         ( Var ( RepID Nothing ) "single" )
@@ -31,7 +31,7 @@ Script
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "mapped" 
             ] "|" 
-            ( Lst gbk 
+            ( Lst gbk Nothing 
                 [ Var ( RepID Nothing ) "single" ] 
                 [ Ref gbk Nothing [] 
                     ( Var ( RepID Nothing ) "single" )

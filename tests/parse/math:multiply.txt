@@ -7,7 +7,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "r2" 
             , aExpr = Fun num Nothing [] "multiply" 
-                [ Lst num [] 
+                [ Lst num Nothing [] 
                     [ Lit num "2.0" 
                     , Lit num "3.5" 
                     ] 
@@ -19,8 +19,8 @@ Script
                 [ Var ( RepID Nothing ) "r1" 
                 , Var ( RepID Nothing ) "r2" 
                 ] "~" 
-                ( Lst num [] [ Lit num "7.0" ] ) 
-                ( Lst num 
+                ( Lst num Nothing [] [ Lit num "7.0" ] ) 
+                ( Lst num Nothing 
                     [ Var ( RepID Nothing ) "r1" 
                     , Var ( RepID Nothing ) "r2" 
                     ] 
@@ -37,8 +37,8 @@ Script
             [ Var ( RepID Nothing ) "r1" 
             , Var ( RepID Nothing ) "r2" 
             ] "~" 
-            ( Lst num [] [ Lit num "7.0" ] ) 
-            ( Lst num 
+            ( Lst num Nothing [] [ Lit num "7.0" ] ) 
+            ( Lst num Nothing 
                 [ Var ( RepID Nothing ) "r1" 
                 , Var ( RepID Nothing ) "r2" 
                 ] 

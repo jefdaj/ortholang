@@ -11,7 +11,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "faas_to_use" 
             , aExpr = Fun faa.list 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "n_to_use" 
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "sample" 
@@ -24,13 +24,13 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "spres" 
             , aExpr = Fun ofr 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "faas_to_use" 
                 , Var ( RepID Nothing ) "n_to_use" 
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "orthofinder" 
                 [ Ref faa.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "n_to_use" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
@@ -45,7 +45,7 @@ Script
                 , Var ( RepID Nothing ) "n_to_use" 
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "length_each" 
-                [ Lst str.list.list 
+                [ Lst str.list.list Nothing 
                     [ Var ( RepID Nothing ) "spres" 
                     , Var ( RepID Nothing ) "faas_to_use" 
                     , Var ( RepID Nothing ) "n_to_use" 
@@ -59,14 +59,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "0.0" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -80,14 +80,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "1.0" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -101,14 +101,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "2.0" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -122,14 +122,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "3.0" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -143,14 +143,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "4.0" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -164,14 +164,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "5.0" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -185,14 +185,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "10.0" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -206,14 +206,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "0.1" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -227,14 +227,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "0.2" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -248,14 +248,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "0.3" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -269,14 +269,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "0.4" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -290,14 +290,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "0.5" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -311,14 +311,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "-0.1" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -332,14 +332,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "-1.0" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -353,14 +353,14 @@ Script
                         ] "ortholog_in_max" 
                         [ Lit num "-10.0" 
                         , Ref ofr 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "faas_to_use" 
                             , Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
                             ( Var ( RepID Nothing ) "spres" )
                         , Ref faa.list 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "n_to_use" 
                             , Var ( RepID Nothing ) "mycoplasma" 
                             ] 
@@ -377,7 +377,7 @@ Script
             , Var ( RepID Nothing ) "n_to_use" 
             , Var ( RepID Nothing ) "mycoplasma" 
             ] "length_each" 
-            [ Lst str.list.list 
+            [ Lst str.list.list Nothing 
                 [ Var ( RepID Nothing ) "spres" 
                 , Var ( RepID Nothing ) "faas_to_use" 
                 , Var ( RepID Nothing ) "n_to_use" 
@@ -391,14 +391,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "0.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -412,14 +412,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "1.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -433,14 +433,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "2.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -454,14 +454,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "3.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -475,14 +475,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "4.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -496,14 +496,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "5.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -517,14 +517,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "10.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -538,14 +538,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "0.1" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -559,14 +559,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "0.2" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -580,14 +580,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "0.3" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -601,14 +601,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "0.4" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -622,14 +622,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "0.5" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -643,14 +643,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "-0.1" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -664,14 +664,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "-1.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -685,14 +685,14 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "-10.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "faas_to_use" 
                         , Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
                         ( Var ( RepID Nothing ) "spres" )
                     , Ref faa.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "n_to_use" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 

@@ -15,7 +15,7 @@ Script
                 [ Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "makeblastdb_faa_all" 
-                [ Lst faa 
+                [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
@@ -41,7 +41,7 @@ Script
                 [ Lit num "1.0e-10" 
                 , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Lst faa 
+                , Lst faa Nothing 
                     [ Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 

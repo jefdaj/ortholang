@@ -15,7 +15,7 @@ Script
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] "makeblastdb_fna_all" 
-                [ Lst fna 
+                [ Lst fna Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 

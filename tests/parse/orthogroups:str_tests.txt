@@ -2,7 +2,7 @@ Script
     { sAssigns = 
         [ Assign 
             { aVar = Var ( RepID Nothing ) "g1" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "1" 
                 , Lit str "2" 
                 , Lit str "3" 
@@ -10,7 +10,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "g2" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "2" 
                 , Lit str "3" 
                 , Lit str "4" 
@@ -18,18 +18,18 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "g3" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "4" 
                 , Lit str "5" 
                 ] 
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "g4" 
-            , aExpr = Lst str [] [ Lit str "6" ]
+            , aExpr = Lst str Nothing [] [ Lit str "6" ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "groups" 
-            , aExpr = Lst str.list 
+            , aExpr = Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "g1" 
                 , Var ( RepID Nothing ) "g2" 
                 , Var ( RepID Nothing ) "g3" 
@@ -47,7 +47,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "f1" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "1" 
                 , Lit str "2" 
                 , Lit str "3" 
@@ -55,7 +55,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "f2" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "4" 
                 , Lit str "5" 
                 , Lit str "6" 
@@ -63,7 +63,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "f3" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "one" 
                 , Lit str "two" 
                 , Lit str "three" 
@@ -71,7 +71,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "fastas" 
-            , aExpr = Lst str.list 
+            , aExpr = Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "f1" 
                 , Var ( RepID Nothing ) "f2" 
                 , Var ( RepID Nothing ) "f3" 
@@ -86,7 +86,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst str.list.list 
+            , aExpr = Lst str.list.list Nothing 
                 [ Var ( RepID Nothing ) "groups" 
                 , Var ( RepID Nothing ) "g1" 
                 , Var ( RepID Nothing ) "g2" 
@@ -905,7 +905,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst str.list.list 
+        ( Lst str.list.list Nothing 
             [ Var ( RepID Nothing ) "groups" 
             , Var ( RepID Nothing ) "g1" 
             , Var ( RepID Nothing ) "g2" 

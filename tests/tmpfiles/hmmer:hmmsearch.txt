@@ -19,34 +19,35 @@
 |   |-- blastp_db
 |   |   `-- 76bf3d901d
 |   |       `-- ec1f6f502d
-|   |           `-- d3bf875bef
-|   |               `-- result -> out
+|   |           `-- ef7067049b
+|   |               `-- 0
+|   |                   `-- result -> out
 |   |-- diff
-|   |   `-- 602d804cfc
+|   |   `-- 86bc14288e
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_hmm_targets
-|   |   `-- e72e981273
+|   |   `-- 6568c256f1
 |   |       `-- result
 |   |-- extract_seqs
 |   |   `-- 695ad777c5
-|   |       `-- 969f282e0e
+|   |       `-- eb8d7504ab
 |   |           `-- result
 |   |-- extract_targets
-|   |   `-- 8ce6f1a5c4
+|   |   `-- 384acef8f5
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- hmmbuild
-|   |   `-- 92572e30a9
+|   |   `-- 1f191d6326
 |   |       |-- result
 |   |       `-- result.err
 |   |-- hmmsearch
 |   |   `-- 01b1e93729
-|   |       `-- d9556f667d
+|   |       `-- 6e6b9f0718
 |   |           `-- 695ad777c5
 |   |               |-- result
 |   |               `-- result.err
 |   |-- list
-|   |   |-- af2a474c38
+|   |   |-- 0281398bde
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- fe26b625e5
 |   |       `-- result -> ../../../cache/lines/...
@@ -57,9 +58,10 @@
 |   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
 |   |-- makeblastdb_faa
 |   |   `-- cf7e527970
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- muscle
-|   |   `-- 3b515b9783
+|   |   `-- af37bb1245
 |   |       `-- result
 |   |-- num
 |   |   |-- 3e281fad0f
@@ -72,15 +74,15 @@
 |       `-- f6e8c8ce02
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits2.hht -> ../exprs/hmmsearch/01b1e93729/d9556f667d/695ad777c5/result
-    |-- hits2_ids.str.list -> ../exprs/extract_hmm_targets/e72e981273/result
-    |-- hits_aln.aln -> ../exprs/muscle/3b515b9783/result
-    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/d3bf875bef/result
-    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/969f282e0e/result
-    |-- hits_hmm.hmm -> ../exprs/hmmbuild/92572e30a9/result
-    |-- hits_ids.str.list -> ../exprs/extract_targets/8ce6f1a5c4/result
+    |-- hits2.hht -> ../exprs/hmmsearch/01b1e93729/6e6b9f0718/695ad777c5/result
+    |-- hits2_ids.str.list -> ../exprs/extract_hmm_targets/6568c256f1/result
+    |-- hits_aln.aln -> ../exprs/muscle/af37bb1245/result
+    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/ef7067049b/0/result
+    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/eb8d7504ab/result
+    |-- hits_hmm.hmm -> ../exprs/hmmbuild/1f191d6326/result
+    |-- hits_ids.str.list -> ../exprs/extract_targets/384acef8f5/result
     |-- mgen.faa -> ../exprs/load_faa/d96205bf90/result
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
-    `-- result -> ../exprs/diff/602d804cfc/result
+    `-- result -> ../exprs/diff/86bc14288e/result
 
-42 directories, 41 files
+44 directories, 41 files

@@ -10,7 +10,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "singles" 
-            , aExpr = Lst fna.blastdb 
+            , aExpr = Lst fna.blastdb Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] 
@@ -35,7 +35,7 @@ Script
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] "makeblastdb_fna_each" 
-                [ Lst fna 
+                [ Lst fna Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
@@ -53,7 +53,7 @@ Script
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] "makeblastdb_fna_all" 
-                [ Lst fna 
+                [ Lst fna Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
@@ -73,7 +73,7 @@ Script
                 , Var ( RepID Nothing ) "each" 
                 , Var ( RepID Nothing ) "both" 
                 ] "length_each" 
-                [ Lst fna.blastdb.list 
+                [ Lst fna.blastdb.list Nothing 
                     [ Var ( RepID Nothing ) "singles" 
                     , Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
@@ -110,7 +110,7 @@ Script
                             ] 
                             ( Var ( RepID Nothing ) "each" )
                         )
-                    , Lst fna.blastdb 
+                    , Lst fna.blastdb Nothing 
                         [ Var ( RepID Nothing ) "both" 
                         , Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "genes5" 
@@ -134,7 +134,7 @@ Script
             , Var ( RepID Nothing ) "each" 
             , Var ( RepID Nothing ) "both" 
             ] "length_each" 
-            [ Lst fna.blastdb.list 
+            [ Lst fna.blastdb.list Nothing 
                 [ Var ( RepID Nothing ) "singles" 
                 , Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
@@ -171,7 +171,7 @@ Script
                         ] 
                         ( Var ( RepID Nothing ) "each" )
                     )
-                , Lst fna.blastdb 
+                , Lst fna.blastdb Nothing 
                     [ Var ( RepID Nothing ) "both" 
                     , Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 

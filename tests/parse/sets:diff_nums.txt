@@ -2,7 +2,7 @@ Script
     { sAssigns = 
         [ Assign 
             { aVar = Var ( RepID Nothing ) "set1" 
-            , aExpr = Lst num [] 
+            , aExpr = Lst num Nothing [] 
                 [ Lit num "1.0" 
                 , Lit num "2.0" 
                 , Lit num "3.0" 
@@ -17,7 +17,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "set2" 
-            , aExpr = Lst num [] 
+            , aExpr = Lst num Nothing [] 
                 [ Lit num "5.0" 
                 , Lit num "6.0" 
                 , Lit num "7.0" 
@@ -37,7 +37,7 @@ Script
                 [ Var ( RepID Nothing ) "set1" 
                 , Var ( RepID Nothing ) "set2" 
                 ] "diff" 
-                [ Lst num.list 
+                [ Lst num.list Nothing 
                     [ Var ( RepID Nothing ) "set1" 
                     , Var ( RepID Nothing ) "set2" 
                     ] 
@@ -63,7 +63,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst num.list 
+            , aExpr = Lst num.list Nothing 
                 [ Var ( RepID Nothing ) "res1" 
                 , Var ( RepID Nothing ) "set1" 
                 , Var ( RepID Nothing ) "set2" 
@@ -83,7 +83,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst num.list 
+        ( Lst num.list Nothing 
             [ Var ( RepID Nothing ) "res1" 
             , Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 

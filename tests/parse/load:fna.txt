@@ -7,7 +7,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "mapped" 
             , aExpr = Fun fna.list Nothing [] "load_fna_each" 
-                [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ] ]
+                [ Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ] ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
@@ -15,7 +15,7 @@ Script
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst fna 
+                ( Lst fna Nothing 
                     [ Var ( RepID Nothing ) "single" ] 
                     [ Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "single" )
@@ -31,7 +31,7 @@ Script
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "mapped" 
             ] "|" 
-            ( Lst fna 
+            ( Lst fna Nothing 
                 [ Var ( RepID Nothing ) "single" ] 
                 [ Ref fna Nothing [] 
                     ( Var ( RepID Nothing ) "single" )

@@ -51,7 +51,7 @@ Script
                         ( Var ( RepID Nothing ) "n" )
                     , Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "maga5" )
-                    , Lst fna 
+                    , Lst fna Nothing 
                         [ Var ( RepID Nothing ) "maga" ] 
                         [ Ref fna Nothing [] 
                             ( Var ( RepID Nothing ) "maga" )
@@ -96,7 +96,7 @@ Script
                         ( Var ( RepID Nothing ) "n" )
                     , Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "maga" )
-                    , Lst fna 
+                    , Lst fna Nothing 
                         [ Var ( RepID Nothing ) "maga5" ] 
                         [ Ref fna Nothing [] 
                             ( Var ( RepID Nothing ) "maga5" )
@@ -165,7 +165,7 @@ Script
                 , Var ( RepID Nothing ) "mappedFwd" 
                 , Var ( RepID Nothing ) "mappedRev" 
                 ] "|" 
-                ( Lst str.list 
+                ( Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "singleFwd" 
                     , Var ( RepID Nothing ) "n" 
@@ -206,7 +206,7 @@ Script
             , Var ( RepID Nothing ) "mappedFwd" 
             , Var ( RepID Nothing ) "mappedRev" 
             ] "|" 
-            ( Lst str.list 
+            ( Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "singleFwd" 
                 , Var ( RepID Nothing ) "n" 

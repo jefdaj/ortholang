@@ -2,7 +2,7 @@ Script
     { sAssigns = 
         [ Assign 
             { aVar = Var ( RepID Nothing ) "l1" 
-            , aExpr = Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+            , aExpr = Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "list1" 
@@ -14,7 +14,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "list2" 
-            , aExpr = Lst faa [] 
+            , aExpr = Lst faa Nothing [] 
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ] ]
             } 
         , Assign 

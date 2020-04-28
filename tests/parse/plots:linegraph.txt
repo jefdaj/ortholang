@@ -23,7 +23,7 @@ Script
                     ( Var ( RepID Nothing ) "yvar" )
                 , Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "xvar" )
-                , Lst num [] 
+                , Lst num Nothing [] 
                     [ Lit num "1.0" 
                     , Lit num "2.0" 
                     , Lit num "3.0" 
@@ -52,7 +52,7 @@ Script
                     )
                 , Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "xvar" )
-                , Lst num [] 
+                , Lst num Nothing [] 
                     [ Lit num "1.0" 
                     , Lit num "2.0" 
                     , Lit num "3.0" 
@@ -72,7 +72,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "plots" 
-            , aExpr = Lst png 
+            , aExpr = Lst png Nothing 
                 [ Var ( RepID Nothing ) "named" 
                 , Var ( RepID Nothing ) "yvar" 
                 , Var ( RepID Nothing ) "xvar" 

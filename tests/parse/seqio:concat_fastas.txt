@@ -3,7 +3,7 @@ Script
         [ Assign 
             { aVar = Var ( RepID Nothing ) "single" 
             , aExpr = Fun fna Nothing [] "concat_fna" 
-                [ Lst fna [] 
+                [ Lst fna Nothing [] 
                     [ Fun fna Nothing [] "gbk_to_fna" 
                         [ Lit str "cds" 
                         , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
@@ -18,8 +18,8 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "mapped" 
             , aExpr = Fun fna.list Nothing [] "concat_fna_each" 
-                [ Lst fna.list [] 
-                    [ Lst fna [] 
+                [ Lst fna.list Nothing [] 
+                    [ Lst fna Nothing [] 
                         [ Fun fna Nothing [] "gbk_to_fna" 
                             [ Lit str "cds" 
                             , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
@@ -38,7 +38,7 @@ Script
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst fna 
+                ( Lst fna Nothing 
                     [ Var ( RepID Nothing ) "single" ] 
                     [ Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "single" )
@@ -54,7 +54,7 @@ Script
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "mapped" 
             ] "|" 
-            ( Lst fna 
+            ( Lst fna Nothing 
                 [ Var ( RepID Nothing ) "single" ] 
                 [ Ref fna Nothing [] 
                     ( Var ( RepID Nothing ) "single" )

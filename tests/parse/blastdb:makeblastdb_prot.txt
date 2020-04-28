@@ -10,7 +10,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "singles" 
-            , aExpr = Lst faa.blastdb 
+            , aExpr = Lst faa.blastdb Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] 
@@ -35,7 +35,7 @@ Script
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] "makeblastdb_faa_each" 
-                [ Lst faa 
+                [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
@@ -53,7 +53,7 @@ Script
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] "makeblastdb_faa_all" 
-                [ Lst faa 
+                [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
@@ -73,7 +73,7 @@ Script
                 , Var ( RepID Nothing ) "each" 
                 , Var ( RepID Nothing ) "both" 
                 ] "length_each" 
-                [ Lst faa.blastdb.list 
+                [ Lst faa.blastdb.list Nothing 
                     [ Var ( RepID Nothing ) "singles" 
                     , Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
@@ -110,7 +110,7 @@ Script
                             ] 
                             ( Var ( RepID Nothing ) "each" )
                         )
-                    , Lst faa.blastdb 
+                    , Lst faa.blastdb Nothing 
                         [ Var ( RepID Nothing ) "both" 
                         , Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "genes5" 
@@ -134,7 +134,7 @@ Script
             , Var ( RepID Nothing ) "each" 
             , Var ( RepID Nothing ) "both" 
             ] "length_each" 
-            [ Lst faa.blastdb.list 
+            [ Lst faa.blastdb.list Nothing 
                 [ Var ( RepID Nothing ) "singles" 
                 , Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
@@ -171,7 +171,7 @@ Script
                         ] 
                         ( Var ( RepID Nothing ) "each" )
                     )
-                , Lst faa.blastdb 
+                , Lst faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "both" 
                     , Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 

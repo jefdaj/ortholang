@@ -10,7 +10,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst str.list 
+            , aExpr = Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "blins" 
                 , Var ( RepID Nothing ) "ball" 
                 ] 
@@ -22,7 +22,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst str.list 
+        ( Lst str.list Nothing 
             [ Var ( RepID Nothing ) "blins" 
             , Var ( RepID Nothing ) "ball" 
             ] 

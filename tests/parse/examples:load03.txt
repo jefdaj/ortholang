@@ -18,7 +18,7 @@ Script
                 [ Fun faa.list Nothing [] "gbk_to_faa_each" 
                     [ Lit str "cds" 
                     , Fun gbk.list Nothing [] "load_gbk_each" 
-                        [ Lst str [] 
+                        [ Lst str Nothing [] 
                             [ Lit str "examples/sequences/PCC_7942_chr.gbk" 
                             , Lit str "examples/sequences/PCC_7942_pANL.gbk" 
                             ] 

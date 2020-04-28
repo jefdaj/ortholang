@@ -19,7 +19,7 @@ Script
                 [ Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "makeblastdb_faa_all" 
-                [ Lst faa 
+                [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 

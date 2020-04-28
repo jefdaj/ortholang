@@ -21,14 +21,14 @@ n1 = Lit num "1.0"
 n2 = Lit num "2.0"
 
 lst0, lst1, lst2, lst3 :: Expr
-lst0  = Lst Empty [] [] -- ah, this is getting empty.list instead of empty
-lst1  = Lst num [] [n1]
-lst2  = Lst num [] [n1, n2]
-lst3  = Lst (ListOf num) [] [lst1]
+lst0  = Lst  Empty       Nothing [] [] -- ah, this is getting empty.list instead of empty
+lst1  = Lst  num         Nothing [] [n1]
+lst2  = Lst  num         Nothing [] [n1, n2]
+lst3  = Lst (ListOf num) Nothing [] [lst1]
 
 s4, lst4 :: Expr
 s4   = Lit str "four"
-lst4 = Lst str [] [s4]
+lst4 = Lst str Nothing [] [s4]
 
 -- TODO why do bops use the list type while lists use the elem type?
 bop00, bop10, bop01, bop40, bop04 :: Expr
@@ -49,8 +49,8 @@ faa0  = Fun (ListOf faa) Nothing [] "load_faa_each" [lst0]
 
 -- TODO fix pretty-printing to write (ListOf faa) instead of faa.lst here
 somefaa, loadsome, loadbop1 :: Expr
-somefaa  = Lst str [] [Lit str "some.faa"]
-loadsome = (Fun (ListOf faa) Nothing [] "load_faa_each" [somefaa])
+somefaa  = Lst str Nothing [] [Lit str "some.faa"]
+loadsome = Fun (ListOf faa) Nothing [] "load_faa_each" [somefaa]
 loadbop1 = Bop (ListOf faa) Nothing [] "~" loadsome loadsome
 
 --------------
@@ -98,10 +98,10 @@ exExprs = exTerms ++ map addParens exTerms ++
   , ("[\"four\"] | [] | []", Bop (ListOf str) Nothing [] "|" bop40 lst0)
 
   -- can put fn calls in lsts, with or without separators
-  , ("[ length [] ]", Lst num [] [len [lst0]])
-  , ("[(length [])]", Lst num [] [len [lst0]])
-  , ("[length [],  length []]", Lst num [] [len [lst0], len [lst0]])
-  , ("[length [],\nlength []]", Lst num [] [len [lst0], len [lst0]])
+  , ("[ length [] ]", Lst num Nothing [] [len [lst0]])
+  , ("[(length [])]", Lst num Nothing [] [len [lst0]])
+  , ("[length [],  length []]", Lst num Nothing [] [len [lst0], len [lst0]])
+  , ("[length [],\nlength []]", Lst num Nothing [] [len [lst0], len [lst0]])
 
   -- should be able to put fn calls in bops, with or without parens
   , ("(load_faa_each [\"some.faa\"]) ~ (load_faa_each [\"some.faa\"])", loadbop1)

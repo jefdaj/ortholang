@@ -22,7 +22,7 @@ Script
             { aVar = Var ( RepID Nothing ) "mapped" 
             , aExpr = Fun str.list.list Nothing 
                 [ Var ( RepID Nothing ) "hits" ] "extract_targets_each" 
-                [ Lst bht 
+                [ Lst bht Nothing 
                     [ Var ( RepID Nothing ) "hits" ] 
                     [ Ref bht 
                         ( Just ( Seed 0 ) ) [] 
@@ -37,7 +37,7 @@ Script
                 , Var ( RepID Nothing ) "hits" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst str.list 
+                ( Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "hits" 
                     ] 
@@ -58,7 +58,7 @@ Script
             , Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "mapped" 
             ] "|" 
-            ( Lst str.list 
+            ( Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "hits" 
                 ] 

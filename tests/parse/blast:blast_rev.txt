@@ -62,7 +62,7 @@ Script
                         [ Lit num "1.0e-5" 
                         , Ref fna Nothing [] 
                             ( Var ( RepID Nothing ) "large" )
-                        , Lst fna 
+                        , Lst fna Nothing 
                             [ Var ( RepID Nothing ) "small" ] 
                             [ Ref fna Nothing [] 
                                 ( Var ( RepID Nothing ) "small" )
@@ -80,7 +80,7 @@ Script
                 , Var ( RepID Nothing ) "srevs" 
                 , Var ( RepID Nothing ) "mrevs" 
                 ] "some" 
-                [ Lst str.list 
+                [ Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "fwds" 
                     , Var ( RepID Nothing ) "small" 
                     , Var ( RepID Nothing ) "large" 
@@ -114,7 +114,7 @@ Script
             , Var ( RepID Nothing ) "srevs" 
             , Var ( RepID Nothing ) "mrevs" 
             ] "some" 
-            [ Lst str.list 
+            [ Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "fwds" 
                 , Var ( RepID Nothing ) "small" 
                 , Var ( RepID Nothing ) "large" 

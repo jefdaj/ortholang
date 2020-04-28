@@ -15,14 +15,14 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "scores" 
             , aExpr = Fun bsr.list 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "odb9_proteobacteria" 
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "busco_proteins_each" 
                 [ Ref blh Nothing [] 
                     ( Var ( RepID Nothing ) "odb9_proteobacteria" )
-                , Lst faa 
+                , Lst faa Nothing 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
@@ -42,7 +42,7 @@ Script
                 , Var ( RepID Nothing ) "mgen" 
                 ] "busco_scores_table" 
                 [ Ref bsr.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "odb9_proteobacteria" 
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 

@@ -18,7 +18,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "cyanodbs" 
-            , aExpr = Lst faa.blastdb 
+            , aExpr = Lst faa.blastdb Nothing 
                 [ Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "magadb" 
                 ] 

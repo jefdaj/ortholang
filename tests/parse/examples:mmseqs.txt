@@ -40,7 +40,7 @@ Script
             , aExpr = Bop faa.list Nothing 
                 [ Var ( RepID Nothing ) "maga" ] "~" 
                 ( Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ] ) 
-                ( Lst faa 
+                ( Lst faa Nothing 
                     [ Var ( RepID Nothing ) "maga" ] 
                     [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga" )

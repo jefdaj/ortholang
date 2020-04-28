@@ -7,7 +7,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "g2" 
             , aExpr = Fun faa Nothing [] "concat_faa" 
-                [ Lst faa [] 
+                [ Lst faa Nothing [] 
                     [ Fun faa Nothing [] "gbk_to_faa" 
                         [ Lit str "cds" 
                         , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_7942_chr.gbk" ]

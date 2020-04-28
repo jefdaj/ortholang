@@ -2,7 +2,7 @@ Script
     { sAssigns = 
         [ Assign 
             { aVar = Var ( RepID Nothing ) "faa_paths" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2.gbk" 
                 , Lit str "examples/sequences/Mycoplasma_arthritidis_protein_refseq.faa" 
                 , Lit str "examples/sequences/Mycoplasma_capricolum_protein_refseq.faa" 

@@ -57,7 +57,7 @@ Script
                     , Var ( RepID Nothing ) "mgen" 
                     ] "filter_evalue_each" 
                     [ Lit num "1.0e-50" 
-                    , Lst bht 
+                    , Lst bht Nothing 
                         [ Var ( RepID Nothing ) "hits" 
                         , Var ( RepID Nothing ) "small" 
                         , Var ( RepID Nothing ) "mgen" 
@@ -88,7 +88,7 @@ Script
                     , Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "mapped" 
                     ] "|" 
-                    ( Lst str.list 
+                    ( Lst str.list Nothing 
                         [ Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "hits" 
                         , Var ( RepID Nothing ) "small" 
@@ -127,7 +127,7 @@ Script
                 , Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst str.list 
+                ( Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "hits" 
                     , Var ( RepID Nothing ) "small" 

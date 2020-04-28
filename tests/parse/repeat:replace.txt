@@ -84,7 +84,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "depsSeparate" 
-            , aExpr = Lst num 
+            , aExpr = Lst num Nothing 
                 [ Var ( RepID Nothing ) "dep1" 
                 , Var ( RepID Nothing ) "dep" 
                 , Var ( RepID Nothing ) "ind" 
@@ -131,7 +131,7 @@ Script
                     ( Var ( RepID Nothing ) "dep" )
                 , Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "ind" )
-                , Lst num [] 
+                , Lst num Nothing [] 
                     [ Lit num "1.0" 
                     , Lit num "2.0" 
                     , Lit num "3.0" 
@@ -142,7 +142,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst num.list 
+            , aExpr = Lst num.list Nothing 
                 [ Var ( RepID Nothing ) "depsSeparate" 
                 , Var ( RepID Nothing ) "dep1" 
                 , Var ( RepID Nothing ) "dep" 
@@ -213,7 +213,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst num.list 
+        ( Lst num.list Nothing 
             [ Var ( RepID Nothing ) "depsSeparate" 
             , Var ( RepID Nothing ) "dep1" 
             , Var ( RepID Nothing ) "dep" 

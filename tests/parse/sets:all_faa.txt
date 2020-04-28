@@ -2,14 +2,14 @@ Script
     { sAssigns = 
         [ Assign 
             { aVar = Var ( RepID Nothing ) "set1" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
                 , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
                 ] 
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "set2" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
                 , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
                 , Lit str "examples/sequences/Mycoplasma_hyopneumoniae_small.faa" 
@@ -21,7 +21,7 @@ Script
                 [ Var ( RepID Nothing ) "set1" 
                 , Var ( RepID Nothing ) "set2" 
                 ] "all" 
-                [ Lst str.list 
+                [ Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "set1" 
                     , Var ( RepID Nothing ) "set2" 
                     ] 
@@ -47,7 +47,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst str.list 
+            , aExpr = Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "res1" 
                 , Var ( RepID Nothing ) "set1" 
                 , Var ( RepID Nothing ) "set2" 
@@ -67,7 +67,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst str.list 
+        ( Lst str.list Nothing 
             [ Var ( RepID Nothing ) "res1" 
             , Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 

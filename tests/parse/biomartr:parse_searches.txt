@@ -3,7 +3,7 @@ Script
         [ Assign 
             { aVar = Var ( RepID Nothing ) "result" 
             , aExpr = Fun search Nothing [] "parse_searches" 
-                [ Lst str [] 
+                [ Lst str Nothing [] 
                     [ Lit str "Synechococcus elongatus PCC maga (refseq)" 
                     , Lit str "Synechocystis sp. PCC mgen (refseq)" 
                     ] 
@@ -12,7 +12,7 @@ Script
         ]
     , sResult = Just 
         ( Fun search Nothing [] "parse_searches" 
-            [ Lst str [] 
+            [ Lst str Nothing [] 
                 [ Lit str "Synechococcus elongatus PCC maga (refseq)" 
                 , Lit str "Synechocystis sp. PCC mgen (refseq)" 
                 ] 

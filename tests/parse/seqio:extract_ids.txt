@@ -28,7 +28,7 @@ Script
             { aVar = Var ( RepID Nothing ) "mappedFna" 
             , aExpr = Fun str.list.list Nothing 
                 [ Var ( RepID Nothing ) "fna" ] "extract_ids_each" 
-                [ Lst fna 
+                [ Lst fna Nothing 
                     [ Var ( RepID Nothing ) "fna" ] 
                     [ Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "fna" )
@@ -39,7 +39,7 @@ Script
             { aVar = Var ( RepID Nothing ) "mappedFaa" 
             , aExpr = Fun str.list.list Nothing 
                 [ Var ( RepID Nothing ) "faa" ] "extract_ids_each" 
-                [ Lst faa 
+                [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "faa" ] 
                     [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "faa" )
@@ -53,7 +53,7 @@ Script
                 , Var ( RepID Nothing ) "fna" 
                 , Var ( RepID Nothing ) "mappedFna" 
                 ] "|" 
-                ( Lst str.list 
+                ( Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "singleFna" 
                     , Var ( RepID Nothing ) "fna" 
                     ] 
@@ -74,7 +74,7 @@ Script
                 , Var ( RepID Nothing ) "faa" 
                 , Var ( RepID Nothing ) "mappedFaa" 
                 ] "|" 
-                ( Lst str.list 
+                ( Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "singleFaa" 
                     , Var ( RepID Nothing ) "faa" 
                     ] 

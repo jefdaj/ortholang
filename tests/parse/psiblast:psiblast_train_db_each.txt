@@ -27,7 +27,7 @@ Script
                 [ Lit num "1.0e-2" 
                 , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Lst faa.blastdb 
+                , Lst faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "magadb" 
                     ] 

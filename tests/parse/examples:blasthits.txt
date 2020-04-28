@@ -136,7 +136,7 @@ Script
                 , Var ( RepID Nothing ) "maga_mbov_rev" 
                 , Var ( RepID Nothing ) "maga_best_mbov" 
                 ] "length_each" 
-                [ Lst str.list 
+                [ Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "maga_ids" 
                     , Var ( RepID Nothing ) "maga_mbov_rbh" 
                     , Var ( RepID Nothing ) "maga_mbov" 
@@ -180,7 +180,7 @@ Script
             , Var ( RepID Nothing ) "maga_mbov_rev" 
             , Var ( RepID Nothing ) "maga_best_mbov" 
             ] "length_each" 
-            [ Lst str.list 
+            [ Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "maga_ids" 
                 , Var ( RepID Nothing ) "maga_mbov_rbh" 
                 , Var ( RepID Nothing ) "maga_mbov" 

@@ -15,7 +15,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "res1" 
             , aExpr = Fun bsr 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "odb9_firmicutes" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "busco_proteins" 
@@ -28,7 +28,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "res2" 
             , aExpr = Fun bsr 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "odb9_proteobacteria" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "busco_proteins" 
@@ -40,7 +40,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst num 
+            , aExpr = Lst num Nothing 
                 [ Var ( RepID Nothing ) "res1" 
                 , Var ( RepID Nothing ) "odb9_firmicutes" 
                 , Var ( RepID Nothing ) "mgen" 
@@ -48,26 +48,26 @@ Script
                 , Var ( RepID Nothing ) "odb9_proteobacteria" 
                 ] 
                 [ Fun num 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "res1" 
                     , Var ( RepID Nothing ) "odb9_firmicutes" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "busco_percent_complete" 
                     [ Ref bsr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "odb9_firmicutes" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
                         ( Var ( RepID Nothing ) "res1" )
                     ]
                 , Fun num 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "res2" 
                     , Var ( RepID Nothing ) "odb9_proteobacteria" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "busco_percent_complete" 
                     [ Ref bsr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "odb9_proteobacteria" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
@@ -77,7 +77,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst num 
+        ( Lst num Nothing 
             [ Var ( RepID Nothing ) "res1" 
             , Var ( RepID Nothing ) "odb9_firmicutes" 
             , Var ( RepID Nothing ) "mgen" 
@@ -85,26 +85,26 @@ Script
             , Var ( RepID Nothing ) "odb9_proteobacteria" 
             ] 
             [ Fun num 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "res1" 
                 , Var ( RepID Nothing ) "odb9_firmicutes" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "busco_percent_complete" 
                 [ Ref bsr 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "odb9_firmicutes" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
                     ( Var ( RepID Nothing ) "res1" )
                 ]
             , Fun num 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "res2" 
                 , Var ( RepID Nothing ) "odb9_proteobacteria" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "busco_percent_complete" 
                 [ Ref bsr 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "odb9_proteobacteria" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 

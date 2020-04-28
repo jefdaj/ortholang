@@ -50,7 +50,7 @@ Script
                     [ Lit num "1.0e-5" 
                     , Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga" )
-                    , Lst faa 
+                    , Lst faa Nothing 
                         [ Var ( RepID Nothing ) "mgen" ] 
                         [ Ref faa Nothing [] 
                             ( Var ( RepID Nothing ) "mgen" )
@@ -97,7 +97,7 @@ Script
                     [ Lit num "1.0e-5" 
                     , Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga" )
-                    , Lst faa.blastdb 
+                    , Lst faa.blastdb Nothing 
                         [ Var ( RepID Nothing ) "mgendb" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
@@ -143,7 +143,7 @@ Script
                             , Var ( RepID Nothing ) "mgen" 
                             , Var ( RepID Nothing ) "mapped" 
                             ] "|" 
-                            ( Lst str.list 
+                            ( Lst str.list Nothing 
                                 [ Var ( RepID Nothing ) "single" 
                                 , Var ( RepID Nothing ) "maga" 
                                 , Var ( RepID Nothing ) "mgen" 
@@ -162,7 +162,7 @@ Script
                                 ( Var ( RepID Nothing ) "mapped" )
                             )
                         ) 
-                        ( Lst str.list 
+                        ( Lst str.list Nothing 
                             [ Var ( RepID Nothing ) "singledb" 
                             , Var ( RepID Nothing ) "maga" 
                             , Var ( RepID Nothing ) "mgendb" 
@@ -220,7 +220,7 @@ Script
                         , Var ( RepID Nothing ) "mgen" 
                         , Var ( RepID Nothing ) "mapped" 
                         ] "|" 
-                        ( Lst str.list 
+                        ( Lst str.list Nothing 
                             [ Var ( RepID Nothing ) "single" 
                             , Var ( RepID Nothing ) "maga" 
                             , Var ( RepID Nothing ) "mgen" 
@@ -239,7 +239,7 @@ Script
                             ( Var ( RepID Nothing ) "mapped" )
                         )
                     ) 
-                    ( Lst str.list 
+                    ( Lst str.list Nothing 
                         [ Var ( RepID Nothing ) "singledb" 
                         , Var ( RepID Nothing ) "maga" 
                         , Var ( RepID Nothing ) "mgendb" 

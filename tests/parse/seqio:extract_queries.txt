@@ -2,7 +2,8 @@ Script
     { sAssigns = 
         [ Assign 
             { aVar = Var ( RepID Nothing ) "hits" 
-            , aExpr = Fun bht Nothing [] "blastp" 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) [] "blastp" 
                 [ Lit num "1.0e-5" 
                 , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
                 , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
@@ -12,7 +13,8 @@ Script
             { aVar = Var ( RepID Nothing ) "single" 
             , aExpr = Fun str.list Nothing 
                 [ Var ( RepID Nothing ) "hits" ] "extract_queries" 
-                [ Ref bht Nothing [] 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) [] 
                     ( Var ( RepID Nothing ) "hits" )
                 ]
             } 
@@ -20,9 +22,10 @@ Script
             { aVar = Var ( RepID Nothing ) "mapped" 
             , aExpr = Fun str.list.list Nothing 
                 [ Var ( RepID Nothing ) "hits" ] "extract_queries_each" 
-                [ Lst bht 
+                [ Lst bht Nothing 
                     [ Var ( RepID Nothing ) "hits" ] 
-                    [ Ref bht Nothing [] 
+                    [ Ref bht 
+                        ( Just ( Seed 0 ) ) [] 
                         ( Var ( RepID Nothing ) "hits" )
                     ]
                 ]
@@ -34,7 +37,7 @@ Script
                 , Var ( RepID Nothing ) "hits" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst str.list 
+                ( Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "hits" 
                     ] 
@@ -55,7 +58,7 @@ Script
             , Var ( RepID Nothing ) "hits" 
             , Var ( RepID Nothing ) "mapped" 
             ] "|" 
-            ( Lst str.list 
+            ( Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "hits" 
                 ] 

@@ -14,7 +14,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst num 
+            , aExpr = Lst num Nothing 
                 [ Var ( RepID Nothing ) "one_half" 
                 , Var ( RepID Nothing ) "three_quarters" 
                 , Var ( RepID Nothing ) "harder" 
@@ -29,7 +29,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst num 
+        ( Lst num Nothing 
             [ Var ( RepID Nothing ) "one_half" 
             , Var ( RepID Nothing ) "three_quarters" 
             , Var ( RepID Nothing ) "harder" 

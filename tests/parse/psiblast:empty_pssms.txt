@@ -74,7 +74,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "cutoffs" 
-            , aExpr = Lst num [] 
+            , aExpr = Lst num Nothing [] 
                 [ Lit num "1.0" 
                 , Lit num "0.5" 
                 , Lit num "0.1" 

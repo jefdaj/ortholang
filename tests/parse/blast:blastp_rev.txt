@@ -51,7 +51,7 @@ Script
                         ( Var ( RepID Nothing ) "n" )
                     , Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga5" )
-                    , Lst faa 
+                    , Lst faa Nothing 
                         [ Var ( RepID Nothing ) "maga" ] 
                         [ Ref faa Nothing [] 
                             ( Var ( RepID Nothing ) "maga" )

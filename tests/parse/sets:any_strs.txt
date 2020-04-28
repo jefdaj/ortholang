@@ -2,7 +2,7 @@ Script
     { sAssigns = 
         [ Assign 
             { aVar = Var ( RepID Nothing ) "set1" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "1" 
                 , Lit str "2" 
                 , Lit str "3" 
@@ -17,7 +17,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "set2" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "5" 
                 , Lit str "6" 
                 , Lit str "7" 
@@ -37,7 +37,7 @@ Script
                 [ Var ( RepID Nothing ) "set1" 
                 , Var ( RepID Nothing ) "set2" 
                 ] "any" 
-                [ Lst str.list 
+                [ Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "set1" 
                     , Var ( RepID Nothing ) "set2" 
                     ] 
@@ -63,7 +63,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst str.list 
+            , aExpr = Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "res1" 
                 , Var ( RepID Nothing ) "set1" 
                 , Var ( RepID Nothing ) "set2" 
@@ -83,7 +83,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst str.list 
+        ( Lst str.list Nothing 
             [ Var ( RepID Nothing ) "res1" 
             , Var ( RepID Nothing ) "set1" 
             , Var ( RepID Nothing ) "set2" 

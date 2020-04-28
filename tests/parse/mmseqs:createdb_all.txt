@@ -8,7 +8,7 @@ Script
             { aVar = Var ( RepID Nothing ) "maga_db" 
             , aExpr = Fun mms Nothing 
                 [ Var ( RepID Nothing ) "maga" ] "mmseqs_createdb_all" 
-                [ Lst faa 
+                [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "maga" ] 
                     [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga" )

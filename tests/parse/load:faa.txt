@@ -6,7 +6,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mylist" 
-            , aExpr = Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
+            , aExpr = Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mapped" 
@@ -23,7 +23,7 @@ Script
                 , Var ( RepID Nothing ) "mapped" 
                 , Var ( RepID Nothing ) "mylist" 
                 ] "|" 
-                ( Lst faa 
+                ( Lst faa Nothing 
                     [ Var ( RepID Nothing ) "single" ] 
                     [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "single" )
@@ -41,7 +41,7 @@ Script
             , Var ( RepID Nothing ) "mapped" 
             , Var ( RepID Nothing ) "mylist" 
             ] "|" 
-            ( Lst faa 
+            ( Lst faa Nothing 
                 [ Var ( RepID Nothing ) "single" ] 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "single" )

@@ -6,20 +6,20 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "l" 
-            , aExpr = Lst num [] [ Lit num "4.0" ]
+            , aExpr = Lst num Nothing [] [ Lit num "4.0" ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "lol" 
-            , aExpr = Lst num.list 
+            , aExpr = Lst num.list Nothing 
                 [ Var ( RepID Nothing ) "l" ] 
                 [ Ref num.list Nothing [] 
                     ( Var ( RepID Nothing ) "l" )
-                , Lst num [] [ Lit num "2.5" ]
+                , Lst num Nothing [] [ Lit num "2.5" ]
                 ] 
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "lolol" 
-            , aExpr = Lst num.list.list 
+            , aExpr = Lst num.list.list Nothing 
                 [ Var ( RepID Nothing ) "lol" 
                 , Var ( RepID Nothing ) "l" 
                 ] 

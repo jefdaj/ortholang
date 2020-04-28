@@ -10,30 +10,36 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "fwdHits" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun str.list Nothing 
                 [ Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
-                ] "blastp" 
-                [ Lit num "1.0e-5" 
-                , Ref faa Nothing [] 
-                    ( Var ( RepID Nothing ) "maga" )
-                , Ref faa Nothing [] 
-                    ( Var ( RepID Nothing ) "mgen" )
-                ] 
+                ] "extract_targets" 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] "blastp" 
+                    [ Lit num "1.0e-5" 
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "maga" )
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "mgen" )
+                    ] 
+                ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Fun num Nothing 
+            , aExpr = Fun str.list Nothing 
                 [ Var ( RepID Nothing ) "fwdHits" 
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
-                ] "length" 
-                [ Fun bht.list Nothing 
+                ] "all" 
+                [ Fun str.list.list Nothing 
                     [ Var ( RepID Nothing ) "fwdHits" 
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "repeat" 
-                    [ Ref bht Nothing 
+                    [ Ref str.list Nothing 
                         [ Var ( RepID Nothing ) "maga" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
@@ -46,17 +52,17 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Fun num Nothing 
+        ( Fun str.list Nothing 
             [ Var ( RepID Nothing ) "fwdHits" 
             , Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
-            ] "length" 
-            [ Fun bht.list Nothing 
+            ] "all" 
+            [ Fun str.list.list Nothing 
                 [ Var ( RepID Nothing ) "fwdHits" 
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "repeat" 
-                [ Ref bht Nothing 
+                [ Ref str.list Nothing 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 

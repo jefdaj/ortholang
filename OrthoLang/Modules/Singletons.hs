@@ -38,7 +38,7 @@ olModule = Module
 
 -- | Take a single expr and wrap it in a singleton list
 withSingleton :: Expr -> Expr
-withSingleton e = Lst (typeOf e) (depsOf e) [e]
+withSingleton e = Lst (typeOf e) (seedOf e) (depsOf e) [e]
 
 -- | Take a list and wrap it in a singleton list, making a list of lists
 -- TODO could it be implemented using 'withSingleton' above?

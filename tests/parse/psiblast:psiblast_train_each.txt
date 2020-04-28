@@ -23,7 +23,7 @@ Script
                 [ Lit num "0.1" 
                 , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Lst faa 
+                , Lst faa Nothing 
                     [ Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 

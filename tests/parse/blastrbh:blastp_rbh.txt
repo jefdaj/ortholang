@@ -163,7 +163,7 @@ Script
                     , Var ( RepID Nothing ) "rev2" 
                     , Var ( RepID Nothing ) "rbh3" 
                     ] "extract_queries_each" 
-                    [ Lst bht 
+                    [ Lst bht Nothing 
                         [ Var ( RepID Nothing ) "rbh1" 
                         , Var ( RepID Nothing ) "fwd" 
                         , Var ( RepID Nothing ) "n" 
@@ -205,7 +205,7 @@ Script
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "extract_targets_each" 
-                    [ Lst bht 
+                    [ Lst bht Nothing 
                         [ Var ( RepID Nothing ) "rbh4" 
                         , Var ( RepID Nothing ) "n" 
                         , Var ( RepID Nothing ) "maga" 

@@ -7,7 +7,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
             , aExpr = Fun dmnd 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "mycoplasma" ] "diamond_makedb_all" 
                 [ Ref faa.list Nothing [] 
                     ( Var ( RepID Nothing ) "mycoplasma" )
@@ -16,7 +16,7 @@ Script
         ] 
     , sResult = Just 
         ( Fun dmnd 
-            ( Just ( Salt 0 ) ) 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "mycoplasma" ] "diamond_makedb_all" 
             [ Ref faa.list Nothing [] 
                 ( Var ( RepID Nothing ) "mycoplasma" )

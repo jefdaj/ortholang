@@ -1,4 +1,4 @@
-Repeatdly re-calculate variables using different random salts
+Repeatdly re-calculate variables using different random seeds
 
 Functions:
 

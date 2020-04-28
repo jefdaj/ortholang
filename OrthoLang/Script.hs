@@ -243,7 +243,7 @@ eExpr' mods scr e@(Fun r s ds name es) =
                                               ("expanded macro: " ++ show e ++ " -> " ++ show e'') e''
                      _ -> e'
 eExpr' mods scr (Bop r ms vs n e1 e2) = Bop r ms vs n (eExpr mods scr e1) (eExpr mods scr e2)
-eExpr' mods scr (Lst r vs es) = Lst r vs $ map (eExpr mods scr) es
+eExpr' mods scr (Lst r ms vs es) = Lst r ms vs $ map (eExpr mods scr) es
 eExpr' _ _ e = e
 
 -- typecheck :: [Module] -> Expr -> Either String Expr
@@ -258,7 +258,7 @@ eExpr' _ _ e = e
 -- do we have to make a rule that you can't use those?
 -- (uuuugly! but not a show-stopper for now)
 extractExprs :: Script -> Expr -> [Expr]
-extractExprs  _  (Lst _ _ es) = es
+extractExprs _ (Lst _ _ _ es) = es
 extractExprs s (Ref _ _ _ v ) = case lookupVar v (sAssigns s) of
                                        Nothing -> error "types.extractExprs" $ "no such var " ++ show v
                                        Just e  -> extractExprs s e
@@ -282,10 +282,10 @@ explainFnBug =
  -}
 mapExprVars :: (Var -> Var) -> Expr -> Expr
 mapExprVars _ e@(Lit  _ _) = e
-mapExprVars fn (Ref  t n vs v      ) = Ref  t n (map fn vs)   (fn v)
-mapExprVars fn (Bop  t n vs s e1 e2) = Bop  t n (map fn vs) s (mapExprVars fn e1) (mapExprVars fn e2)
-mapExprVars fn (Fun  t n vs s es   ) = Fun  t n (map fn vs) s (map (mapExprVars fn) es)
-mapExprVars fn (Lst t vs   es   ) = Lst t (map fn vs)   (map (mapExprVars fn) es)
+mapExprVars fn (Ref t n vs v      ) = Ref t n (map fn vs)   (fn v)
+mapExprVars fn (Bop t n vs s e1 e2) = Bop t n (map fn vs) s (mapExprVars fn e1) (mapExprVars fn e2)
+mapExprVars fn (Fun t n vs s es   ) = Fun t n (map fn vs) s (map (mapExprVars fn) es)
+mapExprVars fn (Lst t n vs   es   ) = Lst t n (map fn vs)   (map (mapExprVars fn) es)
 mapExprVars _ (Com _) = error "script.mapExprVars" "implement this!"
 
 mapAssignVars :: (Var -> Var) -> Assign -> Assign
@@ -392,7 +392,7 @@ rmRef' scr var e@(Ref _ _ _ v2)
   | var == v2 = justOrDie "failed to rmRef variable!" $ lookupVar var (sAssigns scr)
   | otherwise = e
 rmRef' _   _   e@(Lit _ _) = e
-rmRef' scr var (Bop  t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)
-rmRef' scr var (Fun  t ms vs s es   ) = Fun t ms (delete var vs) s (map (rmRef scr var) es)
-rmRef' scr var (Lst t vs       es   ) = Lst t    (delete var vs)   (map (rmRef scr var) es)
+rmRef' scr var (Bop t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)
+rmRef' scr var (Fun t ms vs s es   ) = Fun t ms (delete var vs) s (map (rmRef scr var) es)
+rmRef' scr var (Lst t ms vs   es   ) = Lst t ms (delete var vs)   (map (rmRef scr var) es)
 rmRef' _   _   (Com _) = error "types.rmRef" "implement this! or rethink?"

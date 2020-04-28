@@ -81,5 +81,5 @@ rRepeatN       scr (Fun t mSeed deps name [resExpr, subVar@(Ref _ _ _ v), repsEx
     subs    = take nReps $ zipWith setSeed [0..] (repeat subExpr) -- TODO is always starting from 0 right?
     -- subs    = zipWith setSeed (unfoldRepID seed nReps) (repeat subExpr)
     -- subs'   = trace ("rRepeatN seeds: " ++ show (map seedOf subs)) subs
-    subList = Lst (typeOf subExpr) (depsOf subExpr) subs -- TODO seed right?
+    subList = Lst (typeOf subExpr) (seedOf subExpr) (depsOf subExpr) subs -- TODO seed right?
 rRepeatN _ _ = fail "bad argument to rRepeatN"

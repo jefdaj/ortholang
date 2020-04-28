@@ -192,7 +192,7 @@ data Expr
   | Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
   | Bop Type (Maybe Seed) [Var] String  Expr Expr -- TODO remove seed?
   | Fun Type (Maybe Seed) [Var] String [Expr] -- TODO is the Eq instance wrong?
-  | Lst Type [Var] [Expr] -- TODO maybe seed?
+  | Lst Type (Maybe Seed) [Var] [Expr]
   | Com CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
 
@@ -223,7 +223,7 @@ instance Pretty Expr where
     | otherwise = PP.text $ show s
   pPrint (Ref _ _ _ v)    = pPrint v
   pPrint (Fun _ _ _ s es) = PP.text s <+> PP.sep (map pNested es)
-  pPrint (Lst _ _ es)  = pList es
+  pPrint (Lst _ _ _ es)  = pList es
   pPrint (Com (CompiledExpr t (ExprPath p) _)) = PP.text $ "Compiled " ++ ext t ++ " " ++ p
 
   -- this is almost right except it breaks lines too early (always nesting),
@@ -254,9 +254,9 @@ pNested e = pPrint e
 
 -- TODO is this not actually needed? seems "show expr" handles it?
 seedOf :: Expr -> Maybe Seed
-seedOf (Lit _ _)                = Nothing
-seedOf (Lst _ _ _)              = Nothing -- TODO was the seed important?
+seedOf (Lit _ _)                  = Nothing
 seedOf (Com (CompiledExpr _ _ _)) = Nothing -- TODO this makes sense right?
+seedOf (Lst _ ms _ _)     = ms
 seedOf (Ref _ ms _ _)     = ms
 seedOf (Bop _ ms _ _ _ _) = ms
 seedOf (Fun _ ms _ _ _)   = ms
@@ -265,10 +265,10 @@ seedOf (Fun _ ms _ _ _)   = ms
 -- TODO would a recursive version be able to replace addPrefixes in ReplaceEach?
 setSeed :: Int -> Expr -> Expr
 setSeed r e@(Lit t s)     = e
-setSeed r e@(Lst t ds es) = e
-setSeed r (Ref t ms ds v)       = Ref  t (fmap (const $ Seed r) ms) ds v
-setSeed r (Bop t ms ds s e1 e2) = Bop  t (fmap (const $ Seed r) ms) ds s e1 e2
-setSeed r (Fun t ms ds s es)    = Fun  t (fmap (const $ Seed r) ms) ds s es
+setSeed r (Ref t ms ds v)       = Ref t (fmap (const $ Seed r) ms) ds v
+setSeed r (Bop t ms ds s e1 e2) = Bop t (fmap (const $ Seed r) ms) ds s (setSeed r e1) (setSeed r e2)
+setSeed r (Lst t ms ds   es   ) = Lst t (fmap (const $ Seed r) ms) ds   $ map (setSeed r) es
+setSeed r (Fun t ms ds s es)    = Fun t (fmap (const $ Seed r) ms) ds s $ map (setSeed r) es
 setSeed _ (Com (CompiledExpr _ _ _)) = error "types.setSeed" "not implemented for compiled rules" -- TODO should it be?
 
 
@@ -347,11 +347,11 @@ emptyDigests :: DigestMap
 emptyDigests = empty
 
 typeOf :: Expr -> Type
-typeOf (Lit   t _      ) = t
-typeOf (Ref   t _ _ _    ) = t
-typeOf (Bop   t _ _ _ _ _) = t
-typeOf (Fun   t _ _ _ _  ) = t
-typeOf (Lst  t _ _    ) = ListOf t
+typeOf (Lit  t _        ) = t
+typeOf (Ref  t _ _ _    ) = t
+typeOf (Bop  t _ _ _ _ _) = t
+typeOf (Fun  t _ _ _ _  ) = t
+typeOf (Lst  t _ _ _    ) = ListOf t
 typeOf (Com (CompiledExpr t _ _)) = t
 
 varOf :: Expr -> [Var]
@@ -359,11 +359,11 @@ varOf (Ref _ _ _ v) = [v]
 varOf _                = [ ]
 
 depsOf :: Expr -> [Var]
-depsOf (Lit  _ _         ) = []
-depsOf (Ref  _ _ vs v      ) = v:vs -- TODO redundant?
-depsOf (Bop  _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
-depsOf (Fun  _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
-depsOf (Lst _ vs   es   ) = nub $ vs ++ concatMap varOf es
+depsOf (Lit _ _           ) = []
+depsOf (Ref _ _ vs v      ) = v:vs -- TODO redundant?
+depsOf (Bop _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
+depsOf (Fun _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
+depsOf (Lst _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
 depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
 
 

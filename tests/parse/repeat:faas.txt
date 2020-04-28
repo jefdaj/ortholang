@@ -7,7 +7,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "use5" 
             , aExpr = Fun str.list 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "faa_names" ] "sample" 
                 [ Lit num "5.0" 
                 , Ref str.list Nothing [] 
@@ -21,7 +21,7 @@ Script
                 , Var ( RepID Nothing ) "faa_names" 
                 ] "repeat" 
                 [ Ref str.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "faa_names" ] 
                     ( Var ( RepID Nothing ) "use5" )
                 , Ref str.list Nothing [] 

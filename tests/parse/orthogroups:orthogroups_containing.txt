@@ -7,10 +7,10 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "ofres" 
             , aExpr = Fun ofr 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "small" ] "orthofinder" 
                 [ Fun faa.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "small" ] "sample" 
                     [ Lit num "5.0" 
                     , Ref faa.list Nothing [] 
@@ -25,10 +25,10 @@ Script
                 , Var ( RepID Nothing ) "small" 
                 ] "orthogroups_containing" 
                 [ Ref ofr 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "small" ] 
                     ( Var ( RepID Nothing ) "ofres" )
-                , Lst str [] 
+                , Lst str Nothing [] 
                     [ Lit str "WP_010925290.1" 
                     , Lit str "NP_975756.1" 
                     , Lit str "WP_011949581.1" 

@@ -263,15 +263,15 @@ argHashes :: Config -> DigestsRef -> Script -> Expr -> [String]
 argHashes c d s (Ref _ _ _ v) = case lookupVar v (sAssigns s) of
                                          Nothing -> error "argHashes" $ "no such var " ++ show v
                                          Just e  -> argHashes c d s e
-argHashes _ _ _ (Lit  _     v    ) = [digest v]
-argHashes c d s (Fun  _ _ _ _ es   ) = map (digest . exprPath c d s) es
-argHashes c d s (Bop  _ _ _ _ e1 e2) = map (digest . exprPath c d s) [e1, e2] -- TODO remove?
-argHashes c d s (Lst _ _   es   ) = [digest $ map (digest . exprPath c d s) es]
+argHashes _ _ _ (Lit _     v      ) = [digest v]
+argHashes c d s (Fun _ _ _ _ es   ) = map (digest . exprPath c d s) es
+argHashes c d s (Bop _ _ _ _ e1 e2) = map (digest . exprPath c d s) [e1, e2] -- TODO remove?
+argHashes c d s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c d s) es] -- TODO use seed here?
 argHashes _ _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
 
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
-bop2fun e@(Bop t r ds _ e1 e2) = Fun t r ds (prefixOf e) [Lst t ds [e1, e2]]
+bop2fun e@(Bop t r ds _ e1 e2) = Fun t r ds (prefixOf e) [Lst t r ds [e1, e2]]
 bop2fun e = error "bop2fun" $ "called with non-Bop: \"" ++ render (pPrint e) ++ "\""
 
 -- TODO rename to tmpPath?
@@ -295,9 +295,9 @@ exprPath c d s expr = traceP "exprPath" expr res
 -- TODO add names to the Bops themselves... or associate with prefix versions?
 -- TODO rewrite this to be the proper thing for bops, which is how you currently use it
 prefixOf :: Expr -> String
-prefixOf (Lit rtn _     ) = ext rtn
+prefixOf (Lit rtn _       ) = ext rtn
 prefixOf (Fun _ _ _ name _) = name
-prefixOf (Lst _ _ _    ) = "list"
+prefixOf (Lst _ _ _ _     ) = "list"
 prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
 prefixOf (Com (CompiledExpr _ _ _)) = error "prefixOf" "CompiledExprs don't need a prefix"
 prefixOf (Bop _ _ _ n _ _ ) = case n of
@@ -424,10 +424,10 @@ TODO is there a better word for this, or a matching typeclass?
 -}
 listExprs :: Expr -> [Expr]
 listExprs   (Ref _ _ _ _    ) = [] -- TODO or is it e?
-listExprs e@(Lit _ _      ) = [e]
+listExprs e@(Lit _ _        ) = [e]
 listExprs e@(Com _          ) = [e]
 listExprs e@(Fun _ _ _ _  es) = e : concatMap listExprs es
-listExprs e@(Lst _ _    es) = e : concatMap listExprs es
+listExprs e@(Lst _ _ _    es) = e : concatMap listExprs es
 listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e
 
 -- listScriptExprs :: Script -> [Expr]

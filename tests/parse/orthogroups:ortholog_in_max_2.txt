@@ -3,7 +3,7 @@ Script
         [ Assign 
             { aVar = Var ( RepID Nothing ) "smallbacteria" 
             , aExpr = Fun faa.list Nothing [] "load_faa_each" 
-                [ Lst str [] 
+                [ Lst str Nothing [] 
                     [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
                     , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
                     ] 
@@ -12,7 +12,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "ofres" 
             , aExpr = Fun ofr 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "smallbacteria" ] "orthofinder" 
                 [ Ref faa.list Nothing [] 
                     ( Var ( RepID Nothing ) "smallbacteria" )
@@ -25,7 +25,7 @@ Script
                 , Var ( RepID Nothing ) "smallbacteria" 
                 ] "orthogroups" 
                 [ Ref ofr 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "smallbacteria" ] 
                     ( Var ( RepID Nothing ) "ofres" )
                 ]
@@ -42,7 +42,7 @@ Script
                     ] "ortholog_in_max" 
                     [ Lit num "2.0" 
                     , Ref ofr 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "smallbacteria" ] 
                         ( Var ( RepID Nothing ) "ofres" )
                     , Ref faa.list Nothing [] 
@@ -62,7 +62,7 @@ Script
                 ] "ortholog_in_max" 
                 [ Lit num "2.0" 
                 , Ref ofr 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "smallbacteria" ] 
                     ( Var ( RepID Nothing ) "ofres" )
                 , Ref faa.list Nothing [] 

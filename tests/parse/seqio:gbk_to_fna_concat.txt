@@ -3,7 +3,7 @@ Script
         [ Assign 
             { aVar = Var ( RepID Nothing ) "result" 
             , aExpr = Fun fna Nothing [] "concat_fna" 
-                [ Lst fna [] 
+                [ Lst fna Nothing [] 
                     [ Fun fna Nothing [] "gbk_to_fna" 
                         [ Lit str "cds" 
                         , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
@@ -18,7 +18,7 @@ Script
         ]
     , sResult = Just 
         ( Fun fna Nothing [] "concat_fna" 
-            [ Lst fna [] 
+            [ Lst fna Nothing [] 
                 [ Fun fna Nothing [] "gbk_to_fna" 
                     [ Lit str "cds" 
                     , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]

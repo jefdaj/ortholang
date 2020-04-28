@@ -7,10 +7,10 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "ofres" 
             , aExpr = Fun ofr 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "mycoplasma" ] "orthofinder" 
                 [ Fun faa.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mycoplasma" ] "sample" 
                     [ Lit num "3.0" 
                     , Ref faa.list Nothing [] 
@@ -25,7 +25,7 @@ Script
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "ortholog_in_all" 
                 [ Ref ofr 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mycoplasma" ] 
                     ( Var ( RepID Nothing ) "ofres" )
                 , Ref faa.list Nothing [] 

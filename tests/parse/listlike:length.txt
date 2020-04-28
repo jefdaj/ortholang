@@ -14,7 +14,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "hits1" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "e" 
                 , Var ( RepID Nothing ) "mgen5" 
                 , Var ( RepID Nothing ) "mbov" 
@@ -44,14 +45,15 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "actualList" 
-            , aExpr = Lst bht 
+            , aExpr = Lst bht Nothing 
                 [ Var ( RepID Nothing ) "hits1" 
                 , Var ( RepID Nothing ) "e" 
                 , Var ( RepID Nothing ) "mgen5" 
                 , Var ( RepID Nothing ) "mbov" 
                 , Var ( RepID Nothing ) "hits3" 
                 ] 
-                [ Ref bht Nothing 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "e" 
                     , Var ( RepID Nothing ) "mgen5" 
                     , Var ( RepID Nothing ) "mbov" 
@@ -67,7 +69,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst num 
+            , aExpr = Lst num Nothing 
                 [ Var ( RepID Nothing ) "hits1" 
                 , Var ( RepID Nothing ) "e" 
                 , Var ( RepID Nothing ) "mgen5" 
@@ -81,7 +83,8 @@ Script
                     , Var ( RepID Nothing ) "mgen5" 
                     , Var ( RepID Nothing ) "mbov" 
                     ] "length" 
-                    [ Ref bht Nothing 
+                    [ Ref bht 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "e" 
                         , Var ( RepID Nothing ) "mgen5" 
                         , Var ( RepID Nothing ) "mbov" 
@@ -122,7 +125,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst num 
+        ( Lst num Nothing 
             [ Var ( RepID Nothing ) "hits1" 
             , Var ( RepID Nothing ) "e" 
             , Var ( RepID Nothing ) "mgen5" 
@@ -136,7 +139,8 @@ Script
                 , Var ( RepID Nothing ) "mgen5" 
                 , Var ( RepID Nothing ) "mbov" 
                 ] "length" 
-                [ Ref bht Nothing 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "e" 
                     , Var ( RepID Nothing ) "mgen5" 
                     , Var ( RepID Nothing ) "mbov" 

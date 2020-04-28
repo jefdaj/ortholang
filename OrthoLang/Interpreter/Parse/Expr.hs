@@ -68,7 +68,7 @@ pList = debugParser "pList" $ do
     Left err -> parseFail err
     Right t  -> do
       let deps  = if null terms then [] else foldr1 union $ map depsOf terms
-          expr  = Lst t deps terms
+          expr  = Lst t Nothing deps terms -- TODO is seed always Nothing here?
       -- putDigests "pList" (expr:terms)
       return expr
 

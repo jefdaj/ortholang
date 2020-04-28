@@ -51,7 +51,7 @@ Script
                     [ Lit num "1.0e-5" 
                     , Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "mbov" )
-                    , Lst fna.blastdb 
+                    , Lst fna.blastdb Nothing 
                         [ Var ( RepID Nothing ) "mgen" ] 
                         [ Ref fna.blastdb 
                             ( Just ( Seed 0 ) ) [] 
@@ -68,7 +68,7 @@ Script
                 , Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst str.list 
+                ( Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "mbov" 
                     , Var ( RepID Nothing ) "mgen" 
@@ -95,7 +95,7 @@ Script
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "mapped" 
             ] "|" 
-            ( Lst str.list 
+            ( Lst str.list Nothing 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "mbov" 
                 , Var ( RepID Nothing ) "mgen" 

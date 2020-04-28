@@ -6,7 +6,7 @@ Script
                 [ Fun faa.list Nothing [] "gbk_to_faa_each" 
                     [ Lit str "cds" 
                     , Fun gbk.list Nothing [] "load_gbk_each" 
-                        [ Lst str [] 
+                        [ Lst str Nothing [] 
                             [ Lit str "examples/sequences/PCC_7942_chr.gbk" 
                             , Lit str "examples/sequences/PCC_7942_pANL.gbk" 
                             ] 
@@ -17,7 +17,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "pcc7942v2" 
             , aExpr = Fun faa Nothing [] "concat_faa" 
-                [ Lst faa [] 
+                [ Lst faa Nothing [] 
                     [ Fun faa Nothing [] "translate" 
                         [ Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/PCC_7942_genome.fna" ] ]
                     , Fun faa Nothing [] "gbk_to_faa" 
@@ -41,7 +41,7 @@ Script
                 [ Var ( RepID Nothing ) "chr" 
                 , Var ( RepID Nothing ) "panl" 
                 ] "concat_faa" 
-                [ Lst faa 
+                [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "chr" 
                     , Var ( RepID Nothing ) "panl" 
                     ] 
@@ -80,7 +80,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst faa 
+            , aExpr = Lst faa Nothing 
                 [ Var ( RepID Nothing ) "pcc7942v1" 
                 , Var ( RepID Nothing ) "pcc7942v2" 
                 , Var ( RepID Nothing ) "pcc7942v3" 
@@ -106,7 +106,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst faa 
+        ( Lst faa Nothing 
             [ Var ( RepID Nothing ) "pcc7942v1" 
             , Var ( RepID Nothing ) "pcc7942v2" 
             , Var ( RepID Nothing ) "pcc7942v3" 

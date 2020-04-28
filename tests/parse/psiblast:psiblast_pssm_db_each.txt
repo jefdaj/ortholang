@@ -47,7 +47,7 @@ Script
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
                     ( Var ( RepID Nothing ) "pssm" )
-                , Lst faa.blastdb 
+                , Lst faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 

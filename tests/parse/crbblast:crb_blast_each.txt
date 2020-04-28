@@ -7,14 +7,14 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "small" 
             , aExpr = Fun faa.list Nothing [] "load_faa_each" 
-                [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ] ]
+                [ Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ] ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "large" 
             , aExpr = Bop faa.list Nothing 
                 [ Var ( RepID Nothing ) "small" ] "|" 
                 ( Fun faa.list Nothing [] "load_faa_each" 
-                    [ Lst str [] [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
+                    [ Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
                 ) 
                 ( Ref faa.list Nothing [] 
                     ( Var ( RepID Nothing ) "small" )

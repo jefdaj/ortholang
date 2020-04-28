@@ -82,7 +82,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst num 
+            , aExpr = Lst num Nothing 
                 [ Var ( RepID Nothing ) "var_that_ignores_first_replace_result" 
                 , Var ( RepID Nothing ) "var_that_depends_on_replace_result" 
                 , Var ( RepID Nothing ) "dep2" 
@@ -107,7 +107,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst num 
+        ( Lst num Nothing 
             [ Var ( RepID Nothing ) "var_that_ignores_first_replace_result" 
             , Var ( RepID Nothing ) "var_that_depends_on_replace_result" 
             , Var ( RepID Nothing ) "dep2" 

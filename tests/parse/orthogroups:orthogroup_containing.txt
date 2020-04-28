@@ -4,7 +4,7 @@ Script
             { aVar = Var ( RepID Nothing ) "small5" 
             , aExpr = Fun faa.list Nothing [] "load_faa_each" 
                 [ Fun str.list 
-                    ( Just ( Salt 0 ) ) [] "sample" 
+                    ( Just ( Seed 0 ) ) [] "sample" 
                     [ Lit num "5.0" 
                     , Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ]
                     ] 
@@ -13,7 +13,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "ofres" 
             , aExpr = Fun ofr 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "small5" ] "orthofinder" 
                 [ Ref faa.list Nothing [] 
                     ( Var ( RepID Nothing ) "small5" )
@@ -26,7 +26,7 @@ Script
                 , Var ( RepID Nothing ) "small5" 
                 ] "orthogroup_containing" 
                 [ Ref ofr 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "small5" ] 
                     ( Var ( RepID Nothing ) "ofres" )
                 , Lit str "WP_013729662.1" 

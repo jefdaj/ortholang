@@ -30,7 +30,7 @@ Script
                 ] "crb_blast_each" 
                 [ Ref fna Nothing [] 
                     ( Var ( RepID Nothing ) "minimgen" )
-                , Lst faa 
+                , Lst faa Nothing 
                     [ Var ( RepID Nothing ) "maga" ] 
                     [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga" )
@@ -51,7 +51,7 @@ Script
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mapped" 
                     ] "|" 
-                    ( Lst crb 
+                    ( Lst crb Nothing 
                         [ Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "minimgen" 
                         , Var ( RepID Nothing ) "maga" 
@@ -87,7 +87,7 @@ Script
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst crb 
+                ( Lst crb Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "minimgen" 
                     , Var ( RepID Nothing ) "maga" 

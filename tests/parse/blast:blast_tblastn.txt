@@ -41,7 +41,7 @@ Script
                     [ Lit num "1.0e-5" 
                     , Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga5" )
-                    , Lst fna 
+                    , Lst fna Nothing 
                         [ Var ( RepID Nothing ) "maga" ] 
                         [ Ref fna Nothing [] 
                             ( Var ( RepID Nothing ) "maga" )
@@ -63,7 +63,7 @@ Script
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mapped" 
                     ] "|" 
-                    ( Lst str.list 
+                    ( Lst str.list Nothing 
                         [ Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "maga5" 
                         , Var ( RepID Nothing ) "maga" 
@@ -97,7 +97,7 @@ Script
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst str.list 
+                ( Lst str.list Nothing 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "maga5" 
                     , Var ( RepID Nothing ) "maga" 

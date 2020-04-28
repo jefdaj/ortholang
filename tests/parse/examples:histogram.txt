@@ -23,7 +23,7 @@ Script
                     ( Var ( RepID Nothing ) "yvar" )
                 , Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "xvar" )
-                , Lst num [] 
+                , Lst num Nothing [] 
                     [ Lit num "1.0" 
                     , Lit num "2.0" 
                     , Lit num "3.0" 
@@ -71,7 +71,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "plots" 
-            , aExpr = Lst png 
+            , aExpr = Lst png Nothing 
                 [ Var ( RepID Nothing ) "xvars" 
                 , Var ( RepID Nothing ) "scores" 
                 , Var ( RepID Nothing ) "yvar" 
@@ -108,7 +108,7 @@ Script
                     ] 
                 , Fun png Nothing [] "histogram" 
                     [ Lit str "histogram of unnamed (inline) nums" 
-                    , Lst num [] 
+                    , Lst num Nothing [] 
                         [ Lit num "1.0" 
                         , Lit num "2.0" 
                         , Lit num "3.0" 

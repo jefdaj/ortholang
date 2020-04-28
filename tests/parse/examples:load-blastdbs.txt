@@ -98,7 +98,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "ndbs" 
-            , aExpr = Lst fna.blastdb 
+            , aExpr = Lst fna.blastdb Nothing 
                 [ Var ( RepID Nothing ) "microbial16s" 
                 , Var ( RepID Nothing ) "env_nt" 
                 , Var ( RepID Nothing ) "est" 
@@ -212,7 +212,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "pdbs" 
-            , aExpr = Lst faa.blastdb 
+            , aExpr = Lst faa.blastdb Nothing 
                 [ Var ( RepID Nothing ) "cdd_delta" 
                 , Var ( RepID Nothing ) "env_nr" 
                 , Var ( RepID Nothing ) "landmark" 

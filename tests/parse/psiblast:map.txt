@@ -65,7 +65,7 @@ Script
                 [ Lit num "1.0e-2" 
                 , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Lst faa.blastdb 
+                , Lst faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "magadb" 
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgendb" 
@@ -118,7 +118,7 @@ Script
                     , Var ( RepID Nothing ) "maga" 
                     ] 
                     ( Var ( RepID Nothing ) "pssm" )
-                , Lst faa.blastdb 
+                , Lst faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "magadb" 
@@ -189,7 +189,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst num 
+            , aExpr = Lst num Nothing 
                 [ Var ( RepID Nothing ) "pssms1" 
                 , Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "magadb" 
@@ -299,7 +299,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst num 
+        ( Lst num Nothing 
             [ Var ( RepID Nothing ) "pssms1" 
             , Var ( RepID Nothing ) "query" 
             , Var ( RepID Nothing ) "magadb" 

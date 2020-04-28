@@ -5,7 +5,7 @@
 |   |   `-- 36189032ad.faa.ids
 |   `-- mmseqs
 |       `-- createdb
-|           `-- 563d748ac6
+|           `-- 07b2cb0a99
 |               |-- result
 |               |-- result.dbtype
 |               |-- result.err
@@ -23,7 +23,7 @@
 |   |       `-- result -> ../../../cache/load/36189032ad.faa
 |   |-- mmseqs_createdb
 |   |   `-- 329cb2539d
-|   |       `-- result -> ../../../cache/mmseqs/createdb/563d748ac6/result.index
+|   |       `-- result -> ../../../cache/mmseqs/createdb/07b2cb0a99/result.index
 |   `-- str
 |       `-- 824ccbd8b2
 |           `-- result -> ../../../cache/lines/...

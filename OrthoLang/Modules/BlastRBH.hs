@@ -95,7 +95,7 @@ mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = Function
 rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
 rMkBlastFromFaRevEach (bCmd, qType, _, _) scr (Fun rtn seed deps _ [e, s, qs]) = do
   let revDbAct   = aMkBlastFromDbRev bCmd
-      sList      = Lst (typeOf s) (depsOf s) [s]
+      sList      = Lst (typeOf s) (seedOf s) (depsOf s) [s]
       subjDbExpr = Fun dbType seed (depsOf sList) dbFnName [sList]
       editedExpr = Fun rtn seed deps editedName [e, subjDbExpr, qs]
       editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now

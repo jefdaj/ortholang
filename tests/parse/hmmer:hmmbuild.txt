@@ -10,7 +10,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "hits" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "blastp" 
@@ -35,7 +36,8 @@ Script
                     , Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "extract_targets" 
-                    [ Ref bht Nothing 
+                    [ Ref bht 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "query" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 

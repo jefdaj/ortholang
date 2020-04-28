@@ -53,7 +53,7 @@ Script
                     ( Var ( RepID Nothing ) "dep" )
                 , Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "ind" )
-                , Lst num [] 
+                , Lst num Nothing [] 
                     [ Lit num "571.0" 
                     , Lit num "577.0" 
                     ] 
@@ -77,7 +77,7 @@ Script
                     ( Var ( RepID Nothing ) "rep1" )
                 , Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "ind2" )
-                , Lst num [] 
+                , Lst num Nothing [] 
                     [ Lit num "587.0" 
                     , Lit num "701.0" 
                     , Lit num "709.0" 
@@ -107,7 +107,7 @@ Script
                     ( Var ( RepID Nothing ) "rep2" )
                 , Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "ind3" )
-                , Lst num [] 
+                , Lst num Nothing [] 
                     [ Lit num "739.0" 
                     , Lit num "743.0" 
                     , Lit num "877.0" 

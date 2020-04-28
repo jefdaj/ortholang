@@ -16,7 +16,7 @@ Script
             { aVar = Var ( RepID Nothing ) "mapped" 
             , aExpr = Fun faa.list.list Nothing 
                 [ Var ( RepID Nothing ) "multifa" ] "split_faa_each" 
-                [ Lst faa 
+                [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "multifa" ] 
                     [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "multifa" )
@@ -35,7 +35,7 @@ Script
                     , Var ( RepID Nothing ) "multifa" 
                     , Var ( RepID Nothing ) "mapped" 
                     ] "|" 
-                    ( Lst faa.list 
+                    ( Lst faa.list Nothing 
                         [ Var ( RepID Nothing ) "genes" 
                         , Var ( RepID Nothing ) "multifa" 
                         ] 
@@ -62,7 +62,7 @@ Script
                 , Var ( RepID Nothing ) "multifa" 
                 , Var ( RepID Nothing ) "mapped" 
                 ] "|" 
-                ( Lst faa.list 
+                ( Lst faa.list Nothing 
                     [ Var ( RepID Nothing ) "genes" 
                     , Var ( RepID Nothing ) "multifa" 
                     ] 

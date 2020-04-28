@@ -24,11 +24,11 @@ Script
                 [ Var ( RepID Nothing ) "var1" 
                 , Var ( RepID Nothing ) "var2" 
                 ] "repeat" 
-                [ Lst num.list 
+                [ Lst num.list Nothing 
                     [ Var ( RepID Nothing ) "var1" 
                     , Var ( RepID Nothing ) "var2" 
                     ] 
-                    [ Lst num 
+                    [ Lst num Nothing 
                         [ Var ( RepID Nothing ) "var1" ] 
                         [ Ref num Nothing [] 
                             ( Var ( RepID Nothing ) "var1" )
@@ -48,11 +48,11 @@ Script
             [ Var ( RepID Nothing ) "var1" 
             , Var ( RepID Nothing ) "var2" 
             ] "repeat" 
-            [ Lst num.list 
+            [ Lst num.list Nothing 
                 [ Var ( RepID Nothing ) "var1" 
                 , Var ( RepID Nothing ) "var2" 
                 ] 
-                [ Lst num 
+                [ Lst num Nothing 
                     [ Var ( RepID Nothing ) "var1" ] 
                     [ Ref num Nothing [] 
                         ( Var ( RepID Nothing ) "var1" )

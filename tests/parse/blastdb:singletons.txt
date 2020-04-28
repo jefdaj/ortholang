@@ -2,7 +2,7 @@ Script
     { sAssigns = 
         [ Assign 
             { aVar = Var ( RepID Nothing ) "nums" 
-            , aExpr = Lst num [] 
+            , aExpr = Lst num Nothing [] 
                 [ Lit num "1.0" 
                 , Lit num "2.0" 
                 , Lit num "3.0" 
@@ -10,7 +10,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "strs" 
-            , aExpr = Lst str [] 
+            , aExpr = Lst str Nothing [] 
                 [ Lit str "1" 
                 , Lit str "2" 
                 , Lit str "3" 
@@ -34,7 +34,7 @@ Script
                 [ Var ( RepID Nothing ) "genes5" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "makeblastdb_faa_each" 
-                [ Lst faa 
+                [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "genes5" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
@@ -47,7 +47,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst num.list 
+            , aExpr = Lst num.list Nothing 
                 [ Var ( RepID Nothing ) "nums" 
                 , Var ( RepID Nothing ) "strs" 
                 , Var ( RepID Nothing ) "dbs" 
@@ -92,7 +92,7 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Lst num.list 
+        ( Lst num.list Nothing 
             [ Var ( RepID Nothing ) "nums" 
             , Var ( RepID Nothing ) "strs" 
             , Var ( RepID Nothing ) "dbs" 
