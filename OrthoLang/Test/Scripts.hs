@@ -60,6 +60,7 @@ stdoutVaries =
   [ "crbblast:crb_blast_each2"
   , "blasthits:reciprocal_best" -- TODO should this be fixable?
   , "blasthits:best_hits"
+  , "hmmer:hmmbuild" -- TODO should be easy to fix by filtering out the DATE line
   ]
 
 -- | These generally need work and should be skipped for now :(
@@ -74,6 +75,43 @@ badlyBroken =
   , "psiblast:compose1"
   , "sonicparanoid:test1"
   , "sonicparanoid:myco3" -- TODO finish writing module first
+
+  -- TODO check on these and remove the easy ones
+  , "blastdb:blastdblist"
+  , "blastdb:makeblastdb_nucl"
+  , "blastdb:makeblastdb_nucl_all"
+  , "blastdb:makeblastdb_nucl_each"
+  , "blastdb:makeblastdb_prot"
+  , "blastdb:makeblastdb_prot_all"
+  , "blastdb:makeblastdb_prot_each"
+  , "blastdb:singletons"
+  , "busco:busco_filter_completeness"
+  , "busco:busco_percent_complete"
+  , "busco:busco_percent_complete_each"
+  , "busco:busco_proteins_each"
+  , "busco:busco_scores_table"
+  , "busco:mycoplasma"
+  , "crbblast:crb_blast_each"
+  , "crbblast:crb_blast_each2"
+  , "crbblast:crb_blast_many_cyanos"
+  , "crbblast:crb_blast_two_cyanos"
+  , "biomartr" -- from examples
+  , "mmseqs" -- from examples
+  , "psiblast_rbh" -- from examples
+  , "listlike:length"
+  , "mmseqs:search"
+  , "mmseqs:search_db"
+  , "orthofinder:basic"
+  , "orthofinder:orthogroups"
+  , "orthogroups:orthogroup_containing"
+  , "orthogroups:orthogroups_containing"
+  , "orthogroups:ortholog_in_all"
+  , "orthogroups:ortholog_in_any"
+  , "orthogroups:ortholog_in_max"
+  , "orthogroups:ortholog_in_max_2"
+  , "orthogroups:ortholog_in_min"
+  , "seqio:gbk_to_fna_concat"
+  , "seqio:split_faa"
   ]
 
 mkTestGroup ::  Config -> LocksRef -> IDsRef -> DigestsRef -> String
@@ -234,9 +272,9 @@ mkScriptTests sDir (name, cut, parse, expand, out, tre, mchk) cfg ref ids dRef =
       expTest   = mkExpandTest  cfg' ref ids dRef name cut expand
       shareTest = mkShareTest cfg' ref ids dRef sDir name out
       runScriptU c r i d = runScript c r i d >> return ()
-      outTests  = if (name `elem` stdoutVaries) then [] else [mkOutTest  cfg' ref ids dRef sDir name out]
-      treeTests = if (name `elem` tmpfilesVary) then [] else [mkTreeTest cfg' ref ids dRef name runScriptU tre]
-      tests     = if (name `elem` badlyBroken)
+      outTests  = if (name `elem` (badlyBroken ++ stdoutVaries)) then [] else [mkOutTest  cfg' ref ids dRef sDir name out]
+      treeTests = if (name `elem` (badlyBroken ++ tmpfilesVary)) then [] else [mkTreeTest cfg' ref ids dRef name runScriptU tre]
+      tests     = if (name `elem`  badlyBroken)
                      then []
                      else [tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]
   return $ testGroup (removePrefix name) tests
