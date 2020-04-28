@@ -19,7 +19,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mgendb" 
-            , aExpr = Fun faa.blastdb Nothing 
+            , aExpr = Fun faa.blastdb 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_faa" 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
@@ -27,7 +28,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "magadb" 
-            , aExpr = Fun faa.blastdb Nothing 
+            , aExpr = Fun faa.blastdb 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "maga" ] "makeblastdb_faa" 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
@@ -35,7 +37,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "pssm" 
-            , aExpr = Fun pssm Nothing 
+            , aExpr = Fun pssm 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "magadb" 
                 , Var ( RepID Nothing ) "maga" 
@@ -43,14 +46,16 @@ Script
                 [ Lit num "1.0e-2" 
                 , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Ref faa.blastdb Nothing 
+                , Ref faa.blastdb 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" ] 
                     ( Var ( RepID Nothing ) "magadb" )
                 ] 
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "pssms1" 
-            , aExpr = Fun pssm.list Nothing 
+            , aExpr = Fun pssm.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "magadb" 
                 , Var ( RepID Nothing ) "maga" 
@@ -66,10 +71,12 @@ Script
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
-                    [ Ref faa.blastdb Nothing 
+                    [ Ref faa.blastdb 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "maga" ] 
                         ( Var ( RepID Nothing ) "magadb" )
-                    , Ref faa.blastdb Nothing 
+                    , Ref faa.blastdb 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "mgen" ] 
                         ( Var ( RepID Nothing ) "mgendb" )
                     ] 
@@ -77,7 +84,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "pssms2" 
-            , aExpr = Fun pssm.list Nothing 
+            , aExpr = Fun pssm.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "queries" 
                 , Var ( RepID Nothing ) "magadb" 
                 , Var ( RepID Nothing ) "maga" 
@@ -85,14 +93,16 @@ Script
                 [ Lit num "1.0e-2" 
                 , Ref faa.list Nothing [] 
                     ( Var ( RepID Nothing ) "queries" )
-                , Ref faa.blastdb Nothing 
+                , Ref faa.blastdb 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" ] 
                     ( Var ( RepID Nothing ) "magadb" )
                 ] 
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "tables1" 
-            , aExpr = Fun bht.list Nothing 
+            , aExpr = Fun bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "pssm" 
                 , Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "magadb" 
@@ -101,7 +111,8 @@ Script
                 , Var ( RepID Nothing ) "mgen" 
                 ] "psiblast_pssm_db_each" 
                 [ Lit num "0.1" 
-                , Ref pssm Nothing 
+                , Ref pssm 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "magadb" 
                     , Var ( RepID Nothing ) "maga" 
@@ -113,10 +124,12 @@ Script
                     , Var ( RepID Nothing ) "magadb" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
-                    [ Ref faa.blastdb Nothing 
+                    [ Ref faa.blastdb 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "mgen" ] 
                         ( Var ( RepID Nothing ) "mgendb" )
-                    , Ref faa.blastdb Nothing 
+                    , Ref faa.blastdb 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "maga" ] 
                         ( Var ( RepID Nothing ) "magadb" )
                     ] 
@@ -124,7 +137,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "tables2" 
-            , aExpr = Fun bht.list Nothing 
+            , aExpr = Fun bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "pssms1" 
                 , Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "magadb" 
@@ -133,7 +147,8 @@ Script
                 , Var ( RepID Nothing ) "mgen" 
                 ] "psiblast_each_pssm_db" 
                 [ Lit num "0.1" 
-                , Ref pssm.list Nothing 
+                , Ref pssm.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "magadb" 
                     , Var ( RepID Nothing ) "maga" 
@@ -141,14 +156,16 @@ Script
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
                     ( Var ( RepID Nothing ) "pssms1" )
-                , Ref faa.blastdb Nothing 
+                , Ref faa.blastdb 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" ] 
                     ( Var ( RepID Nothing ) "magadb" )
                 ] 
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "tables3" 
-            , aExpr = Fun bht.list Nothing 
+            , aExpr = Fun bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "pssms1" 
                 , Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "magadb" 
@@ -157,7 +174,8 @@ Script
                 , Var ( RepID Nothing ) "mgen" 
                 ] "psiblast_each_pssm" 
                 [ Lit num "0.1" 
-                , Ref pssm.list Nothing 
+                , Ref pssm.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "magadb" 
                     , Var ( RepID Nothing ) "maga" 
@@ -193,7 +211,8 @@ Script
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "length" 
-                    [ Ref pssm.list Nothing 
+                    [ Ref pssm.list 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "query" 
                         , Var ( RepID Nothing ) "magadb" 
                         , Var ( RepID Nothing ) "maga" 
@@ -208,7 +227,8 @@ Script
                     , Var ( RepID Nothing ) "magadb" 
                     , Var ( RepID Nothing ) "maga" 
                     ] "length" 
-                    [ Ref pssm.list Nothing 
+                    [ Ref pssm.list 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "queries" 
                         , Var ( RepID Nothing ) "magadb" 
                         , Var ( RepID Nothing ) "maga" 
@@ -224,7 +244,8 @@ Script
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "length" 
-                    [ Ref bht.list Nothing 
+                    [ Ref bht.list 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "pssm" 
                         , Var ( RepID Nothing ) "query" 
                         , Var ( RepID Nothing ) "magadb" 
@@ -243,7 +264,8 @@ Script
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "length" 
-                    [ Ref bht.list Nothing 
+                    [ Ref bht.list 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "pssms1" 
                         , Var ( RepID Nothing ) "query" 
                         , Var ( RepID Nothing ) "magadb" 
@@ -262,7 +284,8 @@ Script
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "length" 
-                    [ Ref bht.list Nothing 
+                    [ Ref bht.list 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "pssms1" 
                         , Var ( RepID Nothing ) "query" 
                         , Var ( RepID Nothing ) "magadb" 
@@ -298,7 +321,8 @@ Script
                 , Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "length" 
-                [ Ref pssm.list Nothing 
+                [ Ref pssm.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "magadb" 
                     , Var ( RepID Nothing ) "maga" 
@@ -313,7 +337,8 @@ Script
                 , Var ( RepID Nothing ) "magadb" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "length" 
-                [ Ref pssm.list Nothing 
+                [ Ref pssm.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "queries" 
                     , Var ( RepID Nothing ) "magadb" 
                     , Var ( RepID Nothing ) "maga" 
@@ -329,7 +354,8 @@ Script
                 , Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "length" 
-                [ Ref bht.list Nothing 
+                [ Ref bht.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "pssm" 
                     , Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "magadb" 
@@ -348,7 +374,8 @@ Script
                 , Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "length" 
-                [ Ref bht.list Nothing 
+                [ Ref bht.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "pssms1" 
                     , Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "magadb" 
@@ -367,7 +394,8 @@ Script
                 , Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "length" 
-                [ Ref bht.list Nothing 
+                [ Ref bht.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "pssms1" 
                     , Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "magadb" 

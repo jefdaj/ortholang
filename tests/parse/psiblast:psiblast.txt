@@ -10,7 +10,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "hits" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "psiblast" 
@@ -23,7 +24,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref bht Nothing 
+            , aExpr = Ref bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "maga" 
                 ] 
@@ -31,7 +33,8 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Ref bht Nothing 
+        ( Ref bht 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "query" 
             , Var ( RepID Nothing ) "maga" 
             ] 

@@ -10,7 +10,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "pssm" 
-            , aExpr = Fun pssm Nothing 
+            , aExpr = Fun pssm 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "psiblast_train" 
@@ -23,7 +24,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref pssm Nothing 
+            , aExpr = Ref pssm 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "maga" 
                 ] 
@@ -31,7 +33,8 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Ref pssm Nothing 
+        ( Ref pssm 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "query" 
             , Var ( RepID Nothing ) "maga" 
             ] 

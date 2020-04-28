@@ -21,16 +21,16 @@
 |   |       |-- result.pin
 |   |       `-- result.psq
 |   |-- map
-|   |   |-- 9624b207d9
+|   |   |-- 9e3a912f0e
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- result.tmp.err
-|   |   `-- 9aecd2b136
+|   |   `-- ea221ca111
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- result.tmp.err
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   |-- 6cfb7df001
+|   |   |-- 43e27cd20e
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 7666691bcd
 |   |   |   `-- result -> ../../../cache/lines/...
@@ -45,17 +45,20 @@
 |   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
 |   |-- makeblastdb_faa
 |   |   |-- 1898488812
-|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   `-- 329cb2539d
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
 |   |   `-- c23938f494
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- psiblast_train_db_each
 |   |   `-- 0c631e7663
 |   |       `-- ec1f6f502d
-|   |           `-- 1cfb27b2f9
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |           `-- 7d321eb17d
+|   |               `-- 0
+|   |                   `-- result -> ../../../../../../cache/lines/...
 |   `-- str
 |       |-- 1e020faf26
 |       |   `-- result -> ../../../cache/lines/...
@@ -64,10 +67,10 @@
 |       `-- 824ccbd8b2
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- magadb.faa.blastdb -> ../exprs/makeblastdb_faa/329cb2539d/result
-    |-- mgendb.faa.blastdb -> ../exprs/makeblastdb_faa/1898488812/result
-    |-- pssm.pssm.list -> ../exprs/psiblast_train_db_each/0c631e7663/ec1f6f502d/1cfb27b2f9/result
+    |-- magadb.faa.blastdb -> ../exprs/makeblastdb_faa/329cb2539d/0/result
+    |-- mgendb.faa.blastdb -> ../exprs/makeblastdb_faa/1898488812/0/result
+    |-- pssm.pssm.list -> ../exprs/psiblast_train_db_each/0c631e7663/ec1f6f502d/7d321eb17d/0/result
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/pssm.pssm.list
 
-32 directories, 38 files
+35 directories, 38 files

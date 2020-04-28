@@ -14,7 +14,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "hitlists" 
-            , aExpr = Fun bht.list Nothing 
+            , aExpr = Fun bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
@@ -35,7 +36,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref bht.list Nothing 
+            , aExpr = Ref bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
@@ -44,7 +46,8 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Ref bht.list Nothing 
+        ( Ref bht.list 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "query" 
             , Var ( RepID Nothing ) "mgen" 
             , Var ( RepID Nothing ) "maga" 

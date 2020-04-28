@@ -22,7 +22,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "g1_10_genes" 
             , aExpr = Fun faa.list 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "g1" ] "sample" 
                 [ Lit num "10.0" 
                 , Fun faa.list Nothing 
@@ -34,14 +34,15 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "pssms" 
-            , aExpr = Fun pssm.list Nothing 
+            , aExpr = Fun pssm.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "g1_10_genes" 
                 , Var ( RepID Nothing ) "g1" 
                 , Var ( RepID Nothing ) "g2" 
                 ] "psiblast_train_pssms" 
                 [ Lit num "1.0e-10" 
                 , Ref faa.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "g1" ] 
                     ( Var ( RepID Nothing ) "g1_10_genes" )
                 , Ref faa Nothing [] 
@@ -50,7 +51,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref pssm.list Nothing 
+            , aExpr = Ref pssm.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "g1_10_genes" 
                 , Var ( RepID Nothing ) "g1" 
                 , Var ( RepID Nothing ) "g2" 
@@ -59,7 +61,8 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Ref pssm.list Nothing 
+        ( Ref pssm.list 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "g1_10_genes" 
             , Var ( RepID Nothing ) "g1" 
             , Var ( RepID Nothing ) "g2" 

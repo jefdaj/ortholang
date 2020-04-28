@@ -6,12 +6,14 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mgendb" 
-            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+            , aExpr = Fun faa.blastdb 
+                ( Just ( Seed 0 ) ) [] "makeblastdb_faa" 
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ] ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "magadb" 
-            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+            , aExpr = Fun faa.blastdb 
+                ( Just ( Seed 0 ) ) [] "makeblastdb_faa" 
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
             } 
         , Assign 
@@ -20,15 +22,18 @@ Script
                 [ Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "magadb" 
                 ] 
-                [ Ref faa.blastdb Nothing [] 
+                [ Ref faa.blastdb 
+                    ( Just ( Seed 0 ) ) [] 
                     ( Var ( RepID Nothing ) "mgendb" )
-                , Ref faa.blastdb Nothing [] 
+                , Ref faa.blastdb 
+                    ( Just ( Seed 0 ) ) [] 
                     ( Var ( RepID Nothing ) "magadb" )
                 ] 
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "hitlists" 
-            , aExpr = Fun bht.list Nothing 
+            , aExpr = Fun bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "cyanodbs" 
                 , Var ( RepID Nothing ) "mgendb" 
@@ -46,7 +51,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref bht.list Nothing 
+            , aExpr = Ref bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "cyanodbs" 
                 , Var ( RepID Nothing ) "mgendb" 
@@ -56,7 +62,8 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Ref bht.list Nothing 
+        ( Ref bht.list 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "query" 
             , Var ( RepID Nothing ) "cyanodbs" 
             , Var ( RepID Nothing ) "mgendb" 

@@ -36,24 +36,28 @@
 |   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
 |   |-- makeblastdb_faa_all
 |   |   |-- 329cb2539d
-|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   `-- 7627de68aa
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
 |   |   `-- c23938f494
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- psiblast_pssm
 |   |   `-- 0c631e7663
-|   |       `-- da9c7e1778
-|   |           `-- 4f0bccea88
-|   |               |-- result
-|   |               `-- result.err
+|   |       `-- 0d018d9579
+|   |           `-- 3831a7a38b
+|   |               `-- 0
+|   |                   |-- result
+|   |                   `-- result.err
 |   |-- psiblast_train_db
 |   |   `-- 0c631e7663
 |   |       `-- ec1f6f502d
-|   |           `-- e3786a6445
-|   |               |-- result -> ../../../../../cache/lines/...
-|   |               `-- result.tmp.err
+|   |           `-- d948239045
+|   |               `-- 0
+|   |                   |-- result -> ../../../../../../cache/lines/...
+|   |                   `-- result.tmp.err
 |   `-- str
 |       |-- 1e020faf26
 |       |   `-- result -> ../../../cache/lines/...
@@ -62,12 +66,12 @@
 |       `-- 824ccbd8b2
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- cyanodb.faa.blastdb -> ../exprs/makeblastdb_faa_all/7627de68aa/result
+    |-- cyanodb.faa.blastdb -> ../exprs/makeblastdb_faa_all/7627de68aa/0/result
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     |-- mgen.faa -> ../exprs/load_faa/f8a41afad4/result
-    |-- pssm.pssm -> ../exprs/psiblast_train_db/0c631e7663/ec1f6f502d/e3786a6445/result
+    |-- pssm.pssm -> ../exprs/psiblast_train_db/0c631e7663/ec1f6f502d/d948239045/0/result
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     |-- result -> ../vars/single.bht
-    `-- single.bht -> ../exprs/psiblast_pssm/0c631e7663/da9c7e1778/4f0bccea88/result
+    `-- single.bht -> ../exprs/psiblast_pssm/0c631e7663/0d018d9579/3831a7a38b/0/result
 
-32 directories, 38 files
+36 directories, 38 files

@@ -10,7 +10,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "magadb" 
-            , aExpr = Fun faa.blastdb Nothing 
+            , aExpr = Fun faa.blastdb 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "maga" ] "makeblastdb_faa" 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
@@ -22,7 +23,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mgendb" 
-            , aExpr = Fun faa.blastdb Nothing 
+            , aExpr = Fun faa.blastdb 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_faa" 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
@@ -34,7 +36,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "pssmmaga" 
-            , aExpr = Fun pssm Nothing 
+            , aExpr = Fun pssm 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "cutoff" 
                 , Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "magadb" 
@@ -44,14 +47,16 @@ Script
                     ( Var ( RepID Nothing ) "cutoff" )
                 , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Ref faa.blastdb Nothing 
+                , Ref faa.blastdb 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" ] 
                     ( Var ( RepID Nothing ) "magadb" )
                 ] 
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "pssmmgen" 
-            , aExpr = Fun pssm Nothing 
+            , aExpr = Fun pssm 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "cutoff" 
                 , Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "mgendb" 
@@ -61,7 +66,8 @@ Script
                     ( Var ( RepID Nothing ) "cutoff" )
                 , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Ref faa.blastdb Nothing 
+                , Ref faa.blastdb 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mgen" ] 
                     ( Var ( RepID Nothing ) "mgendb" )
                 ] 
@@ -91,7 +97,8 @@ Script
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "cutoffs" 
                 ] "replace_each" 
-                [ Ref pssm Nothing 
+                [ Ref pssm 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "cutoff" 
                     , Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "magadb" 
@@ -114,7 +121,8 @@ Script
                 , Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "cutoffs" 
                 ] "replace_each" 
-                [ Ref pssm Nothing 
+                [ Ref pssm 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "cutoff" 
                     , Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "mgendb" 
@@ -129,7 +137,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "hitsmaga" 
-            , aExpr = Fun bht.list Nothing 
+            , aExpr = Fun bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "cutoff" 
                 , Var ( RepID Nothing ) "pssmsmaga" 
                 , Var ( RepID Nothing ) "pssmmaga" 
@@ -155,7 +164,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "hitsmgen" 
-            , aExpr = Fun bht.list Nothing 
+            , aExpr = Fun bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "cutoff" 
                 , Var ( RepID Nothing ) "pssmsmgen" 
                 , Var ( RepID Nothing ) "pssmmgen" 
@@ -181,7 +191,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref bht.list Nothing 
+            , aExpr = Ref bht.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "cutoff" 
                 , Var ( RepID Nothing ) "pssmsmgen" 
                 , Var ( RepID Nothing ) "pssmmgen" 
@@ -194,7 +205,8 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Ref bht.list Nothing 
+        ( Ref bht.list 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "cutoff" 
             , Var ( RepID Nothing ) "pssmsmgen" 
             , Var ( RepID Nothing ) "pssmmgen" 

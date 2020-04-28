@@ -14,7 +14,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "cyanodb" 
-            , aExpr = Fun faa.blastdb Nothing 
+            , aExpr = Fun faa.blastdb 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "makeblastdb_faa_all" 
@@ -31,7 +32,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "pssm" 
-            , aExpr = Fun pssm Nothing 
+            , aExpr = Fun pssm 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "cyanodb" 
                 , Var ( RepID Nothing ) "mgen" 
@@ -40,7 +42,8 @@ Script
                 [ Lit num "1.0e-10" 
                 , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Ref faa.blastdb Nothing 
+                , Ref faa.blastdb 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
@@ -49,7 +52,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "single" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "pssm" 
                 , Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "cyanodb" 
@@ -57,14 +61,16 @@ Script
                 , Var ( RepID Nothing ) "maga" 
                 ] "psiblast_pssm_db" 
                 [ Lit num "1.0e-10" 
-                , Ref pssm Nothing 
+                , Ref pssm 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "query" 
                     , Var ( RepID Nothing ) "cyanodb" 
                     , Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
                     ( Var ( RepID Nothing ) "pssm" )
-                , Ref faa.blastdb Nothing 
+                , Ref faa.blastdb 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
@@ -73,7 +79,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref bht Nothing 
+            , aExpr = Ref bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "pssm" 
                 , Var ( RepID Nothing ) "query" 
                 , Var ( RepID Nothing ) "cyanodb" 
@@ -84,7 +91,8 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Ref bht Nothing 
+        ( Ref bht 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "pssm" 
             , Var ( RepID Nothing ) "query" 
             , Var ( RepID Nothing ) "cyanodb" 
