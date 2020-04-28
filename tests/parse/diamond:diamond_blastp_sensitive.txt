@@ -11,7 +11,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
             , aExpr = Fun bht 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "diamond_blastp_sensitive" 
@@ -25,7 +25,7 @@ Script
         ] 
     , sResult = Just 
         ( Fun bht 
-            ( Just ( Salt 0 ) ) 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "maga" 
             , Var ( RepID Nothing ) "mgen" 
             ] "diamond_blastp_sensitive" 

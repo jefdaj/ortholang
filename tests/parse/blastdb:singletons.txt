@@ -29,7 +29,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "dbs" 
-            , aExpr = Fun faa.blastdb.list Nothing 
+            , aExpr = Fun faa.blastdb.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "genes5" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "makeblastdb_faa_each" 
@@ -79,7 +80,8 @@ Script
                         , Var ( RepID Nothing ) "genes5" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] "singletons" 
-                        [ Ref faa.blastdb.list Nothing 
+                        [ Ref faa.blastdb.list 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "genes5" 
                             , Var ( RepID Nothing ) "mgen" 
                             ] 
@@ -123,7 +125,8 @@ Script
                     , Var ( RepID Nothing ) "genes5" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "singletons" 
-                    [ Ref faa.blastdb.list Nothing 
+                    [ Ref faa.blastdb.list 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "genes5" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 

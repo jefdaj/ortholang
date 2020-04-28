@@ -11,7 +11,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "hits" 
             , aExpr = Fun crb 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "minimgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "crb_blast" 
@@ -29,7 +29,7 @@ Script
                 , Var ( RepID Nothing ) "maga" 
                 ] "extract_targets" 
                 [ Ref crb 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "minimgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
@@ -44,7 +44,7 @@ Script
             , Var ( RepID Nothing ) "maga" 
             ] "extract_targets" 
             [ Ref crb 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "minimgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] 

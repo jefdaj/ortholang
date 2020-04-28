@@ -14,12 +14,14 @@ Script
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] 
-                [ Fun fna.blastdb Nothing 
+                [ Fun fna.blastdb 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "single" ] "makeblastdb_fna" 
                     [ Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "single" )
                     ]
-                , Fun fna.blastdb Nothing 
+                , Fun fna.blastdb 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "genes5" ] "makeblastdb_fna" 
                     [ Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "genes5" )
@@ -28,7 +30,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "each" 
-            , aExpr = Fun fna.blastdb.list Nothing 
+            , aExpr = Fun fna.blastdb.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] "makeblastdb_fna_each" 
@@ -45,7 +48,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "both" 
-            , aExpr = Fun fna.blastdb Nothing 
+            , aExpr = Fun fna.blastdb 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] "makeblastdb_fna_all" 
@@ -81,7 +85,8 @@ Script
                         , Var ( RepID Nothing ) "genes5" 
                         ] 
                         ( Var ( RepID Nothing ) "singles" )
-                    , Ref fna.blastdb.list Nothing 
+                    , Ref fna.blastdb.list 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "genes5" 
                         ] 
@@ -98,7 +103,8 @@ Script
                             ] 
                             ( Var ( RepID Nothing ) "singles" )
                         ) 
-                        ( Ref fna.blastdb.list Nothing 
+                        ( Ref fna.blastdb.list 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "single" 
                             , Var ( RepID Nothing ) "genes5" 
                             ] 
@@ -109,7 +115,8 @@ Script
                         , Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "genes5" 
                         ] 
-                        [ Ref fna.blastdb Nothing 
+                        [ Ref fna.blastdb 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "single" 
                             , Var ( RepID Nothing ) "genes5" 
                             ] 
@@ -139,7 +146,8 @@ Script
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
                     ( Var ( RepID Nothing ) "singles" )
-                , Ref fna.blastdb.list Nothing 
+                , Ref fna.blastdb.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
@@ -156,7 +164,8 @@ Script
                         ] 
                         ( Var ( RepID Nothing ) "singles" )
                     ) 
-                    ( Ref fna.blastdb.list Nothing 
+                    ( Ref fna.blastdb.list 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "genes5" 
                         ] 
@@ -167,7 +176,8 @@ Script
                     , Var ( RepID Nothing ) "single" 
                     , Var ( RepID Nothing ) "genes5" 
                     ] 
-                    [ Ref fna.blastdb Nothing 
+                    [ Ref fna.blastdb 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "single" 
                         , Var ( RepID Nothing ) "genes5" 
                         ] 

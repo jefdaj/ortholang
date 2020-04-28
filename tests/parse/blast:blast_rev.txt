@@ -14,7 +14,8 @@ Script
                 [ Var ( RepID Nothing ) "small" 
                 , Var ( RepID Nothing ) "large" 
                 ] "extract_queries" 
-                [ Fun bht Nothing 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "small" 
                     , Var ( RepID Nothing ) "large" 
                     ] "blastn" 

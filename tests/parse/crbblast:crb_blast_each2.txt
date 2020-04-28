@@ -11,7 +11,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "single" 
             , aExpr = Fun crb 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "minimgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "crb_blast" 
@@ -24,7 +24,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "mapped" 
             , aExpr = Fun crb.list 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "minimgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "crb_blast_each" 
@@ -57,7 +57,7 @@ Script
                         , Var ( RepID Nothing ) "maga" 
                         ] 
                         [ Ref crb 
-                            ( Just ( Salt 0 ) ) 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "minimgen" 
                             , Var ( RepID Nothing ) "maga" 
                             ] 
@@ -65,7 +65,7 @@ Script
                         ]
                     ) 
                     ( Ref crb.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "minimgen" 
                         , Var ( RepID Nothing ) "maga" 
                         ] 
@@ -93,7 +93,7 @@ Script
                     , Var ( RepID Nothing ) "maga" 
                     ] 
                     [ Ref crb 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "minimgen" 
                         , Var ( RepID Nothing ) "maga" 
                         ] 
@@ -101,7 +101,7 @@ Script
                     ]
                 ) 
                 ( Ref crb.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "minimgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 

@@ -23,16 +23,17 @@
 |   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_fna_all
 |   |   `-- d1dbfd10ec
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
 |       |-- 0ecd3e7ed5
 |       |   `-- result -> ../../../cache/lines/...
 |       `-- ac19b3d2a1
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- db.fna.blastdb -> ../exprs/makeblastdb_fna_all/d1dbfd10ec/result
+    |-- db.fna.blastdb -> ../exprs/makeblastdb_fna_all/d1dbfd10ec/0/result
     |-- genes5.fna -> ../exprs/load_fna/821d1bdfd1/result
     |-- result -> ../vars/db.fna.blastdb
     `-- single.fna -> ../exprs/load_fna/2c54deea89/result
 
-16 directories, 19 files
+17 directories, 19 files

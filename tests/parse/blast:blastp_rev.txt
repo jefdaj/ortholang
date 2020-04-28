@@ -19,7 +19,8 @@ Script
                 , Var ( RepID Nothing ) "maga5" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "extract_queries" 
-                [ Fun bht Nothing 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "n" 
                     , Var ( RepID Nothing ) "maga5" 
                     , Var ( RepID Nothing ) "maga" 
@@ -40,7 +41,8 @@ Script
                 , Var ( RepID Nothing ) "maga5" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "extract_queries_each" 
-                [ Fun bht.list Nothing 
+                [ Fun bht.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "n" 
                     , Var ( RepID Nothing ) "maga5" 
                     , Var ( RepID Nothing ) "maga" 

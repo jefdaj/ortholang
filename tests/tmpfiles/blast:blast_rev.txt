@@ -23,16 +23,19 @@
 |           `-- result.nsq
 |-- exprs
 |   |-- all
-|   |   `-- f8e98745d0
+|   |   `-- af54137280
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- any
-|   |   |-- e2a3c9db7d
+|   |   |-- af54137280
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- f8e98745d0
+|   |   `-- e2a3c9db7d
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- blastn_db
 |   |   |-- b6d4e4cdf4
 |   |   |   `-- 17f792cf84
+|   |   |       |-- 8bb60c4d3b
+|   |   |       |   `-- 0
+|   |   |       |       `-- result -> out
 |   |   |       `-- e8325359a2
 |   |   |           `-- result -> out
 |   |   `-- e10471b511
@@ -45,29 +48,29 @@
 |   |           `-- 89ab255c64
 |   |               `-- result -> ../../../../../cache/lines/...
 |   |-- diff
-|   |   `-- 256cf9a883
+|   |   `-- b4c9bd1d0b
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_queries
 |   |   |-- 37835b977a
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   |-- 64f00ab8df
+|   |   |-- ceeda8e571
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   `-- ceeda8e571
+|   |   `-- d4d4fdb94e
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
 |   |   `-- f8b6b15892
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 3f7e485eef
-|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 6b12d6586a
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- a949ecf31a
+|   |   |-- 772d06b8cd
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- f4e1efe52a
+|   |   |-- 995eab3e77
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- a949ecf31a
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |   |-- 2c54deea89
@@ -76,6 +79,8 @@
 |   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_fna
 |   |   `-- 6b72f6b956
+|   |       |-- 0
+|   |       |   `-- result -> ../../../../cache/lines/...
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_fna_all
 |   |   `-- 6b72f6b956
@@ -89,11 +94,11 @@
 |       `-- ac19b3d2a1
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- fwds.str.list -> ../exprs/extract_queries/64f00ab8df/result
+    |-- fwds.str.list -> ../exprs/extract_queries/d4d4fdb94e/result
     |-- large.fna -> ../exprs/load_fna/821d1bdfd1/result
     |-- mrevs.str.list -> ../exprs/any/e2a3c9db7d/result
-    |-- result -> ../exprs/diff/256cf9a883/result
+    |-- result -> ../exprs/diff/b4c9bd1d0b/result
     |-- small.fna -> ../exprs/load_fna/2c54deea89/result
     `-- srevs.str.list -> ../exprs/extract_queries/37835b977a/result
 
-52 directories, 44 files
+55 directories, 46 files

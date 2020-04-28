@@ -10,7 +10,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mgendb" 
-            , aExpr = Fun faa.blastdb Nothing 
+            , aExpr = Fun faa.blastdb 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_faa" 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
@@ -22,7 +23,8 @@ Script
                 [ Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "extract_queries" 
-                [ Fun bht Nothing 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "blastp" 
@@ -40,7 +42,8 @@ Script
                 [ Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "extract_queries_each" 
-                [ Fun bht.list Nothing 
+                [ Fun bht.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "blastp_each" 
@@ -62,7 +65,8 @@ Script
                 , Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "extract_queries" 
-                [ Fun bht Nothing 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
@@ -70,7 +74,8 @@ Script
                     [ Lit num "1.0e-5" 
                     , Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga" )
-                    , Ref faa.blastdb Nothing 
+                    , Ref faa.blastdb 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "mgen" ] 
                         ( Var ( RepID Nothing ) "mgendb" )
                     ] 
@@ -83,7 +88,8 @@ Script
                 , Var ( RepID Nothing ) "mgendb" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "extract_queries_each" 
-                [ Fun bht.list Nothing 
+                [ Fun bht.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
@@ -95,7 +101,8 @@ Script
                         [ Var ( RepID Nothing ) "mgendb" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
-                        [ Ref faa.blastdb Nothing 
+                        [ Ref faa.blastdb 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "mgen" ] 
                             ( Var ( RepID Nothing ) "mgendb" )
                         ]

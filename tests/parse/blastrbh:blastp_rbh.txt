@@ -14,7 +14,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "fwd" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "n" 
                 , Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
@@ -29,7 +30,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "rev1" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "n" 
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
@@ -66,13 +68,15 @@ Script
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "rev1" 
                 ] "reciprocal_best" 
-                [ Ref bht Nothing 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "n" 
                     , Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
                     ( Var ( RepID Nothing ) "fwd" )
-                , Ref bht Nothing 
+                , Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "n" 
                     , Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
@@ -89,7 +93,8 @@ Script
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "rev2" 
                 ] "reciprocal_best" 
-                [ Ref bht Nothing 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "n" 
                     , Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 

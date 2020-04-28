@@ -17,7 +17,8 @@ Script
                 [ Var ( RepID Nothing ) "genes5" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "extract_queries" 
-                [ Fun bht Nothing 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "genes5" 
                     , Var ( RepID Nothing ) "maga" 
                     ] "tblastx" 

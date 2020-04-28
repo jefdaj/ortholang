@@ -6,7 +6,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "maga" 
-            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+            , aExpr = Fun faa.blastdb 
+                ( Just ( Seed 0 ) ) [] "makeblastdb_faa" 
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
             } 
         , Assign 
@@ -15,14 +16,16 @@ Script
                 [ Var ( RepID Nothing ) "maga5" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "extract_queries" 
-                [ Fun bht Nothing 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga5" 
                     , Var ( RepID Nothing ) "maga" 
                     ] "blastp_db" 
                     [ Lit num "1.0e-5" 
                     , Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga5" )
-                    , Ref faa.blastdb Nothing [] 
+                    , Ref faa.blastdb 
+                        ( Just ( Seed 0 ) ) [] 
                         ( Var ( RepID Nothing ) "maga" )
                     ] 
                 ]
@@ -33,7 +36,8 @@ Script
                 [ Var ( RepID Nothing ) "maga5" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "extract_queries_each" 
-                [ Fun bht.list Nothing 
+                [ Fun bht.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga5" 
                     , Var ( RepID Nothing ) "maga" 
                     ] "blastp_db_each" 
@@ -42,7 +46,8 @@ Script
                         ( Var ( RepID Nothing ) "maga5" )
                     , Lst faa.blastdb 
                         [ Var ( RepID Nothing ) "maga" ] 
-                        [ Ref faa.blastdb Nothing [] 
+                        [ Ref faa.blastdb 
+                            ( Just ( Seed 0 ) ) [] 
                             ( Var ( RepID Nothing ) "maga" )
                         ]
                     ] 

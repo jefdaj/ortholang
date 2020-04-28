@@ -10,7 +10,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "fwdHits" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "blastp" 
@@ -23,7 +24,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "revHits" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "blastp" 
@@ -42,12 +44,14 @@ Script
                 , Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "revHits" 
                 ] "reciprocal_best" 
-                [ Ref bht Nothing 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
                     ( Var ( RepID Nothing ) "fwdHits" )
-                , Ref bht Nothing 
+                , Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 

@@ -13,7 +13,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "blast_hits" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "my_species" 
                 , Var ( RepID Nothing ) "swissprot" 
                 ] "blastx_db" 
@@ -31,7 +32,8 @@ Script
                 , Var ( RepID Nothing ) "my_species" 
                 , Var ( RepID Nothing ) "swissprot" 
                 ] "extract_queries" 
-                [ Ref bht Nothing 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "my_species" 
                     , Var ( RepID Nothing ) "swissprot" 
                     ] 
@@ -45,7 +47,8 @@ Script
                 , Var ( RepID Nothing ) "my_species" 
                 , Var ( RepID Nothing ) "swissprot" 
                 ] "extract_targets" 
-                [ Ref bht Nothing 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "my_species" 
                     , Var ( RepID Nothing ) "swissprot" 
                     ] 

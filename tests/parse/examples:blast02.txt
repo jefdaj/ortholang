@@ -21,7 +21,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "hits" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "pcc7942" ] "blastp_db" 
                 [ Lit num "1.0e-50" 
                 , Ref faa Nothing [] 

@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 47fe55441b
+|   |   |-- 8ca231e261
 |   |   |   |-- 9ae7ddb842
 |   |   |   |   |-- args -> ../../../../cache/lines/...
 |   |   |   |   `-- result -> ../../../../exprs/length/9ae7ddb842/result
@@ -11,13 +11,13 @@
 |   |   |   `-- db75c1e66d
 |   |   |       |-- args -> ../../../../cache/lines/...
 |   |   |       `-- result -> ../../../../exprs/length/db75c1e66d/result
-|   |   `-- 74f9b0e1b5
+|   |   `-- b88aff789b
 |   |       |-- 201980d355
 |   |       |   |-- args -> ../../../../cache/lines/...
-|   |       |   `-- result -> ../../../../exprs/makeblastdb_fna/201980d355/result
+|   |       |   `-- result -> ../../../../exprs/makeblastdb_fna/201980d355/0/result
 |   |       `-- 9c3ec12a2c
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/makeblastdb_fna/9c3ec12a2c/result
+|   |           `-- result -> ../../../../exprs/makeblastdb_fna/9c3ec12a2c/0/result
 |   |-- load
 |   |   |-- 6046a54e92.fna
 |   |   |-- 6046a54e92.fna.ids
@@ -44,7 +44,7 @@
 |           `-- result.nsq
 |-- exprs
 |   |-- any
-|   |   `-- f0cdca1165
+|   |   `-- 2c7d6a6c38
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- length
 |   |   |-- 9ae7ddb842
@@ -54,22 +54,22 @@
 |   |   `-- db75c1e66d
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- length_each
-|   |   `-- 97082f7737
+|   |   `-- d63d9a5544
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- list
+|   |   |-- 1e030f81d2
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 2bdbbc3d1a
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 327b26d8b6
+|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 6b12d6586a
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 6e7f6e02da
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- a6695c3178
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- a949ecf31a
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- b868e06b38
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- c7c2a06efd
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- d952449acb
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- dd40adbee7
+|   |   `-- a949ecf31a
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |   |-- 2c54deea89
@@ -78,19 +78,25 @@
 |   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_fna
 |   |   |-- 201980d355
-|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   |-- 6b72f6b956
-|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   |-- 89ab255c64
-|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |   `-- 0
+|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   `-- 9c3ec12a2c
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- makeblastdb_fna_all
 |   |   `-- d1dbfd10ec
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- makeblastdb_fna_each
 |   |   `-- c82a41695e
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- singletons
 |   |   `-- d1dbfd10ec
 |   |       `-- result -> ../../../cache/lines/...
@@ -100,11 +106,11 @@
 |       `-- ac19b3d2a1
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- both.fna.blastdb -> ../exprs/makeblastdb_fna_all/d1dbfd10ec/result
-    |-- each.fna.blastdb.list -> ../exprs/makeblastdb_fna_each/c82a41695e/result
+    |-- both.fna.blastdb -> ../exprs/makeblastdb_fna_all/d1dbfd10ec/0/result
+    |-- each.fna.blastdb.list -> ../exprs/makeblastdb_fna_each/c82a41695e/0/result
     |-- genes5.fna -> ../exprs/load_fna/821d1bdfd1/result
-    |-- result -> ../exprs/length_each/97082f7737/result
+    |-- result -> ../exprs/length_each/d63d9a5544/result
     |-- single.fna -> ../exprs/load_fna/2c54deea89/result
-    `-- singles.fna.blastdb.list -> ../exprs/list/b868e06b38/result
+    `-- singles.fna.blastdb.list -> ../exprs/list/327b26d8b6/result
 
-49 directories, 58 files
+55 directories, 58 files

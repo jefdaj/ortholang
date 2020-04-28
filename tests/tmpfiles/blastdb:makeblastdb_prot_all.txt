@@ -23,16 +23,17 @@
 |   |       `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_faa_all
 |   |   `-- d432260851
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   `-- str
 |       |-- 1e020faf26
 |       |   `-- result -> ../../../cache/lines/...
 |       `-- ead30046d0
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- db.faa.blastdb -> ../exprs/makeblastdb_faa_all/d432260851/result
+    |-- db.faa.blastdb -> ../exprs/makeblastdb_faa_all/d432260851/0/result
     |-- genes5.faa -> ../exprs/load_faa/81fa36fcfa/result
     |-- result -> ../vars/db.faa.blastdb
     `-- single.faa -> ../exprs/load_faa/ae9e22061f/result
 
-16 directories, 19 files
+17 directories, 19 files

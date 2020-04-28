@@ -10,7 +10,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "hits" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "small" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "blastp" 
@@ -34,7 +35,8 @@ Script
                     , Var ( RepID Nothing ) "mgen" 
                     ] "filter_bitscore" 
                     [ Lit num "50.0" 
-                    , Ref bht Nothing 
+                    , Ref bht 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "small" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
@@ -60,7 +62,8 @@ Script
                         , Var ( RepID Nothing ) "small" 
                         , Var ( RepID Nothing ) "mgen" 
                         ] 
-                        [ Ref bht Nothing 
+                        [ Ref bht 
+                            ( Just ( Seed 0 ) ) 
                             [ Var ( RepID Nothing ) "small" 
                             , Var ( RepID Nothing ) "mgen" 
                             ] 

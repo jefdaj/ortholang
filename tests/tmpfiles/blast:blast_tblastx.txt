@@ -15,11 +15,8 @@
 |   |       `-- result.nsq
 |   `-- seqio
 |-- exprs
-|   |-- all
-|   |   `-- e3b82b9a9b
-|   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_queries
-|   |   `-- d6120bc80f
+|   |   `-- 42c6ff5d9c
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- gbk_to_fna_rawids
@@ -27,9 +24,7 @@
 |   |       `-- d3c226bec7
 |   |           `-- result
 |   |-- list
-|   |   |-- bce759b836
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- f53cf7f9aa
+|   |   `-- bce759b836
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |   `-- 821d1bdfd1
@@ -42,15 +37,11 @@
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_fna
 |   |   `-- bc5062d574
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- repeat
-|   |   `-- 02164a58c4
-|   |       `-- 494baa00c6
-|   |           `-- 723ab8a8d7
-|   |               `-- result -> ../../../../../cache/lines/...
 |   |-- str
 |   |   |-- 90811d06ee
 |   |   |   `-- result -> ../../../cache/lines/...
@@ -61,15 +52,16 @@
 |   `-- tblastx_db
 |       `-- b6d4e4cdf4
 |           `-- 494baa00c6
-|               `-- b355c8b3ba
-|                   `-- result -> out
+|               `-- f456b46f19
+|                   `-- 0
+|                       `-- result -> out
 |-- reps
-|   `-- fa078e3375
-|       |-- hits.str.list -> ../../exprs/extract_queries/d6120bc80f/result
-|       `-- result -> ../../reps/fa078e3375/hits.str.list
+|   `-- 71244816ff
+|       |-- hits.str.list -> ../../exprs/extract_queries/42c6ff5d9c/result
+|       `-- result -> ../../reps/71244816ff/hits.str.list
 `-- vars
     |-- genes5.fna -> ../exprs/load_fna/821d1bdfd1/result
     |-- maga.fna -> ../exprs/load_fna_path/fe2757ed86/result
-    `-- result -> ../exprs/all/e3b82b9a9b/result
+    `-- result -> ../reps/71244816ff/result
 
-41 directories, 31 files
+36 directories, 28 files

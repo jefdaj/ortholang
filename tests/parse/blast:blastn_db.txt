@@ -9,7 +9,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mgen" 
-            , aExpr = Fun fna.blastdb Nothing [] "makeblastdb_fna" 
+            , aExpr = Fun fna.blastdb 
+                ( Just ( Seed 0 ) ) [] "makeblastdb_fna" 
                 [ Fun fna Nothing [] "gbk_to_fna" 
                     [ Lit str "cds" 
                     , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
@@ -22,14 +23,16 @@ Script
                 [ Var ( RepID Nothing ) "mbov" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "extract_queries" 
-                [ Fun bht Nothing 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mbov" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "blastn_db" 
                     [ Lit num "1.0e-5" 
                     , Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "mbov" )
-                    , Ref fna.blastdb Nothing [] 
+                    , Ref fna.blastdb 
+                        ( Just ( Seed 0 ) ) [] 
                         ( Var ( RepID Nothing ) "mgen" )
                     ] 
                 ]
@@ -40,7 +43,8 @@ Script
                 [ Var ( RepID Nothing ) "mbov" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "extract_queries_each" 
-                [ Fun bht.list Nothing 
+                [ Fun bht.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mbov" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "blastn_db_each" 
@@ -49,7 +53,8 @@ Script
                         ( Var ( RepID Nothing ) "mbov" )
                     , Lst fna.blastdb 
                         [ Var ( RepID Nothing ) "mgen" ] 
-                        [ Ref fna.blastdb Nothing [] 
+                        [ Ref fna.blastdb 
+                            ( Just ( Seed 0 ) ) [] 
                             ( Var ( RepID Nothing ) "mgen" )
                         ]
                     ] 

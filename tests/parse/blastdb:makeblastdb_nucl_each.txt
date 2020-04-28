@@ -10,7 +10,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "dbs" 
-            , aExpr = Fun fna.blastdb.list Nothing 
+            , aExpr = Fun fna.blastdb.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] "makeblastdb_fna_each" 
@@ -27,7 +28,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref fna.blastdb.list Nothing 
+            , aExpr = Ref fna.blastdb.list 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "single" 
                 , Var ( RepID Nothing ) "genes5" 
                 ] 
@@ -35,7 +37,8 @@ Script
             } 
         ] 
     , sResult = Just 
-        ( Ref fna.blastdb.list Nothing 
+        ( Ref fna.blastdb.list 
+            ( Just ( Seed 0 ) ) 
             [ Var ( RepID Nothing ) "single" 
             , Var ( RepID Nothing ) "genes5" 
             ] 

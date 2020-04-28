@@ -10,7 +10,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "maga_mbov" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mbov" 
                 ] "blastp" 
@@ -29,7 +30,8 @@ Script
                 , Var ( RepID Nothing ) "mbov" 
                 ] "filter_evalue" 
                 [ Lit num "1.0e-50" 
-                , Ref bht Nothing 
+                , Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mbov" 
                     ] 
@@ -43,7 +45,8 @@ Script
                 , Var ( RepID Nothing ) "maga" 
                 , Var ( RepID Nothing ) "mbov" 
                 ] "best_hits" 
-                [ Ref bht Nothing 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mbov" 
                     ] 
@@ -52,7 +55,8 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "maga_mbov_rev" 
-            , aExpr = Fun bht Nothing 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "mbov" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "blastp" 
@@ -71,12 +75,14 @@ Script
                 , Var ( RepID Nothing ) "mbov" 
                 , Var ( RepID Nothing ) "maga_mbov_rev" 
                 ] "reciprocal_best" 
-                [ Ref bht Nothing 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "maga" 
                     , Var ( RepID Nothing ) "mbov" 
                     ] 
                     ( Var ( RepID Nothing ) "maga_mbov" )
-                , Ref bht Nothing 
+                , Ref bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mbov" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 

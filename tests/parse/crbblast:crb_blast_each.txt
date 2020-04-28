@@ -27,7 +27,7 @@ Script
                 , Var ( RepID Nothing ) "small" 
                 ] "extract_queries_each" 
                 [ Fun crb.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "reference" 
                     , Var ( RepID Nothing ) "small" 
                     ] "crb_blast_each" 
@@ -46,7 +46,7 @@ Script
                 , Var ( RepID Nothing ) "small" 
                 ] "extract_queries_each" 
                 [ Fun crb.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "reference" 
                     , Var ( RepID Nothing ) "large" 
                     , Var ( RepID Nothing ) "small" 

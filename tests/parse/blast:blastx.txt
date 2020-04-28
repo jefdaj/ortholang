@@ -20,7 +20,8 @@ Script
                 [ Var ( RepID Nothing ) "mbov" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "extract_queries" 
-                [ Fun bht Nothing 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mbov" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "blastx" 
@@ -38,7 +39,8 @@ Script
                 [ Var ( RepID Nothing ) "mbov" 
                 , Var ( RepID Nothing ) "mgen" 
                 ] "extract_queries_each" 
-                [ Fun bht.list Nothing 
+                [ Fun bht.list 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mbov" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] "blastx_each" 

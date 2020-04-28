@@ -1,14 +1,14 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 6851253b7a
-|   |   |   `-- 3849e686c4
+|   |   |-- 963d7afe8e
+|   |   |   `-- 011ed73a10
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/extract_queries/3849e686c4/result
-|   |   `-- 8c3a560e39
+|   |   |       `-- result -> ../../../../exprs/extract_queries/011ed73a10/result
+|   |   `-- be47d954bf
 |   |       `-- 688af09c48
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/blastp_db/e10471b511/c5b21af5d4/688af09c48/result
+|   |           `-- result -> ../../../../exprs/blastp_db/e10471b511/c5b21af5d4/688af09c48/0/result
 |   |-- load
 |   |   |-- 36189032ad.faa
 |   |   |-- 36189032ad.faa.ids
@@ -23,43 +23,46 @@
 |           `-- result.psq
 |-- exprs
 |   |-- all
-|   |   `-- 1059af3469
+|   |   `-- 952ef7f7ec
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- any
-|   |   `-- 8ae63a73d1
+|   |   `-- a4312c17c8
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- blastp_db
 |   |   |-- b6d4e4cdf4
 |   |   |   `-- 2c7651beca
-|   |   |       `-- b62e287c6e
-|   |   |           `-- result -> out
+|   |   |       `-- 46d637ad1e
+|   |   |           `-- 0
+|   |   |               `-- result -> out
 |   |   `-- e10471b511
 |   |       `-- c5b21af5d4
 |   |           `-- 688af09c48
-|   |               `-- result -> out
+|   |               `-- 0
+|   |                   `-- result -> out
 |   |-- blastp_db_each
 |   |   `-- b6d4e4cdf4
 |   |       `-- 2c7651beca
-|   |           `-- 1d83be6e1a
-|   |               `-- result -> ../../../../../cache/lines/...
+|   |           `-- 3bfcfc99ff
+|   |               `-- 0
+|   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 3849e686c4
+|   |   |-- 011ed73a10
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   `-- bcdb24a1d6
+|   |   `-- 64ad687bcb
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
-|   |   `-- 05d0799c9b
+|   |   `-- e39431608f
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- list
+|   |   |-- 358277a051
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 588e4af596
+|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 7666691bcd
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 7d7be9c6fc
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 876d22e875
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- a4805e106a
+|   |   `-- 9b26480c7d
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 1e0498b59a
@@ -68,7 +71,8 @@
 |   |       `-- result -> ../../../cache/load/cb3e90dc00.faa
 |   |-- makeblastdb_faa
 |   |   `-- 329cb2539d
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
@@ -79,9 +83,9 @@
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- maga5.faa -> ../exprs/load_faa/81fa36fcfa/result
-    |-- maga.faa.blastdb -> ../exprs/makeblastdb_faa/329cb2539d/result
-    |-- mapped.str.list.list -> ../exprs/extract_queries_each/05d0799c9b/result
-    |-- result -> ../exprs/all/1059af3469/result
-    `-- single.str.list -> ../exprs/extract_queries/bcdb24a1d6/result
+    |-- maga.faa.blastdb -> ../exprs/makeblastdb_faa/329cb2539d/0/result
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/e39431608f/result
+    |-- result -> ../exprs/all/952ef7f7ec/result
+    `-- single.str.list -> ../exprs/extract_queries/64ad687bcb/result
 
-46 directories, 38 files
+50 directories, 38 files

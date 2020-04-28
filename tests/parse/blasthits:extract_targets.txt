@@ -2,7 +2,8 @@ Script
     { sAssigns = 
         [ Assign 
             { aVar = Var ( RepID Nothing ) "hits" 
-            , aExpr = Fun bht Nothing [] "blastp" 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) [] "blastp" 
                 [ Lit num "1.0e-5" 
                 , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
                 , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
@@ -12,7 +13,8 @@ Script
             { aVar = Var ( RepID Nothing ) "single" 
             , aExpr = Fun str.list Nothing 
                 [ Var ( RepID Nothing ) "hits" ] "extract_targets" 
-                [ Ref bht Nothing [] 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) [] 
                     ( Var ( RepID Nothing ) "hits" )
                 ]
             } 
@@ -22,7 +24,8 @@ Script
                 [ Var ( RepID Nothing ) "hits" ] "extract_targets_each" 
                 [ Lst bht 
                     [ Var ( RepID Nothing ) "hits" ] 
-                    [ Ref bht Nothing [] 
+                    [ Ref bht 
+                        ( Just ( Seed 0 ) ) [] 
                         ( Var ( RepID Nothing ) "hits" )
                     ]
                 ]

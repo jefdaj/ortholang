@@ -11,7 +11,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "hitlists" 
             , aExpr = Fun crb.list 
-                ( Just ( Salt 0 ) ) 
+                ( Just ( Seed 0 ) ) 
                 [ Var ( RepID Nothing ) "mgen5" 
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "crb_blast_each" 
@@ -34,7 +34,7 @@ Script
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] "extract_queries_each" 
                     [ Ref crb.list 
-                        ( Just ( Salt 0 ) ) 
+                        ( Just ( Seed 0 ) ) 
                         [ Var ( RepID Nothing ) "mgen5" 
                         , Var ( RepID Nothing ) "mycoplasma" 
                         ] 
@@ -55,7 +55,7 @@ Script
                 , Var ( RepID Nothing ) "mycoplasma" 
                 ] "extract_queries_each" 
                 [ Ref crb.list 
-                    ( Just ( Salt 0 ) ) 
+                    ( Just ( Seed 0 ) ) 
                     [ Var ( RepID Nothing ) "mgen5" 
                     , Var ( RepID Nothing ) "mycoplasma" 
                     ] 
