@@ -79,7 +79,7 @@ mkBlastFromDb d@(bCmd, qType, _, sType) = Function
   , fName = bCmd ++ "_db"
   , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs blastdb sType)]
   , fOutput = Exactly bht
-  , fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDb d
   }
 
@@ -177,7 +177,7 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = Function
   , fName = bCmd
   , fInputs = [Exactly num, Exactly qType, Exactly sType]
   , fOutput = Exactly bht
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFa d
   }
 
@@ -202,7 +202,7 @@ mkBlastFromDbEach d@(bCmd, qType, _, sType) = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb sType))]
   , fOutput = Exactly (ListOf bht)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDbEach d
   }
   where
@@ -220,7 +220,7 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly qType, Exactly (ListOf faType)]
   , fOutput = Exactly (ListOf bht)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaEach d
   }
   where

@@ -1,45 +1,49 @@
-module OrthoLang.Modules.Replace where
+{-|
+This is some pretty awkward code, but I also think it's one of the coolest
+features of OrthoLang! It conveniently answers the common question "What would
+happen to my results if I changed variable X?" You can already edit and re-run
+any code of course, but it tends to be something people don't take good notes
+on. Having it built in to the language both documents and parallelizes
+everything. It also makes it easy to plot the results so you don't have to
+write your own R/python script for that (until you want publication-quality
+figures).
 
-{- This is some pretty awkward code, but I also think it's one of the coolest
- - features of OrthoLang! It conveniently answers the common question "What
- - would happen to my results if I changed variable X?" You can already edit
- - and re-run any code of course, but it tends to be something people don't
- - take good notes on. Having it built in to the language both documents and
- - parallelizes everything. It also makes it easy to plot the results so you
- - don't have to write your own R/python script for that (until you want
- - publication-quality figures).
- -
- - It's implemented by:
- - 1) copying the whole script once per variable substitution
- - 2) "mangling" the file names in the copies so their variables don't conflict with existing ones
- - 3) gathering a list of the final results into one final variable in the main namespace
- -
- - The mangling thing is ugly, but relatively simple to implement and works well.
- - It results in a tree of "rep" symlinks like this:
- -
- - reps
- -    ├── 312356c109
- -    │   ├── dep.num -> ../../exprs/multiply/653e971b5e_cd4761ce86_0.num
- -    │   ├── ind.num -> ../../exprs/num/89fb8b4aed_0.num
- -    │   └── result -> ../../reps/312356c109/dep.num
- -    ├── 4792af49ff
- -    │   ├── dep.num -> ../../exprs/multiply/653e971b5e_698967e992_0.num
- -    │   └── result -> ../../reps/4792af49ff/dep.num
- -    ├── 4ab901304c
- -    │   ├── dep.num -> ../../exprs/multiply/653e971b5e_538f7a4f17_0.num
- -    │   ├── ind.num -> ../../exprs/num/a629005e3c_0.num
- -    │   └── result -> ../../reps/4ab901304c/dep.num
- -    ├── 6eaa4d790a
- -    │   ├── dep.num -> ../../exprs/multiply/653e971b5e_e05aae5b00_0.num
- -    │   ├── ind.num -> ../../exprs/num/eaad7f2e40_0.num
- -    │   └── result -> ../../reps/6eaa4d790a/dep.num
- -    └── e8c54e2b5c
- -        ├── dep.num -> ../../exprs/multiply/653e971b5e_adf56c2208_0.num
- -        ├── ind.num -> ../../exprs/num/ea11b49459_0.num
- -        └── result -> ../../reps/e8c54e2b5c/dep.num
- -
- -TODO is an initial var to start from really needed, or can that be the whole script?
- -}
+It's implemented by:
+
+1. copying the whole script once per variable substitution
+
+2. "mangling" the var names in the copies so their variables don't conflict with existing ones
+
+3. gathering a list of the final results into one final variable in the main namespace
+
+The mangling thing is ugly, but relatively simple to implement and works well.
+It results in a tree of "rep" symlinks like this:
+
+reps
+   ├── 312356c109
+   │   ├── dep.num -> ../../exprs/multiply/653e971b5e_cd4761ce86_0.num
+   │   ├── ind.num -> ../../exprs/num/89fb8b4aed_0.num
+   │   └── result -> ../../reps/312356c109/dep.num
+   ├── 4792af49ff
+   │   ├── dep.num -> ../../exprs/multiply/653e971b5e_698967e992_0.num
+   │   └── result -> ../../reps/4792af49ff/dep.num
+   ├── 4ab901304c
+   │   ├── dep.num -> ../../exprs/multiply/653e971b5e_538f7a4f17_0.num
+   │   ├── ind.num -> ../../exprs/num/a629005e3c_0.num
+   │   └── result -> ../../reps/4ab901304c/dep.num
+   ├── 6eaa4d790a
+   │   ├── dep.num -> ../../exprs/multiply/653e971b5e_e05aae5b00_0.num
+   │   ├── ind.num -> ../../exprs/num/eaad7f2e40_0.num
+   │   └── result -> ../../reps/6eaa4d790a/dep.num
+   └── e8c54e2b5c
+       ├── dep.num -> ../../exprs/multiply/653e971b5e_adf56c2208_0.num
+       ├── ind.num -> ../../exprs/num/ea11b49459_0.num
+       └── result -> ../../reps/e8c54e2b5c/dep.num
+
+TODO is an initial var to start from really needed, or can that be the whole script?
+-}
+
+module OrthoLang.Modules.Replace where
 
 import Development.Shake
 import OrthoLang.Types
@@ -64,12 +68,11 @@ olModule = Module
 -- replace --
 -------------
 
+-- TODO this is a good one to use when designing the fn help text
 replace :: Function
 replace = Function
   { fOpChar = Nothing, fName = "replace"
-  ,fTags = []
-  -- , fTypeCheck = tReplace
-  -- , fTypeDesc  = dReplace
+  , fTags = []
   , fInputs =
       [ AnyType "the return type"
       , AnyType "the type of the var to replace"
@@ -85,38 +88,40 @@ replace = Function
 --  Some ot "the type of the var to replace") (Some ot "the return type")
 -- shown as "t1 t2 t2 -> t1, where t1 is the return type, t2 is the type of the var to replace"
 -- TODO make a generic typegroup that matches anything, and gets represented as A, B, ...
-tReplace :: [Type] -> Either String Type
-tReplace (res:sub:sub':[]) | sub == sub' = Right res
-tReplace _ = Left "invalid args to replace" -- TODO better errors here
+-- tReplace :: [Type] -> Either String Type
+-- tReplace (res:sub:sub':[]) | sub == sub' = Right res
+-- tReplace _ = Left "invalid args to replace" -- TODO better errors here
 
 -- TODO write this is a way that will make sense to other people
-dReplace :: String
-dReplace = "replace : <outputvar> <vartoreplace> <exprtoreplacewith> -> <newoutput>"
+-- dReplace :: String
+-- dReplace = "replace : <outputvar> <vartoreplace> <exprtoreplacewith> -> <newoutput>"
 
+-- | Guards `rReplace'` against invalid arguments
 rReplace :: RulesFn
 rReplace st (Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subExpr:[])) = rReplace' st resExpr subVar subExpr
 rReplace _ e = fail $ "bad argument to rReplace: " ++ show e
 
-{- This does the actual replace operation. It takes an expression to edit, the
- - variable to replace, and an expression to put in its place. While it does
- - that it also filters to remove any irrelevant variables and sets a unique
- - "replace ID" on everything to keep the new copies of variables from
- - conflicting with the existing ones. The copies go in a separate "reps"
- - folder named by the ID.
- -
- - TODO any reason not to merge it into rReplace above?
- -}
+{-|
+This does the actual replace operation. It takes an expression to edit, the
+variable to replace, and an expression to put in its place. While it does that
+it also filters to remove any irrelevant variables and sets a unique 'RepID' on
+everything to keep the new copies of variables from conflicting with the
+existing ones. The copies go in a separate "reps" folder named by the ID.
+
+TODO any reason not to merge it into rReplace above?
+-}
 rReplace' :: Script
-          -> Expr -- the result expression for a single replacement, which *doesn't* contain all the info
-          -> Var  -- we also need the variable to be replaced
-          -> Expr -- and an expression to replace it with (which could be a ref to another variable)
+          -> Expr -- ^ the result expression for a single replacement, which *doesn't* contain all the info
+          -> Var  -- ^ we also need the variable to be replaced (TODO could it be an expr?)
+          -> Expr -- ^ and an expression to replace it with (which could be a ref to another variable)
           -> Rules ExprPath
 rReplace' scr resExpr subVar@(Var _ _) subExpr = do
   let res   = Assign resultVar resExpr
+      rRef  = Ref (typeOf resExpr) (seedOf resExpr) (depsOf resExpr) resultVar -- TODO is resultVar a dep too?
       sub   = Assign subVar subExpr
       deps  = filter (\a -> (elem (aVar a) $ depsOf resExpr ++ depsOf subExpr)) (sAssigns scr)
       newID = calcRepID scr resExpr subVar subExpr
-      scr'  = setRepIDs newID $ Script {sAssigns = [sub] ++ deps ++ [res], sResult = Just resExpr}
+      scr'  = setRepIDs newID $ Script {sAssigns = [sub] ++ deps ++ [res], sResult = Just rRef}
   (ResPath resPath) <- compileScript scr' -- TODO is this right??
   return (ExprPath resPath)
 
@@ -195,12 +200,12 @@ replaceEach = Function
 --  Some ot "the type of the var to replace",
 --  (ListOf (Some ot "the type of the var to replace")) (ListOf (Some ot "the return type"))
 -- shown as "t1 t2 t2.list -> t1.list, where t1 is the return type, t2 is the type of the var to replace"
-tReplaceEach :: [Type] -> Either String Type
-tReplaceEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
-tReplaceEach _ = Left "invalid args to replace_each" -- TODO better errors here
+-- tReplaceEach :: [Type] -> Either String Type
+-- tReplaceEach (res:sub:(ListOf sub'):[]) | sub == sub' = Right $ ListOf res
+-- tReplaceEach _ = Left "invalid args to replace_each" -- TODO better errors here
 
-dReplaceEach :: String
-dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.list"
+-- dReplaceEach :: String
+-- dReplaceEach = "replace_each : <outputvar> <inputvar> <inputvars> -> <output>.list"
 
 {- This takes a list expression that includes the variable to replace and a
  - list of things to replace it with. It calls rReplace' to do each replacement

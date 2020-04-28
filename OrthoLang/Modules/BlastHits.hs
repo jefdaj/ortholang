@@ -69,7 +69,7 @@ extractQueriesEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [ListSigs (Some ht "hit table")]
   , fOutput = Exactly (ListOf (ListOf str))
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 1
   }
   where
@@ -81,7 +81,7 @@ extractTargets = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Some ht "hit table"]
   , fOutput = Exactly (ListOf str)
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol True 2
   }
   where
@@ -92,7 +92,7 @@ extractTargetsEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [ListSigs (Some ht "hit table")]
   , fOutput = Exactly (ListOf (ListOf str))
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 2
   }
   where
@@ -142,7 +142,7 @@ mkFilterHits colname = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Some ht "hit table"]
   , fOutput = Some ht "hit table" -- TODO or bht like before?
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aFilterHits colname
   }
   where
@@ -156,7 +156,7 @@ mkFilterHitsEach colname = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, ListSigs (Some ht "hit table")]
   , fOutput = ListSigs (Some ht "hit table")
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aFilterHits colname
   }
   where
@@ -199,7 +199,7 @@ bestHits =  Function
   { fOpChar = Nothing, fName = name 
   , fInputs = [Some ht "hit table"]
   , fOutput =  Some ht "hit table"
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple aBestExtract
   }
   where
@@ -210,7 +210,7 @@ bestHitsEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [ListSigs (Some ht "hit table")]
   , fOutput =  ListSigs (Some ht "hit table")
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 aBestExtract
   }
   where

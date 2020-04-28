@@ -143,7 +143,7 @@ mkLoadDBEach name faType = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf str)]
   , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
-  ,fTags = []
+  , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = undefined -- TODO write this!
   }
 
@@ -343,7 +343,7 @@ makeblastdbFnaAll = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
   , fOutput =  Exactly ndb
-  , fTags = []
+  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
@@ -354,7 +354,7 @@ makeblastdbFaaAll = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf faa)]
   , fOutput = Exactly pdb
-  , fTags = []
+  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
@@ -499,7 +499,7 @@ makeblastdbFna = Function
   { fOpChar = Nothing, fName = "makeblastdb_fna"
   , fInputs = [Exactly fna] -- TODO can't do it from faa right?
   , fOutput =  Exactly ndb
-  ,fTags = []
+  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
 
@@ -508,7 +508,7 @@ makeblastdbFaa = Function
   { fOpChar = Nothing, fName = "makeblastdb_faa"
   , fInputs = [Exactly faa] -- TODO can't do it from faa right?
   , fOutput =  Exactly pdb
-  ,fTags = []
+  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
   }
 
@@ -533,7 +533,7 @@ mkMakeblastdbEach faType = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf faType)]
   , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
-  , fTags = []
+  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
   }
   where

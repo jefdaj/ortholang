@@ -276,7 +276,7 @@ psiblast = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly faa, Exactly faa]
   , fOutput = Exactly bht
-  ,fTags = []
+  , fTags = [Nondeterministic]
   -- , fNewRules = NewNotImplemented, fOldRules = rPsiblast
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
   }
@@ -288,7 +288,7 @@ psiblastEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
   , fOutput = Exactly (ListOf bht)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rPsiblastEach
   }
   where
@@ -312,7 +312,7 @@ psiblastDb = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly faa, Exactly pdb]
   , fOutput = Exactly bht
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
   }
   where
@@ -326,7 +326,7 @@ psiblastDbEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
   , fOutput = Exactly (ListOf bht)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   -- can't use withPssmQuery here because there's a list of things to train against
   -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
   -- , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s e
@@ -357,7 +357,7 @@ psiblastTrain = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly faa, Exactly faa]
   , fOutput = Exactly pssm
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
   }
   where
@@ -369,7 +369,7 @@ psiblastTrainPssms = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly (ListOf faa), Exactly faa]
   , fOutput = Exactly (ListOf pssm)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   -- , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map2of3 faa pssm aPsiblastTrainDb) s $ withPdbSubject e
   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
   }
@@ -383,7 +383,7 @@ psiblastTrainEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
   , fOutput = Exactly (ListOf pssm)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
   }
   where
@@ -394,7 +394,7 @@ psiblastTrainAll = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
   , fOutput = Exactly pssm
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
   }
   where
@@ -405,7 +405,7 @@ psiblastTrainDb = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly faa, Exactly pdb]
   , fOutput = Exactly pssm
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastTrainDb
   }
   where
@@ -416,7 +416,7 @@ psiblastTrainDbEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
   , fOutput = Exactly (ListOf pssm)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
   }
   where
@@ -427,7 +427,7 @@ psiblastTrainPssmsDb = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly (ListOf faa), Exactly pdb]
   , fOutput = Exactly (ListOf pssm)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   -- , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map2of3 faa pssm aPsiblastTrainDb
   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastTrainDb'
   }
@@ -443,7 +443,7 @@ psiblastPssm = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly pssm, Exactly faa]
   , fOutput = Exactly bht
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
@@ -455,7 +455,7 @@ psiblastPssmAll = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf faa)]
   , fOutput = Exactly bht
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
   }
   where
@@ -466,7 +466,7 @@ psiblastPssmEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf faa)]
   , fOutput = Exactly (ListOf bht)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
   }
   where
@@ -480,7 +480,7 @@ psiblastPssmDb = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly pssm, Exactly pdb]
   , fOutput = Exactly bht
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastSearchDb
   }
   where
@@ -491,7 +491,7 @@ psiblastPssmDbEach = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf pdb)]
   , fOutput = Exactly (ListOf bht)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
   }
   where
@@ -508,7 +508,7 @@ psiblastEachPssmDb = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly pdb]
   , fOutput = Exactly (ListOf bht)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   -- , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map2of3 pssm bht $ aPsiblastSearchDb
   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastSearchDb'
   }
@@ -526,7 +526,7 @@ psiblastEachPssm = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly faa]
   , fOutput = Exactly (ListOf bht)
-  ,fTags = []
+  , fTags = [Nondeterministic]
   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
   }
   where

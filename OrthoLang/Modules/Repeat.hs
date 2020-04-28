@@ -61,6 +61,8 @@ extractNum _   (Lit x n) | x == num = readSciInt n
 extractNum scr (Ref _ _ _ v) = extractNum scr $ justOrDie "extractNum failed!" $ lookupVar v (sAssigns scr)
 extractNum _ _ = error "bad argument to extractNum"
 
+-- OK, so this is expanding subList to a list of load_faa ... calls and passing those to rReplaceEach
+
 -- takes a result expression to re-evaluate, a variable to repeat and start from,
 -- and a number of reps. returns a list of the result var re-evaluated that many times
 -- can be read as "evaluate resExpr starting from subVar, repsExpr times"
