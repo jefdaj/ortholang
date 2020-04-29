@@ -72,7 +72,7 @@ aSimpleScript' parCmd fixEmpties script (out:ins) = do
   c <- fmap fromJust getShakeExtra
   -- TODO is tmpDir used here at all? should it be?
   -- TODO match []?
-  let loc = "core.compile.simple.aSimpleScript'"
+  let loc = "interpreter.compile.simple.aSimpleScript'"
       actFn t (o:is) = let o'  = fromPath loc c o -- TODO better var names here
                            t'  = fromPath loc c t
                            is' = map (fromPath loc c) is
@@ -102,7 +102,7 @@ rSimple' mTmpPrefix actFn scr e@(Fun _ _ _ _ exprs) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let mTmpDir  = fmap (cacheDir cfg) mTmpPrefix -- TODO tables bug here?
-      loc = "core.compile.basic.rSimple'"
+      loc = "interpreter.compile.basic.rSimple'"
       outPath  = exprPath cfg dRef scr e
       outPath' = fromPath loc cfg outPath
       argPaths' = map (\(ExprPath p) -> toPath loc cfg p) argPaths
@@ -118,7 +118,7 @@ aSimple' outPath actFn mTmpDir argPaths = do
   -- TODO probably not "simple tmp" anymore... remove? rename?
   cfg <- fmap fromJust getShakeExtra
   let hashes     = concat $ intersperse "/" $ map digest argPaths'
-      loc = "core.compile.basic.aSimple'"
+      loc = "interpreter.compile.basic.aSimple'"
       argPaths'  = map (fromPath loc cfg) argPaths
       outPath'   = fromPath loc cfg outPath
       out = traceA loc outPath' (outPath':tmpDir':argPaths')

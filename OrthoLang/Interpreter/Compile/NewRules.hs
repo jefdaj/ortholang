@@ -252,7 +252,7 @@ aReloadIDsDir loadCacheDir = do
     if not exists
       then return []
       else liftIO $ getDirectoryFilesIO loadCacheDir ["//*.ids"]
-  liftIO $ debug "core.sanitize.aReloadIDsDir" $ "idPaths: " ++ show idPaths
+  liftIO $ debug "interpreter.sanitize.aReloadIDsDir" $ "idPaths: " ++ show idPaths
   mapM_ aLoadIDs idPaths
 
 {-|
@@ -262,7 +262,7 @@ sequence file is loaded, and from 'rReloadIDs' during subsequent program runs.
 aLoadIDs :: FilePath -> Action ()
 aLoadIDs idsPath' = do
   alwaysRerun
-  liftIO $ debug "core.sanitize.aLoadIDs" $ "idsPath': " ++ idsPath'
+  liftIO $ debug "interpreter.sanitize.aLoadIDs" $ "idsPath': " ++ idsPath'
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoadIDs"
       idsPath = toPath loc cfg idsPath'
@@ -271,8 +271,8 @@ aLoadIDs idsPath' = do
   let (Path p) = idsPath
       k = dropExtension p
       v = takeBaseName idsPath' -- TODO is this good enough? maybe try to find the original filename
-  -- liftIO $ debug "core.sanitize.aLoadIDs" $ "k: " ++ k
-  -- liftIO $ debug "core.sanitize.aLoadIDs" $ "v: " ++ v
+  -- liftIO $ debug "interpreter.sanitize.aLoadIDs" $ "k: " ++ k
+  -- liftIO $ debug "interpreter.sanitize.aLoadIDs" $ "v: " ++ v
   ids <- fmap fromJust getShakeExtra
   liftIO $ atomicModifyIORef' ids $ \h@(IDs {hFiles = fs, hSeqIDs = is}) ->
     (h { hFiles  = M.insert k v fs

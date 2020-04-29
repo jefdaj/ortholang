@@ -67,7 +67,7 @@ import System.FilePath ((</>))
 
 
 debugC :: String -> String -> a -> a
-debugC name msg rtn = trace ("core.compile." ++ name) msg rtn
+debugC name msg rtn = trace ("interpreter.compile." ++ name) msg rtn
 
 -- TODO restrict to Expr?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called
@@ -116,7 +116,7 @@ rNamedFunction' scr expr name = do
   cfg  <- fmap fromJust getShakeExtraRules
   mods <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let loc = "core.compile.basic.rNamedFunction'"
+  let loc = "interpreter.compile.basic.rNamedFunction'"
   case findFunction mods name of
     Nothing -> error "rNamedFunction" $ "no such function \"" ++ name ++ "\""
     Just f  -> case fNewRules f of
@@ -135,7 +135,7 @@ rAssign :: Script -> Assign -> Rules (Var, VarPath)
 rAssign scr (Assign var expr) = do
   (ExprPath path) <- rExpr scr expr
   cfg <- fmap fromJust getShakeExtraRules
-  let loc = "core.compile.basic.rAssign"
+  let loc = "interpreter.compile.basic.rAssign"
   path' <- rVar var expr $ toPath loc cfg path
   let res  = (var, path')
       res' = debugRules "rAssign" (var, expr) res
@@ -153,7 +153,7 @@ emptyScriptMsg = Script {sAssigns = [asn], sResult = Just msg}
 compileScript :: Script -> Rules ResPath
 compileScript scr = do
   cfg <- fmap fromJust getShakeExtraRules
-  let loc = "core.compile.basic.compileScript"
+  let loc = "interpreter.compile.basic.compileScript"
       scr' = trace loc ("scr:\n" ++ render (pPrint scr)) scr
   mapM_ (rAssign scr') (sAssigns scr') -- TODO remove?
   -- case lookupResult (sAssigns scr') of -- TODO can't we use sResult here?
@@ -180,7 +180,7 @@ rLit :: RulesFn
 rLit scr expr = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let loc = "core.compile.basic.rLit"
+  let loc = "interpreter.compile.basic.rLit"
   let path  = exprPath cfg dRef scr expr -- absolute paths allowed!
       path' = debugRules "rLit" expr $ fromPath loc cfg path
   path' %> \_ -> aLit expr path
@@ -191,7 +191,7 @@ rLit scr expr = do
 aLit :: Expr -> Path -> Action ()
 aLit expr out = do
   cfg <- fmap fromJust getShakeExtra
-  let loc   = "core.compile.basic.aLit"
+  let loc   = "interpreter.compile.basic.aLit"
       paths :: Expr -> FilePath
       paths (Lit _ p) = p
       paths _ = fail "bad argument to paths"
@@ -243,7 +243,7 @@ rListLits :: RulesFn
 rListLits scr e@(Lst _ _ _ exprs) = do
   litPaths <- mapM (rExpr scr) exprs
   cfg <- fmap fromJust getShakeExtraRules
-  let loc = "core.compile.basic.rListLits"
+  let loc = "interpreter.compile.basic.rListLits"
       litPaths' = map (\(ExprPath p) -> toPath loc cfg p) litPaths
   dRef <- fmap fromJust getShakeExtraRules
   let outPath  = exprPath cfg dRef scr e
@@ -256,7 +256,7 @@ rListLits _ e = error "rListLits" $ "bad argument: " ++ show e
 aListLits :: [Path] -> Path -> Action ()
 aListLits paths outPath = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.compile.basic.aListLits"
+  let loc = "interpreter.compile.basic.aListLits"
       out'   = fromPath loc cfg outPath
       out''  = traceA "aListLits" out' (out':paths')
       paths' = map (fromPath loc cfg) paths
@@ -291,7 +291,7 @@ rListPaths scr e@(Lst _ _ _ exprs) = do
   paths <- mapM (rExpr scr) exprs
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let loc = "core.compile.basic.rListPaths"
+  let loc = "interpreter.compile.basic.rListPaths"
       paths'   = map (\(ExprPath p) -> toPath loc cfg p) paths
       -- hash     = digest $ concat $ map digest paths'
       -- outPath  = unsafeExprPathExplicit cfg "list" (ListOf rtn) seed [hash]
@@ -305,7 +305,7 @@ aListPaths :: [Path] -> Path -> Action ()
 aListPaths paths outPath = do
   cfg <- fmap fromJust getShakeExtra
   let out'   = fromPath loc cfg outPath
-      loc    = "core.compile.basic.aListPaths"
+      loc    = "interpreter.compile.basic.aListPaths"
       out''  = traceA "aListPaths" out' (out':paths')
       paths' = map (fromPath loc cfg) paths -- TODO remove this
   need' loc paths'
@@ -319,7 +319,7 @@ aListPaths paths outPath = do
 rRef :: RulesFn
 rRef _ e@(Ref _ _ _ var) = do
   cfg <- fmap fromJust getShakeExtraRules
-  let loc = "core.compile.basic.rRef"
+  let loc = "interpreter.compile.basic.rRef"
       ePath p = ExprPath $ debugRules loc e $ fromPath loc cfg p
   return $ ePath $ varPath cfg var e
     
@@ -332,7 +332,7 @@ rVar :: Var -> Expr -> Path -> Rules VarPath
 rVar var expr oPath = do
   cfg <- fmap fromJust getShakeExtraRules
   let vPath  = varPath cfg var expr
-      loc = "core.compile.basic.rVar"
+      loc = "interpreter.compile.basic.rVar"
       vPath' = debugRules loc var $ fromPath loc cfg vPath
   vPath' %> \_ -> aVar vPath oPath
   return (VarPath vPath')
@@ -341,7 +341,7 @@ aVar :: Path -> Path -> Action ()
 aVar vPath oPath = do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.compile.basic.aVar"
+  let loc = "interpreter.compile.basic.aVar"
       oPath'  = fromPath loc cfg oPath
       vPath'  = fromPath loc cfg vPath
       vPath'' = traceA "aVar" vPath [vPath', oPath']

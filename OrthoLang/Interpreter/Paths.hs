@@ -244,7 +244,7 @@ stringPath = Path
 cacheDir :: Config -> String -> Path
 cacheDir cfg modName = toPath loc cfg path
   where
-    loc = "core.paths.cacheDir"
+    loc = "interpreter.paths.cacheDir"
     path = tmpdir cfg </> "cache" </> modName
 
 -- TODO cacheDirUniq or Explicit?
@@ -280,7 +280,7 @@ bop2fun e = error "bop2fun" $ "called with non-Bop: \"" ++ render (pPrint e) ++ 
 exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
 exprPath c _ _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath loc c p
   where
-    loc = "core.paths.exprPath"
+    loc = "interpreter.paths.exprPath"
 exprPath c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
                                Nothing -> error "exprPath" $ "no such var '" ++ vName ++ "'\n" ++ show (sAssigns s)
                                Just e  -> exprPath c d s e
@@ -317,7 +317,7 @@ prefixOf (Bop _ _ _ n _ _ ) = case n of
 exprPathExplicit :: Config -> String -> Maybe Seed -> [String] -> Path
 exprPathExplicit cfg prefix mSeed hashes = toPath loc cfg path
   where
-    loc = "core.paths.exprPathExplicit"
+    loc = "interpreter.paths.exprPathExplicit"
     dir  = tmpdir cfg </> "exprs" </> prefix
     base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Seed n) -> show n) mSeed)
     path = dir </> base </> "result" -- <.> ext rtype
@@ -327,7 +327,7 @@ exprPathExplicit cfg prefix mSeed hashes = toPath loc cfg path
 varPath :: Config -> Var -> Expr -> Path
 varPath cfg (Var (RepID rep) var) expr = toPath loc cfg $ tmpdir cfg </> repDir </> base
   where
-    loc = "core.paths.varPath"
+    loc = "interpreter.paths.varPath"
     base = if var == "result" then var else var <.> ext (typeOf expr)
     repDir = case rep of
                Nothing -> "vars"
@@ -407,7 +407,7 @@ pathDigest :: Path -> PathDigest
 pathDigest = PathDigest . digest
 
 exprDigest :: Config -> DigestsRef -> Script -> Expr -> DigestMap
-exprDigest cfg dRef scr expr = traceShow "core.paths.exprDigest" res
+exprDigest cfg dRef scr expr = traceShow "interpreter.paths.exprDigest" res
   where
     p = exprPath cfg dRef scr expr
     dKey = PathDigest $ digest p
@@ -448,7 +448,7 @@ listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e
 decodeNewRulesType :: Config -> DigestsRef -> ExprPath -> IO Type
 decodeNewRulesType cfg dRef (ExprPath out) = do
   dMap <- readIORef dRef
-  let loc = "core.paths.decodeNewRulesType"
+  let loc = "interpreter.paths.decodeNewRulesType"
       k = pathDigest $ toPath loc cfg out
   case M.lookup k dMap of
     Nothing -> throwIO $ MissingDigests out [show k]
@@ -460,7 +460,7 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
   dMap <- readIORef dRef
   -- look up the outpath digest, and throw an error if missing
   -- (could do this before or after dependencies)
-  let loc = "core.paths.decodeNewRulesDeps"
+  let loc = "interpreter.paths.decodeNewRulesDeps"
       oKey  = pathDigest $ toPath loc cfg out
       moDig = M.lookup oKey dMap
   case moDig of

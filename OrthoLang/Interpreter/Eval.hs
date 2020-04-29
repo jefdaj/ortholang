@@ -233,7 +233,7 @@ myShake mods cfg ref ids dr pm delay rules = do
             ]
         }
 
-  oneLineShakeErrors "core.eval.myShake" $ (shake shakeOpts . alternatives) rules
+  oneLineShakeErrors "interpreter.eval.myShake" $ (shake shakeOpts . alternatives) rules
   -- removeIfExists $ tmpdir cfg </> ".shake.lock"
   --
 {- This seems to be separately required to show the final result of eval.
@@ -249,34 +249,34 @@ prettyResult :: Config -> LocksRef -> Type -> Path -> Action Doc
 prettyResult _ _ Empty  _ = return $ text "[]"
 prettyResult cfg ref (ListOf t) f
   | t `elem` [str, num] = do
-    lits <- readLits "core.eval.prettyResult" $ fromPath loc cfg f
+    lits <- readLits "interpreter.eval.prettyResult" $ fromPath loc cfg f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
     return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
   | otherwise = do
-    paths <- readPaths "core.eval.prettyResult" $ fromPath loc cfg f
+    paths <- readPaths "interpreter.eval.prettyResult" $ fromPath loc cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
     return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
   where
-    loc = "core.eval.eval.prettyResult"
+    loc = "interpreter.eval.eval.prettyResult"
 prettyResult cfg ref (ScoresOf _)  f = do
   s <- liftIO (defaultShow cfg ref $ fromPath loc cfg f)
   return $ text s
   where
-    loc = "core.eval.eval.prettyResult"
+    loc = "interpreter.eval.eval.prettyResult"
 
 -- TODO case for EncodedAs here, and later redesign this as a typeclass
 prettyResult cfg ref (EncodedAs e _)  f = liftIO $ fmap text $ enShow e cfg ref f'
   where
     f' = fromPath loc cfg f
-    loc = "core.eval.eval.prettyResult"
+    loc = "interpreter.eval.eval.prettyResult"
 
 prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
   where
     showFn = if t == num then prettyNum else text
     f' = fromPath loc cfg f
-    loc = "core.eval.eval.prettyResult"
+    loc = "interpreter.eval.eval.prettyResult"
 
 -- run the result of any of the c* functions, and print it
 -- (only compileScript is actually useful outside testing though)
@@ -311,7 +311,7 @@ eval mods hdl cfg ref ids dr rtype p = do
     eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake mods cfg ref ids dr pm delay $ do
       newRules mods
       (ResPath path) <- rpath
-      let loc = "core.eval.eval.eval'"
+      let loc = "interpreter.eval.eval.eval'"
       -- runs the actual script, links vars/result to hashed output
       "eval" ~> do
         alwaysRerun
@@ -361,7 +361,7 @@ printLong _ ref idsref pm _ path = do
 printShort :: Config -> LocksRef -> IDsRef -> P.Meter' EvalProgress -> Type -> FilePath -> Action ()
 printShort cfg ref idsref pm rtype path = do
   ids <- liftIO $ readIORef idsref
-  let loc = "core.eval.printShort"
+  let loc = "interpreter.eval.printShort"
   res <- prettyResult cfg ref rtype $ toPath loc cfg path
   -- liftIO $ putStrLn $ show ids
   -- liftIO $ putStrLn $ "rendering with unhashIDs (" ++ show (length $ M.keys ids) ++ " keys)..."

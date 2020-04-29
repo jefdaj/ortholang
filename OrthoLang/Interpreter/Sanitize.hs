@@ -89,7 +89,7 @@ hashIDsTxt txt = (unlines lines', M.fromList seqids)
 hashIDsFile :: Path -> Path -> Action ()
 hashIDsFile inFa outFa = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.sanitize.hashIDsFile"
+  let loc = "interpreter.sanitize.hashIDsFile"
       inFa'   = fromPath loc cfg inFa
       outFa'  = fromPath loc cfg outFa
       outIDs' = outFa' <.> "ids"
@@ -165,7 +165,7 @@ unhashIDs longIDs ids t = case findNext t of
 unhashIDsFile :: Path -> FilePath -> Action ()
 unhashIDsFile inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.sanitize.unhashIDsFile"
+  let loc = "interpreter.sanitize.unhashIDsFile"
       inPath'  = fromPath loc cfg inPath
   -- txt <- withReadLock' inPath' $ readFile' $ fromPath loc cfg inPath
   txt <- readFileStrict' inPath'
@@ -194,7 +194,7 @@ splitSeqid' s = let r = splitSeqid s in trace "splitSeqid" ("splitSeqid '" ++ s 
 readIDs :: Path -> Action (M.Map String String)
 readIDs path = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.sanitize.readIDs"
+  let loc = "interpreter.sanitize.readIDs"
       path' = fromPath loc cfg path
   -- txt <- withReadLock' path' $ readFile' path'
   txt <- readFileStrict' path'
@@ -221,14 +221,14 @@ lookupID (IDs {hFiles = f, hSeqIDs = s}) i =
   else case catMaybes (map (M.lookup i) (M.elems s)) of -- i is a seqid; look in all the maps for it
     []  -> Nothing
     [x] -> Just x
-    xs  -> trace "core.sanitize.lookupID" ("WARNING: duplicate seqids. using the first:\n" ++ show xs) (Just $ head xs)
+    xs  -> trace "interpreter.sanitize.lookupID" ("WARNING: duplicate seqids. using the first:\n" ++ show xs) (Just $ head xs)
 
 -- TODO move to Actions? causes an import cycle so far
 -- TODO is this one ever used, or just the reverse hashes one below? maybe remove
 lookupIDsFile :: Path -> Path -> Action ()
 lookupIDsFile inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.sanitize.lookupIDsFile"
+  let loc = "interpreter.sanitize.lookupIDsFile"
   partialIDs <- readList loc $ fromPath loc cfg inPath
   ref <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef ref
@@ -241,7 +241,7 @@ lookupIDsFile inPath outPath = do
   idKeys <- mapM lookupFn partialIDs
   dRef <- fmap fromJust getShakeExtra
   liftIO $ addDigest dRef (ListOf str) outPath -- TODO make this an Action?
-  let loc = "core.sanitize.lookupIDsFile"
+  let loc = "interpreter.sanitize.lookupIDsFile"
   writeCachedLines loc (fromPath loc cfg outPath) idKeys
 
 -- lookupHash :: IDs -> String -> Maybe String
@@ -249,13 +249,13 @@ lookupIDsFile inPath outPath = do
 --   case catMaybes (map (M.lookup i) (M.elems hs)) of -- i is a seqid; look in all the maps for it
 --     []  -> Nothing
 --     [x] -> Just x
---     xs  -> trace "core.sanitize.lookupHash" ("WARNING: duplicate hashes. using the first:\n" ++ show xs) (Just $ head xs)
+--     xs  -> trace "interpreter.sanitize.lookupHash" ("WARNING: duplicate hashes. using the first:\n" ++ show xs) (Just $ head xs)
 -- 
 -- -- TODO move to Actions? causes an import cycle so far
 -- lookupHashesFile :: Path -> Path -> Action ()
 -- lookupHashesFile inPath outPath = do
 --   cfg <- fmap fromJust getShakeExtra
---   let loc = "core.sanitize.lookupHashesFile"
+--   let loc = "interpreter.sanitize.lookupHashesFile"
 --   partialIDs <- readList loc $ fromPath loc cfg inPath
 --   ref <- fmap fromJust getShakeExtra
 --   ids <- liftIO $ readIORef ref

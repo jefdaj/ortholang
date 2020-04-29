@@ -64,7 +64,7 @@ parserTrace' s = pt <|> return ()
         pt = try $ do
            x <- try $ many1 anyToken
            let x' = let sx = show x in if length sx > n then take n sx ++ "\"..." else sx
-           trace ("core.parser." ++ s) (x') $ try $ eof
+           trace ("interpreter.parser." ++ s) (x') $ try $ eof
            fail x'
 
 {-|
@@ -76,7 +76,7 @@ Based on Text.Parsec.Combinator.parserTraced, but:
 parserTraced' :: (Stream s m t, Show t) => String -> ParsecT s u m b -> ParsecT s u m b
 parserTraced' s p = do
   parserTrace' s
-  p <|> trace ("core.parser." ++ s) "backtracked" (fail s)
+  p <|> trace ("interpreter.parser." ++ s) "backtracked" (fail s)
 
 {-|
 Trace for a parser

@@ -106,12 +106,12 @@ debugA name msg = liftIO $ debug name msg
 
 -- debugA is for export; debugA' is specialized to this module
 debugA' :: String -> String -> Action ()
-debugA' name = debugA ("core.actions." ++ name)
+debugA' name = debugA ("interpreter.actions." ++ name)
 
 -- TODO use this for all (or most) of the current debugS calls if possible
 -- TODO use Shake's traced function for this? rewrite it to work with Logging?
 traceA :: (Show a, Show b) => DebugLocation -> a -> [b] -> a
-traceA name out args = trace "core.actions" msg out
+traceA name out args = trace "interpreter.actions" msg out
   where
     msg = name ++ " creating " ++ show out ++ " from " ++ show args
 
@@ -145,7 +145,7 @@ TODO If the path is to a list of paths, should we also recursively need those
 needShared :: String -> Path -> Action ()
 needShared name path@(Path p) = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.actions.needShared" -- TODO pass from callers?
+  let loc = "interpreter.actions.needShared" -- TODO pass from callers?
       path' = fromPath loc cfg path
   debugA' loc $ "called for '" ++ path' ++ "'"
 
@@ -242,7 +242,7 @@ download cfg url = do
 readFileStrict' :: FilePath -> Action String
 readFileStrict' path = do
   ref <- fmap fromJust getShakeExtra
-  need' "core.actions.readFileStrict'" [path]
+  need' "interpreter.actions.readFileStrict'" [path]
   withReadLock' path $ liftIO (readFileStrict ref path)
 -- {-# INLINE readFileStrict' #-}
 
@@ -330,7 +330,7 @@ readStrings loc etype p =
          cfg <- fmap fromJust getShakeExtra
          (fmap . map) (fromPath loc' cfg) (readPaths loc' p)
        where
-         etype' = trace "core.actions.readStrings" ("readStrings (each " ++ ext etype ++ ") from " ++ p) etype
+         etype' = trace "interpreter.actions.readStrings" ("readStrings (each " ++ ext etype ++ ") from " ++ p) etype
 
 {- OrthoLang requires empty lists to contain the text <<emptylist>> so we can
  - distinguish them from the empty files that might result from a cmd
@@ -355,7 +355,7 @@ readList loc path = do
         $ readFileStrict lRef path
 
 countLines :: FilePath -> Action Scientific
-countLines path = readList "core.actions.countLines" path >>= return . count
+countLines path = readList "interpreter.actions.countLines" path >>= return . count
   where
     count ls = read (show $ length ls) :: Scientific
 
@@ -367,7 +367,7 @@ countLines path = readList "core.actions.countLines" path >>= return . count
 cachedLinesPath :: Config -> [String] -> FilePath
 cachedLinesPath cfg content = cDir </> digest content <.> "txt"
   where
-    loc = "core.actions.cachedLinesPath"
+    loc = "interpreter.actions.cachedLinesPath"
     cDir = fromPath loc cfg $ cacheDir cfg "lines"
 
 -- TODO move to Util?
@@ -443,8 +443,8 @@ writeLits loc path lits = do
 --      (seems almost certain to be caught on reading later)
 writeLit :: DebugLocation -> FilePath -> String -> Action ()
 writeLit loc path lit = do
-  -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lit: \"" ++ lit ++ "\"")
-  -- debugS (pack "core.actions.writeLit") (pack $ "writeLit lits: \"" ++ lits ++ "\"")
+  -- debugS (pack "interpreter.actions.writeLit") (pack $ "writeLit lit: \"" ++ lit ++ "\"")
+  -- debugS (pack "interpreter.actions.writeLit") (pack $ "writeLit lits: \"" ++ lits ++ "\"")
   debugA' loc' $ show lit ++ " -> writeLits " ++ show lits
   writeLits loc' path lits
   where
@@ -489,7 +489,7 @@ trackWrite' fs = do
   -- liftIO $ mapM_ (\f -> setFileMode f 444) fs -- TODO is 444 right? test it
   cfg <- fmap fromJust getShakeExtra
   liftIO $ mapM_ ((\f -> catchAny f (\_ -> return ())) . setReadOnly cfg) fs -- TODO is 444 right? test it
-  trackWrite $ traceShow "core.actions.trackWrite'" fs
+  trackWrite $ traceShow "interpreter.actions.trackWrite'" fs
 
 setReadOnly :: Config -> FilePath -> IO ()
 setReadOnly cfg path = do
@@ -509,7 +509,7 @@ doesn't have to be duplicated over and over.
 -}
 fixEmptyText :: FilePath -> Action FilePath
 fixEmptyText path = do
-  need' "core.actions.fixEmptyText" [path] -- Note isEmpty does this too
+  need' "interpreter.actions.fixEmptyText" [path] -- Note isEmpty does this too
   empty <- isEmpty path
   return $ if empty then "/dev/null" else path -- TODO will /dev/null work?
 
@@ -563,7 +563,7 @@ runCmd d = do
   inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns d
   inPaths' <- if cmdFixEmpties d
                 then mapM (fixEmptyText) inPaths
-                else need' "core.actions.runCmd" inPaths >> return inPaths
+                else need' "interpreter.actions.runCmd" inPaths >> return inPaths
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory stdoutPath
   dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
@@ -651,7 +651,7 @@ hashContent path = do
   cfg  <- fmap fromJust getShakeExtra
   (lRef :: LocksRef) <- fmap fromJust getShakeExtra
   (disk, _, _) <- liftIO $ readIORef lRef
-  let loc = "core.actions.hashContent"
+  let loc = "interpreter.actions.hashContent"
       path' = fromPath loc cfg path
   need' loc [path']
   -- Stdout out <- withReadLock' path' $ command [] "md5sum" [path']
@@ -686,7 +686,7 @@ withBinHash :: Expr -> Path
             -> (Path -> Action ()) -> Action ()
 withBinHash expr outPath actFn = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.actions.withBinHash"
+  let loc = "interpreter.actions.withBinHash"
       binDir'  = fromPath loc cfg $ cacheDir cfg "bin"
       outPath' = fromPath loc cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
@@ -723,12 +723,12 @@ to be kind of confusing either way)
 symlink :: Path -> Path -> Action ()
 symlink src dst = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.actions.symlink"
+  let loc = "interpreter.actions.symlink"
       src' = fromPath loc cfg src
       dst' = fromPath loc cfg dst
       dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
   -- TODO why does this break it?
-  -- need' "core.actions.symlink" [dst']
+  -- need' "interpreter.actions.symlink" [dst']
   withWriteOnce src' $ do
     liftIO $ createDirectoryIfMissing True $ takeDirectory src'
     liftIO $ ignoreExistsError $ createSymbolicLink dstr src'

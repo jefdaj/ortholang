@@ -167,7 +167,7 @@ mkBop bop = return $ \e1 e2 ->
 bopInputs :: [TypeSig] -> [TypeSig]
 bopInputs [Exactly (ListOf t)] = [Exactly t, Exactly t]
 bopInputs [ListSigs s] = [s, s]
-bopInputs s = error "core.parse.expr.bopInputs" $ "bad argument: " ++ show s
+bopInputs s = error "interpreter.parse.expr.bopInputs" $ "bad argument: " ++ show s
 
 ---------------
 -- functions --

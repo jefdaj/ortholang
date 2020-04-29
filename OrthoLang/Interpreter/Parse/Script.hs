@@ -222,6 +222,6 @@ pScript = debugParser "pScript" $ do
 -- TODO should we really care what the current script is when loading a new one?
 parseFile :: [Module] -> GlobalEnv -> FilePath -> IO (Either String Script)
 parseFile mods (_, cfg, ref, _, _) path = do -- only passed on, so modules could be passed here instead?
-  debug "core.parse.script.parseFile" $ "parseFile \"" ++ path ++ "\""
+  debug "interpreter.parse.script.parseFile" $ "parseFile \"" ++ path ++ "\""
   txt <- readScriptWithIncludes ref path
   return $ (parseString mods cfg . stripComments) txt

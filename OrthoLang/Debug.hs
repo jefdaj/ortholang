@@ -52,7 +52,7 @@ logIO fnName msg = debug fnName msg
 
 -- TODO take Text instead?
 traceP :: (Pretty a, Show b) => String -> a -> b -> b
-traceP name expr path = L.traceSL' (T.pack $ "core.paths." ++ name) (T.pack msg) path
+traceP name expr path = L.traceSL' (T.pack $ "interpreter.paths." ++ name) (T.pack msg) path
   where
     ren = render $ pPrint expr
     msg = "\"" ++ ren ++ "' -> " ++ show path -- TODO include types?

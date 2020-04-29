@@ -34,7 +34,7 @@ map3of3 inType outType act3 out a1 a2 a3 = do
   -- debugA $ "map3Base arg paths: " ++ show [a1, a2, a3]
   -- this way breaks psiblast_db_each
   cfg <- fmap fromJust getShakeExtra
-  let loc = "core.compile.map2.map3of3"
+  let loc = "interpreter.compile.map2.map3of3"
   inPaths <- readStrings loc inType $ fromPath loc cfg a3
   -- but this way breaks something too, right?
   -- a3path  <- readPath locks $ fromPath loc cfg a3
@@ -60,7 +60,7 @@ rFun3 act3 scr expr@(Fun _ _ _ _ [a1, a2, a3]) = do
   (ExprPath arg3') <- rExpr scr a3
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let loc = "core.compile.map2.rFun3"
+  let loc = "interpreter.compile.map2.rFun3"
       arg1   = toPath loc cfg arg1'
       arg2   = toPath loc cfg arg2'
       arg3   = toPath loc cfg arg3'

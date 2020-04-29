@@ -86,7 +86,7 @@ rMapTmps :: Int -> (Path -> [Path] -> Action ()) -> String -> RulesFn
 rMapTmps index actFn tmpPrefix scr e = do
   cfg <- fmap fromJust getShakeExtraRules
   let tmpFn args = do
-        let loc = "core.compile.map.rMapTmps"
+        let loc = "interpreter.compile.map.rMapTmps"
             base = concat $ intersperse "/" $ map digest args
             dir  = fromPath loc cfg $ cacheDir cfg tmpPrefix
         return $ toPath loc cfg (dir </> base)
@@ -120,7 +120,7 @@ rMapMain mapIndex mTmpFn actFn scr e@(Fun r ms _ name exprs) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let singleName     = replace "_each" "" name -- TODO any less brittle ideas? could make this a fn
-      loc = "core.compile.map.rMapMain"
+      loc = "interpreter.compile.map.rMapMain"
       mainOutPath    = fromPath loc cfg $ exprPath cfg dRef scr e
       regularArgPaths'  = map (\(ExprPath p) -> toPath loc cfg p) regularArgPaths
       argLastsPath'  = toPath loc cfg mappedArgsPath
@@ -174,7 +174,7 @@ aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
 eachPath :: Config -> FilePath -> Type -> FilePath -> FilePath
 eachPath cfg tmpDir eType path = tmpDir </> hash' </> "result" -- <.> ext eType TODO /result?
   where
-    loc = "core.compile.map.eachPath"
+    loc = "interpreter.compile.map.eachPath"
     path' = toPath loc cfg path
     hash  = digest path'
     hash' = debugC "eachPath" ("hash of " ++ show path' ++ " is " ++ hash) hash
@@ -198,7 +198,7 @@ aMapArgs mapIndex eType regularArgs' tmp' mappedArg = do
   debugFn $ "argPaths': " ++ show argPaths'
   writePaths loc argsPath argPaths'
   where
-    loc = "core.compile.map.aMapArgs"
+    loc = "interpreter.compile.map.aMapArgs"
     debugFn = debugA' loc
 
 {- This gathers together Rules-time and Action-time arguments and passes

@@ -33,7 +33,7 @@ compose1 name ts fn1 fn2 = newMacro name (fInputs fn1) (fOutput fn2) macro' ts
     macro' = macro `deepseq` macro -- force composition errors immediately
 
 err :: String -> a
-err = error "core.compile.compose.mCompose1"
+err = error "interpreter.compile.compose.mCompose1"
 
 {-|
 When this function recieves the initial expression it should be named after the
