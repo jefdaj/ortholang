@@ -1,5 +1,5 @@
 var1 = 1.5
 var2 = "nothing depends on var2 so far"
 var3 = 2.0e-3 * var1
-var4 = var3 * 5 - var1
+var4 = (var3 * 5) - var1
 result = var4
