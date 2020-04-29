@@ -8,7 +8,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Script (expandMacros)
 import OrthoLang.Modules     (modules)
-import OrthoLang.Locks (withWriteLockEmpty)
+import OrthoLang.Locks (withWriteLockEmpty, withWriteLock)
 import OrthoLang.Util   (justOrDie, rmAll)
 
 import Control.Monad         (when)
@@ -171,23 +171,38 @@ mkTreeTest cfg ref ids dRef name act t = goldenDiff d t (act' >> treeAct)
       -- writeFile ("tests/tmpfiles" </> takeBaseName t <.> "txt") out
       return $ B8.pack out
 
--- TODO use safe writes here
-mkTripTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> String -> FilePath -> FilePath -> TestTree
-mkTripTest cfg ref ids dRef name cut parse = goldenDiff d parse tripAct
+mkParseTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> String -> FilePath -> FilePath -> TestTree
+mkParseTest cfg ref ids dRef name cut parse = goldenDiff d parse parseAct
+  where
+    d = name ++ ".ol parses as expected"
+    parseAct = withTmpDirLock cfg ref $ do
+      scr2 <- parseFileIO modules (emptyScript, cfg, ref, ids, dRef) cut
+      return $ B8.pack $ T.unpack $ pShowNoColor scr2
+
+{-|
+Tests that if we parse a script, save it to a tmpfile, and parse that, then
+both scripts are the same.  We take that to mean that parsing + saving is being
+done correctly.
+-}
+mkTripTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> String -> FilePath -> TestTree
+mkTripTest cfg ref ids dRef name cut = goldenDiff d tripShow tripAct
   where
     d = name ++ ".ol unchanged by round-trip to file"
-    -- tripShow  = tmpdir cfg </> "round-trip.show"
+    tripShow  = tmpdir cfg </> "round-trip.show" -- data structure from parsing the first time
+    tripTmp   = tmpdir cfg </> "round-trip.ol"   -- script pretty-printed from that data structure
+    -- parse, save, and show the original script
+    -- both the re-saved and shown versions are used below
     tripSetup = do
-      scr1 <- parseFileIO modules (emptyScript, cfg, ref, ids, dRef) $
-                justOrDie "failed to get script in mkTripTest" $ script cfg
+      scr1 <- parseFileIO modules (emptyScript, cfg, ref, ids, dRef) cut
       -- this is useful for debugging
       -- writeScript cut scr1
-      writeBinaryFile parse $ T.unpack $ pShowNoColor scr1
-    -- tripAct = withWriteLock'IO (tmpdir cfg <.> "lock") $ do
+      writeBinaryFile tripShow $ T.unpack $ pShowNoColor scr1
+      txt <- renderIO cfg $ pPrint scr1
+      withWriteLock ref tripTmp $ writeBinaryFile tripTmp txt
+    -- parse and show the round-tripped script, and test that the second show equals the first
     tripAct = withTmpDirLock cfg ref $ do
-      -- _    <- withFileLock (tmpdir cfg) tripSetup
       _ <- tripSetup
-      scr2 <- parseFileIO modules (emptyScript, cfg, ref, ids, dRef) cut
+      scr2 <- parseFileIO modules (emptyScript, cfg, ref, ids, dRef) tripTmp
       return $ B8.pack $ T.unpack $ pShowNoColor scr2
 
 mkExpandTest :: Config -> LocksRef -> IDsRef -> DigestsRef -> String -> FilePath -> FilePath -> TestTree
@@ -268,15 +283,16 @@ mkScriptTests sDir (name, cut, parse, expand, out, tre, mchk) cfg ref ids dRef =
   checkTests <- case mchk of
                   Nothing -> return []
                   Just c  -> mkCheckTest cfg' ref ids dRef sDir name c
-  let tripTest  = mkTripTest  cfg' ref ids dRef name cut parse
-      expTest   = mkExpandTest  cfg' ref ids dRef name cut expand
-      shareTest = mkShareTest cfg' ref ids dRef sDir name out
+  let parseTest = mkParseTest  cfg' ref ids dRef name cut parse
+      tripTest  = mkTripTest   cfg' ref ids dRef name cut
+      expTest   = mkExpandTest cfg' ref ids dRef name cut expand
+      shareTest = mkShareTest  cfg' ref ids dRef sDir name out
       runScriptU c r i d = runScript c r i d >> return ()
       outTests  = if (name `elem` (badlyBroken ++ stdoutVaries)) then [] else [mkOutTest  cfg' ref ids dRef sDir name out]
       treeTests = if (name `elem` (badlyBroken ++ tmpfilesVary)) then [] else [mkTreeTest cfg' ref ids dRef name runScriptU tre]
       tests     = if (name `elem`  badlyBroken)
                      then []
-                     else [tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]
+                     else [parseTest, tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]
   return $ testGroup (removePrefix name) tests
   where
     name' = replace ":" "_" name -- ':' messes with BLASTDB paths

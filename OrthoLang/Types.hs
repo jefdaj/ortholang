@@ -177,8 +177,8 @@ isResult (Assign v@(Var _ "result") _) = True
 isResult _ = False
 
 instance Pretty Var where
-  pPrint (Var (RepID  Nothing) s) = PP.text s
-  pPrint (Var (RepID (Just r)) s) = PP.text s <+> pPrint r
+  pPrint (Var _ s) = PP.text s
+  -- pPrint (Var (RepID (Just r)) s) = PP.text s <+> pPrint r
 
 -- the common fields are:
 -- * return type
