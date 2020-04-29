@@ -237,18 +237,20 @@ instance Pretty Expr where
 
   -- this one is a little better: the first line is right and *then* it starts doing that
   -- TODO ask on stackoverflow if there's any better way, but later
-  pPrint (Bop _ _ _ c e1 e2) = PP.sep $ PP.punctuate (PP.text $ " " ++ c) [pPrint e1, pPrint e2]
+  pPrint (Bop _ _ _ c e1 e2) = PP.sep $ PP.punctuate (PP.text $ " " ++ c) [pPrint e1, pNested e2]
 
 pList :: (Pretty a) => [a] -> Doc
 pList es = PP.text "[" <> PP.sep (PP.punctuate (PP.text ",") (map pPrint es)) <> PP.text "]"
 
+-- adds parens if negative (to avoid conflicts with the `-` bop)
+-- prints simple int if possible, and otherwise decimal
 prettyNum :: String -> Doc
-prettyNum s = PP.text $
-  case toBoundedInteger n of
-    Just i  -> show (i :: Int)
-    Nothing -> show n -- as decimal
+prettyNum s = if "-" `isPrefixOf` s' then PP.parens (PP.text s') else PP.text s'
   where
-    n = read s :: Scientific
+    n  = read s :: Scientific
+    s' = case toBoundedInteger n of
+          Just i  -> show (i :: Int) -- as int if possible
+          Nothing -> show  n         -- as decimal otherwise
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!

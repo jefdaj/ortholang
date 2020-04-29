@@ -8,5 +8,5 @@ rbh1 = reciprocal_best fwd rev1
 rbh2 = reciprocal_best fwd rev2
 rbh3 = blastp_rbh n mgen maga
 rbh4 = blastp_rbh n maga mgen
-lists = extract_queries_each [rbh1, rbh2, rbh3] | extract_targets_each [rbh4]
-result = any lists ~ all lists
+lists = extract_queries_each [rbh1, rbh2, rbh3] | (extract_targets_each [rbh4])
+result = any lists ~ (all lists)
