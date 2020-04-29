@@ -237,7 +237,7 @@ instance Pretty Expr where
 
   -- this one is a little better: the first line is right and *then* it starts doing that
   -- TODO ask on stackoverflow if there's any better way, but later
-  pPrint (Bop _ _ _ c e1 e2) = PP.sep $ PP.punctuate (PP.text $ " " ++ c) [pNested e1, pNested e2]
+  pPrint (Bop _ _ _ c e1 e2) = PP.sep $ PP.punctuate (PP.text $ " " ++ c) [pPrint e1, pNested e2]
 
 pList :: (Pretty a) => [a] -> Doc
 pList es = PP.text "[" <> PP.sep (PP.punctuate (PP.text ",") (map pPrint es)) <> PP.text "]"
@@ -245,7 +245,7 @@ pList es = PP.text "[" <> PP.sep (PP.punctuate (PP.text ",") (map pPrint es)) <>
 -- adds parens if negative (to avoid conflicts with the `-` bop)
 -- prints simple int if possible, and otherwise decimal
 prettyNum :: String -> Doc
-prettyNum s = if "-" `isPrefixOf` s then PP.parens (PP.text s') else PP.text s'
+prettyNum s = if "-" `isPrefixOf` s' then PP.parens (PP.text s') else PP.text s'
   where
     n  = read s :: Scientific
     s' = case toBoundedInteger n of
