@@ -237,7 +237,7 @@ instance Pretty Expr where
 
   -- this one is a little better: the first line is right and *then* it starts doing that
   -- TODO ask on stackoverflow if there's any better way, but later
-  pPrint (Bop _ _ _ c e1 e2) = PP.sep $ PP.punctuate (PP.text $ " " ++ c) [pPrint e1, pPrint e2]
+  pPrint (Bop _ _ _ c e1 e2) = PP.sep $ PP.punctuate (PP.text $ " " ++ c) [pNested e1, pNested e2]
 
 pList :: (Pretty a) => [a] -> Doc
 pList es = PP.text "[" <> PP.sep (PP.punctuate (PP.text ",") (map pPrint es)) <> PP.text "]"
