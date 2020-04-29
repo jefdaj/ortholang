@@ -242,13 +242,15 @@ instance Pretty Expr where
 pList :: (Pretty a) => [a] -> Doc
 pList es = PP.text "[" <> PP.sep (PP.punctuate (PP.text ",") (map pPrint es)) <> PP.text "]"
 
+-- adds parens if negative (to avoid conflicts with the `-` bop)
+-- prints simple int if possible, and otherwise decimal
 prettyNum :: String -> Doc
-prettyNum s = PP.text $
-  case toBoundedInteger n of
-    Just i  -> show (i :: Int)
-    Nothing -> show n -- as decimal
+prettyNum s = if "-" `isPrefixOf` s then PP.parens (PP.text s') else PP.text s'
   where
-    n = read s :: Scientific
+    n  = read s :: Scientific
+    s' = case toBoundedInteger n of
+          Just i  -> show (i :: Int) -- as int if possible
+          Nothing -> show  n         -- as decimal otherwise
 
 -- this adds parens around nested function calls
 -- without it things can get really messy!
