@@ -28,14 +28,14 @@ olModule = Module
 ll :: TypeGroup
 ll = TypeGroup
   { tgExt  = "ll"
-  , tgDesc  = "files that can be treated like lists"
+  , tgDesc  = "something list-like"
   , tgMembers = [ListSigs (AnyType "any type"), Exactly bht, Exactly crb, Exactly mms]
   }
 
 length :: Function
 length = Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Some ll "something list-like"]
+  , fInputs = [Some ll "a list-like type"]
   , fOutput = Exactly num
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rLength
@@ -52,7 +52,7 @@ length = Function
 lengthEach :: Function
 lengthEach = Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [ListSigs (Some ll "something list-like")]
+  , fInputs = [ListSigs (Some ll "a list-like type")]
   , fOutput = Exactly (ListOf num)
   ,fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 aLength -- TODO is 1 wrong?

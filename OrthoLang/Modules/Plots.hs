@@ -173,7 +173,7 @@ venndiagram = let name = "venndiagram" in Function
   { fOpChar = Nothing, fName = name
   -- , fTypeCheck = tPlotListOfLists
   -- , fTypeDesc  = name ++ " : X.list.list -> png"
-  , fInputs = [ListSigs (ListSigs (AnyType "any type"))]
+  , fInputs = [ListSigs (ListSigs (AnyType "the type to count unique values of"))]
   , fOutput = Exactly png
   , fTags = []
   , fNewRules = NewNotImplemented

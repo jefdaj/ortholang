@@ -45,6 +45,7 @@ module OrthoLang.Types
   , Type(..)
   , TypeGroup(..)
   , TypeSig(..)
+  , Desc(..)
   , Var(..)
   , resultVar
   , isResult

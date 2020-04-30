@@ -66,7 +66,7 @@ olModule = Module
 og :: TypeGroup
 og = TypeGroup
   { tgExt = "og"
-  , tgDesc = "orthogroups (orthofinder, sonicparanoid, or greencut results)"
+  , tgDesc = "orthogroup list"
   , tgMembers = [Exactly ofr, Exactly spr, Exactly gcr]
   }
 
@@ -83,7 +83,7 @@ og = TypeGroup
 orthogroups :: Function
 orthogroups = let name = "orthogroups" in Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "some orthogroup"]
+  , fInputs = [Some og "orthogroup"]
   , fOutput =  Exactly sll
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rOrthogroups
@@ -171,7 +171,7 @@ aOrthogroups _ args = error $ "bad argument to aOrthogroups: " ++ show args
 orthogroupContaining :: Function
 orthogroupContaining = let name = "orthogroup_containing" in Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "some orthogroup", Exactly str]
+  , fInputs = [Some og "any orthogroup", Exactly str]
   , fOutput = Exactly (ListOf str)
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple aOrthogroupContaining
@@ -201,7 +201,7 @@ aOrthogroupContaining args = error $ "bad argument to aOrthogroupContaining: " +
 orthogroupsContaining :: Function
 orthogroupsContaining = let name = "orthogroups_containing" in Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "some orthogroup", Exactly (ListOf str)]
+  , fInputs = [Some og "any orthogroup", Exactly (ListOf str)]
   , fOutput = Exactly sll
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aOrthogroupsFilter containsOneOf
@@ -236,7 +236,7 @@ aOrthogroupsFilter _ args = error $ "bad argument to aOrthogroupContaining: " ++
 orthologInAny :: Function
 orthologInAny = let name = "ortholog_in_any" in Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "some orthogroup", Exactly (ListOf faa)]
+  , fInputs = [Some og "any orthogroup", Exactly (ListOf faa)]
   , fOutput = Exactly sll
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules name
@@ -258,7 +258,7 @@ orthologInAnyStr = let name = "ortholog_in_any_str" in Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly sll, Exactly sll]
   , fOutput = Exactly sll
-  , fTags = []
+  , fTags = [Hidden]
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAny
   }
 
@@ -310,7 +310,7 @@ rOrthologFilterStr _ _ _ _ = error "bad arguments to rOrthologFilterStr"
 orthologInAll :: Function
 orthologInAll = let name = "ortholog_in_all" in Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "some orthogroup", Exactly (ListOf faa)]
+  , fInputs = [Some og "any orthogroup", Exactly (ListOf faa)]
   , fOutput = Exactly sll
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules "ortholog_in_all"
@@ -321,7 +321,7 @@ orthologInAllStr = let name = "ortholog_in_all_str" in Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly sll, Exactly sll]
   , fOutput = Exactly sll
-  , fTags = []
+  , fTags = [Hidden]
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAll
   }
 
@@ -345,7 +345,7 @@ orthologInMinStr = let name = "ortholog_in_min_str" in Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly sll, Exactly sll]
   , fOutput = Exactly sll
-  , fTags = []
+  , fTags = [Hidden]
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStrFrac "min" pickMin
   }
 
@@ -397,7 +397,7 @@ rOrthologFilterStrFrac _ _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
 orthologInMin :: Function
 orthologInMin = let name = "ortholog_in_min" in Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Some og "some orthogroup", Exactly (ListOf faa)]
+  , fInputs = [Exactly num, Some og "any orthogroup", Exactly (ListOf faa)]
   , fOutput = Exactly sll
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
@@ -418,7 +418,7 @@ mkOrthologsStrFracRules _ _ _ = error "bad arguments to mkOrthologStrFracRules"
 orthologInMax :: Function
 orthologInMax = let name = "ortholog_in_max" in Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Some og "some orthogroup", Exactly (ListOf faa)]
+  , fInputs = [Exactly num, Some og "any orthogroup", Exactly (ListOf faa)]
   , fOutput = Exactly sll
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
@@ -429,7 +429,7 @@ orthologInMaxStr = let name = "ortholog_in_max_str" in Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly num, Exactly sll, Exactly sll]
   , fOutput = Exactly sll
-  , fTags = []
+  , fTags = [Hidden]
   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStrFrac "max" pickMax
   }
 

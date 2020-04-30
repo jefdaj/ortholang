@@ -23,7 +23,8 @@ import OrthoLang.Util (headOrDie, stripWhiteSpace)
 import OrthoLang.Debug (trace)
 
 import Data.Char             (toLower)
-import Data.List             (nub, sort, isInfixOf)
+import Data.List             (nub, sort, isInfixOf, intercalate)
+import Data.List.Utils       (addToAL)
 import Data.List.Split       (splitOn)
 import Data.Maybe            (catMaybes, fromJust)
 
@@ -84,7 +85,7 @@ fHelp mods name = case findFunction mods name of
     doc <- getDoc $ map toLower (fName f)
     return $ case doc of
       Nothing -> Just tsig
-      Just d  -> Just $ tsig ++ "\n\n" ++ d
+      Just d  -> Just $ tsig ++ "\n" ++ d
 
 -- TODO write this one like the ones above that work: find from the list, then describe
 -- TODO what should we say if they want help on an encoding by itself, like blastdb, vs encoded type?
@@ -120,9 +121,169 @@ listFunctionTypesWithOutput mods thing = filter matches descs
                                        splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions mods)
 
+
+-----------------------
+-- explain type sigs --
+-----------------------
+
 -- TODO bop version
-renderTypeSig :: Function -> String
-renderTypeSig f = fName f ++ " : " ++ ins ++ " -> " ++ out
+-- TODO distinguish type variables properly
+-- TODO and explain them below with a "where ..." thing
+-- renderTypeSig :: Function -> String
+-- renderTypeSig f = fName f ++ " : " ++ ins ++ " -> " ++ out
+--   where
+--    ins = unwords $ map ext (fInputs f)
+--    out = ext $ fOutput f
+
+-- TODO name type variables, but how? think about replace_each first then generalize
+--      fold left -> right with an accumulator of current names
+--      when encountering...
+--        something with an exact
+-- TODO convert the acc to a final string description
+-- typeSigVarNames :: Function -> [(TypeSig, String)]
+-- typeSigVarNames f = typeSigVarNames' [] $ fInputs f ++ [fOutput f]
+
+-- typeSigVarNames' :: [(TypeSig, String)] -> [TypeSig] -> [(TypeSig, String)]
+-- typeSigVarNames' acc [] = acc
+-- typeSigVarNames' acc (s:ss) = typeSigVarNames' acc' ss
+--   where
+--     acc' = undefined
+
+
+-------------------
+-- map type sigs --
+-------------------
+
+type VarName = String
+type VarDesc = String
+type VarIndex = Int
+type VarMap = [(VarName, [(VarDesc, VarIndex)])]
+
+-- no need to map the output because we require it to match one of the inputs
+inputNames :: Function -> VarMap
+inputNames f = inputNames' [] $ fInputs f
+
+inputNames' :: VarMap -> [TypeSig] -> VarMap
+inputNames' acc [] = acc
+inputNames' acc (s:ss) = inputNames' (addSig acc s) ss
+
+addSig :: VarMap -> TypeSig -> VarMap
+addSig vm (ListSigs     t) = addSig vm t
+addSig vm (ScoresSigs   t) = addSig vm t
+addSig vm (EncodedSig e t) = let vm' = addSig vm t
+                                     in        addName vm' (ext e, desc e)
+addSig vm (AnyType      s) = addName vm ("any", s) -- TODO need s as a key right?
+addSig vm (Some       g s) = addGroup vm g s       -- TODO need s as a key right?
+
+addSig vm (Exactly (ListOf      t)) = addType vm t
+addSig vm (Exactly (ScoresOf    t)) = addType vm t
+addSig vm (Exactly (EncodedAs e t)) = let vm' = addName vm  (ext e, desc e)
+                                              in addType vm' t
+addSig vm (Exactly t) = addType vm t
+
+addGroup :: VarMap -> TypeGroup -> String -> VarMap
+addGroup vm g s = addName vm (ext g, s) -- TODO fix this? desc g ++ ": " ++ exts ++ " (" ++ s ++ ")")
   where
-   ins = unwords $ map ext (fInputs f)
-   out = ext $ fOutput f
+    exts = intercalate ", " $ map ext $ tgMembers g
+
+addType :: VarMap -> Type -> VarMap
+addType vm (ListOf      t) = addName vm (ext t, desc t)
+addType vm (ScoresOf    t) = addName vm (ext t, desc t)
+addType vm (EncodedAs e t) = let vm' = addName vm  (ext e, desc e)
+                                 in        addName vm' (ext t, desc t)
+addType vm t = addName vm (ext t, desc t)
+
+addName :: VarMap -> (VarName, VarDesc) -> VarMap
+addName vm (tvn, tvd) = case lookup tvn vm of
+  Nothing -> addToAL vm tvn [(tvd, 1)]
+  Just ds -> case lookup tvd ds of
+    Just  _ -> vm -- already recorded it
+    Nothing -> addToAL vm tvn $ ds ++ [(tvd, length ds + 1)]
+
+
+----------------------
+-- render type sigs --
+----------------------
+
+-- | Renders the entire type signature help block (not counting custom help file text)
+renderSig :: Function -> String
+renderSig f = unwords $ [name, ":"] ++ inSigs ++ ["->", outSig]
+  where
+    name   = fName f
+    names  = inputNames f
+    inSigs = map (renderExt names) $ fInputs f
+    outSig = renderExt names $ fOutput f
+
+renderTypeSig :: Function -> String
+renderTypeSig f = renderSig f ++ "\n" ++ renderWhere names (fInputs f)
+  where
+    name   = fName f -- TODO move to renderWhere?
+    names  = inputNames f -- TODO move to renderWhere?
+    -- inSigs = map (renderExt names) $ fInputs f
+    -- outSig = renderExt names $ fOutput f
+
+renderExt :: VarMap -> TypeSig -> String
+renderExt vm (ListSigs     s) = renderExt vm s ++ ".list"
+renderExt vm (ScoresSigs   s) = renderExt vm s ++ ".scores"
+renderExt vm (EncodedSig e s) = renderExt vm s ++ "." ++ renderName vm (ext e) Nothing
+renderExt vm (AnyType      s) = renderName vm "any" (Just s)
+renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
+renderExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
+
+renderWhereExt :: VarMap -> TypeSig -> String
+renderWhereExt vm (ListSigs     s) = renderWhereExt vm s
+renderWhereExt vm (ScoresSigs   s) = renderWhereExt vm s
+renderWhereExt vm (EncodedSig e s) = renderWhereExt vm s ++ "." ++ renderName vm (ext e) Nothing -- TODO what to do?
+renderWhereExt vm (AnyType      s) = renderName vm "any" (Just s)
+renderWhereExt vm (Some       g s) = renderName vm (ext g) (Just s)
+renderWhereExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
+
+-- TODO should this be shown for all types, or just the ambiguous ones? start with those
+renderWhereDesc :: TypeSig -> Maybe String
+renderWhereDesc (AnyType s) = Just s -- $ s ++ " (can be any type)"
+renderWhereDesc (Some  g s) = Just $ s ++ " (" ++ renderGroupMembers g ++ ")"
+renderWhereDesc (Exactly _) = Nothing
+renderWhereDesc (ListSigs     s) = renderWhereDesc s
+renderWhereDesc (ScoresSigs   s) = renderWhereDesc s
+renderWhereDesc (EncodedSig _ s) = renderWhereDesc s -- TODO return a list of both? only if doing non-ambig ones
+
+renderGroupMembers :: TypeGroup -> String
+renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ tgMembers g)
+  where
+    withCommas [ ] = ""
+    withCommas [m] = ext m
+    withCommas  ms = intercalate ", " (map ext ms) ++ ","
+
+-- output should never need descibing because it's either an exact type or also one of the inputs
+renderWhere :: VarMap -> [TypeSig] -> String
+renderWhere names inSigs = if length descs == 0 then "" else init $ unlines $ "where" : descs
+  where
+    descs = nub $ catMaybes $ map (\i -> fmap (withExt i) $ renderWhereDesc i) inSigs
+    withExt i d = "  " ++ unwords [renderWhereExt names i, "is", d]
+
+-- Renders the type variable name: faa, og, any1, etc.
+-- TODO remove the raw errors?
+-- TODO have this return the where... descriptions too?
+renderName :: VarMap -> VarName -> Maybe VarDesc -> String
+renderName names name mDsc = case lookup name names of
+
+  -- this can happen when the output type isn't one of the inputs.
+  -- that's only a problem if it's ambiguous.
+  -- TODO check for that here? or separately maybe
+  -- Nothing -> error $ "no such typesig name: '" ++ name ++ "'
+  -- options are:\n" ++ show names
+  Nothing -> name
+
+  Just indexMap -> case mDsc of
+    Nothing -> name -- not something that needs to be indexed anyway (TODO remove this?)
+    Just  d -> case lookup d indexMap of
+
+                 -- this can happen when the output type isn't one of the inputs.
+                 -- that's only a problem if it's ambiguous.
+                 -- TODO check for that here? or separately maybe
+                 -- Nothing -> error $ "no such typesig description: '" ++ d ++ "'.
+                 -- options are:\n" ++ show indexMap
+                 Nothing -> name
+                 Just  i -> if length indexMap < 2
+                              then name
+                              else name ++ show i

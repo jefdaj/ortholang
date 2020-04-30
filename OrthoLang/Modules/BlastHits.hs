@@ -35,7 +35,7 @@ olModule = Module
 ht :: TypeGroup
 ht = TypeGroup
   { tgExt = "ht"
-  , tgDesc  = "BLAST hit table-like"
+  , tgDesc  = "hit table"
   , tgMembers = [Exactly bht, Exactly crb] -- TODO mms too
   }
 

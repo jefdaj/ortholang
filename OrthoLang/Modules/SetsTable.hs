@@ -25,7 +25,7 @@ tsv = Type
 setsTable :: Function
 setsTable = let name = "sets_table" in Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [ListSigs (ListSigs (Some lit "some lit"))] -- TODO would any type work, not just lits?
+  , fInputs = [ListSigs (ListSigs (Some lit "a literal"))] -- TODO would any type work, not just lits?
   , fOutput = Exactly tsv -- TODO would it help to make this EncodedAs tsv ...?
   , fTags = []
   , fNewRules = NewNotImplemented
