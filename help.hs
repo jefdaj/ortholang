@@ -5,6 +5,7 @@ import OrthoLang.Modules (modules)
 import Data.List
 import Data.List.Utils
 import Data.Maybe
+import Data.Either
 
 -- TODO name type variables, but how? think about replace_each first then generalize
 --      fold left -> right with an accumulator of current names
@@ -19,14 +20,36 @@ import Data.Maybe
 type VarName = String
 type VarDesc = String
 type VarIndex = Int
-type VarMap = [(VarName, [(VarIndex, VarDesc)])]
+type VarMap = [(VarName, [(VarDesc, VarIndex)])]
 
-typeSigVarNames :: Function -> VarMap
-typeSigVarNames f = typeSigVarNames' [] $ fInputs f -- ++ [fOutput f] (output has to be one of the inputs right?)
+-- VarMap formatted for use when folding over a type signature
+-- Does not include types that don't need an index
+-- type VarMap2 = [(VarName, VarIndex), VarDesc]
 
-typeSigVarNames' :: VarMap -> [TypeSig] -> VarMap
-typeSigVarNames' acc [] = acc
-typeSigVarNames' acc (s:ss) = typeSigVarNames' (addSig acc s) ss
+-- TODO remove?
+-- type NiceVarMap = [(VarName,   VarIndex, VarDesc)]
+
+-- TODO remove?
+-- flattenMap :: VarMap -> NiceVarMap
+-- flattenMap [] = []
+-- flattenMap ((n, ds):xs) = map (flattenOne n) ds ++ flattenMap xs
+
+-- TODO remove?
+-- flattenOne :: VarName -> (VarIndex, VarDesc) -> (VarName, VarIndex, VarDesc)
+-- flattenOne n (i, d) = (n ++ show i, i, d)
+
+-- type VarExt = String
+-- type VarKey = (VarExt, VarIndex)
+-- type VarInfo = (VarName, VarDesc)
+-- type VarMap2 = [(VarKey, VarInfo)]
+
+-- no need to map the output because we require it to match one of the inputs
+inputNames :: Function -> VarMap
+inputNames f = inputNames' [] $ fInputs f
+
+inputNames' :: VarMap -> [TypeSig] -> VarMap
+inputNames' acc [] = acc
+inputNames' acc (s:ss) = inputNames' (addSig acc s) ss
 
 addSig :: VarMap -> TypeSig -> VarMap
 addSig vm (ListSigs     t) = addSig vm t
@@ -54,14 +77,12 @@ addType vm (EncodedAs e t) = let vm' = addName vm  (ext e, desc e)
                                  in        addName vm' (ext t, desc t)
 addType vm t = addName vm (ext t, desc t)
 
--- TODO are some getting overwritten?
 addName :: VarMap -> (VarName, VarDesc) -> VarMap
 addName vm (tvn, tvd) = case lookup tvn vm of
-  Nothing -> addToAL vm tvn [(1, tvd)]
-  Just ds -> let ds' = if tvd `elem` (map snd ds)
-                         then ds
-                         else ds ++ [(length ds + 1, tvd)]
-             in addToAL vm tvn ds'
+  Nothing -> addToAL vm tvn [(tvd, 1)]
+  Just ds -> case lookup tvd ds of
+    Just  _ -> vm -- already recorded it
+    Nothing -> addToAL vm tvn $ ds ++ [(tvd, length ds + 1)]
 
 ------------
 -- render --
@@ -75,23 +96,49 @@ Var naming rules:
 * Same variables need to go in the signature and where clause of course
 
 Idea: the things that need an index are the same ones that need a custom description, so combine
+Idea: only things where the desc list > 1 long need a custom description right? use that!
 -}
 
 -- | Renders the entire type signature help block (not counting custom help file text)
-renderHelp :: Function -> String
-renderHelp = undefined
--- renderHelp f = fName f ++ " : " ++ ins ++ " -> " ++ out ++ "\n" ++ wClause
---   where
---    ins = unwords $ map (\(i, t) -> renderType vm) (fInputs f)
---    out = renderType vm $ fOutput f
---    vm = typeSigVarNames f
---    wClause = unlines $ "where..." : map (\(n, (i, d)) -> renderDesc n i d) names
---    names = concatMap (\(n, ds) -> zip (repeat n) ds) vm
+renderSig :: Function -> String
+renderSig f = unwords $ [fName f, ":"] ++ inSigs ++ ["->", outSig]
+  where
+    names  = inputNames f
+    inSigs = map (renderExt names) $ fInputs f
+    outSig = renderExt names $ fOutput f
 
--- | Renders the type variable name: faa, og, any1, etc.
--- TODO how to fold over this?
-renderType :: VarName -> VarIndex -> String
-renderType = undefined
+-- TODO sig + where clause
+renderHelp :: Function -> String
+renderHelp f = undefined
+
+-- like ext combined with renderName... how should that work?
+-- ext Empty             = "empty" -- special case for empty lists with no element type
+-- ext (ListOf        t) = ext t ++ ".list"
+-- ext (ScoresOf      t) = ext t ++ ".scores"
+-- ext (EncodedAs   e t) = ext t ++ "." ++ ext e
+-- ext (Type {tExt = e}) = e
+
+renderExt :: VarMap -> TypeSig -> String
+renderExt vm (ListSigs     s) = renderExt vm s ++ ".list"
+renderExt vm (ScoresSigs   s) = renderExt vm s ++ ".scores"
+renderExt vm (EncodedSig e s) = renderExt vm s ++ "." ++ renderName vm (ext e) Nothing
+renderExt vm (AnyType      s) = renderName vm "any" (Just s)
+renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
+renderExt vm (Exactly      t) = renderName vm (ext t) Nothing
+
+-- Renders the type variable name: faa, og, any1, etc.
+-- TODO remove the raw errors?
+renderName :: VarMap -> VarName -> Maybe VarDesc -> String
+renderName names name mDesc = case lookup name names of
+  Nothing -> error $ "no such typesig name: '" ++ name ++ "'" -- shouldn't happen
+  Just indexMap -> case mDesc of
+    Nothing -> name -- not something that needs to be indexed anyway (TODO remove this?)
+    Just  d -> case lookup d indexMap of
+                 Nothing -> error $ "no such typesig description: '" ++ d ++ "'"
+                 Just  i -> if length indexMap < 2
+                              then name
+                              else name ++ show i
+
 -- renderType vm name index = case lookup name vm of
 --   Nothing -> error "renderType failed :("
 --   Just (name, descs) -> if index < 0 || index >= length descs
@@ -103,7 +150,7 @@ renderType = undefined
 -- TODO should be doable by zipping the exts onto the indexed descriptions,
 --      and dropping some of the indexes at the same time
 renderDesc :: VarName -> VarIndex -> VarDesc -> String
-renderDesc name index desc = "  " ++ name ++ show index ++ " is " ++ desc
+renderDesc name index dsc = "  " ++ name ++ show index ++ " is " ++ dsc
 
 ----------
 -- main --
@@ -124,12 +171,35 @@ os = map fOutput fs
 f90 :: Function
 f90 = fs !! 90
 
+n90 :: String
+n90 = fName f90
+
 s10 :: [TypeSig]
 s10 = fInputs f90 ++ [fOutput f90]
 
+names :: [(String, VarMap)]
+names = map (\f -> (fName f, inputNames f)) fs
+
+m90 :: VarMap
+m90 = fromJust $ lookup n90 names
+
+v90 = renderName m90 "fna" Nothing
+
+sr :: Function
+sr = head $ filter (\f -> fName f == "score_repeats") fs
+
+srNames :: VarMap
+srNames = inputNames sr
+
+-- test :: Function -> String
+-- test f = undefined
+--   where
+--     names = inputNames f
+--     name  = fName f
+
 main :: IO ()
 main = do
-  let names = map (\f -> (fName f, typeSigVarNames f)) fs
+  -- let names = map (\f -> (fName f, inputNames f)) fs
 
       -- longnames = filter (\(n, ds) -> length ds > 2) names
       -- keys = map (\(n, m) -> (n, map fst m)) names
@@ -138,20 +208,27 @@ main = do
   -- mapM_ print keys
   -- mapM_ print names
 
-  print $ fromJust $ lookup "replace" names
-  -- putStrLn $ renderHelp $ fromJust $ lookup "replace" fsByName
+  -- print $ fromJust $ lookup "busco_list_lineages" names
+  -- print $ fromJust $ lookup "load_faa_each" names
+  -- print $ fromJust $ lookup "concat_bht" names
+  -- print $ fromJust $ lookup "scatterplot" names
 
-  print $ fromJust $ lookup "replace_each" names
-  -- putStrLn $ renderHelp $ fromJust $ lookup "replace_each" fsByName
+  -- print $ fromJust $ lookup "replace" names
+  -- putStrLn $ renderSig $ fromJust $ lookup "replace" fsByName
 
-  print $ fromJust $ lookup "repeat" names
-  -- putStrLn $ renderHelp $ fromJust $ lookup "repeat" fsByName
+  -- print $ fromJust $ lookup "replace_each" names
+  -- putStrLn $ renderSig $ fromJust $ lookup "replace_each" fsByName
 
-  print $ fromJust $ lookup "score_repeats" names
-  -- putStrLn $ renderHelp $ fromJust $ lookup "score_repeats" fsByName
+  -- print $ fromJust $ lookup "repeat" names
+  -- putStrLn $ renderSig $ fromJust $ lookup "repeat" fsByName
 
-  -- print $ lookup "replace" names
-  -- print $ lookup "replace_each" names
-  -- print $ lookup "repeat" names
-  -- print $ lookup "score_repeats" names
-  return ()
+  -- how to render inputs:
+  -- print $ fromJust $ lookup "score_repeats" names
+  -- print $ renderName srNames "any" (Just "the input type") -- anytypes/typegroups
+  -- print $ renderName srNames "num" Nothing                 -- exact types
+
+  -- print $ map renderName $ fInputs f90
+  -- putStrLn $ renderSig $ fromJust $ lookup "score_repeats" fsByName
+  -- let r90 = renderName () $ fromJust $ lookup n90 names
+
+  print $ renderSig sr
