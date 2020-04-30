@@ -73,7 +73,7 @@ renderSig f = unwords $ [fName f, ":"] ++ inSigs ++ ["->", outSig]
 
 -- TODO sig + where clause
 renderHelp :: Function -> String
-renderHelp f = undefined
+renderHelp f = renderSig f ++ "\n" ++ renderWhere (fInputs f)
 
 renderExt :: VarMap -> TypeSig -> String
 renderExt vm (ListSigs     s) = renderExt vm s ++ ".list"
@@ -83,10 +83,24 @@ renderExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
 renderExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
 
+-- TODO should this be shown for all types, or just the ambiguous ones? start with those
+renderDesc :: TypeSig -> Maybe String
+renderDesc (AnyType s) = Just $ "  " ++ s
+renderDesc (Some  _ s) = Just $ "  " ++ s
+renderDesc (Exactly _) = Nothing
+renderDesc (ListSigs     s) = renderDesc s
+renderDesc (ScoresSigs   s) = renderDesc s
+renderDesc (EncodedSig _ s) = renderDesc s
+
+-- output should never need descibing because it's either an exact type or also one of the inputs
+renderWhere :: [TypeSig] -> String
+renderWhere ins = unlines $ "where" : (nub $ catMaybes $ map renderDesc ins)
+
 -- Renders the type variable name: faa, og, any1, etc.
 -- TODO remove the raw errors?
+-- TODO have this return the where... descriptions too?
 renderName :: VarMap -> VarName -> Maybe VarDesc -> String
-renderName names name mDesc = case lookup name names of
+renderName names name mDsc = case lookup name names of
 
   -- this can happen when the output type isn't one of the inputs.
   -- that's only a problem if it's ambiguous.
@@ -95,7 +109,7 @@ renderName names name mDesc = case lookup name names of
   -- options are:\n" ++ show names
   Nothing -> name
 
-  Just indexMap -> case mDesc of
+  Just indexMap -> case mDsc of
     Nothing -> name -- not something that needs to be indexed anyway (TODO remove this?)
     Just  d -> case lookup d indexMap of
 
@@ -112,8 +126,10 @@ renderName names name mDesc = case lookup name names of
 -- | Renders the type variable description (everything after "where...")
 -- TODO should be doable by zipping the exts onto the indexed descriptions,
 --      and dropping some of the indexes at the same time
-renderDesc :: VarName -> VarIndex -> VarDesc -> String
-renderDesc name index dsc = "  " ++ name ++ show index ++ " is " ++ dsc
+-- renderDesc :: VarMap -> VarName -> Maybe VarDesc -> String
+-- renderDesc names name mDsc = unwords $ [name']
+--   where
+--     name' = renderName names name mDsc
 
 ----------
 -- main --
@@ -162,4 +178,4 @@ main = do
 
   -- then print just the ones we want to inspect
   let testfns = ["repeat", "replace", "replace_each", "scatterplot", "venndiagram"]
-  mapM_ (putStrLn . renderSig) $ filter (\f -> fName f `elem` testfns) fs
+  mapM_ (putStrLn . renderHelp) $ filter (\f -> fName f `elem` testfns) fs
