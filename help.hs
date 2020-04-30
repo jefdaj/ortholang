@@ -65,15 +65,20 @@ addName vm (tvn, tvd) = case lookup tvn vm of
 
 -- | Renders the entire type signature help block (not counting custom help file text)
 renderSig :: Function -> String
-renderSig f = unwords $ [fName f, ":"] ++ inSigs ++ ["->", outSig]
+renderSig f = unwords $ [name, ":"] ++ inSigs ++ ["->", outSig]
   where
+    name   = fName f
     names  = inputNames f
     inSigs = map (renderExt names) $ fInputs f
     outSig = renderExt names $ fOutput f
 
--- TODO sig + where clause
 renderHelp :: Function -> String
-renderHelp f = renderSig f ++ "\n" ++ renderWhere (fInputs f)
+renderHelp f = renderSig f ++ "\n" ++ renderWhere names (fInputs f)
+  where
+    name   = fName f -- TODO move to renderWhere?
+    names  = inputNames f -- TODO move to renderWhere?
+    -- inSigs = map (renderExt names) $ fInputs f
+    -- outSig = renderExt names $ fOutput f
 
 renderExt :: VarMap -> TypeSig -> String
 renderExt vm (ListSigs     s) = renderExt vm s ++ ".list"
@@ -83,18 +88,29 @@ renderExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
 renderExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
 
+renderExtOnly :: VarMap -> TypeSig -> String
+renderExtOnly vm (ListSigs     s) = renderExtOnly vm s
+renderExtOnly vm (ScoresSigs   s) = renderExtOnly vm s
+renderExtOnly vm (EncodedSig e s) = renderExtOnly vm s ++ "." ++ renderName vm (ext e) Nothing -- TODO what to do?
+renderExtOnly vm (AnyType      s) = renderName vm "any" (Just s)
+renderExtOnly vm (Some       g s) = renderName vm (ext g) (Just s)
+renderExtOnly vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
+
 -- TODO should this be shown for all types, or just the ambiguous ones? start with those
 renderDesc :: TypeSig -> Maybe String
-renderDesc (AnyType s) = Just $ "  " ++ s
-renderDesc (Some  _ s) = Just $ "  " ++ s
+renderDesc (AnyType s) = Just s
+renderDesc (Some  _ s) = Just s
 renderDesc (Exactly _) = Nothing
 renderDesc (ListSigs     s) = renderDesc s
 renderDesc (ScoresSigs   s) = renderDesc s
 renderDesc (EncodedSig _ s) = renderDesc s
 
 -- output should never need descibing because it's either an exact type or also one of the inputs
-renderWhere :: [TypeSig] -> String
-renderWhere ins = unlines $ "where" : (nub $ catMaybes $ map renderDesc ins)
+renderWhere :: VarMap -> [TypeSig] -> String
+renderWhere names inSigs = if length descs == 0 then "" else unlines $ "where" : descs
+  where
+    descs = nub $ catMaybes $ map (\i -> fmap (withExt i) $ renderDesc i) inSigs
+    withExt i d = "  " ++ unwords [renderExtOnly names i, "=", d]
 
 -- Renders the type variable name: faa, og, any1, etc.
 -- TODO remove the raw errors?
@@ -173,7 +189,8 @@ srNames = inputNames sr
 main :: IO ()
 main = do
   -- check that they all finish without errors:
-  mapM_ (putStrLn . renderSig) fs
+  mapM_ (putStrLn . renderHelp) fs
+  putStrLn ""
   putStrLn ""
 
   -- then print just the ones we want to inspect
