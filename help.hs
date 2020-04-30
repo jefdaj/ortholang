@@ -8,13 +8,6 @@ import Data.List
 import Data.List.Utils
 import Data.Maybe
 import Data.Either
--- import Control.Exception
-
--- TODO name type variables, but how? think about replace_each first then generalize
---      fold left -> right with an accumulator of current names
---      when encountering...
---        something with an exact
--- TODO convert the acc to a final string description
 
 ---------
 -- map --
@@ -24,27 +17,6 @@ type VarName = String
 type VarDesc = String
 type VarIndex = Int
 type VarMap = [(VarName, [(VarDesc, VarIndex)])]
-
--- VarMap formatted for use when folding over a type signature
--- Does not include types that don't need an index
--- type VarMap2 = [(VarName, VarIndex), VarDesc]
-
--- TODO remove?
--- type NiceVarMap = [(VarName,   VarIndex, VarDesc)]
-
--- TODO remove?
--- flattenMap :: VarMap -> NiceVarMap
--- flattenMap [] = []
--- flattenMap ((n, ds):xs) = map (flattenOne n) ds ++ flattenMap xs
-
--- TODO remove?
--- flattenOne :: VarName -> (VarIndex, VarDesc) -> (VarName, VarIndex, VarDesc)
--- flattenOne n (i, d) = (n ++ show i, i, d)
-
--- type VarExt = String
--- type VarKey = (VarExt, VarIndex)
--- type VarInfo = (VarName, VarDesc)
--- type VarMap2 = [(VarKey, VarInfo)]
 
 -- no need to map the output because we require it to match one of the inputs
 inputNames :: Function -> VarMap
@@ -91,21 +63,6 @@ addName vm (tvn, tvd) = case lookup tvn vm of
 -- render --
 ------------
 
-{-|
-Var naming rules:
-
-* Regular types are shown in the type signature as their extensions (no index)
-* TypeGroups or AnyTypes are shown with an index too (only if more than one?)
-* Same variables need to go in the signature and where clause of course
-
-Idea: the things that need an index are the same ones that need a custom description, so combine
-Idea: only things where the desc list > 1 long need a custom description right? use that!
--}
-
--- tryRender :: Function -> IO (Either String String)
--- tryRender f = catch (return $ Right $ renderSig f)
---                     (\(e :: SomeException) -> return $ Left $ show e)
-
 -- | Renders the entire type signature help block (not counting custom help file text)
 renderSig :: Function -> String
 renderSig f = unwords $ [fName f, ":"] ++ inSigs ++ ["->", outSig]
@@ -117,13 +74,6 @@ renderSig f = unwords $ [fName f, ":"] ++ inSigs ++ ["->", outSig]
 -- TODO sig + where clause
 renderHelp :: Function -> String
 renderHelp f = undefined
-
--- like ext combined with renderName... how should that work?
--- ext Empty             = "empty" -- special case for empty lists with no element type
--- ext (ListOf        t) = ext t ++ ".list"
--- ext (ScoresOf      t) = ext t ++ ".scores"
--- ext (EncodedAs   e t) = ext t ++ "." ++ ext e
--- ext (Type {tExt = e}) = e
 
 renderExt :: VarMap -> TypeSig -> String
 renderExt vm (ListSigs     s) = renderExt vm s ++ ".list"
@@ -203,12 +153,6 @@ sr = head $ filter (\f -> fName f == "score_repeats") fs
 
 srNames :: VarMap
 srNames = inputNames sr
-
--- test :: Function -> String
--- test f = undefined
---   where
---     names = inputNames f
---     name  = fName f
 
 main :: IO ()
 main = do
