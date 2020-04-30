@@ -1,3 +1,5 @@
-mmseqs_search : num fa fa -> bht
-
+mmseqs_search : num fa1 fa2 -> bht
+where
+  fa1 is query (any fasta) (fna or faa)
+  fa2 is subject (any fasta) (fna or faa)
 Find matching sequences in two fasta files, similar to BLAST.

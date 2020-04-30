@@ -54,7 +54,7 @@ ht = TypeGroup
 extractQueries :: Function
 extractQueries = Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Some ht "hit table"]
+  , fInputs = [Some ht "a hit table"]
   , fOutput = Exactly (ListOf str)
   , fTags = []
   , fNewRules = NewNotImplemented
@@ -67,7 +67,7 @@ extractQueries = Function
 extractQueriesEach :: Function
 extractQueriesEach = Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [ListSigs (Some ht "hit table")]
+  , fInputs = [ListSigs (Some ht "a hit table")]
   , fOutput = Exactly (ListOf (ListOf str))
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 1
@@ -79,7 +79,7 @@ extractQueriesEach = Function
 extractTargets :: Function
 extractTargets = Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Some ht "hit table"]
+  , fInputs = [Some ht "a hit table"]
   , fOutput = Exactly (ListOf str)
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol True 2
@@ -90,7 +90,7 @@ extractTargets = Function
 extractTargetsEach :: Function
 extractTargetsEach = Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [ListSigs (Some ht "hit table")]
+  , fInputs = [ListSigs (Some ht "a hit table")]
   , fOutput = Exactly (ListOf (ListOf str))
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 2
@@ -140,8 +140,8 @@ filterEvalue = mkFilterHits "evalue"
 mkFilterHits :: String -> Function
 mkFilterHits colname = Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Some ht "hit table"]
-  , fOutput = Some ht "hit table" -- TODO or bht like before?
+  , fInputs = [Exactly num, Some ht "a hit table"]
+  , fOutput = Some ht "a hit table" -- TODO or bht like before?
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aFilterHits colname
   }
@@ -154,8 +154,8 @@ filterEvalueEach = mkFilterHitsEach "evalue"
 mkFilterHitsEach :: String -> Function
 mkFilterHitsEach colname = Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, ListSigs (Some ht "hit table")]
-  , fOutput = ListSigs (Some ht "hit table")
+  , fInputs = [Exactly num, ListSigs (Some ht "a hit table")]
+  , fOutput = ListSigs (Some ht "a hit table")
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aFilterHits colname
   }
@@ -197,8 +197,8 @@ aFilterHits _ args = error $ "bad argument to aFilterHits: " ++ show args
 bestHits :: Function
 bestHits =  Function
   { fOpChar = Nothing, fName = name 
-  , fInputs = [Some ht "hit table"]
-  , fOutput =  Some ht "hit table"
+  , fInputs = [Some ht "a hit table"]
+  , fOutput =  Some ht "a hit table"
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rSimple aBestExtract
   }
@@ -208,8 +208,8 @@ bestHits =  Function
 bestHitsEach :: Function
 bestHitsEach = Function
   { fOpChar = Nothing, fName = name
-  , fInputs = [ListSigs (Some ht "hit table")]
-  , fOutput =  ListSigs (Some ht "hit table")
+  , fInputs = [ListSigs (Some ht "a hit table")]
+  , fOutput =  ListSigs (Some ht "a hit table")
   , fTags = []
   , fNewRules = NewNotImplemented, fOldRules = rMap 1 aBestExtract
   }

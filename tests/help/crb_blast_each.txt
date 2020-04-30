@@ -1,1 +1,3 @@
 crb_blast_each : fna fa.list -> crb.list
+where
+  fa is any fasta file (fna or faa)

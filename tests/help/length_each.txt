@@ -1,1 +1,3 @@
 length_each : ll.list -> num.list
+where
+  ll is a list-like type (any.list, bht, crb, or mms)

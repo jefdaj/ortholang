@@ -1,5 +1,6 @@
 ortholog_in_any : og faa.list -> str.list.list
-
+where
+  og is any orthogroup (ofr, spr, or gcr)
 Arguments:
   orthogroup finder results
   list of proteomes (fasta files)

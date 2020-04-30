@@ -1,1 +1,3 @@
 extract_ids : fa -> str.list
+where
+  fa is any fasta file (fna or faa)

@@ -1,1 +1,3 @@
 crb_blast : fna fa -> crb
+where
+  fa is any fasta file (fna or faa)

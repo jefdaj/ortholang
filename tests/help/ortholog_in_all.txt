@@ -1,4 +1,5 @@
 ortholog_in_all : og faa.list -> str.list.list
-
+where
+  og is any orthogroup (ofr, spr, or gcr)
 Filter a list of orthogroups to keep the ones with an ortholog in every proteome.
 These are universal genes in that group of proteomes, but not necesarily single copy.

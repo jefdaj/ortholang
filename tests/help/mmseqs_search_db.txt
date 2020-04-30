@@ -1,3 +1,4 @@
 mmseqs_search_db : num fa mms -> bht
-
+where
+  fa is any fasta file (fna or faa)
 Search a target database for sequences matching the query FASTA, similar to BLAST.

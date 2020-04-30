@@ -1,5 +1,6 @@
 score_repeats : num any any.list -> any.scores
-
+where
+  any is the input type
 Shorthand for the common use case where you want to score your cut by some
 metric, for example number of hits, then vary one of the input parameters and
 see how the score changes.

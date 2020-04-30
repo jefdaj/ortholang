@@ -1,1 +1,3 @@
 ortholog_in_min : num og faa.list -> str.list.list
+where
+  og is any orthogroup (ofr, spr, or gcr)

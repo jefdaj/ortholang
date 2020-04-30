@@ -1,3 +1,4 @@
 best_hits : ht -> ht
-
+where
+  ht is a hit table (bht or crb)
 Given a hit table, returns a smaller hit table with only the best hit per query gene ID.

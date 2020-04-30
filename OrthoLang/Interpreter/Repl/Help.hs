@@ -1,5 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module OrthoLang.Interpreter.Repl.Help
   (
 
@@ -110,7 +108,7 @@ listFunctionTypesWithInput :: Ext e => [Module] -> e -> [String]
 listFunctionTypesWithInput mods thing = filter matches descs
   where
     -- TODO match more carefully because it should have to be an entire word
-    matches d = (ext thing) `elem` (words $ headOrDie "listFuncionTypesWithInput failed" $
+    matches d = (ext thing) `elem` (words $ headOrDie "listFunctionTypesWithInput failed" $
                                        splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions mods)
 
@@ -120,34 +118,6 @@ listFunctionTypesWithOutput mods thing = filter matches descs
     matches d = (ext thing) `elem` (words $ unwords $ tail $
                                        splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions mods)
-
-
------------------------
--- explain type sigs --
------------------------
-
--- TODO bop version
--- TODO distinguish type variables properly
--- TODO and explain them below with a "where ..." thing
--- renderTypeSig :: Function -> String
--- renderTypeSig f = fName f ++ " : " ++ ins ++ " -> " ++ out
---   where
---    ins = unwords $ map ext (fInputs f)
---    out = ext $ fOutput f
-
--- TODO name type variables, but how? think about replace_each first then generalize
---      fold left -> right with an accumulator of current names
---      when encountering...
---        something with an exact
--- TODO convert the acc to a final string description
--- typeSigVarNames :: Function -> [(TypeSig, String)]
--- typeSigVarNames f = typeSigVarNames' [] $ fInputs f ++ [fOutput f]
-
--- typeSigVarNames' :: [(TypeSig, String)] -> [TypeSig] -> [(TypeSig, String)]
--- typeSigVarNames' acc [] = acc
--- typeSigVarNames' acc (s:ss) = typeSigVarNames' acc' ss
---   where
---     acc' = undefined
 
 
 -------------------
@@ -182,7 +152,7 @@ addSig vm (Exactly (EncodedAs e t)) = let vm' = addName vm  (ext e, desc e)
 addSig vm (Exactly t) = addType vm t
 
 addGroup :: VarMap -> TypeGroup -> String -> VarMap
-addGroup vm g s = addName vm (ext g, s) -- TODO fix this? desc g ++ ": " ++ exts ++ " (" ++ s ++ ")")
+addGroup vm g s = addName vm (ext g, s)
   where
     exts = intercalate ", " $ map ext $ tgMembers g
 
@@ -205,7 +175,7 @@ addName vm (tvn, tvd) = case lookup tvn vm of
 -- render type sigs --
 ----------------------
 
--- | Renders the entire type signature help block (not counting custom help file text)
+-- Renders the entire type signature help block (not counting custom help file text)
 renderSig :: Function -> String
 renderSig f = unwords $ [name, ":"] ++ inSigs ++ ["->", outSig]
   where
@@ -240,7 +210,7 @@ renderWhereExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO anoth
 
 -- TODO should this be shown for all types, or just the ambiguous ones? start with those
 renderWhereDesc :: TypeSig -> Maybe String
-renderWhereDesc (AnyType s) = Just s -- $ s ++ " (can be any type)"
+renderWhereDesc (AnyType s) = Just s -- s ++ " (can be any type)"
 renderWhereDesc (Some  g s) = Just $ s ++ " (" ++ renderGroupMembers g ++ ")"
 renderWhereDesc (Exactly _) = Nothing
 renderWhereDesc (ListSigs     s) = renderWhereDesc s
@@ -254,7 +224,7 @@ renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ 
     withCommas [m] = ext m
     withCommas  ms = intercalate ", " (map ext ms) ++ ","
 
--- output should never need descibing because it's either an exact type or also one of the inputs
+-- output should never need descibing because its either an exact type or also one of the inputs
 renderWhere :: VarMap -> [TypeSig] -> String
 renderWhere names inSigs = if length descs == 0 then "" else init $ unlines $ "where" : descs
   where
@@ -267,22 +237,18 @@ renderWhere names inSigs = if length descs == 0 then "" else init $ unlines $ "w
 renderName :: VarMap -> VarName -> Maybe VarDesc -> String
 renderName names name mDsc = case lookup name names of
 
-  -- this can happen when the output type isn't one of the inputs.
-  -- that's only a problem if it's ambiguous.
+  -- this can happen when the output type isnt one of the inputs.
+  -- that's only a problem if its ambiguous.
   -- TODO check for that here? or separately maybe
-  -- Nothing -> error $ "no such typesig name: '" ++ name ++ "'
-  -- options are:\n" ++ show names
   Nothing -> name
 
   Just indexMap -> case mDsc of
     Nothing -> name -- not something that needs to be indexed anyway (TODO remove this?)
     Just  d -> case lookup d indexMap of
 
-                 -- this can happen when the output type isn't one of the inputs.
-                 -- that's only a problem if it's ambiguous.
+                 -- this can happen when the output type isnt one of the inputs.
+                 -- thats only a problem if it's ambiguous.
                  -- TODO check for that here? or separately maybe
-                 -- Nothing -> error $ "no such typesig description: '" ++ d ++ "'.
-                 -- options are:\n" ++ show indexMap
                  Nothing -> name
                  Just  i -> if length indexMap < 2
                               then name

@@ -1,1 +1,3 @@
 extract_targets_each : ht.list -> str.list.list
+where
+  ht is a hit table (bht or crb)

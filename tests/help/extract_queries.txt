@@ -1,1 +1,3 @@
 extract_queries : ht -> str.list
+where
+  ht is a hit table (bht or crb)

@@ -1,1 +1,3 @@
 extract_scored : any.scores -> any.list
+where
+  any is the input type

@@ -490,7 +490,7 @@ instance Eq TypeGroup where
 instance Pretty TypeGroup where
   pPrint g = PP.text $ tgExt g
 
--- | types which have a file extension
+-- types which have a file extension
 class Ext a where
   ext  :: a -> String
 

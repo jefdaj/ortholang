@@ -1,1 +1,3 @@
 diff : any.list.list -> any.list
+where
+  any is any type

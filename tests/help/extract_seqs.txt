@@ -1,1 +1,3 @@
 extract_seqs : fa str.list -> fa
+where
+  fa is any fasta file (fna or faa)
