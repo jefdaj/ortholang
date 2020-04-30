@@ -88,29 +88,36 @@ renderExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
 renderExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
 
-renderExtOnly :: VarMap -> TypeSig -> String
-renderExtOnly vm (ListSigs     s) = renderExtOnly vm s
-renderExtOnly vm (ScoresSigs   s) = renderExtOnly vm s
-renderExtOnly vm (EncodedSig e s) = renderExtOnly vm s ++ "." ++ renderName vm (ext e) Nothing -- TODO what to do?
-renderExtOnly vm (AnyType      s) = renderName vm "any" (Just s)
-renderExtOnly vm (Some       g s) = renderName vm (ext g) (Just s)
-renderExtOnly vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
+renderWhereExt :: VarMap -> TypeSig -> String
+renderWhereExt vm (ListSigs     s) = renderWhereExt vm s
+renderWhereExt vm (ScoresSigs   s) = renderWhereExt vm s
+renderWhereExt vm (EncodedSig e s) = renderWhereExt vm s ++ "." ++ renderName vm (ext e) Nothing -- TODO what to do?
+renderWhereExt vm (AnyType      s) = renderName vm "any" (Just s)
+renderWhereExt vm (Some       g s) = renderName vm (ext g) (Just s)
+renderWhereExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
 
 -- TODO should this be shown for all types, or just the ambiguous ones? start with those
-renderDesc :: TypeSig -> Maybe String
-renderDesc (AnyType s) = Just s
-renderDesc (Some  _ s) = Just s
-renderDesc (Exactly _) = Nothing
-renderDesc (ListSigs     s) = renderDesc s
-renderDesc (ScoresSigs   s) = renderDesc s
-renderDesc (EncodedSig _ s) = renderDesc s
+renderWhereDesc :: TypeSig -> Maybe String
+renderWhereDesc (AnyType s) = Just s -- $ s ++ " (can be any type)"
+renderWhereDesc (Some  g s) = Just $ s ++ " (" ++ renderGroupMembers g ++ ")"
+renderWhereDesc (Exactly _) = Nothing
+renderWhereDesc (ListSigs     s) = renderWhereDesc s
+renderWhereDesc (ScoresSigs   s) = renderWhereDesc s
+renderWhereDesc (EncodedSig _ s) = renderWhereDesc s -- TODO return a list of both? only if doing non-ambig ones
+
+renderGroupMembers :: TypeGroup -> String
+renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ tgMembers g)
+  where
+    withCommas [ ] = ""
+    withCommas [m] = ext m
+    withCommas  ms = intercalate ", " (map ext ms) ++ ","
 
 -- output should never need descibing because it's either an exact type or also one of the inputs
 renderWhere :: VarMap -> [TypeSig] -> String
 renderWhere names inSigs = if length descs == 0 then "" else unlines $ "where" : descs
   where
-    descs = nub $ catMaybes $ map (\i -> fmap (withExt i) $ renderDesc i) inSigs
-    withExt i d = "  " ++ unwords [renderExtOnly names i, "=", d]
+    descs = nub $ catMaybes $ map (\i -> fmap (withExt i) $ renderWhereDesc i) inSigs
+    withExt i d = "  " ++ unwords [renderWhereExt names i, "is", d]
 
 -- Renders the type variable name: faa, og, any1, etc.
 -- TODO remove the raw errors?
@@ -142,8 +149,8 @@ renderName names name mDsc = case lookup name names of
 -- | Renders the type variable description (everything after "where...")
 -- TODO should be doable by zipping the exts onto the indexed descriptions,
 --      and dropping some of the indexes at the same time
--- renderDesc :: VarMap -> VarName -> Maybe VarDesc -> String
--- renderDesc names name mDsc = unwords $ [name']
+-- renderWhereDesc :: VarMap -> VarName -> Maybe VarDesc -> String
+-- renderWhereDesc names name mDsc = unwords $ [name']
 --   where
 --     name' = renderName names name mDsc
 
@@ -194,5 +201,5 @@ main = do
   putStrLn ""
 
   -- then print just the ones we want to inspect
-  let testfns = ["repeat", "replace", "replace_each", "scatterplot", "venndiagram"]
+  let testfns = ["repeat", "replace", "replace_each", "scatterplot", "venndiagram", "length_each", "length", "sets_table"]
   mapM_ (putStrLn . renderHelp) $ filter (\f -> fName f `elem` testfns) fs
