@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Main where
 
 import OrthoLang.Types
@@ -6,6 +8,7 @@ import Data.List
 import Data.List.Utils
 import Data.Maybe
 import Data.Either
+-- import Control.Exception
 
 -- TODO name type variables, but how? think about replace_each first then generalize
 --      fold left -> right with an accumulator of current names
@@ -66,7 +69,7 @@ addSig vm (Exactly (EncodedAs e t)) = let vm' = addName vm  (ext e, desc e)
 addSig vm (Exactly t) = addType vm t
 
 addGroup :: VarMap -> TypeGroup -> String -> VarMap
-addGroup vm g s = addName vm (ext g, desc g ++ ": " ++ exts ++ " (" ++ s ++ ")")
+addGroup vm g s = addName vm (ext g, s) -- TODO fix this? desc g ++ ": " ++ exts ++ " (" ++ s ++ ")")
   where
     exts = intercalate ", " $ map ext $ tgMembers g
 
@@ -99,6 +102,10 @@ Idea: the things that need an index are the same ones that need a custom descrip
 Idea: only things where the desc list > 1 long need a custom description right? use that!
 -}
 
+-- tryRender :: Function -> IO (Either String String)
+-- tryRender f = catch (return $ Right $ renderSig f)
+--                     (\(e :: SomeException) -> return $ Left $ show e)
+
 -- | Renders the entire type signature help block (not counting custom help file text)
 renderSig :: Function -> String
 renderSig f = unwords $ [fName f, ":"] ++ inSigs ++ ["->", outSig]
@@ -124,27 +131,33 @@ renderExt vm (ScoresSigs   s) = renderExt vm s ++ ".scores"
 renderExt vm (EncodedSig e s) = renderExt vm s ++ "." ++ renderName vm (ext e) Nothing
 renderExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
-renderExt vm (Exactly      t) = renderName vm (ext t) Nothing
+renderExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
 
 -- Renders the type variable name: faa, og, any1, etc.
 -- TODO remove the raw errors?
 renderName :: VarMap -> VarName -> Maybe VarDesc -> String
 renderName names name mDesc = case lookup name names of
-  Nothing -> error $ "no such typesig name: '" ++ name ++ "'" -- shouldn't happen
+
+  -- this can happen when the output type isn't one of the inputs.
+  -- that's only a problem if it's ambiguous.
+  -- TODO check for that here? or separately maybe
+  -- Nothing -> error $ "no such typesig name: '" ++ name ++ "'
+  -- options are:\n" ++ show names
+  Nothing -> name
+
   Just indexMap -> case mDesc of
     Nothing -> name -- not something that needs to be indexed anyway (TODO remove this?)
     Just  d -> case lookup d indexMap of
-                 Nothing -> error $ "no such typesig description: '" ++ d ++ "'"
+
+                 -- this can happen when the output type isn't one of the inputs.
+                 -- that's only a problem if it's ambiguous.
+                 -- TODO check for that here? or separately maybe
+                 -- Nothing -> error $ "no such typesig description: '" ++ d ++ "'.
+                 -- options are:\n" ++ show indexMap
+                 Nothing -> name
                  Just  i -> if length indexMap < 2
                               then name
                               else name ++ show i
-
--- renderType vm name index = case lookup name vm of
---   Nothing -> error "renderType failed :("
---   Just (name, descs) -> if index < 0 || index >= length descs
---     then error "renderType failed :("
---     else let (_, desc) = descs !! index
---          in name ++ " " ++ desc
 
 -- | Renders the type variable description (everything after "where...")
 -- TODO should be doable by zipping the exts onto the indexed descriptions,
@@ -199,36 +212,10 @@ srNames = inputNames sr
 
 main :: IO ()
 main = do
-  -- let names = map (\f -> (fName f, inputNames f)) fs
+  -- check that they all finish without errors:
+  mapM_ (putStrLn . renderSig) fs
+  putStrLn ""
 
-      -- longnames = filter (\(n, ds) -> length ds > 2) names
-      -- keys = map (\(n, m) -> (n, map fst m)) names
-      -- vals = map (\(n, m) -> (n, map snd m)) names
-      -- longvals = filter (\(n, m) -> length m > 1) vals
-  -- mapM_ print keys
-  -- mapM_ print names
-
-  -- print $ fromJust $ lookup "busco_list_lineages" names
-  -- print $ fromJust $ lookup "load_faa_each" names
-  -- print $ fromJust $ lookup "concat_bht" names
-  -- print $ fromJust $ lookup "scatterplot" names
-
-  -- print $ fromJust $ lookup "replace" names
-  -- putStrLn $ renderSig $ fromJust $ lookup "replace" fsByName
-
-  -- print $ fromJust $ lookup "replace_each" names
-  -- putStrLn $ renderSig $ fromJust $ lookup "replace_each" fsByName
-
-  -- print $ fromJust $ lookup "repeat" names
-  -- putStrLn $ renderSig $ fromJust $ lookup "repeat" fsByName
-
-  -- how to render inputs:
-  -- print $ fromJust $ lookup "score_repeats" names
-  -- print $ renderName srNames "any" (Just "the input type") -- anytypes/typegroups
-  -- print $ renderName srNames "num" Nothing                 -- exact types
-
-  -- print $ map renderName $ fInputs f90
-  -- putStrLn $ renderSig $ fromJust $ lookup "score_repeats" fsByName
-  -- let r90 = renderName () $ fromJust $ lookup n90 names
-
-  print $ renderSig sr
+  -- then print just the ones we want to inspect
+  let testfns = ["repeat", "replace", "replace_each", "scatterplot", "venndiagram"]
+  mapM_ (putStrLn . renderSig) $ filter (\f -> fName f `elem` testfns) fs
