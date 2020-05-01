@@ -1,5 +1,5 @@
-No help topics found for 'gz'. Maybe you mean one of these?
+The gz extension is for gunzip archive.
 
-faa.gz
-fna.gz
-gz
+You can create them with these 0 functions:
+
+And use them with these 0 functions:

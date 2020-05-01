@@ -1,4 +1,4 @@
-psiblast_train_each : num faa faa -> pssm
+psiblast_train_each : num faa faa.list -> pssm.list
 where
   num = number in regular or scientific notation
   faa = FASTA amino acid

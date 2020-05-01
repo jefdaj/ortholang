@@ -1,1 +1,6 @@
 The search extension is for intermediate table describing biomartr searches.
+
+You can create them with these 1 functions:
+  parse_searches : str.list -> search
+
+And use them with these 0 functions:

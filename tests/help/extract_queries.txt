@@ -1,4 +1,4 @@
-extract_queries : ht -> str
+extract_queries : ht -> str.list
 where
   ht = a hit table (bht or crb)
   str = string

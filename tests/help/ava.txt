@@ -1,1 +1,5 @@
 The ava extension is for all-vs-all hit table listing.
+
+You can create them with these 0 functions:
+
+And use them with these 0 functions:

@@ -1,1 +1,6 @@
 The crb extension is for tab-separated table of conditional reciprocal blast best hits.
+
+You can create them with these 1 functions:
+  crb_blast : fna fa -> crb
+
+And use them with these 0 functions:

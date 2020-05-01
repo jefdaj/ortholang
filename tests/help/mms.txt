@@ -1,1 +1,8 @@
 The mms extension is for MMSeqs2 sequence database.
+
+You can create them with these 2 functions:
+  mmseqs_createdb : fa -> mms
+  mmseqs_createdb_all : fa.list -> mms
+
+And use them with these 1 functions:
+  mmseqs_search_db : num fa mms -> bht

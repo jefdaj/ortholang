@@ -1,4 +1,4 @@
-orthogroups : og -> str
+orthogroups : og -> str.list.list
 where
   og = orthogroup (ofr, spr, or gcr)
   str = string

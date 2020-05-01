@@ -1,4 +1,4 @@
-ortholog_in_min : num og faa -> str
+ortholog_in_min : num og faa.list -> str.list.list
 where
   num = number in regular or scientific notation
   og = any orthogroup (ofr, spr, or gcr)

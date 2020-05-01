@@ -1,15 +1,12 @@
-No help topics found for 'og'. Maybe you mean one of these?
+The og extension is for orthogroup list.
 
-histogram
-og
-orthogroup_containing
-orthogroups
-orthogroups_containing
-ortholog_in_all
-ortholog_in_all_str
-ortholog_in_any
-ortholog_in_any_str
-ortholog_in_max
-ortholog_in_max_str
-ortholog_in_min
-ortholog_in_min_str
+You can create them with these 0 functions:
+
+And use them with these 7 functions:
+  orthogroup_containing : og str -> str.list
+  orthogroups : og -> str.list.list
+  orthogroups_containing : og str.list -> str.list.list
+  ortholog_in_all : og faa.list -> str.list.list
+  ortholog_in_any : og faa.list -> str.list.list
+  ortholog_in_max : num og faa.list -> str.list.list
+  ortholog_in_min : num og faa.list -> str.list.list

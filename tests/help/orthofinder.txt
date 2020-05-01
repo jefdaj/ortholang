@@ -1,4 +1,4 @@
-orthofinder : faa -> ofr
+orthofinder : faa.list -> ofr
 where
   faa = FASTA amino acid
   ofr = OrthoFinder results

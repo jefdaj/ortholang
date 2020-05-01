@@ -1,7 +1,15 @@
-No help topics found for 'ht'. Maybe you mean one of these?
+The ht extension is for hit table.
 
-bht
-concat_bht
-concat_bht_each
-hht
-ht
+You can create them with these 4 functions:
+  best_hits : ht -> ht
+  filter_bitscore : num ht -> ht
+  filter_evalue : num ht -> ht
+  filter_pident : num ht -> ht
+
+And use them with these 6 functions:
+  best_hits : ht -> ht
+  extract_queries : ht -> str.list
+  extract_targets : ht -> str.list
+  filter_bitscore : num ht -> ht
+  filter_evalue : num ht -> ht
+  filter_pident : num ht -> ht

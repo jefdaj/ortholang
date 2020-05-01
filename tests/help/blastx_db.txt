@@ -1,4 +1,4 @@
-blastx_db : num fna faa -> bht
+blastx_db : num fna faa.blastdb -> bht
 where
   num = number in regular or scientific notation
   fna = FASTA nucleic acid

@@ -1,1 +1,8 @@
 The bst extension is for BUSCO scores table.
+
+You can create them with these 2 functions:
+  busco_scores_table : bsr.list -> bst
+  concat_bst : bst.list -> bst
+
+And use them with these 1 functions:
+  busco_filter_completeness : num bst faa.list -> faa.list

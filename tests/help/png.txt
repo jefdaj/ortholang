@@ -1,1 +1,9 @@
 The png extension is for plot image.
+
+You can create them with these 4 functions:
+  histogram : str num.list -> png
+  linegraph : str num.scores -> png
+  scatterplot : str num.scores -> png
+  venndiagram : any.list.list -> png
+
+And use them with these 0 functions:

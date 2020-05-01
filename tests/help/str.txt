@@ -1,1 +1,18 @@
 The str extension is for string.
+
+You can create them with these 2 functions:
+  newrulestest1 : str str -> str
+  newrulestest3 : str str str -> str
+
+And use them with these 35 functions:
+  blastdbget_faa : str -> faa.blastdb
+  blastdbget_fna : str -> fna.blastdb
+  blastdblist : str -> str.list
+  busco_fetch_lineage : str -> blh
+  busco_list_lineages : str -> str.list
+  cheat : str any str -> any
+  gbk_to_faa : str gbk -> faa
+  gbk_to_faa_each : str gbk.list -> faa.list
+  gbk_to_faa_rawids : str gbk -> faa
+  gbk_to_faa_rawids_each : str gbk.list -> faa.list
+  ...

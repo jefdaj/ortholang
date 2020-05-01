@@ -1,3 +1,3 @@
-busco_list_lineages : str -> str
+busco_list_lineages : str -> str.list
 where
   str = string

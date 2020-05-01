@@ -1,4 +1,4 @@
-ortholog_in_any_str : str str -> str
+ortholog_in_any_str : str.list.list str.list.list -> str.list.list
 where
   str = string
 

@@ -1,4 +1,4 @@
-parse_searches : str -> search
+parse_searches : str.list -> search
 where
   str = string
   search = intermediate table describing biomartr searches

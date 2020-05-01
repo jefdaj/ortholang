@@ -1,4 +1,4 @@
-psiblast_each_pssm_db : num pssm faa -> bht
+psiblast_each_pssm_db : num pssm.list faa.blastdb -> bht.list
 where
   num = number in regular or scientific notation
   pssm = PSI-BLAST position-specific substitution matrix as ASCII

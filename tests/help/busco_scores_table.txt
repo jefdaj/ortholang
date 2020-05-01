@@ -1,4 +1,4 @@
-busco_scores_table : bsr -> bst
+busco_scores_table : bsr.list -> bst
 where
   bsr = BUSCO results
   bst = BUSCO scores table

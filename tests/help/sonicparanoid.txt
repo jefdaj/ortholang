@@ -1,4 +1,4 @@
-sonicparanoid : faa -> spr
+sonicparanoid : faa.list -> spr
 where
   faa = FASTA amino acid
   spr = SonicParanoid results

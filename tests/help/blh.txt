@@ -1,1 +1,11 @@
 The blh extension is for BUSCO lineage HMMs.
+
+You can create them with these 2 functions:
+  busco_fetch_lineage : str -> blh
+  load_lineage : str -> blh
+
+And use them with these 4 functions:
+  busco_proteins : blh faa -> bsr
+  busco_proteins_each : blh faa.list -> bsr.list
+  busco_transcriptome : blh fna -> bsr
+  busco_transcriptome_each : blh fna.list -> bsr.list

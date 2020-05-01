@@ -1,1 +1,8 @@
 The bsr extension is for BUSCO results.
+
+You can create them with these 2 functions:
+  busco_proteins : blh faa -> bsr
+  busco_transcriptome : blh fna -> bsr
+
+And use them with these 1 functions:
+  busco_percent_complete : bsr -> num

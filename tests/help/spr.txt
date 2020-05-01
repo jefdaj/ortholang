@@ -1,1 +1,6 @@
 The spr extension is for SonicParanoid results.
+
+You can create them with these 1 functions:
+  sonicparanoid : faa.list -> spr
+
+And use them with these 0 functions:

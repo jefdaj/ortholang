@@ -1,1 +1,24 @@
 The fna extension is for FASTA nucleic acid.
+
+This would be the fna help.
+It's two lines long.
+
+You can create them with these 5 functions:
+  concat_fna : fna.list -> fna
+  gbk_to_fna : str gbk -> fna
+  gbk_to_fna_rawids : str gbk -> fna
+  load_fna : str -> fna
+  load_fna_path : str -> fna
+
+And use them with these 53 functions:
+  blastn : num fna fna -> bht
+  blastn_db : num fna fna.blastdb -> bht
+  blastn_db_each : num fna fna.blastdb.list -> bht.list
+  blastn_each : num fna fna.list -> bht.list
+  blastn_rbh : num fna fna -> bht
+  blastn_rbh_each : num fna fna.list -> bht.list
+  blastn_rev : num fna fna -> bht
+  blastn_rev_each : num fna fna.list -> bht.list
+  blastx : num fna faa -> bht
+  blastx_db : num fna faa.blastdb -> bht
+  ...

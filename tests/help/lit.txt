@@ -1,7 +1,5 @@
-No help topics found for 'lit'. Maybe you mean one of these?
+The lit extension is for basic literal (str or num).
 
-lit
-split_faa
-split_faa_each
-split_fna
-split_fna_each
+You can create them with these 0 functions:
+
+And use them with these 0 functions:

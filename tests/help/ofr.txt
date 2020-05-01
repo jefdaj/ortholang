@@ -1,1 +1,6 @@
 The ofr extension is for OrthoFinder results.
+
+You can create them with these 1 functions:
+  orthofinder : faa.list -> ofr
+
+And use them with these 0 functions:

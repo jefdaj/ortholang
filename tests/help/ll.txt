@@ -1,16 +1,6 @@
-No help topics found for 'll'. Maybe you mean one of these?
+The ll extension is for something list-like.
 
-all
-all-vs-all
-diamond_makedb_all
-ll
-makeblastdb_faa_all
-makeblastdb_fna_all
-mmseqs_createdb_all
-ortholog_in_all
-ortholog_in_all_str
-psiblast_all
-psiblast_pssm_all
-psiblast_pssms_all
-psiblast_train_all
-reciprocal_best_all
+You can create them with these 0 functions:
+
+And use them with these 1 functions:
+  length : ll -> num

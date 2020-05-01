@@ -1,1 +1,18 @@
 The dmnd extension is for DIAMOND database.
+
+You can create them with these 2 functions:
+  diamond_makedb : faa -> dmnd
+  diamond_makedb_all : faa.list -> dmnd
+
+And use them with these 12 functions:
+  diamond_blastp_db : num faa dmnd -> bht
+  diamond_blastp_db_more_sensitive : num faa dmnd -> bht
+  diamond_blastp_db_more_sensitive_rev : num dmnd faa -> bht
+  diamond_blastp_db_rev : num dmnd faa -> bht
+  diamond_blastp_db_sensitive : num faa dmnd -> bht
+  diamond_blastp_db_sensitive_rev : num dmnd faa -> bht
+  diamond_blastx_db : num fna dmnd -> bht
+  diamond_blastx_db_more_sensitive : num fna dmnd -> bht
+  diamond_blastx_db_more_sensitive_rev : num dmnd fna -> bht
+  diamond_blastx_db_rev : num dmnd fna -> bht
+  ...

@@ -1,4 +1,4 @@
-get_genomes : str -> fna
+get_genomes : str.list -> fna.gz.list
 where
   str = string
   fna = FASTA nucleic acid

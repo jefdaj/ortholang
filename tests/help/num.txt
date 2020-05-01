@@ -1,1 +1,22 @@
 The num extension is for number in regular or scientific notation.
+
+You can create them with these 6 functions:
+  add : num.list -> num
+  busco_percent_complete : bsr -> num
+  divide : num.list -> num
+  length : ll -> num
+  multiply : num.list -> num
+  subtract : num.list -> num
+
+And use them with these 127 functions:
+  blastn : num fna fna -> bht
+  blastn_db : num fna fna.blastdb -> bht
+  blastn_db_each : num fna fna.blastdb.list -> bht.list
+  blastn_each : num fna fna.list -> bht.list
+  blastn_rbh : num fna fna -> bht
+  blastn_rbh_each : num fna fna.list -> bht.list
+  blastn_rev : num fna fna -> bht
+  blastn_rev_each : num fna fna.list -> bht.list
+  blastp : num faa faa -> bht
+  blastp_db : num faa faa.blastdb -> bht
+  ...

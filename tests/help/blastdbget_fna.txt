@@ -1,4 +1,4 @@
-blastdbget_fna : str -> fna
+blastdbget_fna : str -> fna.blastdb
 where
   str = string
   fna = FASTA nucleic acid

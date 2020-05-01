@@ -1,26 +1,12 @@
-No help topics found for 'fa'. Maybe you mean one of these?
+The fa extension is for FASTA nucleic OR amino acid.
 
-blastdbget_faa
-concat_faa
-concat_faa_each
-fa
-faa
-faa.blastdb
-faa.gz
-gbk_to_faa
-gbk_to_faa_each
-gbk_to_faa_rawids
-gbk_to_faa_rawids_each
-greencut2_families
-load_faa
-load_faa_db
-load_faa_db_each
-load_faa_each
-load_faa_glob
-load_faa_path
-load_faa_path_each
-makeblastdb_faa
-makeblastdb_faa_all
-makeblastdb_faa_each
-split_faa
-split_faa_each
+You can create them with these 1 functions:
+  extract_seqs : fa str.list -> fa
+
+And use them with these 6 functions:
+  crb_blast : fna fa -> crb
+  extract_ids : fa -> str.list
+  extract_seqs : fa str.list -> fa
+  extract_seqs_each : fa str.list.list -> fa.list
+  mmseqs_createdb : fa -> mms
+  mmseqs_search_db : num fa mms -> bht

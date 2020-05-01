@@ -1,5 +1,5 @@
 gbk_to_faa_rawids : str gbk -> faa
 where
   str = string
-  gbk = genbank
+  gbk = Genbank files
   faa = FASTA amino acid

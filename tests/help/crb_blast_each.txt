@@ -1,4 +1,4 @@
-crb_blast_each : fna fa.list -> crb
+crb_blast_each : fna fa.list -> crb.list
 where
   fna = FASTA nucleic acid
   fa = any fasta file (fna or faa)

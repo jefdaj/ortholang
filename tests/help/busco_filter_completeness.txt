@@ -1,4 +1,4 @@
-busco_filter_completeness : num bst faa -> faa
+busco_filter_completeness : num bst faa.list -> faa.list
 where
   num = number in regular or scientific notation
   bst = BUSCO scores table

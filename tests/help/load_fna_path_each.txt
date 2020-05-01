@@ -1,4 +1,4 @@
-load_fna_path_each : str -> fna.list
+load_fna_path_each : str.list -> fna.list
 where
   str = string
   fna = FASTA nucleic acid

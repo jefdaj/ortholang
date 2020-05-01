@@ -1,1 +1,6 @@
 The tsv extension is for set membership table (spreadsheet).
+
+You can create them with these 1 functions:
+  sets_table : lit.list.list -> tsv
+
+And use them with these 0 functions:

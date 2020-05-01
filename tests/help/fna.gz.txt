@@ -1,1 +1,5 @@
 The fna.gz extension is for FASTA nucleic acid encoded as gunzip archive.
+
+You can create them with these 0 functions:
+
+And use them with these 0 functions:

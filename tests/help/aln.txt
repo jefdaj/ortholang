@@ -1,1 +1,7 @@
 The aln extension is for multiple sequence alignment.
+
+You can create them with these 1 functions:
+  muscle : faa -> aln
+
+And use them with these 1 functions:
+  hmmbuild : aln -> hmm

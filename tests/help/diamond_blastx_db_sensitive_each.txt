@@ -1,4 +1,4 @@
-diamond_blastx_db_sensitive_each : num fna dmnd -> bht
+diamond_blastx_db_sensitive_each : num fna dmnd.list -> bht.list
 where
   num = number in regular or scientific notation
   fna = FASTA nucleic acid

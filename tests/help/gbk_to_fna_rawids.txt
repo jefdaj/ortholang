@@ -1,5 +1,5 @@
 gbk_to_fna_rawids : str gbk -> fna
 where
   str = string
-  gbk = genbank
+  gbk = Genbank files
   fna = FASTA nucleic acid

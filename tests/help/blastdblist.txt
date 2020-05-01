@@ -1,4 +1,4 @@
-blastdblist : str -> str
+blastdblist : str -> str.list
 where
   str = string
 
