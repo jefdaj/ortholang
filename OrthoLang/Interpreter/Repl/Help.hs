@@ -94,13 +94,16 @@ eHelp :: [Module] -> String -> IO (Maybe String)
 eHelp mods name = case findExtDesc mods name of
   Nothing -> return Nothing
   Just (te, td) -> do
-    let outputs = listFunctionTypesWithOutput mods te
-        inputs  = listFunctionTypesWithInput  mods te
+    let outputs  = listFunctionTypesWithOutput mods te
+        inputs   = listFunctionTypesWithInput  mods te
+        nShown   = 10
+        outputs' = if length outputs > nShown then take nShown outputs ++ ["  ..."] else outputs
+        inputs'  = if length inputs  > nShown then take nShown inputs  ++ ["  ..."] else inputs
         tFnList = unlines
-                     $ ["You can create them with these functions:"] ++ outputs
-                    ++ ["", "And use them with these functions:"   ] ++ inputs
+                    $ ["You can create them with these " ++ show (length outputs)++ " functions:"] ++ outputs'
+                   ++ ["", "And use them with these "    ++ show (length inputs) ++ " functions:"] ++ inputs'
     doc <- getDoc te
-    return $ let txt d = "The " ++ te ++ " extension is for " ++ td ++ " files." ++ d ++ "\n\n" ++ tFnList
+    return $ let txt d = "The " ++ te ++ " extension is for " ++ td ++ "." ++ d ++ "\n\n" ++ tFnList
              in case doc of
                   Nothing -> Just $ txt ""
                   Just  d -> Just $ txt ("\n\n" ++ d)
