@@ -207,7 +207,7 @@ renderExt vm (ScoresSigs   s) = renderExt vm s ++ ".scores"
 renderExt vm (EncodedSig e s) = renderExt vm s ++ "." ++ renderName vm (ext e) Nothing
 renderExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
-renderExt vm (Exactly      t) = renderName vm (extBaseOnly t) Nothing
+renderExt vm (Exactly      t) = renderName vm (ext t) Nothing
 
 renderWhereExt :: VarMap -> TypeSig -> String
 renderWhereExt vm (ListSigs     s) = renderWhereExt vm s
