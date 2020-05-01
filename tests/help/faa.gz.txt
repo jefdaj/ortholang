@@ -1,3 +1,1 @@
-No help topics found for 'faa.gz'. Maybe you mean one of these?
-
-faa.gz
+The faa.gz extension is for FASTA amino acid encoded as gunzip archive.

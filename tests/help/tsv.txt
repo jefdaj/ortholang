@@ -1,3 +1,1 @@
-No help topics found for 'tsv'. Maybe you mean one of these?
-
-tsv
+The tsv extension is for set membership table (spreadsheet).

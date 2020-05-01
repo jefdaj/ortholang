@@ -1,3 +1,1 @@
-No help topics found for 'fna.blastdb'. Maybe you mean one of these?
-
-fna.blastdb
+The fna.blastdb extension is for FASTA nucleic acid encoded as NCBI BLAST+ sequence database.

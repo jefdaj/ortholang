@@ -1,4 +1,1 @@
-No help topics found for 'bst'. Maybe you mean one of these?
-
-bst
-concat_bst
+The bst extension is for BUSCO scores table.

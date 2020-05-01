@@ -1,3 +1,1 @@
-No help topics found for 'ofr'. Maybe you mean one of these?
-
-ofr
+The ofr extension is for OrthoFinder results.

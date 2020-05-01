@@ -1,3 +1,1 @@
-No help topics found for 'fna.gz'. Maybe you mean one of these?
-
-fna.gz
+The fna.gz extension is for FASTA nucleic acid encoded as gunzip archive.

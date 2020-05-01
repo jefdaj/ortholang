@@ -30,14 +30,15 @@ import Data.Maybe            (catMaybes, fromJust)
 -- note: head should be OK here because of the fallback
 help :: Config -> [Module] -> String -> IO String
 help cfg mods line = case words (map toLower line) of
-  [w] -> sequence [f, m, b] >>= \ms -> let ms' = trace "interpreter.repl.help" ("ms: " ++ show ms) ms
-                                       in (return . stripWhiteSpace . head . catMaybes) ms'
+  [w] -> sequence [t, f, m, b] >>= \ms ->
+           let ms' = trace "interpreter.repl.help" ("ms: " ++ show ms) ms
+           in (return . stripWhiteSpace . head . catMaybes) ms'
            where
              f = fHelp mods w
              m = mHelp mods w
+             t = tHelp mods w
              b = return $ Just $ fallbackHelp cfg mods w
              -- es = eHelp mods w -- TODO write the rest of this
-
   _ -> getDoc "repl" >>= return . fromJust
 
 -- TODO make sure lowercase names of everything are unique! got about 10 overlaps here...
@@ -73,6 +74,16 @@ mHelp mods name = case findModule mods (map toLower name) of
     return $ case doc of
       Nothing -> Just basics
       Just d -> Just $ d ++ "\n\n" ++ basics
+
+tHelp :: [Module] -> String -> IO (Maybe String)
+tHelp mods name = case findType mods name of
+  Nothing -> return Nothing
+  Just t -> do
+    doc <- getDoc $ map toLower (ext t)
+    return $ let basics = "The " ++ ext t ++ " extension means " ++ desc t ++ "."
+             in case doc of
+                  Nothing -> Just basics
+                  Just d  -> Just $ basics ++ "\n" ++ d
 
 -- TODO this is the way to go! just have to rewrite the rest to return stuff even without the doc found
 -- TODO is there any fDesc? guess that's the type sig mostly
@@ -143,8 +154,8 @@ addSig vm (ListSigs     t) = addSig vm t
 addSig vm (ScoresSigs   t) = addSig vm t
 addSig vm (EncodedSig e t) = let vm' = addSig vm t
                                      in        addName vm' (ext e, desc e)
-addSig vm (AnyType      s) = addName vm ("any", s) -- TODO need s as a key right?
-addSig vm (Some       g s) = addGroup vm g s       -- TODO need s as a key right?
+addSig vm (AnyType      s) = addName vm ("any", s)
+addSig vm (Some       g s) = addGroup vm g s
 
 addSig vm (Exactly (ListOf      t)) = addType vm t
 addSig vm (Exactly (ScoresOf    t)) = addType vm t
@@ -154,8 +165,8 @@ addSig vm (Exactly t) = addType vm t
 
 addGroup :: VarMap -> TypeGroup -> String -> VarMap
 addGroup vm g s = addName vm (ext g, s)
-  where
-    exts = intercalate ", " $ map ext $ tgMembers g
+  -- where
+    -- exts = intercalate ", " $ map ext $ tgMembers g
 
 addType :: VarMap -> Type -> VarMap
 addType vm (ListOf      t) = addName vm (ext t, desc t)
@@ -188,10 +199,7 @@ renderSig f = unwords $ [name, ":"] ++ inSigs ++ ["->", outSig]
 renderTypeSig :: Function -> String
 renderTypeSig f = renderSig f ++ "\n" ++ renderWhere names (fInputs f ++ [fOutput f])
   where
-    name   = fName f -- TODO move to renderWhere?
-    names  = inputNames f -- TODO move to renderWhere?
-    -- inSigs = map (renderExt names) $ fInputs f
-    -- outSig = renderExt names $ fOutput f
+    names  = inputNames f
 
 renderExt :: VarMap -> TypeSig -> String
 renderExt vm (ListSigs     s) = renderExt vm s ++ ".list"
@@ -199,7 +207,7 @@ renderExt vm (ScoresSigs   s) = renderExt vm s ++ ".scores"
 renderExt vm (EncodedSig e s) = renderExt vm s ++ "." ++ renderName vm (ext e) Nothing
 renderExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
-renderExt vm (Exactly      t) = renderName vm (extBaseOnly t) Nothing -- TODO another function here for Types
+renderExt vm (Exactly      t) = renderName vm (extBaseOnly t) Nothing
 
 renderWhereExt :: VarMap -> TypeSig -> String
 renderWhereExt vm (ListSigs     s) = renderWhereExt vm s
@@ -207,11 +215,11 @@ renderWhereExt vm (ScoresSigs   s) = renderWhereExt vm s
 renderWhereExt vm (EncodedSig e s) = renderWhereExt vm s ++ "." ++ renderName vm (ext e) Nothing -- TODO what to do?
 renderWhereExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderWhereExt vm (Some       g s) = renderName vm (ext g) (Just s)
-renderWhereExt vm (Exactly      t) = renderName vm (extBaseOnly t) Nothing -- TODO another function here for Types
+renderWhereExt vm (Exactly      t) = renderName vm (extBaseOnly t) Nothing
 
 -- TODO convert to [String] for encodings
 renderWhereDesc :: TypeSig -> Maybe String
-renderWhereDesc (AnyType s) = Just s -- s ++ " (can be any type)"
+renderWhereDesc (AnyType s) = Just s
 renderWhereDesc (Some  g s) = Just $ s ++ " (" ++ renderGroupMembers g ++ ")"
 renderWhereDesc (Exactly t) = Just $ descBaseOnly t
 renderWhereDesc (ListSigs     s) = renderWhereDesc s

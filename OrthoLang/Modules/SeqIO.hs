@@ -60,7 +60,7 @@ loadGbkGlob     = mkLoadGlob           "load_gbk_glob"       loadGbkEach
 gbk :: Type
 gbk = Type
   { tExt  = "gbk"
-  , tDesc = "genbank"
+  , tDesc = "Genbank files"
   , tShow = defaultShow
   }
 

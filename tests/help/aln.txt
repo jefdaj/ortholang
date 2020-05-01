@@ -1,3 +1,1 @@
-No help topics found for 'aln'. Maybe you mean one of these?
-
-aln
+The aln extension is for multiple sequence alignment.

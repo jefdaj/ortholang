@@ -1,3 +1,1 @@
-No help topics found for 'dmnd'. Maybe you mean one of these?
-
-dmnd
+The dmnd extension is for DIAMOND database.

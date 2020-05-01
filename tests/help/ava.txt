@@ -1,3 +1,1 @@
-No help topics found for 'ava'. Maybe you mean one of these?
-
-ava
+The ava extension is for all-vs-all hit table listing.

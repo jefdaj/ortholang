@@ -1,5 +1,1 @@
-No help topics found for 'bht'. Maybe you mean one of these?
-
-bht
-concat_bht
-concat_bht_each
+The bht extension is for tab-separated table of blast hits (outfmt 6).

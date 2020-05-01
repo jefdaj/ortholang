@@ -1,3 +1,1 @@
-No help topics found for 'png'. Maybe you mean one of these?
-
-png
+The png extension is for plot image.

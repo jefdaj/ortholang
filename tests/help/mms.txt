@@ -1,10 +1,1 @@
-No help topics found for 'mms'. Maybe you mean one of these?
-
-hmmsearch
-hmmsearch_each
-mms
-mmseqs
-mmseqs_createdb
-mmseqs_createdb_all
-mmseqs_search
-mmseqs_search_db
+The mms extension is for MMSeqs2 sequence database.

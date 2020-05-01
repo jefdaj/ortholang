@@ -1,3 +1,1 @@
-No help topics found for 'num'. Maybe you mean one of these?
-
-num
+The num extension is for number in regular or scientific notation.

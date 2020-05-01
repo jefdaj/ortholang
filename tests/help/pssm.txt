@@ -1,15 +1,1 @@
-No help topics found for 'pssm'. Maybe you mean one of these?
-
-psiblast_each_pssm
-psiblast_each_pssm_db
-psiblast_pssm
-psiblast_pssm_all
-psiblast_pssm_db
-psiblast_pssm_db_each
-psiblast_pssm_each
-psiblast_pssms
-psiblast_pssms_all
-psiblast_pssms_db
-psiblast_train_pssms
-psiblast_train_pssms_db
-pssm
+The pssm extension is for PSI-BLAST position-specific substitution matrix as ASCII.

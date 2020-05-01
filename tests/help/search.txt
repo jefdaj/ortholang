@@ -1,8 +1,1 @@
-No help topics found for 'search'. Maybe you mean one of these?
-
-hmmsearch
-hmmsearch_each
-mmseqs_search
-mmseqs_search_db
-parse_searches
-search
+The search extension is for intermediate table describing biomartr searches.

@@ -1,3 +1,1 @@
-No help topics found for 'blh'. Maybe you mean one of these?
-
-blh
+The blh extension is for BUSCO lineage HMMs.

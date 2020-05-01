@@ -1,6 +1,1 @@
-No help topics found for 'crb'. Maybe you mean one of these?
-
-crb
-crb-blast
-crb_blast
-crb_blast_each
+The crb extension is for tab-separated table of conditional reciprocal blast best hits.
