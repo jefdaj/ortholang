@@ -7,7 +7,7 @@ module OrthoLang.Interpreter.Repl.Help
   , renderSig -- signature only
   , renderSigLong -- signature + where clauses
   , findExtDesc
-  -- , descBaseOnly
+  -- , descBase
 
   -- * HelpDoc typeclass (TODO don't export?)
   , mHelp
@@ -209,36 +209,37 @@ renderExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
 renderExt vm (Exactly      t) = renderName vm (ext t) Nothing
 
-renderWhereExt :: VarMap -> TypeSig -> String
-renderWhereExt vm (ListSigs     s) = renderWhereExt vm s
-renderWhereExt vm (ScoresSigs   s) = renderWhereExt vm s
-renderWhereExt vm (EncodedSig e s) = renderWhereExt vm s ++ "." ++ renderName vm (ext e) Nothing -- TODO what to do?
-renderWhereExt vm (AnyType      s) = renderName vm "any" (Just s)
-renderWhereExt vm (Some       g s) = renderName vm (ext g) (Just s)
-renderWhereExt vm (Exactly      t) = renderName vm (extBaseOnly t) Nothing
+-- like renderExt, but simplified by not showing lists, scores, etc.
+renderExtBase :: VarMap -> TypeSig -> String
+renderExtBase vm (ListSigs     s) = renderExtBase vm s
+renderExtBase vm (ScoresSigs   s) = renderExtBase vm s
+renderExtBase vm (EncodedSig e s) = renderExtBase vm s ++ "." ++ renderName vm (ext e) Nothing -- TODO what to do?
+renderExtBase vm (AnyType      s) = renderName vm "any" (Just s)
+renderExtBase vm (Some       g s) = renderName vm (ext g) (Just s)
+renderExtBase vm (Exactly      t) = renderName vm (extBase t) Nothing
 
 -- TODO convert to [String] for encodings
 renderWhereDesc :: TypeSig -> Maybe String
 renderWhereDesc (AnyType s) = Just s
 renderWhereDesc (Some  g s) = Just $ s ++ " (" ++ renderGroupMembers g ++ ")"
-renderWhereDesc (Exactly t) = Just $ descBaseOnly t
+renderWhereDesc (Exactly t) = Just $ descBase t
 renderWhereDesc (ListSigs     s) = renderWhereDesc s
 renderWhereDesc (ScoresSigs   s) = renderWhereDesc s
 renderWhereDesc (EncodedSig _ s) = renderWhereDesc s -- TODO return a list of both? only if doing non-ambig ones
 
 -- TODO convert to [String] for encodings
-extBaseOnly :: Type -> String
-extBaseOnly (ListOf      t) = extBaseOnly t
-extBaseOnly (ScoresOf    t) = extBaseOnly t
-extBaseOnly (EncodedAs _ t) = extBaseOnly t
-extBaseOnly t = ext t
+extBase :: Type -> String
+extBase (ListOf      t) = extBase t
+extBase (ScoresOf    t) = extBase t
+extBase (EncodedAs _ t) = extBase t
+extBase t = ext t
 
 -- TODO convert to [String] for encodings
-descBaseOnly :: Type -> String
-descBaseOnly (ListOf      t) = descBaseOnly t
-descBaseOnly (ScoresOf    t) = descBaseOnly t
-descBaseOnly (EncodedAs _ t) = descBaseOnly t
-descBaseOnly t = desc t
+descBase :: Type -> String
+descBase (ListOf      t) = descBase t
+descBase (ScoresOf    t) = descBase t
+descBase (EncodedAs _ t) = descBase t
+descBase t = desc t
 
 renderGroupMembers :: TypeGroup -> String
 renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ tgMembers g)
@@ -251,7 +252,7 @@ renderWhere :: VarMap -> [TypeSig] -> String
 renderWhere names inSigs = if length descs == 0 then "" else unlines $ "where" : descs
   where
     descs = nub $ catMaybes $ map (\i -> fmap (withExt i) $ renderWhereDesc i) inSigs
-    withExt i d = "  " ++ unwords [renderWhereExt names i, "=", d]
+    withExt i d = "  " ++ unwords [renderExtBase names i, "=", d]
 
 -- Renders the type variable name: faa, og, any1, etc.
 -- TODO remove the raw errors?
