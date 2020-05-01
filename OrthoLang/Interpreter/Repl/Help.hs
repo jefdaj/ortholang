@@ -153,14 +153,14 @@ addSig :: VarMap -> TypeSig -> VarMap
 addSig vm (ListSigs     t) = addSig vm t
 addSig vm (ScoresSigs   t) = addSig vm t
 addSig vm (EncodedSig e t) = let vm' = addSig vm t
-                                     in        addName vm' (ext e, desc e)
+                             in addName vm' (ext e, desc e)
 addSig vm (AnyType      s) = addName vm ("any", s)
 addSig vm (Some       g s) = addGroup vm g s
 
 addSig vm (Exactly (ListOf      t)) = addType vm t
 addSig vm (Exactly (ScoresOf    t)) = addType vm t
-addSig vm (Exactly (EncodedAs e t)) = let vm' = addName vm  (ext e, desc e)
-                                              in addType vm' t
+addSig vm (Exactly (EncodedAs e t)) = let vm' = addName vm (ext e, desc e)
+                                      in addType vm' t
 addSig vm (Exactly t) = addType vm t
 
 addGroup :: VarMap -> TypeGroup -> String -> VarMap
@@ -172,7 +172,7 @@ addType :: VarMap -> Type -> VarMap
 addType vm (ListOf      t) = addName vm (ext t, desc t)
 addType vm (ScoresOf    t) = addName vm (ext t, desc t)
 addType vm (EncodedAs e t) = let vm' = addName vm  (ext e, desc e)
-                                 in        addName vm' (ext t, desc t)
+                             in addName vm' (ext t, desc t)
 addType vm t = addName vm (ext t, desc t)
 
 addName :: VarMap -> (VarName, VarDesc) -> VarMap
