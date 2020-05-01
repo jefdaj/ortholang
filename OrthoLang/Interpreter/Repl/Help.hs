@@ -5,6 +5,7 @@ module OrthoLang.Interpreter.Repl.Help
     help -- also used in Test.Repl
   , helpTopics
   , renderTypeSig
+  -- , descBaseOnly
 
   -- * HelpDoc typeclass (TODO don't export?)
   , mHelp
@@ -185,7 +186,7 @@ renderSig f = unwords $ [name, ":"] ++ inSigs ++ ["->", outSig]
     outSig = renderExt names $ fOutput f
 
 renderTypeSig :: Function -> String
-renderTypeSig f = renderSig f ++ "\n" ++ renderWhere names (fInputs f)
+renderTypeSig f = renderSig f ++ "\n" ++ renderWhere names (fInputs f ++ [fOutput f])
   where
     name   = fName f -- TODO move to renderWhere?
     names  = inputNames f -- TODO move to renderWhere?
@@ -198,7 +199,7 @@ renderExt vm (ScoresSigs   s) = renderExt vm s ++ ".scores"
 renderExt vm (EncodedSig e s) = renderExt vm s ++ "." ++ renderName vm (ext e) Nothing
 renderExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderExt vm (Some       g s) = renderName vm (ext g) (Just s)
-renderExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
+renderExt vm (Exactly      t) = renderName vm (extBaseOnly t) Nothing -- TODO another function here for Types
 
 renderWhereExt :: VarMap -> TypeSig -> String
 renderWhereExt vm (ListSigs     s) = renderWhereExt vm s
@@ -206,16 +207,31 @@ renderWhereExt vm (ScoresSigs   s) = renderWhereExt vm s
 renderWhereExt vm (EncodedSig e s) = renderWhereExt vm s ++ "." ++ renderName vm (ext e) Nothing -- TODO what to do?
 renderWhereExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderWhereExt vm (Some       g s) = renderName vm (ext g) (Just s)
-renderWhereExt vm (Exactly      t) = renderName vm (ext t) Nothing -- TODO another function here for Types
+renderWhereExt vm (Exactly      t) = renderName vm (extBaseOnly t) Nothing -- TODO another function here for Types
 
 -- TODO should this be shown for all types, or just the ambiguous ones? start with those
+-- TODO convert to [String] for encodings
 renderWhereDesc :: TypeSig -> Maybe String
 renderWhereDesc (AnyType s) = Just s -- s ++ " (can be any type)"
 renderWhereDesc (Some  g s) = Just $ s ++ " (" ++ renderGroupMembers g ++ ")"
-renderWhereDesc (Exactly _) = Nothing
+renderWhereDesc (Exactly t) = Just $ descBaseOnly t
 renderWhereDesc (ListSigs     s) = renderWhereDesc s
 renderWhereDesc (ScoresSigs   s) = renderWhereDesc s
 renderWhereDesc (EncodedSig _ s) = renderWhereDesc s -- TODO return a list of both? only if doing non-ambig ones
+
+-- TODO convert to [String] for encodings
+extBaseOnly :: Type -> String
+extBaseOnly (ListOf      t) = extBaseOnly t
+extBaseOnly (ScoresOf    t) = extBaseOnly t
+extBaseOnly (EncodedAs _ t) = extBaseOnly t
+extBaseOnly t = ext t
+
+-- TODO convert to [String] for encodings
+descBaseOnly :: Type -> String
+descBaseOnly (ListOf      t) = descBaseOnly t
+descBaseOnly (ScoresOf    t) = descBaseOnly t
+descBaseOnly (EncodedAs _ t) = descBaseOnly t
+descBaseOnly t = desc t
 
 renderGroupMembers :: TypeGroup -> String
 renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ tgMembers g)
@@ -224,12 +240,11 @@ renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ 
     withCommas [m] = ext m
     withCommas  ms = intercalate ", " (map ext ms) ++ ","
 
--- output should never need descibing because its either an exact type or also one of the inputs
 renderWhere :: VarMap -> [TypeSig] -> String
-renderWhere names inSigs = if length descs == 0 then "" else init $ unlines $ "where" : descs
+renderWhere names inSigs = if length descs == 0 then "" else unlines $ "where" : descs
   where
     descs = nub $ catMaybes $ map (\i -> fmap (withExt i) $ renderWhereDesc i) inSigs
-    withExt i d = "  " ++ unwords [renderWhereExt names i, "is", d]
+    withExt i d = "  " ++ unwords [renderWhereExt names i, "=", d]
 
 -- Renders the type variable name: faa, og, any1, etc.
 -- TODO remove the raw errors?
