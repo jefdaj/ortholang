@@ -4,7 +4,9 @@ module OrthoLang.Interpreter.Repl.Help
   -- * Functions used in Core.Repl
     help -- also used in Test.Repl
   , helpTopics
-  , renderTypeSig
+  , renderSig -- signature only
+  , renderSigLong -- signature + where clauses
+  , findExtDesc
   -- , descBaseOnly
 
   -- * HelpDoc typeclass (TODO don't export?)
@@ -25,27 +27,26 @@ import Data.Char             (toLower)
 import Data.List             (nub, sort, isInfixOf, intercalate)
 import Data.List.Utils       (addToAL)
 import Data.List.Split       (splitOn)
-import Data.Maybe            (catMaybes, fromJust)
+import Data.Maybe            (catMaybes, fromJust, listToMaybe)
 
 -- note: head should be OK here because of the fallback
 help :: Config -> [Module] -> String -> IO String
 help cfg mods line = case words (map toLower line) of
-  [w] -> sequence [t, f, m, b] >>= \ms ->
+  [w] -> sequence [e, f, m, b] >>= \ms ->
            let ms' = trace "interpreter.repl.help" ("ms: " ++ show ms) ms
            in (return . stripWhiteSpace . head . catMaybes) ms'
            where
              f = fHelp mods w
              m = mHelp mods w
-             t = tHelp mods w
+             e = eHelp mods w
              b = return $ Just $ fallbackHelp cfg mods w
-             -- es = eHelp mods w -- TODO write the rest of this
   _ -> getDoc "repl" >>= return . fromJust
 
 -- TODO make sure lowercase names of everything are unique! got about 10 overlaps here...
 -- TODO include something notfound?
 -- TODO add bop infix operators (by mapping them to prefix equivalents)
 helpTopics :: Config -> [Module] -> [String]
-helpTopics cfg mods = sort $ nub $ map (map toLower) $ ts ++ gs ++ es ++ fs ++ ms
+helpTopics _ mods = sort $ nub $ map (map toLower) $ ts ++ gs ++ es ++ fs ++ ms
   where
     ms = map mName mods
     ts = map ext $ nub $ concatMap mTypes     mods
@@ -75,61 +76,57 @@ mHelp mods name = case findModule mods (map toLower name) of
       Nothing -> Just basics
       Just d -> Just $ d ++ "\n\n" ++ basics
 
-tHelp :: [Module] -> String -> IO (Maybe String)
-tHelp mods name = case findType mods name of
-  Nothing -> return Nothing
-  Just t -> do
-    doc <- getDoc $ map toLower (ext t)
-    return $ let basics = "The " ++ ext t ++ " extension means " ++ desc t ++ "."
-             in case doc of
-                  Nothing -> Just basics
-                  Just d  -> Just $ basics ++ "\n" ++ d
-
 -- TODO this is the way to go! just have to rewrite the rest to return stuff even without the doc found
 -- TODO is there any fDesc? guess that's the type sig mostly
 fHelp :: [Module] -> String -> IO (Maybe String)
 fHelp mods name = case findFunction mods name of
   Nothing -> return Nothing
   Just f -> do
-    let tsig = renderTypeSig f
+    let tsig = renderSigLong f
     doc <- getDoc $ map toLower (fName f)
     return $ case doc of
       Nothing -> Just tsig
       Just d  -> Just $ tsig ++ "\n" ++ d
 
--- TODO write this one like the ones above that work: find from the list, then describe
 -- TODO what should we say if they want help on an encoding by itself, like blastdb, vs encoded type?
 --      for one thing, probably ignore the encoded type if it's not in any module lists, since it might be invalid
--- eHelp :: [Module] -> String -> IO (Maybe String)
--- eHelp mods name = do
---   doc <- getDoc $ ext e
---   return $ case doc of
---     Nothing -> Nothing
---     -- TODO you can say this either way, right?
---     Just d -> Just $ "The " ++ ext e ++ " extension is for " ++ desc e ++ " files.\n\n"
---                      ++ d ++ "\n\n" ++ tFnList
---   where
---     -- TODO add this stuff to t,g,or e help
---     outputs = listFunctionTypesWithOutput mods e
---     inputs  = listFunctionTypesWithInput  mods e
---     tFnList = unlines
---                  $ ["You can create them with these functions:"] ++ outputs
---                 ++ ["", "And use them with these functions:"   ] ++ inputs
+eHelp :: [Module] -> String -> IO (Maybe String)
+eHelp mods name = case findExtDesc mods name of
+  Nothing -> return Nothing
+  Just (te, td) -> do
+    let outputs = listFunctionTypesWithOutput mods te
+        inputs  = listFunctionTypesWithInput  mods te
+        tFnList = unlines
+                     $ ["You can create them with these functions:"] ++ outputs
+                    ++ ["", "And use them with these functions:"   ] ++ inputs
+    doc <- getDoc te
+    return $ let txt d = "The " ++ te ++ " extension is for " ++ td ++ " files." ++ d ++ "\n\n" ++ tFnList
+             in case doc of
+                  Nothing -> Just $ txt ""
+                  Just  d -> Just $ txt ("\n\n" ++ d)
 
-listFunctionTypesWithInput :: Ext e => [Module] -> e -> [String]
-listFunctionTypesWithInput mods thing = filter matches descs
+findExtDesc :: [Module] -> String -> Maybe (String, String)
+findExtDesc mods name = listToMaybe $ catMaybes [fmap ed t, fmap ed g, fmap ed e]
+  where
+    ed :: (Ext a, Desc a) => a -> (String, String)
+    ed x = (ext x, desc x)
+    t = findType     mods name
+    g = findGroup    mods name
+    e = findEncoding mods name
+
+listFunctionTypesWithInput :: [Module] -> String -> [String]
+listFunctionTypesWithInput mods e = filter matches descs
   where
     -- TODO match more carefully because it should have to be an entire word
-    matches d = (ext thing) `elem` (words $ headOrDie "listFunctionTypesWithInput failed" $
+    matches d = e `elem` (words $ headOrDie "listFunctionTypesWithInput failed" $
                                        splitOn ">" $ unwords $ tail $ splitOn ":" d)
-    descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions mods)
+    descs = map (\f -> "  " ++ renderSig f) (listFunctions mods)
 
-listFunctionTypesWithOutput :: Ext e => [Module] -> e -> [String]
-listFunctionTypesWithOutput mods thing = filter matches descs
+listFunctionTypesWithOutput :: [Module] -> String -> [String]
+listFunctionTypesWithOutput mods e = filter matches descs
   where
-    matches d = (ext thing) `elem` (words $ unwords $ tail $
-                                       splitOn ">" $ unwords $ tail $ splitOn ":" d)
-    descs = map (\f -> "  " ++ renderTypeSig f) (listFunctions mods)
+    matches d = e `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
+    descs = map (\f -> "  " ++ renderSig f) (listFunctions mods)
 
 
 -------------------
@@ -196,8 +193,8 @@ renderSig f = unwords $ [name, ":"] ++ inSigs ++ ["->", outSig]
     inSigs = map (renderExt names) $ fInputs f
     outSig = renderExt names $ fOutput f
 
-renderTypeSig :: Function -> String
-renderTypeSig f = renderSig f ++ "\n" ++ renderWhere names (fInputs f ++ [fOutput f])
+renderSigLong :: Function -> String
+renderSigLong f = renderSig f ++ "\n" ++ renderWhere names (fInputs f ++ [fOutput f])
   where
     names  = inputNames f
 

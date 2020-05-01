@@ -34,7 +34,7 @@ import qualified Data.Map.Strict as M
 
 import OrthoLang.Interpreter.Parse     (parseExpr)
 -- import OrthoLang.Interpreter.Pretty    (pPrint, render, pPrintHdl)
-import OrthoLang.Interpreter.Repl.Help (help, renderTypeSig)
+import OrthoLang.Interpreter.Repl.Help (help, renderSigLong)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 
 import Control.Monad.IO.Class     (liftIO)
@@ -86,7 +86,7 @@ cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo
       "" -> allTypes
       s' -> oneType s'
     oneType e = case findFunction mods e of
-      Just f  -> renderTypeSig f
+      Just f  -> renderSigLong f
       Nothing -> showExprType mods st e -- TODO also show the expr itself?
     allTypes = stripWhiteSpace $ unlines $ map showAssignType $ sAssigns scr
 
