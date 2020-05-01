@@ -1,1 +1,4 @@
-load_gbk_each : str.list -> gbk.list
+load_gbk_each : str -> gbk.list
+where
+  str = string
+  gbk = genbank

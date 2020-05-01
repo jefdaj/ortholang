@@ -1,1 +1,3 @@
-concat_bht_each : bht.list.list -> bht.list
+concat_bht_each : bht -> bht
+where
+  bht = tab-separated table of blast hits (outfmt 6)

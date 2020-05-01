@@ -1,1 +1,4 @@
-ortholog_in_min_str : num str.list.list str.list.list -> str.list.list
+ortholog_in_min_str : num str str -> str
+where
+  num = number in regular or scientific notation
+  str = string

@@ -1,3 +1,4 @@
-extract_seqs_each : fa str.list.list -> fa.list
+extract_seqs_each : fa str -> fa.list
 where
-  fa is any fasta file (fna or faa)
+  fa = any fasta file (fna or faa)
+  str = string

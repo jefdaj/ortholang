@@ -1,1 +1,4 @@
 greencut2_families : bht bht -> gcr
+where
+  bht = tab-separated table of blast hits (outfmt 6)
+  gcr = GreenCut results

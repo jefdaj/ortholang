@@ -1,1 +1,4 @@
-busco_percent_complete_each : bsr.list -> num.list
+busco_percent_complete_each : bsr -> num
+where
+  bsr = BUSCO results
+  num = number in regular or scientific notation

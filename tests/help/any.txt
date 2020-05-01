@@ -1,5 +1,6 @@
 any : any.list.list -> any.list
 where
-  any is any type
+  any = any type
+
 Given a list of lists, returns the unique elements from all of them.
 Like & (set union) but with a flexible number of arguments.

@@ -1,1 +1,4 @@
 load_gbk_path : str -> gbk
+where
+  str = string
+  gbk = genbank

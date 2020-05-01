@@ -1,8 +1,6 @@
+replace : any1 any2 any2 -> any1
+where
+  any1 = the return type
+  any2 = the type of the var to replace
+
 See what one (dependent) variable would be if you changed another (independent) variable.
-
-Replace variables in the script to see how the results change
-
-Functions:
-
-replace
-replace_each

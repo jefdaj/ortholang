@@ -1,1 +1,5 @@
-busco_proteins_each : blh faa.list -> bsr.list
+busco_proteins_each : blh faa -> bsr
+where
+  blh = BUSCO lineage HMMs
+  faa = FASTA amino acid
+  bsr = BUSCO results

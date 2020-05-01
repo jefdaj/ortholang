@@ -1,1 +1,5 @@
-gbk_to_fna_rawids_each : str gbk.list -> fna.list
+gbk_to_fna_rawids_each : str gbk -> fna
+where
+  str = string
+  gbk = genbank
+  fna = FASTA nucleic acid

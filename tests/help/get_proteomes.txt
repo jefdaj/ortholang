@@ -1,1 +1,4 @@
-get_proteomes : str.list -> faa.gz.list
+get_proteomes : str -> faa
+where
+  str = string
+  faa = FASTA amino acid

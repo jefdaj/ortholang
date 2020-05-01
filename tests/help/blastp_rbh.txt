@@ -1,1 +1,5 @@
 blastp_rbh : num faa faa -> bht
+where
+  num = number in regular or scientific notation
+  faa = FASTA amino acid
+  bht = tab-separated table of blast hits (outfmt 6)

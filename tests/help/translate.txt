@@ -1,1 +1,4 @@
 translate : fna -> faa
+where
+  fna = FASTA nucleic acid
+  faa = FASTA amino acid

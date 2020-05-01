@@ -1,4 +1,5 @@
 best_hits_each : ht.list -> ht.list
 where
-  ht is a hit table (bht or crb)
+  ht = a hit table (bht or crb)
+
 Given a list of hit tables, returns a list of smaller hit tables, each with only the best hit per query gene ID.

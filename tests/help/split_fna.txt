@@ -1,1 +1,3 @@
-split_fna : fna -> fna.list
+split_fna : fna -> fna
+where
+  fna = FASTA nucleic acid

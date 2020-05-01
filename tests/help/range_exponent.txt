@@ -1,4 +1,6 @@
 range_exponent : num num num num -> num.list
+where
+  num = number in regular or scientific notation
 
 Arguments: base, exp_start, exp_stop, exp_step
 

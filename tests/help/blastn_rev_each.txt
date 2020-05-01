@@ -1,4 +1,8 @@
-blastn_rev_each : num fna fna.list -> bht.list
+blastn_rev_each : num fna fna -> bht
+where
+  num = number in regular or scientific notation
+  fna = FASTA nucleic acid
+  bht = tab-separated table of blast hits (outfmt 6)
 
 Like blastn_rev, but BLASTs a list of sequence files against the first one.
 

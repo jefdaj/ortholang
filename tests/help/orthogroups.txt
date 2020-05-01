@@ -1,17 +1,6 @@
+orthogroups : og -> str
+where
+  og = orthogroup (ofr, spr, or gcr)
+  str = string
+
 Parse results from an ortholog finder and list genes in all orthogroups.
-
-Common interface for working with the results of OrthoFinder, SonicParanoid, etc.
-
-Functions:
-
-orthogroups
-orthogroup_containing
-orthogroups_containing
-ortholog_in_any
-ortholog_in_all
-ortholog_in_min
-ortholog_in_max
-ortholog_in_any_str
-ortholog_in_all_str
-ortholog_in_min_str
-ortholog_in_max_str

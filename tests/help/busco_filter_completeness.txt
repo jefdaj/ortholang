@@ -1,4 +1,8 @@
-busco_filter_completeness : num bst faa.list -> faa.list
+busco_filter_completeness : num bst faa -> faa
+where
+  num = number in regular or scientific notation
+  bst = BUSCO scores table
+  faa = FASTA amino acid
 
 Filter a list of transcriptomes or proteomes by their BUSCO completeness score.
 

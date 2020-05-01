@@ -1,6 +1,4 @@
-Align sequences with MUSCLE
-
-Functions:
-
-muscle
-muscle_each
+muscle : faa -> aln
+where
+  faa = FASTA amino acid
+  aln = multiple sequence alignment

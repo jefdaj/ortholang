@@ -1,1 +1,5 @@
 gbk_to_faa : str gbk -> faa
+where
+  str = string
+  gbk = genbank
+  faa = FASTA amino acid

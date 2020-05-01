@@ -1,4 +1,6 @@
-orthogroups_containing : og str.list -> str.list.list
+orthogroups_containing : og str -> str
 where
-  og is any orthogroup (ofr, spr, or gcr)
+  og = any orthogroup (ofr, spr, or gcr)
+  str = string
+
 Given a list of gene IDs, list the orthogroups that contain any of them.

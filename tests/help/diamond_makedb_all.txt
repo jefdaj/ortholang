@@ -1,3 +1,6 @@
-diamond_makedb_all : faa.list -> dmnd
+diamond_makedb_all : faa -> dmnd
+where
+  faa = FASTA amino acid
+  dmnd = DIAMOND database
 
 Create one DIAMOND database from mutliple protein FASTA files.

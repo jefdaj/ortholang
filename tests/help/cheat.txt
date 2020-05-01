@@ -1,5 +1,4 @@
-Run your own script and OrthoLang will assume the types are valid
-
-Functions:
-
-cheat
+cheat : str any str -> any
+where
+  str = string
+  any = the return type

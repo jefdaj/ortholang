@@ -1,4 +1,8 @@
-blastn_db_each : num fna fna.blastdb.list -> bht.list
+blastn_db_each : num fna fna -> bht
+where
+  num = number in regular or scientific notation
+  fna = FASTA nucleic acid
+  bht = tab-separated table of blast hits (outfmt 6)
 
 Like blastn_db, but BLASTs against a list of databases.
 Useful when you have one database per group and want to separate the hits.

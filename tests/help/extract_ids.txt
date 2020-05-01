@@ -1,3 +1,4 @@
-extract_ids : fa -> str.list
+extract_ids : fa -> str
 where
-  fa is any fasta file (fna or faa)
+  fa = any fasta file (fna or faa)
+  str = string

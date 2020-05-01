@@ -1,6 +1,9 @@
-ortholog_in_any : og faa.list -> str.list.list
+ortholog_in_any : og faa -> str
 where
-  og is any orthogroup (ofr, spr, or gcr)
+  og = any orthogroup (ofr, spr, or gcr)
+  faa = FASTA amino acid
+  str = string
+
 Arguments:
   orthogroup finder results
   list of proteomes (fasta files)

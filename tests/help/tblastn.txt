@@ -1,4 +1,9 @@
 tblastn : num faa fna -> bht
+where
+  num = number in regular or scientific notation
+  faa = FASTA amino acid
+  fna = FASTA nucleic acid
+  bht = tab-separated table of blast hits (outfmt 6)
 
 BLAST amino acid (protein) sequences against nucleic acid (DNA) sequences.
 

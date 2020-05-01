@@ -1,1 +1,5 @@
-busco_transcriptome_each : blh fna.list -> bsr.list
+busco_transcriptome_each : blh fna -> bsr
+where
+  blh = BUSCO lineage HMMs
+  fna = FASTA nucleic acid
+  bsr = BUSCO results

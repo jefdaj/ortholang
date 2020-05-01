@@ -1,4 +1,6 @@
 mmseqs_createdb : fa -> mms
 where
-  fa is any fasta type (fna or faa)
+  fa = any fasta type (fna or faa)
+  mms = MMSeqs2 sequence database
+
 Create an MMSeqs2 sequence database from a FASTA file.

@@ -1,1 +1,5 @@
-histogram : str num.list -> png
+histogram : str num -> png
+where
+  str = string
+  num = number in regular or scientific notation
+  png = plot image

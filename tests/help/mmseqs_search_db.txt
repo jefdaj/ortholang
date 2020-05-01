@@ -1,4 +1,8 @@
 mmseqs_search_db : num fa mms -> bht
 where
-  fa is any fasta file (fna or faa)
+  num = number in regular or scientific notation
+  fa = any fasta file (fna or faa)
+  mms = MMSeqs2 sequence database
+  bht = tab-separated table of blast hits (outfmt 6)
+
 Search a target database for sequences matching the query FASTA, similar to BLAST.

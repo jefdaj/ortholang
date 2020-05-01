@@ -1,1 +1,4 @@
 load_faa_glob : str -> faa.list
+where
+  str = string
+  faa = FASTA amino acid

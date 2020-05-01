@@ -1,1 +1,6 @@
 diamond_blastx_db_rev : num dmnd fna -> bht
+where
+  num = number in regular or scientific notation
+  dmnd = DIAMOND database
+  fna = FASTA nucleic acid
+  bht = tab-separated table of blast hits (outfmt 6)

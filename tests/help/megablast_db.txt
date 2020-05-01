@@ -1,1 +1,5 @@
-megablast_db : num fna fna.blastdb -> bht
+megablast_db : num fna fna -> bht
+where
+  num = number in regular or scientific notation
+  fna = FASTA nucleic acid
+  bht = tab-separated table of blast hits (outfmt 6)

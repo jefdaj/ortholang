@@ -1,3 +1,6 @@
-ortholog_in_min : num og faa.list -> str.list.list
+ortholog_in_min : num og faa -> str
 where
-  og is any orthogroup (ofr, spr, or gcr)
+  num = number in regular or scientific notation
+  og = any orthogroup (ofr, spr, or gcr)
+  faa = FASTA amino acid
+  str = string

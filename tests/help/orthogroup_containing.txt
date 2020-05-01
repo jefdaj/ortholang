@@ -1,5 +1,7 @@
-orthogroup_containing : og str -> str.list
+orthogroup_containing : og str -> str
 where
-  og is any orthogroup (ofr, spr, or gcr)
+  og = any orthogroup (ofr, spr, or gcr)
+  str = string
+
 Given one gene ID, list others in the same orthogroup.
 Returns an empty list if there aren't any.

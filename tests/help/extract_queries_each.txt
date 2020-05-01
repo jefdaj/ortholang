@@ -1,3 +1,4 @@
-extract_queries_each : ht.list -> str.list.list
+extract_queries_each : ht.list -> str
 where
-  ht is a hit table (bht or crb)
+  ht = a hit table (bht or crb)
+  str = string

@@ -1,3 +1,5 @@
 newrulestest1 : str str -> str
+where
+  str = string
 
 Test of the New Rules infrastructure 1

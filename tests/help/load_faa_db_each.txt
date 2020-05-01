@@ -1,1 +1,4 @@
-load_faa_db_each : str.list -> faa.blastdb.list
+load_faa_db_each : str -> faa
+where
+  str = string
+  faa = FASTA amino acid

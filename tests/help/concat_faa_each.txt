@@ -1,1 +1,3 @@
-concat_faa_each : faa.list.list -> faa.list
+concat_faa_each : faa -> faa
+where
+  faa = FASTA amino acid

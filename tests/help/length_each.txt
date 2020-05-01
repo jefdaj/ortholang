@@ -1,3 +1,4 @@
-length_each : ll.list -> num.list
+length_each : ll.list -> num
 where
-  ll is a list-like type (any.list, bht, crb, or mms)
+  ll = a list-like type (any.list, bht, crb, or mms)
+  num = number in regular or scientific notation

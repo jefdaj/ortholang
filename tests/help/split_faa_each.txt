@@ -1,1 +1,3 @@
-split_faa_each : faa.list -> faa.list.list
+split_faa_each : faa -> faa
+where
+  faa = FASTA amino acid

@@ -1,1 +1,3 @@
 newrulestest3 : str str str -> str
+where
+  str = string

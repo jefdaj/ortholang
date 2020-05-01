@@ -1,5 +1,5 @@
-Repeatdly re-calculate variables using different random seeds
-
-Functions:
-
-repeat
+repeat : any1 any2 num -> any1.list
+where
+  any1 = the output type
+  any2 = the input type
+  num = number in regular or scientific notation

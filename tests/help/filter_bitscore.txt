@@ -1,3 +1,4 @@
 filter_bitscore : num ht -> ht
 where
-  ht is a hit table (bht or crb)
+  num = number in regular or scientific notation
+  ht = a hit table (bht or crb)

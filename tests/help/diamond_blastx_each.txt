@@ -1,1 +1,6 @@
-diamond_blastx_each : num fna faa.list -> bht.list
+diamond_blastx_each : num fna faa -> bht
+where
+  num = number in regular or scientific notation
+  fna = FASTA nucleic acid
+  faa = FASTA amino acid
+  bht = tab-separated table of blast hits (outfmt 6)

@@ -1,1 +1,5 @@
-tblastx_rbh_each : num fna fna.list -> bht.list
+tblastx_rbh_each : num fna fna -> bht
+where
+  num = number in regular or scientific notation
+  fna = FASTA nucleic acid
+  bht = tab-separated table of blast hits (outfmt 6)

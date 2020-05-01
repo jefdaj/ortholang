@@ -1,1 +1,3 @@
-reciprocal_best_all : bht.list bht.list -> bht
+reciprocal_best_all : bht bht -> bht
+where
+  bht = tab-separated table of blast hits (outfmt 6)

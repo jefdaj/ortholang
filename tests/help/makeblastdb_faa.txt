@@ -1,1 +1,3 @@
-makeblastdb_faa : faa -> faa.blastdb
+makeblastdb_faa : faa -> faa
+where
+  faa = FASTA amino acid

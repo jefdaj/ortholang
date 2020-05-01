@@ -1,1 +1,3 @@
-makeblastdb_fna_each : fna.list -> fna.blastdb.list
+makeblastdb_fna_each : fna -> fna
+where
+  fna = FASTA nucleic acid

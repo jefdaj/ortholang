@@ -1,5 +1,6 @@
 all : any.list.list -> any.list
 where
-  any is any type
+  any = any type
+
 Given a list of lists, returns the elements all of them have in common.
 Like | (set intersection) but with a flexible number of arguments.

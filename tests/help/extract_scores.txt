@@ -1,3 +1,4 @@
-extract_scores : any.scores -> num.list
+extract_scores : any.scores -> num
 where
-  any is the input type
+  any = the input type
+  num = number in regular or scientific notation

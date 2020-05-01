@@ -1,3 +1,5 @@
-crb_blast_each : fna fa.list -> crb.list
+crb_blast_each : fna fa.list -> crb
 where
-  fa is any fasta file (fna or faa)
+  fna = FASTA nucleic acid
+  fa = any fasta file (fna or faa)
+  crb = tab-separated table of conditional reciprocal blast best hits

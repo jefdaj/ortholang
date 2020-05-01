@@ -1,1 +1,4 @@
 hmmbuild : aln -> hmm
+where
+  aln = multiple sequence alignment
+  hmm = hidden markov model

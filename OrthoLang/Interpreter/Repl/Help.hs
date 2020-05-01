@@ -30,11 +30,11 @@ import Data.Maybe            (catMaybes, fromJust)
 -- note: head should be OK here because of the fallback
 help :: Config -> [Module] -> String -> IO String
 help cfg mods line = case words (map toLower line) of
-  [w] -> sequence [m, f, b] >>= \ms -> let ms' = trace "interpreter.repl.help" ("ms: " ++ show ms) ms
+  [w] -> sequence [f, m, b] >>= \ms -> let ms' = trace "interpreter.repl.help" ("ms: " ++ show ms) ms
                                        in (return . stripWhiteSpace . head . catMaybes) ms'
            where
-             m = mHelp mods w
              f = fHelp mods w
+             m = mHelp mods w
              b = return $ Just $ fallbackHelp cfg mods w
              -- es = eHelp mods w -- TODO write the rest of this
 
@@ -209,7 +209,6 @@ renderWhereExt vm (AnyType      s) = renderName vm "any" (Just s)
 renderWhereExt vm (Some       g s) = renderName vm (ext g) (Just s)
 renderWhereExt vm (Exactly      t) = renderName vm (extBaseOnly t) Nothing -- TODO another function here for Types
 
--- TODO should this be shown for all types, or just the ambiguous ones? start with those
 -- TODO convert to [String] for encodings
 renderWhereDesc :: TypeSig -> Maybe String
 renderWhereDesc (AnyType s) = Just s -- s ++ " (can be any type)"

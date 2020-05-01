@@ -1,1 +1,4 @@
-extract_hmm_targets_each : hht.list -> str.list.list
+extract_hmm_targets_each : hht -> str
+where
+  hht = HMMER hits table
+  str = string

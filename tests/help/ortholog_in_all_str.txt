@@ -1,3 +1,5 @@
-ortholog_in_all_str : str.list.list str.list.list -> str.list.list
+ortholog_in_all_str : str str -> str
+where
+  str = string
 
 Version of ortholog_in_all that expects arguments already extracted.

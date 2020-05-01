@@ -1,4 +1,6 @@
 range_add : num num num -> num.list
+where
+  num = number in regular or scientific notation
 
 Arguments: start, stop, step
 

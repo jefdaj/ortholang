@@ -1,1 +1,3 @@
-concat_bst : bst.list -> bst
+concat_bst : bst -> bst
+where
+  bst = BUSCO scores table

@@ -1,1 +1,6 @@
 hmmsearch : num hmm faa -> hht
+where
+  num = number in regular or scientific notation
+  hmm = hidden markov model
+  faa = FASTA amino acid
+  hht = HMMER hits table

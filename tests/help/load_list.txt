@@ -1,1 +1,3 @@
-load_list : str -> str.list
+load_list : str -> str
+where
+  str = string

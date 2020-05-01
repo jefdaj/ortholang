@@ -1,4 +1,9 @@
-blastx_db : num fna faa.blastdb -> bht
+blastx_db : num fna faa -> bht
+where
+  num = number in regular or scientific notation
+  fna = FASTA nucleic acid
+  faa = FASTA amino acid
+  bht = tab-separated table of blast hits (outfmt 6)
 
 Like blastx, but BLASTs against an existing database.
 
