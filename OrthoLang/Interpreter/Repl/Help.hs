@@ -115,10 +115,10 @@ findExtDesc mods name = listToMaybe $ catMaybes [fmap ed t, fmap ed g, fmap ed e
     ed x = (ext x, desc x)
     t = findType     mods name
     g = findGroup    mods name
-    e = findEncoding mods name
+    e = findEncoding mods name -- TODO do this in a separate function because encodings are different?
 
 listFunctionTypesWithInput :: [Module] -> String -> [String]
-listFunctionTypesWithInput mods e = filter matches descs
+listFunctionTypesWithInput mods e = sort $ filter matches descs
   where
     -- TODO match more carefully because it should have to be an entire word
     matches d = e `elem` (words $ headOrDie "listFunctionTypesWithInput failed" $
@@ -126,7 +126,7 @@ listFunctionTypesWithInput mods e = filter matches descs
     descs = map (\f -> "  " ++ renderSig f) (listFunctions mods)
 
 listFunctionTypesWithOutput :: [Module] -> String -> [String]
-listFunctionTypesWithOutput mods e = filter matches descs
+listFunctionTypesWithOutput mods e = sort $ filter matches descs
   where
     matches d = e `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ renderSig f) (listFunctions mods)
