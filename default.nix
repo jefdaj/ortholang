@@ -6,7 +6,7 @@ let
   # TODO add the ones that don't conflict for easier development?
   inherit (import ./dependencies.nix) runDepends;
 
-  myGHC = pkgs.haskell.packages.ghc865;
+  myGHC = pkgs.haskell.packages.ghc883;
   logging = myGHC.callPackage (import ./logging) {};
   progress-meter = haskell.lib.overrideCabal pkgs.haskellPackages.progress-meter (_: {
     broken = false;

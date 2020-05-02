@@ -12,12 +12,13 @@ let
   in import (fetchFromGitHub {
     owner  = "jefdaj";
     repo   = "nixpkgs";
-    rev    = "c0233c5230bdd8bcc2d2261e7ce76fd134c5fc73";
-    sha256 = "11wxbannq6s30l75b5kjklfsxh21gaac337jnsri1gd4dbph6x9w";
+    # 2020-05-01 rebase of clean-20.03 branch:
+    rev    = "de9ce1046376cb83e3b083b8cf2702f72f1c9d61";
+    sha256 = "1m7j5fsfq8h6xq9x7qnf50m9qgki2k5pfpyr4s9ad9yv0simmpwm";
   }) {};
 
-  # use this instead to try to uild it with your system's current nixpkgs:
-  # pkgs = import /home/user/nixpkgs {};
+  # use this instead to try to build it with your system's current nixpkgs:
+  # pkgs = import /home/jefdaj/nixpkgs {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 

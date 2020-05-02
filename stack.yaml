@@ -9,7 +9,7 @@ allow-newer: true
 nix:
   enable: true
   pure: false
-  packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc865]
+  packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc883]
 
 extra-package-dbs: []
 packages:
@@ -17,14 +17,14 @@ packages:
 - logging
 
 # it works best if this matches the haskell.compiler.ghcXXX version in default.nix
-# lts-15.3 = ghc882
+# lts-15.10 = ghc883
 # lts-14.27 = ghc865
 system-ghc: true
-resolver: lts-14.27
-extra-deps:
-  - posix-escape-0.1
-  - path-io-1.6.0
-  - progress-meter-1.0.0.1
+resolver: lts-15.10
+# extra-deps:
+        # - posix-escape-0.1
+        # - path-io-1.6.0
+        # - progress-meter-1.0.0.1
 
 build:
   haddock: true
