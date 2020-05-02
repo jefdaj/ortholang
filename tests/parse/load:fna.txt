@@ -1,44 +1,44 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "single" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "single"
             , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mapped" 
-            , aExpr = Fun fna.list Nothing [] "load_fna_each" 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mapped"
+            , aExpr = Fun fna.list Nothing [] "load_fna_each"
                 [ Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_single.fna" ] ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Bop fna.list Nothing 
-                [ Var ( RepID Nothing ) "single" 
-                , Var ( RepID Nothing ) "mapped" 
-                ] "|" 
-                ( Lst fna Nothing 
-                    [ Var ( RepID Nothing ) "single" ] 
-                    [ Ref fna Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Bop fna.list Nothing
+                [ Var ( RepID Nothing ) "single"
+                , Var ( RepID Nothing ) "mapped"
+                ] "|"
+                ( Lst fna Nothing
+                    [ Var ( RepID Nothing ) "single" ]
+                    [ Ref fna Nothing []
                         ( Var ( RepID Nothing ) "single" )
                     ]
-                ) 
-                ( Ref fna.list Nothing [] 
+                )
+                ( Ref fna.list Nothing []
                     ( Var ( RepID Nothing ) "mapped" )
                 )
-            } 
-        ] 
-    , sResult = Just 
-        ( Bop fna.list Nothing 
-            [ Var ( RepID Nothing ) "single" 
-            , Var ( RepID Nothing ) "mapped" 
-            ] "|" 
-            ( Lst fna Nothing 
-                [ Var ( RepID Nothing ) "single" ] 
-                [ Ref fna Nothing [] 
+            }
+        ]
+    , sResult = Just
+        ( Bop fna.list Nothing
+            [ Var ( RepID Nothing ) "single"
+            , Var ( RepID Nothing ) "mapped"
+            ] "|"
+            ( Lst fna Nothing
+                [ Var ( RepID Nothing ) "single" ]
+                [ Ref fna Nothing []
                     ( Var ( RepID Nothing ) "single" )
                 ]
-            ) 
-            ( Ref fna.list Nothing [] 
+            )
+            ( Ref fna.list Nothing []
                 ( Var ( RepID Nothing ) "mapped" )
             )
         )
-    } 
+    }

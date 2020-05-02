@@ -1,52 +1,52 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "r1" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "r1"
             , aExpr = Bop num Nothing [] "*" ( Lit num "2.0" ) ( Lit num "3.5" )
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "r2" 
-            , aExpr = Fun num Nothing [] "multiply" 
-                [ Lst num Nothing [] 
-                    [ Lit num "2.0" 
-                    , Lit num "3.5" 
-                    ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "r2"
+            , aExpr = Fun num Nothing [] "multiply"
+                [ Lst num Nothing []
+                    [ Lit num "2.0"
+                    , Lit num "3.5"
+                    ]
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Bop num.list Nothing 
-                [ Var ( RepID Nothing ) "r1" 
-                , Var ( RepID Nothing ) "r2" 
-                ] "~" 
-                ( Lst num Nothing [] [ Lit num "7.0" ] ) 
-                ( Lst num Nothing 
-                    [ Var ( RepID Nothing ) "r1" 
-                    , Var ( RepID Nothing ) "r2" 
-                    ] 
-                    [ Ref num Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Bop num.list Nothing
+                [ Var ( RepID Nothing ) "r1"
+                , Var ( RepID Nothing ) "r2"
+                ] "~"
+                ( Lst num Nothing [] [ Lit num "7.0" ] )
+                ( Lst num Nothing
+                    [ Var ( RepID Nothing ) "r1"
+                    , Var ( RepID Nothing ) "r2"
+                    ]
+                    [ Ref num Nothing []
                         ( Var ( RepID Nothing ) "r1" )
-                    , Ref num Nothing [] 
+                    , Ref num Nothing []
                         ( Var ( RepID Nothing ) "r2" )
-                    ] 
+                    ]
                 )
-            } 
-        ] 
-    , sResult = Just 
-        ( Bop num.list Nothing 
-            [ Var ( RepID Nothing ) "r1" 
-            , Var ( RepID Nothing ) "r2" 
-            ] "~" 
-            ( Lst num Nothing [] [ Lit num "7.0" ] ) 
-            ( Lst num Nothing 
-                [ Var ( RepID Nothing ) "r1" 
-                , Var ( RepID Nothing ) "r2" 
-                ] 
-                [ Ref num Nothing [] 
+            }
+        ]
+    , sResult = Just
+        ( Bop num.list Nothing
+            [ Var ( RepID Nothing ) "r1"
+            , Var ( RepID Nothing ) "r2"
+            ] "~"
+            ( Lst num Nothing [] [ Lit num "7.0" ] )
+            ( Lst num Nothing
+                [ Var ( RepID Nothing ) "r1"
+                , Var ( RepID Nothing ) "r2"
+                ]
+                [ Ref num Nothing []
                     ( Var ( RepID Nothing ) "r1" )
-                , Ref num Nothing [] 
+                , Ref num Nothing []
                     ( Var ( RepID Nothing ) "r2" )
-                ] 
+                ]
             )
         )
-    } 
+    }

@@ -1,76 +1,76 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "maga" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "maga"
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mgen" 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mgen"
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "fwdHits" 
-            , aExpr = Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] "extract_targets" 
-                [ Fun bht 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    ] "blastp" 
-                    [ Lit num "1.0e-5" 
-                    , Ref faa Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "fwdHits"
+            , aExpr = Fun str.list Nothing
+                [ Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "mgen"
+                ] "extract_targets"
+                [ Fun bht
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "mgen"
+                    ] "blastp"
+                    [ Lit num "1.0e-5"
+                    , Ref faa Nothing []
                         ( Var ( RepID Nothing ) "maga" )
-                    , Ref faa Nothing [] 
+                    , Ref faa Nothing []
                         ( Var ( RepID Nothing ) "mgen" )
-                    ] 
+                    ]
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "fwdHits" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] "all" 
-                [ Fun str.list.list Nothing 
-                    [ Var ( RepID Nothing ) "fwdHits" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    ] "repeat" 
-                    [ Ref str.list Nothing 
-                        [ Var ( RepID Nothing ) "maga" 
-                        , Var ( RepID Nothing ) "mgen" 
-                        ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Fun str.list Nothing
+                [ Var ( RepID Nothing ) "fwdHits"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "mgen"
+                ] "all"
+                [ Fun str.list.list Nothing
+                    [ Var ( RepID Nothing ) "fwdHits"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "mgen"
+                    ] "repeat"
+                    [ Ref str.list Nothing
+                        [ Var ( RepID Nothing ) "maga"
+                        , Var ( RepID Nothing ) "mgen"
+                        ]
                         ( Var ( RepID Nothing ) "fwdHits" )
-                    , Ref faa Nothing [] 
+                    , Ref faa Nothing []
                         ( Var ( RepID Nothing ) "mgen" )
-                    , Lit num "10.0" 
-                    ] 
+                    , Lit num "10.0"
+                    ]
                 ]
-            } 
-        ] 
-    , sResult = Just 
-        ( Fun str.list Nothing 
-            [ Var ( RepID Nothing ) "fwdHits" 
-            , Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] "all" 
-            [ Fun str.list.list Nothing 
-                [ Var ( RepID Nothing ) "fwdHits" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] "repeat" 
-                [ Ref str.list Nothing 
-                    [ Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    ] 
+            }
+        ]
+    , sResult = Just
+        ( Fun str.list Nothing
+            [ Var ( RepID Nothing ) "fwdHits"
+            , Var ( RepID Nothing ) "maga"
+            , Var ( RepID Nothing ) "mgen"
+            ] "all"
+            [ Fun str.list.list Nothing
+                [ Var ( RepID Nothing ) "fwdHits"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "mgen"
+                ] "repeat"
+                [ Ref str.list Nothing
+                    [ Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "mgen"
+                    ]
                     ( Var ( RepID Nothing ) "fwdHits" )
-                , Ref faa Nothing [] 
+                , Ref faa Nothing []
                     ( Var ( RepID Nothing ) "mgen" )
-                , Lit num "10.0" 
-                ] 
+                , Lit num "10.0"
+                ]
             ]
         )
-    } 
+    }

@@ -1,47 +1,47 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Fun num.list.list.list Nothing [] "leave_each_out" 
-                [ Lst num.list Nothing [] 
-                    [ Lst num Nothing [] 
-                        [ Lit num "1.0" 
-                        , Lit num "2.0" 
-                        , Lit num "3.0" 
-                        ] 
-                    , Lst num Nothing [] 
-                        [ Lit num "2.0" 
-                        , Lit num "3.0" 
-                        , Lit num "4.0" 
-                        ] 
-                    , Lst num Nothing [] 
-                        [ Lit num "3.0" 
-                        , Lit num "4.0" 
-                        , Lit num "5.0" 
-                        ] 
-                    ] 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Fun num.list.list.list Nothing [] "leave_each_out"
+                [ Lst num.list Nothing []
+                    [ Lst num Nothing []
+                        [ Lit num "1.0"
+                        , Lit num "2.0"
+                        , Lit num "3.0"
+                        ]
+                    , Lst num Nothing []
+                        [ Lit num "2.0"
+                        , Lit num "3.0"
+                        , Lit num "4.0"
+                        ]
+                    , Lst num Nothing []
+                        [ Lit num "3.0"
+                        , Lit num "4.0"
+                        , Lit num "5.0"
+                        ]
+                    ]
                 ]
-            } 
+            }
         ]
-    , sResult = Just 
-        ( Fun num.list.list.list Nothing [] "leave_each_out" 
-            [ Lst num.list Nothing [] 
-                [ Lst num Nothing [] 
-                    [ Lit num "1.0" 
-                    , Lit num "2.0" 
-                    , Lit num "3.0" 
-                    ] 
-                , Lst num Nothing [] 
-                    [ Lit num "2.0" 
-                    , Lit num "3.0" 
-                    , Lit num "4.0" 
-                    ] 
-                , Lst num Nothing [] 
-                    [ Lit num "3.0" 
-                    , Lit num "4.0" 
-                    , Lit num "5.0" 
-                    ] 
-                ] 
+    , sResult = Just
+        ( Fun num.list.list.list Nothing [] "leave_each_out"
+            [ Lst num.list Nothing []
+                [ Lst num Nothing []
+                    [ Lit num "1.0"
+                    , Lit num "2.0"
+                    , Lit num "3.0"
+                    ]
+                , Lst num Nothing []
+                    [ Lit num "2.0"
+                    , Lit num "3.0"
+                    , Lit num "4.0"
+                    ]
+                , Lst num Nothing []
+                    [ Lit num "3.0"
+                    , Lit num "4.0"
+                    , Lit num "5.0"
+                    ]
+                ]
             ]
         )
-    } 
+    }

@@ -1,101 +1,101 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "queries" 
-            , aExpr = Fun faa.list Nothing [] "split_faa" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "queries"
+            , aExpr = Fun faa.list Nothing [] "split_faa"
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ] ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mgen" 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mgen"
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "maga" 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "maga"
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "cyanodb" 
-            , aExpr = Fun faa.blastdb 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "mgen" 
-                , Var ( RepID Nothing ) "maga" 
-                ] "makeblastdb_faa_all" 
-                [ Lst faa Nothing 
-                    [ Var ( RepID Nothing ) "mgen" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] 
-                    [ Ref faa Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "cyanodb"
+            , aExpr = Fun faa.blastdb
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "maga"
+                ] "makeblastdb_faa_all"
+                [ Lst faa Nothing
+                    [ Var ( RepID Nothing ) "mgen"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
+                    [ Ref faa Nothing []
                         ( Var ( RepID Nothing ) "mgen" )
-                    , Ref faa Nothing [] 
+                    , Ref faa Nothing []
                         ( Var ( RepID Nothing ) "maga" )
-                    ] 
+                    ]
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "pssms" 
-            , aExpr = Fun pssm.list 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "queries" 
-                , Var ( RepID Nothing ) "cyanodb" 
-                , Var ( RepID Nothing ) "mgen" 
-                , Var ( RepID Nothing ) "maga" 
-                ] "psiblast_train_pssms_db" 
-                [ Lit num "1.0e-10" 
-                , Ref faa.list Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "pssms"
+            , aExpr = Fun pssm.list
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "queries"
+                , Var ( RepID Nothing ) "cyanodb"
+                , Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "maga"
+                ] "psiblast_train_pssms_db"
+                [ Lit num "1.0e-10"
+                , Ref faa.list Nothing []
                     ( Var ( RepID Nothing ) "queries" )
-                , Ref faa.blastdb 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "mgen" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] 
+                , Ref faa.blastdb
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "mgen"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
                     ( Var ( RepID Nothing ) "cyanodb" )
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "tablemgen" 
-            , aExpr = Fun bht 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "pssms" 
-                , Var ( RepID Nothing ) "queries" 
-                , Var ( RepID Nothing ) "cyanodb" 
-                , Var ( RepID Nothing ) "mgen" 
-                , Var ( RepID Nothing ) "maga" 
-                ] "psiblast_pssms_all" 
-                [ Lit num "1.0e-10" 
-                , Ref pssm.list 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "queries" 
-                    , Var ( RepID Nothing ) "cyanodb" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] 
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "tablemgen"
+            , aExpr = Fun bht
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "pssms"
+                , Var ( RepID Nothing ) "queries"
+                , Var ( RepID Nothing ) "cyanodb"
+                , Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "maga"
+                ] "psiblast_pssms_all"
+                [ Lit num "1.0e-10"
+                , Ref pssm.list
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "queries"
+                    , Var ( RepID Nothing ) "cyanodb"
+                    , Var ( RepID Nothing ) "mgen"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
                     ( Var ( RepID Nothing ) "pssms" )
-                , Ref faa Nothing [] 
+                , Ref faa Nothing []
                     ( Var ( RepID Nothing ) "mgen" )
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref bht 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "pssms" 
-                , Var ( RepID Nothing ) "queries" 
-                , Var ( RepID Nothing ) "cyanodb" 
-                , Var ( RepID Nothing ) "mgen" 
-                , Var ( RepID Nothing ) "maga" 
-                ] 
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Ref bht
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "pssms"
+                , Var ( RepID Nothing ) "queries"
+                , Var ( RepID Nothing ) "cyanodb"
+                , Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "maga"
+                ]
                 ( Var ( RepID Nothing ) "tablemgen" )
-            } 
-        ] 
-    , sResult = Just 
-        ( Ref bht 
-            ( Just ( Seed 0 ) ) 
-            [ Var ( RepID Nothing ) "pssms" 
-            , Var ( RepID Nothing ) "queries" 
-            , Var ( RepID Nothing ) "cyanodb" 
-            , Var ( RepID Nothing ) "mgen" 
-            , Var ( RepID Nothing ) "maga" 
-            ] 
+            }
+        ]
+    , sResult = Just
+        ( Ref bht
+            ( Just ( Seed 0 ) )
+            [ Var ( RepID Nothing ) "pssms"
+            , Var ( RepID Nothing ) "queries"
+            , Var ( RepID Nothing ) "cyanodb"
+            , Var ( RepID Nothing ) "mgen"
+            , Var ( RepID Nothing ) "maga"
+            ]
             ( Var ( RepID Nothing ) "tablemgen" )
         )
-    } 
+    }

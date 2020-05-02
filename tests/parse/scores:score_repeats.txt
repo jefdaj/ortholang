@@ -1,109 +1,109 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "ind" 
-            , aExpr = Lit num "1.0" 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "dep" 
-            , aExpr = Bop num Nothing 
-                [ Var ( RepID Nothing ) "ind" ] "*" ( Lit num "1200.0" ) 
-                ( Ref num Nothing [] 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "ind"
+            , aExpr = Lit num "1.0"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "dep"
+            , aExpr = Bop num Nothing
+                [ Var ( RepID Nothing ) "ind" ] "*" ( Lit num "1200.0" )
+                ( Ref num Nothing []
                     ( Var ( RepID Nothing ) "ind" )
                 )
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "rep" 
-            , aExpr = Fun num.scores Nothing 
-                [ Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                ] "score_repeats" 
-                [ Ref num Nothing 
-                    [ Var ( RepID Nothing ) "ind" ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "rep"
+            , aExpr = Fun num.scores Nothing
+                [ Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                ] "score_repeats"
+                [ Ref num Nothing
+                    [ Var ( RepID Nothing ) "ind" ]
                     ( Var ( RepID Nothing ) "dep" )
-                , Ref num Nothing [] 
+                , Ref num Nothing []
                     ( Var ( RepID Nothing ) "ind" )
-                , Lst num Nothing [] 
-                    [ Lit num "1.0" 
-                    , Lit num "2.0" 
-                    , Lit num "3.0" 
-                    , Lit num "4.0" 
-                    , Lit num "5.0" 
-                    ] 
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "inputs" 
-            , aExpr = Fun num.list Nothing 
-                [ Var ( RepID Nothing ) "rep" 
-                , Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                ] "extract_scored" 
-                [ Ref num.scores Nothing 
-                    [ Var ( RepID Nothing ) "dep" 
-                    , Var ( RepID Nothing ) "ind" 
-                    ] 
+                , Lst num Nothing []
+                    [ Lit num "1.0"
+                    , Lit num "2.0"
+                    , Lit num "3.0"
+                    , Lit num "4.0"
+                    , Lit num "5.0"
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "inputs"
+            , aExpr = Fun num.list Nothing
+                [ Var ( RepID Nothing ) "rep"
+                , Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                ] "extract_scored"
+                [ Ref num.scores Nothing
+                    [ Var ( RepID Nothing ) "dep"
+                    , Var ( RepID Nothing ) "ind"
+                    ]
                     ( Var ( RepID Nothing ) "rep" )
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "scores" 
-            , aExpr = Fun num.list Nothing 
-                [ Var ( RepID Nothing ) "rep" 
-                , Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                ] "extract_scores" 
-                [ Ref num.scores Nothing 
-                    [ Var ( RepID Nothing ) "dep" 
-                    , Var ( RepID Nothing ) "ind" 
-                    ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "scores"
+            , aExpr = Fun num.list Nothing
+                [ Var ( RepID Nothing ) "rep"
+                , Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                ] "extract_scores"
+                [ Ref num.scores Nothing
+                    [ Var ( RepID Nothing ) "dep"
+                    , Var ( RepID Nothing ) "ind"
+                    ]
                     ( Var ( RepID Nothing ) "rep" )
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lst num.list Nothing 
-                [ Var ( RepID Nothing ) "inputs" 
-                , Var ( RepID Nothing ) "rep" 
-                , Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                , Var ( RepID Nothing ) "scores" 
-                ] 
-                [ Ref num.list Nothing 
-                    [ Var ( RepID Nothing ) "rep" 
-                    , Var ( RepID Nothing ) "dep" 
-                    , Var ( RepID Nothing ) "ind" 
-                    ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Lst num.list Nothing
+                [ Var ( RepID Nothing ) "inputs"
+                , Var ( RepID Nothing ) "rep"
+                , Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                , Var ( RepID Nothing ) "scores"
+                ]
+                [ Ref num.list Nothing
+                    [ Var ( RepID Nothing ) "rep"
+                    , Var ( RepID Nothing ) "dep"
+                    , Var ( RepID Nothing ) "ind"
+                    ]
                     ( Var ( RepID Nothing ) "inputs" )
-                , Ref num.list Nothing 
-                    [ Var ( RepID Nothing ) "rep" 
-                    , Var ( RepID Nothing ) "dep" 
-                    , Var ( RepID Nothing ) "ind" 
-                    ] 
+                , Ref num.list Nothing
+                    [ Var ( RepID Nothing ) "rep"
+                    , Var ( RepID Nothing ) "dep"
+                    , Var ( RepID Nothing ) "ind"
+                    ]
                     ( Var ( RepID Nothing ) "scores" )
-                ] 
-            } 
-        ] 
-    , sResult = Just 
-        ( Lst num.list Nothing 
-            [ Var ( RepID Nothing ) "inputs" 
-            , Var ( RepID Nothing ) "rep" 
-            , Var ( RepID Nothing ) "dep" 
-            , Var ( RepID Nothing ) "ind" 
-            , Var ( RepID Nothing ) "scores" 
-            ] 
-            [ Ref num.list Nothing 
-                [ Var ( RepID Nothing ) "rep" 
-                , Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                ] 
+                ]
+            }
+        ]
+    , sResult = Just
+        ( Lst num.list Nothing
+            [ Var ( RepID Nothing ) "inputs"
+            , Var ( RepID Nothing ) "rep"
+            , Var ( RepID Nothing ) "dep"
+            , Var ( RepID Nothing ) "ind"
+            , Var ( RepID Nothing ) "scores"
+            ]
+            [ Ref num.list Nothing
+                [ Var ( RepID Nothing ) "rep"
+                , Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                ]
                 ( Var ( RepID Nothing ) "inputs" )
-            , Ref num.list Nothing 
-                [ Var ( RepID Nothing ) "rep" 
-                , Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                ] 
+            , Ref num.list Nothing
+                [ Var ( RepID Nothing ) "rep"
+                , Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                ]
                 ( Var ( RepID Nothing ) "scores" )
-            ] 
+            ]
         )
-    } 
+    }

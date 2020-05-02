@@ -1,9 +1,9 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lit str "crb_blast example not written yet" 
-            } 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Lit str "crb_blast example not written yet"
+            }
         ]
     , sResult = Just ( Lit str "crb_blast example not written yet" )
-    } 
+    }

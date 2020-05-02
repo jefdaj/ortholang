@@ -1,8 +1,5 @@
 The fna extension is for FASTA nucleic acid.
 
-This would be the fna help.
-It's two lines long.
-
 You can create them with these 5 functions:
   concat_fna : fna.list -> fna
   gbk_to_fna : str gbk -> fna

@@ -1,112 +1,112 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "mgen" 
-            , aExpr = Fun fna Nothing [] "gbk_to_fna" 
-                [ Lit str "cds" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "mgen"
+            , aExpr = Fun fna Nothing [] "gbk_to_fna"
+                [ Lit str "cds"
                 , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mbov" 
-            , aExpr = Fun fna Nothing [] "gbk_to_fna" 
-                [ Lit str "cds" 
-                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk" ]
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "single" 
-            , aExpr = Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "mbov" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] "extract_queries" 
-                [ Fun bht 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "mbov" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    ] "blastn" 
-                    [ Lit num "1.0e-5" 
-                    , Ref fna Nothing [] 
-                        ( Var ( RepID Nothing ) "mbov" )
-                    , Ref fna Nothing [] 
-                        ( Var ( RepID Nothing ) "mgen" )
-                    ] 
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mapped" 
-            , aExpr = Fun str.list.list Nothing 
-                [ Var ( RepID Nothing ) "mbov" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] "extract_queries_each" 
-                [ Fun bht.list 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "mbov" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    ] "blastn_each" 
-                    [ Lit num "1.0e-5" 
-                    , Ref fna Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mbov"
+            , aExpr = Fun fna Nothing [] "gbk_to_fna"
+                [ Lit str "cds"
+                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk" ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "single"
+            , aExpr = Fun str.list Nothing
+                [ Var ( RepID Nothing ) "mbov"
+                , Var ( RepID Nothing ) "mgen"
+                ] "extract_queries"
+                [ Fun bht
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "mbov"
+                    , Var ( RepID Nothing ) "mgen"
+                    ] "blastn"
+                    [ Lit num "1.0e-5"
+                    , Ref fna Nothing []
                         ( Var ( RepID Nothing ) "mbov" )
-                    , Lst fna Nothing 
-                        [ Var ( RepID Nothing ) "mgen" ] 
-                        [ Ref fna Nothing [] 
+                    , Ref fna Nothing []
+                        ( Var ( RepID Nothing ) "mgen" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mapped"
+            , aExpr = Fun str.list.list Nothing
+                [ Var ( RepID Nothing ) "mbov"
+                , Var ( RepID Nothing ) "mgen"
+                ] "extract_queries_each"
+                [ Fun bht.list
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "mbov"
+                    , Var ( RepID Nothing ) "mgen"
+                    ] "blastn_each"
+                    [ Lit num "1.0e-5"
+                    , Ref fna Nothing []
+                        ( Var ( RepID Nothing ) "mbov" )
+                    , Lst fna Nothing
+                        [ Var ( RepID Nothing ) "mgen" ]
+                        [ Ref fna Nothing []
                             ( Var ( RepID Nothing ) "mgen" )
                         ]
-                    ] 
+                    ]
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Bop str.list.list Nothing 
-                [ Var ( RepID Nothing ) "single" 
-                , Var ( RepID Nothing ) "mbov" 
-                , Var ( RepID Nothing ) "mgen" 
-                , Var ( RepID Nothing ) "mapped" 
-                ] "|" 
-                ( Lst str.list Nothing 
-                    [ Var ( RepID Nothing ) "single" 
-                    , Var ( RepID Nothing ) "mbov" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    ] 
-                    [ Ref str.list Nothing 
-                        [ Var ( RepID Nothing ) "mbov" 
-                        , Var ( RepID Nothing ) "mgen" 
-                        ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Bop str.list.list Nothing
+                [ Var ( RepID Nothing ) "single"
+                , Var ( RepID Nothing ) "mbov"
+                , Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "mapped"
+                ] "|"
+                ( Lst str.list Nothing
+                    [ Var ( RepID Nothing ) "single"
+                    , Var ( RepID Nothing ) "mbov"
+                    , Var ( RepID Nothing ) "mgen"
+                    ]
+                    [ Ref str.list Nothing
+                        [ Var ( RepID Nothing ) "mbov"
+                        , Var ( RepID Nothing ) "mgen"
+                        ]
                         ( Var ( RepID Nothing ) "single" )
                     ]
-                ) 
-                ( Ref str.list.list Nothing 
-                    [ Var ( RepID Nothing ) "mbov" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    ] 
+                )
+                ( Ref str.list.list Nothing
+                    [ Var ( RepID Nothing ) "mbov"
+                    , Var ( RepID Nothing ) "mgen"
+                    ]
                     ( Var ( RepID Nothing ) "mapped" )
                 )
-            } 
-        ] 
-    , sResult = Just 
-        ( Bop str.list.list Nothing 
-            [ Var ( RepID Nothing ) "single" 
-            , Var ( RepID Nothing ) "mbov" 
-            , Var ( RepID Nothing ) "mgen" 
-            , Var ( RepID Nothing ) "mapped" 
-            ] "|" 
-            ( Lst str.list Nothing 
-                [ Var ( RepID Nothing ) "single" 
-                , Var ( RepID Nothing ) "mbov" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] 
-                [ Ref str.list Nothing 
-                    [ Var ( RepID Nothing ) "mbov" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    ] 
+            }
+        ]
+    , sResult = Just
+        ( Bop str.list.list Nothing
+            [ Var ( RepID Nothing ) "single"
+            , Var ( RepID Nothing ) "mbov"
+            , Var ( RepID Nothing ) "mgen"
+            , Var ( RepID Nothing ) "mapped"
+            ] "|"
+            ( Lst str.list Nothing
+                [ Var ( RepID Nothing ) "single"
+                , Var ( RepID Nothing ) "mbov"
+                , Var ( RepID Nothing ) "mgen"
+                ]
+                [ Ref str.list Nothing
+                    [ Var ( RepID Nothing ) "mbov"
+                    , Var ( RepID Nothing ) "mgen"
+                    ]
                     ( Var ( RepID Nothing ) "single" )
                 ]
-            ) 
-            ( Ref str.list.list Nothing 
-                [ Var ( RepID Nothing ) "mbov" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] 
+            )
+            ( Ref str.list.list Nothing
+                [ Var ( RepID Nothing ) "mbov"
+                , Var ( RepID Nothing ) "mgen"
+                ]
                 ( Var ( RepID Nothing ) "mapped" )
             )
         )
-    } 
+    }

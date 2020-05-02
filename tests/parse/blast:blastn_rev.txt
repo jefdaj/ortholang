@@ -1,237 +1,237 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "maga5" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "maga5"
             , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "maga" 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "maga"
             , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "n" 
-            , aExpr = Lit num "1.0e-5" 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "singleFwd" 
-            , aExpr = Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "n" 
-                , Var ( RepID Nothing ) "maga5" 
-                , Var ( RepID Nothing ) "maga" 
-                ] "extract_queries" 
-                [ Fun bht 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] "blastn" 
-                    [ Ref num Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "n"
+            , aExpr = Lit num "1.0e-5"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "singleFwd"
+            , aExpr = Fun str.list Nothing
+                [ Var ( RepID Nothing ) "n"
+                , Var ( RepID Nothing ) "maga5"
+                , Var ( RepID Nothing ) "maga"
+                ] "extract_queries"
+                [ Fun bht
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga5"
+                    , Var ( RepID Nothing ) "maga"
+                    ] "blastn"
+                    [ Ref num Nothing []
                         ( Var ( RepID Nothing ) "n" )
-                    , Ref fna Nothing [] 
+                    , Ref fna Nothing []
                         ( Var ( RepID Nothing ) "maga5" )
-                    , Ref fna Nothing [] 
+                    , Ref fna Nothing []
                         ( Var ( RepID Nothing ) "maga" )
-                    ] 
+                    ]
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mappedFwd" 
-            , aExpr = Fun str.list.list Nothing 
-                [ Var ( RepID Nothing ) "n" 
-                , Var ( RepID Nothing ) "maga5" 
-                , Var ( RepID Nothing ) "maga" 
-                ] "extract_queries_each" 
-                [ Fun bht.list 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] "blastn_each" 
-                    [ Ref num Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mappedFwd"
+            , aExpr = Fun str.list.list Nothing
+                [ Var ( RepID Nothing ) "n"
+                , Var ( RepID Nothing ) "maga5"
+                , Var ( RepID Nothing ) "maga"
+                ] "extract_queries_each"
+                [ Fun bht.list
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga5"
+                    , Var ( RepID Nothing ) "maga"
+                    ] "blastn_each"
+                    [ Ref num Nothing []
                         ( Var ( RepID Nothing ) "n" )
-                    , Ref fna Nothing [] 
+                    , Ref fna Nothing []
                         ( Var ( RepID Nothing ) "maga5" )
-                    , Lst fna Nothing 
-                        [ Var ( RepID Nothing ) "maga" ] 
-                        [ Ref fna Nothing [] 
+                    , Lst fna Nothing
+                        [ Var ( RepID Nothing ) "maga" ]
+                        [ Ref fna Nothing []
                             ( Var ( RepID Nothing ) "maga" )
                         ]
-                    ] 
+                    ]
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "singleRev" 
-            , aExpr = Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "n" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "maga5" 
-                ] "extract_queries" 
-                [ Fun bht Nothing 
-                    [ Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    ] "blastn_rev" 
-                    [ Ref num Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "singleRev"
+            , aExpr = Fun str.list Nothing
+                [ Var ( RepID Nothing ) "n"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "maga5"
+                ] "extract_queries"
+                [ Fun bht Nothing
+                    [ Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "maga5"
+                    ] "blastn_rev"
+                    [ Ref num Nothing []
                         ( Var ( RepID Nothing ) "n" )
-                    , Ref fna Nothing [] 
+                    , Ref fna Nothing []
                         ( Var ( RepID Nothing ) "maga" )
-                    , Ref fna Nothing [] 
+                    , Ref fna Nothing []
                         ( Var ( RepID Nothing ) "maga5" )
-                    ] 
+                    ]
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mappedRev" 
-            , aExpr = Fun str.list.list Nothing 
-                [ Var ( RepID Nothing ) "n" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "maga5" 
-                ] "extract_queries_each" 
-                [ Fun bht.list Nothing 
-                    [ Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    ] "blastn_rev_each" 
-                    [ Ref num Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mappedRev"
+            , aExpr = Fun str.list.list Nothing
+                [ Var ( RepID Nothing ) "n"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "maga5"
+                ] "extract_queries_each"
+                [ Fun bht.list Nothing
+                    [ Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "maga5"
+                    ] "blastn_rev_each"
+                    [ Ref num Nothing []
                         ( Var ( RepID Nothing ) "n" )
-                    , Ref fna Nothing [] 
+                    , Ref fna Nothing []
                         ( Var ( RepID Nothing ) "maga" )
-                    , Lst fna Nothing 
-                        [ Var ( RepID Nothing ) "maga5" ] 
-                        [ Ref fna Nothing [] 
+                    , Lst fna Nothing
+                        [ Var ( RepID Nothing ) "maga5" ]
+                        [ Ref fna Nothing []
                             ( Var ( RepID Nothing ) "maga5" )
                         ]
-                    ] 
+                    ]
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "single" 
-            , aExpr = Bop str.list Nothing 
-                [ Var ( RepID Nothing ) "singleFwd" 
-                , Var ( RepID Nothing ) "n" 
-                , Var ( RepID Nothing ) "maga5" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "singleRev" 
-                ] "|" 
-                ( Ref str.list Nothing 
-                    [ Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "single"
+            , aExpr = Bop str.list Nothing
+                [ Var ( RepID Nothing ) "singleFwd"
+                , Var ( RepID Nothing ) "n"
+                , Var ( RepID Nothing ) "maga5"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "singleRev"
+                ] "|"
+                ( Ref str.list Nothing
+                    [ Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga5"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
                     ( Var ( RepID Nothing ) "singleFwd" )
-                ) 
-                ( Ref str.list Nothing 
-                    [ Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    ] 
+                )
+                ( Ref str.list Nothing
+                    [ Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "maga5"
+                    ]
                     ( Var ( RepID Nothing ) "singleRev" )
                 )
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mapped" 
-            , aExpr = Bop str.list.list Nothing 
-                [ Var ( RepID Nothing ) "mappedFwd" 
-                , Var ( RepID Nothing ) "n" 
-                , Var ( RepID Nothing ) "maga5" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mappedRev" 
-                ] "|" 
-                ( Ref str.list.list Nothing 
-                    [ Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mapped"
+            , aExpr = Bop str.list.list Nothing
+                [ Var ( RepID Nothing ) "mappedFwd"
+                , Var ( RepID Nothing ) "n"
+                , Var ( RepID Nothing ) "maga5"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "mappedRev"
+                ] "|"
+                ( Ref str.list.list Nothing
+                    [ Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga5"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
                     ( Var ( RepID Nothing ) "mappedFwd" )
-                ) 
-                ( Ref str.list.list Nothing 
-                    [ Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    ] 
+                )
+                ( Ref str.list.list Nothing
+                    [ Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "maga5"
+                    ]
                     ( Var ( RepID Nothing ) "mappedRev" )
                 )
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Bop str.list.list Nothing 
-                [ Var ( RepID Nothing ) "single" 
-                , Var ( RepID Nothing ) "singleFwd" 
-                , Var ( RepID Nothing ) "n" 
-                , Var ( RepID Nothing ) "maga5" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "singleRev" 
-                , Var ( RepID Nothing ) "mapped" 
-                , Var ( RepID Nothing ) "mappedFwd" 
-                , Var ( RepID Nothing ) "mappedRev" 
-                ] "|" 
-                ( Lst str.list Nothing 
-                    [ Var ( RepID Nothing ) "single" 
-                    , Var ( RepID Nothing ) "singleFwd" 
-                    , Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "singleRev" 
-                    ] 
-                    [ Ref str.list Nothing 
-                        [ Var ( RepID Nothing ) "singleFwd" 
-                        , Var ( RepID Nothing ) "n" 
-                        , Var ( RepID Nothing ) "maga5" 
-                        , Var ( RepID Nothing ) "maga" 
-                        , Var ( RepID Nothing ) "singleRev" 
-                        ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Bop str.list.list Nothing
+                [ Var ( RepID Nothing ) "single"
+                , Var ( RepID Nothing ) "singleFwd"
+                , Var ( RepID Nothing ) "n"
+                , Var ( RepID Nothing ) "maga5"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "singleRev"
+                , Var ( RepID Nothing ) "mapped"
+                , Var ( RepID Nothing ) "mappedFwd"
+                , Var ( RepID Nothing ) "mappedRev"
+                ] "|"
+                ( Lst str.list Nothing
+                    [ Var ( RepID Nothing ) "single"
+                    , Var ( RepID Nothing ) "singleFwd"
+                    , Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga5"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "singleRev"
+                    ]
+                    [ Ref str.list Nothing
+                        [ Var ( RepID Nothing ) "singleFwd"
+                        , Var ( RepID Nothing ) "n"
+                        , Var ( RepID Nothing ) "maga5"
+                        , Var ( RepID Nothing ) "maga"
+                        , Var ( RepID Nothing ) "singleRev"
+                        ]
                         ( Var ( RepID Nothing ) "single" )
                     ]
-                ) 
-                ( Ref str.list.list Nothing 
-                    [ Var ( RepID Nothing ) "mappedFwd" 
-                    , Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "mappedRev" 
-                    ] 
+                )
+                ( Ref str.list.list Nothing
+                    [ Var ( RepID Nothing ) "mappedFwd"
+                    , Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga5"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "mappedRev"
+                    ]
                     ( Var ( RepID Nothing ) "mapped" )
                 )
-            } 
-        ] 
-    , sResult = Just 
-        ( Bop str.list.list Nothing 
-            [ Var ( RepID Nothing ) "single" 
-            , Var ( RepID Nothing ) "singleFwd" 
-            , Var ( RepID Nothing ) "n" 
-            , Var ( RepID Nothing ) "maga5" 
-            , Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "singleRev" 
-            , Var ( RepID Nothing ) "mapped" 
-            , Var ( RepID Nothing ) "mappedFwd" 
-            , Var ( RepID Nothing ) "mappedRev" 
-            ] "|" 
-            ( Lst str.list Nothing 
-                [ Var ( RepID Nothing ) "single" 
-                , Var ( RepID Nothing ) "singleFwd" 
-                , Var ( RepID Nothing ) "n" 
-                , Var ( RepID Nothing ) "maga5" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "singleRev" 
-                ] 
-                [ Ref str.list Nothing 
-                    [ Var ( RepID Nothing ) "singleFwd" 
-                    , Var ( RepID Nothing ) "n" 
-                    , Var ( RepID Nothing ) "maga5" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "singleRev" 
-                    ] 
+            }
+        ]
+    , sResult = Just
+        ( Bop str.list.list Nothing
+            [ Var ( RepID Nothing ) "single"
+            , Var ( RepID Nothing ) "singleFwd"
+            , Var ( RepID Nothing ) "n"
+            , Var ( RepID Nothing ) "maga5"
+            , Var ( RepID Nothing ) "maga"
+            , Var ( RepID Nothing ) "singleRev"
+            , Var ( RepID Nothing ) "mapped"
+            , Var ( RepID Nothing ) "mappedFwd"
+            , Var ( RepID Nothing ) "mappedRev"
+            ] "|"
+            ( Lst str.list Nothing
+                [ Var ( RepID Nothing ) "single"
+                , Var ( RepID Nothing ) "singleFwd"
+                , Var ( RepID Nothing ) "n"
+                , Var ( RepID Nothing ) "maga5"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "singleRev"
+                ]
+                [ Ref str.list Nothing
+                    [ Var ( RepID Nothing ) "singleFwd"
+                    , Var ( RepID Nothing ) "n"
+                    , Var ( RepID Nothing ) "maga5"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "singleRev"
+                    ]
                     ( Var ( RepID Nothing ) "single" )
                 ]
-            ) 
-            ( Ref str.list.list Nothing 
-                [ Var ( RepID Nothing ) "mappedFwd" 
-                , Var ( RepID Nothing ) "n" 
-                , Var ( RepID Nothing ) "maga5" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mappedRev" 
-                ] 
+            )
+            ( Ref str.list.list Nothing
+                [ Var ( RepID Nothing ) "mappedFwd"
+                , Var ( RepID Nothing ) "n"
+                , Var ( RepID Nothing ) "maga5"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "mappedRev"
+                ]
                 ( Var ( RepID Nothing ) "mapped" )
             )
         )
-    } 
+    }

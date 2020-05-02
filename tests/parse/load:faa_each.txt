@@ -1,62 +1,62 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "l1" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "l1"
             , aExpr = Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "list1" 
-            , aExpr = Fun faa.list Nothing 
-                [ Var ( RepID Nothing ) "l1" ] "load_faa_each" 
-                [ Ref str.list Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "list1"
+            , aExpr = Fun faa.list Nothing
+                [ Var ( RepID Nothing ) "l1" ] "load_faa_each"
+                [ Ref str.list Nothing []
                     ( Var ( RepID Nothing ) "l1" )
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "list2" 
-            , aExpr = Lst faa Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "list2"
+            , aExpr = Lst faa Nothing []
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ] ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Fun num Nothing 
-                [ Var ( RepID Nothing ) "list1" 
-                , Var ( RepID Nothing ) "l1" 
-                , Var ( RepID Nothing ) "list2" 
-                ] "length" 
-                [ Bop faa.list Nothing 
-                    [ Var ( RepID Nothing ) "list1" 
-                    , Var ( RepID Nothing ) "l1" 
-                    , Var ( RepID Nothing ) "list2" 
-                    ] "|" 
-                    ( Ref faa.list Nothing 
-                        [ Var ( RepID Nothing ) "l1" ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Fun num Nothing
+                [ Var ( RepID Nothing ) "list1"
+                , Var ( RepID Nothing ) "l1"
+                , Var ( RepID Nothing ) "list2"
+                ] "length"
+                [ Bop faa.list Nothing
+                    [ Var ( RepID Nothing ) "list1"
+                    , Var ( RepID Nothing ) "l1"
+                    , Var ( RepID Nothing ) "list2"
+                    ] "|"
+                    ( Ref faa.list Nothing
+                        [ Var ( RepID Nothing ) "l1" ]
                         ( Var ( RepID Nothing ) "list1" )
-                    ) 
-                    ( Ref faa.list Nothing [] 
+                    )
+                    ( Ref faa.list Nothing []
                         ( Var ( RepID Nothing ) "list2" )
                     )
                 ]
-            } 
-        ] 
-    , sResult = Just 
-        ( Fun num Nothing 
-            [ Var ( RepID Nothing ) "list1" 
-            , Var ( RepID Nothing ) "l1" 
-            , Var ( RepID Nothing ) "list2" 
-            ] "length" 
-            [ Bop faa.list Nothing 
-                [ Var ( RepID Nothing ) "list1" 
-                , Var ( RepID Nothing ) "l1" 
-                , Var ( RepID Nothing ) "list2" 
-                ] "|" 
-                ( Ref faa.list Nothing 
-                    [ Var ( RepID Nothing ) "l1" ] 
+            }
+        ]
+    , sResult = Just
+        ( Fun num Nothing
+            [ Var ( RepID Nothing ) "list1"
+            , Var ( RepID Nothing ) "l1"
+            , Var ( RepID Nothing ) "list2"
+            ] "length"
+            [ Bop faa.list Nothing
+                [ Var ( RepID Nothing ) "list1"
+                , Var ( RepID Nothing ) "l1"
+                , Var ( RepID Nothing ) "list2"
+                ] "|"
+                ( Ref faa.list Nothing
+                    [ Var ( RepID Nothing ) "l1" ]
                     ( Var ( RepID Nothing ) "list1" )
-                ) 
-                ( Ref faa.list Nothing [] 
+                )
+                ( Ref faa.list Nothing []
                     ( Var ( RepID Nothing ) "list2" )
                 )
             ]
         )
-    } 
+    }

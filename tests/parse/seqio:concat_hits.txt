@@ -1,77 +1,77 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "query" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "query"
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mgen" 
-            , aExpr = Fun faa.blastdb 
-                ( Just ( Seed 0 ) ) [] "makeblastdb_faa" 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mgen"
+            , aExpr = Fun faa.blastdb
+                ( Just ( Seed 0 ) ) [] "makeblastdb_faa"
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "maga" 
-            , aExpr = Fun faa.blastdb 
-                ( Just ( Seed 0 ) ) [] "makeblastdb_faa" 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "maga"
+            , aExpr = Fun faa.blastdb
+                ( Just ( Seed 0 ) ) [] "makeblastdb_faa"
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ] ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "hitlists" 
-            , aExpr = Fun bht.list 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "query" 
-                , Var ( RepID Nothing ) "mgen" 
-                , Var ( RepID Nothing ) "maga" 
-                ] "psiblast_db_each" 
-                [ Lit num "1.0e-2" 
-                , Ref faa Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "hitlists"
+            , aExpr = Fun bht.list
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "query"
+                , Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "maga"
+                ] "psiblast_db_each"
+                [ Lit num "1.0e-2"
+                , Ref faa Nothing []
                     ( Var ( RepID Nothing ) "query" )
-                , Lst faa.blastdb Nothing 
-                    [ Var ( RepID Nothing ) "mgen" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] 
-                    [ Ref faa.blastdb 
-                        ( Just ( Seed 0 ) ) [] 
+                , Lst faa.blastdb Nothing
+                    [ Var ( RepID Nothing ) "mgen"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
+                    [ Ref faa.blastdb
+                        ( Just ( Seed 0 ) ) []
                         ( Var ( RepID Nothing ) "mgen" )
-                    , Ref faa.blastdb 
-                        ( Just ( Seed 0 ) ) [] 
+                    , Ref faa.blastdb
+                        ( Just ( Seed 0 ) ) []
                         ( Var ( RepID Nothing ) "maga" )
-                    ] 
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Fun bht Nothing 
-                [ Var ( RepID Nothing ) "hitlists" 
-                , Var ( RepID Nothing ) "query" 
-                , Var ( RepID Nothing ) "mgen" 
-                , Var ( RepID Nothing ) "maga" 
-                ] "concat_bht" 
-                [ Ref bht.list 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "query" 
-                    , Var ( RepID Nothing ) "mgen" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] 
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Fun bht Nothing
+                [ Var ( RepID Nothing ) "hitlists"
+                , Var ( RepID Nothing ) "query"
+                , Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "maga"
+                ] "concat_bht"
+                [ Ref bht.list
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "query"
+                    , Var ( RepID Nothing ) "mgen"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
                     ( Var ( RepID Nothing ) "hitlists" )
                 ]
-            } 
-        ] 
-    , sResult = Just 
-        ( Fun bht Nothing 
-            [ Var ( RepID Nothing ) "hitlists" 
-            , Var ( RepID Nothing ) "query" 
-            , Var ( RepID Nothing ) "mgen" 
-            , Var ( RepID Nothing ) "maga" 
-            ] "concat_bht" 
-            [ Ref bht.list 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "query" 
-                , Var ( RepID Nothing ) "mgen" 
-                , Var ( RepID Nothing ) "maga" 
-                ] 
+            }
+        ]
+    , sResult = Just
+        ( Fun bht Nothing
+            [ Var ( RepID Nothing ) "hitlists"
+            , Var ( RepID Nothing ) "query"
+            , Var ( RepID Nothing ) "mgen"
+            , Var ( RepID Nothing ) "maga"
+            ] "concat_bht"
+            [ Ref bht.list
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "query"
+                , Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "maga"
+                ]
                 ( Var ( RepID Nothing ) "hitlists" )
             ]
         )
-    } 
+    }

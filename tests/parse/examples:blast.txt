@@ -1,64 +1,64 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "my_species" 
-            , aExpr = Fun fna Nothing [] "gbk_to_fna" 
-                [ Lit str "cds" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "my_species"
+            , aExpr = Fun fna Nothing [] "gbk_to_fna"
+                [ Lit str "cds"
                 , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/PCC_6803_genome.gbff" ]
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "swissprot" 
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "swissprot"
             , aExpr = Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "swissprot" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "blast_hits" 
-            , aExpr = Fun bht 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "my_species" 
-                , Var ( RepID Nothing ) "swissprot" 
-                ] "blastx_db" 
-                [ Lit num "1.0e-20" 
-                , Ref fna Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "blast_hits"
+            , aExpr = Fun bht
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "my_species"
+                , Var ( RepID Nothing ) "swissprot"
+                ] "blastx_db"
+                [ Lit num "1.0e-20"
+                , Ref fna Nothing []
                     ( Var ( RepID Nothing ) "my_species" )
-                , Ref faa.blastdb Nothing [] 
+                , Ref faa.blastdb Nothing []
                     ( Var ( RepID Nothing ) "swissprot" )
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "genes_with_hits" 
-            , aExpr = Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "blast_hits" 
-                , Var ( RepID Nothing ) "my_species" 
-                , Var ( RepID Nothing ) "swissprot" 
-                ] "extract_queries" 
-                [ Ref bht 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "my_species" 
-                    , Var ( RepID Nothing ) "swissprot" 
-                    ] 
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "genes_with_hits"
+            , aExpr = Fun str.list Nothing
+                [ Var ( RepID Nothing ) "blast_hits"
+                , Var ( RepID Nothing ) "my_species"
+                , Var ( RepID Nothing ) "swissprot"
+                ] "extract_queries"
+                [ Ref bht
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "my_species"
+                    , Var ( RepID Nothing ) "swissprot"
+                    ]
                     ( Var ( RepID Nothing ) "blast_hits" )
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "nr_seq_matches" 
-            , aExpr = Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "blast_hits" 
-                , Var ( RepID Nothing ) "my_species" 
-                , Var ( RepID Nothing ) "swissprot" 
-                ] "extract_targets" 
-                [ Ref bht 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "my_species" 
-                    , Var ( RepID Nothing ) "swissprot" 
-                    ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "nr_seq_matches"
+            , aExpr = Fun str.list Nothing
+                [ Var ( RepID Nothing ) "blast_hits"
+                , Var ( RepID Nothing ) "my_species"
+                , Var ( RepID Nothing ) "swissprot"
+                ] "extract_targets"
+                [ Ref bht
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "my_species"
+                    , Var ( RepID Nothing ) "swissprot"
+                    ]
                     ( Var ( RepID Nothing ) "blast_hits" )
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Lit str "nothing so far" 
-            } 
-        ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Lit str "nothing so far"
+            }
+        ]
     , sResult = Just ( Lit str "nothing so far" )
-    } 
+    }
