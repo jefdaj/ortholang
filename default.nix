@@ -8,11 +8,13 @@ let
 
   myGHC = pkgs.haskell.packages.ghc883;
   logging = myGHC.callPackage (import ./logging) {};
+  docopt  = myGHC.callPackage (import ./docopt) {};
+  MissingH = haskell.lib.doJailbreak pkgs.haskellPackages.MissingH;
   progress-meter = haskell.lib.overrideCabal pkgs.haskellPackages.progress-meter (_: {
     broken = false;
     jailbreak = true;
   });
-  haskellPkg = myGHC.callPackage ./ortholang.nix { inherit logging progress-meter; };
+  haskellPkg = myGHC.callPackage ./ortholang.nix { inherit docopt logging progress-meter MissingH; };
 
   # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?

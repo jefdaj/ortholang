@@ -15,16 +15,22 @@ extra-package-dbs: []
 packages:
 - .
 - logging
+- docopt
 
 # it works best if this matches the haskell.compiler.ghcXXX version in default.nix
 # lts-15.10 = ghc883
 # lts-14.27 = ghc865
 system-ghc: true
 resolver: lts-15.10
-# extra-deps:
-        # - posix-escape-0.1
-        # - path-io-1.6.0
-        # - progress-meter-1.0.0.1
+extra-deps:
+  - progress-meter-1.0.0.1
+  - posix-escape-0.1
+  - download-0.3.2.7
+  - store-0.7.4
+  - store-core-0.4.4.2
+  - th-utilities-0.2.4.0
+  - MissingH-1.4.3.0
+  # - path-io-1.6.0
 
 build:
   haddock: true
