@@ -9,8 +9,8 @@ let
   myGHC = pkgs.haskell.packages.ghc883;
   logging = myGHC.callPackage (import ./logging) {};
   docopt  = myGHC.callPackage (import ./docopt) {};
-  MissingH = haskell.lib.doJailbreak pkgs.haskellPackages.MissingH;
-  progress-meter = haskell.lib.overrideCabal pkgs.haskellPackages.progress-meter (_: {
+  MissingH = pkgs.haskell.lib.doJailbreak pkgs.haskellPackages.MissingH;
+  progress-meter = pkgs.haskell.lib.overrideCabal pkgs.haskellPackages.progress-meter (_: {
     broken = false;
     jailbreak = true;
   });
@@ -23,7 +23,7 @@ let
 
   # see https://github.com/jml/nix-haskell-example
   # TODO final wrapper with +RTS -N -RTS?
-  ortholang = haskell.lib.overrideCabal haskellPkg (drv: {
+  ortholang = pkgs.haskell.lib.overrideCabal haskellPkg (drv: {
     src = builtins.filterSource noBigDotfiles ./.;
 
     buildDepends = (drv.buildDepends or [])  ++ runDepends ++ [

@@ -3,7 +3,7 @@ name:               OrthoLang
 synopsis:           Short, reproducible phylogenomic cuts
 author:             Jeffrey David Johnson
 maintainer:         jefdaj@berkeley.edu
-version:            0.9.4
+version:            0.9.5
 -- license:            AGPL-3
 license-file:       LICENSE
 build-type:         Simple
@@ -37,7 +37,6 @@ common shared-properties
   default-language: Haskell2010
   pkgconfig-depends: zlib
   build-depends:    Glob,
-                    -- TODO is this ok to bring back? MissingH,
                     MissingH,
                     QuickCheck,
                     base,

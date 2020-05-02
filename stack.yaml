@@ -30,7 +30,6 @@ extra-deps:
   - store-core-0.4.4.2
   - th-utilities-0.2.4.0
   - MissingH-1.4.3.0
-  # - path-io-1.6.0
 
 build:
   haddock: true

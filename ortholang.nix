@@ -1,46 +1,46 @@
 { mkDerivation, ansi-terminal, base, bytestring, concurrent-extra
 , configurator, containers, cryptohash, data-default-class, deepseq
 , directory, dlist, docopt, download, filelock, filepath, Glob
-, haskeline, hspec, logging, mtl, parsec, path, path-io
+, haskeline, hspec, logging, MissingH, mtl, parsec, path, path-io
 , posix-escape, pretty, pretty-simple, process, progress-meter
 , QuickCheck, random, random-shuffle, raw-strings-qq, regex-compat
 , regex-posix, retry, safe-exceptions, scientific, setlocale, shake
 , silently, split, stdenv, store, strict, tasty, tasty-golden
 , tasty-hspec, tasty-hunit, tasty-quickcheck, temporary
 , terminal-size, text, time, transformers, unbounded-delays, unix
-, unordered-containers, utility-ht, zlib, MissingH
+, unordered-containers, utility-ht, zlib
 }:
 mkDerivation {
   pname = "OrthoLang";
-  version = "0.9.4";
+  version = "0.9.5";
   src = ./.;
-  isLibrary = true;
+  isLibrary = false; # TODO true? only used to generate demo docs so far
   isExecutable = true;
   enableSeparateDataOutput = true;
   libraryHaskellDepends = [
     ansi-terminal base bytestring concurrent-extra configurator
     containers cryptohash data-default-class deepseq directory dlist
     docopt download filelock filepath Glob haskeline hspec logging
-    mtl parsec path path-io posix-escape pretty pretty-simple
+    MissingH mtl parsec path path-io posix-escape pretty pretty-simple
     process progress-meter QuickCheck random random-shuffle
     raw-strings-qq regex-compat regex-posix retry safe-exceptions
     scientific setlocale shake silently split store strict tasty
     tasty-golden tasty-hspec tasty-hunit tasty-quickcheck temporary
     terminal-size text time transformers unbounded-delays unix
-    unordered-containers utility-ht MissingH
+    unordered-containers utility-ht
   ];
   libraryPkgconfigDepends = [ zlib ];
   executableHaskellDepends = [
     ansi-terminal base bytestring concurrent-extra configurator
     containers cryptohash data-default-class deepseq directory dlist
     docopt download filelock filepath Glob haskeline hspec logging
-    mtl parsec path path-io posix-escape pretty pretty-simple
+    MissingH mtl parsec path path-io posix-escape pretty pretty-simple
     process progress-meter QuickCheck random random-shuffle
     raw-strings-qq regex-compat regex-posix retry safe-exceptions
     scientific setlocale shake silently split store strict tasty
     tasty-golden tasty-hspec tasty-hunit tasty-quickcheck temporary
     terminal-size text time transformers unbounded-delays unix
-    unordered-containers utility-ht MissingH
+    unordered-containers utility-ht
   ];
   executablePkgconfigDepends = [ zlib ];
   description = "Short, reproducible phylogenomic cuts";
