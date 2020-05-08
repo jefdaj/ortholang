@@ -14,7 +14,9 @@ let
     broken = false;
     jailbreak = true;
   });
-  haskellPkg = myGHC.callPackage ./ortholang.nix { inherit docopt logging progress-meter MissingH; };
+  haskellPkg = myGHC.callPackage ./ortholang.nix {
+    inherit docopt logging progress-meter MissingH;
+  };
 
   # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?

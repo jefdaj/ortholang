@@ -175,7 +175,7 @@ venndiagram = let name = "venndiagram" in Function
   -- , fTypeDesc  = name ++ " : X.list.list -> png"
   , fInputs = [ListSigs (ListSigs (AnyType "the type to count unique values of"))]
   , fOutput = Exactly png
-  , fTags = []
+  , fTags = [] -- TODO add set names as an input str.list so they get included in hashes!
   , fNewRules = NewNotImplemented
   , fOldRules = rPlotListOfLists "venndiagram.R"
   }
