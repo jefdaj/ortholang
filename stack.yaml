@@ -9,7 +9,7 @@ allow-newer: true
 nix:
   enable: true
   pure: false
-  packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc883]
+  packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc865]
 
 extra-package-dbs: []
 packages:
@@ -18,10 +18,10 @@ packages:
 - docopt
 
 # it works best if this matches the haskell.compiler.ghcXXX version in default.nix
-# lts-15.10 = ghc883
+# lts-15.11 = ghc883
 # lts-14.27 = ghc865
 system-ghc: true
-resolver: lts-15.10
+resolver: lts-14.27
 extra-deps:
   - progress-meter-1.0.0.1
   - posix-escape-0.1

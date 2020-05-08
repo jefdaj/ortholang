@@ -14,7 +14,7 @@ mkDerivation {
   pname = "OrthoLang";
   version = "0.9.5";
   src = ./.;
-  isLibrary = false; # TODO true? only used to generate demo docs so far
+  isLibrary = true;
   isExecutable = true;
   enableSeparateDataOutput = true;
   libraryHaskellDepends = [

@@ -6,17 +6,21 @@ let
   # TODO add the ones that don't conflict for easier development?
   inherit (import ./dependencies.nix) runDepends;
 
-  myGHC = pkgs.haskell.packages.ghc883;
-  logging = myGHC.callPackage (import ./logging) {};
-  docopt  = myGHC.callPackage (import ./docopt) {};
-  MissingH = pkgs.haskell.lib.doJailbreak pkgs.haskellPackages.MissingH;
-  progress-meter = pkgs.haskell.lib.overrideCabal pkgs.haskellPackages.progress-meter (_: {
-    broken = false;
-    jailbreak = true;
-  });
-  haskellPkg = myGHC.callPackage ./ortholang.nix {
-    inherit docopt logging progress-meter MissingH;
+  myHaskell = pkgs.haskell.packages.ghc865.override {
+    overrides = new: old: rec {
+      logging = new.callPackage (import ./logging) {};
+
+      # this will be needed to upgrade to 8.8.x, unless upstream fixes it first:
+      # docopt  = new.callPackage (import ./docopt) {};
+
+      MissingH = pkgs.haskell.lib.overrideCabal old.MissingH (_: {jailbreak = true;});
+      progress-meter = pkgs.haskell.lib.overrideCabal old.progress-meter (_: {
+        broken = false;
+        jailbreak = true;
+      });
+    };
   };
+  haskellPkg = myHaskell.callPackage ./ortholang.nix {};
 
   # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?

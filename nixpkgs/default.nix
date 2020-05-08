@@ -12,9 +12,9 @@ let
   in import (fetchFromGitHub {
     owner  = "jefdaj";
     repo   = "nixpkgs";
-    # 2020-05-01 rebase of clean-20.03 branch:
-    rev    = "de9ce1046376cb83e3b083b8cf2702f72f1c9d61";
-    sha256 = "1m7j5fsfq8h6xq9x7qnf50m9qgki2k5pfpyr4s9ad9yv0simmpwm";
+    # 2020-05-08 update of clean-20.03 branch:
+    rev    = "ba6b15ea6765b27dc6aaccfa17befa7260279e47";
+    sha256 = "0cyw38qgczcs0f39mfb3f51hvx5c6wvy7bxdsf6qnwc8q9b259iy";
   }) {};
 
   # use this instead to try to build it with your system's current nixpkgs:
