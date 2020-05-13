@@ -22,6 +22,7 @@ import System.Console.Docopt.NoTH (parseUsageOrExit)
 import System.Directory           (doesFileExist)
 import System.FilePath            ((</>), (<.>))
 import Text.Read.HT               (maybeRead)
+import System.Directory           (createDirectoryIfMissing)
 
 {- The logging module keeps its own state in an IORef, so no need to include
  - this in the main OrthoLang config below.
@@ -115,6 +116,7 @@ loadConfig args = do
   -- debug' $ show res
   setLogLevel LevelDebug
   mapM_ setDebugSourceRegex debugregex
+  mapM_ (createDirectoryIfMissing True) [tmpdir, workdir] -- TODO handle shared too? or do all this later
   return res
 
 getDoc :: String -> IO (Maybe String)
@@ -181,6 +183,7 @@ configFields =
 securityMessage :: String
 securityMessage = "For security reasons, you can't enable shell access from inside the REPL."
 
+-- TODO also create the dir if it's a path? may need to rename or add a second dir fn
 absPathOrUrl :: String -> IO String
 absPathOrUrl p = if isURL p then return p else absolutize p
 
