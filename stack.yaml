@@ -15,7 +15,7 @@ extra-package-dbs: []
 packages:
 - .
 - logging
-- docopt
+# - docopt
 
 # it works best if this matches the haskell.compiler.ghcXXX version in default.nix
 # lts-15.11 = ghc883
