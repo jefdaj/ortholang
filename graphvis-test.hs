@@ -68,27 +68,31 @@ myColor n = Color $ myColorCL n
 
 type MockVar = (Text, [Text])
 
-type MockScript = [MockVar]
+type MockScript = ([MockVar], Text)
 
 -- mkNodes2 :: MockScript -> [(Int, Text)]
 -- mkNodes2 vs = Prelude.zip [1..] $ Prelude.map fst vs
 
 mockScript :: MockScript
-mockScript =
-  [ ("one"  , [])
-  , ("two"  , ["one"])
-  , ("three", ["one", "two"])
-  , ("four" , ["two", "three"])
-  ]
+mockScript = (vs, "four")
+  where
+    vs =
+      [ ("one"  , [])
+      , ("two"  , ["one"])
+      , ("three", ["one", "two"])
+      , ("four" , ["two", "three"])
+      ]
 
 mockNodes :: ([LNode Text], NodeMap Text)
-mockNodes = mkNodes new $ Prelude.map fst mockScript
+mockNodes = mkNodes new $ Prelude.map fst $ fst mockScript
 
 mkVarGraph :: MockScript -> Gr Text Text
-mkVarGraph scr = mkGraph nodes edges
+mkVarGraph (vs, r) = mkGraph nodes edges
   where
-    (nodes, nodemap) = mkNodes new $ Prelude.map fst scr
-    edges = fromJust $ mkEdges nodemap $ Prelude.concatMap (\(v, ds) -> Prelude.map (\d -> (d, v, "")) ds) scr
+    rv = ("result", [r])
+    vs' = vs ++ [rv]
+    (nodes, nodemap) = mkNodes new $ Prelude.map fst vs'
+    edges = fromJust $ mkEdges nodemap $ Prelude.concatMap (\(v, ds) -> Prelude.map (\d -> (d, v, "")) ds) vs'
 
 mockGraph :: Gr Text Text
 mockGraph = mkVarGraph mockScript
