@@ -45,7 +45,7 @@ ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = f
                  ]
              , NodeAttrs
                 [ shape     Ellipse
-                , FillColor (myColorCL 1)
+                , FillColor (fromJust $ Prelude.lookup "green" myPalette)
                 , style     filled
                 ]
              ]
@@ -74,7 +74,7 @@ type MockScript = ([MockVar], Text)
 -- mkNodes2 vs = Prelude.zip [1..] $ Prelude.map fst vs
 
 mockScript :: MockScript
-mockScript = (vs, "four")
+mockScript = (vs, "three")
   where
     vs =
       [ ("one"  , [])
@@ -82,6 +82,14 @@ mockScript = (vs, "four")
       , ("three", ["one", "two"])
       , ("four" , ["two", "three"])
       ]
+
+myPalette :: [(String, ColorList)]
+myPalette =
+ [ ("pink" , c 253 202 255)
+ , ("blue" , c 197 255 255)
+ , ("green", c 217 255 173)
+ ]
+ where c r g b = toColorList [RGB r g b]
 
 mockNodes :: ([LNode Text], NodeMap Text)
 mockNodes = mkNodes new $ Prelude.map fst $ fst mockScript
