@@ -54,6 +54,7 @@ common shared-properties
                     -- TODO remove in favor of path
                     filelock,
                     filepath,
+                    graphviz,
                     haskeline,
                     mtl,
                     parsec,
@@ -142,6 +143,7 @@ library
                     OrthoLang.Modules.Busco,
                     OrthoLang.Modules.CRBBlast,
                     OrthoLang.Modules.Cheat,
+                    OrthoLang.Modules.DepGraph,
                     OrthoLang.Modules.Diamond,
                     OrthoLang.Modules.GreenCut,
                     OrthoLang.Modules.Hmmer,

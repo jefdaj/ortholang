@@ -111,6 +111,7 @@ in rec {
   ortholang-blast         = mkModule ./OrthoLang/Modules/Blast         [ myBlast parallel ] "";
   ortholang-blastdb       = mkModule ./OrthoLang/Modules/BlastDB       [ myBlast blastdbget ] "";
   ortholang-crbblast      = mkModule ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
+  ortholang-depgraph      = mkModule ./OrthoLang/Modules/DepGraph      [ graphviz ] "";
   ortholang-diamond       = mkModule ./OrthoLang/Modules/Diamond       [ diamond ] "";
   ortholang-hmmer         = mkModule ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
   ortholang-mmseqs        = mkModule ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
@@ -142,6 +143,7 @@ in rec {
     ortholang-blasthits
     ortholang-blastrbh
     ortholang-crbblast
+    ortholang-depgraph
     ortholang-diamond
     ortholang-hmmer
     ortholang-mmseqs
