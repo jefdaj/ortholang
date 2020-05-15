@@ -40,18 +40,18 @@ ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = f
   where fn (_,l)   = [textLabel l]
         fe (_,_,l) = [textLabel l]
         ga = [ GraphAttrs
-                 [ RankDir FromLeft
+                 [ RankDir FromTop
                  , BgColor [toWColor White]
                  ]
              , NodeAttrs
-                [ shape     BoxShape
-                , FillColor (myColorCL 2)
+                [ shape     Ellipse
+                , FillColor (myColorCL 1)
                 , style     filled
                 ]
              ]
 
 myColorCL :: Word8 -> ColorList
-myColorCL n | n == 1 = c $ (RGB 127 108 138)
+myColorCL n | n == 1 = c $ (RGB 229 255 204)
             | n == 2 = c $ (RGB 175 177 112)
             | n == 3 = c $ (RGB 226 206 179)
             | n == 4 = c $ (RGB 172 126 100)
@@ -75,10 +75,10 @@ type MockScript = [MockVar]
 
 mockScript :: MockScript
 mockScript =
-  [ ("one", [])
-  , ("two", ["one"])
+  [ ("one"  , [])
+  , ("two"  , ["one"])
   , ("three", ["one", "two"])
-  , ("four", ["two", "three"])
+  , ("four" , ["two", "three"])
   ]
 
 mockNodes :: ([LNode Text], NodeMap Text)
