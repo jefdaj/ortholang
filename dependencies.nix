@@ -32,6 +32,7 @@ let
     curl
     cacert # for curl https
     fontconfig.lib # for R plotting scripts
+    graphviz
   ];
 
   # TODO why is patching shebangs on the wrapped scripts necessary??
@@ -111,7 +112,7 @@ in rec {
   ortholang-blast         = mkModule ./OrthoLang/Modules/Blast         [ myBlast parallel ] "";
   ortholang-blastdb       = mkModule ./OrthoLang/Modules/BlastDB       [ myBlast blastdbget ] "";
   ortholang-crbblast      = mkModule ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
-  ortholang-depgraph      = mkModule ./OrthoLang/Modules/DepGraph      [ graphviz ] "";
+  ortholang-depgraph      = mkModule ./OrthoLang/Modules/DepGraph      [ graphviz ] ""; # TODO remove?
   ortholang-diamond       = mkModule ./OrthoLang/Modules/Diamond       [ diamond ] "";
   ortholang-hmmer         = mkModule ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
   ortholang-mmseqs        = mkModule ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";

@@ -54,6 +54,7 @@ common shared-properties
                     -- TODO remove in favor of path
                     filelock,
                     filepath,
+                    fgl,
                     graphviz,
                     haskeline,
                     mtl,
