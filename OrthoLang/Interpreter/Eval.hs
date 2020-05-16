@@ -226,7 +226,7 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//exprs/ortholog_*//result"
             , "//exprs/psiblast*//result"
             , "//exprs/psiblast*//result.tmp"
-            , "//exprs/range_integers//result"
+            , "//exprs/range_*//result"
             , "//exprs/reciprocal_best//result"
             , "//exprs/tblast*//out"
             , "//exprs/translate//result"
