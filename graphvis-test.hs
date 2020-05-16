@@ -66,6 +66,9 @@ myColor n = Color $ myColorCL n
 -- from simple lists --
 -----------------------
 
+-- TODO make this the intermediate format we write to string + parse again?
+--      wait no! just do everything first and save the finished dot script into the string
+--      then name the post-macro function plot_graphviz or plot_dot
 type MockVar = (Text, [Text])
 
 type MockScript = ([MockVar], Text)
@@ -122,7 +125,7 @@ mkVarGraph2 = DotGraph
 
 main :: IO ()
 main = do
-    doDots [ ("ex1" , graphToDot ex1Params ex1) ]
+    -- doDots [ ("ex1" , graphToDot ex1Params ex1) ]
     doDots [ ("mock" , graphToDot ex1Params mockGraph) ]
     -- doDots [ ("ex2" , ex2)
     --        , ("ex3" , ex3)
