@@ -30,7 +30,11 @@ png :: Type
 png = Type
   { tExt  = "png"
   , tDesc = "plot image"
-  , tShow = \_ _ f -> return $ "plot image \"" ++ f ++ "\""
+  , tShow = \cfg _ path -> do
+      -- resolving symlinks fixes a bug in the jupyter kernel when returning multiple plots
+      -- (without it they'd all just be vars/result and erroneously return the last result)
+      path' <- resolveSymlinks (Just $ tmpdir cfg) path
+      return $ "plot image \"" ++ path' ++ "\""
   }
 
 -------------------
