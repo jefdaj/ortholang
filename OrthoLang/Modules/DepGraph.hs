@@ -17,6 +17,8 @@ module OrthoLang.Modules.DepGraph where
 
 import OrthoLang.Types
 import OrthoLang.Interpreter
+import OrthoLang.Debug (error)
+import Prelude hiding (error)
 import Data.GraphViz
 import Data.Graph.Inductive hiding (nodes, edges)
 import Data.GraphViz.Attributes.Complete -- (ColorList, Color(..), toColorList)
@@ -33,33 +35,51 @@ olModule = Module
   , mTypes = [png]
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [graphScript] -- TODO graph_depends, graph_rdepends (with common parts factored out)
+  , mFunctions = [plotDot, plotScript] -- TODO plot_depends, plot_rdepends (with common parts factored out)
   }
 
-graphScript :: Function
-graphScript = newMacro
-  "graph_script" -- TODO plot_script?
+
+--------------
+-- plot_dot --
+--------------
+
+-- TODO also take a title
+plotDot :: Function
+plotDot = newFnA1
+  "plot_dot"
+  (Exactly str) -- ^ shown dotgraph
+  (Exactly png) -- ^ graph
+  aPlotDot
+  [Hidden]
+
+aPlotDot :: NewAction1
+aPlotDot = undefined
+
+
+-----------------
+-- plot_script --
+-----------------
+
+plotScript :: Function
+plotScript = newMacro
+  "plot_script"
   [Exactly str] -- ^ title
   (Exactly png) -- ^ graph
-  mDepgraphScript
+  mPlotScript
   [ReadsScript]
 
--- TODO figure out how to add a title to the graph
-mDepgraphScript :: MacroExpansion
-mDepgraphScript scr expr = undefined
+-- | This inserts a plot_dot call with the complete dot structure in its str input.
+mPlotScript :: MacroExpansion
+mPlotScript scr (Fun t ms vs n _) | n == "plot_script" = Fun t ms vs "plot_dot" [ds]
+  where
+    dg = dotGraph scr
+    ds = Lit str (show dg)
+mPlotScript _ e = error "ortholang.modules.depgraph.mPlotScript" $ "bad expr arg: " ++ show e
 
--- TODO different dir, obviously
--- createImage :: PrintDotRepr dg n => (FilePath, dg n) -> IO FilePath
--- createImage (n, g) = createImageInDir "/tmp" n Png g
 
--- createImageInDir :: PrintDotRepr dg n => FilePath -> FilePath -> GraphvizOutput -> dg n -> IO FilePath
--- createImageInDir d n o g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) o (combine d n)
-
--- TODO does it also need to return a path? want to use bin cache
--- renderGraph :: PrintDotRepr dg n => FilePath -> GraphvizOutput -> dg n -> IO ()
--- renderGraph = undefined
-
--- graphVars :: 
+----------------------------
+-- create dot from script --
+----------------------------
 
 olColors :: [(String, ColorList)]
 olColors =
@@ -70,6 +90,7 @@ olColors =
  where
    c r g b = toColorList [RGB r g b]
 
+-- TODO customize these
 ex1Params :: GraphvizParams n String String () String
 ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
   where fn (_,l)   = [textLabel $ T.pack l]
@@ -87,9 +108,10 @@ ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = f
 
 {-|
 Reads the script (only up to the point where the graph fn was called!) and
-generates a Haskell 'DotGraph' data structure. It will be 'Prelude.show'n and
-passed to the graphing function via an OrthoLang string. Which is kind of
-roundabout but seems to work.
+generates a Haskell 'DotGraph' data structure. It could be used directly with
+'renderDotGraph', but instead it will be 'Prelude.show'n and passed to the
+graphing function via an OrthoLang string. Which is kind of roundabout but
+seems to work.
 -}
 dotGraph :: Script -> DotGraph Node
 dotGraph scr = graphToDot ex1Params (gr :: Gr String String)
@@ -103,3 +125,18 @@ dotGraph scr = graphToDot ex1Params (gr :: Gr String String)
     edges = fromJust $ mkEdges nodemap
           $ concatMap (\(Assign (Var _ v) e) ->
                           map (\(Var _ d) -> (d, v, "")) (depsOf e)) as'
+
+
+-----------------------
+-- render dot to png --
+-----------------------
+
+createImageInDir :: PrintDotRepr dg n => FilePath -> FilePath -> GraphvizOutput -> dg n -> IO FilePath
+createImageInDir d n o g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) o (combine d n)
+
+-- TODO does it also need to return a path? want to use bin cache
+renderDotGraph :: PrintDotRepr dg n => dg n -> IO FilePath
+renderDotGraph g = createImageInDir d n Png g
+  where
+    d = "/tmp" -- TODO set this
+    n = "renderDotGraph" -- TODO set this
