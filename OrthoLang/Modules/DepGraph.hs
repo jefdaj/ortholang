@@ -16,6 +16,7 @@ Partially based on this tutorial:
 module OrthoLang.Modules.DepGraph where
 
 import OrthoLang.Types
+import OrthoLang.Interpreter.Paths (prefixOf)
 import OrthoLang.Interpreter
 import OrthoLang.Debug (error)
 import Prelude hiding (error)
@@ -147,7 +148,7 @@ varnamesToIgnore = ["result"]
 -- TODO also do Bops
 edgeLabel' :: Expr -> String
 edgeLabel' (Fun _ _ _ n _) = if n `elem` fnNamesToIgnore then "" else n
-edgeLabel' (Bop _ _ _ n _ _) = if n `elem` fnNamesToIgnore then "" else n
+edgeLabel' e@(Bop _ _ _ _ _ _) = let n' = prefixOf e in if n' `elem` fnNamesToIgnore then "" else n'
 edgeLabel' _ = ""
 
 -- specifically, edge labels
