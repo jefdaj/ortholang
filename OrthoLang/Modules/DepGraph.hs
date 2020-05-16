@@ -25,6 +25,7 @@ import Data.GraphViz.Attributes.Complete -- (ColorList, Color(..), toColorList)
 import Data.Maybe (fromJust)
 import System.FilePath (combine)
 import qualified Data.Text.Lazy as T
+import Control.Monad.IO.Class (liftIO)
 
 import OrthoLang.Modules.Plots (png) -- TODO rename?
 
@@ -53,7 +54,16 @@ plotDot = newFnA1
   [Hidden]
 
 aPlotDot :: NewAction1
-aPlotDot = undefined
+aPlotDot (ExprPath out) inDot = do
+  let loc = "ortholang.modules.depgraph.aPlotDot"
+  txt <- readLit loc inDot
+  let g = read txt :: DotGraph Node
+  liftIO $ renderDotGraph out g
+  return ()
+
+-- TODO why return the filepath?
+renderDotGraph :: PrintDotRepr dg n => FilePath -> dg n -> IO FilePath
+renderDotGraph path g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) Png path
 
 
 -----------------
@@ -125,18 +135,3 @@ dotGraph scr = graphToDot ex1Params (gr :: Gr String String)
     edges = fromJust $ mkEdges nodemap
           $ concatMap (\(Assign (Var _ v) e) ->
                           map (\(Var _ d) -> (d, v, "")) (depsOf e)) as'
-
-
------------------------
--- render dot to png --
------------------------
-
-createImageInDir :: PrintDotRepr dg n => FilePath -> FilePath -> GraphvizOutput -> dg n -> IO FilePath
-createImageInDir d n o g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) o (combine d n)
-
--- TODO does it also need to return a path? want to use bin cache
-renderDotGraph :: PrintDotRepr dg n => dg n -> IO FilePath
-renderDotGraph g = createImageInDir d n Png g
-  where
-    d = "/tmp" -- TODO set this
-    n = "renderDotGraph" -- TODO set this
