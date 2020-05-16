@@ -766,6 +766,7 @@ data FnTag
   | ReadsDirs  -- ^ do not repeat, do not cache/share
   | ReadsFile  -- ^ do not repeat, do cache/share TODO ReadsFiles
   | ReadsURL   -- ^ do not repeat, do not cache/share?
+  | ReadsScript -- ^ do not cache/share... but does repeat matter?
   | Broken     -- ^ remove from functions list when loading
   | Hidden     -- ^ remove from user-facing lists
   deriving (Eq, Read, Show)
