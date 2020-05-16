@@ -15,6 +15,19 @@ read_list <- function(filename)
   # read one list
   scan(filename, what=character(), quiet=TRUE)
 
+fix_unnamed <- function(listnames) {
+  # number any unnamed lists to differentiate them better
+  listnames2 <- character(length(character()))
+  for(i in seq_along(listnames)) {
+    if (listnames[i] == "result") {
+      listnames2[i] <- paste0("list", i)
+    } else {
+      listnames2[i] <- listnames[i]
+    }
+  }
+	return(listnames2)
+}
+
 read_lol <- function(filename) {
   # read a list of lists
   filenames <- read_list(filename)
@@ -22,7 +35,7 @@ read_lol <- function(filename) {
 }
 
 read_named_lol <- function(namesfile, listsfile) {
-  listnames <- read_list(namesfile)
+  listnames <- read_list(namesfile) %>% fix_unnamed
   lists <- read_lol(listsfile)
   stopifnot(length(listnames) == length(lists))
   names(lists) <- listnames
