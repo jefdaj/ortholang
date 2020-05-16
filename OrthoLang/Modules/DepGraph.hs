@@ -34,13 +34,33 @@ createImageInDir d n o g = Data.GraphViz.addExtension (runGraphvizCommand Dot g)
 olModule :: Module
 olModule = undefined
 
-----------------------
--- from text script --
-----------------------
+----------
+-- mock --
+----------
 
-type MockVar = (String, [String])
+-- type MockVar = (String, [String])
+-- 
+-- type MockScript = ([MockVar], String)
+-- 
+-- mockScript :: MockScript
+-- mockScript = (vs, "three")
+--   where
+--     vs =
+--       [ ("one"  , [])
+--       , ("two"  , ["one"])
+--       , ("three", ["one", "two"])
+--       , ("four" , ["two", "three"])
+--       ]
+-- 
+-- mockNodes :: ([LNode String], NodeMap String)
+-- mockNodes = mkNodes new $ map fst $ fst mockScript
+-- 
+-- mockGraph :: Gr String String
+-- mockGraph = mkVarGraph mockScript
 
-type MockScript = ([MockVar], String)
+------------
+-- actual --
+------------
 
 olColors :: [(String, ColorList)]
 olColors =
@@ -48,29 +68,16 @@ olColors =
  , ("blue" , c 197 255 255)
  , ("green", c 217 255 173)
  ]
- where c r g b = toColorList [RGB r g b]
+ where
+   c r g b = toColorList [RGB r g b]
 
-mkVarGraph :: MockScript -> Gr String String
-mkVarGraph (vs, r) = mkGraph nodes edges
+mkVarGraph :: Script -> Gr String String
+mkVarGraph scr = mkGraph nodes edges
   where
-    rv = ("result", [r])
-    vs' = vs ++ [rv]
-    (nodes, nodemap) = mkNodes new $ Prelude.map fst vs'
+    vn (Assign (Var _ v) _) = v
+    as' = sAssigns scr ++ case sResult scr of
+                            Nothing -> []
+                            Just e -> [Assign resultVar e]
+    (nodes, nodemap) = mkNodes new $ map vn as'
     edges = fromJust $ mkEdges nodemap
-          $ Prelude.concatMap (\(v, ds) -> Prelude.map (\d -> (d, v, "")) ds) vs'
-
-mockScript :: MockScript
-mockScript = (vs, "three")
-  where
-    vs =
-      [ ("one"  , [])
-      , ("two"  , ["one"])
-      , ("three", ["one", "two"])
-      , ("four" , ["two", "three"])
-      ]
-
-mockNodes :: ([LNode String], NodeMap String)
-mockNodes = mkNodes new $ Prelude.map fst $ fst mockScript
-
-mockGraph :: Gr String String
-mockGraph = mkVarGraph mockScript
+          $ concatMap (\(Assign (Var _ v) e) -> map (\(Var _ d) -> (d, v, "")) (depsOf e)) as'
