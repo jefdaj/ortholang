@@ -46,19 +46,21 @@ olModule = Module
 
 -- TODO also take a title
 plotDot :: Function
-plotDot = newFnA1
+plotDot = hidden $ newFnA1
   "plot_dot"
   (Exactly str) -- ^ shown dotgraph
   (Exactly png) -- ^ graph
   aPlotDot
   [Hidden]
 
+-- TODO withBinHash, right?
 aPlotDot :: NewAction1
 aPlotDot (ExprPath out) inDot = do
   let loc = "ortholang.modules.depgraph.aPlotDot"
   txt <- readLit loc inDot
   let g = read txt :: DotGraph Node
   liftIO $ renderDotGraph out g
+  trackWrite' [out]
   return ()
 
 -- TODO why return the filepath?
@@ -70,6 +72,7 @@ renderDotGraph path g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) Pn
 -- plot_script --
 -----------------
 
+-- TODO make the title work
 plotScript :: Function
 plotScript = newMacro
   "plot_script"
@@ -117,9 +120,9 @@ ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = f
              ]
 
 {-|
-Reads the script (only up to the point where the graph fn was called!) and
-generates a Haskell 'DotGraph' data structure. It could be used directly with
-'renderDotGraph', but instead it will be 'Prelude.show'n and passed to the
+Reads the script (only up to the point where the graph fn was called) and
+generates a Haskell DotGraph data structure. It could be used directly with
+renderDotGraph, but instead it will be  and passed to the
 graphing function via an OrthoLang string. Which is kind of roundabout but
 seems to work.
 -}
