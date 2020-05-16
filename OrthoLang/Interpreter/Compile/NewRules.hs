@@ -311,6 +311,7 @@ newPattern cfg useSeed name nArgs =
 -- TODO need to addDigest in here somehow?
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
 -- TODO one less * if not using repeat seed
+-- TODO when a function (only macros?) has the ReadsCode tag, treat that as an input to hash
 {-|
 -}
 rNewRules
@@ -427,6 +428,7 @@ newFn name mChar iSigs oSig rFn aFn tags = Function
 -- Macros get read access to the entire 'Script' up to where they were called,
 -- but can only return one altered 'Expr'.
 
+-- TODO can a Haskell closure be "hidden" in here to implement graph_script? try it!
 type MacroExpansion = Script -> Expr -> Expr
 
 {-|

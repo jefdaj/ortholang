@@ -33,19 +33,17 @@ olModule = Module
   , mFunctions = [graphScript] -- TODO graph_depends, graph_rdepends (with common parts factored out)
   }
 
--- TODO how are we going to pass the script itself? probably need a new type of fn?
 graphScript :: Function
-graphScript = newFnA1
-  "graph_script"
-  (Exactly str) -- ^ title
+graphScript = newMacro
+  "graph_script" -- TODO plot_script?
+  [Exactly str] -- ^ title
   (Exactly png) -- ^ graph
-  aDepgraphScript
+  mDepgraphScript
   [ReadsScript]
 
 -- TODO figure out how to add a title to the graph
-aDepgraphScript :: NewAction1
-aDepgraphScript (ExprPath out) titlePath = do
-  undefined
+mDepgraphScript :: MacroExpansion
+mDepgraphScript scr expr = undefined
 
 -- TODO different dir, obviously
 -- createImage :: PrintDotRepr dg n => (FilePath, dg n) -> IO FilePath
