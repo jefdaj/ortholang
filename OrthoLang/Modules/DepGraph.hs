@@ -120,14 +120,52 @@ ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = f
                 ]
              ]
 
--- | Like depsOf, but does not include indirect dependencies since they complicate the graph.
-directDepsOf :: Expr -> [Var]
-directDepsOf (Lit _ _           ) = []
-directDepsOf (Ref _ _ vs v      ) = [v]
-directDepsOf (Bop _ _ vs _ e1 e2) = nub $ concatMap directDepsOf [e1, e2] ++ concatMap varOf [e1, e2]
-directDepsOf (Fun _ _ vs _ es   ) = nub $ concatMap directDepsOf es ++ concatMap varOf es
-directDepsOf (Lst _ _ vs   es   ) = nub $ concatMap directDepsOf es ++ concatMap varOf es
-directDepsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
+{-|
+Like depsOf, but customized for pretty graph output. Differences:
+
+* does not include indirect dependencies
+-}
+graphDeps :: Expr -> [Var]
+graphDeps (Lit _ _           ) = []
+graphDeps (Ref _ _ vs v      ) = [v]
+graphDeps (Bop _ _ vs _ e1 e2) = nub $ concatMap graphDeps [e1, e2] ++ concatMap varOf [e1, e2]
+graphDeps (Fun _ _ vs _ es   ) = nub $ concatMap graphDeps es ++ concatMap varOf es
+graphDeps (Lst _ _ vs   es   ) = nub $ concatMap graphDeps es ++ concatMap varOf es
+graphDeps (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
+
+mkNodes' :: Script -> ([LNode String], NodeMap String)
+mkNodes' scr = mkNodes new nodes'
+  where
+    vn (Assign (Var _ v) _) = v -- TODO move to Types?
+    nodes = map vn $ sAssigns scr
+    nodes' = filter (\n -> not $ n `elem` varnamesToIgnore) nodes
+
+-- TODO explain that result will be removed in the notebook
+varnamesToIgnore :: [String]
+varnamesToIgnore = ["result"]
+
+-- TODO also do Bops
+edgeLabel' :: Expr -> String
+edgeLabel' (Fun _ _ _ n _) = if n `elem` fnNamesToIgnore then "" else n
+edgeLabel' (Bop _ _ _ n _ _) = if n `elem` fnNamesToIgnore then "" else n
+edgeLabel' _ = ""
+
+-- specifically, edge labels
+-- TODO only remove the current plot fn while leaving any others?
+--      don't bother just for this, but subgraphs might be required for repeat + replace too
+fnNamesToIgnore :: [String]
+fnNamesToIgnore = ["plot_script", "plot_dot"] -- , "plot_depends", "plot_rdepends"]
+
+-- TODO label some edges to get the removal working
+mkEdges' :: NodeMap String -> Script -> [LEdge String]
+mkEdges' nodemap scr = fromJust $ mkEdges nodemap edges'
+  where
+    -- TODO also filter out the edges (fns) to ignore here based on the assignment expr
+    --      oh, but only if adding fn labels to edges doesn't make the above version work already
+    as' = filter (\(Assign (Var _ v) _) -> not $ v `elem` varnamesToIgnore) $ sAssigns scr
+    edges = concatMap (\(Assign (Var _ v) e) ->
+                          map (\(Var _ d) -> (d, v, edgeLabel' e)) (graphDeps e)) as'
+    edges' = filter (\(_,_,e) -> not $ e `elem` fnNamesToIgnore) edges
 
 {-|
 Reads the script (only up to the point where the graph fn was called) and
@@ -140,11 +178,5 @@ dotGraph :: Script -> DotGraph Node
 dotGraph scr = graphToDot ex1Params (gr :: Gr String String)
   where
     gr = mkGraph nodes edges
-    vn (Assign (Var _ v) _) = v -- TODO move to Types?
-    as' = sAssigns scr ++ case sResult scr of
-                            Nothing -> []
-                            Just e -> [Assign resultVar e]
-    (nodes, nodemap) = mkNodes new $ map vn as'
-    edges = fromJust $ mkEdges nodemap
-          $ concatMap (\(Assign (Var _ v) e) ->
-                          map (\(Var _ d) -> (d, v, "")) (directDepsOf e)) as'
+    (nodes, nodemap) = mkNodes' scr
+    edges = mkEdges' nodemap scr
