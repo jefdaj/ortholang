@@ -26,6 +26,7 @@ import Data.Maybe (fromJust)
 import System.FilePath (combine)
 import qualified Data.Text.Lazy as T
 import Control.Monad.IO.Class (liftIO)
+import Data.List (nub)
 
 import OrthoLang.Modules.Plots (png) -- TODO rename?
 
@@ -119,6 +120,15 @@ ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = f
                 ]
              ]
 
+-- | Like depsOf, but does not include indirect dependencies since they complicate the graph.
+directDepsOf :: Expr -> [Var]
+directDepsOf (Lit _ _           ) = []
+directDepsOf (Ref _ _ vs v      ) = [v]
+directDepsOf (Bop _ _ vs _ e1 e2) = nub $ concatMap directDepsOf [e1, e2] ++ concatMap varOf [e1, e2]
+directDepsOf (Fun _ _ vs _ es   ) = nub $ concatMap directDepsOf es ++ concatMap varOf es
+directDepsOf (Lst _ _ vs   es   ) = nub $ concatMap directDepsOf es ++ concatMap varOf es
+directDepsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
+
 {-|
 Reads the script (only up to the point where the graph fn was called) and
 generates a Haskell DotGraph data structure. It could be used directly with
@@ -137,4 +147,4 @@ dotGraph scr = graphToDot ex1Params (gr :: Gr String String)
     (nodes, nodemap) = mkNodes new $ map vn as'
     edges = fromJust $ mkEdges nodemap
           $ concatMap (\(Assign (Var _ v) e) ->
-                          map (\(Var _ d) -> (d, v, "")) (depsOf e)) as'
+                          map (\(Var _ d) -> (d, v, "")) (directDepsOf e)) as'

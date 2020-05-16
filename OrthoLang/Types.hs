@@ -53,6 +53,7 @@ module OrthoLang.Types
   , defaultShow
   , defaultShowN -- same but lets you pick how many lines to show
   , depsOf
+  , varOf
   , emptyDigests
   , emptyIDs
   , emptyScript
@@ -370,7 +371,7 @@ typeOf (Com (CompiledExpr t _ _)) = t
 
 varOf :: Expr -> [Var]
 varOf (Ref _ _ _ v) = [v]
-varOf _                = [ ]
+varOf _             = [ ]
 
 depsOf :: Expr -> [Var]
 depsOf (Lit _ _           ) = []
