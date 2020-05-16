@@ -14,53 +14,49 @@ Partially based on this tutorial:
 module OrthoLang.Modules.DepGraph where
 
 import OrthoLang.Types
+import OrthoLang.Interpreter
 import Data.GraphViz
 import Data.Graph.Inductive hiding (nodes, edges)
-import Control.Monad (forM_)
 import Data.GraphViz.Attributes.Complete (ColorList, Color(..), toColorList)
 import Data.Maybe (fromJust)
 import System.FilePath (combine)
 
-doDots :: PrintDotRepr dg n => [(FilePath, dg n)] -> IO ()
-doDots cases = forM_ cases createImage
-
--- TODO different dir, obviously
-createImage :: PrintDotRepr dg n => (FilePath, dg n) -> IO FilePath
-createImage (n, g) = createImageInDir "/tmp" n Png g
-
-createImageInDir :: PrintDotRepr dg n => FilePath -> FilePath -> GraphvizOutput -> dg n -> IO FilePath
-createImageInDir d n o g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) o (combine d n)
+import OrthoLang.Modules.Plots (png) -- TODO rename?
 
 olModule :: Module
-olModule = undefined
+olModule = Module
+  { mName = "DepGraph"
+  , mDesc = "Graphs dependencies between OrthoLang variables"
+  , mTypes = [png]
+  , mGroups = []
+  , mEncodings = []
+  , mFunctions = [graphScript] -- TODO graph_depends, graph_rdepends (with common parts factored out)
+  }
 
-----------
--- mock --
-----------
+-- TODO how are we going to pass the script itself? probably need a new type of fn?
+graphScript :: Function
+graphScript = newFnA1
+  "graph_script"
+  (Exactly str) -- ^ title
+  (Exactly png) -- ^ graph
+  aDepgraphScript
+  [ReadsScript]
 
--- type MockVar = (String, [String])
--- 
--- type MockScript = ([MockVar], String)
--- 
--- mockScript :: MockScript
--- mockScript = (vs, "three")
---   where
---     vs =
---       [ ("one"  , [])
---       , ("two"  , ["one"])
---       , ("three", ["one", "two"])
---       , ("four" , ["two", "three"])
---       ]
--- 
--- mockNodes :: ([LNode String], NodeMap String)
--- mockNodes = mkNodes new $ map fst $ fst mockScript
--- 
--- mockGraph :: Gr String String
--- mockGraph = mkVarGraph mockScript
+-- TODO figure out how to add a title to the graph
+aDepgraphScript :: NewAction1
+aDepgraphScript (ExprPath out) titlePath = do
+  undefined
 
-------------
--- actual --
-------------
+-- TODO different dir, obviously
+-- createImage :: PrintDotRepr dg n => (FilePath, dg n) -> IO FilePath
+-- createImage (n, g) = createImageInDir "/tmp" n Png g
+
+-- createImageInDir :: PrintDotRepr dg n => FilePath -> FilePath -> GraphvizOutput -> dg n -> IO FilePath
+-- createImageInDir d n o g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) o (combine d n)
+
+-- TODO does it also need to return a path? want to use bin cache
+renderGraph :: PrintDotRepr dg n => FilePath -> GraphvizOutput -> dg n -> IO ()
+renderGraph = undefined
 
 olColors :: [(String, ColorList)]
 olColors =
@@ -71,10 +67,10 @@ olColors =
  where
    c r g b = toColorList [RGB r g b]
 
-mkVarGraph :: Script -> Gr String String
-mkVarGraph scr = mkGraph nodes edges
+dotGraph :: Script -> Gr String String
+dotGraph scr = mkGraph nodes edges
   where
-    vn (Assign (Var _ v) _) = v
+    vn (Assign (Var _ v) _) = v -- TODO move to Types?
     as' = sAssigns scr ++ case sResult scr of
                             Nothing -> []
                             Just e -> [Assign resultVar e]
