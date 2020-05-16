@@ -57,7 +57,7 @@ plot_lists <- function(lists, filename) {
     # viewport prevents labels getting cut off
     # from https://stackoverflow.com/a/22826211
     grid.newpage()
-    pushViewport(viewport(width=unit(0.95, "npc"), height = unit(0.95, "npc")))
+    pushViewport(viewport(width=unit(0.95, "npc"), height = unit(1, "npc")))
     grid.draw(v)
   }
   invisible(dev.off())
