@@ -110,7 +110,9 @@ olColors =
 -- TODO customize these
 ex1Params :: GraphvizParams n String String () String
 ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
-  where fn (_,l)   = if "_inputs" `isSuffixOf` l then [Shape PointShape] else [textLabel $ T.pack l]
+  where fn (_,l)   = if "_inputs" `isSuffixOf` l
+                       then [Shape PointShape, Width 0.01, Height 0.01]
+                       else [textLabel $ T.pack l]
         fe (_,_,l) = [textLabel $ T.pack l, ArrowHead noArrow] -- TODO how to apply arrow to specific edges only?
         ga = [ GraphAttrs
                  [ RankDir FromTop
