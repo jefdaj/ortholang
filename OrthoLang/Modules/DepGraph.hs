@@ -60,8 +60,8 @@ olModule = Module
 plotDot :: Function
 plotDot = hidden $ newFnA1
   "plot_dot"
-  (Exactly str) -- ^ shown dotgraph
-  (Exactly png) -- ^ graph
+  (Exactly str)
+  (Exactly png)
   aPlotDot
   [Hidden]
 
@@ -88,8 +88,8 @@ renderDotGraph path g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) Pn
 plotScript :: Function
 plotScript = newMacro
   "plot_script"
-  [Exactly str] -- ^ title
-  (Exactly png) -- ^ graph
+  [Exactly str]
+  (Exactly png)
   (mkDepGraphMacro selectAll)
   [ReadsScript]
 
@@ -116,7 +116,7 @@ plotDepends :: Function
 plotDepends = newMacro
   "plot_depends"
   [Exactly str, AnyType "type of the expr whose depends will be plotted"]
-  (Exactly png) -- ^ graph
+  (Exactly png)
   (mkDepGraphMacro selectDepends)
   [ReadsScript]
 
@@ -135,7 +135,7 @@ plotRDepends :: Function
 plotRDepends = newMacro
   "plot_rdepends"
   [Exactly str, AnyType "type of the expr whose reverse depends will be plotted"]
-  (Exactly png) -- ^ graph
+  (Exactly png)
   (mkDepGraphMacro selectRDepends)
   [ReadsScript]
 
