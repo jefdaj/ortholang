@@ -24,6 +24,7 @@ Notable repeat/replace and lists of results are not handled properly yet.
 module OrthoLang.Modules.DepGraph where
 
 import OrthoLang.Types
+import OrthoLang.Script (rDepsOf)
 import OrthoLang.Interpreter.Paths (prefixOf)
 import OrthoLang.Interpreter
 import OrthoLang.Util (digest, justOrDie)
@@ -47,7 +48,7 @@ olModule = Module
   , mTypes = [png]
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [plotDot, plotScript, plotDepends] -- TODO plot_rdepends (with common parts factored out)
+  , mFunctions = [plotDot, plotScript, plotDepends, plotRDepends]
   }
 
 
@@ -124,6 +125,25 @@ plotDepends = newMacro
 selectDepends :: Script -> [Expr] -> [Var]
 selectDepends _ [expr] = depsOf expr
 selectDepends _ es = error "ortholang.modules.depgraph.selectDepends" $ "bad exprs: " ++ show es
+
+
+-------------------
+-- plot_rdepends --
+-------------------
+
+-- TODO make the title work
+plotRDepends :: Function
+plotRDepends = newMacro
+  "plot_rdepends"
+  [Exactly str, AnyType "type of the expr whose reverse depends will be plotted"]
+  (Exactly png) -- ^ graph
+  (mkDepGraphMacro selectRDepends)
+  [ReadsScript]
+
+  -- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
+selectRDepends :: Script -> [Expr] -> [Var]
+selectRDepends scr [Ref _ _ _ v] = v : rDepsOf scr v
+selectRDepends _ es = error "ortholang.modules.depgraph.selectRDepends" $ "bad exprs: " ++ show es
 
 
 ---------------------------
@@ -251,12 +271,12 @@ fnNamesToIgnore :: [String]
 fnNamesToIgnore = ["plot_script", "plot_dot", "plot_depends", "plot_rdepends"]
 
 -- TODO how would you go about also adding indirect inputs here? probably need a fn that works on only exprs
-mkInputEdges :: Assign -> [(NLabel, NLabel, ELabel)]
-mkInputEdges (Assign (Var _ v) e) = directInputs
+mkInputEdges :: [String] -> Assign -> [(NLabel, NLabel, ELabel)]
+mkInputEdges selected (Assign (Var _ v) e) = directInputs
   where
     directInputs = if length inputs < 2 then edgesLabeled else edgesMerged
     tmpNode      = NLTmp (prefixOf e) (digest e)
-    inputs       = filter (/= (digest e)) $ inputNodes (digest e) e
+    inputs       = filter (\i -> i `elem` selected) $ filter (/= (digest e)) $ inputNodes (digest e) e
     edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow (prefixOf e))) inputs
     edgesMerged  = map (\i -> (NLVar i, tmpNode, ELTail)) inputs ++ [(tmpNode, NLVar v, ELHead)]
 
@@ -270,5 +290,6 @@ mkEdges' nodemap assigns = justOrDie "mkEdges'" $ mkEdges nodemap edges'
     loc = "ortholang.modules.depgraph.mkEdges'"
     -- as' = allAssigns scr
     as' = trace loc ("assigns: " ++ show assigns) assigns
-    edges = concatMap mkInputEdges as'
+    selectedNames = map (\(Assign (Var _ n) _) -> n) assigns
+    edges = concatMap (mkInputEdges selectedNames) as'
     edges' = trace loc ("edges: " ++ show edges) edges
