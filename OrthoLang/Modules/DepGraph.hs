@@ -112,13 +112,14 @@ olColors =
 
 -- TODO remove strings here if they're actually passed somewhere else?
 data NLabel
-	= NLVar String -- ^ string is the varname
+  = NLVar String -- ^ string is the varname
   | NLTmp String String -- ^ strings are name, expr digest
   deriving (Read, Show, Eq, Ord)
 
 data ELabel
-  = ELMerge -- ^ one of multiple function inputs
-  | ELArrow -- ^ the only function input
+  = ELTail -- ^ one of multiple arrows from input -> tmpnode
+  | ELHead -- ^ arrow from tmpnode -> output
+  | ELArrow String -- ^ the only function input; string is the fn name
   deriving (Read, Show, Eq, Ord)
 
 -- TODO should n be String?
@@ -128,8 +129,9 @@ ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = f
   where
     fn (_,NLVar l) = [textLabel $ T.pack l]
     fn (_,NLTmp l _) = [textLabel $ T.pack l, Shape PlainText]
-    fe (_,_,ELMerge ) = [Dir NoDir]
-    fe (_,_,ELArrow) = []
+    fe (_,_,ELArrow l) = [textLabel $ T.pack l]
+    fe (_,_,ELTail ) = [Dir NoDir]
+    fe (_,_,ELHead) = []
     ga = [ GraphAttrs
              [ RankDir FromTop
              , BgColor [toWColor White]
@@ -190,8 +192,8 @@ mkInputEdges (Assign (Var _ v) e) = if length inputs < 2 then edgesLabeled else 
   where
     tmpNode      = NLTmp (prefixOf e) (digest e)
     inputs       = filter (/= (digest e)) $ inputNodes (digest e) e
-    edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow)) inputs
-    edgesMerged  = map (\i -> (NLVar i, tmpNode, ELMerge)) inputs ++ [(tmpNode, NLVar v, ELArrow)]
+    edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow (prefixOf e))) inputs
+    edgesMerged  = map (\i -> (NLVar i, tmpNode, ELTail)) inputs ++ [(tmpNode, NLVar v, ELHead)]
 
 keepAssign :: Assign -> Bool
 keepAssign (Assign (Var _ v) e) = not (v `elem` varNamesToIgnore)
