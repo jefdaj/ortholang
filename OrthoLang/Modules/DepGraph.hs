@@ -128,7 +128,12 @@ data ELabel
 ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
   where
     fn (_,NLVar l  ) = [textLabel $ T.pack l]
-    fn (_,NLTmp l _) = [textLabel $ T.pack l, Shape PlainText, FillColor (toColorList [RGB 255 255 255])]
+    fn (_,NLTmp l _) = [ textLabel $ T.pack l
+                       , Shape PlainText
+                       , FillColor (toColorList [RGB 255 255 255])
+                       , Width  0.01
+                       , Height 0.01
+                       ]
 
     fe (_,_,ELArrow l) = [textLabel $ T.pack l]
     fe (_,_,ELTail   ) = [Dir NoDir]
