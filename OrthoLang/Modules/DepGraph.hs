@@ -143,35 +143,20 @@ inputVars (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instea
 
 -- merges input edges, as explained here:
 -- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz
--- mergeInputs :: [Var] -> [Var]
--- mergeInputs inputs
---   | length inputs < 2 = inputs
---   | otherwise = inputs' ++ [arrow]
---   where
---     tmp = () -- the intermediate node
---     setDest = undefined
---     inputs' = map (setDest tmp) inputs
---     arrow = undefined
 
 -- TODO this needs to add tmpNodes, but ideally not extra ones. how to tell?
 mkNodes' :: Script -> ([LNode String], NodeMap String)
 mkNodes' scr = mkNodes new nodes''
   where
     vn (Assign (Var _ v) _) = v -- TODO move to Types?
-    nodes = map vn $ sAssigns scr -- TODO aha! this probably needs to include the tmpNodes
+    nodes = map vn $ filter keepAssign $ sAssigns scr -- TODO aha! this probably needs to include the tmpNodes
     tmpNodes = concatMap (\(Assign _ e) -> if length (inputVars e) > 1 then [digest e ++ "_inputs"] else []) $ sAssigns scr
-    nodes' = filter (\n -> not $ n `elem` varnamesToIgnore) (nodes ++ tmpNodes)
+    nodes' = filter (\n -> not $ n `elem` varNamesToIgnore) (nodes ++ tmpNodes)
     nodes'' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes': " ++ show nodes') nodes'
 
 -- TODO explain that result will be removed in the notebook
-varnamesToIgnore :: [String]
-varnamesToIgnore = ["result"]
-
--- TODO is this exactly prefixOf?
--- edgeLabel' :: Expr -> String
--- edgeLabel' (Fun _ _ _ n _) = n
--- edgeLabel' e@(Bop _ _ _ _ _ _) = prefixOf e
--- edgeLabel' _ = ""
+varNamesToIgnore :: [String]
+varNamesToIgnore = ["result"]
 
 -- specifically, edge labels
 -- TODO only remove the current plot fn while leaving any others?
@@ -188,7 +173,7 @@ mkInputEdges (Assign (Var _ v) e) = if length inputs < 2 then edgesLabeled else 
     edgesMerged  = map (\i -> (i, tmpNode, "")) inputs ++ [(tmpNode, v, prefixOf e)]
 
 keepAssign :: Assign -> Bool
-keepAssign (Assign (Var _ v) e) = not (v `elem` varnamesToIgnore)
+keepAssign (Assign (Var _ v) e) = not (v `elem` varNamesToIgnore)
                                && not (prefixOf e `elem` fnNamesToIgnore)
 
 mkEdges' :: NodeMap String -> Script -> [LEdge String]
@@ -213,19 +198,3 @@ dotGraph scr = graphToDot ex1Params (gr :: Gr String String)
     gr = mkGraph nodes edges
     (nodes, nodemap) = mkNodes' scr -- TODO aha! this probably needs to include the tmpnodes
     edges = mkEdges' nodemap scr
-
--- merges input edges, as explained here:
--- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz
--- mergeInputsGraph :: Gr String String -> Gr String String
--- mergeInputsGraph gr = gr
--- 
--- -- TODO will this fail/not typecheck because the nodes are labeled?
--- mergeInputsNode :: Gr String String -> Node -> Gr String String
--- mergeInputsNode gr n
---   | indeg gr n < 2 = gr
---   | otherwise =
---       let ctx    = G.context gr n
---           inputs = G.inn gr n
---           gr'    = delEdges inputs gr
---       in undefined          
---   where
