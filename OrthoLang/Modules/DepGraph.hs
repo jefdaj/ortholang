@@ -47,7 +47,7 @@ olModule = Module
   , mTypes = [png]
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [plotDot, plotScript] -- TODO plot_depends, plot_rdepends (with common parts factored out)
+  , mFunctions = [plotDot, plotScript, plotDepends] -- TODO plot_rdepends (with common parts factored out)
   }
 
 
@@ -90,17 +90,40 @@ plotScript = newMacro
   "plot_script"
   [Exactly str] -- ^ title
   (Exactly png) -- ^ graph
-  (mkDepGraphMacro sAssigns)
+  (mkDepGraphMacro selectAll)
   [ReadsScript]
+
+selectAll :: Script -> [Expr] -> [Var]
+selectAll scr _ = map aVar $ sAssigns scr
 
 -- | This inserts a plot_dot call with the complete dot structure in its str input.
 -- TODO implement the other two by applying a function to the script first?
-mkDepGraphMacro :: (Script -> [Assign]) -> MacroExpansion
-mkDepGraphMacro assignFn scr (Fun t ms vs n _) = Fun t ms vs "plot_dot" [ds]
+mkDepGraphMacro :: (Script -> [Expr] -> [Var]) -> MacroExpansion
+mkDepGraphMacro selectFn scr (Fun t ms vs n (_:es)) = Fun t ms vs "plot_dot" [ds] -- TODO use the title arg
   where
-    dg = dotGraph $ assignFn scr
+    vs = selectFn scr es
+    dg = dotGraph $ filter (\a -> aVar a `elem` vs) $ sAssigns scr
     ds = Lit str (show dg)
 mkDepGraphMacro _ _ e = error "ortholang.modules.depgraph.mkDepGraphMacro" $ "bad expr arg: " ++ show e
+
+
+------------------
+-- plot_depends --
+------------------
+
+-- TODO make the title work
+plotDepends :: Function
+plotDepends = newMacro
+  "plot_depends"
+  [Exactly str, AnyType "type of the expr whose depends will be plotted"]
+  (Exactly png) -- ^ graph
+  (mkDepGraphMacro selectDepends)
+  [ReadsScript]
+
+  -- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
+selectDepends :: Script -> [Expr] -> [Var]
+selectDepends _ [expr] = depsOf expr
+selectDepends _ es = error "ortholang.modules.depgraph.selectDepends" $ "bad exprs: " ++ show es
 
 
 ---------------------------
