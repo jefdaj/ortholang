@@ -171,16 +171,20 @@ inputVars (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instea
 -- merges input edges, as explained here:
 -- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz
 
+allAssigns :: Script -> [Assign]
+allAssigns scr = filter keepAssign $ sAssigns scr ++ case sResult scr of
+  Nothing -> []
+  Just e  -> [Assign resultVar e]
+
 -- TODO this needs to add tmpNodes, but ideally not extra ones. how to tell?
 mkNodes' :: Script -> ([LNode NLabel], NodeMap NLabel)
 mkNodes' scr = mkNodes new nodes'
   where
-    varNodes = concatMap (\(Assign (Var _ v) _) ->
-                            if v `elem` varNamesToIgnore then [] else [NLVar v])
-                         (filter keepAssign $ sAssigns scr)
+    -- as' = sAssigns scr ++ [Assign resultVar (sResult scr)]
+    varNodes = concatMap (\(Assign (Var _ v) _) -> [NLVar v]) (allAssigns scr)
     tmpNodes = concatMap (\(Assign (Var _ v) e) ->
                             if length (inputVars e) < 2 then [] else [NLTmp (prefixOf e) (digest e)])
-                         (filter keepAssign $ sAssigns scr) -- TODO was there a reason not to filter these?
+                         (allAssigns scr)
     nodes = varNodes ++ tmpNodes
     nodes' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes: " ++ show nodes) nodes
 
@@ -210,7 +214,7 @@ mkEdges' :: NodeMap NLabel -> Script -> [LEdge ELabel]
 mkEdges' nodemap scr = justOrDie "mkEdges'" $ mkEdges nodemap edges'
   where
     loc = "ortholang.modules.depgraph.mkEdges'"
-    as' = filter keepAssign $ sAssigns scr
+    as' = allAssigns scr
     as'' = trace loc ("as': " ++ show as') as'
     edges = concatMap mkInputEdges as''
     edges' = trace loc ("edges: " ++ show edges) edges
