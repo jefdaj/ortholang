@@ -681,6 +681,9 @@ What it does:
 TODO remove if ggplot turns out to be nondeterministic
 
 TODO use hash of expr + original ext instead so it looks nicer?
+     this would also probably help certain programs recognize their filetypes
+
+TODO remove the need for the expr and just use a random dir
 -}
 withBinHash :: Expr -> Path
             -> (Path -> Action ()) -> Action ()

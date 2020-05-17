@@ -47,7 +47,7 @@ olModule = Module
   , mTypes = [png]
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [plotDot, plotScript, plotDepends, plotRDepends]
+  , mFunctions = [plotDot, plotVars, plotDepends, plotRDepends]
   }
 
 
@@ -71,23 +71,30 @@ aPlotDot (ExprPath out) inDot = do
   let loc = "ortholang.modules.depgraph.aPlotDot"
   txt <- readLit loc inDot
   let g = read txt :: DotGraph Node
+
+  -- TODO does this really need the expr?
+  -- withBinHash expr outPath actFn = do
   liftIO $ renderDotGraph out g
+
   trackWrite' [out]
   return ()
 
 -- TODO why return the filepath?
+-- TODO and why is it adding .png itself?
 renderDotGraph :: PrintDotRepr dg n => FilePath -> dg n -> IO FilePath
 renderDotGraph path g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) Png path
 
 
 -----------------
--- plot_script --
+-- plot_vars --
 -----------------
 
 -- TODO make the title work
-plotScript :: Function
-plotScript = newMacro
-  "plot_script"
+-- TODO do use the result var if possible! just have a special constructor for it and render a different color
+--      might need to use a special _inputs naming scheme. could be simple: result_inputs. lol
+plotVars :: Function
+plotVars = newMacro
+  "plot_vars"
   [Exactly str]
   (Exactly png)
   (mkDepGraphMacro selectAll)
@@ -263,7 +270,7 @@ varNamesToIgnore = ["result"]
 -- TODO only remove the current plot fn while leaving any others?
 --      don't bother just for this, but subgraphs might be required for repeat + replace too
 fnNamesToIgnore :: [String]
-fnNamesToIgnore = ["plot_script", "plot_dot", "plot_depends", "plot_rdepends"]
+fnNamesToIgnore = ["plot_vars", "plot_dot", "plot_depends", "plot_rdepends"]
 
 -- TODO how would you go about also adding indirect inputs here? probably need a fn that works on only exprs
 mkInputEdges :: [String] -> Assign -> [(NLabel, NLabel, ELabel)]
