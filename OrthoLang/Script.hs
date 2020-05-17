@@ -217,7 +217,10 @@ expandMacros :: [Module] -> Script -> Script
 expandMacros = eScript
 
 eScript :: [Module] -> Script -> Script
-eScript mods s = s {sAssigns = map (eAssign mods s) (sAssigns s)}
+eScript mods s = s
+  { sAssigns = map (eAssign mods s) (sAssigns s)
+  , sResult = fmap (eExpr mods s) (sResult s)
+  }
 
 eAssign :: [Module] -> Script -> Assign -> Assign
 eAssign mods scr a@(Assign {aExpr = e}) = a {aExpr = eExpr mods scr e}
