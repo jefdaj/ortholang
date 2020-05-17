@@ -90,17 +90,17 @@ plotScript = newMacro
   "plot_script"
   [Exactly str] -- ^ title
   (Exactly png) -- ^ graph
-  mPlotScript
+  (mkDepGraphMacro sAssigns)
   [ReadsScript]
 
 -- | This inserts a plot_dot call with the complete dot structure in its str input.
 -- TODO implement the other two by applying a function to the script first?
-mPlotScript :: MacroExpansion
-mPlotScript scr (Fun t ms vs n _) | n == "plot_script" = Fun t ms vs "plot_dot" [ds]
+mkDepGraphMacro :: (Script -> [Assign]) -> MacroExpansion
+mkDepGraphMacro assignFn scr (Fun t ms vs n _) = Fun t ms vs "plot_dot" [ds]
   where
-    dg = dotGraph scr
+    dg = dotGraph $ assignFn scr
     ds = Lit str (show dg)
-mPlotScript _ e = error "ortholang.modules.depgraph.mPlotScript" $ "bad expr arg: " ++ show e
+mkDepGraphMacro _ _ e = error "ortholang.modules.depgraph.mkDepGraphMacro" $ "bad expr arg: " ++ show e
 
 
 ---------------------------
@@ -165,12 +165,13 @@ renderDotGraph, but instead it will be  and passed to the
 graphing function via an OrthoLang string. Which is kind of roundabout but
 seems to work.
 -}
-dotGraph :: Script -> DotGraph Node
-dotGraph scr = graphToDot params (gr :: Gr NLabel ELabel)
+dotGraph :: [Assign] -> DotGraph Node
+dotGraph assigns = graphToDot params (gr :: Gr NLabel ELabel)
   where
+    assigns' = filter keepAssign assigns
     gr = mkGraph nodes edges
-    (nodes, nodemap) = mkNodes' scr
-    edges = mkEdges' nodemap scr
+    (nodes, nodemap) = mkNodes' assigns'
+    edges = mkEdges' nodemap assigns'
 
 
 ------------------------------
@@ -198,20 +199,21 @@ inputVars (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instea
 -- merges input edges, as explained here:
 -- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz
 
-allAssigns :: Script -> [Assign]
-allAssigns scr = filter keepAssign $ sAssigns scr ++ case sResult scr of
-  Nothing -> []
-  Just e  -> [Assign resultVar e]
+-- allAssigns :: Script -> [Assign]
+-- allAssigns scr = filter keepAssign $ sAssigns scr ++ case sResult scr of
+  -- Nothing -> []
+  -- Just e  -> [Assign resultVar e]
 
 -- TODO this needs to add tmpNodes, but ideally not extra ones. how to tell?
-mkNodes' :: Script -> ([LNode NLabel], NodeMap NLabel)
-mkNodes' scr = mkNodes new nodes'
+mkNodes' :: [Assign] -> ([LNode NLabel], NodeMap NLabel)
+mkNodes' assigns = mkNodes new nodes'
   where
     -- as' = sAssigns scr ++ [Assign resultVar (sResult scr)]
-    varNodes = concatMap (\(Assign (Var _ v) _) -> [NLVar v]) (allAssigns scr)
+    -- assigns' = filter keepAssign assigns
+    varNodes = concatMap (\(Assign (Var _ v) _) -> [NLVar v]) assigns
     tmpNodes = concatMap (\(Assign (Var _ v) e) ->
                             if length (inputVars e) < 2 then [] else [NLTmp (prefixOf e) (digest e)])
-                         (allAssigns scr)
+                         assigns
     nodes = varNodes ++ tmpNodes
     nodes' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes: " ++ show nodes) nodes
 
@@ -239,11 +241,11 @@ keepAssign :: Assign -> Bool
 keepAssign (Assign (Var _ v) e) = not (v `elem` varNamesToIgnore)
                                && not (prefixOf e `elem` fnNamesToIgnore)
 
-mkEdges' :: NodeMap NLabel -> Script -> [LEdge ELabel]
-mkEdges' nodemap scr = justOrDie "mkEdges'" $ mkEdges nodemap edges'
+mkEdges' :: NodeMap NLabel -> [Assign] -> [LEdge ELabel]
+mkEdges' nodemap assigns = justOrDie "mkEdges'" $ mkEdges nodemap edges'
   where
     loc = "ortholang.modules.depgraph.mkEdges'"
-    as' = allAssigns scr
-    as'' = trace loc ("as': " ++ show as') as'
-    edges = concatMap mkInputEdges as''
+    -- as' = allAssigns scr
+    as' = trace loc ("assigns: " ++ show assigns) assigns
+    edges = concatMap mkInputEdges as'
     edges' = trace loc ("edges: " ++ show edges) edges
