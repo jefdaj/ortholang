@@ -18,16 +18,18 @@ module OrthoLang.Modules.DepGraph where
 import OrthoLang.Types
 import OrthoLang.Interpreter.Paths (prefixOf)
 import OrthoLang.Interpreter
-import OrthoLang.Debug (error)
+import OrthoLang.Util (digest, justOrDie)
+import OrthoLang.Debug (error, trace)
 import Prelude hiding (error)
 import Data.GraphViz
 import Data.Graph.Inductive hiding (nodes, edges)
+import qualified Data.Graph.Inductive.Graph as G
 import Data.GraphViz.Attributes.Complete -- (ColorList, Color(..), toColorList)
 import Data.Maybe (fromJust)
 import System.FilePath (combine)
 import qualified Data.Text.Lazy as T
 import Control.Monad.IO.Class (liftIO)
-import Data.List (nub)
+import Data.List (sort, nub)
 
 import OrthoLang.Modules.Plots (png) -- TODO rename?
 
@@ -126,47 +128,77 @@ Like depsOf, but customized for pretty graph output. Differences:
 
 * does not include indirect dependencies
 -}
-graphDeps :: Expr -> [Var]
-graphDeps (Lit _ _           ) = []
-graphDeps (Ref _ _ vs v      ) = [v]
-graphDeps (Bop _ _ vs _ e1 e2) = nub $ concatMap graphDeps [e1, e2] ++ concatMap varOf [e1, e2]
-graphDeps (Fun _ _ vs _ es   ) = nub $ concatMap graphDeps es ++ concatMap varOf es
-graphDeps (Lst _ _ vs   es   ) = nub $ concatMap graphDeps es ++ concatMap varOf es
-graphDeps (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
+inputNodes :: String -> Expr -> [String]
+inputNodes tmp e = inputs ++ if length inputs < 2 then [] else [tmp]
+  where
+    inputs = map (\(Var _ n) -> n) $ inputVars e -- TODO have to handle repeats here?
 
+inputVars :: Expr -> [Var]
+inputVars (Lit _ _           ) = []
+inputVars (Ref _ _ vs v      ) = [v]
+inputVars (Bop _ _ vs _ e1 e2) = nub $ concatMap inputVars [e1, e2] ++ concatMap varOf [e1, e2]
+inputVars (Fun _ _ vs _ es   ) = nub $ concatMap inputVars es ++ concatMap varOf es
+inputVars (Lst _ _ vs   es   ) = nub $ concatMap inputVars es ++ concatMap varOf es
+inputVars (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
+
+-- merges input edges, as explained here:
+-- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz
+-- mergeInputs :: [Var] -> [Var]
+-- mergeInputs inputs
+--   | length inputs < 2 = inputs
+--   | otherwise = inputs' ++ [arrow]
+--   where
+--     tmp = () -- the intermediate node
+--     setDest = undefined
+--     inputs' = map (setDest tmp) inputs
+--     arrow = undefined
+
+-- TODO this needs to add tmpNodes, but ideally not extra ones. how to tell?
 mkNodes' :: Script -> ([LNode String], NodeMap String)
-mkNodes' scr = mkNodes new nodes'
+mkNodes' scr = mkNodes new nodes''
   where
     vn (Assign (Var _ v) _) = v -- TODO move to Types?
-    nodes = map vn $ sAssigns scr
-    nodes' = filter (\n -> not $ n `elem` varnamesToIgnore) nodes
+    nodes = map vn $ sAssigns scr -- TODO aha! this probably needs to include the tmpNodes
+    tmpNodes = concatMap (\(Assign _ e) -> if length (inputVars e) > 1 then [digest e ++ "_inputs"] else []) $ sAssigns scr
+    nodes' = filter (\n -> not $ n `elem` varnamesToIgnore) (nodes ++ tmpNodes)
+    nodes'' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes': " ++ show nodes') nodes'
 
 -- TODO explain that result will be removed in the notebook
 varnamesToIgnore :: [String]
 varnamesToIgnore = ["result"]
 
--- TODO also do Bops
-edgeLabel' :: Expr -> String
-edgeLabel' (Fun _ _ _ n _) = if n `elem` fnNamesToIgnore then "" else n
-edgeLabel' e@(Bop _ _ _ _ _ _) = let n' = prefixOf e in if n' `elem` fnNamesToIgnore then "" else n'
-edgeLabel' _ = ""
+-- TODO is this exactly prefixOf?
+-- edgeLabel' :: Expr -> String
+-- edgeLabel' (Fun _ _ _ n _) = n
+-- edgeLabel' e@(Bop _ _ _ _ _ _) = prefixOf e
+-- edgeLabel' _ = ""
 
 -- specifically, edge labels
 -- TODO only remove the current plot fn while leaving any others?
 --      don't bother just for this, but subgraphs might be required for repeat + replace too
 fnNamesToIgnore :: [String]
-fnNamesToIgnore = ["plot_script", "plot_dot"] -- , "plot_depends", "plot_rdepends"]
+fnNamesToIgnore = ["plot_script", "plot_dot", "plot_depends", "plot_rdepends"]
 
--- TODO label some edges to get the removal working
-mkEdges' :: NodeMap String -> Script -> [LEdge String]
-mkEdges' nodemap scr = fromJust $ mkEdges nodemap edges'
+mkInputEdges :: Assign -> [(String, String, String)]
+mkInputEdges (Assign (Var _ v) e) = if length inputs < 2 then edgesLabeled else edgesMerged
   where
-    -- TODO also filter out the edges (fns) to ignore here based on the assignment expr
-    --      oh, but only if adding fn labels to edges doesn't make the above version work already
-    as' = filter (\(Assign (Var _ v) _) -> not $ v `elem` varnamesToIgnore) $ sAssigns scr
-    edges = concatMap (\(Assign (Var _ v) e) ->
-                          map (\(Var _ d) -> (d, v, edgeLabel' e)) (graphDeps e)) as'
-    edges' = filter (\(_,_,e) -> not $ e `elem` fnNamesToIgnore) edges
+    tmpNode      = digest e ++ "_inputs"
+    inputs       = filter (/= tmpNode) $ inputNodes tmpNode e
+    edgesLabeled = map (\i -> (i, v, prefixOf e)) inputs
+    edgesMerged  = map (\i -> (i, tmpNode, "")) inputs ++ [(tmpNode, v, prefixOf e)]
+
+keepAssign :: Assign -> Bool
+keepAssign (Assign (Var _ v) e) = not (v `elem` varnamesToIgnore)
+                               && not (prefixOf e `elem` fnNamesToIgnore)
+
+mkEdges' :: NodeMap String -> Script -> [LEdge String]
+mkEdges' nodemap scr = justOrDie "mkEdges'" $ mkEdges nodemap edges'
+  where
+    loc = "ortholang.modules.depgraph.mkEdges'"
+    as' = filter keepAssign $ sAssigns scr
+    as'' = trace loc ("as': " ++ show as') as'
+    edges = concatMap mkInputEdges as''
+    edges' = trace loc ("edges: " ++ show edges) edges
 
 {-|
 Reads the script (only up to the point where the graph fn was called) and
@@ -179,5 +211,21 @@ dotGraph :: Script -> DotGraph Node
 dotGraph scr = graphToDot ex1Params (gr :: Gr String String)
   where
     gr = mkGraph nodes edges
-    (nodes, nodemap) = mkNodes' scr
+    (nodes, nodemap) = mkNodes' scr -- TODO aha! this probably needs to include the tmpnodes
     edges = mkEdges' nodemap scr
+
+-- merges input edges, as explained here:
+-- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz
+-- mergeInputsGraph :: Gr String String -> Gr String String
+-- mergeInputsGraph gr = gr
+-- 
+-- -- TODO will this fail/not typecheck because the nodes are labeled?
+-- mergeInputsNode :: Gr String String -> Node -> Gr String String
+-- mergeInputsNode gr n
+--   | indeg gr n < 2 = gr
+--   | otherwise =
+--       let ctx    = G.context gr n
+--           inputs = G.inn gr n
+--           gr'    = delEdges inputs gr
+--       in undefined          
+--   where
