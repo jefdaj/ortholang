@@ -29,7 +29,7 @@ import Data.Maybe (fromJust)
 import System.FilePath (combine)
 import qualified Data.Text.Lazy as T
 import Control.Monad.IO.Class (liftIO)
-import Data.List (sort, nub)
+import Data.List (sort, nub, isSuffixOf)
 
 import OrthoLang.Modules.Plots (png) -- TODO rename?
 
@@ -110,8 +110,8 @@ olColors =
 -- TODO customize these
 ex1Params :: GraphvizParams n String String () String
 ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
-  where fn (_,l)   = [textLabel $ T.pack l]
-        fe (_,_,l) = [textLabel $ T.pack l]
+  where fn (_,l)   = if "_inputs" `isSuffixOf` l then [Shape PointShape] else [textLabel $ T.pack l]
+        fe (_,_,l) = [textLabel $ T.pack l, ArrowHead noArrow] -- TODO how to apply arrow to specific edges only?
         ga = [ GraphAttrs
                  [ RankDir FromTop
                  , BgColor [toWColor White]
