@@ -135,7 +135,7 @@ ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = f
                        , Height 0.01
                        ]
 
-    fe (_,_,ELArrow l) = [textLabel $ T.pack l]
+    fe (_,_,ELArrow l) = [textLabel $ T.pack (" " ++ l ++ " ")]
     fe (_,_,ELTail   ) = [Dir NoDir]
     fe (_,_,ELHead   ) = []
 
