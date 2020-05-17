@@ -170,7 +170,7 @@ mkNodes' scr = mkNodes new nodes'
                             if v `elem` varNamesToIgnore then [] else [NLVar v])
                          (filter keepAssign $ sAssigns scr)
     tmpNodes = concatMap (\(Assign (Var _ v) e) ->
-                            if length (inputVars e) < 2 then [] else [NLTmp v $ digest e])
+                            if length (inputVars e) < 2 then [] else [NLTmp (prefixOf e) (digest e)])
                          (filter keepAssign $ sAssigns scr) -- TODO was there a reason not to filter these?
     nodes = varNodes ++ tmpNodes
     nodes' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes: " ++ show nodes) nodes
@@ -188,7 +188,7 @@ fnNamesToIgnore = ["plot_script", "plot_dot", "plot_depends", "plot_rdepends"]
 -- mkInputEdges :: Assign -> [(String, String, ELabel)]
 mkInputEdges (Assign (Var _ v) e) = if length inputs < 2 then edgesLabeled else edgesMerged
   where
-    tmpNode      = NLTmp v $ digest e -- ++ "_inputs" -- TODO is this right?
+    tmpNode      = NLTmp (prefixOf e) (digest e)
     inputs       = filter (/= (digest e)) $ inputNodes (digest e) e
     edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow)) inputs
     edgesMerged  = map (\i -> (NLVar i, tmpNode, ELMerge)) inputs ++ [(tmpNode, NLVar v, ELArrow)]
