@@ -94,6 +94,7 @@ plotScript = newMacro
   [ReadsScript]
 
 -- | This inserts a plot_dot call with the complete dot structure in its str input.
+-- TODO implement the other two by applying a function to the script first?
 mPlotScript :: MacroExpansion
 mPlotScript scr (Fun t ms vs n _) | n == "plot_script" = Fun t ms vs "plot_dot" [ds]
   where
@@ -121,7 +122,7 @@ olColors =
 
 -- TODO remove strings here if they're actually passed somewhere else?
 data NLabel
-  = NLVar String -- ^ string is the varname
+  = NLVar String        -- ^ string is the varname
   | NLTmp String String -- ^ strings are name, expr digest
   deriving (Read, Show, Eq, Ord)
 
@@ -224,9 +225,11 @@ varNamesToIgnore = ["result"]
 fnNamesToIgnore :: [String]
 fnNamesToIgnore = ["plot_script", "plot_dot", "plot_depends", "plot_rdepends"]
 
--- mkInputEdges :: Assign -> [(String, String, ELabel)]
-mkInputEdges (Assign (Var _ v) e) = if length inputs < 2 then edgesLabeled else edgesMerged
+-- TODO how would you go about also adding indirect inputs here? probably need a fn that works on only exprs
+mkInputEdges :: Assign -> [(NLabel, NLabel, ELabel)]
+mkInputEdges (Assign (Var _ v) e) = directInputs
   where
+    directInputs = if length inputs < 2 then edgesLabeled else edgesMerged
     tmpNode      = NLTmp (prefixOf e) (digest e)
     inputs       = filter (/= (digest e)) $ inputNodes (digest e) e
     edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow (prefixOf e))) inputs
