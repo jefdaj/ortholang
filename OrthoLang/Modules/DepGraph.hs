@@ -107,23 +107,39 @@ olColors =
  where
    c r g b = toColorList [RGB r g b]
 
--- TODO customize these
-ex1Params :: GraphvizParams n String String () String
+-- see here for how to use labels:
+-- http://www.michaelburge.us/2017/09/01/how-to-use-graphviz-in-haskell.html
+
+-- TODO remove strings here if they're actually passed somewhere else?
+data NLabel
+	= NLVar String -- ^ string is the varname
+  | NLTmp String -- ^ string is the expr digest
+  deriving (Read, Show, Eq, Ord)
+
+data ELabel
+  = ELMerge -- ^ one of multiple function inputs
+  | ELArrow -- ^ the only function input
+  deriving (Read, Show, Eq, Ord)
+
+-- TODO should n be String?
+-- TODO once formatting works, should be easy to rename the intermediate nodes too
+-- ex1Params :: GraphvizParams n NLabel ELabel () String
 ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
-  where fn (_,l)   = if "_inputs" `isSuffixOf` l
-                       then [Shape PointShape, Width 0.01, Height 0.01]
-                       else [textLabel $ T.pack l]
-        fe (_,_,l) = [textLabel $ T.pack l, ArrowHead noArrow] -- TODO how to apply arrow to specific edges only?
-        ga = [ GraphAttrs
-                 [ RankDir FromTop
-                 , BgColor [toWColor White]
-                 ]
-             , NodeAttrs
-                [ shape     Ellipse
-                , FillColor (fromJust $ Prelude.lookup "blue" olColors)
-                , style     filled
-                ]
+  where
+    fn (_,NLVar l) = [textLabel $ T.pack l]
+    fn (_,NLTmp _) = [Shape PointShape, Width 0.01, Height 0.01]
+    fe (_,_,ELMerge ) = [Dir NoDir]
+    fe (_,_,ELArrow) = []
+    ga = [ GraphAttrs
+             [ RankDir FromTop
+             , BgColor [toWColor White]
              ]
+         , NodeAttrs
+            [ shape     Ellipse
+            , FillColor (fromJust $ Prelude.lookup "blue" olColors)
+            , style     filled
+            ]
+         ]
 
 {-|
 Like depsOf, but customized for pretty graph output. Differences:
@@ -147,14 +163,17 @@ inputVars (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instea
 -- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz
 
 -- TODO this needs to add tmpNodes, but ideally not extra ones. how to tell?
-mkNodes' :: Script -> ([LNode String], NodeMap String)
-mkNodes' scr = mkNodes new nodes''
+mkNodes' :: Script -> ([LNode NLabel], NodeMap NLabel)
+mkNodes' scr = mkNodes new nodes'
   where
-    vn (Assign (Var _ v) _) = v -- TODO move to Types?
-    nodes = map vn $ filter keepAssign $ sAssigns scr -- TODO aha! this probably needs to include the tmpNodes
-    tmpNodes = concatMap (\(Assign _ e) -> if length (inputVars e) > 1 then [digest e ++ "_inputs"] else []) $ sAssigns scr
-    nodes' = filter (\n -> not $ n `elem` varNamesToIgnore) (nodes ++ tmpNodes)
-    nodes'' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes': " ++ show nodes') nodes'
+    varNodes = concatMap (\(Assign (Var _ v) _) ->
+                            if v `elem` varNamesToIgnore then [] else [NLVar v])
+                         (filter keepAssign $ sAssigns scr)
+    tmpNodes = concatMap (\(Assign _ e) ->
+                            if length (inputVars e) < 2 then [] else [NLTmp $ digest e])
+                         (filter keepAssign $ sAssigns scr) -- TODO was there a reason not to filter these?
+    nodes = varNodes ++ tmpNodes
+    nodes' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes: " ++ show nodes) nodes
 
 -- TODO explain that result will be removed in the notebook
 varNamesToIgnore :: [String]
@@ -166,19 +185,19 @@ varNamesToIgnore = ["result"]
 fnNamesToIgnore :: [String]
 fnNamesToIgnore = ["plot_script", "plot_dot", "plot_depends", "plot_rdepends"]
 
-mkInputEdges :: Assign -> [(String, String, String)]
+-- mkInputEdges :: Assign -> [(String, String, ELabel)]
 mkInputEdges (Assign (Var _ v) e) = if length inputs < 2 then edgesLabeled else edgesMerged
   where
-    tmpNode      = digest e ++ "_inputs"
-    inputs       = filter (/= tmpNode) $ inputNodes tmpNode e
-    edgesLabeled = map (\i -> (i, v, prefixOf e)) inputs
-    edgesMerged  = map (\i -> (i, tmpNode, "")) inputs ++ [(tmpNode, v, prefixOf e)]
+    tmpNode      = NLTmp $ digest e -- ++ "_inputs" -- TODO is this right?
+    inputs       = filter (/= (digest e)) $ inputNodes (digest e) e
+    edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow)) inputs
+    edgesMerged  = map (\i -> (NLVar i, tmpNode, ELMerge)) inputs ++ [(tmpNode, NLVar v, ELArrow)]
 
 keepAssign :: Assign -> Bool
 keepAssign (Assign (Var _ v) e) = not (v `elem` varNamesToIgnore)
                                && not (prefixOf e `elem` fnNamesToIgnore)
 
-mkEdges' :: NodeMap String -> Script -> [LEdge String]
+mkEdges' :: NodeMap NLabel -> Script -> [LEdge ELabel]
 mkEdges' nodemap scr = justOrDie "mkEdges'" $ mkEdges nodemap edges'
   where
     loc = "ortholang.modules.depgraph.mkEdges'"
@@ -194,9 +213,9 @@ renderDotGraph, but instead it will be  and passed to the
 graphing function via an OrthoLang string. Which is kind of roundabout but
 seems to work.
 -}
-dotGraph :: Script -> DotGraph Node
-dotGraph scr = graphToDot ex1Params (gr :: Gr String String)
+-- dotGraph :: Script -> DotGraph Node
+dotGraph scr = graphToDot ex1Params (gr :: Gr NLabel ELabel)
   where
     gr = mkGraph nodes edges
-    (nodes, nodemap) = mkNodes' scr -- TODO aha! this probably needs to include the tmpnodes
+    (nodes, nodemap) = mkNodes' scr
     edges = mkEdges' nodemap scr
