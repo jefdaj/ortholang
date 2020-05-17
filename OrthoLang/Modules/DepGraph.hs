@@ -253,9 +253,13 @@ mkNodes' assigns = mkNodes new nodes'
   where
     -- as' = sAssigns scr ++ [Assign resultVar (sResult scr)]
     -- assigns' = filter keepAssign assigns
+    selected = map aVar assigns
     varNodes = concatMap (\(Assign (Var _ v) _) -> [NLVar v]) assigns
     tmpNodes = concatMap (\(Assign (Var _ v) e) ->
-                            if length (inputVars e) < 2 then [] else [NLTmp (prefixOf e) (digest e)])
+                            let inputs = filter (`elem` selected) $ inputVars e
+                            in if length inputs < 2
+                              then []
+                              else [NLTmp (prefixOf e) (digest e)])
                          assigns
     nodes = varNodes ++ tmpNodes
     nodes' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes: " ++ show nodes) nodes
