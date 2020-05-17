@@ -1,17 +1,25 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 {-|
 Generates dependency graphs using Graphviz. They are useful for debugging the
-interpreter, as well as for tutorials and documentation.
-
-Partially based on this tutorial:
-
-<http://haroldcarr.org/posts/2014-02-28-using-graphviz-via-haskell.html>
+interpreter, as well as for tutorials and documentation. This is a work in
+progress, and may fail in interesting or surprising ways when given edge cases!
+Notable repeat/replace and lists of results are not handled properly yet.
 -}
 
--- TODO add graph label attributes: https://stackoverflow.com/a/6452088/429898
+-- TODO get bin hash working
+-- TODO see if bin hash was all that it needed to get files sorted out
+-- TODO add plot_depends
+-- TODO add plot_rdepends
+
+-- Partially based on this tutorial:
+-- http://haroldcarr.org/posts/2014-02-28-using-graphviz-via-haskell.html
+
+-- TODO add graph label attributes? https://stackoverflow.com/a/6452088/429898
+-- TODO how to handle complicated lists like ortholog_in_max.ol uses?
+--      oh, i get it: have to add more nodes + edges per Expr when they're nested, not just one per assign
+--      and that's important for having the initial inputs show up too
 
 module OrthoLang.Modules.DepGraph where
 
@@ -24,14 +32,13 @@ import Prelude hiding (error)
 import Data.GraphViz
 import Data.Graph.Inductive hiding (nodes, edges)
 import qualified Data.Graph.Inductive.Graph as G
-import Data.GraphViz.Attributes.Complete -- (ColorList, Color(..), toColorList)
+import Data.GraphViz.Attributes.Complete
 import Data.Maybe (fromJust)
 import System.FilePath (combine)
 import qualified Data.Text.Lazy as T
 import Control.Monad.IO.Class (liftIO)
 import Data.List (sort, nub, isSuffixOf)
-
-import OrthoLang.Modules.Plots (png) -- TODO rename?
+import OrthoLang.Modules.Plots (png)
 
 olModule :: Module
 olModule = Module
@@ -48,7 +55,8 @@ olModule = Module
 -- plot_dot --
 --------------
 
--- TODO also take a title
+-- | Hidden function for rendering the raw Haskell Graphviz data structure passed as a string
+-- TODO also take a title?
 plotDot :: Function
 plotDot = hidden $ newFnA1
   "plot_dot"
@@ -94,10 +102,11 @@ mPlotScript scr (Fun t ms vs n _) | n == "plot_script" = Fun t ms vs "plot_dot" 
 mPlotScript _ e = error "ortholang.modules.depgraph.mPlotScript" $ "bad expr arg: " ++ show e
 
 
-----------------------------
--- create dot from script --
-----------------------------
+---------------------------
+-- create dot from graph --
+---------------------------
 
+-- TODO remove?
 olColors :: [(String, ColorList)]
 olColors =
  [ ("pink" , c 253 202 255)
@@ -122,10 +131,8 @@ data ELabel
   | ELArrow String -- ^ the only function input; string is the fn name
   deriving (Read, Show, Eq, Ord)
 
--- TODO should n be String?
--- TODO once formatting works, should be easy to rename the intermediate nodes too
--- ex1Params :: GraphvizParams n NLabel ELabel () String
-ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
+params :: GraphvizParams n NLabel ELabel () NLabel
+params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
   where
     fn (_,NLVar l  ) = [textLabel $ T.pack l]
     fn (_,NLTmp l _) = [ textLabel $ T.pack l
@@ -149,6 +156,25 @@ ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = f
             , style     filled
             ]
          ]
+
+{-|
+Reads the script (only up to the point where the graph fn was called) and
+generates a Haskell DotGraph data structure. It could be used directly with
+renderDotGraph, but instead it will be  and passed to the
+graphing function via an OrthoLang string. Which is kind of roundabout but
+seems to work.
+-}
+dotGraph :: Script -> DotGraph Node
+dotGraph scr = graphToDot params (gr :: Gr NLabel ELabel)
+  where
+    gr = mkGraph nodes edges
+    (nodes, nodemap) = mkNodes' scr
+    edges = mkEdges' nodemap scr
+
+
+------------------------------
+-- create graph from script --
+------------------------------
 
 {-|
 Like depsOf, but customized for pretty graph output. Differences:
@@ -218,17 +244,3 @@ mkEdges' nodemap scr = justOrDie "mkEdges'" $ mkEdges nodemap edges'
     as'' = trace loc ("as': " ++ show as') as'
     edges = concatMap mkInputEdges as''
     edges' = trace loc ("edges: " ++ show edges) edges
-
-{-|
-Reads the script (only up to the point where the graph fn was called) and
-generates a Haskell DotGraph data structure. It could be used directly with
-renderDotGraph, but instead it will be  and passed to the
-graphing function via an OrthoLang string. Which is kind of roundabout but
-seems to work.
--}
--- dotGraph :: Script -> DotGraph Node
-dotGraph scr = graphToDot ex1Params (gr :: Gr NLabel ELabel)
-  where
-    gr = mkGraph nodes edges
-    (nodes, nodemap) = mkNodes' scr
-    edges = mkEdges' nodemap scr
