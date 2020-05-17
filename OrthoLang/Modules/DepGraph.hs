@@ -113,7 +113,7 @@ olColors =
 -- TODO remove strings here if they're actually passed somewhere else?
 data NLabel
 	= NLVar String -- ^ string is the varname
-  | NLTmp String -- ^ string is the expr digest
+  | NLTmp String String -- ^ strings are name, expr digest
   deriving (Read, Show, Eq, Ord)
 
 data ELabel
@@ -127,7 +127,7 @@ data ELabel
 ex1Params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
   where
     fn (_,NLVar l) = [textLabel $ T.pack l]
-    fn (_,NLTmp _) = [Shape PointShape, Width 0.01, Height 0.01]
+    fn (_,NLTmp l _) = [textLabel $ T.pack l, Shape PlainText]
     fe (_,_,ELMerge ) = [Dir NoDir]
     fe (_,_,ELArrow) = []
     ga = [ GraphAttrs
@@ -169,8 +169,8 @@ mkNodes' scr = mkNodes new nodes'
     varNodes = concatMap (\(Assign (Var _ v) _) ->
                             if v `elem` varNamesToIgnore then [] else [NLVar v])
                          (filter keepAssign $ sAssigns scr)
-    tmpNodes = concatMap (\(Assign _ e) ->
-                            if length (inputVars e) < 2 then [] else [NLTmp $ digest e])
+    tmpNodes = concatMap (\(Assign (Var _ v) e) ->
+                            if length (inputVars e) < 2 then [] else [NLTmp v $ digest e])
                          (filter keepAssign $ sAssigns scr) -- TODO was there a reason not to filter these?
     nodes = varNodes ++ tmpNodes
     nodes' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes: " ++ show nodes) nodes
@@ -188,7 +188,7 @@ fnNamesToIgnore = ["plot_script", "plot_dot", "plot_depends", "plot_rdepends"]
 -- mkInputEdges :: Assign -> [(String, String, ELabel)]
 mkInputEdges (Assign (Var _ v) e) = if length inputs < 2 then edgesLabeled else edgesMerged
   where
-    tmpNode      = NLTmp $ digest e -- ++ "_inputs" -- TODO is this right?
+    tmpNode      = NLTmp v $ digest e -- ++ "_inputs" -- TODO is this right?
     inputs       = filter (/= (digest e)) $ inputNodes (digest e) e
     edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow)) inputs
     edgesMerged  = map (\i -> (NLVar i, tmpNode, ELMerge)) inputs ++ [(tmpNode, NLVar v, ELArrow)]
