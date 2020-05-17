@@ -10,12 +10,11 @@ Notable repeat/replace and lists of results are not handled properly yet.
 
 -- TODO get bin hash working
 -- TODO see if bin hash was all that it needed to get files sorted out
--- TODO add plot_depends
--- TODO add plot_rdepends
 
 -- Partially based on this tutorial:
 -- http://haroldcarr.org/posts/2014-02-28-using-graphviz-via-haskell.html
 
+-- TODO add a few tests
 -- TODO add graph label attributes? https://stackoverflow.com/a/6452088/429898
 -- TODO how to handle complicated lists like ortholog_in_max.ol uses?
 --      oh, i get it: have to add more nodes + edges per Expr when they're nested, not just one per assign
@@ -242,17 +241,10 @@ inputVars (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instea
 -- merges input edges, as explained here:
 -- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz
 
--- allAssigns :: Script -> [Assign]
--- allAssigns scr = filter keepAssign $ sAssigns scr ++ case sResult scr of
-  -- Nothing -> []
-  -- Just e  -> [Assign resultVar e]
-
 -- TODO this needs to add tmpNodes, but ideally not extra ones. how to tell?
 mkNodes' :: [Assign] -> ([LNode NLabel], NodeMap NLabel)
 mkNodes' assigns = mkNodes new nodes'
   where
-    -- as' = sAssigns scr ++ [Assign resultVar (sResult scr)]
-    -- assigns' = filter keepAssign assigns
     selected = map aVar assigns
     varNodes = concatMap (\(Assign (Var _ v) _) -> [NLVar v]) assigns
     tmpNodes = concatMap (\(Assign (Var _ v) e) ->
@@ -264,7 +256,6 @@ mkNodes' assigns = mkNodes new nodes'
     nodes = varNodes ++ tmpNodes
     nodes' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes: " ++ show nodes) nodes
 
--- TODO explain that result will be removed in the notebook
 varNamesToIgnore :: [String]
 varNamesToIgnore = ["result"]
 
@@ -292,7 +283,6 @@ mkEdges' :: NodeMap NLabel -> [Assign] -> [LEdge ELabel]
 mkEdges' nodemap assigns = justOrDie "mkEdges'" $ mkEdges nodemap edges'
   where
     loc = "ortholang.modules.depgraph.mkEdges'"
-    -- as' = allAssigns scr
     as' = trace loc ("assigns: " ++ show assigns) assigns
     selectedNames = map (\(Assign (Var _ n) _) -> n) assigns
     edges = concatMap (mkInputEdges selectedNames) as'
