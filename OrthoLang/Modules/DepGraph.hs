@@ -156,7 +156,9 @@ olColors :: [(String, ColorList)]
 olColors =
  [ ("pink" , c 253 202 255)
  , ("blue" , c 197 255 255)
+ , ("blue2", c 77 210 255)
  , ("green", c 217 255 173)
+ , ("green2", c 102 255 51)
  ]
  where
    c r g b = toColorList [RGB r g b]
@@ -182,7 +184,7 @@ params title = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge 
     fn (_,NLVar l  ) = [ textLabel $ T.pack l
                        , shape Ellipse
                        , style filled
-                       , FillColor (fromJust $ Prelude.lookup "blue" olColors)
+                       , FillColor (fromJust $ Prelude.lookup "blue2" olColors)
                        ]
 
     fn (_,NLTmp l _) = [ textLabel $ T.pack l
