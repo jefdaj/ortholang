@@ -34,6 +34,7 @@ import Data.Graph.Inductive hiding (nodes, edges)
 import qualified Data.Graph.Inductive.Graph as G
 import Data.GraphViz.Attributes.Complete
 import Data.Maybe (fromJust)
+import System.Directory (renameFile)
 import System.FilePath (combine)
 import qualified Data.Text.Lazy as T
 import Control.Monad.IO.Class (liftIO)
@@ -74,9 +75,14 @@ aPlotDot (ExprPath out) inDot = do
 
   -- TODO does this really need the expr?
   -- withBinHash expr outPath actFn = do
-  liftIO $ renderDotGraph out g
 
+  -- graphviz seems to add its own .png extension, which messes up the path.
+  -- so we move the file before marking it written.
+  -- TODO put this into the renderDotGraph fn
+  tmpOut <- liftIO $ renderDotGraph out g
+  liftIO $ renameFile tmpOut out
   trackWrite' [out]
+
   return ()
 
 -- TODO why return the filepath?
