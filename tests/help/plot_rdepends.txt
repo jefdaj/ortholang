@@ -1,0 +1,5 @@
+plot_rdepends : str any -> png
+where
+  str = string
+  any = type of the expr whose reverse depends will be plotted
+  png = plot image

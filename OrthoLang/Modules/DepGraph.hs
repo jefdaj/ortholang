@@ -8,7 +8,6 @@ progress, and may fail in interesting or surprising ways when given edge cases!
 Notable repeat/replace and lists of results are not handled properly yet.
 -}
 
--- TODO get bin hash working
 -- TODO see if bin hash was all that it needed to get files sorted out
 
 -- Partially based on this tutorial:
@@ -67,7 +66,6 @@ plotDot = hidden $ newFnA1
   aPlotDot
   [Hidden]
 
--- TODO withBinHash, right?
 aPlotDot :: NewAction1
 aPlotDot (ExprPath out) inDot = do
   let loc = "ortholang.modules.depgraph.aPlotDot"
@@ -75,21 +73,13 @@ aPlotDot (ExprPath out) inDot = do
   cfg <- fmap fromJust $ getShakeExtra
   let g = read txt :: DotGraph Node
       out' = toPath loc cfg out
-
-  -- TODO does this really need the expr?
-
-  -- TODO put this into the renderDotGraph fn
   withBinHash out out' $ \tmpPath -> do
     let tmpPath' = fromPath loc cfg tmpPath
     renderDotGraph tmpPath' g
-  -- liftIO $ renameFile tmpOut out
-  -- trackWrite' [out]
-
-  -- return ()
 
 renderDotGraph :: PrintDotRepr dg n => FilePath -> dg n -> Action ()
 renderDotGraph path g = do
-  -- graphviz adds its own .png extension here, so we have to move it back after
+  -- graphviz adds its own .png extension here, so we have to move the file afterward
   tmp <- liftIO $ Data.GraphViz.addExtension (runGraphvizCommand Dot g) Png path
   liftIO $ renameFile tmp path
   trackWrite' [path]

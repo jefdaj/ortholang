@@ -1,0 +1,4 @@
+plot_dot : str -> png
+where
+  str = string
+  png = plot image
