@@ -59,7 +59,7 @@ plotDot :: Function
 plotDot = hidden $ newFnA1
   "plot_dot"
   (Exactly str)
-  (Exactly png)
+  (Exactly png) -- TODO svg?
   aPlotDot
   [Hidden]
 
@@ -72,10 +72,11 @@ aPlotDot (ExprPath out) inDot = do
       out' = toPath loc cfg out
   withBinHash out out' $ \tmpPath -> do
     let tmpPath' = fromPath loc cfg tmpPath
-    renderDotGraph tmpPath' g
+    renderPng tmpPath' g
 
-renderDotGraph :: PrintDotRepr dg n => FilePath -> dg n -> Action ()
-renderDotGraph path g = do
+-- TODO how does the sizing work if we make it svg instead?
+renderPng :: PrintDotRepr dg n => FilePath -> dg n -> Action ()
+renderPng path g = do
   -- graphviz adds its own .png extension here, so we have to move the file afterward
   tmp <- liftIO $ Data.GraphViz.addExtension (runGraphvizCommand Dot g) Png path
   liftIO $ renameFile tmp path
@@ -196,6 +197,9 @@ params title = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge 
              , Label (StrLabel (T.pack $ title ++ "\n\n"))
              , LabelLoc VTop
              , LabelDistance 5.0
+             -- size is in inches, so max 900 x 1200 pixels overall
+             , Size (GSize 3.0 (Just 4.0) False)
+             , DPI 300
              ]
          , NodeAttrs
             [ shape     Ellipse
@@ -207,7 +211,7 @@ params title = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge 
 {-|
 Reads the script (only up to the point where the graph fn was called) and
 generates a Haskell DotGraph data structure. It could be used directly with
-renderDotGraph, but instead it will be  and passed to the
+renderPng, but instead it will be  and passed to the
 graphing function via an OrthoLang string. Which is kind of roundabout but
 seems to work.
 -}
