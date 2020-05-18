@@ -197,7 +197,7 @@ renderSig f = unwords $ [name, ":"] ++ inSigs ++ ["->", outSig]
     outSig = renderExt names $ fOutput f
 
 renderSigLong :: Function -> String
-renderSigLong f = renderSig f ++ "\n" ++ renderWhere names (fInputs f ++ [fOutput f])
+renderSigLong f = "\n" ++ renderSig f ++ "\n" ++ renderWhere names (fInputs f ++ [fOutput f])
   where
     names  = inputNames f
 
@@ -249,7 +249,7 @@ renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ 
     withCommas  ms = intercalate ", " (map ext ms) ++ ","
 
 renderWhere :: VarMap -> [TypeSig] -> String
-renderWhere names inSigs = if length descs == 0 then "" else unlines $ "where" : descs
+renderWhere names inSigs = if length descs == 0 then "" else unlines $ "\nwhere..." : descs
   where
     descs = nub $ catMaybes $ map (\i -> fmap (withExt i) $ renderWhereDesc i) inSigs
     withExt i d = "  " ++ unwords [renderExtBase names i, "=", d]

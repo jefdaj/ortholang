@@ -77,7 +77,7 @@ shortPrompt cfg = name ++ promptArrow
 cmdHelp :: ReplInfo
 cmdHelp ms st@(_, cfg, _, _, _) hdl line = do
   doc <- help cfg ms line
-  hPutStrLn hdl doc
+  hPutStrLn hdl $ "\n" ++ doc
 
 cmdType :: ReplInfo
 cmdType mods st@(scr, _, _, _, _) hdl s = hPutStrLn hdl typeInfo
