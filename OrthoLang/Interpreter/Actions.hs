@@ -685,15 +685,15 @@ TODO use hash of expr + original ext instead so it looks nicer?
 
 TODO remove the need for the expr and just use a random dir
 -}
-withBinHash :: Expr -> Path
+withBinHash :: Show a => a -> Path
             -> (Path -> Action ()) -> Action ()
-withBinHash expr outPath actFn = do
+withBinHash uniq outPath actFn = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "interpreter.actions.withBinHash"
       binDir'  = fromPath loc cfg $ cacheDir cfg "bin"
       outPath' = fromPath loc cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
-  let binTmp' = binDir' </> digest expr -- <.> takeExtension outPath'
+  let binTmp' = binDir' </> digest uniq -- <.> takeExtension outPath'
       binTmp  = toPath loc cfg binTmp'
   _ <- actFn binTmp
   md5 <- hashContent binTmp

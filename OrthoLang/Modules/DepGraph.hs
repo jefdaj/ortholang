@@ -72,13 +72,16 @@ aPlotDot :: NewAction1
 aPlotDot (ExprPath out) inDot = do
   let loc = "ortholang.modules.depgraph.aPlotDot"
   txt <- readLit loc inDot
+  cfg <- fmap fromJust $ getShakeExtra
   let g = read txt :: DotGraph Node
+      out' = toPath loc cfg out
 
   -- TODO does this really need the expr?
-  -- withBinHash expr outPath actFn = do
 
   -- TODO put this into the renderDotGraph fn
-  renderDotGraph out g
+  withBinHash out out' $ \tmpPath -> do
+    let tmpPath' = fromPath loc cfg tmpPath
+    renderDotGraph tmpPath' g
   -- liftIO $ renameFile tmpOut out
   -- trackWrite' [out]
 
