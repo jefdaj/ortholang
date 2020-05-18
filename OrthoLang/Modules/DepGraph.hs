@@ -22,6 +22,7 @@ Notable repeat/replace and lists of results are not handled properly yet.
 
 module OrthoLang.Modules.DepGraph where
 
+import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Script (rDepsOf)
 import OrthoLang.Interpreter.Paths (prefixOf)
@@ -76,19 +77,19 @@ aPlotDot (ExprPath out) inDot = do
   -- TODO does this really need the expr?
   -- withBinHash expr outPath actFn = do
 
-  -- graphviz seems to add its own .png extension, which messes up the path.
-  -- so we move the file before marking it written.
   -- TODO put this into the renderDotGraph fn
-  tmpOut <- liftIO $ renderDotGraph out g
-  liftIO $ renameFile tmpOut out
-  trackWrite' [out]
+  renderDotGraph out g
+  -- liftIO $ renameFile tmpOut out
+  -- trackWrite' [out]
 
-  return ()
+  -- return ()
 
--- TODO why return the filepath?
--- TODO and why is it adding .png itself?
-renderDotGraph :: PrintDotRepr dg n => FilePath -> dg n -> IO FilePath
-renderDotGraph path g = Data.GraphViz.addExtension (runGraphvizCommand Dot g) Png path
+renderDotGraph :: PrintDotRepr dg n => FilePath -> dg n -> Action ()
+renderDotGraph path g = do
+  -- graphviz adds its own .png extension here, so we have to move it back after
+  tmp <- liftIO $ Data.GraphViz.addExtension (runGraphvizCommand Dot g) Png path
+  liftIO $ renameFile tmp path
+  trackWrite' [path]
 
 
 -----------------
