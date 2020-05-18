@@ -204,10 +204,10 @@ params title = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge 
              , Label (StrLabel (T.pack $ title ++ "\n\n"))
              , LabelLoc VTop
              , LabelDistance 5.0
-             -- size is in inches, so max 900 x 1200 pixels overall:
              -- TODO scale it by the number of nodes?
+             -- max size in pixels is (DPI * first number) x (DPI * second number):
              , DPI 300
-             , Size (GSize 3.0 (Just 4.0) False)
+             , Size (GSize 6.0 (Just 8.0) False)
              ]
          ]
 
