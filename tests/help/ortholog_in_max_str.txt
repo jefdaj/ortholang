@@ -1,4 +1,5 @@
 ortholog_in_max_str : num str.list.list str.list.list -> str.list.list
+
 where
   num = number in regular or scientific notation
   str = string

@@ -1,340 +1,340 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "l1"
-            , aExpr = Fun num.list Nothing [] "range_integers"
-                [ Lit num "1.0"
-                , Lit num "10.0"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "l2"
-            , aExpr = Fun num.list Nothing [] "range_integers"
-                [ Lit num "3.0"
-                , Lit num "15.0"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "l3"
-            , aExpr = Fun num.list Nothing [] "range_integers"
-                [ Lit num "3.0"
-                , Lit num "20.0"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "l4"
-            , aExpr = Fun num.list Nothing [] "range_integers"
-                [ Lit num "15.0"
-                , Lit num "50.0"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "l5"
-            , aExpr = Fun num.list Nothing [] "range_integers"
-                [ Lit num "0.0"
-                , Lit num "10.0"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "l6"
-            , aExpr = Fun num.list Nothing [] "range_integers"
-                [ Lit num "0.0"
-                , Lit num "100.0"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "d_one"
-            , aExpr = Fun tsv Nothing
-                [ Var ( RepID Nothing ) "l1" ] "sets_table"
-                [ Lst num.list Nothing
-                    [ Var ( RepID Nothing ) "l1" ]
-                    [ Ref num.list Nothing []
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "l1" 
+            , aExpr = Fun num.list Nothing [] "range_integers" 
+                [ Lit num "1.0" 
+                , Lit num "10.0" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "l2" 
+            , aExpr = Fun num.list Nothing [] "range_integers" 
+                [ Lit num "3.0" 
+                , Lit num "15.0" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "l3" 
+            , aExpr = Fun num.list Nothing [] "range_integers" 
+                [ Lit num "3.0" 
+                , Lit num "20.0" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "l4" 
+            , aExpr = Fun num.list Nothing [] "range_integers" 
+                [ Lit num "15.0" 
+                , Lit num "50.0" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "l5" 
+            , aExpr = Fun num.list Nothing [] "range_integers" 
+                [ Lit num "0.0" 
+                , Lit num "10.0" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "l6" 
+            , aExpr = Fun num.list Nothing [] "range_integers" 
+                [ Lit num "0.0" 
+                , Lit num "100.0" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "d_one" 
+            , aExpr = Fun tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" ] "sets_table" 
+                [ Lst num.list Nothing 
+                    [ Var ( RepID Nothing ) "l1" ] 
+                    [ Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l1" )
                     ]
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "d_two"
-            , aExpr = Fun tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                ] "sets_table"
-                [ Lst num.list Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    ]
-                    [ Ref num.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "d_two" 
+            , aExpr = Fun tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                ] "sets_table" 
+                [ Lst num.list Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    ] 
+                    [ Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l1" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l2" )
-                    ]
+                    ] 
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "d_three"
-            , aExpr = Fun tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l3"
-                ] "sets_table"
-                [ Lst num.list Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l3"
-                    ]
-                    [ Ref num.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "d_three" 
+            , aExpr = Fun tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l3" 
+                ] "sets_table" 
+                [ Lst num.list Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l3" 
+                    ] 
+                    [ Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l1" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l2" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l3" )
-                    ]
+                    ] 
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "d_four"
-            , aExpr = Fun tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l3"
-                , Var ( RepID Nothing ) "l4"
-                ] "sets_table"
-                [ Lst num.list Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l3"
-                    , Var ( RepID Nothing ) "l4"
-                    ]
-                    [ Ref num.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "d_four" 
+            , aExpr = Fun tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l3" 
+                , Var ( RepID Nothing ) "l4" 
+                ] "sets_table" 
+                [ Lst num.list Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l3" 
+                    , Var ( RepID Nothing ) "l4" 
+                    ] 
+                    [ Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l1" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l2" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l3" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l4" )
-                    ]
+                    ] 
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "d_five"
-            , aExpr = Fun tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l3"
-                , Var ( RepID Nothing ) "l4"
-                , Var ( RepID Nothing ) "l5"
-                ] "sets_table"
-                [ Lst num.list Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l3"
-                    , Var ( RepID Nothing ) "l4"
-                    , Var ( RepID Nothing ) "l5"
-                    ]
-                    [ Ref num.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "d_five" 
+            , aExpr = Fun tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l3" 
+                , Var ( RepID Nothing ) "l4" 
+                , Var ( RepID Nothing ) "l5" 
+                ] "sets_table" 
+                [ Lst num.list Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l3" 
+                    , Var ( RepID Nothing ) "l4" 
+                    , Var ( RepID Nothing ) "l5" 
+                    ] 
+                    [ Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l1" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l2" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l3" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l4" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l5" )
-                    ]
+                    ] 
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "d_six"
-            , aExpr = Fun tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l3"
-                , Var ( RepID Nothing ) "l4"
-                , Var ( RepID Nothing ) "l5"
-                , Var ( RepID Nothing ) "l6"
-                ] "sets_table"
-                [ Lst num.list Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l3"
-                    , Var ( RepID Nothing ) "l4"
-                    , Var ( RepID Nothing ) "l5"
-                    , Var ( RepID Nothing ) "l6"
-                    ]
-                    [ Ref num.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "d_six" 
+            , aExpr = Fun tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l3" 
+                , Var ( RepID Nothing ) "l4" 
+                , Var ( RepID Nothing ) "l5" 
+                , Var ( RepID Nothing ) "l6" 
+                ] "sets_table" 
+                [ Lst num.list Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l3" 
+                    , Var ( RepID Nothing ) "l4" 
+                    , Var ( RepID Nothing ) "l5" 
+                    , Var ( RepID Nothing ) "l6" 
+                    ] 
+                    [ Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l1" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l2" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l3" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l4" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l5" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l6" )
-                    ]
+                    ] 
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "d_five_unordered"
-            , aExpr = Fun tsv Nothing
-                [ Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l5"
-                , Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l3"
-                , Var ( RepID Nothing ) "l4"
-                ] "sets_table"
-                [ Lst num.list Nothing
-                    [ Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l5"
-                    , Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l3"
-                    , Var ( RepID Nothing ) "l4"
-                    ]
-                    [ Ref num.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "d_five_unordered" 
+            , aExpr = Fun tsv Nothing 
+                [ Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l5" 
+                , Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l3" 
+                , Var ( RepID Nothing ) "l4" 
+                ] "sets_table" 
+                [ Lst num.list Nothing 
+                    [ Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l5" 
+                    , Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l3" 
+                    , Var ( RepID Nothing ) "l4" 
+                    ] 
+                    [ Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l2" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l5" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l1" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l3" )
-                    , Ref num.list Nothing []
+                    , Ref num.list Nothing [] 
                         ( Var ( RepID Nothing ) "l4" )
-                    ]
+                    ] 
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Lst tsv Nothing
-                [ Var ( RepID Nothing ) "d_one"
-                , Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "d_two"
-                , Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "d_three"
-                , Var ( RepID Nothing ) "l3"
-                , Var ( RepID Nothing ) "d_four"
-                , Var ( RepID Nothing ) "l4"
-                , Var ( RepID Nothing ) "d_five"
-                , Var ( RepID Nothing ) "l5"
-                , Var ( RepID Nothing ) "d_five_unordered"
-                , Var ( RepID Nothing ) "d_six"
-                , Var ( RepID Nothing ) "l6"
-                ]
-                [ Ref tsv Nothing
-                    [ Var ( RepID Nothing ) "l1" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lst tsv Nothing 
+                [ Var ( RepID Nothing ) "d_one" 
+                , Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "d_two" 
+                , Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "d_three" 
+                , Var ( RepID Nothing ) "l3" 
+                , Var ( RepID Nothing ) "d_four" 
+                , Var ( RepID Nothing ) "l4" 
+                , Var ( RepID Nothing ) "d_five" 
+                , Var ( RepID Nothing ) "l5" 
+                , Var ( RepID Nothing ) "d_five_unordered" 
+                , Var ( RepID Nothing ) "d_six" 
+                , Var ( RepID Nothing ) "l6" 
+                ] 
+                [ Ref tsv Nothing 
+                    [ Var ( RepID Nothing ) "l1" ] 
                     ( Var ( RepID Nothing ) "d_one" )
-                , Ref tsv Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    ]
+                , Ref tsv Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    ] 
                     ( Var ( RepID Nothing ) "d_two" )
-                , Ref tsv Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l3"
-                    ]
+                , Ref tsv Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l3" 
+                    ] 
                     ( Var ( RepID Nothing ) "d_three" )
-                , Ref tsv Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l3"
-                    , Var ( RepID Nothing ) "l4"
-                    ]
+                , Ref tsv Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l3" 
+                    , Var ( RepID Nothing ) "l4" 
+                    ] 
                     ( Var ( RepID Nothing ) "d_four" )
-                , Ref tsv Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l3"
-                    , Var ( RepID Nothing ) "l4"
-                    , Var ( RepID Nothing ) "l5"
-                    ]
+                , Ref tsv Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l3" 
+                    , Var ( RepID Nothing ) "l4" 
+                    , Var ( RepID Nothing ) "l5" 
+                    ] 
                     ( Var ( RepID Nothing ) "d_five" )
-                , Ref tsv Nothing
-                    [ Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l5"
-                    , Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l3"
-                    , Var ( RepID Nothing ) "l4"
-                    ]
+                , Ref tsv Nothing 
+                    [ Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l5" 
+                    , Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l3" 
+                    , Var ( RepID Nothing ) "l4" 
+                    ] 
                     ( Var ( RepID Nothing ) "d_five_unordered" )
-                , Ref tsv Nothing
-                    [ Var ( RepID Nothing ) "l1"
-                    , Var ( RepID Nothing ) "l2"
-                    , Var ( RepID Nothing ) "l3"
-                    , Var ( RepID Nothing ) "l4"
-                    , Var ( RepID Nothing ) "l5"
-                    , Var ( RepID Nothing ) "l6"
-                    ]
+                , Ref tsv Nothing 
+                    [ Var ( RepID Nothing ) "l1" 
+                    , Var ( RepID Nothing ) "l2" 
+                    , Var ( RepID Nothing ) "l3" 
+                    , Var ( RepID Nothing ) "l4" 
+                    , Var ( RepID Nothing ) "l5" 
+                    , Var ( RepID Nothing ) "l6" 
+                    ] 
                     ( Var ( RepID Nothing ) "d_six" )
-                ]
-            }
-        ]
-    , sResult = Just
-        ( Lst tsv Nothing
-            [ Var ( RepID Nothing ) "d_one"
-            , Var ( RepID Nothing ) "l1"
-            , Var ( RepID Nothing ) "d_two"
-            , Var ( RepID Nothing ) "l2"
-            , Var ( RepID Nothing ) "d_three"
-            , Var ( RepID Nothing ) "l3"
-            , Var ( RepID Nothing ) "d_four"
-            , Var ( RepID Nothing ) "l4"
-            , Var ( RepID Nothing ) "d_five"
-            , Var ( RepID Nothing ) "l5"
-            , Var ( RepID Nothing ) "d_five_unordered"
-            , Var ( RepID Nothing ) "d_six"
-            , Var ( RepID Nothing ) "l6"
-            ]
-            [ Ref tsv Nothing
-                [ Var ( RepID Nothing ) "l1" ]
+                ] 
+            } 
+        ] 
+    , sResult = Just 
+        ( Lst tsv Nothing 
+            [ Var ( RepID Nothing ) "d_one" 
+            , Var ( RepID Nothing ) "l1" 
+            , Var ( RepID Nothing ) "d_two" 
+            , Var ( RepID Nothing ) "l2" 
+            , Var ( RepID Nothing ) "d_three" 
+            , Var ( RepID Nothing ) "l3" 
+            , Var ( RepID Nothing ) "d_four" 
+            , Var ( RepID Nothing ) "l4" 
+            , Var ( RepID Nothing ) "d_five" 
+            , Var ( RepID Nothing ) "l5" 
+            , Var ( RepID Nothing ) "d_five_unordered" 
+            , Var ( RepID Nothing ) "d_six" 
+            , Var ( RepID Nothing ) "l6" 
+            ] 
+            [ Ref tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" ] 
                 ( Var ( RepID Nothing ) "d_one" )
-            , Ref tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                ]
+            , Ref tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                ] 
                 ( Var ( RepID Nothing ) "d_two" )
-            , Ref tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l3"
-                ]
+            , Ref tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l3" 
+                ] 
                 ( Var ( RepID Nothing ) "d_three" )
-            , Ref tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l3"
-                , Var ( RepID Nothing ) "l4"
-                ]
+            , Ref tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l3" 
+                , Var ( RepID Nothing ) "l4" 
+                ] 
                 ( Var ( RepID Nothing ) "d_four" )
-            , Ref tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l3"
-                , Var ( RepID Nothing ) "l4"
-                , Var ( RepID Nothing ) "l5"
-                ]
+            , Ref tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l3" 
+                , Var ( RepID Nothing ) "l4" 
+                , Var ( RepID Nothing ) "l5" 
+                ] 
                 ( Var ( RepID Nothing ) "d_five" )
-            , Ref tsv Nothing
-                [ Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l5"
-                , Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l3"
-                , Var ( RepID Nothing ) "l4"
-                ]
+            , Ref tsv Nothing 
+                [ Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l5" 
+                , Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l3" 
+                , Var ( RepID Nothing ) "l4" 
+                ] 
                 ( Var ( RepID Nothing ) "d_five_unordered" )
-            , Ref tsv Nothing
-                [ Var ( RepID Nothing ) "l1"
-                , Var ( RepID Nothing ) "l2"
-                , Var ( RepID Nothing ) "l3"
-                , Var ( RepID Nothing ) "l4"
-                , Var ( RepID Nothing ) "l5"
-                , Var ( RepID Nothing ) "l6"
-                ]
+            , Ref tsv Nothing 
+                [ Var ( RepID Nothing ) "l1" 
+                , Var ( RepID Nothing ) "l2" 
+                , Var ( RepID Nothing ) "l3" 
+                , Var ( RepID Nothing ) "l4" 
+                , Var ( RepID Nothing ) "l5" 
+                , Var ( RepID Nothing ) "l6" 
+                ] 
                 ( Var ( RepID Nothing ) "d_six" )
-            ]
+            ] 
         )
-    }
+    } 

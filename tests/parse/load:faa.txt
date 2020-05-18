@@ -1,55 +1,55 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "single"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mylist"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mylist" 
             , aExpr = Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mapped"
-            , aExpr = Fun faa.list Nothing
-                [ Var ( RepID Nothing ) "mylist" ] "load_faa_each"
-                [ Ref str.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mapped" 
+            , aExpr = Fun faa.list Nothing 
+                [ Var ( RepID Nothing ) "mylist" ] "load_faa_each" 
+                [ Ref str.list Nothing [] 
                     ( Var ( RepID Nothing ) "mylist" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Bop faa.list Nothing
-                [ Var ( RepID Nothing ) "single"
-                , Var ( RepID Nothing ) "mapped"
-                , Var ( RepID Nothing ) "mylist"
-                ] "|"
-                ( Lst faa Nothing
-                    [ Var ( RepID Nothing ) "single" ]
-                    [ Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop faa.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "mapped" 
+                , Var ( RepID Nothing ) "mylist" 
+                ] "|" 
+                ( Lst faa Nothing 
+                    [ Var ( RepID Nothing ) "single" ] 
+                    [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "single" )
                     ]
-                )
-                ( Ref faa.list Nothing
-                    [ Var ( RepID Nothing ) "mylist" ]
+                ) 
+                ( Ref faa.list Nothing 
+                    [ Var ( RepID Nothing ) "mylist" ] 
                     ( Var ( RepID Nothing ) "mapped" )
                 )
-            }
-        ]
-    , sResult = Just
-        ( Bop faa.list Nothing
-            [ Var ( RepID Nothing ) "single"
-            , Var ( RepID Nothing ) "mapped"
-            , Var ( RepID Nothing ) "mylist"
-            ] "|"
-            ( Lst faa Nothing
-                [ Var ( RepID Nothing ) "single" ]
-                [ Ref faa Nothing []
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop faa.list Nothing 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "mapped" 
+            , Var ( RepID Nothing ) "mylist" 
+            ] "|" 
+            ( Lst faa Nothing 
+                [ Var ( RepID Nothing ) "single" ] 
+                [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "single" )
                 ]
-            )
-            ( Ref faa.list Nothing
-                [ Var ( RepID Nothing ) "mylist" ]
+            ) 
+            ( Ref faa.list Nothing 
+                [ Var ( RepID Nothing ) "mylist" ] 
                 ( Var ( RepID Nothing ) "mapped" )
             )
         )
-    }
+    } 

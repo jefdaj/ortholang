@@ -1,206 +1,206 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "query"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "query" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_single.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mgen"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgen" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "hits"
-            , aExpr = Fun bht
-                ( Just ( Seed 0 ) )
-                [ Var ( RepID Nothing ) "query"
-                , Var ( RepID Nothing ) "mgen"
-                ] "blastp"
-                [ Lit num "0.1"
-                , Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits" 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
+                [ Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "blastp" 
+                [ Lit num "0.1" 
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Ref faa Nothing []
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "hits_ids"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "query"
-                , Var ( RepID Nothing ) "mgen"
-                ] "extract_targets"
-                [ Ref bht
-                    ( Just ( Seed 0 ) )
-                    [ Var ( RepID Nothing ) "query"
-                    , Var ( RepID Nothing ) "mgen"
-                    ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits_ids" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "extract_targets" 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "query" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] 
                     ( Var ( RepID Nothing ) "hits" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "hits_faa"
-            , aExpr = Fun faa Nothing
-                [ Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "query"
-                ] "extract_seqs"
-                [ Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits_faa" 
+            , aExpr = Fun faa Nothing 
+                [ Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "query" 
+                ] "extract_seqs" 
+                [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
-                , Fun str.list Nothing
-                    [ Var ( RepID Nothing ) "hits"
-                    , Var ( RepID Nothing ) "query"
-                    , Var ( RepID Nothing ) "mgen"
-                    ] "extract_targets"
-                    [ Ref bht
-                        ( Just ( Seed 0 ) )
-                        [ Var ( RepID Nothing ) "query"
-                        , Var ( RepID Nothing ) "mgen"
-                        ]
+                , Fun str.list Nothing 
+                    [ Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "query" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] "extract_targets" 
+                    [ Ref bht 
+                        ( Just ( Seed 0 ) ) 
+                        [ Var ( RepID Nothing ) "query" 
+                        , Var ( RepID Nothing ) "mgen" 
+                        ] 
                         ( Var ( RepID Nothing ) "hits" )
                     ]
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "hits_aln"
-            , aExpr = Fun aln Nothing
-                [ Var ( RepID Nothing ) "hits_faa"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "query"
-                ] "muscle"
-                [ Ref faa Nothing
-                    [ Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "hits"
-                    , Var ( RepID Nothing ) "query"
-                    ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits_aln" 
+            , aExpr = Fun aln Nothing 
+                [ Var ( RepID Nothing ) "hits_faa" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "query" 
+                ] "muscle" 
+                [ Ref faa Nothing 
+                    [ Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "query" 
+                    ] 
                     ( Var ( RepID Nothing ) "hits_faa" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "hits_hmm"
-            , aExpr = Fun hmm Nothing
-                [ Var ( RepID Nothing ) "hits_aln"
-                , Var ( RepID Nothing ) "hits_faa"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "query"
-                ] "hmmbuild"
-                [ Ref aln Nothing
-                    [ Var ( RepID Nothing ) "hits_faa"
-                    , Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "hits"
-                    , Var ( RepID Nothing ) "query"
-                    ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits_hmm" 
+            , aExpr = Fun hmm Nothing 
+                [ Var ( RepID Nothing ) "hits_aln" 
+                , Var ( RepID Nothing ) "hits_faa" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "query" 
+                ] "hmmbuild" 
+                [ Ref aln Nothing 
+                    [ Var ( RepID Nothing ) "hits_faa" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "query" 
+                    ] 
                     ( Var ( RepID Nothing ) "hits_aln" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "hits2"
-            , aExpr = Fun hht Nothing
-                [ Var ( RepID Nothing ) "hits_hmm"
-                , Var ( RepID Nothing ) "hits_aln"
-                , Var ( RepID Nothing ) "hits_faa"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "query"
-                ] "hmmsearch"
-                [ Lit num "1.0e-10"
-                , Ref hmm Nothing
-                    [ Var ( RepID Nothing ) "hits_aln"
-                    , Var ( RepID Nothing ) "hits_faa"
-                    , Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "hits"
-                    , Var ( RepID Nothing ) "query"
-                    ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits2" 
+            , aExpr = Fun hht Nothing 
+                [ Var ( RepID Nothing ) "hits_hmm" 
+                , Var ( RepID Nothing ) "hits_aln" 
+                , Var ( RepID Nothing ) "hits_faa" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "query" 
+                ] "hmmsearch" 
+                [ Lit num "1.0e-10" 
+                , Ref hmm Nothing 
+                    [ Var ( RepID Nothing ) "hits_aln" 
+                    , Var ( RepID Nothing ) "hits_faa" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "query" 
+                    ] 
                     ( Var ( RepID Nothing ) "hits_hmm" )
-                , Ref faa Nothing []
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "hits2_ids"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "hits2"
-                , Var ( RepID Nothing ) "hits_hmm"
-                , Var ( RepID Nothing ) "hits_aln"
-                , Var ( RepID Nothing ) "hits_faa"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "query"
-                ] "extract_hmm_targets"
-                [ Ref hht Nothing
-                    [ Var ( RepID Nothing ) "hits_hmm"
-                    , Var ( RepID Nothing ) "hits_aln"
-                    , Var ( RepID Nothing ) "hits_faa"
-                    , Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "hits"
-                    , Var ( RepID Nothing ) "query"
-                    ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits2_ids" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "hits2" 
+                , Var ( RepID Nothing ) "hits_hmm" 
+                , Var ( RepID Nothing ) "hits_aln" 
+                , Var ( RepID Nothing ) "hits_faa" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "query" 
+                ] "extract_hmm_targets" 
+                [ Ref hht Nothing 
+                    [ Var ( RepID Nothing ) "hits_hmm" 
+                    , Var ( RepID Nothing ) "hits_aln" 
+                    , Var ( RepID Nothing ) "hits_faa" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "query" 
+                    ] 
                     ( Var ( RepID Nothing ) "hits2" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Bop str.list Nothing
-                [ Var ( RepID Nothing ) "hits2_ids"
-                , Var ( RepID Nothing ) "hits2"
-                , Var ( RepID Nothing ) "hits_hmm"
-                , Var ( RepID Nothing ) "hits_aln"
-                , Var ( RepID Nothing ) "hits_faa"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "query"
-                , Var ( RepID Nothing ) "hits_ids"
-                ] "~"
-                ( Ref str.list Nothing
-                    [ Var ( RepID Nothing ) "hits2"
-                    , Var ( RepID Nothing ) "hits_hmm"
-                    , Var ( RepID Nothing ) "hits_aln"
-                    , Var ( RepID Nothing ) "hits_faa"
-                    , Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "hits"
-                    , Var ( RepID Nothing ) "query"
-                    ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop str.list Nothing 
+                [ Var ( RepID Nothing ) "hits2_ids" 
+                , Var ( RepID Nothing ) "hits2" 
+                , Var ( RepID Nothing ) "hits_hmm" 
+                , Var ( RepID Nothing ) "hits_aln" 
+                , Var ( RepID Nothing ) "hits_faa" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "hits_ids" 
+                ] "~" 
+                ( Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "hits2" 
+                    , Var ( RepID Nothing ) "hits_hmm" 
+                    , Var ( RepID Nothing ) "hits_aln" 
+                    , Var ( RepID Nothing ) "hits_faa" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "query" 
+                    ] 
                     ( Var ( RepID Nothing ) "hits2_ids" )
-                )
-                ( Ref str.list Nothing
-                    [ Var ( RepID Nothing ) "hits"
-                    , Var ( RepID Nothing ) "query"
-                    , Var ( RepID Nothing ) "mgen"
-                    ]
+                ) 
+                ( Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "query" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] 
                     ( Var ( RepID Nothing ) "hits_ids" )
                 )
-            }
-        ]
-    , sResult = Just
-        ( Bop str.list Nothing
-            [ Var ( RepID Nothing ) "hits2_ids"
-            , Var ( RepID Nothing ) "hits2"
-            , Var ( RepID Nothing ) "hits_hmm"
-            , Var ( RepID Nothing ) "hits_aln"
-            , Var ( RepID Nothing ) "hits_faa"
-            , Var ( RepID Nothing ) "mgen"
-            , Var ( RepID Nothing ) "hits"
-            , Var ( RepID Nothing ) "query"
-            , Var ( RepID Nothing ) "hits_ids"
-            ] "~"
-            ( Ref str.list Nothing
-                [ Var ( RepID Nothing ) "hits2"
-                , Var ( RepID Nothing ) "hits_hmm"
-                , Var ( RepID Nothing ) "hits_aln"
-                , Var ( RepID Nothing ) "hits_faa"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "query"
-                ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop str.list Nothing 
+            [ Var ( RepID Nothing ) "hits2_ids" 
+            , Var ( RepID Nothing ) "hits2" 
+            , Var ( RepID Nothing ) "hits_hmm" 
+            , Var ( RepID Nothing ) "hits_aln" 
+            , Var ( RepID Nothing ) "hits_faa" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "hits" 
+            , Var ( RepID Nothing ) "query" 
+            , Var ( RepID Nothing ) "hits_ids" 
+            ] "~" 
+            ( Ref str.list Nothing 
+                [ Var ( RepID Nothing ) "hits2" 
+                , Var ( RepID Nothing ) "hits_hmm" 
+                , Var ( RepID Nothing ) "hits_aln" 
+                , Var ( RepID Nothing ) "hits_faa" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "query" 
+                ] 
                 ( Var ( RepID Nothing ) "hits2_ids" )
-            )
-            ( Ref str.list Nothing
-                [ Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "query"
-                , Var ( RepID Nothing ) "mgen"
-                ]
+            ) 
+            ( Ref str.list Nothing 
+                [ Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "query" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] 
                 ( Var ( RepID Nothing ) "hits_ids" )
             )
         )
-    }
+    } 

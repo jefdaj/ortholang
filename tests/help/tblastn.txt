@@ -1,4 +1,5 @@
 tblastn : num faa fna -> bht
+
 where
   num = number in regular or scientific notation
   faa = FASTA amino acid

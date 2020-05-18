@@ -1,37 +1,37 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "all_faas"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "all_faas" 
             , aExpr = Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/*.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "small_faas"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "small_faas" 
             , aExpr = Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/*_small.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Bop faa.list Nothing
-                [ Var ( RepID Nothing ) "all_faas"
-                , Var ( RepID Nothing ) "small_faas"
-                ] "~"
-                ( Ref faa.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop faa.list Nothing 
+                [ Var ( RepID Nothing ) "all_faas" 
+                , Var ( RepID Nothing ) "small_faas" 
+                ] "~" 
+                ( Ref faa.list Nothing [] 
                     ( Var ( RepID Nothing ) "all_faas" )
-                )
-                ( Ref faa.list Nothing []
+                ) 
+                ( Ref faa.list Nothing [] 
                     ( Var ( RepID Nothing ) "small_faas" )
                 )
-            }
-        ]
-    , sResult = Just
-        ( Bop faa.list Nothing
-            [ Var ( RepID Nothing ) "all_faas"
-            , Var ( RepID Nothing ) "small_faas"
-            ] "~"
-            ( Ref faa.list Nothing []
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop faa.list Nothing 
+            [ Var ( RepID Nothing ) "all_faas" 
+            , Var ( RepID Nothing ) "small_faas" 
+            ] "~" 
+            ( Ref faa.list Nothing [] 
                 ( Var ( RepID Nothing ) "all_faas" )
-            )
-            ( Ref faa.list Nothing []
+            ) 
+            ( Ref faa.list Nothing [] 
                 ( Var ( RepID Nothing ) "small_faas" )
             )
         )
-    }
+    } 

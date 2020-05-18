@@ -1,56 +1,56 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "ncbi_db_list"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "ncbi_db_list" 
             , aExpr = Fun str.list Nothing [] "blastdblist" [ Lit str "" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "ncbi_human_db_list"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "ncbi_human_db_list" 
             , aExpr = Fun str.list Nothing [] "blastdblist" [ Lit str "human" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "human_est"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "human_est" 
             , aExpr = Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "human_est" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "swissprot"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "swissprot" 
             , aExpr = Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "swissprot" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "rsprotein"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "rsprotein" 
             , aExpr = Fun faa.blastdb Nothing [] "blastdbget_faa" [ Lit str "refseq_protein" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "rsgenomic"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "rsgenomic" 
             , aExpr = Fun fna.blastdb Nothing [] "blastdbget_fna" [ Lit str "refseq_genomic" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "pcc7942p"
-            , aExpr = Fun faa.gz.list Nothing [] "get_proteomes"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc7942p" 
+            , aExpr = Fun faa.gz.list Nothing [] "get_proteomes" 
                 [ Lst str Nothing [] [ Lit str "Synechococcus elongatus PCC 7942 (refseq)" ] ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "pcc7942n"
-            , aExpr = Fun fna.gz.list Nothing [] "get_genomes"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc7942n" 
+            , aExpr = Fun fna.gz.list Nothing [] "get_genomes" 
                 [ Lst str Nothing [] [ Lit str "Synechococcus elongatus PCC 7942 (refseq)" ] ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "pcc6803"
-            , aExpr = Fun faa.gz.list Nothing [] "get_proteomes"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc6803" 
+            , aExpr = Fun faa.gz.list Nothing [] "get_proteomes" 
                 [ Lst str Nothing [] [ Lit str "Synechocystis sp. PCC 6803 (refseq)" ] ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "samplefa"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "samplefa" 
             , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "https://molb7621.github.io/workshop/_downloads/sample.fa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref fna Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref fna Nothing [] 
                 ( Var ( RepID Nothing ) "samplefa" )
-            }
-        ]
-    , sResult = Just
-        ( Ref fna Nothing []
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref fna Nothing [] 
             ( Var ( RepID Nothing ) "samplefa" )
         )
-    }
+    } 

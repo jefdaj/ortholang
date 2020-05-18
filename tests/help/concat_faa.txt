@@ -1,3 +1,4 @@
 concat_faa : faa.list -> faa
+
 where
   faa = FASTA amino acid

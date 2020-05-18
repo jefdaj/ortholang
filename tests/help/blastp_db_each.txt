@@ -1,4 +1,5 @@
 blastp_db_each : num faa faa.blastdb.list -> bht.list
+
 where
   num = number in regular or scientific notation
   faa = FASTA amino acid

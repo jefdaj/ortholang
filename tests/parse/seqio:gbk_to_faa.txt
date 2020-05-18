@@ -1,20 +1,20 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "maga"
-            , aExpr = Fun faa Nothing [] "gbk_to_faa"
-                [ Lit str "cds"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun faa Nothing [] "gbk_to_faa" 
+                [ Lit str "cds" 
                 , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2.gbk" ]
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref faa Nothing []
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
-            }
-        ]
-    , sResult = Just
-        ( Ref faa Nothing []
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref faa Nothing [] 
             ( Var ( RepID Nothing ) "maga" )
         )
-    }
+    } 

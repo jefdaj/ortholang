@@ -1,75 +1,75 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "hits"
-            , aExpr = Fun bht
-                ( Just ( Seed 0 ) ) [] "blastp"
-                [ Lit num "1.0e-5"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "hits" 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) [] "blastp" 
+                [ Lit num "1.0e-5" 
                 , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
                 , Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "single"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "hits" ] "extract_targets"
-                [ Ref bht
-                    ( Just ( Seed 0 ) ) []
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "hits" ] "extract_targets" 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) [] 
                     ( Var ( RepID Nothing ) "hits" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mapped"
-            , aExpr = Fun str.list.list Nothing
-                [ Var ( RepID Nothing ) "hits" ] "extract_targets_each"
-                [ Lst bht Nothing
-                    [ Var ( RepID Nothing ) "hits" ]
-                    [ Ref bht
-                        ( Just ( Seed 0 ) ) []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mapped" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "hits" ] "extract_targets_each" 
+                [ Lst bht Nothing 
+                    [ Var ( RepID Nothing ) "hits" ] 
+                    [ Ref bht 
+                        ( Just ( Seed 0 ) ) [] 
                         ( Var ( RepID Nothing ) "hits" )
                     ]
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Bop str.list.list Nothing
-                [ Var ( RepID Nothing ) "single"
-                , Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "mapped"
-                ] "|"
-                ( Lst str.list Nothing
-                    [ Var ( RepID Nothing ) "single"
-                    , Var ( RepID Nothing ) "hits"
-                    ]
-                    [ Ref str.list Nothing
-                        [ Var ( RepID Nothing ) "hits" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop str.list.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "mapped" 
+                ] "|" 
+                ( Lst str.list Nothing 
+                    [ Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "hits" 
+                    ] 
+                    [ Ref str.list Nothing 
+                        [ Var ( RepID Nothing ) "hits" ] 
                         ( Var ( RepID Nothing ) "single" )
                     ]
-                )
-                ( Ref str.list.list Nothing
-                    [ Var ( RepID Nothing ) "hits" ]
+                ) 
+                ( Ref str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "hits" ] 
                     ( Var ( RepID Nothing ) "mapped" )
                 )
-            }
-        ]
-    , sResult = Just
-        ( Bop str.list.list Nothing
-            [ Var ( RepID Nothing ) "single"
-            , Var ( RepID Nothing ) "hits"
-            , Var ( RepID Nothing ) "mapped"
-            ] "|"
-            ( Lst str.list Nothing
-                [ Var ( RepID Nothing ) "single"
-                , Var ( RepID Nothing ) "hits"
-                ]
-                [ Ref str.list Nothing
-                    [ Var ( RepID Nothing ) "hits" ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop str.list.list Nothing 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "hits" 
+            , Var ( RepID Nothing ) "mapped" 
+            ] "|" 
+            ( Lst str.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "hits" 
+                ] 
+                [ Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "hits" ] 
                     ( Var ( RepID Nothing ) "single" )
                 ]
-            )
-            ( Ref str.list.list Nothing
-                [ Var ( RepID Nothing ) "hits" ]
+            ) 
+            ( Ref str.list.list Nothing 
+                [ Var ( RepID Nothing ) "hits" ] 
                 ( Var ( RepID Nothing ) "mapped" )
             )
         )
-    }
+    } 

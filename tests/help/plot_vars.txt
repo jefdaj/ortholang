@@ -1,4 +1,5 @@
 plot_vars : str -> png
+
 where
   str = string
   png = plot image

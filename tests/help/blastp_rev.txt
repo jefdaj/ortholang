@@ -1,4 +1,5 @@
 blastp_rev : num faa faa -> bht
+
 where
   num = number in regular or scientific notation
   faa = FASTA amino acid

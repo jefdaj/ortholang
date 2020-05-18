@@ -1,4 +1,5 @@
 diamond_blastp_db_sensitive : num faa dmnd -> bht
+
 where
   num = number in regular or scientific notation
   faa = FASTA amino acid

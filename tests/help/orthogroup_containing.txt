@@ -1,4 +1,5 @@
 orthogroup_containing : og str -> str.list
+
 where
   og = any orthogroup (ofr, spr, or gcr)
   str = string

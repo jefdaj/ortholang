@@ -1,4 +1,5 @@
 mmseqs_search : num fa1 fa2 -> bht
+
 where
   num = number in regular or scientific notation
   fa1 = query (any fasta) (fna or faa)

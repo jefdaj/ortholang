@@ -1,54 +1,54 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "mgen"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "mgen" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "maga"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mgendb"
-            , aExpr = Fun dmnd
-                ( Just ( Seed 0 ) )
-                [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb"
-                [ Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgendb" 
+            , aExpr = Fun dmnd 
+                ( Just ( Seed 0 ) ) 
+                [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb" 
+                [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Fun bht
-                ( Just ( Seed 0 ) )
-                [ Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgendb"
-                , Var ( RepID Nothing ) "mgen"
-                ] "diamond_blastp_db"
-                [ Lit num "1.0e-50"
-                , Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
+                [ Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgendb" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "diamond_blastp_db" 
+                [ Lit num "1.0e-50" 
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
-                , Ref dmnd
-                    ( Just ( Seed 0 ) )
-                    [ Var ( RepID Nothing ) "mgen" ]
+                , Ref dmnd 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "mgen" ] 
                     ( Var ( RepID Nothing ) "mgendb" )
-                ]
-            }
-        ]
-    , sResult = Just
-        ( Fun bht
-            ( Just ( Seed 0 ) )
-            [ Var ( RepID Nothing ) "maga"
-            , Var ( RepID Nothing ) "mgendb"
-            , Var ( RepID Nothing ) "mgen"
-            ] "diamond_blastp_db"
-            [ Lit num "1.0e-50"
-            , Ref faa Nothing []
+                ] 
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun bht 
+            ( Just ( Seed 0 ) ) 
+            [ Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgendb" 
+            , Var ( RepID Nothing ) "mgen" 
+            ] "diamond_blastp_db" 
+            [ Lit num "1.0e-50" 
+            , Ref faa Nothing [] 
                 ( Var ( RepID Nothing ) "maga" )
-            , Ref dmnd
-                ( Just ( Seed 0 ) )
-                [ Var ( RepID Nothing ) "mgen" ]
+            , Ref dmnd 
+                ( Just ( Seed 0 ) ) 
+                [ Var ( RepID Nothing ) "mgen" ] 
                 ( Var ( RepID Nothing ) "mgendb" )
-            ]
+            ] 
         )
-    }
+    } 

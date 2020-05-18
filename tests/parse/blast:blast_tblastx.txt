@@ -1,79 +1,79 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "genes5"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "genes5" 
             , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "maga"
-            , aExpr = Fun fna Nothing [] "gbk_to_fna"
-                [ Lit str "cds"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun fna Nothing [] "gbk_to_fna" 
+                [ Lit str "cds" 
                 , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "hits"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "genes5"
-                , Var ( RepID Nothing ) "maga"
-                ] "extract_queries"
-                [ Fun bht
-                    ( Just ( Seed 0 ) )
-                    [ Var ( RepID Nothing ) "genes5"
-                    , Var ( RepID Nothing ) "maga"
-                    ] "tblastx"
-                    [ Lit num "1.0e-5"
-                    , Ref fna Nothing []
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "hits" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "genes5" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "extract_queries" 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "genes5" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] "tblastx" 
+                    [ Lit num "1.0e-5" 
+                    , Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "genes5" )
-                    , Ref fna Nothing []
+                    , Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "maga" )
-                    ]
+                    ] 
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "genes5"
-                , Var ( RepID Nothing ) "maga"
-                ] "all"
-                [ Fun str.list.list Nothing
-                    [ Var ( RepID Nothing ) "hits"
-                    , Var ( RepID Nothing ) "genes5"
-                    , Var ( RepID Nothing ) "maga"
-                    ] "repeat"
-                    [ Ref str.list Nothing
-                        [ Var ( RepID Nothing ) "genes5"
-                        , Var ( RepID Nothing ) "maga"
-                        ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "genes5" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "all" 
+                [ Fun str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "hits" 
+                    , Var ( RepID Nothing ) "genes5" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] "repeat" 
+                    [ Ref str.list Nothing 
+                        [ Var ( RepID Nothing ) "genes5" 
+                        , Var ( RepID Nothing ) "maga" 
+                        ] 
                         ( Var ( RepID Nothing ) "hits" )
-                    , Ref fna Nothing []
+                    , Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "genes5" )
-                    , Lit num "10.0"
-                    ]
+                    , Lit num "10.0" 
+                    ] 
                 ]
-            }
-        ]
-    , sResult = Just
-        ( Fun str.list Nothing
-            [ Var ( RepID Nothing ) "hits"
-            , Var ( RepID Nothing ) "genes5"
-            , Var ( RepID Nothing ) "maga"
-            ] "all"
-            [ Fun str.list.list Nothing
-                [ Var ( RepID Nothing ) "hits"
-                , Var ( RepID Nothing ) "genes5"
-                , Var ( RepID Nothing ) "maga"
-                ] "repeat"
-                [ Ref str.list Nothing
-                    [ Var ( RepID Nothing ) "genes5"
-                    , Var ( RepID Nothing ) "maga"
-                    ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun str.list Nothing 
+            [ Var ( RepID Nothing ) "hits" 
+            , Var ( RepID Nothing ) "genes5" 
+            , Var ( RepID Nothing ) "maga" 
+            ] "all" 
+            [ Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "hits" 
+                , Var ( RepID Nothing ) "genes5" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "repeat" 
+                [ Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "genes5" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
                     ( Var ( RepID Nothing ) "hits" )
-                , Ref fna Nothing []
+                , Ref fna Nothing [] 
                     ( Var ( RepID Nothing ) "genes5" )
-                , Lit num "10.0"
-                ]
+                , Lit num "10.0" 
+                ] 
             ]
         )
-    }
+    } 

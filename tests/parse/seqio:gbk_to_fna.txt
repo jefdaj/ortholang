@@ -1,28 +1,28 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "gbk"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "gbk" 
             , aExpr = Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "fna"
-            , aExpr = Fun fna Nothing
-                [ Var ( RepID Nothing ) "gbk" ] "gbk_to_fna"
-                [ Lit str "cds"
-                , Ref gbk Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "fna" 
+            , aExpr = Fun fna Nothing 
+                [ Var ( RepID Nothing ) "gbk" ] "gbk_to_fna" 
+                [ Lit str "cds" 
+                , Ref gbk Nothing [] 
                     ( Var ( RepID Nothing ) "gbk" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref fna Nothing
-                [ Var ( RepID Nothing ) "gbk" ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref fna Nothing 
+                [ Var ( RepID Nothing ) "gbk" ] 
                 ( Var ( RepID Nothing ) "fna" )
-            }
-        ]
-    , sResult = Just
-        ( Ref fna Nothing
-            [ Var ( RepID Nothing ) "gbk" ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref fna Nothing 
+            [ Var ( RepID Nothing ) "gbk" ] 
             ( Var ( RepID Nothing ) "fna" )
         )
-    }
+    } 

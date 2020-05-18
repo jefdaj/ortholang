@@ -1,3 +1,4 @@
 concat_fna : fna.list -> fna
+
 where
   fna = FASTA nucleic acid

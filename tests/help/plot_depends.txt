@@ -1,4 +1,5 @@
 plot_depends : str any -> png
+
 where
   str = string
   any = type of the expr whose depends will be plotted

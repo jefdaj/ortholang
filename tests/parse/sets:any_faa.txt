@@ -1,88 +1,88 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "set1"
-            , aExpr = Lst str Nothing []
-                [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa"
-                , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "set2"
-            , aExpr = Lst str Nothing []
-                [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa"
-                , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa"
-                , Lit str "examples/sequences/Mycoplasma_hyopneumoniae_small.faa"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "res1"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "set1"
-                , Var ( RepID Nothing ) "set2"
-                ] "any"
-                [ Lst str.list Nothing
-                    [ Var ( RepID Nothing ) "set1"
-                    , Var ( RepID Nothing ) "set2"
-                    ]
-                    [ Ref str.list Nothing []
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "set1" 
+            , aExpr = Lst str Nothing [] 
+                [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
+                , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "set2" 
+            , aExpr = Lst str Nothing [] 
+                [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
+                , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
+                , Lit str "examples/sequences/Mycoplasma_hyopneumoniae_small.faa" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "res1" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                ] "any" 
+                [ Lst str.list Nothing 
+                    [ Var ( RepID Nothing ) "set1" 
+                    , Var ( RepID Nothing ) "set2" 
+                    ] 
+                    [ Ref str.list Nothing [] 
                         ( Var ( RepID Nothing ) "set1" )
-                    , Ref str.list Nothing []
+                    , Ref str.list Nothing [] 
                         ( Var ( RepID Nothing ) "set2" )
-                    ]
+                    ] 
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "res2"
-            , aExpr = Bop str.list Nothing
-                [ Var ( RepID Nothing ) "set1"
-                , Var ( RepID Nothing ) "set2"
-                ] "|"
-                ( Ref str.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "res2" 
+            , aExpr = Bop str.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                ] "|" 
+                ( Ref str.list Nothing [] 
                     ( Var ( RepID Nothing ) "set1" )
-                )
-                ( Ref str.list Nothing []
+                ) 
+                ( Ref str.list Nothing [] 
                     ( Var ( RepID Nothing ) "set2" )
                 )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Lst str.list Nothing
-                [ Var ( RepID Nothing ) "res1"
-                , Var ( RepID Nothing ) "set1"
-                , Var ( RepID Nothing ) "set2"
-                , Var ( RepID Nothing ) "res2"
-                ]
-                [ Ref str.list Nothing
-                    [ Var ( RepID Nothing ) "set1"
-                    , Var ( RepID Nothing ) "set2"
-                    ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lst str.list Nothing 
+                [ Var ( RepID Nothing ) "res1" 
+                , Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                , Var ( RepID Nothing ) "res2" 
+                ] 
+                [ Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "set1" 
+                    , Var ( RepID Nothing ) "set2" 
+                    ] 
                     ( Var ( RepID Nothing ) "res1" )
-                , Ref str.list Nothing
-                    [ Var ( RepID Nothing ) "set1"
-                    , Var ( RepID Nothing ) "set2"
-                    ]
+                , Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "set1" 
+                    , Var ( RepID Nothing ) "set2" 
+                    ] 
                     ( Var ( RepID Nothing ) "res2" )
-                ]
-            }
-        ]
-    , sResult = Just
-        ( Lst str.list Nothing
-            [ Var ( RepID Nothing ) "res1"
-            , Var ( RepID Nothing ) "set1"
-            , Var ( RepID Nothing ) "set2"
-            , Var ( RepID Nothing ) "res2"
-            ]
-            [ Ref str.list Nothing
-                [ Var ( RepID Nothing ) "set1"
-                , Var ( RepID Nothing ) "set2"
-                ]
+                ] 
+            } 
+        ] 
+    , sResult = Just 
+        ( Lst str.list Nothing 
+            [ Var ( RepID Nothing ) "res1" 
+            , Var ( RepID Nothing ) "set1" 
+            , Var ( RepID Nothing ) "set2" 
+            , Var ( RepID Nothing ) "res2" 
+            ] 
+            [ Ref str.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                ] 
                 ( Var ( RepID Nothing ) "res1" )
-            , Ref str.list Nothing
-                [ Var ( RepID Nothing ) "set1"
-                , Var ( RepID Nothing ) "set2"
-                ]
+            , Ref str.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                ] 
                 ( Var ( RepID Nothing ) "res2" )
-            ]
+            ] 
         )
-    }
+    } 

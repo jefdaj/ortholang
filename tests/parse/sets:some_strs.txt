@@ -1,84 +1,84 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "set1"
-            , aExpr = Lst str Nothing []
-                [ Lit str "1"
-                , Lit str "2"
-                , Lit str "3"
-                , Lit str "4"
-                , Lit str "5"
-                , Lit str "6"
-                , Lit str "7"
-                , Lit str "8"
-                , Lit str "9"
-                , Lit str "10"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "set2"
-            , aExpr = Lst str Nothing []
-                [ Lit str "5"
-                , Lit str "6"
-                , Lit str "7"
-                , Lit str "8"
-                , Lit str "9"
-                , Lit str "10"
-                , Lit str "11"
-                , Lit str "12"
-                , Lit str "13"
-                , Lit str "14"
-                , Lit str "15"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "set3"
-            , aExpr = Lst str Nothing []
-                [ Lit str "5"
-                , Lit str "6"
-                , Lit str "7"
-                , Lit str "8"
-                , Lit str "9"
-                , Lit str "10"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "fn"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "set1"
-                , Var ( RepID Nothing ) "set2"
-                , Var ( RepID Nothing ) "set3"
-                ] "some"
-                [ Lst str.list Nothing
-                    [ Var ( RepID Nothing ) "set1"
-                    , Var ( RepID Nothing ) "set2"
-                    , Var ( RepID Nothing ) "set3"
-                    ]
-                    [ Ref str.list Nothing []
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "set1" 
+            , aExpr = Lst str Nothing [] 
+                [ Lit str "1" 
+                , Lit str "2" 
+                , Lit str "3" 
+                , Lit str "4" 
+                , Lit str "5" 
+                , Lit str "6" 
+                , Lit str "7" 
+                , Lit str "8" 
+                , Lit str "9" 
+                , Lit str "10" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "set2" 
+            , aExpr = Lst str Nothing [] 
+                [ Lit str "5" 
+                , Lit str "6" 
+                , Lit str "7" 
+                , Lit str "8" 
+                , Lit str "9" 
+                , Lit str "10" 
+                , Lit str "11" 
+                , Lit str "12" 
+                , Lit str "13" 
+                , Lit str "14" 
+                , Lit str "15" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "set3" 
+            , aExpr = Lst str Nothing [] 
+                [ Lit str "5" 
+                , Lit str "6" 
+                , Lit str "7" 
+                , Lit str "8" 
+                , Lit str "9" 
+                , Lit str "10" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "fn" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                , Var ( RepID Nothing ) "set3" 
+                ] "some" 
+                [ Lst str.list Nothing 
+                    [ Var ( RepID Nothing ) "set1" 
+                    , Var ( RepID Nothing ) "set2" 
+                    , Var ( RepID Nothing ) "set3" 
+                    ] 
+                    [ Ref str.list Nothing [] 
                         ( Var ( RepID Nothing ) "set1" )
-                    , Ref str.list Nothing []
+                    , Ref str.list Nothing [] 
                         ( Var ( RepID Nothing ) "set2" )
-                    , Ref str.list Nothing []
+                    , Ref str.list Nothing [] 
                         ( Var ( RepID Nothing ) "set3" )
-                    ]
+                    ] 
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref str.list Nothing
-                [ Var ( RepID Nothing ) "set1"
-                , Var ( RepID Nothing ) "set2"
-                , Var ( RepID Nothing ) "set3"
-                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref str.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                , Var ( RepID Nothing ) "set3" 
+                ] 
                 ( Var ( RepID Nothing ) "fn" )
-            }
-        ]
-    , sResult = Just
-        ( Ref str.list Nothing
-            [ Var ( RepID Nothing ) "set1"
-            , Var ( RepID Nothing ) "set2"
-            , Var ( RepID Nothing ) "set3"
-            ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref str.list Nothing 
+            [ Var ( RepID Nothing ) "set1" 
+            , Var ( RepID Nothing ) "set2" 
+            , Var ( RepID Nothing ) "set3" 
+            ] 
             ( Var ( RepID Nothing ) "fn" )
         )
-    }
+    } 

@@ -4,7 +4,7 @@ You can create them with these 2 functions:
   newrulestest1 : str str -> str
   newrulestest3 : str str str -> str
 
-And use them with these 35 functions:
+And use them with these 39 functions:
   blastdbget_faa : str -> faa.blastdb
   blastdbget_fna : str -> fna.blastdb
   blastdblist : str -> str.list

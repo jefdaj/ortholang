@@ -1,145 +1,145 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "fna"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "fna" 
             , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "faa"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faa" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "singleFna"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "fna" ] "extract_ids"
-                [ Ref fna Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "singleFna" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "fna" ] "extract_ids" 
+                [ Ref fna Nothing [] 
                     ( Var ( RepID Nothing ) "fna" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "singleFaa"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "faa" ] "extract_ids"
-                [ Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "singleFaa" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "faa" ] "extract_ids" 
+                [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "faa" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mappedFna"
-            , aExpr = Fun str.list.list Nothing
-                [ Var ( RepID Nothing ) "fna" ] "extract_ids_each"
-                [ Lst fna Nothing
-                    [ Var ( RepID Nothing ) "fna" ]
-                    [ Ref fna Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mappedFna" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "fna" ] "extract_ids_each" 
+                [ Lst fna Nothing 
+                    [ Var ( RepID Nothing ) "fna" ] 
+                    [ Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "fna" )
                     ]
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mappedFaa"
-            , aExpr = Fun str.list.list Nothing
-                [ Var ( RepID Nothing ) "faa" ] "extract_ids_each"
-                [ Lst faa Nothing
-                    [ Var ( RepID Nothing ) "faa" ]
-                    [ Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mappedFaa" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "faa" ] "extract_ids_each" 
+                [ Lst faa Nothing 
+                    [ Var ( RepID Nothing ) "faa" ] 
+                    [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "faa" )
                     ]
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "bothFna"
-            , aExpr = Bop str.list.list Nothing
-                [ Var ( RepID Nothing ) "singleFna"
-                , Var ( RepID Nothing ) "fna"
-                , Var ( RepID Nothing ) "mappedFna"
-                ] "|"
-                ( Lst str.list Nothing
-                    [ Var ( RepID Nothing ) "singleFna"
-                    , Var ( RepID Nothing ) "fna"
-                    ]
-                    [ Ref str.list Nothing
-                        [ Var ( RepID Nothing ) "fna" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "bothFna" 
+            , aExpr = Bop str.list.list Nothing 
+                [ Var ( RepID Nothing ) "singleFna" 
+                , Var ( RepID Nothing ) "fna" 
+                , Var ( RepID Nothing ) "mappedFna" 
+                ] "|" 
+                ( Lst str.list Nothing 
+                    [ Var ( RepID Nothing ) "singleFna" 
+                    , Var ( RepID Nothing ) "fna" 
+                    ] 
+                    [ Ref str.list Nothing 
+                        [ Var ( RepID Nothing ) "fna" ] 
                         ( Var ( RepID Nothing ) "singleFna" )
                     ]
-                )
-                ( Ref str.list.list Nothing
-                    [ Var ( RepID Nothing ) "fna" ]
+                ) 
+                ( Ref str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "fna" ] 
                     ( Var ( RepID Nothing ) "mappedFna" )
                 )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "bothFaa"
-            , aExpr = Bop str.list.list Nothing
-                [ Var ( RepID Nothing ) "singleFaa"
-                , Var ( RepID Nothing ) "faa"
-                , Var ( RepID Nothing ) "mappedFaa"
-                ] "|"
-                ( Lst str.list Nothing
-                    [ Var ( RepID Nothing ) "singleFaa"
-                    , Var ( RepID Nothing ) "faa"
-                    ]
-                    [ Ref str.list Nothing
-                        [ Var ( RepID Nothing ) "faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "bothFaa" 
+            , aExpr = Bop str.list.list Nothing 
+                [ Var ( RepID Nothing ) "singleFaa" 
+                , Var ( RepID Nothing ) "faa" 
+                , Var ( RepID Nothing ) "mappedFaa" 
+                ] "|" 
+                ( Lst str.list Nothing 
+                    [ Var ( RepID Nothing ) "singleFaa" 
+                    , Var ( RepID Nothing ) "faa" 
+                    ] 
+                    [ Ref str.list Nothing 
+                        [ Var ( RepID Nothing ) "faa" ] 
                         ( Var ( RepID Nothing ) "singleFaa" )
                     ]
-                )
-                ( Ref str.list.list Nothing
-                    [ Var ( RepID Nothing ) "faa" ]
+                ) 
+                ( Ref str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "faa" ] 
                     ( Var ( RepID Nothing ) "mappedFaa" )
                 )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Bop str.list.list Nothing
-                [ Var ( RepID Nothing ) "bothFna"
-                , Var ( RepID Nothing ) "singleFna"
-                , Var ( RepID Nothing ) "fna"
-                , Var ( RepID Nothing ) "mappedFna"
-                , Var ( RepID Nothing ) "bothFaa"
-                , Var ( RepID Nothing ) "singleFaa"
-                , Var ( RepID Nothing ) "faa"
-                , Var ( RepID Nothing ) "mappedFaa"
-                ] "|"
-                ( Ref str.list.list Nothing
-                    [ Var ( RepID Nothing ) "singleFna"
-                    , Var ( RepID Nothing ) "fna"
-                    , Var ( RepID Nothing ) "mappedFna"
-                    ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop str.list.list Nothing 
+                [ Var ( RepID Nothing ) "bothFna" 
+                , Var ( RepID Nothing ) "singleFna" 
+                , Var ( RepID Nothing ) "fna" 
+                , Var ( RepID Nothing ) "mappedFna" 
+                , Var ( RepID Nothing ) "bothFaa" 
+                , Var ( RepID Nothing ) "singleFaa" 
+                , Var ( RepID Nothing ) "faa" 
+                , Var ( RepID Nothing ) "mappedFaa" 
+                ] "|" 
+                ( Ref str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "singleFna" 
+                    , Var ( RepID Nothing ) "fna" 
+                    , Var ( RepID Nothing ) "mappedFna" 
+                    ] 
                     ( Var ( RepID Nothing ) "bothFna" )
-                )
-                ( Ref str.list.list Nothing
-                    [ Var ( RepID Nothing ) "singleFaa"
-                    , Var ( RepID Nothing ) "faa"
-                    , Var ( RepID Nothing ) "mappedFaa"
-                    ]
+                ) 
+                ( Ref str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "singleFaa" 
+                    , Var ( RepID Nothing ) "faa" 
+                    , Var ( RepID Nothing ) "mappedFaa" 
+                    ] 
                     ( Var ( RepID Nothing ) "bothFaa" )
                 )
-            }
-        ]
-    , sResult = Just
-        ( Bop str.list.list Nothing
-            [ Var ( RepID Nothing ) "bothFna"
-            , Var ( RepID Nothing ) "singleFna"
-            , Var ( RepID Nothing ) "fna"
-            , Var ( RepID Nothing ) "mappedFna"
-            , Var ( RepID Nothing ) "bothFaa"
-            , Var ( RepID Nothing ) "singleFaa"
-            , Var ( RepID Nothing ) "faa"
-            , Var ( RepID Nothing ) "mappedFaa"
-            ] "|"
-            ( Ref str.list.list Nothing
-                [ Var ( RepID Nothing ) "singleFna"
-                , Var ( RepID Nothing ) "fna"
-                , Var ( RepID Nothing ) "mappedFna"
-                ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop str.list.list Nothing 
+            [ Var ( RepID Nothing ) "bothFna" 
+            , Var ( RepID Nothing ) "singleFna" 
+            , Var ( RepID Nothing ) "fna" 
+            , Var ( RepID Nothing ) "mappedFna" 
+            , Var ( RepID Nothing ) "bothFaa" 
+            , Var ( RepID Nothing ) "singleFaa" 
+            , Var ( RepID Nothing ) "faa" 
+            , Var ( RepID Nothing ) "mappedFaa" 
+            ] "|" 
+            ( Ref str.list.list Nothing 
+                [ Var ( RepID Nothing ) "singleFna" 
+                , Var ( RepID Nothing ) "fna" 
+                , Var ( RepID Nothing ) "mappedFna" 
+                ] 
                 ( Var ( RepID Nothing ) "bothFna" )
-            )
-            ( Ref str.list.list Nothing
-                [ Var ( RepID Nothing ) "singleFaa"
-                , Var ( RepID Nothing ) "faa"
-                , Var ( RepID Nothing ) "mappedFaa"
-                ]
+            ) 
+            ( Ref str.list.list Nothing 
+                [ Var ( RepID Nothing ) "singleFaa" 
+                , Var ( RepID Nothing ) "faa" 
+                , Var ( RepID Nothing ) "mappedFaa" 
+                ] 
                 ( Var ( RepID Nothing ) "bothFaa" )
             )
         )
-    }
+    } 

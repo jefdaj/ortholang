@@ -1,4 +1,5 @@
 ortholog_in_max : num og faa.list -> str.list.list
+
 where
   num = number in regular or scientific notation
   og = any orthogroup (ofr, spr, or gcr)

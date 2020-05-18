@@ -1,25 +1,25 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "pcc6803"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "pcc6803" 
             , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/PCC_6803_genes.fna" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "pcc7942"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc7942" 
             , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/PCC_7942_genes.fna" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "both"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "both" 
             , aExpr = Fun fna.list Nothing [] "load_fna_glob" [ Lit str "examples/sequences/PCC_*_genes.fna" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref fna.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref fna.list Nothing [] 
                 ( Var ( RepID Nothing ) "both" )
-            }
-        ]
-    , sResult = Just
-        ( Ref fna.list Nothing []
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref fna.list Nothing [] 
             ( Var ( RepID Nothing ) "both" )
         )
-    }
+    } 

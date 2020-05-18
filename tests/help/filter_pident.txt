@@ -1,4 +1,5 @@
 filter_pident : num ht -> ht
+
 where
   num = number in regular or scientific notation
   ht = a hit table (bht or crb)

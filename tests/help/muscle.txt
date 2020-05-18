@@ -1,4 +1,5 @@
 muscle : faa -> aln
+
 where
   faa = FASTA amino acid
   aln = multiple sequence alignment

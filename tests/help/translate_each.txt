@@ -1,4 +1,5 @@
 translate_each : fna.list -> faa.list
+
 where
   fna = FASTA nucleic acid
   faa = FASTA amino acid

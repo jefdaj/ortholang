@@ -1,216 +1,216 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "maga"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mbov"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mbov" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_bovis_small.fa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "maga_mbov"
-            , aExpr = Fun bht
-                ( Just ( Seed 0 ) )
-                [ Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mbov"
-                ] "blastp"
-                [ Lit num "1.0e-10"
-                , Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga_mbov" 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
+                [ Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mbov" 
+                ] "blastp" 
+                [ Lit num "1.0e-10" 
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
-                , Ref faa Nothing []
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mbov" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "maga_mbov_stringent"
-            , aExpr = Fun bht Nothing
-                [ Var ( RepID Nothing ) "maga_mbov"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mbov"
-                ] "filter_evalue"
-                [ Lit num "1.0e-50"
-                , Ref bht
-                    ( Just ( Seed 0 ) )
-                    [ Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mbov"
-                    ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga_mbov_stringent" 
+            , aExpr = Fun bht Nothing 
+                [ Var ( RepID Nothing ) "maga_mbov" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mbov" 
+                ] "filter_evalue" 
+                [ Lit num "1.0e-50" 
+                , Ref bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mbov" 
+                    ] 
+                    ( Var ( RepID Nothing ) "maga_mbov" )
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga_best_mbov" 
+            , aExpr = Fun bht Nothing 
+                [ Var ( RepID Nothing ) "maga_mbov" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mbov" 
+                ] "best_hits" 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mbov" 
+                    ] 
                     ( Var ( RepID Nothing ) "maga_mbov" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "maga_best_mbov"
-            , aExpr = Fun bht Nothing
-                [ Var ( RepID Nothing ) "maga_mbov"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mbov"
-                ] "best_hits"
-                [ Ref bht
-                    ( Just ( Seed 0 ) )
-                    [ Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mbov"
-                    ]
-                    ( Var ( RepID Nothing ) "maga_mbov" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "maga_mbov_rev"
-            , aExpr = Fun bht
-                ( Just ( Seed 0 ) )
-                [ Var ( RepID Nothing ) "mbov"
-                , Var ( RepID Nothing ) "maga"
-                ] "blastp"
-                [ Lit num "1.0e-10"
-                , Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga_mbov_rev" 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
+                [ Var ( RepID Nothing ) "mbov" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "blastp" 
+                [ Lit num "1.0e-10" 
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mbov" )
-                , Ref faa Nothing []
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "maga_mbov_rbh"
-            , aExpr = Fun bht Nothing
-                [ Var ( RepID Nothing ) "maga_mbov"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mbov"
-                , Var ( RepID Nothing ) "maga_mbov_rev"
-                ] "reciprocal_best"
-                [ Ref bht
-                    ( Just ( Seed 0 ) )
-                    [ Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mbov"
-                    ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga_mbov_rbh" 
+            , aExpr = Fun bht Nothing 
+                [ Var ( RepID Nothing ) "maga_mbov" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mbov" 
+                , Var ( RepID Nothing ) "maga_mbov_rev" 
+                ] "reciprocal_best" 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mbov" 
+                    ] 
                     ( Var ( RepID Nothing ) "maga_mbov" )
-                , Ref bht
-                    ( Just ( Seed 0 ) )
-                    [ Var ( RepID Nothing ) "mbov"
-                    , Var ( RepID Nothing ) "maga"
-                    ]
+                , Ref bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "mbov" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
                     ( Var ( RepID Nothing ) "maga_mbov_rev" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "maga_ids"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "maga_mbov_rbh"
-                , Var ( RepID Nothing ) "maga_mbov"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mbov"
-                , Var ( RepID Nothing ) "maga_mbov_rev"
-                ] "extract_queries"
-                [ Ref bht Nothing
-                    [ Var ( RepID Nothing ) "maga_mbov"
-                    , Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mbov"
-                    , Var ( RepID Nothing ) "maga_mbov_rev"
-                    ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga_ids" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "maga_mbov_rbh" 
+                , Var ( RepID Nothing ) "maga_mbov" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mbov" 
+                , Var ( RepID Nothing ) "maga_mbov_rev" 
+                ] "extract_queries" 
+                [ Ref bht Nothing 
+                    [ Var ( RepID Nothing ) "maga_mbov" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mbov" 
+                    , Var ( RepID Nothing ) "maga_mbov_rev" 
+                    ] 
                     ( Var ( RepID Nothing ) "maga_mbov_rbh" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mbov_ids"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "maga_mbov_rbh"
-                , Var ( RepID Nothing ) "maga_mbov"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mbov"
-                , Var ( RepID Nothing ) "maga_mbov_rev"
-                ] "extract_targets"
-                [ Ref bht Nothing
-                    [ Var ( RepID Nothing ) "maga_mbov"
-                    , Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mbov"
-                    , Var ( RepID Nothing ) "maga_mbov_rev"
-                    ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mbov_ids" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "maga_mbov_rbh" 
+                , Var ( RepID Nothing ) "maga_mbov" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mbov" 
+                , Var ( RepID Nothing ) "maga_mbov_rev" 
+                ] "extract_targets" 
+                [ Ref bht Nothing 
+                    [ Var ( RepID Nothing ) "maga_mbov" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mbov" 
+                    , Var ( RepID Nothing ) "maga_mbov_rev" 
+                    ] 
                     ( Var ( RepID Nothing ) "maga_mbov_rbh" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Fun num.list Nothing
-                [ Var ( RepID Nothing ) "maga_ids"
-                , Var ( RepID Nothing ) "maga_mbov_rbh"
-                , Var ( RepID Nothing ) "maga_mbov"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mbov"
-                , Var ( RepID Nothing ) "maga_mbov_rev"
-                , Var ( RepID Nothing ) "maga_best_mbov"
-                ] "length_each"
-                [ Lst str.list Nothing
-                    [ Var ( RepID Nothing ) "maga_ids"
-                    , Var ( RepID Nothing ) "maga_mbov_rbh"
-                    , Var ( RepID Nothing ) "maga_mbov"
-                    , Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mbov"
-                    , Var ( RepID Nothing ) "maga_mbov_rev"
-                    , Var ( RepID Nothing ) "maga_best_mbov"
-                    ]
-                    [ Ref str.list Nothing
-                        [ Var ( RepID Nothing ) "maga_mbov_rbh"
-                        , Var ( RepID Nothing ) "maga_mbov"
-                        , Var ( RepID Nothing ) "maga"
-                        , Var ( RepID Nothing ) "mbov"
-                        , Var ( RepID Nothing ) "maga_mbov_rev"
-                        ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun num.list Nothing 
+                [ Var ( RepID Nothing ) "maga_ids" 
+                , Var ( RepID Nothing ) "maga_mbov_rbh" 
+                , Var ( RepID Nothing ) "maga_mbov" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mbov" 
+                , Var ( RepID Nothing ) "maga_mbov_rev" 
+                , Var ( RepID Nothing ) "maga_best_mbov" 
+                ] "length_each" 
+                [ Lst str.list Nothing 
+                    [ Var ( RepID Nothing ) "maga_ids" 
+                    , Var ( RepID Nothing ) "maga_mbov_rbh" 
+                    , Var ( RepID Nothing ) "maga_mbov" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mbov" 
+                    , Var ( RepID Nothing ) "maga_mbov_rev" 
+                    , Var ( RepID Nothing ) "maga_best_mbov" 
+                    ] 
+                    [ Ref str.list Nothing 
+                        [ Var ( RepID Nothing ) "maga_mbov_rbh" 
+                        , Var ( RepID Nothing ) "maga_mbov" 
+                        , Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mbov" 
+                        , Var ( RepID Nothing ) "maga_mbov_rev" 
+                        ] 
                         ( Var ( RepID Nothing ) "maga_ids" )
-                    , Fun str.list Nothing
-                        [ Var ( RepID Nothing ) "maga_best_mbov"
-                        , Var ( RepID Nothing ) "maga_mbov"
-                        , Var ( RepID Nothing ) "maga"
-                        , Var ( RepID Nothing ) "mbov"
-                        ] "extract_queries"
-                        [ Ref bht Nothing
-                            [ Var ( RepID Nothing ) "maga_mbov"
-                            , Var ( RepID Nothing ) "maga"
-                            , Var ( RepID Nothing ) "mbov"
-                            ]
+                    , Fun str.list Nothing 
+                        [ Var ( RepID Nothing ) "maga_best_mbov" 
+                        , Var ( RepID Nothing ) "maga_mbov" 
+                        , Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mbov" 
+                        ] "extract_queries" 
+                        [ Ref bht Nothing 
+                            [ Var ( RepID Nothing ) "maga_mbov" 
+                            , Var ( RepID Nothing ) "maga" 
+                            , Var ( RepID Nothing ) "mbov" 
+                            ] 
                             ( Var ( RepID Nothing ) "maga_best_mbov" )
                         ]
-                    ]
+                    ] 
                 ]
-            }
-        ]
-    , sResult = Just
-        ( Fun num.list Nothing
-            [ Var ( RepID Nothing ) "maga_ids"
-            , Var ( RepID Nothing ) "maga_mbov_rbh"
-            , Var ( RepID Nothing ) "maga_mbov"
-            , Var ( RepID Nothing ) "maga"
-            , Var ( RepID Nothing ) "mbov"
-            , Var ( RepID Nothing ) "maga_mbov_rev"
-            , Var ( RepID Nothing ) "maga_best_mbov"
-            ] "length_each"
-            [ Lst str.list Nothing
-                [ Var ( RepID Nothing ) "maga_ids"
-                , Var ( RepID Nothing ) "maga_mbov_rbh"
-                , Var ( RepID Nothing ) "maga_mbov"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mbov"
-                , Var ( RepID Nothing ) "maga_mbov_rev"
-                , Var ( RepID Nothing ) "maga_best_mbov"
-                ]
-                [ Ref str.list Nothing
-                    [ Var ( RepID Nothing ) "maga_mbov_rbh"
-                    , Var ( RepID Nothing ) "maga_mbov"
-                    , Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mbov"
-                    , Var ( RepID Nothing ) "maga_mbov_rev"
-                    ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun num.list Nothing 
+            [ Var ( RepID Nothing ) "maga_ids" 
+            , Var ( RepID Nothing ) "maga_mbov_rbh" 
+            , Var ( RepID Nothing ) "maga_mbov" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mbov" 
+            , Var ( RepID Nothing ) "maga_mbov_rev" 
+            , Var ( RepID Nothing ) "maga_best_mbov" 
+            ] "length_each" 
+            [ Lst str.list Nothing 
+                [ Var ( RepID Nothing ) "maga_ids" 
+                , Var ( RepID Nothing ) "maga_mbov_rbh" 
+                , Var ( RepID Nothing ) "maga_mbov" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mbov" 
+                , Var ( RepID Nothing ) "maga_mbov_rev" 
+                , Var ( RepID Nothing ) "maga_best_mbov" 
+                ] 
+                [ Ref str.list Nothing 
+                    [ Var ( RepID Nothing ) "maga_mbov_rbh" 
+                    , Var ( RepID Nothing ) "maga_mbov" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mbov" 
+                    , Var ( RepID Nothing ) "maga_mbov_rev" 
+                    ] 
                     ( Var ( RepID Nothing ) "maga_ids" )
-                , Fun str.list Nothing
-                    [ Var ( RepID Nothing ) "maga_best_mbov"
-                    , Var ( RepID Nothing ) "maga_mbov"
-                    , Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mbov"
-                    ] "extract_queries"
-                    [ Ref bht Nothing
-                        [ Var ( RepID Nothing ) "maga_mbov"
-                        , Var ( RepID Nothing ) "maga"
-                        , Var ( RepID Nothing ) "mbov"
-                        ]
+                , Fun str.list Nothing 
+                    [ Var ( RepID Nothing ) "maga_best_mbov" 
+                    , Var ( RepID Nothing ) "maga_mbov" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mbov" 
+                    ] "extract_queries" 
+                    [ Ref bht Nothing 
+                        [ Var ( RepID Nothing ) "maga_mbov" 
+                        , Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mbov" 
+                        ] 
                         ( Var ( RepID Nothing ) "maga_best_mbov" )
                     ]
-                ]
+                ] 
             ]
         )
-    }
+    } 

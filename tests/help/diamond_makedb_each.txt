@@ -1,4 +1,5 @@
 diamond_makedb_each : faa.list -> dmnd.list
+
 where
   faa = FASTA amino acid
   dmnd = DIAMOND database

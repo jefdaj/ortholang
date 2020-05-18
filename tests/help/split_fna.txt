@@ -1,3 +1,4 @@
 split_fna : fna -> fna.list
+
 where
   fna = FASTA nucleic acid

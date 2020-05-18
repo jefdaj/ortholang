@@ -1,4 +1,5 @@
 diamond_blastx_db_sensitive_rev : num dmnd fna -> bht
+
 where
   num = number in regular or scientific notation
   dmnd = DIAMOND database

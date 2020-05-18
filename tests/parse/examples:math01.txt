@@ -1,86 +1,86 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "x"
-            , aExpr = Lit num "2.0"
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "y"
-            , aExpr = Lit num "3.5"
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "z"
-            , aExpr = Lit num "1.0e-50"
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "a"
-            , aExpr = Bop num Nothing
-                [ Var ( RepID Nothing ) "x"
-                , Var ( RepID Nothing ) "y"
-                ] "/"
-                ( Ref num Nothing []
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "x" 
+            , aExpr = Lit num "2.0" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "y" 
+            , aExpr = Lit num "3.5" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "z" 
+            , aExpr = Lit num "1.0e-50" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "a" 
+            , aExpr = Bop num Nothing 
+                [ Var ( RepID Nothing ) "x" 
+                , Var ( RepID Nothing ) "y" 
+                ] "/" 
+                ( Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "x" )
-                )
-                ( Ref num Nothing []
+                ) 
+                ( Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "y" )
                 )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "b"
-            , aExpr = Bop num Nothing
-                [ Var ( RepID Nothing ) "y"
-                , Var ( RepID Nothing ) "a"
-                , Var ( RepID Nothing ) "x"
-                ] "-"
-                ( Bop num Nothing
-                    [ Var ( RepID Nothing ) "y" ] "*" ( Lit num "9.71" )
-                    ( Ref num Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "b" 
+            , aExpr = Bop num Nothing 
+                [ Var ( RepID Nothing ) "y" 
+                , Var ( RepID Nothing ) "a" 
+                , Var ( RepID Nothing ) "x" 
+                ] "-" 
+                ( Bop num Nothing 
+                    [ Var ( RepID Nothing ) "y" ] "*" ( Lit num "9.71" ) 
+                    ( Ref num Nothing [] 
                         ( Var ( RepID Nothing ) "y" )
                     )
-                )
-                ( Bop num Nothing
-                    [ Var ( RepID Nothing ) "a"
-                    , Var ( RepID Nothing ) "x"
-                    , Var ( RepID Nothing ) "y"
-                    ] "*"
-                    ( Ref num Nothing
-                        [ Var ( RepID Nothing ) "x"
-                        , Var ( RepID Nothing ) "y"
-                        ]
+                ) 
+                ( Bop num Nothing 
+                    [ Var ( RepID Nothing ) "a" 
+                    , Var ( RepID Nothing ) "x" 
+                    , Var ( RepID Nothing ) "y" 
+                    ] "*" 
+                    ( Ref num Nothing 
+                        [ Var ( RepID Nothing ) "x" 
+                        , Var ( RepID Nothing ) "y" 
+                        ] 
                         ( Var ( RepID Nothing ) "a" )
-                    )
-                    ( Ref num Nothing []
+                    ) 
+                    ( Ref num Nothing [] 
                         ( Var ( RepID Nothing ) "x" )
                     )
                 )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "c"
-            , aExpr = Bop num Nothing
-                [ Var ( RepID Nothing ) "z"
-                , Var ( RepID Nothing ) "y"
-                ] "-"
-                ( Ref num Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "c" 
+            , aExpr = Bop num Nothing 
+                [ Var ( RepID Nothing ) "z" 
+                , Var ( RepID Nothing ) "y" 
+                ] "-" 
+                ( Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "z" )
-                )
-                ( Ref num Nothing []
+                ) 
+                ( Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "y" )
                 )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Bop num Nothing
-                [ Var ( RepID Nothing ) "z" ] "*" ( Lit num "2.43" )
-                ( Ref num Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop num Nothing 
+                [ Var ( RepID Nothing ) "z" ] "*" ( Lit num "2.43" ) 
+                ( Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "z" )
                 )
-            }
-        ]
-    , sResult = Just
-        ( Bop num Nothing
-            [ Var ( RepID Nothing ) "z" ] "*" ( Lit num "2.43" )
-            ( Ref num Nothing []
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop num Nothing 
+            [ Var ( RepID Nothing ) "z" ] "*" ( Lit num "2.43" ) 
+            ( Ref num Nothing [] 
                 ( Var ( RepID Nothing ) "z" )
             )
         )
-    }
+    } 

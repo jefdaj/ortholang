@@ -1,4 +1,5 @@
 megablast_each : num fna fna.list -> bht.list
+
 where
   num = number in regular or scientific notation
   fna = FASTA nucleic acid

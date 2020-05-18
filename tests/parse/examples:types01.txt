@@ -1,47 +1,47 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "n"
-            , aExpr = Lit num "4.0"
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "l"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "n" 
+            , aExpr = Lit num "4.0" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "l" 
             , aExpr = Lst num Nothing [] [ Lit num "4.0" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "lol"
-            , aExpr = Lst num.list Nothing
-                [ Var ( RepID Nothing ) "l" ]
-                [ Ref num.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "lol" 
+            , aExpr = Lst num.list Nothing 
+                [ Var ( RepID Nothing ) "l" ] 
+                [ Ref num.list Nothing [] 
                     ( Var ( RepID Nothing ) "l" )
                 , Lst num Nothing [] [ Lit num "2.5" ]
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "lolol"
-            , aExpr = Lst num.list.list Nothing
-                [ Var ( RepID Nothing ) "lol"
-                , Var ( RepID Nothing ) "l"
-                ]
-                [ Ref num.list.list Nothing
-                    [ Var ( RepID Nothing ) "l" ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "lolol" 
+            , aExpr = Lst num.list.list Nothing 
+                [ Var ( RepID Nothing ) "lol" 
+                , Var ( RepID Nothing ) "l" 
+                ] 
+                [ Ref num.list.list Nothing 
+                    [ Var ( RepID Nothing ) "l" ] 
                     ( Var ( RepID Nothing ) "lol" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref num.list.list.list Nothing
-                [ Var ( RepID Nothing ) "lol"
-                , Var ( RepID Nothing ) "l"
-                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref num.list.list.list Nothing 
+                [ Var ( RepID Nothing ) "lol" 
+                , Var ( RepID Nothing ) "l" 
+                ] 
                 ( Var ( RepID Nothing ) "lolol" )
-            }
-        ]
-    , sResult = Just
-        ( Ref num.list.list.list Nothing
-            [ Var ( RepID Nothing ) "lol"
-            , Var ( RepID Nothing ) "l"
-            ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref num.list.list.list Nothing 
+            [ Var ( RepID Nothing ) "lol" 
+            , Var ( RepID Nothing ) "l" 
+            ] 
             ( Var ( RepID Nothing ) "lolol" )
         )
-    }
+    } 

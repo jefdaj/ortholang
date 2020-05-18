@@ -1,37 +1,37 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "all_faa"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "all_faa" 
             , aExpr = Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/*.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "all_fna"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "all_fna" 
             , aExpr = Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/*.fna" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "pcc7942"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "pcc7942" 
             , aExpr = Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/PCC_7942_*.gbk" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "two_cyanos"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "two_cyanos" 
             , aExpr = Fun str.list Nothing [] "load_list" [ Lit str "examples/genome-lists/genbank-two-cyanos.txt" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "two_genbank_files"
-            , aExpr = Fun gbk.list Nothing
-                [ Var ( RepID Nothing ) "two_cyanos" ] "load_gbk_each"
-                [ Ref str.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "two_genbank_files" 
+            , aExpr = Fun gbk.list Nothing 
+                [ Var ( RepID Nothing ) "two_cyanos" ] "load_gbk_each" 
+                [ Ref str.list Nothing [] 
                     ( Var ( RepID Nothing ) "two_cyanos" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref str.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref str.list Nothing [] 
                 ( Var ( RepID Nothing ) "pcc7942" )
-            }
-        ]
-    , sResult = Just
-        ( Ref str.list Nothing []
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref str.list Nothing [] 
             ( Var ( RepID Nothing ) "pcc7942" )
         )
-    }
+    } 

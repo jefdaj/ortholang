@@ -1,30 +1,30 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "maga"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "maga_db"
-            , aExpr = Fun mms Nothing
-                [ Var ( RepID Nothing ) "maga" ] "mmseqs_createdb_all"
-                [ Lst faa Nothing
-                    [ Var ( RepID Nothing ) "maga" ]
-                    [ Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga_db" 
+            , aExpr = Fun mms Nothing 
+                [ Var ( RepID Nothing ) "maga" ] "mmseqs_createdb_all" 
+                [ Lst faa Nothing 
+                    [ Var ( RepID Nothing ) "maga" ] 
+                    [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "maga" )
                     ]
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref mms Nothing
-                [ Var ( RepID Nothing ) "maga" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref mms Nothing 
+                [ Var ( RepID Nothing ) "maga" ] 
                 ( Var ( RepID Nothing ) "maga_db" )
-            }
-        ]
-    , sResult = Just
-        ( Ref mms Nothing
-            [ Var ( RepID Nothing ) "maga" ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref mms Nothing 
+            [ Var ( RepID Nothing ) "maga" ] 
             ( Var ( RepID Nothing ) "maga_db" )
         )
-    }
+    } 

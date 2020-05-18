@@ -1,4 +1,5 @@
 diamond_blastx_more_sensitive : num fna faa -> bht
+
 where
   num = number in regular or scientific notation
   fna = FASTA nucleic acid

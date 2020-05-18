@@ -1,4 +1,5 @@
 tblastx_db : num fna fna.blastdb -> bht
+
 where
   num = number in regular or scientific notation
   fna = FASTA nucleic acid

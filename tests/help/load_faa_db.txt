@@ -1,4 +1,5 @@
 load_faa_db : str -> faa.blastdb
+
 where
   str = string
   faa = FASTA amino acid

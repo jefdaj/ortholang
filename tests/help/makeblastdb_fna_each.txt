@@ -1,3 +1,4 @@
 makeblastdb_fna_each : fna.list -> fna.blastdb.list
+
 where
   fna = FASTA nucleic acid

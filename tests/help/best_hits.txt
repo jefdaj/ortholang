@@ -1,4 +1,5 @@
 best_hits : ht -> ht
+
 where
   ht = a hit table (bht or crb)
 

@@ -1,252 +1,252 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "maga"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mgen"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mgen" 
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "fwdHits"
-            , aExpr = Fun bht
-                ( Just ( Seed 0 ) )
-                [ Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgen"
-                ] "blastp"
-                [ Lit num "1.0e-5"
-                , Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "fwdHits" 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
+                [ Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                ] "blastp" 
+                [ Lit num "1.0e-5" 
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
-                , Ref faa Nothing []
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "revHits"
-            , aExpr = Fun bht
-                ( Just ( Seed 0 ) )
-                [ Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "maga"
-                ] "blastp"
-                [ Lit num "1.0e-5"
-                , Ref faa Nothing []
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "revHits" 
+            , aExpr = Fun bht 
+                ( Just ( Seed 0 ) ) 
+                [ Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "blastp" 
+                [ Lit num "1.0e-5" 
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
-                , Ref faa Nothing []
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "recHits"
-            , aExpr = Fun bht Nothing
-                [ Var ( RepID Nothing ) "fwdHits"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "revHits"
-                ] "reciprocal_best"
-                [ Ref bht
-                    ( Just ( Seed 0 ) )
-                    [ Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mgen"
-                    ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "recHits" 
+            , aExpr = Fun bht Nothing 
+                [ Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "revHits" 
+                ] "reciprocal_best" 
+                [ Ref bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    ] 
                     ( Var ( RepID Nothing ) "fwdHits" )
-                , Ref bht
-                    ( Just ( Seed 0 ) )
-                    [ Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "maga"
-                    ]
+                , Ref bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
                     ( Var ( RepID Nothing ) "revHits" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref bht Nothing
-                [ Var ( RepID Nothing ) "fwdHits"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "revHits"
-                ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref bht Nothing 
+                [ Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "revHits" 
+                ] 
                 ( Var ( RepID Nothing ) "recHits" )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "n_repeats"
-            , aExpr = Lit num "3.0"
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "solidHits"
-            , aExpr = Fun bht.list Nothing
-                [ Var ( RepID Nothing ) "recHits"
-                , Var ( RepID Nothing ) "fwdHits"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "revHits"
-                , Var ( RepID Nothing ) "n_repeats"
-                ] "repeat"
-                [ Ref bht Nothing
-                    [ Var ( RepID Nothing ) "fwdHits"
-                    , Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "revHits"
-                    ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "n_repeats" 
+            , aExpr = Lit num "3.0" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "solidHits" 
+            , aExpr = Fun bht.list Nothing 
+                [ Var ( RepID Nothing ) "recHits" 
+                , Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "revHits" 
+                , Var ( RepID Nothing ) "n_repeats" 
+                ] "repeat" 
+                [ Ref bht Nothing 
+                    [ Var ( RepID Nothing ) "fwdHits" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "revHits" 
+                    ] 
                     ( Var ( RepID Nothing ) "recHits" )
-                , Ref faa Nothing []
+                , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
-                , Ref num Nothing []
+                , Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "n_repeats" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "solidHitIDs"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "solidHits"
-                , Var ( RepID Nothing ) "recHits"
-                , Var ( RepID Nothing ) "fwdHits"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "revHits"
-                , Var ( RepID Nothing ) "n_repeats"
-                ] "all"
-                [ Fun str.list.list Nothing
-                    [ Var ( RepID Nothing ) "solidHits"
-                    , Var ( RepID Nothing ) "recHits"
-                    , Var ( RepID Nothing ) "fwdHits"
-                    , Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "revHits"
-                    , Var ( RepID Nothing ) "n_repeats"
-                    ] "extract_queries_each"
-                    [ Ref bht.list Nothing
-                        [ Var ( RepID Nothing ) "recHits"
-                        , Var ( RepID Nothing ) "fwdHits"
-                        , Var ( RepID Nothing ) "maga"
-                        , Var ( RepID Nothing ) "mgen"
-                        , Var ( RepID Nothing ) "revHits"
-                        , Var ( RepID Nothing ) "n_repeats"
-                        ]
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "solidHitIDs" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "solidHits" 
+                , Var ( RepID Nothing ) "recHits" 
+                , Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "revHits" 
+                , Var ( RepID Nothing ) "n_repeats" 
+                ] "all" 
+                [ Fun str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "solidHits" 
+                    , Var ( RepID Nothing ) "recHits" 
+                    , Var ( RepID Nothing ) "fwdHits" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "revHits" 
+                    , Var ( RepID Nothing ) "n_repeats" 
+                    ] "extract_queries_each" 
+                    [ Ref bht.list Nothing 
+                        [ Var ( RepID Nothing ) "recHits" 
+                        , Var ( RepID Nothing ) "fwdHits" 
+                        , Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mgen" 
+                        , Var ( RepID Nothing ) "revHits" 
+                        , Var ( RepID Nothing ) "n_repeats" 
+                        ] 
                         ( Var ( RepID Nothing ) "solidHits" )
                     ]
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref str.list Nothing
-                [ Var ( RepID Nothing ) "solidHits"
-                , Var ( RepID Nothing ) "recHits"
-                , Var ( RepID Nothing ) "fwdHits"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "revHits"
-                , Var ( RepID Nothing ) "n_repeats"
-                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref str.list Nothing 
+                [ Var ( RepID Nothing ) "solidHits" 
+                , Var ( RepID Nothing ) "recHits" 
+                , Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "revHits" 
+                , Var ( RepID Nothing ) "n_repeats" 
+                ] 
                 ( Var ( RepID Nothing ) "solidHitIDs" )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "n_hits_by_n_repeats"
-            , aExpr = Fun num.scores Nothing
-                [ Var ( RepID Nothing ) "solidHitIDs"
-                , Var ( RepID Nothing ) "solidHits"
-                , Var ( RepID Nothing ) "recHits"
-                , Var ( RepID Nothing ) "fwdHits"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "revHits"
-                , Var ( RepID Nothing ) "n_repeats"
-                ] "score_repeats"
-                [ Fun num Nothing
-                    [ Var ( RepID Nothing ) "solidHitIDs"
-                    , Var ( RepID Nothing ) "solidHits"
-                    , Var ( RepID Nothing ) "recHits"
-                    , Var ( RepID Nothing ) "fwdHits"
-                    , Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "revHits"
-                    , Var ( RepID Nothing ) "n_repeats"
-                    ] "length"
-                    [ Ref str.list Nothing
-                        [ Var ( RepID Nothing ) "solidHits"
-                        , Var ( RepID Nothing ) "recHits"
-                        , Var ( RepID Nothing ) "fwdHits"
-                        , Var ( RepID Nothing ) "maga"
-                        , Var ( RepID Nothing ) "mgen"
-                        , Var ( RepID Nothing ) "revHits"
-                        , Var ( RepID Nothing ) "n_repeats"
-                        ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "n_hits_by_n_repeats" 
+            , aExpr = Fun num.scores Nothing 
+                [ Var ( RepID Nothing ) "solidHitIDs" 
+                , Var ( RepID Nothing ) "solidHits" 
+                , Var ( RepID Nothing ) "recHits" 
+                , Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "revHits" 
+                , Var ( RepID Nothing ) "n_repeats" 
+                ] "score_repeats" 
+                [ Fun num Nothing 
+                    [ Var ( RepID Nothing ) "solidHitIDs" 
+                    , Var ( RepID Nothing ) "solidHits" 
+                    , Var ( RepID Nothing ) "recHits" 
+                    , Var ( RepID Nothing ) "fwdHits" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "revHits" 
+                    , Var ( RepID Nothing ) "n_repeats" 
+                    ] "length" 
+                    [ Ref str.list Nothing 
+                        [ Var ( RepID Nothing ) "solidHits" 
+                        , Var ( RepID Nothing ) "recHits" 
+                        , Var ( RepID Nothing ) "fwdHits" 
+                        , Var ( RepID Nothing ) "maga" 
+                        , Var ( RepID Nothing ) "mgen" 
+                        , Var ( RepID Nothing ) "revHits" 
+                        , Var ( RepID Nothing ) "n_repeats" 
+                        ] 
                         ( Var ( RepID Nothing ) "solidHitIDs" )
                     ]
-                , Ref num Nothing []
+                , Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "n_repeats" )
-                , Lst num Nothing []
-                    [ Lit num "1.0"
-                    , Lit num "2.0"
-                    , Lit num "3.0"
-                    , Lit num "4.0"
-                    , Lit num "5.0"
-                    , Lit num "6.0"
-                    , Lit num "7.0"
-                    , Lit num "8.0"
-                    , Lit num "9.0"
-                    , Lit num "10.0"
-                    , Lit num "15.0"
-                    , Lit num "20.0"
-                    , Lit num "30.0"
-                    , Lit num "50.0"
-                    , Lit num "75.0"
-                    , Lit num "100.0"
-                    ]
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Fun png Nothing
-                [ Var ( RepID Nothing ) "n_hits_by_n_repeats"
-                , Var ( RepID Nothing ) "solidHitIDs"
-                , Var ( RepID Nothing ) "solidHits"
-                , Var ( RepID Nothing ) "recHits"
-                , Var ( RepID Nothing ) "fwdHits"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "revHits"
-                , Var ( RepID Nothing ) "n_repeats"
-                ] "linegraph"
-                [ Lit str "After X repeats, how many genes have been found every time?"
-                , Ref num.scores Nothing
-                    [ Var ( RepID Nothing ) "solidHitIDs"
-                    , Var ( RepID Nothing ) "solidHits"
-                    , Var ( RepID Nothing ) "recHits"
-                    , Var ( RepID Nothing ) "fwdHits"
-                    , Var ( RepID Nothing ) "maga"
-                    , Var ( RepID Nothing ) "mgen"
-                    , Var ( RepID Nothing ) "revHits"
-                    , Var ( RepID Nothing ) "n_repeats"
-                    ]
+                , Lst num Nothing [] 
+                    [ Lit num "1.0" 
+                    , Lit num "2.0" 
+                    , Lit num "3.0" 
+                    , Lit num "4.0" 
+                    , Lit num "5.0" 
+                    , Lit num "6.0" 
+                    , Lit num "7.0" 
+                    , Lit num "8.0" 
+                    , Lit num "9.0" 
+                    , Lit num "10.0" 
+                    , Lit num "15.0" 
+                    , Lit num "20.0" 
+                    , Lit num "30.0" 
+                    , Lit num "50.0" 
+                    , Lit num "75.0" 
+                    , Lit num "100.0" 
+                    ] 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun png Nothing 
+                [ Var ( RepID Nothing ) "n_hits_by_n_repeats" 
+                , Var ( RepID Nothing ) "solidHitIDs" 
+                , Var ( RepID Nothing ) "solidHits" 
+                , Var ( RepID Nothing ) "recHits" 
+                , Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "revHits" 
+                , Var ( RepID Nothing ) "n_repeats" 
+                ] "linegraph" 
+                [ Lit str "After X repeats, how many genes have been found every time?" 
+                , Ref num.scores Nothing 
+                    [ Var ( RepID Nothing ) "solidHitIDs" 
+                    , Var ( RepID Nothing ) "solidHits" 
+                    , Var ( RepID Nothing ) "recHits" 
+                    , Var ( RepID Nothing ) "fwdHits" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mgen" 
+                    , Var ( RepID Nothing ) "revHits" 
+                    , Var ( RepID Nothing ) "n_repeats" 
+                    ] 
                     ( Var ( RepID Nothing ) "n_hits_by_n_repeats" )
-                ]
-            }
-        ]
-    , sResult = Just
-        ( Fun png Nothing
-            [ Var ( RepID Nothing ) "n_hits_by_n_repeats"
-            , Var ( RepID Nothing ) "solidHitIDs"
-            , Var ( RepID Nothing ) "solidHits"
-            , Var ( RepID Nothing ) "recHits"
-            , Var ( RepID Nothing ) "fwdHits"
-            , Var ( RepID Nothing ) "maga"
-            , Var ( RepID Nothing ) "mgen"
-            , Var ( RepID Nothing ) "revHits"
-            , Var ( RepID Nothing ) "n_repeats"
-            ] "linegraph"
-            [ Lit str "After X repeats, how many genes have been found every time?"
-            , Ref num.scores Nothing
-                [ Var ( RepID Nothing ) "solidHitIDs"
-                , Var ( RepID Nothing ) "solidHits"
-                , Var ( RepID Nothing ) "recHits"
-                , Var ( RepID Nothing ) "fwdHits"
-                , Var ( RepID Nothing ) "maga"
-                , Var ( RepID Nothing ) "mgen"
-                , Var ( RepID Nothing ) "revHits"
-                , Var ( RepID Nothing ) "n_repeats"
-                ]
+                ] 
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun png Nothing 
+            [ Var ( RepID Nothing ) "n_hits_by_n_repeats" 
+            , Var ( RepID Nothing ) "solidHitIDs" 
+            , Var ( RepID Nothing ) "solidHits" 
+            , Var ( RepID Nothing ) "recHits" 
+            , Var ( RepID Nothing ) "fwdHits" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mgen" 
+            , Var ( RepID Nothing ) "revHits" 
+            , Var ( RepID Nothing ) "n_repeats" 
+            ] "linegraph" 
+            [ Lit str "After X repeats, how many genes have been found every time?" 
+            , Ref num.scores Nothing 
+                [ Var ( RepID Nothing ) "solidHitIDs" 
+                , Var ( RepID Nothing ) "solidHits" 
+                , Var ( RepID Nothing ) "recHits" 
+                , Var ( RepID Nothing ) "fwdHits" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mgen" 
+                , Var ( RepID Nothing ) "revHits" 
+                , Var ( RepID Nothing ) "n_repeats" 
+                ] 
                 ( Var ( RepID Nothing ) "n_hits_by_n_repeats" )
-            ]
+            ] 
         )
-    }
+    } 

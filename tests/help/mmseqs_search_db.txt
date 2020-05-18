@@ -1,4 +1,5 @@
 mmseqs_search_db : num fa mms -> bht
+
 where
   num = number in regular or scientific notation
   fa = any fasta file (fna or faa)

@@ -1,4 +1,5 @@
 newrulestest1 : str str -> str
+
 where
   str = string
 

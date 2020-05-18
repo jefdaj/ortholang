@@ -1,4 +1,5 @@
 tblastn_db : num faa fna.blastdb -> bht
+
 where
   num = number in regular or scientific notation
   faa = FASTA amino acid

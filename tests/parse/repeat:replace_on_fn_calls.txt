@@ -1,62 +1,62 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "faa_paths"
-            , aExpr = Lst str Nothing []
-                [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2.gbk"
-                , Lit str "examples/sequences/Mycoplasma_arthritidis_protein_refseq.faa"
-                , Lit str "examples/sequences/Mycoplasma_capricolum_protein_refseq.faa"
-                , Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "faa_path"
-            , aExpr = Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa"
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "faa"
-            , aExpr = Fun faa Nothing
-                [ Var ( RepID Nothing ) "faa_path" ] "load_faa"
-                [ Ref str Nothing []
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "faa_paths" 
+            , aExpr = Lst str Nothing [] 
+                [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2.gbk" 
+                , Lit str "examples/sequences/Mycoplasma_arthritidis_protein_refseq.faa" 
+                , Lit str "examples/sequences/Mycoplasma_capricolum_protein_refseq.faa" 
+                , Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faa_path" 
+            , aExpr = Lit str "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa" 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faa" 
+            , aExpr = Fun faa Nothing 
+                [ Var ( RepID Nothing ) "faa_path" ] "load_faa" 
+                [ Ref str Nothing [] 
                     ( Var ( RepID Nothing ) "faa_path" )
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "faa_alternatives"
-            , aExpr = Fun faa.list Nothing
-                [ Var ( RepID Nothing ) "faa"
-                , Var ( RepID Nothing ) "faa_path"
-                , Var ( RepID Nothing ) "faa_paths"
-                ] "replace_each"
-                [ Ref faa Nothing
-                    [ Var ( RepID Nothing ) "faa_path" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faa_alternatives" 
+            , aExpr = Fun faa.list Nothing 
+                [ Var ( RepID Nothing ) "faa" 
+                , Var ( RepID Nothing ) "faa_path" 
+                , Var ( RepID Nothing ) "faa_paths" 
+                ] "replace_each" 
+                [ Ref faa Nothing 
+                    [ Var ( RepID Nothing ) "faa_path" ] 
                     ( Var ( RepID Nothing ) "faa" )
-                , Ref str Nothing []
+                , Ref str Nothing [] 
                     ( Var ( RepID Nothing ) "faa_path" )
-                , Ref str.list Nothing []
+                , Ref str.list Nothing [] 
                     ( Var ( RepID Nothing ) "faa_paths" )
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "faa_paths_fn"
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "faa_paths_fn" 
             , aExpr = Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/Mycoplasma_*.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref faa.list Nothing
-                [ Var ( RepID Nothing ) "faa"
-                , Var ( RepID Nothing ) "faa_path"
-                , Var ( RepID Nothing ) "faa_paths"
-                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref faa.list Nothing 
+                [ Var ( RepID Nothing ) "faa" 
+                , Var ( RepID Nothing ) "faa_path" 
+                , Var ( RepID Nothing ) "faa_paths" 
+                ] 
                 ( Var ( RepID Nothing ) "faa_alternatives" )
-            }
-        ]
-    , sResult = Just
-        ( Ref faa.list Nothing
-            [ Var ( RepID Nothing ) "faa"
-            , Var ( RepID Nothing ) "faa_path"
-            , Var ( RepID Nothing ) "faa_paths"
-            ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref faa.list Nothing 
+            [ Var ( RepID Nothing ) "faa" 
+            , Var ( RepID Nothing ) "faa_path" 
+            , Var ( RepID Nothing ) "faa_paths" 
+            ] 
             ( Var ( RepID Nothing ) "faa_alternatives" )
         )
-    }
+    } 

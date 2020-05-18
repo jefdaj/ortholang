@@ -1,4 +1,5 @@
 muscle_each : faa.list -> aln.list
+
 where
   faa = FASTA amino acid
   aln = multiple sequence alignment

@@ -1,9 +1,9 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Lit str "function not finished yet"
-            }
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Lit str "function not finished yet" 
+            } 
         ]
     , sResult = Just ( Lit str "function not finished yet" )
-    }
+    } 

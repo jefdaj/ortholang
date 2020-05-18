@@ -1,4 +1,5 @@
 load_faa_path_each : str.list -> faa.list
+
 where
   str = string
   faa = FASTA amino acid

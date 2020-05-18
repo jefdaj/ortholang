@@ -1,47 +1,47 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "single"
-            , aExpr = Fun faa Nothing [] "translate"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
+            , aExpr = Fun faa Nothing [] "translate" 
                 [ Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ] ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "mapped"
-            , aExpr = Fun faa.list Nothing [] "translate_each"
-                [ Fun fna.list Nothing [] "load_fna_each"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mapped" 
+            , aExpr = Fun faa.list Nothing [] "translate_each" 
+                [ Fun fna.list Nothing [] "load_fna_each" 
                     [ Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ] ]
                 ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Bop faa.list Nothing
-                [ Var ( RepID Nothing ) "single"
-                , Var ( RepID Nothing ) "mapped"
-                ] "|"
-                ( Lst faa Nothing
-                    [ Var ( RepID Nothing ) "single" ]
-                    [ Ref faa Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Bop faa.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "mapped" 
+                ] "|" 
+                ( Lst faa Nothing 
+                    [ Var ( RepID Nothing ) "single" ] 
+                    [ Ref faa Nothing [] 
                         ( Var ( RepID Nothing ) "single" )
                     ]
-                )
-                ( Ref faa.list Nothing []
+                ) 
+                ( Ref faa.list Nothing [] 
                     ( Var ( RepID Nothing ) "mapped" )
                 )
-            }
-        ]
-    , sResult = Just
-        ( Bop faa.list Nothing
-            [ Var ( RepID Nothing ) "single"
-            , Var ( RepID Nothing ) "mapped"
-            ] "|"
-            ( Lst faa Nothing
-                [ Var ( RepID Nothing ) "single" ]
-                [ Ref faa Nothing []
+            } 
+        ] 
+    , sResult = Just 
+        ( Bop faa.list Nothing 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "mapped" 
+            ] "|" 
+            ( Lst faa Nothing 
+                [ Var ( RepID Nothing ) "single" ] 
+                [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "single" )
                 ]
-            )
-            ( Ref faa.list Nothing []
+            ) 
+            ( Ref faa.list Nothing [] 
                 ( Var ( RepID Nothing ) "mapped" )
             )
         )
-    }
+    } 

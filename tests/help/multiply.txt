@@ -1,3 +1,4 @@
 multiply : num.list -> num
+
 where
   num = number in regular or scientific notation

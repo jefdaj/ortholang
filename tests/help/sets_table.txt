@@ -1,4 +1,5 @@
 sets_table : lit.list.list -> tsv
+
 where
   lit = a literal (str or num)
   tsv = set membership table (spreadsheet)

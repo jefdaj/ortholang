@@ -1,4 +1,5 @@
 filter_evalue_each : num ht.list -> ht.list
+
 where
   num = number in regular or scientific notation
   ht = a hit table (bht or crb)

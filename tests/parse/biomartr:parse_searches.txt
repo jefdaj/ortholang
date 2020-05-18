@@ -1,21 +1,21 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Fun search Nothing [] "parse_searches"
-                [ Lst str Nothing []
-                    [ Lit str "Synechococcus elongatus PCC maga (refseq)"
-                    , Lit str "Synechocystis sp. PCC mgen (refseq)"
-                    ]
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun search Nothing [] "parse_searches" 
+                [ Lst str Nothing [] 
+                    [ Lit str "Synechococcus elongatus PCC maga (refseq)" 
+                    , Lit str "Synechocystis sp. PCC mgen (refseq)" 
+                    ] 
                 ]
-            }
+            } 
         ]
-    , sResult = Just
-        ( Fun search Nothing [] "parse_searches"
-            [ Lst str Nothing []
-                [ Lit str "Synechococcus elongatus PCC maga (refseq)"
-                , Lit str "Synechocystis sp. PCC mgen (refseq)"
-                ]
+    , sResult = Just 
+        ( Fun search Nothing [] "parse_searches" 
+            [ Lst str Nothing [] 
+                [ Lit str "Synechococcus elongatus PCC maga (refseq)" 
+                , Lit str "Synechocystis sp. PCC mgen (refseq)" 
+                ] 
             ]
         )
-    }
+    } 

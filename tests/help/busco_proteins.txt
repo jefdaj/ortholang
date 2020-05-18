@@ -1,4 +1,5 @@
 busco_proteins : blh faa -> bsr
+
 where
   blh = BUSCO lineage HMMs
   faa = FASTA amino acid

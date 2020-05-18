@@ -1,4 +1,5 @@
 load_faa : str -> faa
+
 where
   str = string
   faa = FASTA amino acid

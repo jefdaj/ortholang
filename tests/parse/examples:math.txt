@@ -1,78 +1,78 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "n1"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "n1" 
             , aExpr = Bop num Nothing [] "+" ( Lit num "1.0" ) ( Lit num "1.0" )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "n2"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "n2" 
             , aExpr = Bop num Nothing [] "-" ( Lit num "1.0" ) ( Lit num "2.0" )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "n3"
-            , aExpr = Bop num Nothing [] "*"
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "n3" 
+            , aExpr = Bop num Nothing [] "*" 
                 ( Bop num Nothing [] "+" ( Lit num "0.56" ) ( Lit num "2.0" ) ) ( Lit num "3.5e-4" )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "n4"
-            , aExpr = Bop num Nothing
-                [ Var ( RepID Nothing ) "n1"
-                , Var ( RepID Nothing ) "n2"
-                , Var ( RepID Nothing ) "n3"
-                ] "/"
-                ( Bop num Nothing
-                    [ Var ( RepID Nothing ) "n1"
-                    , Var ( RepID Nothing ) "n2"
-                    ] "+"
-                    ( Ref num Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "n4" 
+            , aExpr = Bop num Nothing 
+                [ Var ( RepID Nothing ) "n1" 
+                , Var ( RepID Nothing ) "n2" 
+                , Var ( RepID Nothing ) "n3" 
+                ] "/" 
+                ( Bop num Nothing 
+                    [ Var ( RepID Nothing ) "n1" 
+                    , Var ( RepID Nothing ) "n2" 
+                    ] "+" 
+                    ( Ref num Nothing [] 
                         ( Var ( RepID Nothing ) "n1" )
-                    )
-                    ( Ref num Nothing []
+                    ) 
+                    ( Ref num Nothing [] 
                         ( Var ( RepID Nothing ) "n2" )
                     )
-                )
-                ( Ref num Nothing []
+                ) 
+                ( Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "n3" )
                 )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "n5"
-            , aExpr = Bop num Nothing
-                [ Var ( RepID Nothing ) "n1"
-                , Var ( RepID Nothing ) "n2"
-                , Var ( RepID Nothing ) "n3"
-                ] "+"
-                ( Ref num Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "n5" 
+            , aExpr = Bop num Nothing 
+                [ Var ( RepID Nothing ) "n1" 
+                , Var ( RepID Nothing ) "n2" 
+                , Var ( RepID Nothing ) "n3" 
+                ] "+" 
+                ( Ref num Nothing [] 
                     ( Var ( RepID Nothing ) "n1" )
-                )
-                ( Bop num Nothing
-                    [ Var ( RepID Nothing ) "n2"
-                    , Var ( RepID Nothing ) "n3"
-                    ] "/"
-                    ( Ref num Nothing []
+                ) 
+                ( Bop num Nothing 
+                    [ Var ( RepID Nothing ) "n2" 
+                    , Var ( RepID Nothing ) "n3" 
+                    ] "/" 
+                    ( Ref num Nothing [] 
                         ( Var ( RepID Nothing ) "n2" )
-                    )
-                    ( Ref num Nothing []
+                    ) 
+                    ( Ref num Nothing [] 
                         ( Var ( RepID Nothing ) "n3" )
                     )
                 )
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Ref num Nothing
-                [ Var ( RepID Nothing ) "n1"
-                , Var ( RepID Nothing ) "n2"
-                , Var ( RepID Nothing ) "n3"
-                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Ref num Nothing 
+                [ Var ( RepID Nothing ) "n1" 
+                , Var ( RepID Nothing ) "n2" 
+                , Var ( RepID Nothing ) "n3" 
+                ] 
                 ( Var ( RepID Nothing ) "n5" )
-            }
-        ]
-    , sResult = Just
-        ( Ref num Nothing
-            [ Var ( RepID Nothing ) "n1"
-            , Var ( RepID Nothing ) "n2"
-            , Var ( RepID Nothing ) "n3"
-            ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Ref num Nothing 
+            [ Var ( RepID Nothing ) "n1" 
+            , Var ( RepID Nothing ) "n2" 
+            , Var ( RepID Nothing ) "n3" 
+            ] 
             ( Var ( RepID Nothing ) "n5" )
         )
-    }
+    } 

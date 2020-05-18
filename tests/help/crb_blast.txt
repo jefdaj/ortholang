@@ -1,4 +1,5 @@
 crb_blast : fna fa -> crb
+
 where
   fna = FASTA nucleic acid
   fa = any fasta file (fna or faa)

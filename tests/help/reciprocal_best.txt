@@ -1,3 +1,4 @@
 reciprocal_best : bht bht -> bht
+
 where
   bht = tab-separated table of blast hits (outfmt 6)

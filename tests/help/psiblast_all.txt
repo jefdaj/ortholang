@@ -1,4 +1,5 @@
 psiblast_all : num faa faa.list -> bht
+
 where
   num = number in regular or scientific notation
   faa = FASTA amino acid

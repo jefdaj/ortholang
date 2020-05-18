@@ -1,64 +1,64 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "set1"
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "set1" 
             , aExpr = Lst str Nothing [] [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "set2"
-            , aExpr = Lst str Nothing []
-                [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa"
-                , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "set3"
-            , aExpr = Lst str Nothing []
-                [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa"
-                , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa"
-                , Lit str "examples/sequences/Mycoplasma_hyopneumoniae_small.faa"
-                ]
-            }
-        , Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Fun str.list Nothing
-                [ Var ( RepID Nothing ) "set1"
-                , Var ( RepID Nothing ) "set2"
-                , Var ( RepID Nothing ) "set3"
-                ] "some"
-                [ Lst str.list Nothing
-                    [ Var ( RepID Nothing ) "set1"
-                    , Var ( RepID Nothing ) "set2"
-                    , Var ( RepID Nothing ) "set3"
-                    ]
-                    [ Ref str.list Nothing []
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "set2" 
+            , aExpr = Lst str Nothing [] 
+                [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
+                , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "set3" 
+            , aExpr = Lst str Nothing [] 
+                [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" 
+                , Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" 
+                , Lit str "examples/sequences/Mycoplasma_hyopneumoniae_small.faa" 
+                ] 
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                , Var ( RepID Nothing ) "set3" 
+                ] "some" 
+                [ Lst str.list Nothing 
+                    [ Var ( RepID Nothing ) "set1" 
+                    , Var ( RepID Nothing ) "set2" 
+                    , Var ( RepID Nothing ) "set3" 
+                    ] 
+                    [ Ref str.list Nothing [] 
                         ( Var ( RepID Nothing ) "set1" )
-                    , Ref str.list Nothing []
+                    , Ref str.list Nothing [] 
                         ( Var ( RepID Nothing ) "set2" )
-                    , Ref str.list Nothing []
+                    , Ref str.list Nothing [] 
                         ( Var ( RepID Nothing ) "set3" )
-                    ]
+                    ] 
                 ]
-            }
-        ]
-    , sResult = Just
-        ( Fun str.list Nothing
-            [ Var ( RepID Nothing ) "set1"
-            , Var ( RepID Nothing ) "set2"
-            , Var ( RepID Nothing ) "set3"
-            ] "some"
-            [ Lst str.list Nothing
-                [ Var ( RepID Nothing ) "set1"
-                , Var ( RepID Nothing ) "set2"
-                , Var ( RepID Nothing ) "set3"
-                ]
-                [ Ref str.list Nothing []
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun str.list Nothing 
+            [ Var ( RepID Nothing ) "set1" 
+            , Var ( RepID Nothing ) "set2" 
+            , Var ( RepID Nothing ) "set3" 
+            ] "some" 
+            [ Lst str.list Nothing 
+                [ Var ( RepID Nothing ) "set1" 
+                , Var ( RepID Nothing ) "set2" 
+                , Var ( RepID Nothing ) "set3" 
+                ] 
+                [ Ref str.list Nothing [] 
                     ( Var ( RepID Nothing ) "set1" )
-                , Ref str.list Nothing []
+                , Ref str.list Nothing [] 
                     ( Var ( RepID Nothing ) "set2" )
-                , Ref str.list Nothing []
+                , Ref str.list Nothing [] 
                     ( Var ( RepID Nothing ) "set3" )
-                ]
+                ] 
             ]
         )
-    }
+    } 

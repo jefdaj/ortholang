@@ -1,4 +1,5 @@
 load_fna_path : str -> fna
+
 where
   str = string
   fna = FASTA nucleic acid

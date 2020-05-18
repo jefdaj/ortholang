@@ -1,4 +1,5 @@
 gbk_to_fna_each : str gbk.list -> fna.list
+
 where
   str = string
   gbk = Genbank files
