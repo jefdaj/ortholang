@@ -57,10 +57,12 @@ helpTopics _ mods = sort $ nub $ map (map toLower) $ ts ++ gs ++ es ++ fs ++ ms
 
 -- TODO also add the suggestions with something like "See also:" when help is found
 fallbackHelp :: Config -> [Module] -> String -> String
-fallbackHelp cfg mods wrd = init $ unlines $ nohelp : suggestions
+fallbackHelp cfg mods wrd = init $ unlines $ nohelp : ss'
   where
+    nShown = 10
     nohelp = "No help topics found for '" ++ wrd ++ "'. Maybe you mean one of these?\n"
-    suggestions = sort $ filter (map toLower wrd `isInfixOf`) $ helpTopics cfg mods
+    ss = sort $ filter (map toLower wrd `isInfixOf`) $ helpTopics cfg mods
+    ss' = if length ss > nShown then take nShown ss ++ ["..."] else ss
 
 -- TODO disambiguate from function names somehow. for example muscle
 -- TODO figure out how to `less` the output
