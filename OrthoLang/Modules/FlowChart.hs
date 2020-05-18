@@ -17,7 +17,7 @@ Notable repeat/replace and lists of results are not handled properly yet.
 --      oh, i get it: have to add more nodes + edges per Expr when they're nested, not just one per assign
 --      and that's important for having the initial inputs show up too
 
-module OrthoLang.Modules.DepGraph where
+module OrthoLang.Modules.FlowChart where
 
 import Development.Shake
 import OrthoLang.Types
@@ -41,8 +41,8 @@ import OrthoLang.Modules.Plots (png)
 
 olModule :: Module
 olModule = Module
-  { mName = "DepGraph"
-  , mDesc = "Graphs dependencies between OrthoLang variables"
+  { mName = "FlowChart"
+  , mDesc = "Draw flowchart representing OrthoLang scripts"
   , mTypes = [png]
   , mGroups = []
   , mEncodings = []
@@ -65,7 +65,7 @@ plotDot = hidden $ newFnA1
 
 aPlotDot :: NewAction1
 aPlotDot (ExprPath out) inDot = do
-  let loc = "ortholang.modules.depgraph.aPlotDot"
+  let loc = "ortholang.modules.flowchart.aPlotDot"
   txt <- readLit loc inDot
   cfg <- fmap fromJust $ getShakeExtra
   let g = read txt :: DotGraph Node
@@ -94,7 +94,7 @@ plotVars = newMacro
   "plot_vars"
   [Exactly str]
   (Exactly png)
-  (mkDepGraphMacro selectAll)
+  (mkFlowChartMacro selectAll)
   [ReadsScript]
 
 selectAll :: Script -> [Expr] -> [Var]
@@ -102,13 +102,13 @@ selectAll scr _ = map aVar $ sAssigns scr
 
 -- | This inserts a plot_dot call with the complete dot structure in its str input.
 -- TODO implement the other two by applying a function to the script first?
-mkDepGraphMacro :: (Script -> [Expr] -> [Var]) -> MacroExpansion
-mkDepGraphMacro selectFn scr (Fun t ms vs n ((Lit str title):es)) = Fun t ms vs "plot_dot" [ds]
+mkFlowChartMacro :: (Script -> [Expr] -> [Var]) -> MacroExpansion
+mkFlowChartMacro selectFn scr (Fun t ms vs n ((Lit str title):es)) = Fun t ms vs "plot_dot" [ds]
   where
     vs = selectFn scr es
     dg = dotGraph title $ filter (\a -> aVar a `elem` vs) $ sAssigns scr
     ds = Lit str (show dg)
-mkDepGraphMacro _ _ e = error "ortholang.modules.depgraph.mkDepGraphMacro" $ "bad expr arg: " ++ show e
+mkFlowChartMacro _ _ e = error "ortholang.modules.flowchart.mkFlowChartMacro" $ "bad expr arg: " ++ show e
 
 
 ------------------
@@ -120,13 +120,13 @@ plotDepends = newMacro
   "plot_depends"
   [Exactly str, AnyType "type of the expr whose depends will be plotted"]
   (Exactly png)
-  (mkDepGraphMacro selectDepends)
+  (mkFlowChartMacro selectDepends)
   [ReadsScript]
 
   -- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
 selectDepends :: Script -> [Expr] -> [Var]
 selectDepends _ [expr] = depsOf expr
-selectDepends _ es = error "ortholang.modules.depgraph.selectDepends" $ "bad exprs: " ++ show es
+selectDepends _ es = error "ortholang.modules.flowchart.selectDepends" $ "bad exprs: " ++ show es
 
 
 -------------------
@@ -138,13 +138,13 @@ plotRDepends = newMacro
   "plot_rdepends"
   [Exactly str, AnyType "type of the expr whose reverse depends will be plotted"]
   (Exactly png)
-  (mkDepGraphMacro selectRDepends)
+  (mkFlowChartMacro selectRDepends)
   [ReadsScript]
 
   -- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
 selectRDepends :: Script -> [Expr] -> [Var]
 selectRDepends scr [Ref _ _ _ v] = v : rDepsOf scr v
-selectRDepends _ es = error "ortholang.modules.depgraph.selectRDepends" $ "bad exprs: " ++ show es
+selectRDepends _ es = error "ortholang.modules.flowchart.selectRDepends" $ "bad exprs: " ++ show es
 
 
 ---------------------------
@@ -265,7 +265,7 @@ mkNodes' assigns = mkNodes new nodes'
                               else [NLTmp (prefixOf e) (digest e)])
                          assigns
     nodes = varNodes ++ tmpNodes
-    nodes' = trace "ortholang.modules.depgraph.mkNodes'" ("nodes: " ++ show nodes) nodes
+    nodes' = trace "ortholang.modules.flowchart.mkNodes'" ("nodes: " ++ show nodes) nodes
 
 varNamesToIgnore :: [String]
 varNamesToIgnore = ["result"]
@@ -293,7 +293,7 @@ keepAssign (Assign (Var _ v) e) = not (v `elem` varNamesToIgnore)
 mkEdges' :: NodeMap NLabel -> [Assign] -> [LEdge ELabel]
 mkEdges' nodemap assigns = justOrDie "mkEdges'" $ mkEdges nodemap edges'
   where
-    loc = "ortholang.modules.depgraph.mkEdges'"
+    loc = "ortholang.modules.flowchart.mkEdges'"
     as' = trace loc ("assigns: " ++ show assigns) assigns
     selectedNames = map (\(Assign (Var _ n) _) -> n) assigns
     edges = concatMap (mkInputEdges selectedNames) as'

@@ -144,7 +144,7 @@ library
                     OrthoLang.Modules.Busco,
                     OrthoLang.Modules.CRBBlast,
                     OrthoLang.Modules.Cheat,
-                    OrthoLang.Modules.DepGraph,
+                    OrthoLang.Modules.FlowChart,
                     OrthoLang.Modules.Diamond,
                     OrthoLang.Modules.GreenCut,
                     OrthoLang.Modules.Hmmer,

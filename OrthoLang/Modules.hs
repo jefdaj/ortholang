@@ -19,7 +19,7 @@ import qualified OrthoLang.Modules.BlastRBH      as BlastRBH
 import qualified OrthoLang.Modules.Busco         as Busco
 import qualified OrthoLang.Modules.CRBBlast      as CRBBlast
 import qualified OrthoLang.Modules.Cheat         as Cheat
-import qualified OrthoLang.Modules.DepGraph      as DepGraph
+import qualified OrthoLang.Modules.FlowChart     as FlowChart
 import qualified OrthoLang.Modules.Diamond       as Diamond
 import qualified OrthoLang.Modules.GreenCut      as GreenCut
 import qualified OrthoLang.Modules.Hmmer         as Hmmer
@@ -63,7 +63,7 @@ modules =
   , Sample.olModule   -- could do rSample
   , Scores.olModule   -- looks semi complicated to convert
   , Sets.olModule     -- could do it same as math?
-  , DepGraph.olModule -- work in progress
+  , FlowChart.olModule -- work in progress
 
   -- load, download, and convert sequences
   , BioMartR.olModule -- rewrite without the parse searches thing
