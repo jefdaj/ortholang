@@ -251,7 +251,7 @@ renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ 
     withCommas  ms = intercalate ", " (map ext ms) ++ ","
 
 renderWhere :: VarMap -> [TypeSig] -> String
-renderWhere names inSigs = if length descs == 0 then "" else unlines $ "\nwhere..." : descs
+renderWhere names inSigs = if length descs == 0 then "" else unlines $ "\nwhere" : descs
   where
     descs = nub $ catMaybes $ map (\i -> fmap (withExt i) $ renderWhereDesc i) inSigs
     withExt i d = "  " ++ unwords [renderExtBase names i, "=", d]
