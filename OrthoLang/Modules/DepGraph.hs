@@ -8,8 +8,6 @@ progress, and may fail in interesting or surprising ways when given edge cases!
 Notable repeat/replace and lists of results are not handled properly yet.
 -}
 
--- TODO see if bin hash was all that it needed to get files sorted out
-
 -- Partially based on this tutorial:
 -- http://haroldcarr.org/posts/2014-02-28-using-graphviz-via-haskell.html
 
@@ -57,7 +55,6 @@ olModule = Module
 --------------
 
 -- | Hidden function for rendering the raw Haskell Graphviz data structure passed as a string
--- TODO also take a title?
 plotDot :: Function
 plotDot = hidden $ newFnA1
   "plot_dot"
@@ -89,7 +86,6 @@ renderDotGraph path g = do
 -- plot_vars --
 -----------------
 
--- TODO make the title work
 -- TODO do use the result var if possible! just have a special constructor for it and render a different color
 --      might need to use a special _inputs naming scheme. could be simple: result_inputs. lol
 plotVars :: Function
@@ -106,10 +102,10 @@ selectAll scr _ = map aVar $ sAssigns scr
 -- | This inserts a plot_dot call with the complete dot structure in its str input.
 -- TODO implement the other two by applying a function to the script first?
 mkDepGraphMacro :: (Script -> [Expr] -> [Var]) -> MacroExpansion
-mkDepGraphMacro selectFn scr (Fun t ms vs n (_:es)) = Fun t ms vs "plot_dot" [ds] -- TODO use the title arg
+mkDepGraphMacro selectFn scr (Fun t ms vs n ((Lit str title):es)) = Fun t ms vs "plot_dot" [ds]
   where
     vs = selectFn scr es
-    dg = dotGraph $ filter (\a -> aVar a `elem` vs) $ sAssigns scr
+    dg = dotGraph title $ filter (\a -> aVar a `elem` vs) $ sAssigns scr
     ds = Lit str (show dg)
 mkDepGraphMacro _ _ e = error "ortholang.modules.depgraph.mkDepGraphMacro" $ "bad expr arg: " ++ show e
 
@@ -118,7 +114,6 @@ mkDepGraphMacro _ _ e = error "ortholang.modules.depgraph.mkDepGraphMacro" $ "ba
 -- plot_depends --
 ------------------
 
--- TODO make the title work
 plotDepends :: Function
 plotDepends = newMacro
   "plot_depends"
@@ -137,7 +132,6 @@ selectDepends _ es = error "ortholang.modules.depgraph.selectDepends" $ "bad exp
 -- plot_rdepends --
 -------------------
 
--- TODO make the title work
 plotRDepends :: Function
 plotRDepends = newMacro
   "plot_rdepends"
@@ -181,8 +175,8 @@ data ELabel
   | ELArrow String -- ^ the only function input; string is the fn name
   deriving (Read, Show, Eq, Ord)
 
-params :: GraphvizParams n NLabel ELabel () NLabel
-params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
+params :: String -> GraphvizParams n NLabel ELabel () NLabel
+params title = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
   where
     fn (_,NLVar l  ) = [textLabel $ T.pack l]
     fn (_,NLTmp l _) = [ textLabel $ T.pack l
@@ -199,6 +193,9 @@ params = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
     ga = [ GraphAttrs
              [ RankDir FromTop
              , BgColor [toWColor White]
+             , Label (StrLabel (T.pack $ title ++ "\n\n"))
+             , LabelLoc VTop
+             , LabelDistance 5.0
              ]
          , NodeAttrs
             [ shape     Ellipse
@@ -214,8 +211,8 @@ renderDotGraph, but instead it will be  and passed to the
 graphing function via an OrthoLang string. Which is kind of roundabout but
 seems to work.
 -}
-dotGraph :: [Assign] -> DotGraph Node
-dotGraph assigns = graphToDot params (gr :: Gr NLabel ELabel)
+dotGraph :: String -> [Assign] -> DotGraph Node
+dotGraph title assigns = graphToDot (params title) (gr :: Gr NLabel ELabel)
   where
     assigns' = filter keepAssign assigns
     gr = mkGraph nodes edges
