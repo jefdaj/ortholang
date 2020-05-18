@@ -179,7 +179,12 @@ data ELabel
 params :: String -> GraphvizParams n NLabel ELabel () NLabel
 params title = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge = fe}
   where
-    fn (_,NLVar l  ) = [textLabel $ T.pack l]
+    fn (_,NLVar l  ) = [ textLabel $ T.pack l
+                       , shape Ellipse
+                       , style filled
+                       , FillColor (fromJust $ Prelude.lookup "blue" olColors)
+                       ]
+
     fn (_,NLTmp l _) = [ textLabel $ T.pack l
                        , Shape PlainText
                        , FillColor (toColorList [RGB 255 255 255])
@@ -197,15 +202,11 @@ params title = nonClusteredParams {globalAttributes = ga, fmtNode = fn, fmtEdge 
              , Label (StrLabel (T.pack $ title ++ "\n\n"))
              , LabelLoc VTop
              , LabelDistance 5.0
-             -- size is in inches, so max 900 x 1200 pixels overall
-             , Size (GSize 3.0 (Just 4.0) False)
+             -- size is in inches, so max 900 x 1200 pixels overall:
+             -- TODO scale it by the number of nodes?
              , DPI 300
+             , Size (GSize 3.0 (Just 4.0) False)
              ]
-         , NodeAttrs
-            [ shape     Ellipse
-            , FillColor (fromJust $ Prelude.lookup "blue" olColors)
-            , style     filled
-            ]
          ]
 
 {-|
