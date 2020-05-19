@@ -14,7 +14,7 @@ import OrthoLang.Types
 import OrthoLang.Locks
 import OrthoLang.Interpreter
 import OrthoLang.Modules.SeqIO      (faa, fna)
-import OrthoLang.Modules.Singletons (withSingletons, withSingletonArg)
+import OrthoLang.Modules.Singletons (withSingleton, withSingletons, withSingletonArg)
 
 import Control.Monad           (when, forM)
 import Data.Char               (toLower)
@@ -349,16 +349,24 @@ makeblastdbFnaAll = Function
   where
     name = "makeblastdb_fna_all"
 
+-- makeblastdbFaaAll :: Function
+-- makeblastdbFaaAll = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly (ListOf faa)]
+--   , fOutput = Exactly pdb
+--   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
+--   }
+--   where
+--     name = "makeblastdb_faa_all"
+
 makeblastdbFaaAll :: Function
-makeblastdbFaaAll = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf faa)]
-  , fOutput = Exactly pdb
-  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
-  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
-  }
-  where
-    name = "makeblastdb_faa_all"
+makeblastdbFaaAll = newFnA1
+  "makeblastdb_faa_all"
+  (Exactly (ListOf faa))
+  (Exactly pdb)
+  (aMakeblastdbAll2 faa)
+  [Nondeterministic]
 
 -- (ListOf (Some fa "a fasta file")) (Encoded blastdb (Some fa "a fasta file"))
 -- shown as "fa.list -> fa.blastdb, where fa is a fasta file"
@@ -397,6 +405,15 @@ listPrefixFiles prefix = getDirectoryFilesIO pDir [pName] >>= return . map (pDir
   where
     pDir  = takeDirectory prefix
     pName = takeFileName  prefix
+
+aMakeblastdbAll2 :: Type -> NewAction1
+aMakeblastdbAll2 dbType (ExprPath out') fasPath' = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.blastdb.aMakeblastdbAll2"
+      out     = toPath loc cfg out'
+      fasPath = toPath loc cfg fasPath'
+      cDir    = makeblastdbCache cfg
+  aMakeblastdbAll dbType cDir [out, fasPath]
 
 -- TODO why does this randomly fail by producing only two files?
 -- TODO why is cDir just the top-level cache without its last dir component?
@@ -494,23 +511,39 @@ aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show 
 -- these are oddly implemented in terms of the _all ones above,
 -- because that turned out to be easier
 
+-- makeblastdbFna :: Function
+-- makeblastdbFna = Function
+--   { fOpChar = Nothing, fName = "makeblastdb_fna"
+--   , fInputs = [Exactly fna] -- TODO can't do it from faa right?
+--   , fOutput =  Exactly ndb
+--   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
+--   }
+
 makeblastdbFna :: Function
-makeblastdbFna = Function
-  { fOpChar = Nothing, fName = "makeblastdb_fna"
-  , fInputs = [Exactly fna] -- TODO can't do it from faa right?
-  , fOutput =  Exactly ndb
-  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
-  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
-  }
+makeblastdbFna = newMacro
+  "makeblastdb_fna"
+  [Exactly fna]
+  (Exactly ndb)
+  mMakeblastdb
+  [Nondeterministic] -- TODO is it though?
+
+-- makeblastdbFaa :: Function
+-- makeblastdbFaa = Function
+--   { fOpChar = Nothing, fName = "makeblastdb_faa"
+--   , fInputs = [Exactly faa] -- TODO can't do it from faa right?
+--   , fOutput =  Exactly pdb
+--   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
+--   }
 
 makeblastdbFaa :: Function
-makeblastdbFaa = Function
-  { fOpChar = Nothing, fName = "makeblastdb_faa"
-  , fInputs = [Exactly faa] -- TODO can't do it from faa right?
-  , fOutput =  Exactly pdb
-  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
-  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
-  }
+makeblastdbFaa = newMacro
+  "makeblastdb_faa"
+  [Exactly faa]
+  (Exactly pdb)
+  mMakeblastdb
+  [Nondeterministic] -- TODO is it though?
 
 -- (Some fa "a fasta file") (Encoded blastdb (Some fa "a fasta file"))
 -- shown as "fa -> fa.blastdb, where fa is a fasta file"
@@ -520,8 +553,12 @@ makeblastdbFaa = Function
 --   | dbType == ndb && faType `elem` [faa, fna] = Right dbType
 -- tMakeblastdb _ _ = error "makeblastdb requires a fasta file" -- TODO typed error
 
-rMakeblastdb :: RulesFn
-rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
+-- rMakeblastdb :: RulesFn
+-- rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
+
+mMakeblastdb :: MacroExpansion
+mMakeblastdb _ (Fun r ms ds n [s]) = Fun r ms ds (n ++ "_all") [withSingleton s]
+mMakeblastdb _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: " ++ show e
 
 -----------------------------------------------
 -- make list of dbs from list of FASTA files --

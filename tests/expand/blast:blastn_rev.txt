@@ -1,7 +1,7 @@
 maga5 = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
 maga = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
 n = 1.0e-5
-singleFwd = extract_queries (blastn n maga5 maga)
+singleFwd = extract_queries (blastn_db n maga5 (makeblastdb_fna_all [maga]))
 mappedFwd = extract_queries_each (blastn_each n maga5 [maga])
 singleRev = extract_queries (blastn_rev n maga maga5)
 mappedRev = extract_queries_each (blastn_rev_each n maga [maga5])

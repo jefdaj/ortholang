@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- 37bfccaa1d
+|   |   `-- 416921b171
 |   |       |-- 688af09c48
 |   |       |   |-- args -> ../../../../cache/lines/...
 |   |       |   `-- result -> ../../../../exprs/psiblast_db/fa2b0d1d52/e4e709a340/688af09c48/0/result
@@ -31,9 +31,9 @@
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   |-- 43e27cd20e
-|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 7666691bcd
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 766b463a89
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- 95f688921b
 |   |       `-- result -> ../../../cache/lines/...
@@ -44,7 +44,7 @@
 |   |   |   `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |   `-- f8a41afad4
 |   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
-|   |-- makeblastdb_faa
+|   |-- makeblastdb_faa_all
 |   |   |-- 1898488812
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
@@ -68,7 +68,7 @@
 |   |-- psiblast_db_each
 |   |   `-- 4467ed0f79
 |   |       `-- ec1f6f502d
-|   |           `-- 7d321eb17d
+|   |           `-- b9d3874c7d
 |   |               `-- 0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   `-- str
@@ -79,10 +79,10 @@
 |       `-- 824ccbd8b2
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- cyanodbs.faa.blastdb.list -> ../exprs/list/43e27cd20e/result
-    |-- hitlists.bht.list -> ../exprs/psiblast_db_each/4467ed0f79/ec1f6f502d/7d321eb17d/0/result
-    |-- magadb.faa.blastdb -> ../exprs/makeblastdb_faa/329cb2539d/0/result
-    |-- mgendb.faa.blastdb -> ../exprs/makeblastdb_faa/1898488812/0/result
+    |-- cyanodbs.faa.blastdb.list -> ../exprs/list/766b463a89/result
+    |-- hitlists.bht.list -> ../exprs/psiblast_db_each/4467ed0f79/ec1f6f502d/b9d3874c7d/0/result
+    |-- magadb.faa.blastdb -> ../exprs/makeblastdb_faa_all/329cb2539d/0/result
+    |-- mgendb.faa.blastdb -> ../exprs/makeblastdb_faa_all/1898488812/0/result
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hitlists.bht.list
 

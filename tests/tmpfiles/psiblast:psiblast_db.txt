@@ -22,7 +22,7 @@
 |   |   |   `-- result -> ../../../cache/load/36189032ad.faa
 |   |   `-- ae9e22061f
 |   |       `-- result -> ../../../cache/load/28e059b2a9.faa
-|   |-- makeblastdb_faa
+|   |-- makeblastdb_faa_all
 |   |   `-- 329cb2539d
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -31,15 +31,15 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- psiblast_db
 |   |   `-- 01b1e93729
-|   |       `-- fb13c95873
-|   |           `-- 46d637ad1e
+|   |       `-- ceca8cd851
+|   |           `-- 3831a7a38b
 |   |               `-- 0
 |   |                   |-- result
 |   |                   `-- result.err
 |   |-- psiblast_train_db
 |   |   `-- 01b1e93729
 |   |       `-- ec1f6f502d
-|   |           `-- 46d637ad1e
+|   |           `-- 3831a7a38b
 |   |               `-- 0
 |   |                   |-- result -> ../../../../../../cache/lines/...
 |   |                   `-- result.tmp.err
@@ -49,8 +49,8 @@
 |       `-- 824ccbd8b2
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/psiblast_db/01b1e93729/fb13c95873/46d637ad1e/0/result
-    |-- maga.faa.blastdb -> ../exprs/makeblastdb_faa/329cb2539d/0/result
+    |-- hits.bht -> ../exprs/psiblast_db/01b1e93729/ceca8cd851/3831a7a38b/0/result
+    |-- maga.faa.blastdb -> ../exprs/makeblastdb_faa_all/329cb2539d/0/result
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hits.bht
 

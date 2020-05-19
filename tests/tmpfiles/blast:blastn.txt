@@ -30,12 +30,12 @@
 |   `-- seqio
 |-- exprs
 |   |-- any
-|   |   `-- 7e4cbae5b9
+|   |   `-- d69cbcfca1
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- blastn_db
 |   |   |-- b6d4e4cdf4
 |   |   |   `-- ce8fc74ec1
-|   |   |       `-- f456b46f19
+|   |   |       `-- 54672524cb
 |   |   |           `-- 0
 |   |   |               `-- result -> out
 |   |   `-- e10471b511
@@ -50,7 +50,7 @@
 |   |               `-- 0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 5d90795501
+|   |   |-- 9a9dab7a58
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
 |   |   `-- fe14e0545a
@@ -66,11 +66,11 @@
 |   |       `-- d3c226bec7
 |   |           `-- result
 |   |-- list
-|   |   |-- 1ae0070f93
+|   |   |-- 0eb6ccc6ef
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 3f2196fa38
+|   |   |-- bce759b836
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- bce759b836
+|   |   `-- e6b06aa806
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |-- load_fna_path
@@ -84,10 +84,11 @@
 |   |   `-- b5a17d977e
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_fna
-|   |   |-- bc5062d574
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
 |   |   `-- ed42a087c8
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
+|   |-- makeblastdb_fna_all
+|   |   `-- bc5062d574
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- makeblastdb_fna_each
@@ -111,7 +112,7 @@
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/bb7a5c6cae/result
     |-- mbov.fna -> ../exprs/load_fna_path/0e1da458bb/result
     |-- mgen.fna -> ../exprs/load_fna_path/fe2757ed86/result
-    |-- result -> ../exprs/any/7e4cbae5b9/result
-    `-- single.str.list -> ../exprs/extract_queries/5d90795501/result
+    |-- result -> ../exprs/any/d69cbcfca1/result
+    `-- single.str.list -> ../exprs/extract_queries/9a9dab7a58/result
 
-66 directories, 48 files
+67 directories, 48 files

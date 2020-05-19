@@ -1,10 +1,10 @@
 .
 |-- cache
 |   |-- each
-|   |   `-- cd9d8ee8fa
-|   |       `-- 73fe09a6bf
+|   |   `-- 31e7e3c328
+|   |       `-- 54e5634f72
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_targets/73fe09a6bf/result
+|   |           `-- result -> ../../../../exprs/extract_targets/54e5634f72/result
 |   |-- load
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |   |   |-- 7050df5d6e.faa
@@ -21,36 +21,36 @@
 |   `-- seqio
 |-- exprs
 |   |-- any
-|   |   `-- 5d8211cd43
+|   |   `-- 16f99a2ef0
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- blastp_db
 |   |   `-- b6d4e4cdf4
 |   |       `-- 2c7651beca
-|   |           `-- 08bf46a86f
+|   |           `-- a0fc6adb1e
 |   |               `-- 0
 |   |                   `-- result -> out
 |   |-- extract_targets
-|   |   |-- 73fe09a6bf
+|   |   |-- 20e5e287b0
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   `-- 794726f739
+|   |   `-- 54e5634f72
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_targets_each
-|   |   `-- 40211a7024
+|   |   `-- 82b992662a
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- gbk_to_faa_rawids
 |   |   `-- 3feaffccb4
 |   |       `-- d3c226bec7
 |   |           `-- result
 |   |-- list
-|   |   |-- 22b7cf60f2
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 27caa6b4f9
+|   |   |-- 8e78f73dad
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 94782d8088
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- 9e1530eff9
+|   |   |-- a409a2a876
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- d6f3518f0a
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   `-- 81fa36fcfa
@@ -61,7 +61,7 @@
 |   |-- load_gbk
 |   |   `-- b5a17d977e
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
-|   |-- makeblastdb_faa
+|   |-- makeblastdb_faa_all
 |   |   `-- e41c27f09f
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -76,9 +76,9 @@
 |       `-- ee108e12fa
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits.bht -> ../exprs/blastp_db/b6d4e4cdf4/2c7651beca/08bf46a86f/0/result
-    |-- mapped.str.list.list -> ../exprs/extract_targets_each/40211a7024/result
-    |-- result -> ../exprs/any/5d8211cd43/result
-    `-- single.str.list -> ../exprs/extract_targets/794726f739/result
+    |-- hits.bht -> ../exprs/blastp_db/b6d4e4cdf4/2c7651beca/a0fc6adb1e/0/result
+    |-- mapped.str.list.list -> ../exprs/extract_targets_each/82b992662a/result
+    |-- result -> ../exprs/any/16f99a2ef0/result
+    `-- single.str.list -> ../exprs/extract_targets/20e5e287b0/result
 
 45 directories, 36 files

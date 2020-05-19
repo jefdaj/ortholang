@@ -19,27 +19,27 @@
 |   |-- blastp_db
 |   |   `-- 76bf3d901d
 |   |       `-- ec1f6f502d
-|   |           `-- ef7067049b
+|   |           `-- e70f55b3b5
 |   |               `-- 0
 |   |                   `-- result -> out
 |   |-- extract_hmm_targets
-|   |   `-- bffc293866
+|   |   `-- 7d4a4849c9
 |   |       `-- result
 |   |-- extract_seqs
 |   |   `-- 695ad777c5
-|   |       `-- eb8d7504ab
+|   |       `-- 1911119d88
 |   |           `-- result
 |   |-- extract_targets
-|   |   `-- 384acef8f5
+|   |   `-- 2a13619cc4
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- hmmbuild
-|   |   `-- 1f191d6326
+|   |   `-- ec55732f8d
 |   |       |-- result
 |   |       `-- result.err
 |   |-- hmmsearch
 |   |   `-- d00a650518
-|   |       `-- 6e6b9f0718
+|   |       `-- 39e884e959
 |   |           `-- 695ad777c5
 |   |               |-- result
 |   |               `-- result.err
@@ -51,12 +51,12 @@
 |   |   |   `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |   `-- d96205bf90
 |   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
-|   |-- makeblastdb_faa
+|   |-- makeblastdb_faa_all
 |   |   `-- cf7e527970
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- muscle
-|   |   `-- af37bb1245
+|   |   `-- 3d4ac804f7
 |   |       `-- result
 |   |-- num
 |   |   |-- efc8362dcc
@@ -69,13 +69,12 @@
 |       `-- f6e8c8ce02
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits3.hht -> ../exprs/hmmsearch/d00a650518/6e6b9f0718/695ad777c5/result
-    |-- hits_aln.aln -> ../exprs/muscle/af37bb1245/result
-    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/ef7067049b/0/result
-    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/eb8d7504ab/result
-    |-- hits_hmm.hmm -> ../exprs/hmmbuild/1f191d6326/result
+    |-- hits3.hht -> ../exprs/hmmsearch/d00a650518/39e884e959/695ad777c5/result
+    |-- hits_aln.aln -> ../exprs/muscle/3d4ac804f7/result
+    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/e70f55b3b5/0/result
+    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/1911119d88/result
+    |-- hits_hmm.hmm -> ../exprs/hmmbuild/ec55732f8d/result
     |-- mgen.faa -> ../exprs/load_faa/d96205bf90/result
-    |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
-    `-- result -> ../exprs/extract_hmm_targets/bffc293866/result
+    `-- result -> ../exprs/extract_hmm_targets/7d4a4849c9/result
 
-41 directories, 37 files
+41 directories, 36 files

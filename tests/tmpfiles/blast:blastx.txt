@@ -30,12 +30,12 @@
 |   `-- seqio
 |-- exprs
 |   |-- any
-|   |   `-- 6b8cd3198d
+|   |   `-- 61914d4788
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- blastx_db
 |   |   |-- b6d4e4cdf4
 |   |   |   `-- ce8fc74ec1
-|   |   |       `-- 08bf46a86f
+|   |   |       `-- a0fc6adb1e
 |   |   |           `-- 0
 |   |   |               `-- result -> out
 |   |   `-- e10471b511
@@ -50,7 +50,7 @@
 |   |               `-- 0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- cee276ca1f
+|   |   |-- 6478f900ab
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
 |   |   `-- dece7e65f7
@@ -68,11 +68,11 @@
 |   |       `-- ad89bfbf0c
 |   |           `-- result
 |   |-- list
-|   |   |-- 6aea35a397
+|   |   |-- 357daaa106
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 94782d8088
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- cbd60f72c0
+|   |   `-- f2e7227da5
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |-- load_faa_path
@@ -88,9 +88,10 @@
 |   |   `-- b5a17d977e
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_faa
-|   |   |-- 9a61cb63ce
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   `-- 9a61cb63ce
+|   |       `-- 0
+|   |           `-- result -> ../../../../cache/lines/...
+|   |-- makeblastdb_faa_all
 |   |   `-- e41c27f09f
 |   |       `-- 0
 |   |           `-- result -> ../../../../cache/lines/...
@@ -115,7 +116,7 @@
     |-- mapped.str.list.list -> ../exprs/extract_queries_each/807034ac1e/result
     |-- mbov.fna -> ../exprs/load_fna_path/0e1da458bb/result
     |-- mgen.faa -> ../exprs/load_faa_path/f18ee4a4e7/result
-    |-- result -> ../exprs/any/6b8cd3198d/result
-    `-- single.str.list -> ../exprs/extract_queries/cee276ca1f/result
+    |-- result -> ../exprs/any/61914d4788/result
+    `-- single.str.list -> ../exprs/extract_queries/6478f900ab/result
 
-70 directories, 48 files
+71 directories, 48 files

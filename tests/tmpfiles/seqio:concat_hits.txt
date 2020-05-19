@@ -4,7 +4,7 @@
 |   |   |-- 2e20367a4e.txt -> ../../cache/lines/...
 |   |   `-- emptybht.txt -> ../../cache/lines/...
 |   |-- each
-|   |   `-- 31cf7d8e46
+|   |   `-- f39825ffc0
 |   |       |-- 14a1d4b191
 |   |       |   |-- args -> ../../../../cache/lines/...
 |   |       |   `-- result -> ../../../../exprs/psiblast_db/ef81466b9f/e4e709a340/14a1d4b191/0/result
@@ -34,14 +34,14 @@
 |   `-- psiblast
 |-- exprs
 |   |-- concat_bht
-|   |   `-- 04323ac5a7
+|   |   `-- 87adf86f19
 |   |       `-- result
 |   |-- list
+|   |   |-- 024a693646
+|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 7666691bcd
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- bf76103a78
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- f11dde8b88
+|   |   `-- bf76103a78
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 1e0498b59a
@@ -50,7 +50,7 @@
 |   |   |   `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |   `-- cfed7edd23
 |   |       `-- result -> ../../../cache/load/10ffe0cf0f.faa
-|   |-- makeblastdb_faa
+|   |-- makeblastdb_faa_all
 |   |   |-- 1ee5bf3dcb
 |   |   |   `-- 0
 |   |   |       `-- result -> ../../../../cache/lines/...
@@ -74,7 +74,7 @@
 |   |-- psiblast_db_each
 |   |   `-- 0c631e7663
 |   |       `-- ec1f6f502d
-|   |           `-- 71645c3cc4
+|   |           `-- 8e24b8839c
 |   |               `-- 0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   `-- str
@@ -85,10 +85,10 @@
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hitlists.bht.list -> ../exprs/psiblast_db_each/0c631e7663/ec1f6f502d/71645c3cc4/0/result
-    |-- maga.faa.blastdb -> ../exprs/makeblastdb_faa/1ee5bf3dcb/0/result
-    |-- mgen.faa.blastdb -> ../exprs/makeblastdb_faa/329cb2539d/0/result
+    |-- hitlists.bht.list -> ../exprs/psiblast_db_each/0c631e7663/ec1f6f502d/8e24b8839c/0/result
+    |-- maga.faa.blastdb -> ../exprs/makeblastdb_faa_all/1ee5bf3dcb/0/result
+    |-- mgen.faa.blastdb -> ../exprs/makeblastdb_faa_all/329cb2539d/0/result
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
-    `-- result -> ../exprs/concat_bht/04323ac5a7/result
+    `-- result -> ../exprs/concat_bht/87adf86f19/result
 
 46 directories, 45 files
