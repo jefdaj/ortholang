@@ -16,7 +16,7 @@ in pkgs.singularity-tools.buildImage {
   ];
 
   # This is for the temporary build image; final output will be smaller
-  diskSize = 10240;
+  diskSize = 20480;
 
   # TODO launch ortholang directly rather than bash?
   runScript = "#!${ortholang.env}\nexec bash \"\$@\"";
