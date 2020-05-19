@@ -31,13 +31,17 @@ module OrthoLang.Interpreter.Compile.NewMap
   , newMap3of3
 
   -- * Implementation
+  , NewMapFunTemplate
+  , newMapFunTemplate
   , newMapRules
 
   )
   where
 
 import Development.Shake
+import OrthoLang.Util (digest)
 import OrthoLang.Types
+import OrthoLang.Interpreter.Paths (exprPath)
 import OrthoLang.Interpreter.Compile.NewRules
 
 
@@ -86,15 +90,43 @@ back that file and fill in the template to create each of the mapped Exprs.
 newtype NewMapFunTemplate = NewMapFunTemplate String
   deriving (Read, Show, Eq, Ord)
 
--- | Create a NewMapFunTemplate by getting the exprPath of the Expr, then
---   replacing one of the arg hashes. Note that the Expr is expected to have an
---   invalid arg type, so it is not possible to compile except with the newmap
---   machinery.
-newMapFunTemplate :: Int -> Expr -> NewMapFunTemplate
-newMapFunTemplate i e@(Fun r ms ds n es) | length es > i = undefined
-newMapFunTemplate i e = error loc $ "bad arg: " ++ show e
+{-
+Create a NewMapFunTemplate by getting the exprPath of the Expr, then replacing
+one of the arg hashes. Note that the Expr is expected to have an invalid arg
+type, so it is not possible to compile except with the newmap machinery.
+
+The inserted MapHere will have a MapID derived from the Expr it replaces. That
+eliminates confusion about which Exprs to replace with which elements later.
+
+The thing to be mapped over should always be a list, so we set the map
+placeholder type to the type of each list element.
+-}
+newMapFunTemplate :: Config -> DigestsRef -> Script -> Int -> Expr -> NewMapFunTemplate
+newMapFunTemplate _ _ _ i _ | i < 0 = error "ortholang.interpreter.compile.newmap.newMapFunTemplate"
+                                          $ "bad arg: " ++ show i
+
+newMapFunTemplate cfg dRef scr i (Fun r ms ds n es) | length es > i = NewMapFunTemplate $ show fn'
   where
-    loc = "ortholang.interpreter.compile.newmap.newMapFunTemplate"
+    exprToReplace = es !! i
+    (ListOf eType) = typeOf exprToReplace
+    mapid = MapID $ digest $ exprPath cfg dRef scr exprToReplace
+    placeholder = Map eType (seedOf exprToReplace)
+                            (depsOf exprToReplace)
+                            (MapHere mapid)
+    es' = replace es (i, placeholder)
+    fn' = Fun r ms ds n es'
+
+newMapFunTemplate _ _ _ _ e = error "ortholang.interpreter.compile.newmap.newMapFunTemplate"
+                                  $ "bad arg: " ++ show e
+
+-- replace the Nth element in a list
+replace :: (Num a, Ord a) => [b] -> (a,b) -> [b]
+replace [] _ = []
+replace (_:xs) (0,a) = a:xs
+replace (x:xs) (n,a) =
+  if n < 0
+    then (x:xs)
+    else x: replace xs (n-1,a)
 
 newMapRules :: Rules ()
 newMapRules = return ()

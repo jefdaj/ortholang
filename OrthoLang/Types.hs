@@ -10,6 +10,7 @@ module OrthoLang.Types
   , delVar
   , CacheDir(..)
   , MappedExpr(..)
+  , MapID(..)
   , Config(..)
   , DigestMap
   , DigestsRef
