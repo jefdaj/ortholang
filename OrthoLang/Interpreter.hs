@@ -112,7 +112,7 @@ module OrthoLang.Interpreter
 --   , typeOf
 
   -- * Old module API: Actions
-  -- , CompiledExpr(..)
+  -- , MappedExpr(..)
   , absolutizePaths
   , cachedLinesPath
   , debugA

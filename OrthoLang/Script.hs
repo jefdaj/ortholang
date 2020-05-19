@@ -291,7 +291,7 @@ mapExprVars fn (Ref t n vs v      ) = Ref t n (map fn vs)   (fn v)
 mapExprVars fn (Bop t n vs s e1 e2) = Bop t n (map fn vs) s (mapExprVars fn e1) (mapExprVars fn e2)
 mapExprVars fn (Fun t n vs s es   ) = Fun t n (map fn vs) s (map (mapExprVars fn) es)
 mapExprVars fn (Lst t n vs   es   ) = Lst t n (map fn vs)   (map (mapExprVars fn) es)
-mapExprVars _ (Com _) = error "script.mapExprVars" "implement this!"
+mapExprVars fn (Map t n vs   m    ) = Map t n (map fn vs) m
 
 mapAssignVars :: (Var -> Var) -> Assign -> Assign
 mapAssignVars fn a@(Assign var expr) = Assign (fn var) (mapExprVars fn expr)
@@ -420,4 +420,6 @@ rmRef' _   _   e@(Lit _ _) = e
 rmRef' scr var (Bop t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)
 rmRef' scr var (Fun t ms vs s es   ) = Fun t ms (delete var vs) s (map (rmRef scr var) es)
 rmRef' scr var (Lst t ms vs   es   ) = Lst t ms (delete var vs)   (map (rmRef scr var) es)
-rmRef' _   _   (Com _) = error "types.rmRef" "implement this! or rethink?"
+rmRef' scr var e@(Map _ _ vs _)
+  | var `elem` vs = error "ortholang.script.rmRef'" $ "already compiled; too late to remove var! " ++ show e
+  | otherwise = e

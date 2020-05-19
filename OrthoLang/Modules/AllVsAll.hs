@@ -47,9 +47,9 @@ rMkAva st (Fun _ _ _ _ [_, faas]) = do
 rMkAva _ e = error $ "bad argument to rMkAva: " ++ show e
 
 -- construct a BLAST-like search expression from compiled paths
-mkSearchExpr :: Type -> Maybe Seed -> [Var] -> String -> Expr -> ExprPath -> ExprPath -> Expr
-mkSearchExpr rtn _ deps name  evalueExpr  queryFaPath subjFaPath
-  =   Fun rtn Nothing deps name [evalueExpr, queryExpr,  subjExpr]
-  where
-    queryExpr = Com $ CompiledExpr faa queryFaPath (return queryFaPath)
-    subjExpr  = Com $ CompiledExpr faa subjFaPath  (return subjFaPath)
+-- mkSearchExpr :: Type -> Maybe Seed -> [Var] -> String -> Expr -> ExprPath -> ExprPath -> Expr
+-- mkSearchExpr rtn _ deps name  evalueExpr  queryFaPath subjFaPath
+--   =   Fun rtn Nothing deps name [evalueExpr, queryExpr,  subjExpr]
+--   where
+--     queryExpr = Map $ MappedExpr faa queryFaPath (return queryFaPath)
+--     subjExpr  = Map $ MappedExpr faa subjFaPath  (return subjFaPath)

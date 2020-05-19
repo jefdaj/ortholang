@@ -208,7 +208,7 @@ replaceEach = Function
  - 2) the main goal here is to replace extractExprs with an equivalent that evaluates the list and returns its paths
  -    that needs to run in Action so it can use IO
  -    and because of that so does the rReplace' call? is that even possible?
- - 3) then given paths we can build CompiledExprs using the known types
+ - 3) then given paths we can build MappedExprs using the known types
  -
  - But then I remembered Core, which might be able to help:
  - rMap :: Int -> ([Path] -> Action ()) -> RulesFn

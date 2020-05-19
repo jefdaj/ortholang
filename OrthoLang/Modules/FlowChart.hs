@@ -247,7 +247,7 @@ inputVars (Ref _ _ vs v      ) = [v]
 inputVars (Bop _ _ vs _ e1 e2) = nub $ concatMap inputVars [e1, e2] ++ concatMap varOf [e1, e2]
 inputVars (Fun _ _ vs _ es   ) = nub $ concatMap inputVars es ++ concatMap varOf es
 inputVars (Lst _ _ vs   es   ) = nub $ concatMap inputVars es ++ concatMap varOf es
-inputVars (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
+inputVars (Map _ _ _ _       ) = [] -- TODO is this right?
 
 -- merges input edges, as explained here:
 -- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz

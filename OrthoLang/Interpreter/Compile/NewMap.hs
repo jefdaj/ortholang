@@ -76,7 +76,7 @@ newMap3of3 (ExprPath o) p1 p2 l3 = undefined
 -- implementation --
 --------------------
 
--- data CompiledExpr = CompiledExpr Type ExprPath (Rules ExprPath)
+-- data MappedExpr = MappedExpr Type ExprPath (Rules ExprPath)
 
 {-|
 String that will be readable into a Fun Expr once <COMPILED_EXPR_PATH_HERE> is
