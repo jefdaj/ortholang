@@ -5,7 +5,8 @@ This is meant to replace the Map and Map2 modules in a way that allows mapping
 over function-generated lists.
 
 So, what would the ideal interface look like? It should probably operate at the
-Action level for now rather than Rules. Seems much easier to grok. Sooo...
+Action level for now rather than Rules. Seems much easier to grok. Problem is,
+extractExprs seems to require being known in at Rules-time!
 
 And how could it be implemented?
 
@@ -17,6 +18,19 @@ And how could it be implemented?
 
 3. gather the results into a final list
 
+Maybe thinking in terms of the file paths will help...
+
+Input list (the one mapped over) can be whatever it naturally is already, like:
+exprs/load_faa_each/<hash>/<rep>/result
+
+And that is the one whose digest should be in the MapHere, right?
+
+Final output list should go in the result of whatever function it was applied to:
+exprs/blastn_each/<hash>/<hash>/<hash>/<rep>/result etc
+
+Ooooh possibly brilliant idea: instead of this whole "replace in the expr" dance,
+can you just have it be called NeedExpr, and read what to need at Action time?
+Have a Need "<digest here>" constructor and rExpr just returns its path.
 -}
 
 module OrthoLang.Interpreter.Compile.NewMap
@@ -31,8 +45,8 @@ module OrthoLang.Interpreter.Compile.NewMap
   , newMap3of3
 
   -- * Implementation
-  , NewMapFunTemplate
-  , newMapFunTemplate
+  , NewMapTemplate
+  , newMapTemplate
   , newMapRules
 
   )
@@ -83,15 +97,17 @@ newMap3of3 (ExprPath o) p1 p2 l3 = undefined
 -- data MappedExpr = MappedExpr Type ExprPath (Rules ExprPath)
 
 {-|
-String that will be readable into a Fun Expr once <COMPILED_EXPR_PATH_HERE> is
+String that will be readable into a Fun Expr once  is
 replaced with a suitable path. The idea is we can save it to a file, then read
 back that file and fill in the template to create each of the mapped Exprs.
+
+TODO does it always need to be a Fun?
 -}
-newtype NewMapFunTemplate = NewMapFunTemplate String
+newtype NewMapTemplate = NewMapTemplate String
   deriving (Read, Show, Eq, Ord)
 
 {-
-Create a NewMapFunTemplate by getting the exprPath of the Expr, then replacing
+Create a NewMapTemplate by getting the exprPath of the Expr, then replacing
 one of the arg hashes. Note that the Expr is expected to have an invalid arg
 type, so it is not possible to compile except with the newmap machinery.
 
@@ -100,12 +116,14 @@ eliminates confusion about which Exprs to replace with which elements later.
 
 The thing to be mapped over should always be a list, so we set the map
 placeholder type to the type of each list element.
+
+TODO write another version of exprPath without the requirement for dRef?
 -}
-newMapFunTemplate :: Config -> DigestsRef -> Script -> Int -> Expr -> NewMapFunTemplate
-newMapFunTemplate _ _ _ i _ | i < 0 = error "ortholang.interpreter.compile.newmap.newMapFunTemplate"
+newMapTemplate :: Config -> DigestsRef -> Script -> Int -> Expr -> NewMapTemplate
+newMapTemplate _ _ _ i _ | i < 0 = error "ortholang.interpreter.compile.newmap.newMapTemplate"
                                           $ "bad arg: " ++ show i
 
-newMapFunTemplate cfg dRef scr i (Fun r ms ds n es) | length es > i = NewMapFunTemplate $ show fn'
+newMapTemplate cfg dRef scr i (Fun r ms ds n es) | length es > i = NewMapTemplate $ show fn'
   where
     exprToReplace = es !! i
     (ListOf eType) = typeOf exprToReplace
@@ -116,7 +134,7 @@ newMapFunTemplate cfg dRef scr i (Fun r ms ds n es) | length es > i = NewMapFunT
     es' = replace es (i, placeholder)
     fn' = Fun r ms ds n es'
 
-newMapFunTemplate _ _ _ _ e = error "ortholang.interpreter.compile.newmap.newMapFunTemplate"
+newMapTemplate _ _ _ _ e = error "ortholang.interpreter.compile.newmap.newMapTemplate"
                                   $ "bad arg: " ++ show e
 
 -- replace the Nth element in a list
@@ -128,5 +146,18 @@ replace (x:xs) (n,a) =
     then (x:xs)
     else x: replace xs (n-1,a)
 
+{-|
+The "new map" machinery works like so:
+
+1. Save a  "template" file, which holds a shown Expr with a MapHere inside
+2. Save an "elements" file, which is a list of paths that should be substituted in
+3. Read those two to create a list of new Exprs
+4. Compile the new Exprs normally (via rExpr)
+
+TODO can the elements file be removed? Should be able to tell by the fn call path
+
+TODO wait why was this necessary at all? can you just extractExprs by needing it first?
+-}
 newMapRules :: Rules ()
-newMapRules = return ()
+newMapRules = do
+  return ()

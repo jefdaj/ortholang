@@ -225,8 +225,14 @@ rReplaceEach :: Script
              -> Rules ExprPath
 rReplaceEach scr expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subList:[])) = do
   subPaths <- rExpr scr subList
+
+  -- TODO how to replace this with the NewMap machinery?
+  -- It needs to handle fn calls + regular lists
+  -- This does seem amenable to being phrased as "mapping over a list whose elements aren't known yet" right?
+  -- Could you just do that and put the results in resPaths?
   let subExprs = extractExprs scr subList
   resPaths <- mapM (rReplace' scr resExpr subVar) subExprs
+
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let loc = "modules.replace.rReplaceEach"
