@@ -578,18 +578,6 @@ mkMakeblastdbEach faType = Function
     -- d = name ++ " : " ++ ext ++ ".list -> " ++ ext dbType ++ ".list"
     -- ext  = if dbType == ndb then "fa" else "faa"
 
--- (ListOf (Some fa "a fasta file")) (ListOf (Encoded blastdb (Some fa "a fasta file")))
--- shown as "fa.list -> fa.blastdb.list, where: fa is a fasta file"
--- tMakeblastdbEach :: Type -> TypeChecker
--- tMakeblastdbEach dbType [ListOf x] | x `elem` [fna, faa] = Right (ListOf dbType)
--- tMakeblastdbEach _ _ = error "expected a list of fasta files" -- TODO typed error
-
--- map1of1 :: Type -> Type -> Action1 -> Action1
--- map1of1 inType outType act1 cfg locks out a1 = do
-
--- rMap :: Int -> ([Path] -> Action ()) -> RulesFn
--- rMap index actFn = rMapMain index Nothing actFn'
-
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
 rMakeblastdbEach :: RulesFn
 rMakeblastdbEach scr (Fun (ListOf dbType) seed deps name [e]) = do
@@ -599,6 +587,18 @@ rMakeblastdbEach scr (Fun (ListOf dbType) seed deps name [e]) = do
       expr' = Fun (ListOf dbType) seed deps name [withSingletons e]
   (rMap 1 act1) scr expr'
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
+
+-- mkMakeblastdbEach :: Type -> Function
+-- mkMakeblastdbEach faType = newMacro
+--   ("makeblastdb_" ++ ext faType ++ "_each")
+--   [Exactly (ListOf faType)]
+--   (Exactly (ListOf (EncodedAs blastdb faType)))
+--   mMakeblastdbEach
+--   [Nondeterministic] -- TODO is it though?
+--
+-- mMakeblastdbEach :: MacroExpansion
+-- mMakeblastdbEach = undefined -- TODO oh, have to solve mapping first :/
+
 
 ------------------
 -- show db info --
