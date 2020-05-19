@@ -395,7 +395,7 @@ newFn name mChar iSigs oSig rFn aFn tags = Function
   , fInputs    = iSigs
   , fOutput    = oSig
   , fTags      = tags
-  , fOldRules  = undefined
+  , fOldRules  = undefined -- TODO why is this being called during blast?
   , fNewRules  = NewRules $ rFn oSig name aFn
   }
 

@@ -73,19 +73,38 @@ blastDescs =
 -- *blast*_db --
 ----------------
 
+-- mkBlastFromDb :: BlastDesc -> Function
+-- mkBlastFromDb d@(bCmd, qType, _, sType) = Function
+--   { fOpChar = Nothing
+--   , fName = bCmd ++ "_db"
+--   , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs blastdb sType)]
+--   , fOutput = Exactly bht
+--   , fTags = [Nondeterministic]
+--   -- , fNewRules = NewRules $ aMkBlastFromDb2 bCmd
+--   , fOldRules = rMkBlastFromDb d
+--   }
+
 mkBlastFromDb :: BlastDesc -> Function
-mkBlastFromDb d@(bCmd, qType, _, sType) = Function
-  { fOpChar = Nothing
-  , fName = bCmd ++ "_db"
-  , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs blastdb sType)]
-  , fOutput = Exactly bht
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDb d
-  }
+mkBlastFromDb (bCmd, qType, _, sType) = newFnA3
+  (bCmd ++ "_db")
+  (Exactly num, Exactly qType, Exactly (EncodedAs blastdb sType))
+  (Exactly bht)
+  (aMkBlastFromDb2 bCmd)
+  [Nondeterministic]
 
 -- TODO remove tmp?
-rMkBlastFromDb :: BlastDesc -> RulesFn
-rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
+-- rMkBlastFromDb :: BlastDesc -> RulesFn
+-- rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
+
+aMkBlastFromDb2 :: String -> NewAction3
+aMkBlastFromDb2 bCmd (ExprPath o') e' q' p' = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.blast.aMkBlastFromDb2"
+      o = toPath loc cfg o'
+      q = toPath loc cfg q'
+      p = toPath loc cfg p'
+      e = toPath loc cfg e'
+  aMkBlastFromDb bCmd [o, e, q, p]
 
 aMkBlastFromDb :: String -> ([Path] -> Action ())
 aMkBlastFromDb bCmd [o, e, q, p] = do
@@ -171,27 +190,43 @@ aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
 -- *blast* --
 -------------
 
-mkBlastFromFa :: BlastDesc -> Function
-mkBlastFromFa d@(bCmd, qType, sType, _) = Function
-  { fOpChar = Nothing
-  , fName = bCmd
-  , fInputs = [Exactly num, Exactly qType, Exactly sType]
-  , fOutput = Exactly bht
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFa d
-  }
+-- mkBlastFromFa :: BlastDesc -> Function
+-- mkBlastFromFa d@(bCmd, qType, sType, _) = Function
+--   { fOpChar = Nothing
+--   , fName = bCmd
+--   , fInputs = [Exactly num, Exactly qType, Exactly sType]
+--   , fOutput = Exactly bht
+--   , fTags = [Nondeterministic]
+--   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFa d
+--   }
 
 -- inserts a "makeblastdb" call and reuses the _db compiler from above
--- TODO check this works after writing the new non- _all makeblastdb fns
-rMkBlastFromFa :: BlastDesc -> RulesFn
-rMkBlastFromFa d@(_, _, _, sType) st (Fun rtn seed deps _ [e, q, s])
-  = rules st (Fun rtn seed deps name1 [e, q, dbExpr])
+-- rMkBlastFromFa :: BlastDesc -> RulesFn
+-- rMkBlastFromFa d@(_, _, _, sType) st (Fun rtn seed deps _ [e, q, s])
+--   = rules st (Fun rtn seed deps name1 [e, q, dbExpr])
+--   where
+--     rules = fOldRules $ mkBlastFromDb d -- TODO aha, have to rewrite this too
+--     name1 = fName $ mkBlastFromDb d
+--     name2 = "makeblastdb_" ++ ext sType
+--     dbExpr = Fun (EncodedAs blastdb sType) seed (depsOf s) name2 [s] 
+-- rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
+
+mkBlastFromFa :: BlastDesc -> Function
+mkBlastFromFa d@(bCmd, qType, sType, _) = newMacro
+  bCmd
+  [Exactly num, Exactly qType, Exactly sType]
+  (Exactly bht)
+  (mMkBlastFromFa d)
+  [Nondeterministic]
+
+mMkBlastFromFa :: BlastDesc -> MacroExpansion
+mMkBlastFromFa d@(bCmd,_,_,sType) _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
   where
-    rules = fOldRules $ mkBlastFromDb d
-    name1 = fName $ mkBlastFromDb d
+    name1 = bCmd ++ "_db"
     name2 = "makeblastdb_" ++ ext sType
-    dbExpr = Fun (EncodedAs blastdb sType) seed (depsOf s) name2 [s] 
-rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
+    expr = Fun (EncodedAs blastdb sType) ms (depsOf s) name2 [s]
+mMkBlastFromFa _ _ e = error "ortholang.modules.blast.mkBlastFromFa" $ "bad arg: " ++ show e
+
 
 ---------------------
 -- *blast*_db_each --
