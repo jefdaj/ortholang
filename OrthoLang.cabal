@@ -115,6 +115,7 @@ library
                     OrthoLang.Interpreter.Compile.Map,
                     OrthoLang.Interpreter.Compile.Map2,
                     OrthoLang.Interpreter.Compile.NewRules,
+                    OrthoLang.Interpreter.Compile.NewMap,
                     OrthoLang.Interpreter.Compile.Simple,
                     OrthoLang.Interpreter.Eval,
                     OrthoLang.Locks,

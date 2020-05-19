@@ -205,6 +205,7 @@ import OrthoLang.Debug
 import OrthoLang.Interpreter.Actions
 import OrthoLang.Interpreter.Compile
 import OrthoLang.Interpreter.Compile.NewRules
+import OrthoLang.Interpreter.Compile.NewMap
 import OrthoLang.Interpreter.Paths
 import OrthoLang.Interpreter.Sanitize
 import OrthoLang.Interpreter.Parse
