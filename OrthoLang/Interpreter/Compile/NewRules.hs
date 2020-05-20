@@ -50,6 +50,12 @@ module OrthoLang.Interpreter.Compile.NewRules
   , newMacro
   , hidden
 
+  -- * Functions from Path Macros
+  -- $pathmacros
+  , newFnP1
+  , newFnP2
+  , newFnP3
+
   -- * Implementation details
   , rReloadIDs
   , newRules
@@ -457,3 +463,29 @@ No need to call this if you've manually added 'Hidden' to 'fTags'.
 -}
 hidden :: Function -> Function
 hidden fn = fn { fTags = Hidden : fTags fn }
+
+-- $pathmacros
+-- This is mostly geared toward writing the _each and _all mapped function
+-- variants easily. It's analagous to macro expansion, but the transformation
+-- is done on the input Paths directly rather than on the Exprs that will be
+-- compiled to those Paths.
+--
+-- The same priciple applies as when writing Expr macros: you have to make sure
+-- that the system knows how to handle the results already. For example if you
+-- make a macro that rewrites "exprs/load_faa_each" paths to "exprs/load_faa"
+-- paths, there must already be Rules for "exprs/load_faa" or Shake will fail
+-- at runtime.
+--
+-- Sometimes you might need both a path macro and a custom action to handle the
+-- paths it creates. To keep things maintainable, it's recommended to create
+-- two functions: one for the path macro, and one that handles the results as
+-- if they were passed in separately. The second one can be hidden from
+-- users.
+--
+-- TODO is all-vs-all a good example of that?
+
+newFnP1 = undefined
+
+newFnP2 = undefined
+
+newFnP3 = undefined
