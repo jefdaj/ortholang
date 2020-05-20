@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 {-|
 The simplest way I can think to implement mapping is at the Action level, using
 something similar to the macros above. The idea is that Shake can figure out
@@ -22,11 +24,14 @@ module OrthoLang.Interpreter.Compile.NewMap
   )
   where
 
+import Prelude hiding (readList)
 import Development.Shake
 import OrthoLang.Util (digest)
+import OrthoLang.Interpreter.Actions (need', readList, writePaths)
 import OrthoLang.Types
-import OrthoLang.Interpreter.Paths (exprPath)
+import OrthoLang.Interpreter.Paths (exprPathExplicit, fromPath)
 import OrthoLang.Interpreter.Compile.NewRules
+import Data.Maybe (fromJust)
 
 
 ---------------
@@ -34,11 +39,7 @@ import OrthoLang.Interpreter.Compile.NewRules
 ---------------
 
 newMap1of1 :: String -> NewAction1 -> NewAction1
-newMap1of1 prefix act o@(ExprPath o') l1' = undefined
-  -- let loc = "ortholang.interpreter.compile.newmap.newMap1of1"
-  -- template <- calcTemplate o 1
-  -- elems <- readList loc l1' -- TODO find out the type and use readstrings?
-  -- undefined
+newMap1of1 prefix act o@(ExprPath o') l1' = newMap1 prefix act o l1'
 
 newMap1of2 :: String -> NewAction2 -> NewAction2
 newMap1of2 prefix act (ExprPath o) l1 p2 = undefined
@@ -70,12 +71,15 @@ newMap3of3 prefix act (ExprPath o) p1 p2 l3 = undefined
 -- we start with the single-list-only case, and will generalize if it works
 newMap1 :: String -> NewAction1 -> NewAction1
 newMap1 prefix actFn (ExprPath outPath) arg1Path = do
-  -- TODO get cfg
-  -- TODO replace prefix in outPath
-  -- TODO digest arg1Path, then replace that digest in outPath with each of its elements?
-  --      no wait, less magical to use the index: hash 1 for this one
-  -- TODO return the list and we're done?
-  undefined
+  let loc = "ortholang.interpreter.compile.newmap.newMap1"
+  elems <- readList loc arg1Path -- TODO get the type and do readStrings instead?
+  cfg <- fmap fromJust getShakeExtra
+  let mSeed  = Nothing -- TODO how to get the seed??
+  let mkPath p = exprPathExplicit cfg prefix mSeed [digest p]
+  let outPaths = map mkPath elems -- TODO will fail on lits? paths?
+      outPaths' = map (fromPath loc cfg) outPaths
+  need' loc outPaths' -- TODO should this be needed later only? decides evaluation order
+  writePaths loc outPath outPaths -- TODO will fail on lits?
 
 -- calcTemplate :: ExprPath -> Int -> Action ExprPathTemplate
 -- calcTemplate path index = do

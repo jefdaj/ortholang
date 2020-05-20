@@ -125,8 +125,8 @@ module OrthoLang.Interpreter.Paths
   -- * Generate paths
   , cacheDir
   , exprPath
-  -- , exprPathExplicit
   , addDigest
+  , exprPathExplicit -- watch out! this one does not add the digest
   , unsafeExprPathExplicit
   , varPath
 
