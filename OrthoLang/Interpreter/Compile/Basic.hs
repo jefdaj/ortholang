@@ -95,11 +95,6 @@ rExpr s e@(Ref _ _ _ _   ) = rRef s e
 rExpr s e@(Lst _ _ _   es) = mapM (rExpr s) es >> rList s e
 rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO is the map part needed?
 rExpr s e@(Bop t ms ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t ms ds [e1, e2]] >> rBop s e -- TODO remove the map part?
-rExpr _ e@(Map _ _ _ m) =
-  let loc = "ortholang.interpreter.compile.basic"
-  in case m of
-    (MapDone p) -> return p
-    (MapHere _) -> error loc $ "can't compile to rules before inserting map arg: " ++ show e
 
 -- | Temporary hack to fix Bops
 rBop :: RulesFn

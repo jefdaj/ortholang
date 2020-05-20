@@ -268,10 +268,6 @@ argHashes _ _ _ (Lit _     v      ) = [digest v]
 argHashes c d s (Fun _ _ _ _ es   ) = map (digest . exprPath c d s) es
 argHashes c d s (Bop _ _ _ _ e1 e2) = map (digest . exprPath c d s) [e1, e2] -- TODO remove?
 argHashes c d s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c d s) es] -- TODO use seed here?
-argHashes _ _ _ e@(Map _ _ _ m) = case m of
-  (MapDone p) -> [digest p]
-  (MapHere _) -> error "ortholang.interpreter.paths.argHashes" $
-                       "can't get hashes before inserting map expr: " ++ show e
 
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
@@ -281,11 +277,6 @@ bop2fun e = error "bop2fun" $ "called with non-Bop: \"" ++ render (pPrint e) ++ 
 -- TODO rename to tmpPath?
 -- TODO remove the third parseenv arg (digestmap)?
 exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
-exprPath c _ _ e@(Map _ _ _ m) =
-  let loc = "interpreter.paths.exprPath"
-  in case m of
-       (MapDone (ExprPath p)) -> toPath loc c p
-       (MapHere _) -> error loc $ "can't get expr path before inserting map expr: " ++ show e
 exprPath c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
                                Nothing -> error "exprPath" $ "no such var '" ++ vName ++ "'\n" ++ show (sAssigns s)
                                Just e  -> exprPath c d s e
@@ -305,7 +296,6 @@ prefixOf (Lit rtn _       ) = ext rtn
 prefixOf (Fun _ _ _ name _) = name
 prefixOf (Lst _ _ _ _     ) = "list"
 prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
-prefixOf (Map _ _ _ _     ) = error "prefixOf" "MappedExprs don't need a prefix"
 prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    "+" -> "add"
                                    "-" -> "subtract"
@@ -432,7 +422,6 @@ TODO is there a better word for this, or a matching typeclass?
 listExprs :: Expr -> [Expr]
 listExprs   (Ref _ _ _ _    ) = [] -- TODO or is it e?
 listExprs e@(Lit _ _        ) = [e]
-listExprs e@(Map _ _ _ _    ) = [e]
 listExprs e@(Fun _ _ _ _  es) = e : concatMap listExprs es
 listExprs e@(Lst _ _ _    es) = e : concatMap listExprs es
 listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e

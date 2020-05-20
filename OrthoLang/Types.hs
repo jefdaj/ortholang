@@ -9,8 +9,6 @@ module OrthoLang.Types
   , hasVar
   , delVar
   , CacheDir(..)
-  , MappedExpr(..)
-  , MapID(..)
   , Config(..)
   , DigestMap
   , DigestsRef
@@ -197,51 +195,13 @@ data Expr
   | Bop Type (Maybe Seed) [Var] String  Expr Expr -- TODO remove seed?
   | Fun Type (Maybe Seed) [Var] String [Expr] -- TODO is the Eq instance wrong?
   | Lst Type (Maybe Seed) [Var] [Expr]
-  | Map Type (Maybe Seed) [Var] MappedExpr -- see MappedExpr below
   deriving (Eq, Show)
 
 -- TODO remove?
 -- repOf :: Var -> RepID
 -- repOf (Var r _) = r
 
-{-
-A placeholder Expr used to implement mapping. It has two states: initially
-MapHere will be inserted with a unique MapID specifying which map operation it
-is a part of. Then once the mapped-over Expr (usually a Lst) has been
-evaluated, that will be replaced with a MapDone. MapDone Exprs have already
-been compiled to Rules, and don't need any further processing.
 
-TODO can the duplicate ExprPaths be removed? The first is needed for Show and Eq
-
-TODO can the Rules part be removed entirely?
-
-TODO what instances does this need?
--}
-data MappedExpr
-  = MapHere MapID    -- ^ placeholder where a compiled expr will be inserted
-  | MapDone ExprPath -- ^ actual compiled expr
-  -- | MapDone ExprPath (Rules ExprPath) -- ^ actual compiled expr
-  deriving (Eq)
-
--- this is actually important because the placeholder is used in NewMap
-instance Show MappedExpr where
-  show (MapHere (MapID i)) = "<MAP_ELEM_HERE " ++ i ++ ">"
-  show (MapDone epath    ) = "MapDone " ++ show epath
-
--- | Uniquely identifies which compiled Expr should be inserted
---   TODO is this a digest, or an exprpath, or what?
-newtype MapID = MapID String deriving (Eq, Show, Read)
-
--- TODO is it a bad idea to hide the compiled-ness?
--- TODO can this be made into a Path?
--- TODO is show ever really needed?
--- TODO remove show instance!
--- instance Show MappedExpr where
---   show (MappedExpr t ms ds p _) = "MappedExpr " ++ ext t ++ " " ++ show p ++ " <<Rules ExprPath>>"
-
--- MappedExprs are compared by the expressions they were compiled from.
--- instance Eq MappedExpr where
---   (MappedExpr _ p1 _) == (MappedExpr _ p2 _) = p1 == p2
 
 -- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty Expr where
@@ -251,9 +211,6 @@ instance Pretty Expr where
   pPrint (Ref _ _ _ v)    = pPrint v
   pPrint (Fun _ _ _ s es) = PP.text s <+> PP.sep (map pNested es)
   pPrint (Lst _ _ _ es)  = pList es
-  -- pPrint (Map (MappedExpr t (ExprPath p) _)) = PP.text $ "Compiled " ++ ext t ++ " " ++ p
-  pPrint (Map _ _ _ (MapHere (MapID i))) = PP.text $ "MapHere <<" ++ i ++ ">>"
-  pPrint (Map _ _ _ (MapDone  p       )) = PP.text $ "MapDone <<" ++ show p ++ ">>"
 
   -- this is almost right except it breaks lines too early (always nesting),
   -- which looks super weird for short bops:
@@ -286,7 +243,6 @@ pNested e = pPrint e
 -- TODO is this not actually needed? seems "show expr" handles it?
 seedOf :: Expr -> Maybe Seed
 seedOf (Lit _ _)          = Nothing
-seedOf (Map _ ms _ _)     = ms
 seedOf (Lst _ ms _ _)     = ms
 seedOf (Ref _ ms _ _)     = ms
 seedOf (Bop _ ms _ _ _ _) = ms
@@ -300,7 +256,6 @@ setSeed r (Ref t ms ds v)       = Ref t (fmap (const $ Seed r) ms) ds v
 setSeed r (Bop t ms ds s e1 e2) = Bop t (fmap (const $ Seed r) ms) ds s (setSeed r e1) (setSeed r e2)
 setSeed r (Lst t ms ds   es   ) = Lst t (fmap (const $ Seed r) ms) ds   $ map (setSeed r) es
 setSeed r (Fun t ms ds s es)    = Fun t (fmap (const $ Seed r) ms) ds s $ map (setSeed r) es
-setSeed r (Map t ms ds m)       = Map t (fmap (const $ Seed r) ms) ds m
 
 
 -------------
@@ -389,7 +344,6 @@ typeOf (Ref  t _ _ _    ) = t
 typeOf (Bop  t _ _ _ _ _) = t
 typeOf (Fun  t _ _ _ _  ) = t
 typeOf (Lst  t _ _ _    ) = ListOf t
-typeOf (Map  t _ _ _    ) = t
 
 varOf :: Expr -> [Var]
 varOf (Ref _ _ _ v) = [v]
@@ -401,7 +355,6 @@ depsOf (Ref _ _ vs v      ) = v:vs -- TODO redundant?
 depsOf (Bop _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
 depsOf (Fun _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
 depsOf (Lst _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
-depsOf (Map _ _ vs _      ) = nub $ vs
 
 
 -----------
