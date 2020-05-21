@@ -12,7 +12,6 @@ let
   in import (fetchFromGitHub {
     owner  = "jefdaj";
     repo   = "nixpkgs";
-    2020-05-08 update of clean-20.03 branch:
     rev    = "fd3aa9e6e403549f97f3ff2be4b12b8227d6f8f9";
     sha256 = "0pnbq5119218nhrsm8m6kxxdq2r8zg1abrg31yb6ihbvmin43hv0";
   }) {};
