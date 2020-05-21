@@ -52,9 +52,8 @@ module OrthoLang.Interpreter.Compile.NewRules
 
   -- * Functions from Path Macros
   -- $pathmacros
-  , newFnP1
-  , newFnP2
-  , newFnP3
+  , newPathMacro
+  , newPathMacroAll
 
   -- * Implementation details
   , rReloadIDs
@@ -479,13 +478,78 @@ hidden fn = fn { fTags = Hidden : fTags fn }
 -- Sometimes you might need both a path macro and a custom action to handle the
 -- paths it creates. To keep things maintainable, it's recommended to create
 -- two functions: one for the path macro, and one that handles the results as
--- if they were passed in separately. The second one can be hidden from
--- users.
+-- if they were passed in separately. The second one can be hidden from users.
+-- It's only a little more work than writing the Action only, and makes it much
+-- easier to interactively debug.
 --
 -- TODO is all-vs-all a good example of that?
+--
+-- This could almost be done more simply by having path macros generate
+-- NewAction functions and substituting those directly into the newFnA* stuff
+-- above, except that then they wouldn't know whether to include seeds. The
+-- extra machinery here lets us decide that based on the input Expr rather than
+-- relying on the path strings (brittle). It also lets us factor out the
+-- "gather paths into one input list" step at the end, which need to handle
+-- literals and paths separately.
 
-newFnP1 = undefined
+type Prefix = String
 
-newFnP2 = undefined
+-- the Action here is required because one of the input paths will normally be
+-- needed + read to generate the list of output paths. The One variant means
+-- the macro returns one path, which will be symlinked to the actual outpath.
+-- Many means it returns a list of paths, which will be written to the actual
+-- outpath.
+type PathMacro    = Prefix -> Maybe Seed -> [FilePath] -> Action  FilePath
+type PathMacroAll = Prefix -> Maybe Seed -> [FilePath] -> Action [FilePath]
 
-newFnP3 = undefined
+-- For one-to-one path changes
+-- TODO is this ever used? Maybe it's not needed except for API consistency
+newPathMacro
+  :: String    -- ^ name of this function
+  -> Prefix    -- ^ prefix (aka name) of the function to expand to
+  -> [TypeSig] -- ^ input types (before macro is applied)
+  -> TypeSig   -- ^ return type (final result after macro + path gathering)
+  -> PathMacro -- ^ path editing macro
+  -> [FnTag]   -- ^ tags
+  -> Function
+newPathMacro fnName mapPrefix inTypes outType pathMacro tags = undefined
+
+-- For one-to-many path changes (mostly maps)
+-- TODO how should this be arranged to allow more than one at a time? mainly for all-vs-all
+--      maybe they could be chained and you take a list of macros here?
+--      ooh, or maybe just make one or more intermediate functions so each is a single one -> many step
+newPathMacroAll
+  :: String       -- ^ name of this function
+  -> Prefix       -- ^ prefix (aka name) of the function to expand to
+  -> [TypeSig]    -- ^ input types (before macro is applied)
+  -> TypeSig      -- ^ return type (final result after macro + path gathering)
+  -> PathMacroAll -- ^ path expanding macro
+  -> [FnTag]      -- ^ tags
+  -> Function
+newPathMacroAll fnName mapPrefix inTypes outType pathMacro tags = undefined
+
+
+-- yesterday's implementation for reference:
+
+-- newMap1 :: String -> NewAction1 -> NewAction1
+-- newMap1 prefix actFn (ExprPath outPath) arg1Path = do
+--   let loc = "ortholang.interpreter.compile.newmap.newMap1"
+--   elems <- readList loc arg1Path -- TODO get the type and do readStrings instead?
+--   cfg <- fmap fromJust getShakeExtra
+--   let mSeed  = Nothing -- TODO how to get the seed??
+--   let mkPath p = exprPathExplicit cfg prefix mSeed [digest p]
+--   let outPaths = map mkPath elems -- TODO will fail on lits? paths?
+--       outPaths' = map (fromPath loc cfg) outPaths
+--   need' loc outPaths' -- TODO should this be needed later only? decides evaluation order
+--   writePaths loc outPath outPaths -- TODO will fail on lits?
+
+
+-- | Gathers the macro-generated output paths into one final output
+-- Note: should *not* need the list of paths, right? preserve the laziness if possible
+-- TODO have I written this already under a different name?
+gatherMapResults :: ExprPath -> [FilePath] -> Action ()
+gatherMapResults = undefined
+
+-- quickly generate _each and _all variants of 1-arg functions, for example makeblastdb
+newPathMacroAll1  = undefined
+newPathMacroEach1 = undefined
