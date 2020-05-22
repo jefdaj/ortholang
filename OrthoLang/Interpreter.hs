@@ -17,7 +17,7 @@ module OrthoLang.Interpreter
   , aNewRulesS1
   , aNewRulesS2
   , aNewRulesS3
-  , newMacro
+  , newExprExpansion
   -- , ActionR
   , NewAction1
   , NewAction2
@@ -26,7 +26,7 @@ module OrthoLang.Interpreter
   -- , Function(..)
   -- , FnTag(..)
   -- , NewRules(..)
-  , MacroExpansion
+  , ExprExpansion
   , addDigest
   , decodeNewRulesType
   , decodeNewRulesDeps

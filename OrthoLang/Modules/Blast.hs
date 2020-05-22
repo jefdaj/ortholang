@@ -213,14 +213,14 @@ aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
 -- rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
 
 mkBlastFromFa :: BlastDesc -> Function
-mkBlastFromFa d@(bCmd, qType, sType, _) = newMacro
+mkBlastFromFa d@(bCmd, qType, sType, _) = newExprExpansion
   bCmd
   [Exactly num, Exactly qType, Exactly sType]
   (Exactly bht)
   (mMkBlastFromFa d)
   [Nondeterministic]
 
-mMkBlastFromFa :: BlastDesc -> MacroExpansion
+mMkBlastFromFa :: BlastDesc -> ExprExpansion
 mMkBlastFromFa d@(bCmd,_,_,sType) _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
   where
     name1 = bCmd ++ "_db"

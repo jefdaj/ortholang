@@ -38,8 +38,8 @@ aTest2 (ExprPath out) a1 a2 a3 = writeCachedLines "modules.newrulestest.aTest2" 
 
 -- TODO any obvious way to constrain the number of args?
 test3 :: Function
-test3 = newMacro "newrulestest3" [Exactly str, Exactly str, Exactly str] (Exactly str) mTest3 []
+test3 = newExprExpansion "newrulestest3" [Exactly str, Exactly str, Exactly str] (Exactly str) mTest3 []
 
-mTest3 :: MacroExpansion
+mTest3 :: ExprExpansion
 mTest3 _ (Fun _ _ _ _ _) = undefined
 mTest3 _ e = error $ "bad argument to mTest3: " ++ show e

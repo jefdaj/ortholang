@@ -19,9 +19,9 @@ module OrthoLang.Interpreter.Compile
   , aNewRulesS1
   , aNewRulesS2
   , aNewRulesS3
-  , newMacro
+  , newExprExpansion
   , newRules
-  , MacroExpansion
+  , ExprExpansion
   -- , rBop
   , rExpr
   , rFun3

@@ -521,7 +521,7 @@ aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show 
 --   }
 
 makeblastdbFna :: Function
-makeblastdbFna = newMacro
+makeblastdbFna = newExprExpansion
   "makeblastdb_fna"
   [Exactly fna]
   (Exactly ndb)
@@ -538,7 +538,7 @@ makeblastdbFna = newMacro
 --   }
 
 makeblastdbFaa :: Function
-makeblastdbFaa = newMacro
+makeblastdbFaa = newExprExpansion
   "makeblastdb_faa"
   [Exactly faa]
   (Exactly pdb)
@@ -556,7 +556,7 @@ makeblastdbFaa = newMacro
 -- rMakeblastdb :: RulesFn
 -- rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
 
-mMakeblastdb :: MacroExpansion
+mMakeblastdb :: ExprExpansion
 mMakeblastdb _ (Fun r ms ds n [s]) = Fun r ms ds (n ++ "_all") [withSingleton s]
 mMakeblastdb _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: " ++ show e
 
@@ -589,14 +589,14 @@ rMakeblastdbEach scr (Fun (ListOf dbType) seed deps name [e]) = do
 rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 
 -- mkMakeblastdbEach :: Type -> Function
--- mkMakeblastdbEach faType = newMacro
+-- mkMakeblastdbEach faType = newExprExpansion
 --   ("makeblastdb_" ++ ext faType ++ "_each")
 --   [Exactly (ListOf faType)]
 --   (Exactly (ListOf (EncodedAs blastdb faType)))
 --   mMakeblastdbEach
 --   [Nondeterministic] -- TODO is it though?
 --
--- mMakeblastdbEach :: MacroExpansion
+-- mMakeblastdbEach :: ExprExpansion
 -- mMakeblastdbEach = undefined -- TODO oh, have to solve mapping first :/
 
 

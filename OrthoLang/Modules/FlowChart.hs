@@ -90,7 +90,7 @@ renderPng path g = do
 -- TODO do use the result var if possible! just have a special constructor for it and render a different color
 --      might need to use a special _inputs naming scheme. could be simple: result_inputs. lol
 plotVars :: Function
-plotVars = newMacro
+plotVars = newExprExpansion
   "plot_vars"
   [Exactly str]
   (Exactly png)
@@ -102,7 +102,7 @@ selectAll scr _ = map aVar $ sAssigns scr
 
 -- | This inserts a plot_dot call with the complete dot structure in its str input.
 -- TODO implement the other two by applying a function to the script first?
-mkFlowChartMacro :: (Script -> [Expr] -> [Var]) -> MacroExpansion
+mkFlowChartMacro :: (Script -> [Expr] -> [Var]) -> ExprExpansion
 mkFlowChartMacro selectFn scr (Fun t ms vs n ((Lit str title):es)) = Fun t ms vs "plot_dot" [ds]
   where
     vs = selectFn scr es
@@ -116,7 +116,7 @@ mkFlowChartMacro _ _ e = error "ortholang.modules.flowchart.mkFlowChartMacro" $ 
 ------------------
 
 plotDepends :: Function
-plotDepends = newMacro
+plotDepends = newExprExpansion
   "plot_depends"
   [Exactly str, AnyType "type of the expr whose depends will be plotted"]
   (Exactly png)
@@ -134,7 +134,7 @@ selectDepends _ es = error "ortholang.modules.flowchart.selectDepends" $ "bad ex
 -------------------
 
 plotRDepends :: Function
-plotRDepends = newMacro
+plotRDepends = newExprExpansion
   "plot_rdepends"
   [Exactly str, AnyType "type of the expr whose reverse depends will be plotted"]
   (Exactly png)

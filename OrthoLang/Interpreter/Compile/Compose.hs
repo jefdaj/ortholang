@@ -27,7 +27,7 @@ compose1
   -> Function -- ^ first function (takes inputs, returns 1 intermediate file)
   -> Function -- ^ second function (takes intermediate file, produces output)
   -> Function -- ^ overall fn (runs fn1, then fn2 on its output)
-compose1 name ts fn1 fn2 = newMacro name (fInputs fn1) (fOutput fn2) macro' ts
+compose1 name ts fn1 fn2 = newExprExpansion name (fInputs fn1) (fOutput fn2) macro' ts
   where
     macro = mCompose1 fn1 fn2
     macro' = macro `deepseq` macro -- force composition errors immediately
@@ -46,7 +46,7 @@ properly. For example, it doesn't check the names.
 
 TODO try to factor some of this boilerplate out and make a generic mCompose
 -}
-mCompose1 :: Function -> Function -> MacroExpansion
+mCompose1 :: Function -> Function -> ExprExpansion
 mCompose1 f1 f2 _ (Fun r2 seed deps _ es)
 
   -- first check that f2 expects one input
