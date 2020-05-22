@@ -52,8 +52,6 @@ module OrthoLang.Interpreter.Compile.NewRules
 
   -- * Path expansions
   -- $pathexpansions
-  -- , newPathChange
-  , PathExpansion
   , newMap1of1
   , newMap2of2
   , newMap2of3
@@ -512,48 +510,36 @@ type Prefix = String
 -- TODO should there be 1,2, and 3-arg versions?
 --
 -- type PathChange    = Prefix -> Maybe Seed -> [FilePath] -> Action  FilePath
-type PathExpansion = Prefix -> [FilePath] -> Action [FilePath]
+-- type PathExpansion = Prefix -> [FilePath] -> Action [FilePath]
 
 -- quickly generate _each and _all variants of 1-arg functions, for example makeblastdb
 
+-- | Maps a NewAction1 over its only argument and writes the result list to the
+--   final output path.
 newMap1of1 :: Prefix -> NewAction1 -> NewAction1
 newMap1of1 prefix act1 o@(ExprPath out) a1 = undefined
 
+-- | Maps a NewAction2 over its 2nd argument and writes the result list to the
+--   final output path.
 newMap2of2 :: Prefix -> NewAction2 -> NewAction2
 newMap2of2 prefix act2 o@(ExprPath out) a1 a2 = undefined
 
+-- | Maps a NewAction3 over its 2nd argument and writes the result list to the
+--   final output path.
 newMap2of3 :: Prefix -> NewAction3 -> NewAction3
 newMap2of3 prefix act2 o@(ExprPath out) a1 a2 a3 = undefined
 
+-- | Maps a NewAction3 over its 3rd argument and writes the result list to the
+--   final output path.
 newMap3of3 :: Prefix -> NewAction3 -> NewAction3
 newMap3of3 prefix act3 o@(ExprPath out) a1 a2 a3 = undefined
 
--- For one-to-many path changes (mostly maps). The results will be written to a final output path.
--- TODO how should this be arranged to allow more than one at a time? mainly for all-vs-all
---      maybe they could be chained and you take a list of macros here?
---      ooh, or maybe just make one or more intermediate functions so each is a single one -> many step
--- TODO only export the Each and All variants but not this one?
--- newPathExpansion
---   :: String        -- ^ name of this function
---   -> Prefix        -- ^ prefix (aka name) of the function to expand to
---   -> [TypeSig]     -- ^ input types (before macro is applied)
---   -> TypeSig       -- ^ return type (final result after macro + path gathering)
---   -> PathExpansion -- ^ path expanding (1-to-many) macro
---   -> [FnTag]       -- ^ tags
---   -> Function
--- newPathExpansion fnName mapPrefix inTypes outType pathMacro tags = undefined
-
 -- | Pass it a 1-argument Action. It maps it over the list and writes the outputs to a list file.
--- TODO rename newMap?
-newEachExpansion :: (ExprPath -> FilePath -> Action ())
-                 -> (ExprPath -> FilePath -> Action ())
-newEachExpansion actToMap o@(ExprPath outPathEach) lstToMapOver = undefined
-
--- TODO hm, does this need another action to collapse the list into one file?
--- TODO hold up! can this be replaced by compose1 every time?
--- newAllExpansion :: (ExprPath -> FilePath -> Action ())
---                 -> (ExprPath -> FilePath -> Action ())
--- newAllExpansion actToMap o@(ExprPath outPathAll) lstToMapOver = undefined
+--   Used to implement all the newMapNofN fns above.
+newMap :: (ExprPath -> FilePath -> Action ())
+       -> (ExprPath -> FilePath -> Action ())
+newMap actToMap o@(ExprPath outList) listToMapOver = do
+  undefined
 
 -- yesterday's implementation for reference:
 
