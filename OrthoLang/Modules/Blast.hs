@@ -96,6 +96,7 @@ mkBlastFromDb (bCmd, qType, _, sType) = newFnA3
 -- rMkBlastFromDb :: BlastDesc -> RulesFn
 -- rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
+-- TODO unify with aMkBlastFromDb below when ready (when rMap can be replaced)
 aMkBlastFromDb2 :: String -> NewAction3
 aMkBlastFromDb2 bCmd (ExprPath o') e' q' p' = do
   cfg <- fmap fromJust getShakeExtra
