@@ -518,22 +518,28 @@ type Prefix = String
 -- | Maps a NewAction1 over its only argument and writes the result list to the
 --   final output path.
 newMap1of1 :: Prefix -> NewAction1 -> NewAction1
-newMap1of1 prefix act1 o a1 = newMap prefix 1 act1 o a1
+newMap1of1 prefix act1 out a1 = newMap prefix 1 act1 out a1
 
 -- | Maps a NewAction2 over its 2nd argument and writes the result list to the
 --   final output path.
 newMap2of2 :: Prefix -> NewAction2 -> NewAction2
-newMap2of2 prefix act2 o@(ExprPath out) a1 a2 = undefined -- TODO how to rearrange the args?
+newMap2of2 prefix act2 out a1 a2 = newMap prefix 2 act1 out a2
+  where
+    act1 o a = act2 o a1 a
 
 -- | Maps a NewAction3 over its 2nd argument and writes the result list to the
 --   final output path.
 newMap2of3 :: Prefix -> NewAction3 -> NewAction3
-newMap2of3 prefix act2 o@(ExprPath out) a1 a2 a3 = undefined
+newMap2of3 prefix act3 out a1 a2 a3 = newMap prefix 2 act1 out a2
+  where
+    act1 o a = act3 o a1 a a3
 
 -- | Maps a NewAction3 over its 3rd argument and writes the result list to the
 --   final output path.
 newMap3of3 :: Prefix -> NewAction3 -> NewAction3
-newMap3of3 prefix act3 o@(ExprPath out) a1 a2 a3 = undefined
+newMap3of3 prefix act3 out a1 a2 a3 = newMap prefix 3 act1 out a3
+  where
+    act1 o a = act3 o a1 a2 a
 
 -- | Pass it a 1-argument Action. It maps it over the list and writes the outputs to a list file.
 --   Used to implement all the newMapNofN fns above.
