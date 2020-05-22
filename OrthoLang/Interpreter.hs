@@ -26,6 +26,11 @@ module OrthoLang.Interpreter
   -- , Function(..)
   -- , FnTag(..)
   -- , NewRules(..)
+  , newMap1of1
+  , newMap2of2
+  , newMap2of3
+  , newMap3of3
+
   , ExprExpansion
   , addDigest
   , decodeNewRulesType

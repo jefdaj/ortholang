@@ -73,17 +73,6 @@ blastDescs =
 -- *blast*_db --
 ----------------
 
--- mkBlastFromDb :: BlastDesc -> Function
--- mkBlastFromDb d@(bCmd, qType, _, sType) = Function
---   { fOpChar = Nothing
---   , fName = bCmd ++ "_db"
---   , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs blastdb sType)]
---   , fOutput = Exactly bht
---   , fTags = [Nondeterministic]
---   -- , fNewRules = NewRules $ aMkBlastFromDb2 bCmd
---   , fOldRules = rMkBlastFromDb d
---   }
-
 mkBlastFromDb :: BlastDesc -> Function
 mkBlastFromDb (bCmd, qType, _, sType) = newFnA3
   (bCmd ++ "_db")
@@ -96,7 +85,7 @@ mkBlastFromDb (bCmd, qType, _, sType) = newFnA3
 -- rMkBlastFromDb :: BlastDesc -> RulesFn
 -- rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
 
--- TODO unify with aMkBlastFromDb below when ready (when rMap can be replaced)
+-- TODO unify with aMkBlastFromDb below when ready
 aMkBlastFromDb2 :: String -> NewAction3
 aMkBlastFromDb2 bCmd (ExprPath o') e' q' p' = do
   cfg <- fmap fromJust getShakeExtra
@@ -191,27 +180,6 @@ aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
 -- *blast* --
 -------------
 
--- mkBlastFromFa :: BlastDesc -> Function
--- mkBlastFromFa d@(bCmd, qType, sType, _) = Function
---   { fOpChar = Nothing
---   , fName = bCmd
---   , fInputs = [Exactly num, Exactly qType, Exactly sType]
---   , fOutput = Exactly bht
---   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFa d
---   }
-
--- inserts a "makeblastdb" call and reuses the _db compiler from above
--- rMkBlastFromFa :: BlastDesc -> RulesFn
--- rMkBlastFromFa d@(_, _, _, sType) st (Fun rtn seed deps _ [e, q, s])
---   = rules st (Fun rtn seed deps name1 [e, q, dbExpr])
---   where
---     rules = fOldRules $ mkBlastFromDb d -- TODO aha, have to rewrite this too
---     name1 = fName $ mkBlastFromDb d
---     name2 = "makeblastdb_" ++ ext sType
---     dbExpr = Fun (EncodedAs blastdb sType) seed (depsOf s) name2 [s] 
--- rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
-
 mkBlastFromFa :: BlastDesc -> Function
 mkBlastFromFa d@(bCmd, qType, sType, _) = newExprExpansion
   bCmd
@@ -221,7 +189,7 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = newExprExpansion
   [Nondeterministic]
 
 mMkBlastFromFa :: BlastDesc -> ExprExpansion
-mMkBlastFromFa d@(bCmd,_,_,sType) _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
+mMkBlastFromFa (bCmd,_,_,sType) _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
   where
     name1 = bCmd ++ "_db"
     name2 = "makeblastdb_" ++ ext sType
@@ -234,41 +202,31 @@ mMkBlastFromFa _ _ e = error "ortholang.modules.blast.mkBlastFromFa" $ "bad arg:
 ---------------------
 
 mkBlastFromDbEach :: BlastDesc -> Function
-mkBlastFromDbEach d@(bCmd, qType, _, sType) = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb sType))]
-  , fOutput = Exactly (ListOf bht)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDbEach d
-  }
-  where
-    name = bCmd ++ "_db_each"
+mkBlastFromDbEach (bCmd, qType, _, sType) = newFnA3
+  (bCmd ++ "_db_each")
+  (Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb sType)))
+  (Exactly (ListOf bht))
+  (newMap3of3 (bCmd ++ "_db") $ aMkBlastFromDb2 bCmd)
+  [Nondeterministic]
 
-rMkBlastFromDbEach :: BlastDesc -> RulesFn
-rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 
 ------------------
 -- *blast*_each --
 ------------------
 
 mkBlastFromFaEach :: BlastDesc -> Function
-mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf faType)]
-  , fOutput = Exactly (ListOf bht)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaEach d
-  }
-  where
-    name = bCmd ++ "_each"
+mkBlastFromFaEach d@(bCmd, qType, faType, _) = newExprExpansion
+  (bCmd ++ "_each")
+  [Exactly num, Exactly qType, Exactly (ListOf faType)]
+  (Exactly (ListOf bht))
+  (mBlastFromFaEach d)
+  [Nondeterministic]
 
--- combination of the two above: insert the makeblastdbcall, then map
-rMkBlastFromFaEach :: BlastDesc -> RulesFn
-rMkBlastFromFaEach d@(_, _, _, sType) st (Fun rtn seed deps _   [e, q, ss])
-  =                              rules st (Fun rtn seed deps fn2 [e, q, ss'])
+mBlastFromFaEach :: BlastDesc -> ExprExpansion
+mBlastFromFaEach d@(_, _, _, sType) _  (Fun rtn seed deps _   [e, q, ss])
+  =                                    (Fun rtn seed deps fn2 [e, q, ss'])
   where
-    rules = rMkBlastFromDbEach d
     ss'   = Fun (ListOf (EncodedAs blastdb sType)) seed (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb_" ++ ext sType ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
-rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"
+mBlastFromFaEach _ _ e = error "ortholang.modules.blast.mkBlastFromFaEach" $  "bad arg: " ++ show e

@@ -129,6 +129,7 @@ pdb = EncodedAs blastdb faa
  - files that you can read to get the proper prefix pattern.
  -}
 
+-- TODO have to implement new rules before blast will work?
 mkLoadDB :: String -> Type -> Function
 mkLoadDB name faType = Function
   { fOpChar = Nothing, fName = name
@@ -138,6 +139,7 @@ mkLoadDB name faType = Function
   , fNewRules = NewNotImplemented, fOldRules = rLoadDB
   }
 
+-- TODO have to implement new rules before blast will work?
 mkLoadDBEach :: String -> Type -> Function
 mkLoadDBEach name faType = Function
   { fOpChar = Nothing, fName = name
