@@ -148,6 +148,7 @@ module OrthoLang.Interpreter.Paths
   , argHashes
   , bop2fun
   , listDigestsInPath
+  , getExprPathSeed
   , listExprs
   -- , listScriptExprs
   , makeTmpdirRelative
@@ -314,7 +315,7 @@ exprPathExplicit cfg prefix mSeed hashes = toPath loc cfg path
   where
     loc = "interpreter.paths.exprPathExplicit"
     dir  = tmpdir cfg </> "exprs" </> prefix
-    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Seed n) -> show n) mSeed)
+    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Seed n) -> 's': show n) mSeed)
     path = dir </> base </> "result" -- <.> ext rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
@@ -483,3 +484,12 @@ listDigestsInPath cfg
   . map (filter (/= '/'))
   . splitPath
   . makeRelative (tmpdir cfg)
+
+-- TODO restrict to ExprPath?
+getExprPathSeed :: Config -> FilePath -> Maybe Seed
+getExprPathSeed cfg p = case comps of
+  [] -> Nothing
+  (('s':seed):_) -> fmap Seed $ read seed
+  _ -> Nothing
+  where
+    comps = dropWhile (== "result") $ reverse $ splitPath $ makeRelative (tmpdir cfg) p

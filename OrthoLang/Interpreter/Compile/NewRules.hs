@@ -85,17 +85,18 @@ import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
-import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..))
+import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths)
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Types
+-- import OrthoLang.Util (digest)
 import System.Exit (ExitCode(..))
 
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName)
-import OrthoLang.Interpreter.Actions     (need')
-import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest)
+import OrthoLang.Interpreter.Actions     (need', readPaths)
+import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest)
 import qualified Data.Map.Strict as M
 import Data.IORef                 (atomicModifyIORef')
 
@@ -517,12 +518,12 @@ type Prefix = String
 -- | Maps a NewAction1 over its only argument and writes the result list to the
 --   final output path.
 newMap1of1 :: Prefix -> NewAction1 -> NewAction1
-newMap1of1 prefix act1 o@(ExprPath out) a1 = undefined
+newMap1of1 prefix act1 o a1 = newMap prefix 1 act1 o a1
 
 -- | Maps a NewAction2 over its 2nd argument and writes the result list to the
 --   final output path.
 newMap2of2 :: Prefix -> NewAction2 -> NewAction2
-newMap2of2 prefix act2 o@(ExprPath out) a1 a2 = undefined
+newMap2of2 prefix act2 o@(ExprPath out) a1 a2 = undefined -- TODO how to rearrange the args?
 
 -- | Maps a NewAction3 over its 2nd argument and writes the result list to the
 --   final output path.
@@ -536,10 +537,39 @@ newMap3of3 prefix act3 o@(ExprPath out) a1 a2 a3 = undefined
 
 -- | Pass it a 1-argument Action. It maps it over the list and writes the outputs to a list file.
 --   Used to implement all the newMapNofN fns above.
-newMap :: (ExprPath -> FilePath -> Action ())
+newMap :: Prefix -> Int
        -> (ExprPath -> FilePath -> Action ())
-newMap actToMap o@(ExprPath outList) listToMapOver = do
-  undefined
+       -> (ExprPath -> FilePath -> Action ())
+newMap mapPrefix mapIndex actToMap o@(ExprPath outList) listToMapOver = do
+  let loc = "ortholang.interpreter.compile.newmap.newMap"
+  cfg <- fmap fromJust getShakeExtra
+  listElems <- readPaths loc listToMapOver -- TODO get the type and do readStrings instead?
+  let newPaths = newMapPaths cfg mapPrefix mapIndex listToMapOver listElems -- TODO what happens if these are lits?
+  writePaths loc outList newPaths -- TODO will fail on lits?
+
+newMapPaths :: Config -> Prefix -> Int -> FilePath -> [Path] -> [Path]
+newMapPaths cfg newFnName mapIndex oldPath newPaths = map (toPath loc cfg . mkPath) newPaths
+  where
+    loc = "ortholang.interpreter.compile.newPaths.newMapPaths"
+    oldDigests = listDigestsInPath cfg oldPath
+    oldSeed    = getExprPathSeed   cfg oldPath
+    newSuffix = case oldSeed of
+                  Nothing -> "result"
+                  Just n  -> ('s':show n) </> "result"
+    newDigests path = map (\(PathDigest s) -> s) $
+                      replace oldDigests (mapIndex, pathDigest path)
+    mkPath p = tmpdir cfg </> "exprs" </> newFnName </>
+               (foldl1 (</>) (newDigests p)) </>
+               newSuffix
+
+-- replace the Nth element in a list
+replace :: [a] -> (Int, a) -> [a]
+replace [] _ = []
+replace (_:xs) (0,a) = a:xs
+replace (x:xs) (n,a) =
+  if n < 0
+    then (x:xs)
+    else x: replace xs (n-1,a)
 
 -- yesterday's implementation for reference:
 
