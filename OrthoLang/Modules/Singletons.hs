@@ -7,7 +7,7 @@ module OrthoLang.Modules.Singletons
   , withSingletons
 
   -- * OrthoLang functions for transforming (TODO remove?)
-  -- , singletons
+  , singletons
 
   -- * OrthoLang module
   , olModule -- TODO don't export this?
@@ -61,8 +61,12 @@ singletons =
     , fTags      = [Hidden]
     -- , fTypeDesc  = name ++ " : X.list -> X.list.list"
     -- , fTypeCheck = tSingletons
+
+    -- TODO when this is composed with a more specific type like faa.list,
+    --      the overall fn's help text should reflect that!
     , fInputs    =           [ListSigs (AnyType "any type")]
     , fOutput    =  ListSigs (ListSigs (AnyType "any type"))
+
     , fNewRules  = NewNotImplemented
     , fOldRules  = rSingletons
     }

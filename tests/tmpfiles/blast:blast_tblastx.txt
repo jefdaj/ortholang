@@ -16,10 +16,10 @@
 |   `-- seqio
 |-- exprs
 |   |-- all
-|   |   `-- a8af1d19f1
+|   |   `-- fcaa9bf749
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_queries
-|   |   `-- 0719ba5149
+|   |   `-- 1c199c3579
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- gbk_to_fna_rawids
@@ -42,13 +42,13 @@
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_fna_all
 |   |   `-- bc5062d574
-|   |       `-- 0
+|   |       `-- s0
 |   |           `-- result -> ../../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- repeat
-|   |   `-- ebbed8ffb9
+|   |   `-- e6a8daf645
 |   |       `-- 494baa00c6
 |   |           `-- 723ab8a8d7
 |   |               `-- result -> ../../../../../cache/lines/...
@@ -62,15 +62,15 @@
 |   `-- tblastx_db
 |       `-- b6d4e4cdf4
 |           `-- 494baa00c6
-|               `-- 54672524cb
-|                   `-- 0
+|               `-- dcf0bdbd07
+|                   `-- s0
 |                       `-- result -> out
 |-- reps
 |   `-- 0dcb04d237
-|       |-- hits.str.list -> ../../exprs/extract_queries/0719ba5149/result
+|       |-- hits.str.list -> ../../exprs/extract_queries/1c199c3579/result
 |       `-- result -> ../../reps/0dcb04d237/hits.str.list
 `-- vars
     |-- maga.fna -> ../exprs/load_fna_path/fe2757ed86/result
-    `-- result -> ../exprs/all/a8af1d19f1/result
+    `-- result -> ../exprs/all/fcaa9bf749/result
 
 43 directories, 30 files

@@ -45,6 +45,9 @@ the second `Function`'s only input, but otherwise assumes the 'Expr' is set up
 properly. For example, it doesn't check the names.
 
 TODO try to factor some of this boilerplate out and make a generic mCompose
+
+TODO also need to make the first function's input more specific to match the second
+     if it's not obvious how, could just take it as an arg
 -}
 mCompose1 :: Function -> Function -> ExprExpansion
 mCompose1 f1 f2 _ (Fun r2 seed deps _ es)
