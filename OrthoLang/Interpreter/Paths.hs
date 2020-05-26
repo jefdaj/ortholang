@@ -267,12 +267,12 @@ TODO does it need the config at all?
 -}
 argHashes :: Config -> DigestsRef -> Script -> Expr -> [String]
 argHashes c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
-                                         Nothing -> error "argHashes" $ "no such var '" ++ vName ++ "'"
+                                         Nothing -> error "ortholang.interpreter.paths.argHashes.Ref" $ "no such var '" ++ vName ++ "'"
                                          Just e  -> argHashes c d s e
-argHashes _ _ _ (Lit _     v      ) = [digest v]
-argHashes c d s (Fun _ _ _ _ es   ) = map (digest . exprPath c d s) es
-argHashes c d s (Bop _ _ _ _ e1 e2) = map (digest . exprPath c d s) [e1, e2] -- TODO remove?
-argHashes c d s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c d s) es] -- TODO use seed here?
+argHashes _ _ _ (Lit _     v      ) =     [digest "ortholang.interpreter.paths.argHashes.Lit" v]
+argHashes c d s (Fun _ _ _ _ es   ) = map (digest "ortholang.interpreter.paths.argHashes.Fun" . exprPath c d s) es
+argHashes c d s (Bop _ _ _ _ e1 e2) = map (digest "ortholang.interpreter.paths.argHashes.Bop" . exprPath c d s) [e1, e2] -- TODO remove?
+argHashes c d s (Lst _ _ _   es   ) = map (digest "ortholang.interpreter.paths.argHashes.Lst" . exprPath c d s) es -- TODO use seed here?
 
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
@@ -404,13 +404,13 @@ unsafeExprPathExplicit cfg dRef prefix rtype mSeed hashes =
   in path `seq` unsafePerformIO $ addDigest dRef rtype path >> return path
 
 pathDigest :: Path -> PathDigest
-pathDigest = PathDigest . digest
+pathDigest = PathDigest . digest "interpreter.paths.pathDigest"
 
 exprDigest :: Config -> DigestsRef -> Script -> Expr -> DigestMap
 exprDigest cfg dRef scr expr = traceShow "interpreter.paths.exprDigest" res
   where
     p = exprPath cfg dRef scr expr
-    dKey = PathDigest $ digest p
+    dKey = PathDigest $ digest "ortholang.interpreter.paths.exprDigest" p
     res = M.singleton dKey (typeOf expr, p)
 
 exprDigests :: Config -> DigestsRef -> Script -> [Expr] -> DigestMap

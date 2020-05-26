@@ -25,7 +25,7 @@ curl url = do
   let loc = "modules.curl.curl"
       url'    = fromPath loc cfg url
       cDir    = fromPath loc cfg $ cacheDir cfg "curl"
-      outPath = cDir </> digest url
+      outPath = cDir </> digest loc url
   liftIO $ createDirectoryIfMissing True cDir
   runCmd $ CmdDesc
     { cmdBinary = "curl.sh"

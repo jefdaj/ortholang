@@ -468,7 +468,7 @@ hidden :: Function -> Function
 hidden fn = fn { fTags = Hidden : fTags fn }
 
 -- $pathexpansions
--- This is mostly geared toward writing the _each and _all mapped function
+-- This is mostly geared toward writing the \_each and \_all mapped function
 -- variants easily. It's analagous to macro expansion, but the transformation
 -- is done on the input Paths directly rather than on the Exprs that were
 -- compiled to generate those Paths.
@@ -480,8 +480,8 @@ hidden fn = fn { fTags = Hidden : fTags fn }
 --
 -- The same priciple applies as when writing Expr expansions: you have to make
 -- sure that the system knows how to handle the results already. For example if
--- you make a macro that rewrites "exprs/load_faa_each" paths to
--- "exprs/load_faa" paths, there must already be Rules for "exprs/load_faa" or
+-- you make a macro that rewrites "exprs/load\_faa\_each" paths to
+-- "exprs/load\_faa" paths, there must already be Rules for "exprs/load\_faa" or
 -- Shake will fail at runtime.
 --
 -- Sometimes you might need both a path expansion and a custom action to handle
@@ -554,12 +554,9 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
   dRef <- fmap fromJust getShakeExtra
   ((ListOf oType), dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef out
 
-  -- TODO these are working! next bug is probably that we also need to add the listToMapOver. but what's its type?
-  --      (this might need to be done before calling this function though, right?)
-  --      (ALSO, THINK MORE ABOUT WHEN DIGESTS SHOULD BE ADDED BECAUSE IT MIGHT NOT BE HERE)
-  --      oh here's an idea: put in in trackWrite'? could include the type there why not
-  let elemType = dTypes !! mapIndex
-      elemType' = traceShow loc "dTypes" dTypes
+  -- TODO remove the addDigests?
+  let elemType = dTypes !! (mapIndex - 1)
+      elemType' = traceShow loc dTypes
   liftIO $ addDigest dRef (ListOf elemType) $ toPath loc cfg listToMapOver
 
   liftIO $ mapM_ (addDigest dRef elemType) inPaths -- TODO remove? also this is the wrong type i think
@@ -577,6 +574,7 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
   -- TODO are the need and trackwrite parts redundant?
   mapM_ (\(o, i) -> need' loc [i] >> actToMap (ExprPath o) i >> trackWrite' [o]) $ zip outPaths' inPaths'
   writePaths loc outList outPaths -- TODO will fail on lits?
+  -- trackWrite' (outList:outPaths')
 
 -- TODO does this need to be added to the digestmap?
 newMapOutPaths :: Config -> Prefix -> Int -> FilePath -> [Path] -> [Path]
@@ -596,6 +594,7 @@ newMapOutPaths cfg newFnName mapIndex oldPath newPaths = map (toPath loc cfg . m
                newSuffix
 
 -- replace the Nth element in a list
+-- old.reddit.com/r/haskell/comments/8jui5k/how_to_replace_an_element_at_an_index_in_a_list/dz2i8rj/
 replace :: [a] -> (Int, a) -> [a]
 replace [] _ = []
 replace (_:xs) (0,a) = a:xs
@@ -603,23 +602,3 @@ replace (x:xs) (n,a) =
   if n < 0
     then (x:xs)
     else x: replace xs (n-1,a)
-
--- yesterday's implementation for reference:
-
--- newMap1 :: String -> NewAction1 -> NewAction1
--- newMap1 prefix actFn (ExprPath outPath) arg1Path = do
---   let loc = "ortholang.interpreter.compile.newrules.newMap1"
---   elems <- readList loc arg1Path -- TODO get the type and do readStrings instead?
---   cfg <- fmap fromJust getShakeExtra
---   let mSeed  = Nothing -- TODO how to get the seed??
---   let mkPath p = exprPathExplicit cfg prefix mSeed [digest p]
---   let outPaths = map mkPath elems -- TODO will fail on lits? paths?
---       outPaths' = map (fromPath loc cfg) outPaths
---   need' loc outPaths' -- TODO should this be needed later only? decides evaluation order
---   writePaths loc outPath outPaths -- TODO will fail on lits?
-
--- | Gathers the macro-generated output paths into one final output
--- Note: should *not* need the list of paths, right? preserve the laziness if possible
--- TODO have I written this already under a different name?
--- gatherMapResults :: ExprPath -> [FilePath] -> Action ()
--- gatherMapResults = undefined

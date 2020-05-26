@@ -365,7 +365,7 @@ countLines path = readList "interpreter.actions.countLines" path >>= return . co
 
 -- TODO move to Paths?
 cachedLinesPath :: Config -> [String] -> FilePath
-cachedLinesPath cfg content = cDir </> digest content <.> "txt"
+cachedLinesPath cfg content = cDir </> digest loc content <.> "txt"
   where
     loc = "interpreter.actions.cachedLinesPath"
     cDir = fromPath loc cfg $ cacheDir cfg "lines"
@@ -693,7 +693,7 @@ withBinHash uniq outPath actFn = do
       binDir'  = fromPath loc cfg $ cacheDir cfg "bin"
       outPath' = fromPath loc cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
-  let binTmp' = binDir' </> digest uniq -- <.> takeExtension outPath'
+  let binTmp' = binDir' </> digest loc uniq -- <.> takeExtension outPath'
       binTmp  = toPath loc cfg binTmp'
   _ <- actFn binTmp
   md5 <- hashContent binTmp

@@ -54,6 +54,8 @@ import OrthoLang.Types
 import Data.List       (filter, delete)
 import OrthoLang.Util  (justOrDie, digest)
 
+-- TODO apparently no import cycle, but this is still improper! refactor modules
+import OrthoLang.Interpreter.Paths (exprPath)
 
 -----------
 -- parse --
@@ -213,28 +215,28 @@ the script.
 
 TODO wait, why can't macro fns be typechecked during parsing? Seems like they could!
 -}
-expandMacros :: [Module] -> Script -> Script
+expandMacros :: [Module] -> Script -> Config -> DigestsRef -> Script
 expandMacros = eScript
 
-eScript :: [Module] -> Script -> Script
-eScript mods s = s
-  { sAssigns = map (eAssign mods s) (sAssigns s)
-  , sResult = fmap (eExpr mods s) (sResult s)
+eScript :: [Module] -> Script -> Config -> DigestsRef -> Script
+eScript mods s c dr = s
+  { sAssigns = map (eAssign mods s c dr) (sAssigns s)
+  , sResult = fmap (eExpr mods s c dr) (sResult s)
   }
 
-eAssign :: [Module] -> Script -> Assign -> Assign
-eAssign mods scr a@(Assign {aExpr = e}) = a {aExpr = eExpr mods scr e}
+eAssign :: [Module] -> Script -> Config -> DigestsRef -> Assign -> Assign
+eAssign mods scr cfg dRef a@(Assign {aExpr = e}) = a {aExpr = eExpr mods scr cfg dRef e}
 
 -- | This one is recursive in case one macro expression is hidden inside the
 --   result of another
-eExpr :: [Module] -> Script -> Expr -> Expr
-eExpr mods scr e = if e' == e then e' else eExpr' mods scr e'
+eExpr :: [Module] -> Script -> Config -> DigestsRef -> Expr -> Expr
+eExpr mods scr cfg dRef e = if e' == e then e' else eExpr' mods scr cfg dRef e'
   where
-    e' = eExpr' mods scr e
+    e' = eExpr' mods scr cfg dRef e
 
-eExpr' :: [Module] -> Script -> Expr -> Expr
-eExpr' mods scr e@(Fun r s ds name es) =
-  let e' = Fun r s ds name $ map (eExpr mods scr) es
+eExpr' :: [Module] -> Script -> Config -> DigestsRef -> Expr -> Expr
+eExpr' mods scr cfg dRef e@(Fun r s ds name es) =
+  let e' = Fun r s ds name $ map (eExpr mods scr cfg dRef) es
   in case findFun mods name of
        Left err -> error "script.eExpr'" err
        Right fn -> case fNewRules fn of
@@ -243,12 +245,13 @@ eExpr' mods scr e@(Fun r s ds name es) =
                      --                   Left err -> error err
                      --                   Right e' -> e'
                      (NewMacro m) -> let e'' = m scr e
+                                         e''' = exprPath cfg dRef scr e'' `seq` e''
                                      in trace "script.eExpr'"
                                               ("expanded macro: " ++ show e ++ " -> " ++ show e'') e''
                      _ -> e'
-eExpr' mods scr (Bop r ms vs n e1 e2) = Bop r ms vs n (eExpr mods scr e1) (eExpr mods scr e2)
-eExpr' mods scr (Lst r ms vs es) = Lst r ms vs $ map (eExpr mods scr) es
-eExpr' _ _ e = e
+eExpr' mods scr cfg dRef (Bop r ms vs n e1 e2) = Bop r ms vs n (eExpr mods scr cfg dRef e1) (eExpr mods scr cfg dRef e2)
+eExpr' mods scr cfg dRef (Lst r ms vs es) = Lst r ms vs $ map (eExpr mods scr cfg dRef) es
+eExpr' _ _ _ _ e = e
 
 -- typecheck :: [Module] -> Expr -> Either String Expr
 -- typecheck mods expr = undefined
@@ -318,11 +321,12 @@ TODO rename it RepHash?
 -}
 calcRepID :: Script -> Expr -> Var -> Expr -> RepID
 calcRepID scr resExpr subVar subExpr =
-  RepID $ Just $ digest
-    [ digest scr -- TODO only the parts the others actually depend on?
-    , digest resExpr
-    , digest subVar -- TODO look up expr in scr and use that?
-    , digest subExpr
+  let loc = "ortholang.script.calcRepID"
+  in RepID $ Just $ digest loc
+    [ digest loc scr -- TODO only the parts the others actually depend on?
+    , digest loc resExpr
+    , digest loc subVar -- TODO look up expr in scr and use that?
+    , digest loc subExpr
     ]
 
 

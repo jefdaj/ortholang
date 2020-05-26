@@ -2,6 +2,8 @@
 
 module OrthoLang.Modules.BlastDB where
 
+-- TODO shen showing db, make paths generic. or just remove the volumes lines completely?
+
 -- TODO aha! errors are partially because i've been assuming blastdbget returns ndb when really it can be pdb?
 --      should be fixable by determining the type from the .ni* files or whatever
 
@@ -632,9 +634,6 @@ mkMakeblastdbAllEach faType = hidden $
     aeName
     (Exactly (ListOf (ListOf            faType)))
     (Exactly (ListOf (EncodedAs blastdb faType)))
-    -- (newMap1of1 "" mMakeblastdb) -- TODO shit, needs both expr and path expansion?
-    -- TODO can this be done with a path expansion to the _all version?
-    -- (newMap1of1 "" $ aMakeblastdb) -- TODO shit, needs both expr and path expansion?
     (newMap1of1 aName $ aMakeblastdbAll2 faType)
     [Hidden]
 

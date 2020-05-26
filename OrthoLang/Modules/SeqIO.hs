@@ -259,7 +259,7 @@ aExtractSeqs out inFa inList = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.seqio.aExtractSeqs"
       tmp  = fromPath loc cfg $ cacheDir cfg "seqio"
-      ids  = tmp </> digest (toPath loc cfg inList) <.> "txt"
+      ids  = tmp </> digest loc (toPath loc cfg inList) <.> "txt"
       ids' = toPath loc cfg ids
   -- TODO these should be the seqid_... ids themselves, not unhashed?
   -- unhashIDsFile (toPath loc cfg inList) ids -- TODO implement as a macro?
@@ -271,7 +271,7 @@ aExtractSeqsOld [outPath, inFa, inList] = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.seqio.aExtractSeqsOld"
       cDir     = fromPath loc cfg $ cacheDir cfg "seqio"
-      tmpList' = cDir </> digest inList <.> "txt"
+      tmpList' = cDir </> digest loc inList <.> "txt"
       tmpList  = toPath loc cfg tmpList'
   liftIO $ createDirectoryIfMissing True cDir
   -- lookupIDsFile inList tmpList
@@ -355,8 +355,8 @@ aConcat cType [outPath, inList] = do
   let tmpDir'   = tmpdir cfg </> "cache" </> "concat"
       emptyPath = tmpDir' </> ("empty" ++ ext cType) <.> "txt"
       emptyStr  = "<<empty" ++ ext cType ++ ">>"
-      inList'   = tmpDir' </> digest inList <.> "txt" -- TODO is that right?
       loc = "ortholang.modules.seqio.aConcat"
+      inList'   = tmpDir' </> digest loc inList <.> "txt" -- TODO is that right?
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromPath loc cfg outPath
   writeCachedLines loc emptyPath [emptyStr]
@@ -403,10 +403,10 @@ aSplit name e [outPath, faPath] = do
   let faPath'   = fromPath loc cfg faPath
       exprDir'  = tmpdir cfg </> "exprs"
       tmpDir'   = tmpdir cfg </> "cache" </> name -- TODO is there a fn for this?
-      prefix'   = tmpDir' </> digest faPath ++ "/"
+      loc = "ortholang.modules.seqio.aSplit"
+      prefix'   = tmpDir' </> digest loc faPath ++ "/"
       outDir'   = exprDir' </> "load_" ++ e
       outPath'  = fromPath loc cfg outPath
-      loc = "modules.seqio.aSplit"
       outPath'' = traceA loc outPath' [outPath', faPath']
       tmpList   = tmpDir' </> takeFileName outPath' <.> "tmp"
       args      = [tmpList, outDir', prefix', faPath']

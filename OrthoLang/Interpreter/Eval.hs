@@ -230,6 +230,8 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//exprs/reciprocal_best//result"
             , "//exprs/tblast*//out"
             , "//exprs/translate//result"
+            , "//exprs/makeblastdb_*_all//result"
+            , "//exprs/makeblastdb_*_all_each//result"
             ]
         }
 
@@ -374,7 +376,7 @@ printShort cfg ref idsref pm rtype path = do
 -- TODO get the type of result and pass to eval
 evalScript :: [Module] -> Handle -> GlobalEnv -> IO ()
 evalScript mods hdl (scr, c, ref, ids, dRef) =
-  let scr' = expandMacros mods scr
+  let scr' = expandMacros mods scr c dRef
       -- res  = sResult scr'
       -- as'  = sAssigns scr'
       -- as'' = trace "ortholang.core.eval.evalScript" ("after macro expansion: " ++ unlines (map show as')) as'

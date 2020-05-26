@@ -117,10 +117,12 @@ digestLength = 10
 -- Note that MD5 is no longer considered secure
 -- But for our purposes (checking for updated files) it doesn't matter.
 -- See https://en.wikipedia.org/wiki/MD5
-digest :: (Show a) => a -> String
-digest val = take digestLength $ show (hash asBytes :: Digest MD5)
+digest :: (Show a) => DebugLocation -> a -> String
+digest loc val = res'
   where
     asBytes = (C8.pack . show) val
+    res = take digestLength $ show (hash asBytes :: Digest MD5)
+    res' = trace (loc ++ ".digest") (show val ++ " -> \"" ++ res ++ "\"") res
 
 -----------
 -- paths --

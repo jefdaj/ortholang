@@ -206,6 +206,7 @@ mkBlastFromDbEach (bCmd, qType, _, sType) = newFnA3
   (bCmd ++ "_db_each")
   (Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb sType)))
   (Exactly (ListOf bht))
+  -- TODO this is an example of where the path-expanded version should not have a seed!
   (newMap3of3 (bCmd ++ "_db") $ aMkBlastFromDb2 bCmd)
   [Nondeterministic]
 

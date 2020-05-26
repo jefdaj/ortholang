@@ -94,7 +94,7 @@ rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
   let out    = exprPath cfg dRef scr e
       loc = "modules.mmseqs.aMmseqsCreateDbAll"
       out'   = debugRules loc e $ fromPath loc cfg out
-      createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest fas
+      createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest loc fas
       dbPath = createDbDir </> "result" -- TODO take hash from somewhere else?
       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
   out' %> \_ -> do
@@ -189,7 +189,7 @@ rMmseqsSearchDb scr e@(Fun _ seed _ _ [n, q, s]) = do
       -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
       -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
       searchDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search"
-      outDbBase = searchDbDir </> digest out <.> "mmseqs2db"
+      outDbBase = searchDbDir </> digest loc out <.> "mmseqs2db"
       -- outDb0    = outDbBase <.> "0" -- TODO remember to remove the .0 when referencing it!
       outDbIndex = outDbBase <.> "index" -- TODO remember to remove the ext when referencing it!
   outDbIndex %> \_ -> aMmseqsSearchDb ePath qPath sPath outDbBase

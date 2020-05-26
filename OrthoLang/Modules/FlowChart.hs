@@ -255,13 +255,14 @@ inputVars (Lst _ _ vs   es   ) = nub $ concatMap inputVars es ++ concatMap varOf
 mkNodes' :: [Assign] -> ([LNode NLabel], NodeMap NLabel)
 mkNodes' assigns = mkNodes new nodes'
   where
+    loc = "ortholang.modules.flowchart.mkNodes'"
     selected = map aVar assigns
     varNodes = concatMap (\(Assign (Var _ v) _) -> [NLVar v]) assigns
     tmpNodes = concatMap (\(Assign (Var _ v) e) ->
                             let inputs = filter (`elem` selected) $ inputVars e
                             in if length inputs < 2
                               then []
-                              else [NLTmp (prefixOf e) (digest e)])
+                              else [NLTmp (prefixOf e) (digest loc e)])
                          assigns
     nodes = varNodes ++ tmpNodes
     nodes' = trace "ortholang.modules.flowchart.mkNodes'" ("nodes: " ++ show nodes) nodes
@@ -280,8 +281,9 @@ mkInputEdges :: [String] -> Assign -> [(NLabel, NLabel, ELabel)]
 mkInputEdges selected (Assign (Var _ v) e) = directInputs
   where
     directInputs = if length inputs < 2 then edgesLabeled else edgesMerged
-    tmpNode      = NLTmp (prefixOf e) (digest e)
-    inputs       = filter (\i -> i `elem` selected) $ filter (/= (digest e)) $ inputNodes (digest e) e
+    loc = "ortholang.modules.flowchart.mkInputEdges"
+    tmpNode      = NLTmp (prefixOf e) (digest loc e)
+    inputs       = filter (\i -> i `elem` selected) $ filter (/= (digest loc e)) $ inputNodes (digest loc e) e
     edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow (prefixOf e))) inputs
     edgesMerged  = map (\i -> (NLVar i, tmpNode, ELTail)) inputs ++ [(tmpNode, NLVar v, ELHead)]
 
