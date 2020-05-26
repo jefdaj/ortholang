@@ -214,6 +214,8 @@ After expansion there shouldn't be any functions implemented as macros left in
 the script.
 
 TODO wait, why can't macro fns be typechecked during parsing? Seems like they could!
+
+TODO oh, have to check for the newly expanded fns seed handling separately here too!
 -}
 expandMacros :: [Module] -> Script -> Config -> DigestsRef -> Script
 expandMacros = eScript
@@ -244,7 +246,7 @@ eExpr' mods scr cfg dRef e@(Fun r s ds name es) =
                      -- (NewMacro m) -> case typecheck mods (m scr e) of
                      --                   Left err -> error err
                      --                   Right e' -> e'
-                     (NewMacro m) -> let e'' = m scr e
+                     (NewMacro m) -> let e'' = m mods scr e
                                          e''' = exprPath cfg dRef scr e'' `seq` e''
                                      in trace "script.eExpr'"
                                               ("expanded macro: " ++ show e ++ " -> " ++ show e'') e''

@@ -232,6 +232,8 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//exprs/translate//result"
             , "//exprs/makeblastdb_*_all//result"
             , "//exprs/makeblastdb_*_all_each//result"
+            , "//exprs/*blast*_db//result"
+            , "//exprs/*blast*_db_each//result"
             ]
         }
 

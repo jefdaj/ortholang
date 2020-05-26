@@ -71,6 +71,7 @@ module OrthoLang.Types
   , runRulesR
   , seedOf
   , setSeed
+  , usesSeed
   , str
   , isLit
   , typeOf
@@ -653,6 +654,9 @@ findFun mods name =
        (f:[]) -> Right f
        _      -> Left $ "function name collision! multiple fns match \"" ++ name ++ "\""
 
+usesSeed :: Function -> Bool
+usesSeed f = Nondeterministic `elem` fTags f
+
 findType :: [Module] -> String -> Maybe Type
 findType mods e = find (\t -> ext t == e') ts
   where
@@ -776,7 +780,7 @@ instance Pretty Function where
 
 data NewRules
   = NewRules (Rules ())
-  | NewMacro (Script -> Expr -> Expr) -- type alias in NewRules.hs for now
+  | NewMacro ([Module] -> Script -> Expr -> Expr) -- type alias in NewRules.hs for now
   | NewNotImplemented -- TODO remove
 
 -- this mostly checks equality, but also has to deal with how an empty list can

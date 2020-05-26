@@ -333,7 +333,7 @@ rNewRules
 rNewRules nArgs applyFn oSig name aFn = do
   cfg  <- fmap fromJust $ getShakeExtraRules
   mods <- fmap fromJust $ getShakeExtraRules
-  let useSeed = elem Nondeterministic $ fTags $ fromRight $ findFun mods name
+  let useSeed = usesSeed $ fromRight $ findFun mods name
       ptn = newPattern cfg useSeed name nArgs
       ptn' = traceShow "rNewrules" ptn
   ptn' %> \p -> do
@@ -438,7 +438,7 @@ newFn name mChar iSigs oSig rFn aFn tags = Function
 -- but can only return one altered 'Expr'.
 
 -- TODO can a Haskell closure be "hidden" in here to implement graph_script? try it!
-type ExprExpansion = Script -> Expr -> Expr
+type ExprExpansion = [Module] -> Script -> Expr -> Expr
 
 {-|
 Macros are straighforward to implement: use any 'ExprExpansion' to create one
@@ -556,17 +556,18 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
 
   -- TODO remove the addDigests?
   let elemType = dTypes !! (mapIndex - 1)
-      elemType' = traceShow loc dTypes
-  liftIO $ addDigest dRef (ListOf elemType) $ toPath loc cfg listToMapOver
+      elemType' = traceShow loc elemType
+  liftIO $ addDigest dRef (ListOf elemType') $ toPath loc cfg listToMapOver
 
-  liftIO $ mapM_ (addDigest dRef elemType) inPaths -- TODO remove? also this is the wrong type i think
+  liftIO $ mapM_ (addDigest dRef elemType') inPaths -- TODO remove? also this is the wrong type i think
   liftIO $ addDigest dRef (ListOf oType) $ toPath loc cfg outList
   let dPaths' = map (fromPath loc cfg) dPaths
   need' loc dPaths'
 
   let inPaths' = map (fromPath loc cfg) inPaths
   liftIO $ debug loc $ "inPaths: " ++ show inPaths
-  let outPaths = newMapOutPaths cfg mapPrefix mapIndex listToMapOver inPaths -- TODO what happens if these are lits?
+  mods <- fmap fromJust getShakeExtra
+  let outPaths = newMapOutPaths mods cfg mapPrefix mapIndex listToMapOver inPaths -- TODO what happens if these are lits?
   liftIO $ mapM_ (addDigest dRef oType) outPaths
   let outPaths' = map (fromPath loc cfg) outPaths
   liftIO $ debug loc $ "outPaths: " ++ show outPaths
@@ -577,16 +578,23 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
   -- trackWrite' (outList:outPaths')
 
 -- TODO does this need to be added to the digestmap?
-newMapOutPaths :: Config -> Prefix -> Int -> FilePath -> [Path] -> [Path]
-newMapOutPaths cfg newFnName mapIndex oldPath newPaths = map (toPath loc cfg . mkPath) newPaths
+newMapOutPaths :: [Module] -> Config -> Prefix -> Int -> FilePath -> [Path] -> [Path]
+newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cfg . mkPath) newPaths
   where
     loc = "ortholang.interpreter.compile.newrules.newMapOutPaths"
     oldDigests = listDigestsInPath cfg oldPath
     oldDigests' = traceShow loc oldDigests
     oldSeed    = getExprPathSeed   cfg oldPath
-    newSuffix = case oldSeed of
-                  Nothing -> "result"
-                  Just n  -> ('s':show n) </> "result"
+    -- newFn = findFun undefined newFnName
+    -- seed = if Nondeterministic `elem` (fTags newFn) then Just (Seed 0) else Nothing
+    -- newSuffix = case seed of
+    newSuffix = case findFun mods newFnName of
+                  Left e -> error loc e
+                  Right f -> if not (usesSeed f)
+                               then "result"
+                               else case oldSeed of
+                                      Nothing -> "result" -- TODO what if only the new fn needs it?
+                                      Just n  -> ('s':show n) </> "result"
     newDigests path = map (\(PathDigest s) -> s) $
                       replace oldDigests' (mapIndex, pathDigest path)
     mkPath p = tmpdir cfg </> "exprs" </> newFnName </>

@@ -95,8 +95,8 @@ gbkToFaa :: Function
 gbkToFaa = newExprExpansion "gbk_to_faa" [Exactly str, Exactly gbk] (Exactly faa) mGbkToFaa [ReadsFile]
 
 mGbkToFaa :: ExprExpansion
-mGbkToFaa _ (Fun r ms ds n [s, g]) = Fun r ms ds "load_faa_path" [Fun r ms ds (n ++ "_rawids") [s, g]]
-mGbkToFaa _ e = error "modules.seqio.mGbkToFaa" $ "bad argument: " ++ show e
+mGbkToFaa _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_faa_path" [Fun r Nothing ds (n ++ "_rawids") [s, g]]
+mGbkToFaa _ _ e = error "modules.seqio.mGbkToFaa" $ "bad argument: " ++ show e
 
 gbkToFaaRawIDs :: Function
 gbkToFaaRawIDs = Function
@@ -114,8 +114,8 @@ gbkToFna :: Function
 gbkToFna = newExprExpansion "gbk_to_fna" [Exactly str, Exactly gbk] (Exactly fna) mGbkToFna [ReadsFile]
 
 mGbkToFna :: ExprExpansion
-mGbkToFna _ (Fun r ms ds n [s, g]) = Fun r ms ds "load_fna_path" [Fun r ms ds (n ++ "_rawids") [s, g]]
-mGbkToFna _ e = error "modules.seqio.mGbkToFna" $ "bad argument: " ++ show e
+mGbkToFna _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_fna_path" [Fun r Nothing ds (n ++ "_rawids") [s, g]]
+mGbkToFna _ _ e = error "modules.seqio.mGbkToFna" $ "bad argument: " ++ show e
 
 gbkToFnaRawIDs :: Function
 gbkToFnaRawIDs = Function
@@ -133,8 +133,8 @@ gbkToFaaEach :: Function
 gbkToFaaEach = newExprExpansion "gbk_to_faa_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf faa) mGbkToFaaEach [ReadsFile]
 
 mGbkToFaaEach :: ExprExpansion
-mGbkToFaaEach _ (Fun r ms ds n [s, g]) = Fun r ms ds "load_faa_path_each" [Fun r ms ds (replace "_each" "_rawids_each" n) [s, g]]
-mGbkToFaaEach _ e = error "modules.seqio.mGbkToFaaEach" $ "bad argument: " ++ show e
+mGbkToFaaEach _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_faa_path_each" [Fun r Nothing ds (replace "_each" "_rawids_each" n) [s, g]]
+mGbkToFaaEach _ _ e = error "modules.seqio.mGbkToFaaEach" $ "bad argument: " ++ show e
 
 gbkToFaaRawIDsEach :: Function
 gbkToFaaRawIDsEach = Function
@@ -152,8 +152,8 @@ gbkToFnaEach :: Function
 gbkToFnaEach = newExprExpansion "gbk_to_fna_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf fna) mGbkToFnaEach [ReadsFile]
 
 mGbkToFnaEach :: ExprExpansion
-mGbkToFnaEach _ (Fun r ms ds n [s, g]) = Fun r ms ds "load_fna_path_each" [Fun r ms ds (replace "_each" "_rawids_each" n) [s, g]]
-mGbkToFnaEach _ e = error "modules.seqio.mGbkToFnaEach" $ "bad argument: " ++ show e
+mGbkToFnaEach _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_fna_path_each" [Fun r Nothing ds (replace "_each" "_rawids_each" n) [s, g]]
+mGbkToFnaEach _ _ e = error "modules.seqio.mGbkToFnaEach" $ "bad argument: " ++ show e
 
 
 gbkToFnaRawIDsEach :: Function

@@ -565,8 +565,8 @@ makeblastdbFaa = newExprExpansion
 -- rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
 
 mMakeblastdb :: ExprExpansion
-mMakeblastdb _ (Fun r ms ds n [s]) = Fun r ms ds (n ++ "_all") [withSingleton s]
-mMakeblastdb _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: " ++ show e
+mMakeblastdb _ _ (Fun r _ ds n [s]) = Fun r Nothing ds (n ++ "_all") [withSingleton s]
+mMakeblastdb _ _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: " ++ show e
 
 -----------------------------------------------
 -- make list of dbs from list of FASTA files --

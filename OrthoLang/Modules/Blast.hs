@@ -189,12 +189,12 @@ mkBlastFromFa d@(bCmd, qType, sType, _) = newExprExpansion
   [Nondeterministic]
 
 mMkBlastFromFa :: BlastDesc -> ExprExpansion
-mMkBlastFromFa (bCmd,_,_,sType) _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
+mMkBlastFromFa (bCmd,_,_,sType) _ _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
   where
     name1 = bCmd ++ "_db"
     name2 = "makeblastdb_" ++ ext sType
-    expr = Fun (EncodedAs blastdb sType) ms (depsOf s) name2 [s]
-mMkBlastFromFa _ _ e = error "ortholang.modules.blast.mkBlastFromFa" $ "bad arg: " ++ show e
+    expr = Fun (EncodedAs blastdb sType) Nothing (depsOf s) name2 [s]
+mMkBlastFromFa _ _ _ e = error "ortholang.modules.blast.mkBlastFromFa" $ "bad arg: " ++ show e
 
 
 ---------------------
@@ -206,7 +206,6 @@ mkBlastFromDbEach (bCmd, qType, _, sType) = newFnA3
   (bCmd ++ "_db_each")
   (Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb sType)))
   (Exactly (ListOf bht))
-  -- TODO this is an example of where the path-expanded version should not have a seed!
   (newMap3of3 (bCmd ++ "_db") $ aMkBlastFromDb2 bCmd)
   [Nondeterministic]
 
@@ -224,10 +223,10 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = newExprExpansion
   [Nondeterministic]
 
 mBlastFromFaEach :: BlastDesc -> ExprExpansion
-mBlastFromFaEach d@(_, _, _, sType) _  (Fun rtn seed deps _   [e, q, ss])
-  =                                    (Fun rtn seed deps fn2 [e, q, ss'])
+mBlastFromFaEach d@(_, _, _, sType) _ _ (Fun rtn seed deps _   [e, q, ss])
+  =                                     (Fun rtn seed deps fn2 [e, q, ss'])
   where
-    ss'   = Fun (ListOf (EncodedAs blastdb sType)) seed (depsOf ss) fn1 [ss]
+    ss'   = Fun (ListOf (EncodedAs blastdb sType)) Nothing (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb_" ++ ext sType ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
-mBlastFromFaEach _ _ e = error "ortholang.modules.blast.mkBlastFromFaEach" $  "bad arg: " ++ show e
+mBlastFromFaEach _ _ _ e = error "ortholang.modules.blast.mkBlastFromFaEach" $  "bad arg: " ++ show e

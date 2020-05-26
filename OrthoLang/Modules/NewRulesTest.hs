@@ -41,5 +41,5 @@ test3 :: Function
 test3 = newExprExpansion "newrulestest3" [Exactly str, Exactly str, Exactly str] (Exactly str) mTest3 []
 
 mTest3 :: ExprExpansion
-mTest3 _ (Fun _ _ _ _ _) = undefined
-mTest3 _ e = error $ "bad argument to mTest3: " ++ show e
+mTest3 _ _ (Fun _ _ _ _ _) = undefined
+mTest3 _ _ e = error $ "bad argument to mTest3: " ++ show e

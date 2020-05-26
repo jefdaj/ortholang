@@ -97,18 +97,18 @@ plotVars = newExprExpansion
   (mkFlowChartMacro selectAll)
   [ReadsScript]
 
-selectAll :: Script -> [Expr] -> [Var]
-selectAll scr _ = map aVar $ sAssigns scr
+selectAll :: [Module] -> Script -> [Expr] -> [Var]
+selectAll _ scr _ = map aVar $ sAssigns scr
 
 -- | This inserts a plot_dot call with the complete dot structure in its str input.
 -- TODO implement the other two by applying a function to the script first?
-mkFlowChartMacro :: (Script -> [Expr] -> [Var]) -> ExprExpansion
-mkFlowChartMacro selectFn scr (Fun t ms vs n ((Lit str title):es)) = Fun t ms vs "plot_dot" [ds]
+mkFlowChartMacro :: ([Module] -> Script -> [Expr] -> [Var]) -> ExprExpansion
+mkFlowChartMacro selectFn mods scr (Fun t ms vs n ((Lit str title):es)) = Fun t ms vs "plot_dot" [ds]
   where
-    vs = selectFn scr es
+    vs = selectFn mods scr es
     dg = dotGraph title $ filter (\a -> aVar a `elem` vs) $ sAssigns scr
     ds = Lit str (show dg)
-mkFlowChartMacro _ _ e = error "ortholang.modules.flowchart.mkFlowChartMacro" $ "bad expr arg: " ++ show e
+mkFlowChartMacro _ _ _ e = error "ortholang.modules.flowchart.mkFlowChartMacro" $ "bad expr arg: " ++ show e
 
 
 ------------------
@@ -124,9 +124,9 @@ plotDepends = newExprExpansion
   [ReadsScript]
 
   -- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
-selectDepends :: Script -> [Expr] -> [Var]
-selectDepends _ [expr] = depsOf expr
-selectDepends _ es = error "ortholang.modules.flowchart.selectDepends" $ "bad exprs: " ++ show es
+selectDepends :: [Module] -> Script -> [Expr] -> [Var]
+selectDepends _ _ [expr] = depsOf expr
+selectDepends _ _ es = error "ortholang.modules.flowchart.selectDepends" $ "bad exprs: " ++ show es
 
 
 -------------------
@@ -142,9 +142,9 @@ plotRDepends = newExprExpansion
   [ReadsScript]
 
   -- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
-selectRDepends :: Script -> [Expr] -> [Var]
-selectRDepends scr [Ref _ _ _ v] = v : rDepsOf scr v
-selectRDepends _ es = error "ortholang.modules.flowchart.selectRDepends" $ "bad exprs: " ++ show es
+selectRDepends :: [Module] -> Script -> [Expr] -> [Var]
+selectRDepends _ scr [Ref _ _ _ v] = v : rDepsOf scr v
+selectRDepends _ _ es = error "ortholang.modules.flowchart.selectRDepends" $ "bad exprs: " ++ show es
 
 
 ---------------------------

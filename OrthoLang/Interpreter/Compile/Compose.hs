@@ -50,7 +50,7 @@ TODO also need to make the first function's input more specific to match the sec
      if it's not obvious how, could just take it as an arg
 -}
 mCompose1 :: Function -> Function -> ExprExpansion
-mCompose1 f1 f2 _ (Fun r2 seed deps _ es)
+mCompose1 f1 f2 _ _ (Fun r2 seed deps _ es)
 
   -- first check that f2 expects one input
   | length (fInputs f2) /= 1 =
@@ -77,4 +77,4 @@ mCompose1 f1 f2 _ (Fun r2 seed deps _ es)
                  in Fun r2 seed deps (fName f2) [e1]
 
 -- oh, and the very first check is that mCompose1 was given a Fun
-mCompose1 _ _ _ e = err $ "bad argument: " ++ show e
+mCompose1 _ _ _ _ e = err $ "bad argument: " ++ show e
