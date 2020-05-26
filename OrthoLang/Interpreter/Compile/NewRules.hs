@@ -85,7 +85,7 @@ import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
-import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths)
+import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite')
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Types
 -- import OrthoLang.Util (digest)
@@ -546,24 +546,51 @@ newMap3of3 prefix act3 out a1 a2 a3 = newMap prefix 3 act1 out a3
 newMap :: Prefix -> Int
        -> (ExprPath -> FilePath -> Action ())
        -> (ExprPath -> FilePath -> Action ())
-newMap mapPrefix mapIndex actToMap o@(ExprPath outList) listToMapOver = do
-  let loc = "ortholang.interpreter.compile.newmap.newMap"
+newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
+  let loc = "ortholang.interpreter.compile.newrules.newMap"
   cfg <- fmap fromJust getShakeExtra
-  listElems <- readPaths loc listToMapOver -- TODO get the type and do readStrings instead?
-  let newPaths = newMapPaths cfg mapPrefix mapIndex listToMapOver listElems -- TODO what happens if these are lits?
-  writePaths loc outList newPaths -- TODO will fail on lits?
+  inPaths <- readPaths loc listToMapOver -- TODO get the type and do readStrings instead?
 
-newMapPaths :: Config -> Prefix -> Int -> FilePath -> [Path] -> [Path]
-newMapPaths cfg newFnName mapIndex oldPath newPaths = map (toPath loc cfg . mkPath) newPaths
+  dRef <- fmap fromJust getShakeExtra
+  ((ListOf oType), dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef out
+
+  -- TODO these are working! next bug is probably that we also need to add the listToMapOver. but what's its type?
+  --      (this might need to be done before calling this function though, right?)
+  --      (ALSO, THINK MORE ABOUT WHEN DIGESTS SHOULD BE ADDED BECAUSE IT MIGHT NOT BE HERE)
+  --      oh here's an idea: put in in trackWrite'? could include the type there why not
+  let elemType = dTypes !! mapIndex
+      elemType' = traceShow loc "dTypes" dTypes
+  liftIO $ addDigest dRef (ListOf elemType) $ toPath loc cfg listToMapOver
+
+  liftIO $ mapM_ (addDigest dRef elemType) inPaths -- TODO remove? also this is the wrong type i think
+  liftIO $ addDigest dRef (ListOf oType) $ toPath loc cfg outList
+  let dPaths' = map (fromPath loc cfg) dPaths
+  need' loc dPaths'
+
+  let inPaths' = map (fromPath loc cfg) inPaths
+  liftIO $ debug loc $ "inPaths: " ++ show inPaths
+  let outPaths = newMapOutPaths cfg mapPrefix mapIndex listToMapOver inPaths -- TODO what happens if these are lits?
+  liftIO $ mapM_ (addDigest dRef oType) outPaths
+  let outPaths' = map (fromPath loc cfg) outPaths
+  liftIO $ debug loc $ "outPaths: " ++ show outPaths
+  -- TODO rewrite with forM_
+  -- TODO are the need and trackwrite parts redundant?
+  mapM_ (\(o, i) -> need' loc [i] >> actToMap (ExprPath o) i >> trackWrite' [o]) $ zip outPaths' inPaths'
+  writePaths loc outList outPaths -- TODO will fail on lits?
+
+-- TODO does this need to be added to the digestmap?
+newMapOutPaths :: Config -> Prefix -> Int -> FilePath -> [Path] -> [Path]
+newMapOutPaths cfg newFnName mapIndex oldPath newPaths = map (toPath loc cfg . mkPath) newPaths
   where
-    loc = "ortholang.interpreter.compile.newPaths.newMapPaths"
+    loc = "ortholang.interpreter.compile.newrules.newMapOutPaths"
     oldDigests = listDigestsInPath cfg oldPath
+    oldDigests' = traceShow loc oldDigests
     oldSeed    = getExprPathSeed   cfg oldPath
     newSuffix = case oldSeed of
                   Nothing -> "result"
                   Just n  -> ('s':show n) </> "result"
     newDigests path = map (\(PathDigest s) -> s) $
-                      replace oldDigests (mapIndex, pathDigest path)
+                      replace oldDigests' (mapIndex, pathDigest path)
     mkPath p = tmpdir cfg </> "exprs" </> newFnName </>
                (foldl1 (</>) (newDigests p)) </>
                newSuffix
@@ -581,7 +608,7 @@ replace (x:xs) (n,a) =
 
 -- newMap1 :: String -> NewAction1 -> NewAction1
 -- newMap1 prefix actFn (ExprPath outPath) arg1Path = do
---   let loc = "ortholang.interpreter.compile.newmap.newMap1"
+--   let loc = "ortholang.interpreter.compile.newrules.newMap1"
 --   elems <- readList loc arg1Path -- TODO get the type and do readStrings instead?
 --   cfg <- fmap fromJust getShakeExtra
 --   let mSeed  = Nothing -- TODO how to get the seed??

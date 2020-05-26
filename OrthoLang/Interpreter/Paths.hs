@@ -171,10 +171,14 @@ import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
 import Path                           (parseAbsFile, fromAbsFile)
 -- import Text.PrettyPrint.HughesPJClass (Pretty)
 
+import qualified Data.Text.Lazy as T
+import Text.Pretty.Simple (pShowNoColor)
+
 import Prelude hiding (error, log)
 import qualified Data.Map.Strict as M
 -- import qualified OrthoLang.Util as U
 
+import Control.Monad.IO.Class     (liftIO)
 import Control.Monad              (when)
 import Data.Either                (partitionEithers)
 import Development.Shake.FilePath (makeRelative, splitPath)
@@ -446,7 +450,9 @@ decodeNewRulesType cfg dRef (ExprPath out) = do
   let loc = "interpreter.paths.decodeNewRulesType"
       k = pathDigest $ toPath loc cfg out
   case M.lookup k dMap of
-    Nothing -> throwIO $ MissingDigests out [show k]
+    Nothing -> do
+      liftIO $ putStrLn $ "entire dMap:\n" ++ T.unpack (pShowNoColor dMap)
+      throwIO $ MissingDigests out [show k]
     Just (t, _) -> return t
 
 -- TODO take an ExprPath
@@ -459,7 +465,9 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
       oKey  = pathDigest $ toPath loc cfg out
       moDig = M.lookup oKey dMap
   case moDig of
-    Nothing -> throwIO $ MissingDigests out [show oKey]
+    Nothing -> do
+      liftIO $ putStrLn $ "entire dMap:\n" ++ T.unpack (pShowNoColor dMap)
+      throwIO $ MissingDigests out [show oKey]
     -- then look up the others too
     -- TODO any reason to re-confirm that the path is right here too?
     Just (oType, _) -> do
@@ -468,7 +476,10 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
           (dFails, dVals) = partitionEithers $ map findk $ trace loc ("dKeys: " ++ show dKeys) dKeys
           dTypes = map fst dVals
           dPaths = map snd dVals
-      when (length dFails > 0) $ throwIO $ MissingDigests out $ map show dFails
+      when (length dFails > 0) $ do
+        liftIO $ putStrLn $ "entire dMap:\n" ++ T.unpack (pShowNoColor dMap)
+        liftIO $ putStrLn $ "dVals:\n" ++ show dVals
+        throwIO $ MissingDigests out $ map show dFails
       -- if everything looks good, return types + paths
       return (oType, dTypes, dPaths)
 

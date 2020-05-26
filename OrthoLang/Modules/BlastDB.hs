@@ -347,7 +347,7 @@ makeblastdbFnaAll = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
   , fOutput =  Exactly ndb
-  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+  , fTags = [] -- TODO is it deterministic though? double-check
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
@@ -358,7 +358,7 @@ makeblastdbFnaAll = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly (ListOf faa)]
 --   , fOutput = Exactly pdb
---   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fTags = [] -- TODO is it deterministic though? double-check
 --   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
 --   }
 --   where
@@ -370,7 +370,7 @@ makeblastdbFaaAll = newFnA1
   (Exactly (ListOf faa))
   (Exactly pdb)
   (aMakeblastdbAll2 faa)
-  [Nondeterministic]
+  []
 
 -- (ListOf (Some fa "a fasta file")) (Encoded blastdb (Some fa "a fasta file"))
 -- shown as "fa.list -> fa.blastdb, where fa is a fasta file"
@@ -454,6 +454,8 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   --
   -- TODO would quoting JUST inner paths be right? And Shake does the outer ones?
   faPaths <- readPaths loc fasPath'
+  let faPaths' = map (fromPath loc cfg) faPaths
+  need' loc faPaths'
   let noQuoting  = unwords $ map (fromPath loc cfg) faPaths
       quoteOuter = "\"" ++ noQuoting ++ "\""
       fixedPaths = if isJust (wrapper cfg) then quoteOuter else noQuoting
@@ -520,7 +522,7 @@ aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show 
 --   { fOpChar = Nothing, fName = "makeblastdb_fna"
 --   , fInputs = [Exactly fna] -- TODO can't do it from faa right?
 --   , fOutput =  Exactly ndb
---   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fTags = [] -- TODO is it deterministic though? double-check
 --   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
 --   }
 
@@ -530,14 +532,14 @@ makeblastdbFna = newExprExpansion
   [Exactly fna]
   (Exactly ndb)
   mMakeblastdb
-  [Nondeterministic] -- TODO is it though?
+  [] -- TODO is it though?
 
 -- makeblastdbFaa :: Function
 -- makeblastdbFaa = Function
 --   { fOpChar = Nothing, fName = "makeblastdb_faa"
 --   , fInputs = [Exactly faa] -- TODO can't do it from faa right?
 --   , fOutput =  Exactly pdb
---   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fTags = [] -- TODO is it deterministic though? double-check
 --   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
 --   }
 
@@ -547,7 +549,7 @@ makeblastdbFaa = newExprExpansion
   [Exactly faa]
   (Exactly pdb)
   mMakeblastdb
-  [Nondeterministic] -- TODO is it though?
+  [] -- TODO is it though?
 
 -- (Some fa "a fasta file") (Encoded blastdb (Some fa "a fasta file"))
 -- shown as "fa -> fa.blastdb, where fa is a fasta file"
@@ -574,7 +576,7 @@ mMakeblastdb _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: " 
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly (ListOf faType)]
 --   , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
---   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fTags = [] -- TODO is it deterministic though? double-check
 --   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
 --   }
 --   where
@@ -598,7 +600,7 @@ mMakeblastdb _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: " 
 --   [Exactly (ListOf faType)]
 --   (Exactly (ListOf (EncodedAs blastdb faType)))
 --   mMakeblastdbEach
---   [Nondeterministic] -- TODO is it though?
+--   [] -- TODO is it though?
 --
 -- mMakeblastdbEach :: ExprExpansion
 -- mMakeblastdbEach = undefined -- TODO oh, have to solve mapping first :/
@@ -634,14 +636,14 @@ mkMakeblastdbAllEach faType = hidden $
     -- TODO can this be done with a path expansion to the _all version?
     -- (newMap1of1 "" $ aMakeblastdb) -- TODO shit, needs both expr and path expansion?
     (newMap1of1 aName $ aMakeblastdbAll2 faType)
-    [Nondeterministic, Hidden]
+    [Hidden]
 
 -- | Hidden helper function that helps define makeblastdb_faa_each etc.
 -- TODO which hidden marker actually works?
 mkMakeblastdbEach :: Type -> Function
 mkMakeblastdbEach faType = hidden $ compose1
   ("makeblastdb_" ++ ext faType ++ "_each")
-  [Nondeterministic, Hidden]
+  [Hidden]
   singletons
   (mkMakeblastdbAllEach faType)
 
