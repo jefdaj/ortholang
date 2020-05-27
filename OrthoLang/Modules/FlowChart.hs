@@ -24,7 +24,7 @@ import OrthoLang.Types
 import OrthoLang.Script (rDepsOf)
 import OrthoLang.Interpreter.Paths (prefixOf)
 import OrthoLang.Interpreter
-import OrthoLang.Util (digest, justOrDie, readOrDie)
+import OrthoLang.Util (digest, justOrDie)
 import OrthoLang.Debug (error, trace)
 import Prelude hiding (error)
 import Data.GraphViz
@@ -68,7 +68,7 @@ aPlotDot (ExprPath out) inDot = do
   let loc = "ortholang.modules.flowchart.aPlotDot"
   txt <- readLit loc inDot
   cfg <- fmap fromJust $ getShakeExtra
-  let g = readOrDie "aPlotDot" txt :: DotGraph Node
+  let g = read txt :: DotGraph Node
       out' = toPath loc cfg out
   withBinHash out out' $ \tmpPath -> do
     let tmpPath' = fromPath loc cfg tmpPath

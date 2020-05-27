@@ -14,7 +14,6 @@ module OrthoLang.Modules.OrthoGroups
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
-import OrthoLang.Util (readOrDie)
 
 import OrthoLang.Modules.SeqIO         (faa)
 import OrthoLang.Modules.OrthoFinder   (ofr)
@@ -377,7 +376,7 @@ rOrthologFilterStrFrac fnName pickerFn scr e@(Fun _ _ _ _ [frac, groupLists, idL
     -- TODO is there a way to avoid reading this?
     nIDs  <- fmap length $ readPaths loc idListsPath
     fnArg <- readLit loc fracPath
-    let fnArg' = show $ pickerFn (toRealFloat (readOrDie "fnArg'" fnArg) :: Double) nIDs
+    let fnArg' = show $ pickerFn (toRealFloat (read fnArg) :: Double) nIDs
     need' loc [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
     runCmd $ CmdDesc
       { cmdParallel = False

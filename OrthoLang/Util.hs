@@ -36,7 +36,6 @@ module OrthoLang.Util
   , insertAt
   , justOrDie
   , headOrDie
-  , readOrDie
   )
   where
 
@@ -290,8 +289,3 @@ justOrDie msg val = case val of
 headOrDie :: String -> [a] -> a
 headOrDie msg [] = error "headOrDie" msg
 headOrDie _ lst = head lst
-
-readOrDie :: Read p => String -> String -> p
-readOrDie msg s = case reads s of
-  [(x, "")] -> x
-  _ -> error "readOrDie" msg
