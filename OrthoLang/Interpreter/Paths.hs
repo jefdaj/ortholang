@@ -502,10 +502,12 @@ listDigestsInPath cfg
   . makeRelative (tmpdir cfg)
 
 -- TODO restrict to ExprPath?
-getExprPathSeed :: Config -> FilePath -> Maybe Seed
-getExprPathSeed cfg p = case comps of
+getExprPathSeed :: FilePath -> Maybe Seed
+getExprPathSeed p = case comps of
   [] -> Nothing
-  (('s':seed):_) -> Just (Seed 0) -- fmap Seed $ read seed -- TODO aha! is this the parse error?
+  (('s':seed):_) -> let n = filter (/= '/') seed
+                        n' = trace "ortholang.interpreter.paths.getExprPathSeed" ("n: " ++ show n) n
+                    in Just $ Seed (read n' :: Int)
   _ -> Nothing
   where
-    comps = dropWhile (== "result") $ reverse $ splitPath $ makeRelative (tmpdir cfg) p
+    comps = dropWhile (== "result") $ reverse $ splitPath p

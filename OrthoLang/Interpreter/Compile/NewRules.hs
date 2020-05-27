@@ -595,7 +595,8 @@ newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cf
     oldDigests' = traceShow loc oldDigests
 
     -- TODO can we remove this?
-    oldSeed    = getExprPathSeed   cfg oldPath
+    oldPath' = trace loc ("oldPath: " ++ show oldPath) oldPath
+    oldSeed    = getExprPathSeed oldPath'
 
     -- newFn = findFun undefined newFnName
     -- seed = if Nondeterministic `elem` (fTags newFn) then Just (Seed 0) else Nothing
