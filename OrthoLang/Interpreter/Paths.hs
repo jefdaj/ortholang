@@ -272,7 +272,10 @@ argHashes c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) o
 argHashes _ _ _ (Lit _     v      ) =     [digest "ortholang.interpreter.paths.argHashes.Lit" v]
 argHashes c d s (Fun _ _ _ _ es   ) = map (digest "ortholang.interpreter.paths.argHashes.Fun" . exprPath c d s) es
 argHashes c d s (Bop _ _ _ _ e1 e2) = map (digest "ortholang.interpreter.paths.argHashes.Bop" . exprPath c d s) [e1, e2] -- TODO remove?
-argHashes c d s (Lst _ _ _   es   ) = map (digest "ortholang.interpreter.paths.argHashes.Lst" . exprPath c d s) es -- TODO use seed here?
+argHashes c d s (Lst _ _ _   es   ) = [digest "ortholang.interpreter.paths.argHashes.Lst.outer" inner]
+  where
+    -- TODO should these be sorted? or should the same list in different order actually be different?
+    inner = map (digest "ortholang.interpreter.paths.argHashes.Lst.inner" . exprPath c d s) es
 
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
