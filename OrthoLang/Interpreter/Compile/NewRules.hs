@@ -549,6 +549,10 @@ newMap :: Prefix -> Int
        -> (ExprPath -> FilePath -> Action ())
 newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
   let loc = "ortholang.interpreter.compile.newrules.newMap"
+  liftIO $ debug loc $ "mapPrefix: " ++ mapPrefix
+  liftIO $ debug loc $ "mapIndex: " ++ show mapIndex
+  liftIO $ debug loc $ "outList: " ++ outList
+  liftIO $ debug loc $ "listToMapOver: " ++ listToMapOver
   cfg <- fmap fromJust getShakeExtra
   
   liftIO $ debug loc $ "about to readPaths from  " ++ listToMapOver
@@ -557,6 +561,9 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
 
   dRef <- fmap fromJust getShakeExtra
   ((ListOf oType), dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef out
+  liftIO $ debug loc $ "oType: " ++ show oType
+  liftIO $ debug loc $ "dTypes: " ++ show dTypes
+  liftIO $ debug loc $ "dPaths: " ++ show dPaths
 
   -- TODO remove the addDigests?
   let elemType = dTypes !! (mapIndex - 1)
