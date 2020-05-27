@@ -187,6 +187,7 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//cache/concat/*.txt"
             , "//cache/curl/*"
             , "//cache/each//args"
+            , "//cache/each//result"
             , "//cache/hmmsearch/result"
             , "//cache/lines/*.txt"
             , "//cache/load/*.f*a"
@@ -211,6 +212,7 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//exprs/diamond_makedb//result"
             , "//exprs/extract_ids//result"
             , "//exprs/extract_queries//tmp"
+            , "//exprs/extract_queries//result"
             , "//exprs/extract_scored//tmp"
             , "//exprs/extract_scores//tmp"
             , "//exprs/extract_seqs//result"
@@ -234,6 +236,7 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//exprs/makeblastdb_*_all_each//result"
             , "//exprs/*blast*_db//result"
             , "//exprs/*blast*_db_each//result"
+            , "//exprs/length//result"
             ]
         }
 
