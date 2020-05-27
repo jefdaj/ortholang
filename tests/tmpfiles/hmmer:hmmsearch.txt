@@ -19,35 +19,35 @@
 |   |-- blastp_db
 |   |   `-- 76bf3d901d
 |   |       `-- ec1f6f502d
-|   |           `-- e70f55b3b5
-|   |               `-- 0
+|   |           `-- 8ac14237ef
+|   |               `-- s0
 |   |                   `-- result -> out
 |   |-- diff
-|   |   `-- 79102b926b
+|   |   `-- 31982a15a5
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_hmm_targets
-|   |   `-- a039d28b94
+|   |   `-- c5e3e362b6
 |   |       `-- result
 |   |-- extract_seqs
 |   |   `-- 695ad777c5
-|   |       `-- 1911119d88
+|   |       `-- 713be2cccc
 |   |           `-- result
 |   |-- extract_targets
-|   |   `-- 2a13619cc4
+|   |   `-- 7da5a06fb1
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- hmmbuild
-|   |   `-- ec55732f8d
+|   |   `-- fa2247d0c5
 |   |       |-- result
 |   |       `-- result.err
 |   |-- hmmsearch
 |   |   `-- 01b1e93729
-|   |       `-- 39e884e959
+|   |       `-- 48ef1a7ff1
 |   |           `-- 695ad777c5
 |   |               |-- result
 |   |               `-- result.err
 |   |-- list
-|   |   |-- 73bf8ccdd4
+|   |   |-- 1a54bad7bc
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- fe26b625e5
 |   |       `-- result -> ../../../cache/lines/...
@@ -58,10 +58,9 @@
 |   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
 |   |-- makeblastdb_faa_all
 |   |   `-- cf7e527970
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- muscle
-|   |   `-- 3d4ac804f7
+|   |   `-- fd536cd564
 |   |       `-- result
 |   |-- num
 |   |   |-- 3e281fad0f
@@ -74,14 +73,14 @@
 |       `-- f6e8c8ce02
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits2.hht -> ../exprs/hmmsearch/01b1e93729/39e884e959/695ad777c5/result
-    |-- hits2_ids.str.list -> ../exprs/extract_hmm_targets/a039d28b94/result
-    |-- hits_aln.aln -> ../exprs/muscle/3d4ac804f7/result
-    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/e70f55b3b5/0/result
-    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/1911119d88/result
-    |-- hits_hmm.hmm -> ../exprs/hmmbuild/ec55732f8d/result
-    |-- hits_ids.str.list -> ../exprs/extract_targets/2a13619cc4/result
+    |-- hits2.hht -> ../exprs/hmmsearch/01b1e93729/48ef1a7ff1/695ad777c5/result
+    |-- hits2_ids.str.list -> ../exprs/extract_hmm_targets/c5e3e362b6/result
+    |-- hits_aln.aln -> ../exprs/muscle/fd536cd564/result
+    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/8ac14237ef/s0/result
+    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/713be2cccc/result
+    |-- hits_hmm.hmm -> ../exprs/hmmbuild/fa2247d0c5/result
+    |-- hits_ids.str.list -> ../exprs/extract_targets/7da5a06fb1/result
     |-- mgen.faa -> ../exprs/load_faa/d96205bf90/result
-    `-- result -> ../exprs/diff/79102b926b/result
+    `-- result -> ../exprs/diff/31982a15a5/result
 
-44 directories, 40 files
+43 directories, 40 files

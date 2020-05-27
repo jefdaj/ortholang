@@ -22,17 +22,17 @@
 |   |-- blastp_db
 |   |   `-- b6d4e4cdf4
 |   |       |-- afa6e907a5
-|   |       |   `-- cc2378bde2
+|   |       |   `-- 4f0bccea88
 |   |       |       `-- s0
 |   |       |           `-- result -> out
 |   |       `-- ccc25bfe26
-|   |           `-- 62a53d06d7
+|   |           `-- 327d988913
 |   |               `-- s0
 |   |                   `-- result -> out
 |   |-- list
-|   |   |-- afa6e907a5
+|   |   |-- 7666691bcd
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- ccc25bfe26
+|   |   `-- bf76103a78
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |   |-- 1e0498b59a
@@ -40,16 +40,16 @@
 |   |   `-- cfed7edd23
 |   |       `-- result -> ../../../cache/load/10ffe0cf0f.faa
 |   |-- makeblastdb_faa_all
-|   |   |-- 31bb083c8b
+|   |   |-- 1ee5bf3dcb
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- b8bc2b98eb
+|   |   `-- 329cb2539d
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- reciprocal_best
-|   |   `-- f11d2b562d
-|   |       `-- cb85dbca23
+|   |   `-- 39652f0a0e
+|   |       `-- 1bdec9d4a6
 |   |           `-- result
 |   `-- str
 |       |-- 824ccbd8b2
@@ -57,11 +57,11 @@
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- fwdHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/ccc25bfe26/62a53d06d7/s0/result
+    |-- fwdHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/ccc25bfe26/327d988913/s0/result
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
-    |-- recHits.bht -> ../exprs/reciprocal_best/f11d2b562d/cb85dbca23/result
+    |-- recHits.bht -> ../exprs/reciprocal_best/39652f0a0e/1bdec9d4a6/result
     |-- result -> ../vars/recHits.bht
-    `-- revHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/afa6e907a5/cc2378bde2/s0/result
+    `-- revHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/afa6e907a5/4f0bccea88/s0/result
 
 32 directories, 32 files

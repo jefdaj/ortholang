@@ -24,23 +24,22 @@
 |   |       `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |-- makeblastdb_faa_all
 |   |   `-- 329cb2539d
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- c23938f494
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- psiblast_pssm_db
 |   |   `-- 0c631e7663
-|   |       `-- cbad616ca1
-|   |           `-- 3831a7a38b
-|   |               `-- 0
+|   |       `-- 7fb7668f90
+|   |           `-- 4f0bccea88
+|   |               `-- s0
 |   |                   |-- result
 |   |                   `-- result.err
 |   |-- psiblast_train_db
 |   |   `-- 0c631e7663
 |   |       `-- ec1f6f502d
-|   |           `-- 3831a7a38b
-|   |               `-- 0
+|   |           `-- 4f0bccea88
+|   |               `-- s0
 |   |                   |-- result -> ../../../../../../cache/lines/...
 |   |                   `-- result.tmp.err
 |   `-- str
@@ -49,11 +48,11 @@
 |       `-- 824ccbd8b2
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hittable.bht -> ../exprs/psiblast_pssm_db/0c631e7663/cbad616ca1/3831a7a38b/0/result
-    |-- magadb.faa.blastdb -> ../exprs/makeblastdb_faa_all/329cb2539d/0/result
+    |-- hittable.bht -> ../exprs/psiblast_pssm_db/0c631e7663/7fb7668f90/4f0bccea88/s0/result
+    |-- magadb.faa.blastdb -> ../exprs/makeblastdb_faa_all/329cb2539d/result
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
-    |-- pssm.pssm -> ../exprs/psiblast_train_db/0c631e7663/ec1f6f502d/3831a7a38b/0/result
+    |-- pssm.pssm -> ../exprs/psiblast_train_db/0c631e7663/ec1f6f502d/4f0bccea88/s0/result
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/hittable.bht
 
-30 directories, 26 files
+29 directories, 26 files

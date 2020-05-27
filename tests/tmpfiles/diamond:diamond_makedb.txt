@@ -6,7 +6,7 @@
 |-- exprs
 |   |-- diamond_makedb
 |   |   `-- afa6e907a5
-|   |       `-- 0
+|   |       `-- s0
 |   |           `-- result
 |   |-- load_faa
 |   |   `-- cfed7edd23
@@ -16,6 +16,6 @@
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
-    `-- result -> ../exprs/diamond_makedb/afa6e907a5/0/result
+    `-- result -> ../exprs/diamond_makedb/afa6e907a5/s0/result
 
 11 directories, 7 files

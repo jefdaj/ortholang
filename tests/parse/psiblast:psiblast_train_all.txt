@@ -10,8 +10,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "cyanodb" 
-            , aExpr = Fun faa.blastdb 
-                ( Just ( Seed 0 ) ) 
+            , aExpr = Fun faa.blastdb Nothing 
                 [ Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
                 ] "makeblastdb_faa_all" 

@@ -16,10 +16,10 @@
 |   `-- seqio
 |-- exprs
 |   |-- all
-|   |   `-- fcaa9bf749
+|   |   `-- eed7f9cd53
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_queries
-|   |   `-- 1c199c3579
+|   |   `-- 3dc800ef80
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- gbk_to_fna_rawids
@@ -42,13 +42,12 @@
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_fna_all
 |   |   `-- bc5062d574
-|   |       `-- s0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- repeat
-|   |   `-- e6a8daf645
+|   |   `-- 621750630d
 |   |       `-- 494baa00c6
 |   |           `-- 723ab8a8d7
 |   |               `-- result -> ../../../../../cache/lines/...
@@ -62,15 +61,15 @@
 |   `-- tblastx_db
 |       `-- b6d4e4cdf4
 |           `-- 494baa00c6
-|               `-- dcf0bdbd07
+|               `-- 78e97d02c8
 |                   `-- s0
 |                       `-- result -> out
 |-- reps
-|   `-- 0dcb04d237
-|       |-- hits.str.list -> ../../exprs/extract_queries/1c199c3579/result
-|       `-- result -> ../../reps/0dcb04d237/hits.str.list
+|   `-- de68903918
+|       |-- hits.str.list -> ../../exprs/extract_queries/3dc800ef80/result
+|       `-- result -> ../../reps/de68903918/hits.str.list
 `-- vars
     |-- maga.fna -> ../exprs/load_fna_path/fe2757ed86/result
-    `-- result -> ../exprs/all/fcaa9bf749/result
+    `-- result -> ../exprs/all/eed7f9cd53/result
 
-43 directories, 30 files
+42 directories, 30 files

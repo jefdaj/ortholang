@@ -2,7 +2,7 @@
 |-- cache
 |-- exprs
 |   |-- all
-|   |   `-- 5b1f2de384
+|   |   `-- c5e83c1c91
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- glob_files
 |   |   `-- 12a4252b4d
@@ -14,14 +14,14 @@
 |   |   `-- eaad7f2e40
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- repeat
-|   |   `-- 96a1ec91b1
+|   |   `-- eddfbcda73
 |   |       `-- 86f9a0860d
 |   |           `-- 312ef56853
 |   |               `-- result -> ../../../../../cache/lines/...
 |   |-- sample
 |   |   `-- 0ca3043701
 |   |       `-- 86f9a0860d
-|   |           `-- 0
+|   |           `-- s0
 |   |               `-- result -> ../../../../../cache/lines/...
 |   `-- str
 |       `-- 3b58ff9708
@@ -29,10 +29,10 @@
 |-- reps
 |   `-- 3accc5295f
 |       |-- result -> ../../reps/3accc5295f/use5.str.list
-|       `-- use5.str.list -> ../../exprs/sample/0ca3043701/86f9a0860d/0/result
+|       `-- use5.str.list -> ../../exprs/sample/0ca3043701/86f9a0860d/s0/result
 `-- vars
     |-- faa_names.str.list -> ../exprs/glob_files/12a4252b4d/result
-    |-- result -> ../exprs/all/5b1f2de384/result
-    `-- use5manytimes.str.list.list -> ../exprs/repeat/96a1ec91b1/86f9a0860d/312ef56853/result
+    |-- result -> ../exprs/all/c5e83c1c91/result
+    `-- use5manytimes.str.list.list -> ../exprs/repeat/eddfbcda73/86f9a0860d/312ef56853/result
 
 23 directories, 12 files

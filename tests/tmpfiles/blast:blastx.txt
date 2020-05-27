@@ -1,18 +1,10 @@
 .
 |-- cache
 |   |-- each
-|   |   |-- 32d882c7ee
-|   |   |   `-- 9a61cb63ce
-|   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/makeblastdb_faa/9a61cb63ce/0/result
-|   |   |-- 3c0f515e33
-|   |   |   `-- b856eeb8ff
-|   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/blastx_db/e10471b511/78b40f3bc3/b856eeb8ff/0/result
-|   |   `-- 827d80b071
-|   |       `-- dece7e65f7
+|   |   `-- 5d5528109c
+|   |       `-- 43f59a1d82
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/dece7e65f7/result
+|   |           `-- result -> ../../../../exprs/extract_queries/43f59a1d82/result
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
@@ -30,34 +22,32 @@
 |   `-- seqio
 |-- exprs
 |   |-- any
-|   |   `-- 61914d4788
+|   |   `-- 3030b7b278
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- blastx_db
-|   |   |-- b6d4e4cdf4
-|   |   |   `-- ce8fc74ec1
-|   |   |       `-- a0fc6adb1e
-|   |   |           `-- 0
-|   |   |               `-- result -> out
-|   |   `-- e10471b511
-|   |       `-- 78b40f3bc3
-|   |           `-- b856eeb8ff
-|   |               `-- 0
+|   |   `-- b6d4e4cdf4
+|   |       `-- ce8fc74ec1
+|   |           |-- 26d5c3fe2e
+|   |           |   `-- s0
+|   |           |       `-- result -> out
+|   |           `-- 9679eefb09
+|   |               `-- s0
 |   |                   `-- result -> out
 |   |-- blastx_db_each
 |   |   `-- b6d4e4cdf4
 |   |       `-- ce8fc74ec1
-|   |           `-- 76f7d723a4
-|   |               `-- 0
+|   |           `-- adcba88698
+|   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 6478f900ab
+|   |   |-- 43f59a1d82
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   `-- dece7e65f7
+|   |   `-- 51eb144455
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
-|   |   `-- 807034ac1e
+|   |   `-- 305801803d
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- gbk_to_faa_rawids
 |   |   `-- 3feaffccb4
@@ -68,11 +58,11 @@
 |   |       `-- ad89bfbf0c
 |   |           `-- result
 |   |-- list
-|   |   |-- 357daaa106
+|   |   |-- 64c48e1b66
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 94782d8088
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- f2e7227da5
+|   |   `-- da774618fd
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |-- load_faa_path
@@ -87,18 +77,14 @@
 |   |   |   `-- result -> ../../../cache/load/1e7afd22cf.gbk
 |   |   `-- b5a17d977e
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
-|   |-- makeblastdb_faa
-|   |   `-- 9a61cb63ce
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
 |   |-- makeblastdb_faa_all
+|   |   |-- 633880bbe1
+|   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- e41c27f09f
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
-|   |-- makeblastdb_faa_each
+|   |       `-- result -> ../../../cache/lines/...
+|   |-- makeblastdb_faa_all_each
 |   |   `-- baf2d6b73b
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
@@ -113,10 +99,9 @@
 |       `-- ee108e12fa
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- mapped.str.list.list -> ../exprs/extract_queries_each/807034ac1e/result
-    |-- mbov.fna -> ../exprs/load_fna_path/0e1da458bb/result
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/305801803d/result
     |-- mgen.faa -> ../exprs/load_faa_path/f18ee4a4e7/result
-    |-- result -> ../exprs/any/61914d4788/result
-    `-- single.str.list -> ../exprs/extract_queries/6478f900ab/result
+    |-- result -> ../exprs/any/3030b7b278/result
+    `-- single.str.list -> ../exprs/extract_queries/51eb144455/result
 
-71 directories, 48 files
+61 directories, 43 files

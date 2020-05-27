@@ -19,8 +19,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mgendb" 
-            , aExpr = Fun faa.blastdb 
-                ( Just ( Seed 0 ) ) 
+            , aExpr = Fun faa.blastdb Nothing 
                 [ Var ( RepID Nothing ) "mgen" ] "makeblastdb_faa" 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "mgen" )
@@ -28,8 +27,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "magadb" 
-            , aExpr = Fun faa.blastdb 
-                ( Just ( Seed 0 ) ) 
+            , aExpr = Fun faa.blastdb Nothing 
                 [ Var ( RepID Nothing ) "maga" ] "makeblastdb_faa" 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
@@ -46,8 +44,7 @@ Script
                 [ Lit num "1.0e-2" 
                 , Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "query" )
-                , Ref faa.blastdb 
-                    ( Just ( Seed 0 ) ) 
+                , Ref faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "maga" ] 
                     ( Var ( RepID Nothing ) "magadb" )
                 ] 
@@ -71,12 +68,10 @@ Script
                     , Var ( RepID Nothing ) "mgendb" 
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
-                    [ Ref faa.blastdb 
-                        ( Just ( Seed 0 ) ) 
+                    [ Ref faa.blastdb Nothing 
                         [ Var ( RepID Nothing ) "maga" ] 
                         ( Var ( RepID Nothing ) "magadb" )
-                    , Ref faa.blastdb 
-                        ( Just ( Seed 0 ) ) 
+                    , Ref faa.blastdb Nothing 
                         [ Var ( RepID Nothing ) "mgen" ] 
                         ( Var ( RepID Nothing ) "mgendb" )
                     ] 
@@ -93,8 +88,7 @@ Script
                 [ Lit num "1.0e-2" 
                 , Ref faa.list Nothing [] 
                     ( Var ( RepID Nothing ) "queries" )
-                , Ref faa.blastdb 
-                    ( Just ( Seed 0 ) ) 
+                , Ref faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "maga" ] 
                     ( Var ( RepID Nothing ) "magadb" )
                 ] 
@@ -124,12 +118,10 @@ Script
                     , Var ( RepID Nothing ) "magadb" 
                     , Var ( RepID Nothing ) "maga" 
                     ] 
-                    [ Ref faa.blastdb 
-                        ( Just ( Seed 0 ) ) 
+                    [ Ref faa.blastdb Nothing 
                         [ Var ( RepID Nothing ) "mgen" ] 
                         ( Var ( RepID Nothing ) "mgendb" )
-                    , Ref faa.blastdb 
-                        ( Just ( Seed 0 ) ) 
+                    , Ref faa.blastdb Nothing 
                         [ Var ( RepID Nothing ) "maga" ] 
                         ( Var ( RepID Nothing ) "magadb" )
                     ] 
@@ -156,8 +148,7 @@ Script
                     , Var ( RepID Nothing ) "mgen" 
                     ] 
                     ( Var ( RepID Nothing ) "pssms1" )
-                , Ref faa.blastdb 
-                    ( Just ( Seed 0 ) ) 
+                , Ref faa.blastdb Nothing 
                     [ Var ( RepID Nothing ) "maga" ] 
                     ( Var ( RepID Nothing ) "magadb" )
                 ] 
