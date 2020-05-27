@@ -275,7 +275,7 @@ readPaths loc path = do
   paths <- (fmap . map) stringPath $ readList loc path
   cfg <- fmap fromJust getShakeExtra
   let loc' = loc ++ ".readPaths"
-  need' loc' $ map (fromPath loc' cfg) paths
+  need' loc' $ map (fromPath loc' cfg) paths -- TODO remove? seems like it would kill laziness
   return paths
 
 -- makes a copy of a list of paths without ortholang funny business,
