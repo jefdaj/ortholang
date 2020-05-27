@@ -550,7 +550,10 @@ newMap :: Prefix -> Int
 newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
   let loc = "ortholang.interpreter.compile.newrules.newMap"
   cfg <- fmap fromJust getShakeExtra
+  
+  liftIO $ debug loc $ "about to readPaths from  " ++ listToMapOver
   inPaths <- readPaths loc listToMapOver -- TODO get the type and do readStrings instead?
+  liftIO $ debug loc $ "successfully readPaths from  " ++ listToMapOver
 
   dRef <- fmap fromJust getShakeExtra
   ((ListOf oType), dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef out
@@ -572,9 +575,14 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
   liftIO $ mapM_ (addDigest dRef oType) outPaths
   let outPaths' = map (fromPath loc cfg) outPaths
   liftIO $ debug loc $ "outPaths: " ++ show outPaths
-  -- TODO rewrite with forM_
+
   -- TODO are the need and trackwrite parts redundant?
-  mapM_ (\(o, i) -> need' loc [i] >> liftIO (createDirectoryIfMissing True o) >> actToMap (ExprPath o) i >> trackWrite' [o]) $ zip outPaths' inPaths'
+  forM_ (zip outPaths' inPaths') $ \(o, i) -> do
+    need' loc [i]
+    liftIO $ createDirectoryIfMissing True o
+    actToMap (ExprPath o) i
+    trackWrite' [o]
+
   writePaths loc outList outPaths -- TODO will fail on lits?
   -- trackWrite' (outList:outPaths')
 
@@ -585,7 +593,10 @@ newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cf
     loc = "ortholang.interpreter.compile.newrules.newMapOutPaths"
     oldDigests = listDigestsInPath cfg oldPath
     oldDigests' = traceShow loc oldDigests
+
+    -- TODO can we remove this?
     oldSeed    = getExprPathSeed   cfg oldPath
+
     -- newFn = findFun undefined newFnName
     -- seed = if Nondeterministic `elem` (fTags newFn) then Just (Seed 0) else Nothing
     -- newSuffix = case seed of
@@ -595,9 +606,9 @@ newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cf
                                then "result"
                                else case oldSeed of
                                       Nothing -> "result" -- TODO what if only the new fn needs it?
-                                      Just n  -> ('s':show n) </> "result" -- TODO could this be the read issue?
+                                      Just (Seed n) -> ('s':show n) </> "result" -- TODO could this be the read issue?
     newDigests path = map (\(PathDigest s) -> s) $
-                      replace oldDigests' (mapIndex, pathDigest path)
+                      replace oldDigests' (mapIndex - 1, pathDigest path)
     mkPath p = tmpdir cfg </> "exprs" </> newFnName </>
                (foldl1 (</>) (newDigests p)) </>
                newSuffix

@@ -272,10 +272,12 @@ argHashes c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) o
 argHashes _ _ _ (Lit _     v      ) =     [digest "ortholang.interpreter.paths.argHashes.Lit" v]
 argHashes c d s (Fun _ _ _ _ es   ) = map (digest "ortholang.interpreter.paths.argHashes.Fun" . exprPath c d s) es
 argHashes c d s (Bop _ _ _ _ e1 e2) = map (digest "ortholang.interpreter.paths.argHashes.Bop" . exprPath c d s) [e1, e2] -- TODO remove?
-argHashes c d s (Lst _ _ _   es   ) = [digest "ortholang.interpreter.paths.argHashes.Lst.outer" inner]
+argHashes c d s (Lst r _ _   es   ) = [outer]
   where
     -- TODO should these be sorted? or should the same list in different order actually be different?
     inner = map (digest "ortholang.interpreter.paths.argHashes.Lst.inner" . exprPath c d s) es
+    outer = digest "ortholang.interpreter.paths.argHashes.Lst.outer" inner
+    -- outer' = outer `seq` unsafePerformIO $ addDigest dRef r path >> return path
 
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
@@ -503,7 +505,7 @@ listDigestsInPath cfg
 getExprPathSeed :: Config -> FilePath -> Maybe Seed
 getExprPathSeed cfg p = case comps of
   [] -> Nothing
-  (('s':seed):_) -> fmap Seed $ read seed
+  (('s':seed):_) -> Just (Seed 0) -- fmap Seed $ read seed -- TODO aha! is this the parse error?
   _ -> Nothing
   where
     comps = dropWhile (== "result") $ reverse $ splitPath $ makeRelative (tmpdir cfg) p
