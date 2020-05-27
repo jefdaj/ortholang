@@ -2,16 +2,16 @@
 |-- cache
 |   |-- each
 |   |   `-- f3dbfa183c
-|   |       `-- 4a7f09d87a
+|   |       `-- bc471bf5dc
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/4a7f09d87a/result
+|   |           `-- result -> ../../../../exprs/extract_queries/bc471bf5dc/result
 |   |-- load
 |   |   |-- 36189032ad.faa
 |   |   |-- 36189032ad.faa.ids
 |   |   |-- cb3e90dc00.faa
 |   |   `-- cb3e90dc00.faa.ids
 |   `-- makeblastdb
-|       `-- d77632b774
+|       `-- 4ce56bb067
 |           |-- result
 |           |-- result.err
 |           |-- result.phr
@@ -27,10 +27,7 @@
 |   |-- blastp_db
 |   |   `-- b6d4e4cdf4
 |   |       `-- 2c7651beca
-|   |           |-- 4f0bccea88
-|   |           |   `-- s0
-|   |           |       `-- result -> out
-|   |           `-- 688af09c48
+|   |           `-- 4f0bccea88
 |   |               `-- s0
 |   |                   `-- result -> out
 |   |-- blastp_db_each
@@ -40,10 +37,10 @@
 |   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 4a7f09d87a
+|   |   |-- 7261f09012
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   `-- 7261f09012
+|   |   `-- bc471bf5dc
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
@@ -80,4 +77,4 @@
     |-- result -> ../exprs/all/cb3175f460/result
     `-- single.str.list -> ../exprs/extract_queries/7261f09012/result
 
-45 directories, 35 files
+43 directories, 34 files

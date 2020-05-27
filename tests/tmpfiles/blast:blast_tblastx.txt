@@ -7,7 +7,7 @@
 |   |   |-- a34f77fb3c.fna
 |   |   `-- a34f77fb3c.fna.ids
 |   |-- makeblastdb
-|   |   `-- e2c09fad14
+|   |   `-- ec98a107d2
 |   |       |-- result
 |   |       |-- result.err
 |   |       |-- result.nhr

@@ -8,23 +8,23 @@
 |   |   |-- 36189032ad.faa
 |   |   `-- 36189032ad.faa.ids
 |   |-- makeblastdb
-|   |   |-- c1b08194e1
+|   |   |-- 4ce56bb067
 |   |   |   |-- result
 |   |   |   |-- result.err
 |   |   |   |-- result.phr
 |   |   |   |-- result.pin
 |   |   |   `-- result.psq
-|   |   `-- d77632b774
+|   |   `-- 9223533d98
 |   |       |-- result
 |   |       |-- result.err
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
 |   |-- map
-|   |   |-- 369703d159
+|   |   |-- 5b6d110a81
 |   |   |   |-- result
 |   |   |   `-- result.err
-|   |   `-- a8d4659818
+|   |   `-- ccff5a0f89
 |   |       |-- result
 |   |       `-- result.err
 |   `-- psiblast

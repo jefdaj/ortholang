@@ -8,7 +8,7 @@
 |   |   |-- 36189032ad.faa
 |   |   `-- 36189032ad.faa.ids
 |   |-- makeblastdb
-|   |   `-- c33ef12b71
+|   |   `-- b01db681f5
 |   |       |-- result
 |   |       |-- result.err
 |   |       |-- result.phr
