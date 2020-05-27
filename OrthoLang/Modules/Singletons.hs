@@ -102,12 +102,22 @@ aSingletons elemType outPath listPath = do
   dbg $ "outpath': " ++ outPath'
   elems <- readStrings loc elemType listPath'
   dbg $ "elems: " ++ show elems
-  singletonPaths <- forM elems $ \e -> do
-    let singletonPath' = if isLit elemType
-                           then cachedLinesPath cfg [e]
-                           else cachedLinesPath cfg [pathString $ toPath loc cfg e]
-        singletonPath  = toPath loc cfg singletonPath'
-    dbg $ "singletonPath': " ++ singletonPath'
-    writeStrings loc elemType singletonPath' [e] -- TODO e'?
-    return singletonPath
-  writePaths loc outPath' singletonPaths -- TODO nondeterministic?
+  dRef <- fmap fromJust getShakeExtra
+  sPaths <- forM elems $ \e -> do
+    let sPath  = singletonPath cfg dRef elemType e
+        sPath' = fromPath loc cfg sPath
+    dbg $ "sPath': " ++ sPath'
+    writeStrings loc elemType sPath' [e] -- TODO e'?
+    return sPath
+  writePaths loc outPath' sPaths -- TODO nondeterministic?
+
+-- this has to match argHashes + exprPath in Paths.hs
+singletonPath :: Config -> DigestsRef -> Type -> String -> Path
+singletonPath c d t s = trace loc ("singletonPath: " ++ show res) res
+  where
+    loc   = "ortholang.modules.singletons.singletonPath"
+    inner = let loc' = loc ++ ".inner" in if isLit t
+              then digest loc' s
+              else digest loc' (Path s)
+    hash  = digest (loc ++ ".outer") inner
+    res   = unsafeExprPathExplicit c d "list" (ListOf t) Nothing [hash]
