@@ -12,6 +12,7 @@ module OrthoLang.Modules.PsiBlast where
 import Development.Shake
 
 import OrthoLang.Types
+import OrthoLang.Util (readOrDie)
 import OrthoLang.Interpreter
 import OrthoLang.Modules.BlastDB    (pdb)
 import OrthoLang.Modules.Blast      (bht)
@@ -167,7 +168,7 @@ aPsiblastDb writingPssm args oPath ePath qPath dbPath = do
   dbPre     <- readPath loc dbPath' -- TODO is this right?
   dbg "aPsiblastDb" $ "dbPre: " ++ show dbPre
 
-  let eDec = formatScientific Fixed Nothing $ read eStr
+  let eDec = formatScientific Fixed Nothing $ readOrDie "eDec" eStr
       cDir = fromPath loc cfg $ cacheDir cfg "psiblast"
       dbPre' = fromPath loc cfg dbPre
 

@@ -26,7 +26,7 @@ olModule = Module
   }
 
 divDouble :: Scientific -> Scientific -> Scientific
-divDouble n1 n2 = read $ show (answer :: Double)
+divDouble n1 n2 = U.readOrDie "divDouble" $ show (answer :: Double)
   where
     answer = toRealFloat n1 / toRealFloat n2
 
@@ -42,6 +42,6 @@ aMathBop mathFn (ExprPath outPath) nsPath = do
   let loc = "modules.math.aMathBop"
   ns <- readLits loc nsPath
   log' ns
-  let n = foldl1 mathFn $ map (read :: String -> Scientific) ns
+  let n = foldl1 mathFn $ map (U.readOrDie "aMathBop" :: String -> Scientific) ns
   writeLit loc outPath $ show n
   log' n

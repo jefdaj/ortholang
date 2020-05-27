@@ -73,7 +73,7 @@ import OrthoLang.Interpreter.Paths        (Path, toPath, fromPath, checkLit, isG
                                    checkLits, cacheDir, pathString, isURL,
                                    stringPath, toGeneric, sharedPath, addDigest)
 import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
-                                   ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
+                                   ignoreExistsError, digest, globFiles, isEmpty, headOrDie, readOrDie)
 import OrthoLang.Locks        (withReadLock', withReadLocks',
                                    withWriteLock', withWriteLocks', withWriteOnce)
 import System.Directory           (doesFileExist, createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
@@ -357,7 +357,7 @@ readList loc path = do
 countLines :: FilePath -> Action Scientific
 countLines path = readList "interpreter.actions.countLines" path >>= return . count
   where
-    count ls = read (show $ length ls) :: Scientific
+    count ls = readOrDie "countLines" (show $ length ls) :: Scientific
 
 -----------------
 -- write files --

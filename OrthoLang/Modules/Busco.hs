@@ -9,6 +9,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Modules.Curl (curl)
 import OrthoLang.Modules.Load (mkLoad)
+import OrthoLang.Util (readOrDie)
 
 import Control.Monad             (when)
 import Data.List                 ((\\))
@@ -416,7 +417,7 @@ rBuscoFilterCompleteness scr e@(Fun _ _ _ _ [m, t, fs]) = do
       out' = fromPath loc cfg out
       loc = "modules.busco.rBuscoFilterCompleteness"
   out' %> \_ -> do
-    score <- fmap (read :: String -> Scientific) $ readLit loc scorePath
+    score <- fmap (readOrDie "score" :: String -> Scientific) $ readLit loc scorePath
     table <- readFileStrict' tablePath -- TODO best read fn?
     faaPaths <- readPaths loc faasList
     let allScores = map parseWords $ map words $ lines table
@@ -427,7 +428,7 @@ rBuscoFilterCompleteness scr e@(Fun _ _ _ _ [m, t, fs]) = do
     writePaths loc out' okPaths
   return $ ExprPath out'
   where
-    parseWords (p:c:_) = (Path p, read c :: Scientific)
+    parseWords (p:c:_) = (Path p, readOrDie "parseWords" c :: Scientific)
     parseWords ws = error $ "bad argument to parseWords: " ++ show ws
 rBuscoFilterCompleteness _ e = error $
   "bad argument to rBuscoFilterCompleteness: " ++ show e

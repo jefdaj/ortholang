@@ -32,6 +32,7 @@ TODO test operator precedence
 module OrthoLang.Test.Parse where
 
 import OrthoLang.Types
+import OrthoLang.Util (readOrDie)
 import OrthoLang.Interpreter
 import OrthoLang.Test.Parse.Arbitrary
 import OrthoLang.Test.Parse.Examples
@@ -145,7 +146,7 @@ wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
       parseWithLeftOver modules pVarEq cfg emptyScript (a ++ w) == Right (takeVar a, "")
   , testProperty "after quoted strings" $
     \(ExQuoted q) (ExSpace w) ->
-      parseWithLeftOver modules pQuoted cfg emptyScript (q ++ w) == Right (read q, "")
+      parseWithLeftOver modules pQuoted cfg emptyScript (q ++ w) == Right (readOrDie "wsProps" q, "")
   , testProperty "after numbers" $
     \(ExNum n) (ExSpace w) -> parsedItAll pNum cfg (n ++ w)
   ]
@@ -161,7 +162,7 @@ acProps cfg ref ids = testGroup "parse randomly generated cut code"
       \(ExAssign a) ->
         parseWithLeftOver modules pVarEq cfg emptyScript a == Right (takeVar a, "")
   , testProperty "quoted strings" $
-      \(ExQuoted q) -> regularParse pQuoted cfg q == Right (read q)
+      \(ExQuoted q) -> regularParse pQuoted cfg q == Right (readOrDie "acProps" q)
   , testProperty "positive numbers" $
       \(ExNum n) -> isRight $ regularParse pNum cfg n
   -- TODO shouldn't have to parse it all since there's a random iden added too

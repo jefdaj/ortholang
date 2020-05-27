@@ -99,6 +99,7 @@ import OrthoLang.Interpreter.Actions     (need', readPaths)
 import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest)
 import qualified Data.Map.Strict as M
 import Data.IORef                 (atomicModifyIORef')
+import System.Directory           (createDirectoryIfMissing)
 
 ---------
 -- API --
@@ -567,13 +568,13 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
   let inPaths' = map (fromPath loc cfg) inPaths
   liftIO $ debug loc $ "inPaths: " ++ show inPaths
   mods <- fmap fromJust getShakeExtra
-  let outPaths = newMapOutPaths mods cfg mapPrefix mapIndex listToMapOver inPaths -- TODO what happens if these are lits?
+  let outPaths = newMapOutPaths mods cfg mapPrefix mapIndex outList inPaths -- TODO what happens if these are lits?
   liftIO $ mapM_ (addDigest dRef oType) outPaths
   let outPaths' = map (fromPath loc cfg) outPaths
   liftIO $ debug loc $ "outPaths: " ++ show outPaths
   -- TODO rewrite with forM_
   -- TODO are the need and trackwrite parts redundant?
-  mapM_ (\(o, i) -> need' loc [i] >> actToMap (ExprPath o) i >> trackWrite' [o]) $ zip outPaths' inPaths'
+  mapM_ (\(o, i) -> need' loc [i] >> liftIO (createDirectoryIfMissing True o) >> actToMap (ExprPath o) i >> trackWrite' [o]) $ zip outPaths' inPaths'
   writePaths loc outList outPaths -- TODO will fail on lits?
   -- trackWrite' (outList:outPaths')
 
@@ -594,7 +595,7 @@ newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cf
                                then "result"
                                else case oldSeed of
                                       Nothing -> "result" -- TODO what if only the new fn needs it?
-                                      Just n  -> ('s':show n) </> "result"
+                                      Just n  -> ('s':show n) </> "result" -- TODO could this be the read issue?
     newDigests path = map (\(PathDigest s) -> s) $
                       replace oldDigests' (mapIndex, pathDigest path)
     mkPath p = tmpdir cfg </> "exprs" </> newFnName </>

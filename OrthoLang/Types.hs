@@ -95,7 +95,7 @@ import qualified Data.Text.Lazy   as T
 import qualified Text.PrettyPrint as PP
 
 import OrthoLang.Locks (LocksRef, withReadLock)
-import OrthoLang.Util  (readFileStrict, readFileLazy)
+import OrthoLang.Util  (readFileStrict, readFileLazy, readOrDie)
 
 import Control.Monad.Reader       (ReaderT, runReaderT, ask)
 import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
@@ -229,6 +229,8 @@ pList es = PP.text "[" <> PP.sep (PP.punctuate (PP.text ",") (map pPrint es)) <>
 prettyNum :: String -> Doc
 prettyNum s = if "-" `isPrefixOf` s' then PP.parens (PP.text s') else PP.text s'
   where
+    -- TODO why does readOrDie fail here, but not regular read? probably need to know more about ReadS
+    -- n  = readOrDie ("prettyNum failed on: \"" ++ s ++ "\"") s :: Scientific
     n  = read s :: Scientific
     s' = case toBoundedInteger n of
           Just i  -> show (i :: Int) -- as int if possible

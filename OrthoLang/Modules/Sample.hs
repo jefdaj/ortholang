@@ -5,6 +5,7 @@ module OrthoLang.Modules.Sample where
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
+import OrthoLang.Util (readOrDie)
 
 import Data.Scientific       (formatScientific, FPFormat(..))
 import System.Random         (StdGen)
@@ -70,7 +71,7 @@ aSample seed t outPath nPath lstPath = do
   nStr <- readLit loc nPath'
   lst  <- readStrings loc t lstPath'
   debugA loc ("seed: " ++ show seed)
-  let n         = read $ formatScientific Fixed (Just 0) $ read nStr
+  let n         = readOrDie "aSample 1" $ formatScientific Fixed (Just 0) $ readOrDie "aSample 2" nStr
       elements' = randomSample seed n lst
   writeStrings loc t outPath' elements'
 
@@ -79,4 +80,4 @@ randomSample (Seed s) n lst = take n $ shuffle lst randGen
   where
     shuffle xs = shuffle' xs $ length xs
     -- according to the docs, and string is OK as a random seed
-    randGen = read (show s) :: StdGen
+    randGen = readOrDie "randomSample" (show s) :: StdGen

@@ -3,6 +3,7 @@ module OrthoLang.Modules.Hmmer
 
 import Development.Shake
 import OrthoLang.Types
+import OrthoLang.Util (readOrDie)
 import OrthoLang.Interpreter
 
 import Data.Scientific          (formatScientific, FPFormat(..))
@@ -126,10 +127,10 @@ aHmmsearch [out, e, hm, fa] = do
       hm'   = fromPath loc cfg hm
       fa'   = fromPath loc cfg fa
   eStr <- readLit loc e'
-  let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
+  let eDec   = formatScientific Fixed Nothing (readOrDie "eDec" eStr) -- format as decimal
 
       -- TODO warn users about this? hmmer fails on smaller values than ~1e-307 on my machine
-      eMin   = formatScientific Fixed Nothing (read "1e-307")
+      eMin   = formatScientific Fixed Nothing (readOrDie "eMin" "1e-307")
       eDec'  = if eDec < eMin then eMin else eDec
 
       tmpDir = tmpdir cfg </> "cache" </> "hmmsearch"
