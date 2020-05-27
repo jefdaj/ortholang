@@ -112,12 +112,13 @@ aSingletons elemType outPath listPath = do
   writePaths loc outPath' sPaths -- TODO nondeterministic?
 
 -- this has to match argHashes + exprPath in Paths.hs
+-- TODO what about when there should be a seed?
 singletonPath :: Config -> DigestsRef -> Type -> String -> Path
 singletonPath c d t s = trace loc ("singletonPath: " ++ show res) res
   where
     loc   = "ortholang.modules.singletons.singletonPath"
     inner = let loc' = loc ++ ".inner" in if isLit t
               then digest loc' s
-              else digest loc' (Path s)
-    hash  = digest (loc ++ ".outer") inner
+              else digest loc' $ toPath loc c s
+    hash  = digest (loc ++ ".outer") [inner]
     res   = unsafeExprPathExplicit c d "list" (ListOf t) Nothing [hash]
