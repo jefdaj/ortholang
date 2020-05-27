@@ -103,9 +103,11 @@ aSingletons elemType outPath listPath = do
   elems <- readStrings loc elemType listPath'
   dbg $ "elems: " ++ show elems
   singletonPaths <- forM elems $ \e -> do
-    let singletonPath' = cachedLinesPath cfg [e] -- TODO nondeterministic?
+    let singletonPath' = if isLit elemType
+                           then cachedLinesPath cfg [e]
+                           else cachedLinesPath cfg [pathString $ toPath loc cfg e]
         singletonPath  = toPath loc cfg singletonPath'
     dbg $ "singletonPath': " ++ singletonPath'
-    writeStrings loc elemType singletonPath' [e]
+    writeStrings loc elemType singletonPath' [e] -- TODO e'?
     return singletonPath
   writePaths loc outPath' singletonPaths -- TODO nondeterministic?

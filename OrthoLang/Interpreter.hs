@@ -175,6 +175,8 @@ module OrthoLang.Interpreter
   , fromGeneric
   , fromPath
   , toPath
+  , pathString
+  , stringPath
   , upBy
   , isURL
 

@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   `-- 05e2bae047
-|   |       `-- 31b140c197
+|   |       `-- 2a29926789
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/31b140c197/result
+|   |           `-- result -> ../../../../exprs/extract_queries/2a29926789/result
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
@@ -27,10 +27,10 @@
 |   |-- blastn_db
 |   |   `-- b6d4e4cdf4
 |   |       `-- ce8fc74ec1
-|   |           |-- 204342c2e4
+|   |           |-- 78e97d02c8
 |   |           |   `-- s0
 |   |           |       `-- result -> out
-|   |           `-- 78e97d02c8
+|   |           `-- 798a5c8f3f
 |   |               `-- s0
 |   |                   `-- result -> out
 |   |-- blastn_db_each
@@ -40,7 +40,7 @@
 |   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 31b140c197
+|   |   |-- 2a29926789
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
 |   |   `-- cb374c8a0d
@@ -74,9 +74,9 @@
 |   |   `-- b5a17d977e
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_fna_all
-|   |   |-- 81909c8c38
+|   |   |-- bc5062d574
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- bc5062d574
+|   |   `-- ed42a087c8
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_fna_all_each
 |   |   `-- fdf32b6dc1

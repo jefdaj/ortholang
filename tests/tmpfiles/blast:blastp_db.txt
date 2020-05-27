@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   |-- 28ec74b73d
-|   |   |   `-- bd292d5eeb
+|   |   |   `-- 4a0c9c8f18
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/extract_queries/bd292d5eeb/result
+|   |   |       `-- result -> ../../../../exprs/extract_queries/4a0c9c8f18/result
 |   |   |-- 7d7e02cd5e
 |   |   |   `-- 6c5dd39a5e
 |   |   |       |-- args -> ../../../../cache/lines/...
@@ -36,13 +36,13 @@
 |   |-- blastp_db
 |   |   `-- b6d4e4cdf4
 |   |       `-- 0b0105e3ef
-|   |           |-- 5f3c636484
-|   |           |   `-- s0
-|   |           |       `-- result -> out
 |   |           |-- 8ea5d5eb81
 |   |           |   `-- s0
 |   |           |       `-- result -> out
-|   |           `-- c7fe98886d
+|   |           |-- c7fe98886d
+|   |           |   `-- s0
+|   |           |       `-- result -> out
+|   |           `-- d1cc5f8880
 |   |               `-- s0
 |   |                   `-- result -> out
 |   |-- blastp_db_each
@@ -55,13 +55,13 @@
 |   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
+|   |   |-- 4a0c9c8f18
+|   |   |   |-- result -> ../../../cache/lines/...
+|   |   |   `-- tmp
 |   |   |-- 6c5dd39a5e
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   |-- 80f87c6d39
-|   |   |   |-- result -> ../../../cache/lines/...
-|   |   |   `-- tmp
-|   |   `-- bd292d5eeb
+|   |   `-- 80f87c6d39
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
@@ -96,7 +96,7 @@
 |   |-- makeblastdb_faa_all
 |   |   |-- 1898488812
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- 2a355948af
+|   |   `-- 9c076fe5cf
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_faa_all_each
 |   |   `-- d5863cb13f
