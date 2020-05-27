@@ -150,7 +150,7 @@ aMapMain :: Int
          -> Action ()
 aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
   cfg <- fmap fromJust getShakeExtra
-  let resolve = resolveSymlinks $ Just $ tmpdir cfg
+  let resolve = resolveSymlinks $ Just [tmpdir cfg </> "cache" </> "each", tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]
       regularArgs'   = map (fromPath loc cfg) regularArgs
       mappedArgList' = fromPath loc cfg mappedArg
       mapTmpDir'     = fromPath loc cfg mapTmpDir
@@ -226,7 +226,7 @@ aMapElem eType tmpFn actFn singleName mSeed out = do
   args <- readPaths loc argsPath
   cfg <- fmap fromJust getShakeExtra
   let args' = map (fromPath loc cfg) args
-  args'' <- liftIO $ mapM (resolveSymlinks $ Just $ tmpdir cfg) args' -- TODO remove?
+  args'' <- liftIO $ mapM (resolveSymlinks $ Just [tmpdir cfg </> "cache" </> "each", tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]) args' -- TODO remove?
   need' loc args'
   debugA loc $ "out: " ++ show out
   dir <- liftIO $ case tmpFn of

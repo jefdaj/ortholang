@@ -493,7 +493,7 @@ trackWrite' fs = do
 
 setReadOnly :: Config -> FilePath -> IO ()
 setReadOnly cfg path = do
-  path' <- resolveSymlinks (Just $ tmpdir cfg) path
+  path' <- resolveSymlinks (Just [tmpdir cfg]) path
   -- TODO skip if path' outside tmpdir
   setFileMode path' 444
 

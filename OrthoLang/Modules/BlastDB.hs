@@ -438,7 +438,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   -- The idea was to hash content here, but it took a long time.
   -- So now it gets hashed only once, in another thread, by a load_* function,
   -- and from then on we pick the hash out of the filename.
-  fasHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ tmpdir cfg) fasPath'
+  fasHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just [tmpdir cfg]) fasPath'
 
   let dbDir  = cDir' </> fasHash
       dbOut  = dbDir </> "result"

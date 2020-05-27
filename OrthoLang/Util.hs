@@ -162,8 +162,8 @@ rmAll = mapM_ removePathForcibly
  -
  - TODO why would there ever be a "does not exist" error?
  -}
-resolveSymlinks :: Maybe FilePath -> FilePath -> IO FilePath
-resolveSymlinks mPrefix path = do
+resolveSymlinks :: Maybe [FilePath] -> FilePath -> IO FilePath
+resolveSymlinks mPrefixes path = do
   -- liftIO $ putStrLn $ "resolveSymlinks path: \"" ++ path ++ "\""
   isLink <- pathIsSymbolicLink path
   if not isLink
@@ -172,10 +172,10 @@ resolveSymlinks mPrefix path = do
       relPath <- readSymbolicLink path
       absPath <- absolutize $ takeDirectory path </> relPath
       -- putStrLn $ "resolveSymlinks absPath: " ++ absPath
-      case mPrefix of
-        Nothing -> resolveSymlinks mPrefix absPath
-        Just p  -> if p `isPrefixOf` absPath
-                     then resolveSymlinks mPrefix absPath
+      case mPrefixes of
+        Nothing -> resolveSymlinks mPrefixes absPath
+        Just ps -> if any (\p -> p `isPrefixOf` absPath) ps
+                     then resolveSymlinks mPrefixes absPath
                      else return path
 
 -- kind of silly that haskell doesn't have this built in, but whatever

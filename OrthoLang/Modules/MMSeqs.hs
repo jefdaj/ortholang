@@ -52,7 +52,7 @@ mms = Type
   { tExt  = "mms"
   , tDesc = "MMSeqs2 sequence database"
   , tShow = \cfg ref path -> do
-      path' <- fmap (-<.> "lookup") $ resolveSymlinks (Just $ tmpdir cfg) path
+      path' <- fmap (-<.> "lookup") $ resolveSymlinks (Just [tmpdir cfg]) path
       Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
       let n = headOrDie "failed to read first word of MMSeqs2 db description" $ words out
       -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' path'

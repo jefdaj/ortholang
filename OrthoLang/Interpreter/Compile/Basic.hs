@@ -308,7 +308,7 @@ aListPaths paths outPath = do
       out''  = traceA "aListPaths" out' (out':paths')
       paths' = map (fromPath loc cfg) paths -- TODO remove this
   need' loc paths'
-  paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ tmpdir cfg) paths'
+  paths'' <- liftIO $ mapM (resolveSymlinks $ Just [tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]) paths'
   need' loc paths''
   let paths''' = map (toPath loc cfg) paths'' -- TODO not working?
   writePaths loc out'' paths'''
