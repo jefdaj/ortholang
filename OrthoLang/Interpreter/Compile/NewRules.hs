@@ -578,10 +578,10 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
 
   -- TODO are the need and trackwrite parts redundant?
   forM_ (zip outPaths' inPaths') $ \(o, i) -> do
-    need' loc [i]
-    liftIO $ createDirectoryIfMissing True o
+    -- need' loc [i]
+    -- liftIO $ createDirectoryIfMissing True o
     actToMap (ExprPath o) i
-    trackWrite' [o]
+    -- trackWrite' [o]
 
   writePaths loc outList outPaths -- TODO will fail on lits?
   -- trackWrite' (outList:outPaths')
