@@ -54,7 +54,7 @@ aPermuteElem eType elements = do
       -- TODO export a utility function for that, since it keeps coming up
       hs  = map (digest $ loc ++ ".inner") elements
       h2  = digest (loc ++ ".outer") hs
-      out = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) Nothing h2
+      out = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) Nothing [h2]
       out' = fromPath loc cfg out
   writeStrings loc eType out' elements
   return out
