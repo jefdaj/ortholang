@@ -114,13 +114,13 @@ aSingletons elemType outPath listPath = do
     writeStrings loc elemType sPath' [e] -- TODO e'?
     return sPath
 
-	-- this is a strange one because we want it to pretend to produce a regular
-	-- list of lists for deduplication of tmpfiles; if it makes a path like
-	-- exprs/singletons/<hash>/result then that won't deduplicate. (not that it's
-	-- a big problem. only a slight amount of extra work) my convoluted initial
-	-- solution is to have it write the exprs/list/<hash>/result file and symlink
-	-- the final outpath to that. then when resolving symlinks within the exprs
-	-- dir, everything will still end up there.
+  -- this is a strange one because we want it to pretend to produce a regular
+  -- list of lists for deduplication of tmpfiles; if it makes a path like
+  -- exprs/singletons/<hash>/result then that won't deduplicate. (not that it's
+  -- a big problem. only a slight amount of extra work) my convoluted initial
+  -- solution is to have it write the exprs/list/<hash>/result file and symlink
+  -- the final outpath to that. then when resolving symlinks within the exprs
+  -- dir, everything will still end up there.
   let outListPath = singletonsPath cfg dRef elemType sPaths
       outListPath' = fromPath loc cfg outListPath
   writePaths loc outListPath' sPaths -- TODO nondeterministic?
