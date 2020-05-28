@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   `-- 05e2bae047
-|   |       `-- 31a5646ed0
+|   |       `-- cb374c8a0d
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/31a5646ed0/result
+|   |           `-- result -> ../../../../exprs/extract_queries/cb374c8a0d/result
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
@@ -18,7 +18,10 @@
 |   |       |-- result.err
 |   |       |-- result.nhr
 |   |       |-- result.nin
-|   |       `-- result.nsq
+|   |       |-- result.nsq
+|   |       |-- result.phr
+|   |       |-- result.pin
+|   |       `-- result.psq
 |   `-- seqio
 |-- exprs
 |   |-- any
@@ -29,7 +32,7 @@
 |   |       `-- ce8fc74ec1
 |   |           `-- 78e97d02c8
 |   |               `-- s0
-|   |                   `-- result -> out
+|   |                   `-- result
 |   |-- blastn_db_each
 |   |   `-- b6d4e4cdf4
 |   |       `-- ce8fc74ec1
@@ -37,9 +40,6 @@
 |   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 31a5646ed0
-|   |   |   |-- result -> ../../../cache/lines/...
-|   |   |   `-- tmp
 |   |   `-- cb374c8a0d
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
@@ -97,4 +97,4 @@
     |-- result -> ../exprs/any/cb5def04a1/result
     `-- single.str.list -> ../exprs/extract_queries/cb374c8a0d/result
 
-55 directories, 42 files
+54 directories, 43 files

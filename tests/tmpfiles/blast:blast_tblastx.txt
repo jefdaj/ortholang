@@ -63,7 +63,7 @@
 |           `-- 494baa00c6
 |               `-- 78e97d02c8
 |                   `-- s0
-|                       `-- result -> out
+|                       `-- result
 |-- reps
 |   `-- de68903918
 |       |-- hits.str.list -> ../../exprs/extract_queries/3dc800ef80/result

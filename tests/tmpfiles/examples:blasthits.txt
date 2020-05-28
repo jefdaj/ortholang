@@ -35,11 +35,11 @@
 |   |       |-- ccc25bfe26
 |   |       |   `-- e583c4a7f4
 |   |       |       `-- s0
-|   |       |           `-- result -> out
+|   |       |           `-- result
 |   |       `-- e0ffbfab50
 |   |           `-- 4f0bccea88
 |   |               `-- s0
-|   |                   `-- result -> out
+|   |                   `-- result
 |   |-- extract_queries
 |   |   |-- 562af23d0b
 |   |   |   |-- result -> ../../../cache/lines/...

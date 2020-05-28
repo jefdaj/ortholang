@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   `-- 4237cc573c
-|   |       `-- 908b51b212
+|   |       `-- ae599d611e
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/908b51b212/result
+|   |           `-- result -> ../../../../exprs/extract_queries/ae599d611e/result
 |   |-- load
 |   |   |-- 6046a54e92.fna
 |   |   |-- 6046a54e92.fna.ids
@@ -16,7 +16,10 @@
 |           |-- result.err
 |           |-- result.nhr
 |           |-- result.nin
-|           `-- result.nsq
+|           |-- result.nsq
+|           |-- result.phr
+|           |-- result.pin
+|           `-- result.psq
 |-- exprs
 |   |-- all
 |   |   `-- 92f543964f
@@ -25,9 +28,6 @@
 |   |   `-- e9282b1701
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 908b51b212
-|   |   |   |-- result -> ../../../cache/lines/...
-|   |   |   `-- tmp
 |   |   `-- ae599d611e
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
@@ -71,7 +71,7 @@
 |   |       `-- 2c7651beca
 |   |           `-- 75e6a93572
 |   |               `-- s0
-|   |                   `-- result -> out
+|   |                   `-- result
 |   `-- tblastn_db_each
 |       `-- b6d4e4cdf4
 |           `-- 2c7651beca
@@ -84,4 +84,4 @@
     |-- result -> ../exprs/all/92f543964f/result
     `-- single.str.list -> ../exprs/extract_queries/ae599d611e/result
 
-48 directories, 36 files
+47 directories, 37 files

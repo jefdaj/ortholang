@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   `-- f3dbfa183c
-|   |       `-- bc471bf5dc
+|   |       `-- 7261f09012
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/bc471bf5dc/result
+|   |           `-- result -> ../../../../exprs/extract_queries/7261f09012/result
 |   |-- load
 |   |   |-- 36189032ad.faa
 |   |   |-- 36189032ad.faa.ids
@@ -29,7 +29,7 @@
 |   |       `-- 2c7651beca
 |   |           `-- 4f0bccea88
 |   |               `-- s0
-|   |                   `-- result -> out
+|   |                   `-- result
 |   |-- blastp_db_each
 |   |   `-- b6d4e4cdf4
 |   |       `-- 2c7651beca
@@ -37,10 +37,7 @@
 |   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 7261f09012
-|   |   |   |-- result -> ../../../cache/lines/...
-|   |   |   `-- tmp
-|   |   `-- bc471bf5dc
+|   |   `-- 7261f09012
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
@@ -77,4 +74,4 @@
     |-- result -> ../exprs/all/cb3175f460/result
     `-- single.str.list -> ../exprs/extract_queries/7261f09012/result
 
-43 directories, 34 files
+42 directories, 32 files

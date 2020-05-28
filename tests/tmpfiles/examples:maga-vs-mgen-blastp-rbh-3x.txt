@@ -24,11 +24,11 @@
 |   |       |-- afa6e907a5
 |   |       |   `-- 4f0bccea88
 |   |       |       `-- s0
-|   |       |           `-- result -> out
+|   |       |           `-- result
 |   |       `-- ccc25bfe26
 |   |           `-- 327d988913
 |   |               `-- s0
-|   |                   `-- result -> out
+|   |                   `-- result
 |   |-- list
 |   |   |-- 7666691bcd
 |   |   |   `-- result -> ../../../cache/lines/...

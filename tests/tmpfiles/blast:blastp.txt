@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   |-- 28ec74b73d
-|   |   |   `-- 8f35dcee4c
+|   |   |   `-- 80f87c6d39
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/extract_queries/8f35dcee4c/result
+|   |   |       `-- result -> ../../../../exprs/extract_queries/80f87c6d39/result
 |   |   `-- 95e5d95631
 |   |       `-- fdd2ce21a3
 |   |           |-- args -> ../../../../cache/lines/...
@@ -30,7 +30,7 @@
 |   |       `-- 0b0105e3ef
 |   |           `-- 8ea5d5eb81
 |   |               `-- s0
-|   |                   `-- result -> out
+|   |                   `-- result
 |   |-- blastp_db_each
 |   |   `-- b6d4e4cdf4
 |   |       `-- 0b0105e3ef
@@ -38,10 +38,7 @@
 |   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 80f87c6d39
-|   |   |   |-- result -> ../../../cache/lines/...
-|   |   |   `-- tmp
-|   |   `-- 8f35dcee4c
+|   |   `-- 80f87c6d39
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
@@ -90,4 +87,4 @@
     |-- result -> ../exprs/length_each/a39c380246/result
     `-- single.str.list -> ../exprs/extract_queries/80f87c6d39/result
 
-51 directories, 39 files
+50 directories, 37 files

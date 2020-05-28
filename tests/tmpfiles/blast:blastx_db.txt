@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   `-- f8f5096784
-|   |       `-- 682151622c
+|   |       `-- 51eb144455
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/682151622c/result
+|   |           `-- result -> ../../../../exprs/extract_queries/51eb144455/result
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
@@ -29,7 +29,7 @@
 |   |       `-- ce8fc74ec1
 |   |           `-- 26d5c3fe2e
 |   |               `-- s0
-|   |                   `-- result -> out
+|   |                   `-- result
 |   |-- blastx_db_each
 |   |   `-- b6d4e4cdf4
 |   |       `-- ce8fc74ec1
@@ -37,10 +37,7 @@
 |   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 51eb144455
-|   |   |   |-- result -> ../../../cache/lines/...
-|   |   |   `-- tmp
-|   |   `-- 682151622c
+|   |   `-- 51eb144455
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
@@ -95,4 +92,4 @@
     |-- result -> ../exprs/any/efca24e9d8/result
     `-- single.str.list -> ../exprs/extract_queries/51eb144455/result
 
-55 directories, 40 files
+54 directories, 38 files
