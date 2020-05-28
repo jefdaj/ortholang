@@ -12,6 +12,7 @@ import System.Directory         (createDirectoryIfMissing)
 import System.Exit              (ExitCode(..))
 import System.FilePath          (takeFileName, (</>))
 import Data.Maybe (fromJust)
+import Data.List (isInfixOf)
 
 olModule :: Module
 olModule = Module
@@ -30,7 +31,8 @@ hmm = Type
   { tExt  = "hmm"
   , tDesc = "hidden markov model"
   -- , tShow = \_ _ f -> return $ "hidden markov model \"" ++ f ++ "\""
-  , tShow = defaultShow
+  , tShow = \c r p -> let rmDate = unlines . filter (\l -> not ("DATE" `isInfixOf` l)) . lines
+                      in defaultShowN 13 c r p >>= return . rmDate
   }
 
 -- TODO add to hit tables types in length, extract_hits etc.
