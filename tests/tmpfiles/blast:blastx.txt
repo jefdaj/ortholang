@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   `-- 5d5528109c
-|   |       `-- 402357e78e
+|   |       `-- 682151622c
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/402357e78e/result
+|   |           `-- result -> ../../../../exprs/extract_queries/682151622c/result
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
@@ -27,10 +27,7 @@
 |   |-- blastx_db
 |   |   `-- b6d4e4cdf4
 |   |       `-- ce8fc74ec1
-|   |           |-- 26d5c3fe2e
-|   |           |   `-- s0
-|   |           |       `-- result -> out
-|   |           `-- 55ddcc223f
+|   |           `-- 26d5c3fe2e
 |   |               `-- s0
 |   |                   `-- result -> out
 |   |-- blastx_db_each
@@ -40,10 +37,10 @@
 |   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 402357e78e
+|   |   |-- 51eb144455
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   `-- 51eb144455
+|   |   `-- 682151622c
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
@@ -62,7 +59,9 @@
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 94782d8088
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- da774618fd
+|   |   |-- da774618fd
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- f7cf8973ea
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
 |   |-- load_faa_path
@@ -78,8 +77,6 @@
 |   |   `-- b5a17d977e
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_faa_all
-|   |   |-- 3da6b31a16
-|   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- e41c27f09f
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_faa_all_each
@@ -90,7 +87,7 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- singletons
 |   |   `-- e41c27f09f
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- result -> ../../../exprs/list/f7cf8973ea/result
 |   `-- str
 |       |-- 638026de12
 |       |   `-- result -> ../../../cache/lines/...
@@ -104,4 +101,4 @@
     |-- result -> ../exprs/any/3030b7b278/result
     `-- single.str.list -> ../exprs/extract_queries/51eb144455/result
 
-61 directories, 43 files
+59 directories, 42 files

@@ -1,7 +1,7 @@
 .
 |-- cache
 |   |-- concat
-|   |   |-- ca142d0220.txt -> ../../cache/lines/...
+|   |   |-- 1c485ff609.txt -> ../../cache/lines/...
 |   |   `-- emptyfaa.txt -> ../../cache/lines/...
 |   |-- load
 |   |   |-- 8a23a5a84e.faa
@@ -13,7 +13,7 @@
 |   |   |-- d8da51f7cd.gbk -> $WORKDIR/examples/sequences/PCC_7942_pANL.gbk
 |   |   `-- ec9540d17e.gbk -> $WORKDIR/examples/sequences/PCC_7942_chr.gbk
 |   |-- makeblastdb
-|   |   `-- a1512fc008
+|   |   `-- 4b989c5ff4
 |   |       |-- result
 |   |       |-- result.err
 |   |       |-- result.phr

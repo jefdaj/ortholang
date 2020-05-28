@@ -9,7 +9,7 @@
 |   |   |-- 28e059b2a9.faa
 |   |   `-- 28e059b2a9.faa.ids
 |   `-- makeblastdb
-|       `-- c1b08194e1
+|       `-- 6a7613556f
 |           |-- result
 |           |-- result.err
 |           |-- result.phr

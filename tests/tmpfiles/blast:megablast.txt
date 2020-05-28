@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   `-- 1bf942904c
-|   |       `-- 1a70d92b2a
+|   |       `-- e1802ed5eb
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/1a70d92b2a/result
+|   |           `-- result -> ../../../../exprs/extract_queries/e1802ed5eb/result
 |   |-- load
 |   |   |-- 6046a54e92.fna
 |   |   `-- 6046a54e92.fna.ids
@@ -20,10 +20,10 @@
 |   |   `-- 1788925caa
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 1a70d92b2a
+|   |   |-- 49ac2bd97a
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
-|   |   `-- 49ac2bd97a
+|   |   `-- e1802ed5eb
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- extract_queries_each
@@ -34,14 +34,14 @@
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 6b12d6586a
 |   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- 99e0ec0177
+|   |   |-- 99e0ec0177
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- ff92ed3b97
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- load_fna
 |   |   `-- 821d1bdfd1
 |   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- makeblastdb_fna_all
-|   |   |-- 568f77ad05
-|   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- 6b72f6b956
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_fna_all_each
@@ -50,10 +50,7 @@
 |   |-- megablast_db
 |   |   `-- b6d4e4cdf4
 |   |       `-- 494baa00c6
-|   |           |-- 75e6a93572
-|   |           |   `-- s0
-|   |           |       `-- result -> out
-|   |           `-- f3b5dc1165
+|   |           `-- 75e6a93572
 |   |               `-- s0
 |   |                   `-- result -> out
 |   |-- megablast_db_each
@@ -67,7 +64,7 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- singletons
 |   |   `-- 6b72f6b956
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- result -> ../../../exprs/list/ff92ed3b97/result
 |   `-- str
 |       `-- ac19b3d2a1
 |           `-- result -> ../../../cache/lines/...
@@ -77,4 +74,4 @@
     |-- result -> ../exprs/any/1788925caa/result
     `-- single.str.list -> ../exprs/extract_queries/49ac2bd97a/result
 
-45 directories, 32 files
+43 directories, 31 files

@@ -6,7 +6,7 @@
 |   |   |-- 11bbf54fc6.faa
 |   |   `-- 11bbf54fc6.faa.ids
 |   `-- makeblastdb
-|       `-- c1b08194e1
+|       `-- 9223533d98
 |           |-- result
 |           |-- result.err
 |           |-- result.phr

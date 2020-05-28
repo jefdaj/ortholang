@@ -2,9 +2,9 @@
 |-- cache
 |   |-- each
 |   |   `-- 05e2bae047
-|   |       `-- 897dc87f6f
+|   |       `-- 31a5646ed0
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/897dc87f6f/result
+|   |           `-- result -> ../../../../exprs/extract_queries/31a5646ed0/result
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
@@ -27,10 +27,7 @@
 |   |-- blastn_db
 |   |   `-- b6d4e4cdf4
 |   |       `-- ce8fc74ec1
-|   |           |-- 78e97d02c8
-|   |           |   `-- s0
-|   |           |       `-- result -> out
-|   |           `-- 9c91ffcd78
+|   |           `-- 78e97d02c8
 |   |               `-- s0
 |   |                   `-- result -> out
 |   |-- blastn_db_each
@@ -40,7 +37,7 @@
 |   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   |-- extract_queries
-|   |   |-- 897dc87f6f
+|   |   |-- 31a5646ed0
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- tmp
 |   |   `-- cb374c8a0d
@@ -58,6 +55,8 @@
 |   |-- list
 |   |   |-- 55e4b95fc9
 |   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 6eee7be83e
+|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- bce759b836
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- e54abad548
@@ -74,9 +73,7 @@
 |   |   `-- b5a17d977e
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
 |   |-- makeblastdb_fna_all
-|   |   |-- bc5062d574
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   `-- c3413ef486
+|   |   `-- bc5062d574
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- makeblastdb_fna_all_each
 |   |   `-- fdf32b6dc1
@@ -86,7 +83,7 @@
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- singletons
 |   |   `-- bc5062d574
-|   |       `-- result -> ../../../cache/lines/...
+|   |       `-- result -> ../../../exprs/list/6eee7be83e/result
 |   `-- str
 |       |-- 638026de12
 |       |   `-- result -> ../../../cache/lines/...
@@ -100,4 +97,4 @@
     |-- result -> ../exprs/any/cb5def04a1/result
     `-- single.str.list -> ../exprs/extract_queries/cb374c8a0d/result
 
-57 directories, 43 files
+55 directories, 42 files
