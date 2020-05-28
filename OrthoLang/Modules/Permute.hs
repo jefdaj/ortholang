@@ -50,7 +50,11 @@ aPermuteElem eType elements = do
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
   let loc = "modules.permute.aPermuteElem"
-      out = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) Nothing $ map (digest loc) elements
+      -- this hashing has to match the Lst case in Interpreter.Paths.exprPath
+      -- TODO export a utility function for that, since it keeps coming up
+      hs  = map (digest $ loc ++ ".inner") elements
+      h2  = digest (loc ++ ".outer") hs
+      out = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) Nothing h2
       out' = fromPath loc cfg out
   writeStrings loc eType out' elements
   return out
