@@ -607,25 +607,7 @@ mMakeblastdb _ _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: 
 -- mMakeblastdbEach :: ExprExpansion
 -- mMakeblastdbEach = undefined -- TODO oh, have to solve mapping first :/
 
-{-|
-This is the first one that seems to need both expr and path expansion...
-can one of them be avoided? What we need overall is basically:
-makeblastdb_{faa,fna}_each -> makeblastdb_{faa,fna}_singleton_each
-
-Wait, is just the path expansion enough?
-makeblastdb_{faa,fna}_each -> list of makeblastdb_{faa,fna} with gathering at the end
-got it :D
-
-Wait, actually this is just what the singletons fn was for. compose1 it?
-start by making makeblastdb_{fna,faa}_singletons, a hidden fn which will expect singletons
-  it's the same as _all_each would be, but hopefully with a less confusing name
-then compose1 with that to get makeblastdb_{fna,faa}_each. right??
-
-reference:
-mkLoadGlob name eachFn = compose1 name [ReadsDirs, ReadsFile, ReadsURL] globFiles eachFn
-
-TODO rename _all_each? because it could be used for a list of lists
--}
+-- | Hidden helper function that helps define makeblastdb_faa_each etc.
 mkMakeblastdbAllEach :: Type -> Function
 mkMakeblastdbAllEach faType = hidden $
   let aName  = "makeblastdb_" ++ ext faType ++ "_all"
@@ -637,12 +619,10 @@ mkMakeblastdbAllEach faType = hidden $
     (newMap1of1 aName $ aMakeblastdbAll2 faType)
     [Hidden]
 
--- | Hidden helper function that helps define makeblastdb_faa_each etc.
--- TODO which hidden marker actually works?
 mkMakeblastdbEach :: Type -> Function
-mkMakeblastdbEach faType = hidden $ compose1
+mkMakeblastdbEach faType = compose1
   ("makeblastdb_" ++ ext faType ++ "_each")
-  [Hidden]
+  []
   singletons
   (mkMakeblastdbAllEach faType)
 
