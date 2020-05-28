@@ -173,7 +173,7 @@ aMkBlastFromDb bCmd [o, e, q, p] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [o'' ++ "*", stdoutPath, stderrPath]
     }
-  symlink o (toPath loc cfg stdoutPath)
+  symlink o (toPath loc cfg stdoutPath) -- TODO reverse it? move/copy instead?
 aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
 
 -------------

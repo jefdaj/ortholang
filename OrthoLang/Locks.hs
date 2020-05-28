@@ -31,7 +31,7 @@ import OrthoLang.Debug
 import qualified Data.Map.Strict                  as Map
 import qualified Control.Concurrent.ReadWriteLock as RWLock
 
-import Development.Shake hiding (doesFileExist)
+import Development.Shake hiding (doesFileExist, doesDirectoryExist)
 import Control.Concurrent.ReadWriteLock (RWLock)
 import Control.Monad                    (when)
 import Data.List                        (nub)
@@ -40,7 +40,7 @@ import Data.IORef                       (IORef, newIORef, atomicModifyIORef')
 import Data.Map.Strict                  (Map)
 import Control.Exception.Safe     (bracket_)
 import System.Directory           (createDirectoryIfMissing, doesFileExist,
-                                   pathIsSymbolicLink)
+                                   doesDirectoryExist, pathIsSymbolicLink)
 import System.FilePath            (takeDirectory)
 import System.Posix.Files         (setFileMode)
 import Control.Exception.Safe     (catch, throwM)
@@ -263,13 +263,22 @@ withWriteLock' path actFn = do
 withWriteOnce :: FilePath -> Action () -> Action ()
 withWriteOnce path actFn = withWriteLock' path $ do
   -- liftIO $ delay 500000 -- 1/2 second
-  exists <- liftIO $ doesFileExist path -- Do not use Shake's version here
-  when (not exists) actFn
-  when exists $ liftIO $ catch (do
+  fBefore <- liftIO $ doesFileExist path      -- Do not use Shake's version here
+  dBefore <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here
+  let before = fBefore || dBefore
+  when (not before) actFn
+
+  fAfter <- liftIO $ doesFileExist path      -- Do not use Shake's version here
+  dAfter <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here
+  let after = fAfter || dAfter
+
+  when fAfter $ liftIO $ catch (do
     isLink <- liftIO $ pathIsSymbolicLink path
-    when (not isLink)
+    when (fAfter && not isLink)
       (setFileMode path 444)) handleExists -- TODO resolve symlinks without cfg?
-  when exists $ trackWrite [path]
+
+  when (after && not before) $ trackWrite [path] -- TODO only for files?
+
   where
     handleExists e
       | isDoesNotExistError e = return ()
