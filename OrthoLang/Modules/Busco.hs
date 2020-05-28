@@ -263,7 +263,7 @@ aBusco mode [outPath, blhPath, faaPath] = do
       cDir = fromPath loc cfg $ buscoCache cfg
       rDir = cDir </> "runs"
       faa' = fromPath loc cfg faaPath
-  blh'' <- liftIO $ resolveSymlinks (Just $ tmpdir cfg) blh'
+  blh'' <- liftIO $ resolveSymlinks (Just [tmpdir cfg]) blh'
   liftIO $ createDirectoryIfMissing True rDir
   runCmd $ CmdDesc
     { cmdBinary = "busco.sh"

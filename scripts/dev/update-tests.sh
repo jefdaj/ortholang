@@ -10,6 +10,8 @@
 
 set -e
 
+[[ -z "$1" ]] && TEST_FILTER="all" || TEST_FILTER="$1"
+
 stack build
 
 logfile="test.log"
@@ -30,7 +32,7 @@ update_tests() {
 # run tests to remake them, while syncing back to main tests dir
 update_tests &
 pid=$?
-stack exec ortholang -- --test all 2>&1 | tee "$logfile"
+stack exec ortholang -- --test "$TEST_FILTER" 2>&1 | tee "$logfile"
 
 # wait for one last rsync, then kill it
 sleep 15

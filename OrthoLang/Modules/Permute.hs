@@ -50,7 +50,7 @@ aPermuteElem eType elements = do
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
   let loc = "modules.permute.aPermuteElem"
-      out = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) Nothing $ map digest elements
+      out = unsafeExprPathExplicit cfg dRef "list" (ListOf eType) Nothing $ map (digest loc) elements
       out' = fromPath loc cfg out
   writeStrings loc eType out' elements
   return out

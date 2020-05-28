@@ -46,9 +46,16 @@ module OrthoLang.Interpreter.Compile.NewRules
 
   -- * Functions from Macros
   -- $frommacros
-  , MacroExpansion
-  , newMacro
+  , ExprExpansion
+  , newExprExpansion
   , hidden
+
+  -- * Path expansions
+  -- $pathexpansions
+  , newMap1of1
+  , newMap2of2
+  , newMap2of3
+  , newMap3of3
 
   -- * Implementation details
   , rReloadIDs
@@ -68,6 +75,7 @@ module OrthoLang.Interpreter.Compile.NewRules
   , aNewRulesS
   , aNewRules
   , aLoadIDs -- TODO where should this go? Actions?
+  -- , newPathExpansion
 
   )
   where
@@ -77,19 +85,21 @@ import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
-import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..))
+import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite')
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Types
+import OrthoLang.Util (resolveSymlinks)
 import System.Exit (ExitCode(..))
 
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName)
-import OrthoLang.Interpreter.Actions     (need')
-import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest)
+import OrthoLang.Interpreter.Actions     (need', readPaths)
+import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest)
 import qualified Data.Map.Strict as M
 import Data.IORef                 (atomicModifyIORef')
+import System.Directory           (createDirectoryIfMissing)
 
 ---------
 -- API --
@@ -324,31 +334,43 @@ rNewRules
 rNewRules nArgs applyFn oSig name aFn = do
   cfg  <- fmap fromJust $ getShakeExtraRules
   mods <- fmap fromJust $ getShakeExtraRules
-  let useSeed = elem Nondeterministic $ fTags $ fromRight $ findFun mods name
+  let useSeed = usesSeed $ fromRight $ findFun mods name
       ptn = newPattern cfg useSeed name nArgs
       ptn' = traceShow "rNewrules" ptn
   ptn' %> \p -> do
     -- TODO if adding rules works anywhere in an action it'll be here right?
     aNewRules applyFn oSig aFn (ExprPath p)
 
+-- | This deduplicates singleton paths (and others?) to prevent duplicate blast tmpfiles
+canonicalExprLinks :: [FilePath] -> Action [FilePath]
+canonicalExprLinks deps = do
+  cfg  <- fmap fromJust $ getShakeExtra
+  liftIO $ mapM (resolveSymlinks (Just [tmpdir cfg </> "vars", tmpdir cfg </> "exprs"])) deps
+
 -- TODO is it possible to get the return type here?
 rNewRulesA1 :: TypeSig -> String -> NewAction1 -> Rules ()
 rNewRulesA1 = rNewRules 1 applyList1
 
 applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
-applyList1 fn deps = fn (deps !! 0)
+applyList1 fn deps = do
+  deps' <- canonicalExprLinks deps
+  fn (deps' !! 0)
 
 rNewRulesA2 :: TypeSig -> String -> NewAction2 -> Rules ()
 rNewRulesA2 = rNewRules 2 applyList2
 
 applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
-applyList2 fn deps = fn (deps !! 0) (deps !! 1)
+applyList2 fn deps = do
+  deps' <- canonicalExprLinks deps
+  fn (deps' !! 0) (deps' !! 1)
 
 rNewRulesA3 :: TypeSig -> String -> NewAction3 -> Rules ()
 rNewRulesA3 = rNewRules 3 applyList3
 
 applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
-applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
+applyList3 fn deps = do
+  deps' <- canonicalExprLinks deps
+  fn (deps' !! 0) (deps' !! 1) (deps' !! 2)
 
 {-|
 -}
@@ -429,16 +451,16 @@ newFn name mChar iSigs oSig rFn aFn tags = Function
 -- but can only return one altered 'Expr'.
 
 -- TODO can a Haskell closure be "hidden" in here to implement graph_script? try it!
-type MacroExpansion = Script -> Expr -> Expr
+type ExprExpansion = [Module] -> Script -> Expr -> Expr
 
 {-|
-Macros are straighforward to implement: use any 'MacroExpansion' to create one
+Macros are straighforward to implement: use any 'ExprExpansion' to create one
 directly.  The only type checking planned so far is that
 'OrthoLang.Interpreter.Compile.Basic.rMacro' will prevent macro expansions from
 changing the return type of their input 'Expr'.
 -}
-newMacro :: String -> [TypeSig] -> TypeSig -> MacroExpansion -> [FnTag] -> Function
-newMacro name iSigs oSig mFn tags = Function
+newExprExpansion :: String -> [TypeSig] -> TypeSig -> ExprExpansion -> [FnTag] -> Function
+newExprExpansion name iSigs oSig mFn tags = Function
   { fOpChar    = Nothing
   , fName      = name
   , fInputs    = iSigs
@@ -457,3 +479,166 @@ No need to call this if you've manually added 'Hidden' to 'fTags'.
 -}
 hidden :: Function -> Function
 hidden fn = fn { fTags = Hidden : fTags fn }
+
+-- $pathexpansions
+-- This is mostly geared toward writing the \_each and \_all mapped function
+-- variants easily. It's analagous to macro expansion, but the transformation
+-- is done on the input Paths directly rather than on the Exprs that were
+-- compiled to generate those Paths.
+--
+-- Fundamentally, the reason to do this stuff at the Action rather than Rules
+-- level is that it can read the results of previous Actions; it should avoid
+-- the problem of mapping over function-generated lists that proved so
+-- intractable with Rules.
+--
+-- The same priciple applies as when writing Expr expansions: you have to make
+-- sure that the system knows how to handle the results already. For example if
+-- you make a macro that rewrites "exprs/load\_faa\_each" paths to
+-- "exprs/load\_faa" paths, there must already be Rules for "exprs/load\_faa" or
+-- Shake will fail at runtime.
+--
+-- Sometimes you might need both a path expansion and a custom action to handle
+-- the paths it creates. To keep things maintainable, it's recommended to
+-- create two functions: one for the path expansion, and one that handles the
+-- results as if they were passed that way originally. The second one can be
+-- hidden from users. It's only a little more work than writing the Action
+-- only, and makes it much easier to interactively debug.
+--
+-- TODO is all-vs-all a good example of that?
+--
+-- One brittle part of this design is the assumption that the expanded paths
+-- always have the same seed as the path they were generated from. Because of
+-- the way seeds work this seems reasonable. But are there any edge cases we
+-- need to be aware of?
+
+type Prefix = String
+
+-- the Action here is required because one of the input paths will normally be
+-- needed + read to generate the list of output paths. The One variant means
+-- the macro returns one path, which will be symlinked to the actual outpath.
+-- Many means it returns a list of paths, which will be written to the actual
+-- outpath.
+--
+-- TODO put the Maybe Seed back? Not sure how to pass it here
+--
+-- TODO should there be 1,2, and 3-arg versions?
+--
+-- type PathChange    = Prefix -> Maybe Seed -> [FilePath] -> Action  FilePath
+-- type PathExpansion = Prefix -> [FilePath] -> Action [FilePath]
+
+-- quickly generate _each and _all variants of 1-arg functions, for example makeblastdb
+
+-- | Maps a NewAction1 over its only argument and writes the result list to the
+--   final output path.
+newMap1of1 :: Prefix -> NewAction1 -> NewAction1
+newMap1of1 prefix act1 out a1 = newMap prefix 1 act1 out a1
+
+-- | Maps a NewAction2 over its 2nd argument and writes the result list to the
+--   final output path.
+newMap2of2 :: Prefix -> NewAction2 -> NewAction2
+newMap2of2 prefix act2 out a1 a2 = newMap prefix 2 act1 out a2
+  where
+    act1 o a = act2 o a1 a
+
+-- | Maps a NewAction3 over its 2nd argument and writes the result list to the
+--   final output path.
+newMap2of3 :: Prefix -> NewAction3 -> NewAction3
+newMap2of3 prefix act3 out a1 a2 a3 = newMap prefix 2 act1 out a2
+  where
+    act1 o a = act3 o a1 a a3
+
+-- | Maps a NewAction3 over its 3rd argument and writes the result list to the
+--   final output path.
+newMap3of3 :: Prefix -> NewAction3 -> NewAction3
+newMap3of3 prefix act3 out a1 a2 a3 = newMap prefix 3 act1 out a3
+  where
+    act1 o a = act3 o a1 a2 a
+
+-- | Pass it a 1-argument Action. It maps it over the list and writes the outputs to a list file.
+--   Used to implement all the newMapNofN fns above.
+newMap :: Prefix -> Int
+       -> (ExprPath -> FilePath -> Action ())
+       -> (ExprPath -> FilePath -> Action ())
+newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
+  let loc = "ortholang.interpreter.compile.newrules.newMap"
+  liftIO $ debug loc $ "mapPrefix: " ++ mapPrefix
+  liftIO $ debug loc $ "mapIndex: " ++ show mapIndex
+  liftIO $ debug loc $ "outList: " ++ outList
+  liftIO $ debug loc $ "listToMapOver: " ++ listToMapOver
+  cfg <- fmap fromJust getShakeExtra
+  
+  liftIO $ debug loc $ "about to readPaths from  " ++ listToMapOver
+  inPaths <- readPaths loc listToMapOver -- TODO get the type and do readStrings instead?
+  liftIO $ debug loc $ "successfully readPaths from  " ++ listToMapOver
+
+  dRef <- fmap fromJust getShakeExtra
+  ((ListOf oType), dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef out
+  liftIO $ debug loc $ "oType: " ++ show oType
+  liftIO $ debug loc $ "dTypes: " ++ show dTypes
+  liftIO $ debug loc $ "dPaths: " ++ show dPaths
+
+  -- TODO remove the addDigests?
+  let elemType = dTypes !! (mapIndex - 1)
+      elemType' = traceShow loc elemType
+  liftIO $ addDigest dRef (ListOf elemType') $ toPath loc cfg listToMapOver
+
+  liftIO $ mapM_ (addDigest dRef elemType') inPaths -- TODO remove? also this is the wrong type i think
+  liftIO $ addDigest dRef (ListOf oType) $ toPath loc cfg outList
+  let dPaths' = map (fromPath loc cfg) dPaths
+  need' loc dPaths'
+
+  let inPaths' = map (fromPath loc cfg) inPaths
+  liftIO $ debug loc $ "inPaths: " ++ show inPaths
+  mods <- fmap fromJust getShakeExtra
+  let outPaths = newMapOutPaths mods cfg mapPrefix mapIndex outList inPaths -- TODO what happens if these are lits?
+  liftIO $ mapM_ (addDigest dRef oType) outPaths
+  let outPaths' = map (fromPath loc cfg) outPaths
+  liftIO $ debug loc $ "outPaths: " ++ show outPaths
+
+  -- TODO are the need and trackwrite parts redundant?
+  forM_ (zip outPaths' inPaths') $ \(o, i) -> do
+    -- need' loc [i]
+    -- liftIO $ createDirectoryIfMissing True o
+    actToMap (ExprPath o) i
+    -- trackWrite' [o]
+
+  writePaths loc outList outPaths -- TODO will fail on lits?
+  -- trackWrite' (outList:outPaths')
+
+-- TODO does this need to be added to the digestmap?
+newMapOutPaths :: [Module] -> Config -> Prefix -> Int -> FilePath -> [Path] -> [Path]
+newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cfg . mkPath) newPaths
+  where
+    loc = "ortholang.interpreter.compile.newrules.newMapOutPaths"
+    oldDigests = listDigestsInPath cfg oldPath
+    oldDigests' = traceShow loc oldDigests
+
+    -- TODO can we remove this?
+    oldPath' = trace loc ("oldPath: " ++ show oldPath) oldPath
+    oldSeed    = getExprPathSeed oldPath'
+
+    -- newFn = findFun undefined newFnName
+    -- seed = if Nondeterministic `elem` (fTags newFn) then Just (Seed 0) else Nothing
+    -- newSuffix = case seed of
+    newSuffix = case findFun mods newFnName of
+                  Left e -> error loc e
+                  Right f -> if not (usesSeed f)
+                               then "result"
+                               else case oldSeed of
+                                      Nothing -> "result" -- TODO what if only the new fn needs it?
+                                      Just (Seed n) -> ('s':show n) </> "result" -- TODO could this be the read issue?
+    newDigests path = map (\(PathDigest s) -> s) $
+                      replace oldDigests' (mapIndex - 1, pathDigest path)
+    mkPath p = tmpdir cfg </> "exprs" </> newFnName </>
+               (foldl1 (</>) (newDigests p)) </>
+               newSuffix
+
+-- replace the Nth element in a list
+-- old.reddit.com/r/haskell/comments/8jui5k/how_to_replace_an_element_at_an_index_in_a_list/dz2i8rj/
+replace :: [a] -> (Int, a) -> [a]
+replace [] _ = []
+replace (_:xs) (0,a) = a:xs
+replace (x:xs) (n,a) =
+  if n < 0
+    then (x:xs)
+    else x: replace xs (n-1,a)

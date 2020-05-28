@@ -6,7 +6,7 @@
 |   |   |-- 28e059b2a9.faa
 |   |   `-- 28e059b2a9.faa.ids
 |   `-- makeblastdb
-|       `-- c1b08194e1
+|       `-- 6a7613556f
 |           |-- result
 |           |-- result.err
 |           |-- result.phr
@@ -16,19 +16,19 @@
 |   |-- blastp_db
 |   |   `-- 76bf3d901d
 |   |       `-- ec1f6f502d
-|   |           `-- e70f55b3b5
-|   |               `-- 0
+|   |           `-- 8ac14237ef
+|   |               `-- s0
 |   |                   `-- result -> out
 |   |-- extract_seqs
 |   |   `-- 695ad777c5
-|   |       `-- 1911119d88
+|   |       `-- 713be2cccc
 |   |           `-- result
 |   |-- extract_targets
-|   |   `-- 2a13619cc4
+|   |   `-- 7da5a06fb1
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- hmmbuild
-|   |   `-- ec55732f8d
+|   |   `-- fa2247d0c5
 |   |       |-- result
 |   |       `-- result.err
 |   |-- list
@@ -41,10 +41,9 @@
 |   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
 |   |-- makeblastdb_faa_all
 |   |   `-- cf7e527970
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- muscle
-|   |   `-- 3d4ac804f7
+|   |   `-- fd536cd564
 |   |       `-- result
 |   |-- num
 |   |   `-- efc8362dcc
@@ -55,11 +54,11 @@
 |       `-- f6e8c8ce02
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits_aln.aln -> ../exprs/muscle/3d4ac804f7/result
-    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/e70f55b3b5/0/result
-    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/1911119d88/result
-    |-- hits_hmm.hmm -> ../exprs/hmmbuild/ec55732f8d/result
+    |-- hits_aln.aln -> ../exprs/muscle/fd536cd564/result
+    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/8ac14237ef/s0/result
+    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/713be2cccc/result
+    |-- hits_hmm.hmm -> ../exprs/hmmbuild/fa2247d0c5/result
     |-- mgen.faa -> ../exprs/load_faa/d96205bf90/result
     `-- result -> ../vars/hits_hmm.hmm
 
-33 directories, 29 files
+32 directories, 29 files

@@ -275,7 +275,7 @@ readPaths loc path = do
   paths <- (fmap . map) stringPath $ readList loc path
   cfg <- fmap fromJust getShakeExtra
   let loc' = loc ++ ".readPaths"
-  need' loc' $ map (fromPath loc' cfg) paths
+  need' loc' $ map (fromPath loc' cfg) paths -- TODO remove? seems like it would kill laziness
   return paths
 
 -- makes a copy of a list of paths without ortholang funny business,
@@ -365,7 +365,7 @@ countLines path = readList "interpreter.actions.countLines" path >>= return . co
 
 -- TODO move to Paths?
 cachedLinesPath :: Config -> [String] -> FilePath
-cachedLinesPath cfg content = cDir </> digest content <.> "txt"
+cachedLinesPath cfg content = cDir </> digest loc content <.> "txt"
   where
     loc = "interpreter.actions.cachedLinesPath"
     cDir = fromPath loc cfg $ cacheDir cfg "lines"
@@ -493,7 +493,7 @@ trackWrite' fs = do
 
 setReadOnly :: Config -> FilePath -> IO ()
 setReadOnly cfg path = do
-  path' <- resolveSymlinks (Just $ tmpdir cfg) path
+  path' <- resolveSymlinks (Just [tmpdir cfg]) path
   -- TODO skip if path' outside tmpdir
   setFileMode path' 444
 
@@ -693,7 +693,7 @@ withBinHash uniq outPath actFn = do
       binDir'  = fromPath loc cfg $ cacheDir cfg "bin"
       outPath' = fromPath loc cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
-  let binTmp' = binDir' </> digest uniq -- <.> takeExtension outPath'
+  let binTmp' = binDir' </> digest loc uniq -- <.> takeExtension outPath'
       binTmp  = toPath loc cfg binTmp'
   _ <- actFn binTmp
   md5 <- hashContent binTmp

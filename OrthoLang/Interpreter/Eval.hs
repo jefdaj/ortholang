@@ -187,6 +187,7 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//cache/concat/*.txt"
             , "//cache/curl/*"
             , "//cache/each//args"
+            , "//cache/each//result"
             , "//cache/hmmsearch/result"
             , "//cache/lines/*.txt"
             , "//cache/load/*.f*a"
@@ -211,6 +212,7 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//exprs/diamond_makedb//result"
             , "//exprs/extract_ids//result"
             , "//exprs/extract_queries//tmp"
+            , "//exprs/extract_queries//result"
             , "//exprs/extract_scored//tmp"
             , "//exprs/extract_scores//tmp"
             , "//exprs/extract_seqs//result"
@@ -230,6 +232,13 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//exprs/reciprocal_best//result"
             , "//exprs/tblast*//out"
             , "//exprs/translate//result"
+            , "//exprs/makeblastdb_*_all//result"
+            , "//exprs/makeblastdb_*_all_each//result"
+            , "//exprs/*blast*_db//result"
+            , "//exprs/blastp_db//out"
+            , "//exprs/blastp_db//result"
+            , "//exprs/*blast*_db_each//result"
+            , "//exprs/length//result"
             ]
         }
 
@@ -374,7 +383,7 @@ printShort cfg ref idsref pm rtype path = do
 -- TODO get the type of result and pass to eval
 evalScript :: [Module] -> Handle -> GlobalEnv -> IO ()
 evalScript mods hdl (scr, c, ref, ids, dRef) =
-  let scr' = expandMacros mods scr
+  let scr' = expandMacros mods scr c dRef
       -- res  = sResult scr'
       -- as'  = sAssigns scr'
       -- as'' = trace "ortholang.core.eval.evalScript" ("after macro expansion: " ++ unlines (map show as')) as'

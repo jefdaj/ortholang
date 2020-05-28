@@ -10,7 +10,7 @@
 |-- exprs
 |   |-- diamond_makedb_all
 |   |   `-- d951085e67
-|   |       `-- 0
+|   |       `-- s0
 |   |           `-- result
 |   |-- glob_files
 |   |   `-- 7b5fa060e3
@@ -23,6 +23,6 @@
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- mycoplasma.faa.list -> ../exprs/load_faa_each/a314fec5c1/result
-    `-- result -> ../exprs/diamond_makedb_all/d951085e67/0/result
+    `-- result -> ../exprs/diamond_makedb_all/d951085e67/s0/result
 
 13 directories, 12 files

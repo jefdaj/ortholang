@@ -275,8 +275,8 @@ rOrthologFilterStr fnName pickerFn scr e@(Fun _ _ _ _ [groupLists, idLists]) = d
       loc = "modules.orthogroups.rOrthologFilterStr"
       out'    = debugRules loc e $ fromPath loc cfg out
       ogDir   = fromPath loc cfg $ ogCache cfg
-      ogsPath = ogDir </> digest groupListsPath <.> "txt"
-      idsPath = ogDir </> digest idListsPath    <.> "txt"
+      ogsPath = ogDir </> digest loc groupListsPath <.> "txt"
+      idsPath = ogDir </> digest loc idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir
   ogsPath %> absolutizePaths loc groupListsPath
   idsPath %> absolutizePaths loc idListsPath
@@ -367,8 +367,8 @@ rOrthologFilterStrFrac fnName pickerFn scr e@(Fun _ _ _ _ [frac, groupLists, idL
       loc = "modules.orthogroups.rOrthologFilterStrFrac"
       out'    = debugRules loc e $ fromPath loc cfg out
       ogDir   = fromPath loc cfg $ ogCache cfg
-      ogsPath = ogDir </> digest groupListsPath <.> "txt"
-      idsPath = ogDir </> digest idListsPath    <.> "txt"
+      ogsPath = ogDir </> digest loc groupListsPath <.> "txt"
+      idsPath = ogDir </> digest loc idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir
   ogsPath %> absolutizePaths loc groupListsPath
   idsPath %> absolutizePaths loc idListsPath

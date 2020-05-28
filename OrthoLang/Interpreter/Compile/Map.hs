@@ -87,7 +87,7 @@ rMapTmps index actFn tmpPrefix scr e = do
   cfg <- fmap fromJust getShakeExtraRules
   let tmpFn args = do
         let loc = "interpreter.compile.map.rMapTmps"
-            base = concat $ intersperse "/" $ map digest args
+            base = concat $ intersperse "/" $ map (digest loc) args
             dir  = fromPath loc cfg $ cacheDir cfg tmpPrefix
         return $ toPath loc cfg (dir </> base)
   rMapMain index (Just tmpFn) actFn scr e
@@ -137,7 +137,9 @@ rMapMain mapIndex mTmpFn actFn scr e@(Fun r ms _ name exprs) = do
 rMapMain _ _ _ _ _ = fail "bad argument to rMapMain"
 
 hashFun :: Config -> DigestsRef -> Script -> Expr -> String
-hashFun cfg dRef scr e@(Fun _ s _ n _) = digest $ [n, show s] ++ argHashes cfg dRef scr e
+hashFun cfg dRef scr e@(Fun _ s _ n _) = digest loc $ [n, show s] ++ argHashes cfg dRef scr e
+  where
+    loc = "ortholang.interpreter.compile.map"
 hashFun _ _ _ _ = error "hashFun" "hashFun only hashes function calls so far"
 
 {- This calls aMapArgs to leave a .args file for each set of args, then gathers
@@ -148,7 +150,7 @@ aMapMain :: Int
          -> Action ()
 aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
   cfg <- fmap fromJust getShakeExtra
-  let resolve = resolveSymlinks $ Just $ tmpdir cfg
+  let resolve = resolveSymlinks $ Just [tmpdir cfg </> "cache" </> "each", tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]
       regularArgs'   = map (fromPath loc cfg) regularArgs
       mappedArgList' = fromPath loc cfg mappedArg
       mapTmpDir'     = fromPath loc cfg mapTmpDir
@@ -176,7 +178,7 @@ eachPath cfg tmpDir eType path = tmpDir </> hash' </> "result" -- <.> ext eType 
   where
     loc = "interpreter.compile.map.eachPath"
     path' = toPath loc cfg path
-    hash  = digest path'
+    hash  = digest loc path'
     hash' = debugC "eachPath" ("hash of " ++ show path' ++ " is " ++ hash) hash
 
 -- This leaves arguments in .args files for aMapElem to find.
@@ -224,7 +226,7 @@ aMapElem eType tmpFn actFn singleName mSeed out = do
   args <- readPaths loc argsPath
   cfg <- fmap fromJust getShakeExtra
   let args' = map (fromPath loc cfg) args
-  args'' <- liftIO $ mapM (resolveSymlinks $ Just $ tmpdir cfg) args' -- TODO remove?
+  args'' <- liftIO $ mapM (resolveSymlinks $ Just [tmpdir cfg </> "cache" </> "each", tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]) args' -- TODO remove?
   need' loc args'
   debugA loc $ "out: " ++ show out
   dir <- liftIO $ case tmpFn of
@@ -237,7 +239,7 @@ aMapElem eType tmpFn actFn singleName mSeed out = do
   dRef <- fmap fromJust getShakeExtra
   let out' = traceA loc (toPath loc cfg out) args''
       -- TODO in order to match exprPath should this NOT follow symlinks?
-      hashes  = map (digest . toPath loc cfg) args'' -- TODO make it match exprPath
+      hashes  = map (digest loc . toPath loc cfg) args'' -- TODO make it match exprPath
       single  = unsafeExprPathExplicit cfg dRef singleName eType mSeed hashes
       single' = fromPath loc cfg single
       args''' = single:map (toPath loc cfg) args''

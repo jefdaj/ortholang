@@ -2,13 +2,13 @@
 |-- cache
 |   |-- each
 |   |   |-- 310eee161f
-|   |   |   `-- c5b21af5d4
+|   |   |   `-- 2c7651beca
 |   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/extract_ids/c5b21af5d4/result
+|   |   |       `-- result -> ../../../../exprs/extract_ids/2c7651beca/result
 |   |   `-- adec6e30ce
-|   |       `-- 4ddb325c30
+|   |       `-- 494baa00c6
 |   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_ids/4ddb325c30/result
+|   |           `-- result -> ../../../../exprs/extract_ids/494baa00c6/result
 |   `-- load
 |       |-- 6046a54e92.fna
 |       |-- 6046a54e92.fna.ids
@@ -25,11 +25,7 @@
 |   |-- extract_ids
 |   |   |-- 2c7651beca
 |   |   |   `-- result
-|   |   |-- 494baa00c6
-|   |   |   `-- result
-|   |   |-- 4ddb325c30
-|   |   |   `-- result
-|   |   `-- c5b21af5d4
+|   |   `-- 494baa00c6
 |   |       `-- result
 |   |-- extract_ids_each
 |   |   |-- 6b72f6b956
@@ -73,4 +69,4 @@
     |-- singleFaa.str.list -> ../exprs/extract_ids/2c7651beca/result
     `-- singleFna.str.list -> ../exprs/extract_ids/494baa00c6/result
 
-36 directories, 37 files
+34 directories, 35 files

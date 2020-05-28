@@ -125,8 +125,8 @@ module OrthoLang.Interpreter.Paths
   -- * Generate paths
   , cacheDir
   , exprPath
-  -- , exprPathExplicit
   , addDigest
+  , exprPathExplicit -- watch out! this one does not add the digest
   , unsafeExprPathExplicit
   , varPath
 
@@ -148,6 +148,7 @@ module OrthoLang.Interpreter.Paths
   , argHashes
   , bop2fun
   , listDigestsInPath
+  , getExprPathSeed
   , listExprs
   -- , listScriptExprs
   , makeTmpdirRelative
@@ -170,10 +171,14 @@ import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
 import Path                           (parseAbsFile, fromAbsFile)
 -- import Text.PrettyPrint.HughesPJClass (Pretty)
 
+import qualified Data.Text.Lazy as T
+import Text.Pretty.Simple (pShowNoColor)
+
 import Prelude hiding (error, log)
 import qualified Data.Map.Strict as M
 -- import qualified OrthoLang.Util as U
 
+import Control.Monad.IO.Class     (liftIO)
 import Control.Monad              (when)
 import Data.Either                (partitionEithers)
 import Development.Shake.FilePath (makeRelative, splitPath)
@@ -262,13 +267,17 @@ TODO does it need the config at all?
 -}
 argHashes :: Config -> DigestsRef -> Script -> Expr -> [String]
 argHashes c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
-                                         Nothing -> error "argHashes" $ "no such var '" ++ vName ++ "'"
+                                         Nothing -> error "ortholang.interpreter.paths.argHashes.Ref" $ "no such var '" ++ vName ++ "'"
                                          Just e  -> argHashes c d s e
-argHashes _ _ _ (Lit _     v      ) = [digest v]
-argHashes c d s (Fun _ _ _ _ es   ) = map (digest . exprPath c d s) es
-argHashes c d s (Bop _ _ _ _ e1 e2) = map (digest . exprPath c d s) [e1, e2] -- TODO remove?
-argHashes c d s (Lst _ _ _   es   ) = [digest $ map (digest . exprPath c d s) es] -- TODO use seed here?
-argHashes _ _ _ (Com (CompiledExpr _ p _)) = [digest p] -- TODO is this OK? it's about all we can do
+argHashes _ _ _ (Lit _     v      ) =     [digest "ortholang.interpreter.paths.argHashes.Lit" v]
+argHashes c d s (Fun _ _ _ _ es   ) = map (digest "ortholang.interpreter.paths.argHashes.Fun" . exprPath c d s) es
+argHashes c d s (Bop _ _ _ _ e1 e2) = map (digest "ortholang.interpreter.paths.argHashes.Bop" . exprPath c d s) [e1, e2] -- TODO remove?
+argHashes c d s (Lst r _ _   es   ) = [outer]
+  where
+    -- TODO should these be sorted? or should the same list in different order actually be different?
+    inner = map (digest "ortholang.interpreter.paths.argHashes.Lst.inner" . exprPath c d s) es
+    outer = digest "ortholang.interpreter.paths.argHashes.Lst.outer" inner
+    -- outer' = outer `seq` unsafePerformIO $ addDigest dRef r path >> return path
 
 -- | Temporary hack to fix Bop expr paths
 bop2fun :: Expr -> Expr
@@ -278,9 +287,6 @@ bop2fun e = error "bop2fun" $ "called with non-Bop: \"" ++ render (pPrint e) ++ 
 -- TODO rename to tmpPath?
 -- TODO remove the third parseenv arg (digestmap)?
 exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
-exprPath c _ _ (Com (CompiledExpr _ (ExprPath p) _)) = toPath loc c p
-  where
-    loc = "interpreter.paths.exprPath"
 exprPath c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
                                Nothing -> error "exprPath" $ "no such var '" ++ vName ++ "'\n" ++ show (sAssigns s)
                                Just e  -> exprPath c d s e
@@ -300,7 +306,6 @@ prefixOf (Lit rtn _       ) = ext rtn
 prefixOf (Fun _ _ _ name _) = name
 prefixOf (Lst _ _ _ _     ) = "list"
 prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
-prefixOf (Com (CompiledExpr _ _ _)) = error "prefixOf" "CompiledExprs don't need a prefix"
 prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    "+" -> "add"
                                    "-" -> "subtract"
@@ -319,7 +324,7 @@ exprPathExplicit cfg prefix mSeed hashes = toPath loc cfg path
   where
     loc = "interpreter.paths.exprPathExplicit"
     dir  = tmpdir cfg </> "exprs" </> prefix
-    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Seed n) -> show n) mSeed)
+    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Seed n) -> 's': show n) mSeed)
     path = dir </> base </> "result" -- <.> ext rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
@@ -404,13 +409,13 @@ unsafeExprPathExplicit cfg dRef prefix rtype mSeed hashes =
   in path `seq` unsafePerformIO $ addDigest dRef rtype path >> return path
 
 pathDigest :: Path -> PathDigest
-pathDigest = PathDigest . digest
+pathDigest = PathDigest . digest "interpreter.paths.pathDigest"
 
 exprDigest :: Config -> DigestsRef -> Script -> Expr -> DigestMap
 exprDigest cfg dRef scr expr = traceShow "interpreter.paths.exprDigest" res
   where
     p = exprPath cfg dRef scr expr
-    dKey = PathDigest $ digest p
+    dKey = PathDigest $ digest "ortholang.interpreter.paths.exprDigest" p
     res = M.singleton dKey (typeOf expr, p)
 
 exprDigests :: Config -> DigestsRef -> Script -> [Expr] -> DigestMap
@@ -427,7 +432,6 @@ TODO is there a better word for this, or a matching typeclass?
 listExprs :: Expr -> [Expr]
 listExprs   (Ref _ _ _ _    ) = [] -- TODO or is it e?
 listExprs e@(Lit _ _        ) = [e]
-listExprs e@(Com _          ) = [e]
 listExprs e@(Fun _ _ _ _  es) = e : concatMap listExprs es
 listExprs e@(Lst _ _ _    es) = e : concatMap listExprs es
 listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e
@@ -451,7 +455,9 @@ decodeNewRulesType cfg dRef (ExprPath out) = do
   let loc = "interpreter.paths.decodeNewRulesType"
       k = pathDigest $ toPath loc cfg out
   case M.lookup k dMap of
-    Nothing -> throwIO $ MissingDigests out [show k]
+    Nothing -> do
+      liftIO $ putStrLn $ "entire dMap:\n" ++ T.unpack (pShowNoColor dMap)
+      throwIO $ MissingDigests out [show k]
     Just (t, _) -> return t
 
 -- TODO take an ExprPath
@@ -464,7 +470,9 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
       oKey  = pathDigest $ toPath loc cfg out
       moDig = M.lookup oKey dMap
   case moDig of
-    Nothing -> throwIO $ MissingDigests out [show oKey]
+    Nothing -> do
+      liftIO $ putStrLn $ "entire dMap:\n" ++ T.unpack (pShowNoColor dMap)
+      throwIO $ MissingDigests out [show oKey]
     -- then look up the others too
     -- TODO any reason to re-confirm that the path is right here too?
     Just (oType, _) -> do
@@ -473,7 +481,10 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
           (dFails, dVals) = partitionEithers $ map findk $ trace loc ("dKeys: " ++ show dKeys) dKeys
           dTypes = map fst dVals
           dPaths = map snd dVals
-      when (length dFails > 0) $ throwIO $ MissingDigests out $ map show dFails
+      when (length dFails > 0) $ do
+        liftIO $ putStrLn $ "entire dMap:\n" ++ T.unpack (pShowNoColor dMap)
+        liftIO $ putStrLn $ "dVals:\n" ++ show dVals
+        throwIO $ MissingDigests out $ map show dFails
       -- if everything looks good, return types + paths
       return (oType, dTypes, dPaths)
 
@@ -489,3 +500,14 @@ listDigestsInPath cfg
   . map (filter (/= '/'))
   . splitPath
   . makeRelative (tmpdir cfg)
+
+-- TODO restrict to ExprPath?
+getExprPathSeed :: FilePath -> Maybe Seed
+getExprPathSeed p = case comps of
+  [] -> Nothing
+  (('s':seed):_) -> let n = filter (/= '/') seed
+                        n' = trace "ortholang.interpreter.paths.getExprPathSeed" ("n: " ++ show n) n
+                    in Just $ Seed (read n' :: Int)
+  _ -> Nothing
+  where
+    comps = dropWhile (== "result") $ reverse $ splitPath p

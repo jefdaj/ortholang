@@ -54,6 +54,8 @@ import OrthoLang.Types
 import Data.List       (filter, delete)
 import OrthoLang.Util  (justOrDie, digest)
 
+-- TODO apparently no import cycle, but this is still improper! refactor modules
+import OrthoLang.Interpreter.Paths (exprPath)
 
 -----------
 -- parse --
@@ -205,36 +207,38 @@ appendResultRef scr (Assign v e) = scr {sAssigns = sAssigns scr ++ [resAsn], sRe
 This expands macros and checks that the resulting types make sense.
 There's some basic typechecking during the 'OrthoLang.Interpreter.Parse' step too, but
 it assumes every 'Function' is right about its return type. After
-'MacroExpansion's have been applied we can ensure that inputs and outputs
+'ExprExpansion's have been applied we can ensure that inputs and outputs
 actually match up.
 
 After expansion there shouldn't be any functions implemented as macros left in
 the script.
 
 TODO wait, why can't macro fns be typechecked during parsing? Seems like they could!
+
+TODO oh, have to check for the newly expanded fns seed handling separately here too!
 -}
-expandMacros :: [Module] -> Script -> Script
+expandMacros :: [Module] -> Script -> Config -> DigestsRef -> Script
 expandMacros = eScript
 
-eScript :: [Module] -> Script -> Script
-eScript mods s = s
-  { sAssigns = map (eAssign mods s) (sAssigns s)
-  , sResult = fmap (eExpr mods s) (sResult s)
+eScript :: [Module] -> Script -> Config -> DigestsRef -> Script
+eScript mods s c dr = s
+  { sAssigns = map (eAssign mods s c dr) (sAssigns s)
+  , sResult = fmap (eExpr mods s c dr) (sResult s)
   }
 
-eAssign :: [Module] -> Script -> Assign -> Assign
-eAssign mods scr a@(Assign {aExpr = e}) = a {aExpr = eExpr mods scr e}
+eAssign :: [Module] -> Script -> Config -> DigestsRef -> Assign -> Assign
+eAssign mods scr cfg dRef a@(Assign {aExpr = e}) = a {aExpr = eExpr mods scr cfg dRef e}
 
 -- | This one is recursive in case one macro expression is hidden inside the
 --   result of another
-eExpr :: [Module] -> Script -> Expr -> Expr
-eExpr mods scr e = if e' == e then e' else eExpr' mods scr e'
+eExpr :: [Module] -> Script -> Config -> DigestsRef -> Expr -> Expr
+eExpr mods scr cfg dRef e = if e' == e then e' else eExpr' mods scr cfg dRef e'
   where
-    e' = eExpr' mods scr e
+    e' = eExpr' mods scr cfg dRef e
 
-eExpr' :: [Module] -> Script -> Expr -> Expr
-eExpr' mods scr e@(Fun r s ds name es) =
-  let e' = Fun r s ds name $ map (eExpr mods scr) es
+eExpr' :: [Module] -> Script -> Config -> DigestsRef -> Expr -> Expr
+eExpr' mods scr cfg dRef e@(Fun r s ds name es) =
+  let e' = Fun r s ds name $ map (eExpr mods scr cfg dRef) es
   in case findFun mods name of
        Left err -> error "script.eExpr'" err
        Right fn -> case fNewRules fn of
@@ -242,13 +246,14 @@ eExpr' mods scr e@(Fun r s ds name es) =
                      -- (NewMacro m) -> case typecheck mods (m scr e) of
                      --                   Left err -> error err
                      --                   Right e' -> e'
-                     (NewMacro m) -> let e'' = m scr e
+                     (NewMacro m) -> let e'' = m mods scr e
+                                         e''' = exprPath cfg dRef scr e'' `seq` e''
                                      in trace "script.eExpr'"
                                               ("expanded macro: " ++ show e ++ " -> " ++ show e'') e''
                      _ -> e'
-eExpr' mods scr (Bop r ms vs n e1 e2) = Bop r ms vs n (eExpr mods scr e1) (eExpr mods scr e2)
-eExpr' mods scr (Lst r ms vs es) = Lst r ms vs $ map (eExpr mods scr) es
-eExpr' _ _ e = e
+eExpr' mods scr cfg dRef (Bop r ms vs n e1 e2) = Bop r ms vs n (eExpr mods scr cfg dRef e1) (eExpr mods scr cfg dRef e2)
+eExpr' mods scr cfg dRef (Lst r ms vs es) = Lst r ms vs $ map (eExpr mods scr cfg dRef) es
+eExpr' _ _ _ _ e = e
 
 -- typecheck :: [Module] -> Expr -> Either String Expr
 -- typecheck mods expr = undefined
@@ -291,7 +296,6 @@ mapExprVars fn (Ref t n vs v      ) = Ref t n (map fn vs)   (fn v)
 mapExprVars fn (Bop t n vs s e1 e2) = Bop t n (map fn vs) s (mapExprVars fn e1) (mapExprVars fn e2)
 mapExprVars fn (Fun t n vs s es   ) = Fun t n (map fn vs) s (map (mapExprVars fn) es)
 mapExprVars fn (Lst t n vs   es   ) = Lst t n (map fn vs)   (map (mapExprVars fn) es)
-mapExprVars _ (Com _) = error "script.mapExprVars" "implement this!"
 
 mapAssignVars :: (Var -> Var) -> Assign -> Assign
 mapAssignVars fn a@(Assign var expr) = Assign (fn var) (mapExprVars fn expr)
@@ -319,11 +323,12 @@ TODO rename it RepHash?
 -}
 calcRepID :: Script -> Expr -> Var -> Expr -> RepID
 calcRepID scr resExpr subVar subExpr =
-  RepID $ Just $ digest
-    [ digest scr -- TODO only the parts the others actually depend on?
-    , digest resExpr
-    , digest subVar -- TODO look up expr in scr and use that?
-    , digest subExpr
+  let loc = "ortholang.script.calcRepID"
+  in RepID $ Just $ digest loc
+    [ digest loc scr -- TODO only the parts the others actually depend on?
+    , digest loc resExpr
+    , digest loc subVar -- TODO look up expr in scr and use that?
+    , digest loc subExpr
     ]
 
 
@@ -420,4 +425,3 @@ rmRef' _   _   e@(Lit _ _) = e
 rmRef' scr var (Bop t ms vs s e1 e2) = Bop t ms (delete var vs) s (rmRef scr var e1) (rmRef scr var e2)
 rmRef' scr var (Fun t ms vs s es   ) = Fun t ms (delete var vs) s (map (rmRef scr var) es)
 rmRef' scr var (Lst t ms vs   es   ) = Lst t ms (delete var vs)   (map (rmRef scr var) es)
-rmRef' _   _   (Com _) = error "types.rmRef" "implement this! or rethink?"

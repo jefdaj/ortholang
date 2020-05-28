@@ -18,11 +18,12 @@ mdbfaa = blastp_db_each 1.0e-5
                         [makeblastdb_faa sfaa1, makeblastdb_faa sfaa2]
 mfafna = blastn_each 1.0e-5 qfna [sfna1, sfna2]
 mfafaa = blastp_each 1.0e-5 qfaa [sfaa1, sfaa2]
-result = any (extract_queries_each sdbfna |
-              extract_queries_each sdbfaa |
-              extract_queries_each mdbfna |
-              extract_queries_each mdbfaa |
-              extract_queries_each sfafna |
-              extract_queries_each sfafaa |
-              extract_queries_each mfafna |
-              extract_queries_each mfafaa)
+queries = any (extract_queries_each sdbfna |
+               extract_queries_each sdbfaa |
+               extract_queries_each mdbfna |
+               extract_queries_each mdbfaa |
+               extract_queries_each sfafna |
+               extract_queries_each sfafaa |
+               extract_queries_each mfafna |
+               extract_queries_each mfafaa)
+result = queries

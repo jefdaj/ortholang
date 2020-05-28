@@ -33,7 +33,7 @@ png = Type
   , tShow = \cfg _ path -> do
       -- resolving symlinks fixes a bug in the jupyter kernel when returning multiple plots
       -- (without it they'd all just be vars/result and erroneously return the last result)
-      path' <- resolveSymlinks (Just $ tmpdir cfg) path
+      path' <- resolveSymlinks (Just [tmpdir cfg]) path
       return $ "plot image \"" ++ path' ++ "\""
   }
 
@@ -214,8 +214,8 @@ rPlotListOfLists sPath scr expr@(Fun _ _ _ _ [lol]) = do
   outPath' %> \_ -> do
     need' loc $ map (fromPath loc cfg) lists
     -- write labels + list paths to the cache dir
-    let labPath  = cDir </> digest expr ++ "_names.txt"
-        aLolPath = cDir </> digest expr ++ "_lists.txt"
+    let labPath  = cDir </> digest loc expr ++ "_names.txt"
+        aLolPath = cDir </> digest loc expr ++ "_lists.txt"
     liftIO $ createDirectoryIfMissing True cDir
     writeCachedLines loc labPath labels
     writeLits loc aLolPath $ map (fromPath loc cfg) lists

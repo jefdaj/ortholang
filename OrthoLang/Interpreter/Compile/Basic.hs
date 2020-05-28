@@ -95,7 +95,6 @@ rExpr s e@(Ref _ _ _ _   ) = rRef s e
 rExpr s e@(Lst _ _ _   es) = mapM (rExpr s) es >> rList s e
 rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO is the map part needed?
 rExpr s e@(Bop t ms ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t ms ds [e1, e2]] >> rBop s e -- TODO remove the map part?
-rExpr _ (Com (CompiledExpr _ _ rules)) = rules
 
 -- | Temporary hack to fix Bops
 rBop :: RulesFn
@@ -309,7 +308,7 @@ aListPaths paths outPath = do
       out''  = traceA "aListPaths" out' (out':paths')
       paths' = map (fromPath loc cfg) paths -- TODO remove this
   need' loc paths'
-  paths'' <- liftIO $ mapM (resolveSymlinks $ Just $ tmpdir cfg) paths'
+  paths'' <- liftIO $ mapM (resolveSymlinks $ Just [tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]) paths'
   need' loc paths''
   let paths''' = map (toPath loc cfg) paths'' -- TODO not working?
   writePaths loc out'' paths'''

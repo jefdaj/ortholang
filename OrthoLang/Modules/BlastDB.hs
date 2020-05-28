@@ -2,6 +2,8 @@
 
 module OrthoLang.Modules.BlastDB where
 
+-- TODO shen showing db, make paths generic. or just remove the volumes lines completely?
+
 -- TODO aha! errors are partially because i've been assuming blastdbget returns ndb when really it can be pdb?
 --      should be fixable by determining the type from the .ni* files or whatever
 
@@ -14,7 +16,7 @@ import OrthoLang.Types
 import OrthoLang.Locks
 import OrthoLang.Interpreter
 import OrthoLang.Modules.SeqIO      (faa, fna)
-import OrthoLang.Modules.Singletons (withSingleton, withSingletons, withSingletonArg)
+import OrthoLang.Modules.Singletons (withSingleton, withSingletons, withSingletonArg, singletons)
 
 import Control.Monad           (when, forM)
 import Data.Char               (toLower)
@@ -82,6 +84,8 @@ olModule = Module
     -- versions, so they internally make their args into lists of singleton lists
     , mkMakeblastdbEach fna -- makeblastdb_fna_each : fa.list  -> ndb.list
     , mkMakeblastdbEach faa -- makeblastdb_faa_each : faa.list -> pdb.list
+    , mkMakeblastdbAllEach fna
+    , mkMakeblastdbAllEach faa
 
     , blastdbgetFna -- TODO mapped version so you can list -> git at once?
     , blastdbgetFaa -- TODO mapped version so you can list -> git at once?
@@ -129,6 +133,7 @@ pdb = EncodedAs blastdb faa
  - files that you can read to get the proper prefix pattern.
  -}
 
+-- TODO have to implement new rules before blast will work?
 mkLoadDB :: String -> Type -> Function
 mkLoadDB name faType = Function
   { fOpChar = Nothing, fName = name
@@ -138,6 +143,7 @@ mkLoadDB name faType = Function
   , fNewRules = NewNotImplemented, fOldRules = rLoadDB
   }
 
+-- TODO have to implement new rules before blast will work?
 mkLoadDBEach :: String -> Type -> Function
 mkLoadDBEach name faType = Function
   { fOpChar = Nothing, fName = name
@@ -343,7 +349,7 @@ makeblastdbFnaAll = Function
   { fOpChar = Nothing, fName = name
   , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
   , fOutput =  Exactly ndb
-  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+  , fTags = [] -- TODO is it deterministic though? double-check
   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
   }
   where
@@ -354,7 +360,7 @@ makeblastdbFnaAll = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly (ListOf faa)]
 --   , fOutput = Exactly pdb
---   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fTags = [] -- TODO is it deterministic though? double-check
 --   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
 --   }
 --   where
@@ -366,7 +372,7 @@ makeblastdbFaaAll = newFnA1
   (Exactly (ListOf faa))
   (Exactly pdb)
   (aMakeblastdbAll2 faa)
-  [Nondeterministic]
+  []
 
 -- (ListOf (Some fa "a fasta file")) (Encoded blastdb (Some fa "a fasta file"))
 -- shown as "fa.list -> fa.blastdb, where fa is a fasta file"
@@ -432,7 +438,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   -- The idea was to hash content here, but it took a long time.
   -- So now it gets hashed only once, in another thread, by a load_* function,
   -- and from then on we pick the hash out of the filename.
-  fasHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just $ tmpdir cfg) fasPath'
+  fasHash <- fmap takeBaseName $ liftIO $ resolveSymlinks (Just [tmpdir cfg]) fasPath'
 
   let dbDir  = cDir' </> fasHash
       dbOut  = dbDir </> "result"
@@ -450,6 +456,8 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   --
   -- TODO would quoting JUST inner paths be right? And Shake does the outer ones?
   faPaths <- readPaths loc fasPath'
+  let faPaths' = map (fromPath loc cfg) faPaths
+  need' loc faPaths'
   let noQuoting  = unwords $ map (fromPath loc cfg) faPaths
       quoteOuter = "\"" ++ noQuoting ++ "\""
       fixedPaths = if isJust (wrapper cfg) then quoteOuter else noQuoting
@@ -516,34 +524,34 @@ aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show 
 --   { fOpChar = Nothing, fName = "makeblastdb_fna"
 --   , fInputs = [Exactly fna] -- TODO can't do it from faa right?
 --   , fOutput =  Exactly ndb
---   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fTags = [] -- TODO is it deterministic though? double-check
 --   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
 --   }
 
 makeblastdbFna :: Function
-makeblastdbFna = newMacro
+makeblastdbFna = newExprExpansion
   "makeblastdb_fna"
   [Exactly fna]
   (Exactly ndb)
   mMakeblastdb
-  [Nondeterministic] -- TODO is it though?
+  [] -- TODO is it though?
 
 -- makeblastdbFaa :: Function
 -- makeblastdbFaa = Function
 --   { fOpChar = Nothing, fName = "makeblastdb_faa"
 --   , fInputs = [Exactly faa] -- TODO can't do it from faa right?
 --   , fOutput =  Exactly pdb
---   , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
+--   , fTags = [] -- TODO is it deterministic though? double-check
 --   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
 --   }
 
 makeblastdbFaa :: Function
-makeblastdbFaa = newMacro
+makeblastdbFaa = newExprExpansion
   "makeblastdb_faa"
   [Exactly faa]
   (Exactly pdb)
   mMakeblastdb
-  [Nondeterministic] -- TODO is it though?
+  [] -- TODO is it though?
 
 -- (Some fa "a fasta file") (Encoded blastdb (Some fa "a fasta file"))
 -- shown as "fa -> fa.blastdb, where fa is a fasta file"
@@ -556,49 +564,67 @@ makeblastdbFaa = newMacro
 -- rMakeblastdb :: RulesFn
 -- rMakeblastdb s e = rMakeblastdbAll s $ withSingletonArg e
 
-mMakeblastdb :: MacroExpansion
-mMakeblastdb _ (Fun r ms ds n [s]) = Fun r ms ds (n ++ "_all") [withSingleton s]
-mMakeblastdb _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: " ++ show e
+mMakeblastdb :: ExprExpansion
+mMakeblastdb _ _ (Fun r _ ds n [s]) = Fun r Nothing ds (n ++ "_all") [withSingleton s]
+mMakeblastdb _ _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: " ++ show e
 
 -----------------------------------------------
 -- make list of dbs from list of FASTA files --
 -----------------------------------------------
 
 -- TODO convert to just one function that makes either kind of db? or let ppl choose the type
-mkMakeblastdbEach :: Type -> Function
-mkMakeblastdbEach faType = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf faType)]
-  , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
-  , fTags = [Nondeterministic] -- TODO is it deterministic though? double-check
-  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
-  }
-  where
-    name = "makeblastdb_" ++ ext faType ++ "_each" -- TODO change scripts to match!
-    -- d = name ++ " : " ++ ext ++ ".list -> " ++ ext dbType ++ ".list"
-    -- ext  = if dbType == ndb then "fa" else "faa"
+-- mkMakeblastdbEach :: Type -> Function
+-- mkMakeblastdbEach faType = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly (ListOf faType)]
+--   , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
+--   , fTags = [] -- TODO is it deterministic though? double-check
+--   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbEach
+--   }
+--   where
+--     name = "makeblastdb_" ++ ext faType ++ "_each" -- TODO change scripts to match!
+--     -- d = name ++ " : " ++ ext ++ ".list -> " ++ ext dbType ++ ".list"
+--     -- ext  = if dbType == ndb then "fa" else "faa"
 
 -- TODO this fails either either with map or vectorize, so problem might be unrelated?
-rMakeblastdbEach :: RulesFn
-rMakeblastdbEach scr (Fun (ListOf dbType) seed deps name [e]) = do
-  cfg <- fmap fromJust getShakeExtraRules
-  let tmpDir = makeblastdbCache cfg 
-      act1 = aMakeblastdbAll dbType tmpDir -- TODO should be i right? not ids?
-      expr' = Fun (ListOf dbType) seed deps name [withSingletons e]
-  (rMap 1 act1) scr expr'
-rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
+-- rMakeblastdbEach :: RulesFn
+-- rMakeblastdbEach scr (Fun (ListOf dbType) seed deps name [e]) = do
+--   cfg <- fmap fromJust getShakeExtraRules
+--   let tmpDir = makeblastdbCache cfg 
+--       act1 = aMakeblastdbAll dbType tmpDir -- TODO should be i right? not ids?
+--       expr' = Fun (ListOf dbType) seed deps name [withSingletons e]
+--   (rMap 1 act1) scr expr'
+-- rMakeblastdbEach _ e = error $ "bad argument to rMakeblastdbEach" ++ show e
 
 -- mkMakeblastdbEach :: Type -> Function
--- mkMakeblastdbEach faType = newMacro
+-- mkMakeblastdbEach faType = newExprExpansion
 --   ("makeblastdb_" ++ ext faType ++ "_each")
 --   [Exactly (ListOf faType)]
 --   (Exactly (ListOf (EncodedAs blastdb faType)))
 --   mMakeblastdbEach
---   [Nondeterministic] -- TODO is it though?
+--   [] -- TODO is it though?
 --
--- mMakeblastdbEach :: MacroExpansion
+-- mMakeblastdbEach :: ExprExpansion
 -- mMakeblastdbEach = undefined -- TODO oh, have to solve mapping first :/
 
+-- | Hidden helper function that helps define makeblastdb_faa_each etc.
+mkMakeblastdbAllEach :: Type -> Function
+mkMakeblastdbAllEach faType = hidden $
+  let aName  = "makeblastdb_" ++ ext faType ++ "_all"
+      aeName = "makeblastdb_" ++ ext faType ++ "_all_each"
+  in newFnA1
+    aeName
+    (Exactly (ListOf (ListOf            faType)))
+    (Exactly (ListOf (EncodedAs blastdb faType)))
+    (newMap1of1 aName $ aMakeblastdbAll2 faType)
+    [Hidden]
+
+mkMakeblastdbEach :: Type -> Function
+mkMakeblastdbEach faType = compose1
+  ("makeblastdb_" ++ ext faType ++ "_each")
+  []
+  singletons
+  (mkMakeblastdbAllEach faType)
 
 ------------------
 -- show db info --
