@@ -88,7 +88,7 @@ import System.Directory (doesDirectoryExist)
 import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite')
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Types
--- import OrthoLang.Util (digest)
+import OrthoLang.Util (resolveSymlinks)
 import System.Exit (ExitCode(..))
 
 import Control.Monad              (when)
@@ -341,24 +341,36 @@ rNewRules nArgs applyFn oSig name aFn = do
     -- TODO if adding rules works anywhere in an action it'll be here right?
     aNewRules applyFn oSig aFn (ExprPath p)
 
+-- | This deduplicates singleton paths (and others?) to prevent duplicate blast tmpfiles
+canonicalExprLinks :: [FilePath] -> Action [FilePath]
+canonicalExprLinks deps = do
+  cfg  <- fmap fromJust $ getShakeExtra
+  liftIO $ mapM (resolveSymlinks (Just [tmpdir cfg </> "vars", tmpdir cfg </> "exprs"])) deps
+
 -- TODO is it possible to get the return type here?
 rNewRulesA1 :: TypeSig -> String -> NewAction1 -> Rules ()
 rNewRulesA1 = rNewRules 1 applyList1
 
 applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
-applyList1 fn deps = fn (deps !! 0)
+applyList1 fn deps = do
+  deps' <- canonicalExprLinks deps
+  fn (deps' !! 0)
 
 rNewRulesA2 :: TypeSig -> String -> NewAction2 -> Rules ()
 rNewRulesA2 = rNewRules 2 applyList2
 
 applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
-applyList2 fn deps = fn (deps !! 0) (deps !! 1)
+applyList2 fn deps = do
+  deps' <- canonicalExprLinks deps
+  fn (deps' !! 0) (deps' !! 1)
 
 rNewRulesA3 :: TypeSig -> String -> NewAction3 -> Rules ()
 rNewRulesA3 = rNewRules 3 applyList3
 
 applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
-applyList3 fn deps = fn (deps !! 0) (deps !! 1) (deps !! 2)
+applyList3 fn deps = do
+  deps' <- canonicalExprLinks deps
+  fn (deps' !! 0) (deps' !! 1) (deps' !! 2)
 
 {-|
 -}
