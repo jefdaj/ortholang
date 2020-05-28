@@ -409,7 +409,7 @@ aSplit name e [outPath, faPath] = do
       outPath'  = fromPath loc cfg outPath
       outPath'' = traceA loc outPath' [outPath', faPath']
       tmpList   = tmpDir' </> takeFileName outPath' <.> "tmp"
-      args      = [tmpList, outDir', prefix', faPath']
+      args      = [tmpList, outDir', prefix', faPath', e]
   -- TODO make sure stderr doesn't come through?
   -- TODO any locking needed here?
   liftIO $ createDirectoryIfMissing True tmpDir'
