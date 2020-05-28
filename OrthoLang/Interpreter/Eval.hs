@@ -47,7 +47,7 @@ import OrthoLang.Interpreter.Paths            (Path, toPath, fromPath)
 import OrthoLang.Locks            (withReadLock')
 import OrthoLang.Interpreter.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Interpreter.Actions          (readLits, readPaths)
--- import OrthoLang.Util             (ignoreErrors)
+import OrthoLang.Util             (ignoreErrors)
 import System.IO                      (Handle)
 import System.FilePath                ((</>), takeFileName)
 import Data.IORef                     (readIORef)
@@ -176,7 +176,8 @@ myShake mods cfg ref ids dr pm delay rules = do
         -- This prints annoying errors whenever a file is accessed unexpectedly
         -- TODO remove ignore patterns as you solve them
         -- TODO is there a difference between relative and absolute paths as shake keys?
-        , shakeLint = Just LintFSATrace
+        -- , shakeLint = Just LintFSATrace
+        , shakeLint = Nothing
         , shakeLintInside =
             [ tDir </> "exprs"
             , tDir </> "cache"
@@ -315,7 +316,7 @@ eval mods hdl cfg ref ids dr rtype p = do
                 , progressInitial = ep
                 , progressRender = if progressbar cfg then (const "") else renderProgress
                 }
-  eval' delay pOpts p -- TODO ignoreErrors again?
+  ignoreErrors $ eval' delay pOpts p -- TODO ignoreErrors again?
   where
     eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake mods cfg ref ids dr pm delay $ do
       newRules mods
@@ -325,7 +326,8 @@ eval mods hdl cfg ref ids dr rtype p = do
       "eval" ~> do
         alwaysRerun
         need ["reloadids"]
-        actionRetry 9 $ need [path]
+        -- actionRetry 9 $ need [path]
+        need [path]
         completeProgress pm -- TODO only when doing the progressbar?
       -- writes unhashed output to outfile
       "outfile" ~> case outfile cfg of

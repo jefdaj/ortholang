@@ -13,6 +13,7 @@ module OrthoLang.Locks
   , withWriteLock'
   , withWriteLocks'
   , withWriteOnce
+  -- , randomDelay
   )
   where
 
@@ -53,6 +54,8 @@ import Text.Regex.Posix           ((=~))
 -- import Data.IORef (readIORef)
 
 -- import Control.Concurrent.Thread.Delay (delay)
+import Control.Concurrent (threadDelay)
+import System.Random
 
 -- TODO move these to Types?
 
@@ -100,6 +103,13 @@ getReadLock lRef path = do
         ((d,p,Map.insert path (l', Attempt (n+1)) c), l')
     Just (l', ReadOnly ) -> ((d,p,c), l')
     Just (l', Success _) -> ((d,p,c), l')
+
+-- just a test to see if locks are the problem
+-- randomDelay :: IO ()
+-- randomDelay = do
+--   microseconds <- getStdRandom (randomR (1000,10000))
+--   threadDelay microseconds
+--   return ()
 
 getWriteLock :: LocksRef -> FilePath -> IO RWLock
 getWriteLock lRef path = do
@@ -221,6 +231,7 @@ but sometimes a lock is just a lock. Then you want this function instead.
 withWriteLockEmpty :: LocksRef -> FilePath -> IO a -> IO a
 withWriteLockEmpty ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
+  -- randomDelay
   l <- liftIO $ getWriteLock ref path
   res <- bracket_
     (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
@@ -266,7 +277,9 @@ withWriteOnce path actFn = withWriteLock' path $ do
   fBefore <- liftIO $ doesFileExist path      -- Do not use Shake's version here
   dBefore <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here
   let before = fBefore || dBefore
-  when (not before) actFn
+  when before $ return ()
+
+  actFn
 
   fAfter <- liftIO $ doesFileExist path      -- Do not use Shake's version here
   dAfter <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here

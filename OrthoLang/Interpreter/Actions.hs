@@ -67,7 +67,7 @@ import OrthoLang.Types
 import Control.Monad              (when)
 import Data.List                  (sort, nub, isPrefixOf, isInfixOf, isSuffixOf)
 import Data.List.Split            (splitOneOf)
-import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
+import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative, splitPath)
 -- import OrthoLang.Interpreter.Debug        (debug)
 import OrthoLang.Interpreter.Paths        (Path, toPath, fromPath, checkLit, isGeneric, fromGeneric,
                                    checkLits, cacheDir, pathString, isURL,
@@ -94,6 +94,7 @@ import Network.Download (openURIString)
 import Control.Exception.Safe (catchAny)
 import Data.Scientific            (Scientific())
 import Data.IORef (readIORef)
+import qualified System.IO.Strict as Strict
 
 ---------------
 -- debugging --
@@ -407,7 +408,7 @@ writeCachedLines loc outPath content = do
   symlink (toPath loc' cfg outPath) (toPath loc' cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script
--- TODO remove in favor of sanitizeFileInPlace?
+-- TODO remove in favor of anitizeFileInPlace?
 writeCachedVersion :: DebugLocation -> FilePath -> FilePath -> Action ()
 writeCachedVersion loc outPath inPath = do
   let loc' = loc ++ ".writeCachedVersion"
@@ -538,6 +539,7 @@ data CmdDesc = CmdDesc
   , cmdParallel      :: Bool
   , cmdExitCode      :: ExitCode -- expected exit code (others are errors)
   }
+  deriving (Show)
 
 {-|
 One wrappedCmd equivalent function to rule them all.
@@ -554,11 +556,15 @@ TODO if stdout == outfile, put it there and skip the .out file altogether, or sy
 -}
 runCmd :: CmdDesc -> Action ()
 runCmd d = do
+  -- liftIO $ randomDelay
+
   cfg <- fmap fromJust getShakeExtra
   let stdoutPath = takeDirectory (cmdOutPath d) </> "out"
       stderrPath = takeDirectory (cmdOutPath d) </> "err"
       dbg = debugA' "runCmd"
   -- liftIO $ delay 1000000
+
+  dbg $ "running command " ++ show d
 
   inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns d
   inPaths' <- if cmdFixEmpties d
@@ -569,13 +575,22 @@ runCmd d = do
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
   (lRef :: LocksRef) <- fmap fromJust getShakeExtra
   (disk, par, _) <- liftIO $ readIORef lRef
+
+  -- TODO need to have this whole operation run on the mapped elements too, right?
   let parLockFn = if cmdParallel d
                     then \f -> withResource par 1 f
                     else id
+
       -- TODO any problem locking the whole dir?
       -- TODO and if not, can the other locks inside that be removed?
       writeDir = takeDirectory $ cmdOutPath d
-      writeLockFn fn = (if (takeBaseName $ takeDirectory writeDir) == "exprs" then withWriteLock' writeDir else id) $ do
+      withDirLock fn = if "exprs/" `elem` splitPath writeDir then do
+                         dbg $ "runCmd acquired dir lock: " ++ writeDir
+                         withWriteLock' writeDir fn
+                       else id fn
+
+      -- writeLockFn fn = withDirLock $ do
+      writeLockFn fn = do
         -- dbg $ "runCmd acquired expr dir write lock: " ++ show writeDir
         withWriteOnce (cmdOutPath d) $ do
           dbg $ "runCmd acquired outpath write lock: " ++ show (cmdOutPath d)
@@ -584,16 +599,17 @@ runCmd d = do
             parLockFn fn
 
   -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
-  writeLockFn $ withReadLocks' inPaths' $ do
+  -- writeLockFn $ withReadLocks' inPaths' $ do
+  writeLockFn $ do
     -- TODO remove opts?
     -- TODO always assume disk is 1?
+    dbg $ "runCmd proper starting"
     Exit code <- withResource disk (length inPaths + 1) $ case wrapper cfg of
       Nothing -> command (cmdOptions d) (cmdBinary d) (cmdArguments d)
       Just w  -> command (Shell:cmdOptions d) w [escape $ unwords (cmdBinary d:cmdArguments d)]
     -- Exit _ <- command [] "sync" [] -- TODO is this needed?
     -- This is disabled because it can make the logs really big
     -- dbg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
-    trackWrite' (cmdOutPath d:stdoutPath:stderrPath:cmdExtraOutPaths d)
     -- return ()
 
     -- TODO use exitWith here?
@@ -601,11 +617,14 @@ runCmd d = do
       let rmPatterns = (takeDirectory (cmdOutPath d) </> "*"):(cmdRmPatterns d)
       in handleCmdError (cmdBinary d) code stderrPath rmPatterns
 
-  let sPaths = stdoutPath:stderrPath:cmdSanitizePaths d -- TODO main outpath too?
-  -- sanitizeFilesInPlace $ cmdSanitizePaths d
-  sanitizeFilesInPlace sPaths
+    -- let sPaths = stdoutPath:stderrPath:cmdSanitizePaths d -- TODO main outpath too?
+    -- sanitizeFilesInPlace sPaths
 
-  return () -- TODO out, err, code here?
+    let written = writeDir:cmdOutPath d:stdoutPath:stderrPath:cmdExtraOutPaths d
+    trackWrite' written
+    dbg $ "runCmd tracked these written: " ++ show written
+
+  -- return () -- TODO out, err, code here?
 
 -- TODO does this do directories?
 -- TODO does this work on absolute paths?
@@ -744,8 +763,7 @@ sanitizeFileInPlace path = do
   -- txt <- readFileStrict' path
   exists <- liftIO $ doesFileExist path
   when exists $ do
-    ref <- fmap fromJust getShakeExtra
-    txt <- liftIO $ readFileStrict ref path -- can't use need here
+    txt <- liftIO $ Strict.readFile path -- avoid using need or readFileStrict here for simplicity
     cfg <- fmap fromJust getShakeExtra
     let txt' = toGeneric cfg txt
     -- liftIO $ putStrLn $ "txt': \"" ++ txt' ++ "\""
