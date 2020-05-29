@@ -244,7 +244,8 @@ readFileStrict' :: FilePath -> Action String
 readFileStrict' path = do
   ref <- fmap fromJust getShakeExtra
   need' "interpreter.actions.readFileStrict'" [path]
-  withReadLock' path $ liftIO (readFileStrict ref path)
+  -- withReadLock' path $ liftIO (readFileStrict ref path)
+  liftIO (readFileStrict ref path)
 -- {-# INLINE readFileStrict' #-}
 
 {- OrthoLang requires empty strings to contain the text <<emptystr>> so we
@@ -344,7 +345,7 @@ readList :: DebugLocation -> FilePath -> Action [String]
 readList loc path = do
   let loc' = loc ++ ".readList"
   debugA' loc' $ show path
-  need' loc' [path] -- Note isEmpty also does this
+  -- need' loc' [path] -- Note isEmpty also does this
   empty <- isEmpty path
   if empty
     then return []

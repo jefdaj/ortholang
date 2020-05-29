@@ -89,6 +89,7 @@ TODO remove the insert digests hack? or is this the main entry point for that to
 
 TODO are the extra rExpr steps needed in most cases, or only for rNamedFunction?
 -}
+-- TODO could this be the cause of the big parsing slowdown?
 rExpr :: RulesFn
 rExpr s e@(Lit _ _       ) = rLit s e
 rExpr s e@(Ref _ _ _ _   ) = rRef s e
@@ -259,7 +260,7 @@ aListLits paths outPath = do
       out'   = fromPath loc cfg outPath
       out''  = traceA "aListLits" out' (out':paths')
       paths' = map (fromPath loc cfg) paths
-  -- need' loc paths' -- TODO remove?
+  need' loc paths' -- note: this is actually important. do not remove
   lits <- mapM (readLit loc) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
   debugA loc $ "lits': " ++ show lits'
