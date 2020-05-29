@@ -44,7 +44,7 @@ import Data.Map.Strict                  (Map)
 import Control.Exception.Safe     (bracket_)
 import System.Directory           (createDirectoryIfMissing, doesFileExist,
                                    doesDirectoryExist, pathIsSymbolicLink)
-import System.FilePath            (takeDirectory)
+import System.FilePath            (takeDirectory, (<.>))
 import System.Posix.Files         (setFileMode)
 import Control.Exception.Safe     (catch, throwM)
 import System.IO.Error            (isDoesNotExistError)
@@ -292,7 +292,7 @@ withWriteOnce path actFn = withWriteLock' path $ do
     when (fAfter && not isLink)
       (setFileMode path 444)) handleExists -- TODO resolve symlinks without cfg?
 
-  when (after && not before) $ trackWrite [path] -- TODO only for files?
+  -- when (after && not before) $ trackWrite [path] -- TODO only for files?
 
   where
     handleExists e

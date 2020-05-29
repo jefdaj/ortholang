@@ -165,7 +165,7 @@ compileScript scr = do
           rp' = fromPath loc cfg rp
       (ExprPath ep') <- rExpr scr' re
       let ep = toPath loc cfg ep'
-      rp' %> \_ -> need' loc [ep'] >> symlink rp ep
+      rp' %> \_ -> symlink rp ep
       return $ ResPath rp'
   return rp
 

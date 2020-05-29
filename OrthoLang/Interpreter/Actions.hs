@@ -763,11 +763,11 @@ symlink src dst = do
       dst' = fromPath loc cfg dst
       dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
   -- TODO why does this break it?
-  -- need' "interpreter.actions.symlink" [dst']
+  need' "interpreter.actions.symlink" [dst']
   withWriteOnce src' $ do
     liftIO $ createDirectoryIfMissing True $ takeDirectory src'
     liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
-  -- trackWrite' [src']
+    trackWrite' [src']
 
 -- Apply toGeneric to sanitize the output(s) of a script
 -- Should be done before trackWrite to avoid confusing Shake

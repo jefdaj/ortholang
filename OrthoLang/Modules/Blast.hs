@@ -192,7 +192,7 @@ mMkBlastFromFa :: BlastDesc -> ExprExpansion
 mMkBlastFromFa (bCmd,_,_,sType) _ _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
   where
     name1 = bCmd ++ "_db"
-    name2 = "makeblastdb_" ++ ext sType
+    name2 = "makeblastdb_" ++ ext sType -- TODO would the _all version withSingleton arg be better?
     expr = Fun (EncodedAs blastdb sType) Nothing (depsOf s) name2 [s]
 mMkBlastFromFa _ _ _ e = error "ortholang.modules.blast.mkBlastFromFa" $ "bad arg: " ++ show e
 
@@ -201,6 +201,7 @@ mMkBlastFromFa _ _ _ e = error "ortholang.modules.blast.mkBlastFromFa" $ "bad ar
 -- *blast*_db_each --
 ---------------------
 
+-- TODO why no re-running bug here?
 mkBlastFromDbEach :: BlastDesc -> Function
 mkBlastFromDbEach (bCmd, qType, _, sType) = newFnA3
   (bCmd ++ "_db_each")
@@ -214,6 +215,7 @@ mkBlastFromDbEach (bCmd, qType, _, sType) = newFnA3
 -- *blast*_each --
 ------------------
 
+-- TODO find the re-running bug here
 mkBlastFromFaEach :: BlastDesc -> Function
 mkBlastFromFaEach d@(bCmd, qType, faType, _) = newExprExpansion
   (bCmd ++ "_each")

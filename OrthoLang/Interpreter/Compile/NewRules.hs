@@ -87,6 +87,7 @@ import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
 import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite')
 import OrthoLang.Interpreter.Sanitize (readIDs)
+import OrthoLang.Locks (withWriteOnce)
 import OrthoLang.Types
 import OrthoLang.Util (resolveSymlinks)
 import System.Exit (ExitCode(..))
@@ -579,7 +580,7 @@ newMap mapPrefix mapIndex out@(ExprPath outList) listToMapOver = do
   let dPaths' = map (fromPath loc cfg) dPaths
   -- need' loc dPaths'
 
-  let inPaths' = map (fromPath loc cfg) inPaths
+  -- let inPaths' = map (fromPath loc cfg) inPaths
   liftIO $ debug loc $ "inPaths: " ++ show inPaths
   mods <- fmap fromJust getShakeExtra
   let outPaths = newMapOutPaths mods cfg mapPrefix mapIndex outList inPaths -- TODO what happens if these are lits?
@@ -595,7 +596,7 @@ newMap mapPrefix mapIndex out@(ExprPath outList) listToMapOver = do
     -- trackWrite' [o]
 
   -- need' loc inPaths'
-  -- need' loc outPaths'
+  need' loc outPaths'
   writePaths loc outList outPaths -- TODO will fail on lits?
   -- trackWrite' (outList:outPaths')
 
