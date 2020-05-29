@@ -585,7 +585,7 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
   liftIO $ mapM_ (addDigest dRef elemType') inPaths -- TODO remove? also this is the wrong type i think
   liftIO $ addDigest dRef (ListOf oType) $ toPath loc cfg outList
   let dPaths' = map (fromPath loc cfg) dPaths
-  need' loc dPaths'
+  -- need' loc dPaths'
 
   let inPaths' = map (fromPath loc cfg) inPaths
   liftIO $ debug loc $ "inPaths: " ++ show inPaths
@@ -596,12 +596,14 @@ newMap mapPrefix mapIndex actToMap out@(ExprPath outList) listToMapOver = do
   liftIO $ debug loc $ "outPaths: " ++ show outPaths
 
   -- TODO are the need and trackwrite parts redundant?
-  forM_ (zip outPaths' inPaths') $ \(o, i) -> do
+  -- forM_ (zip outPaths' inPaths') $ \(o, i) -> do
     -- need' loc [i]
     -- liftIO $ createDirectoryIfMissing True o
-    actToMap (ExprPath o) i
+    -- actToMap (ExprPath o) i
     -- trackWrite' [o]
 
+  -- need' loc inPaths'
+  -- need' loc outPaths'
   writePaths loc outList outPaths -- TODO will fail on lits?
   -- trackWrite' (outList:outPaths')
 
