@@ -17,22 +17,19 @@ import OrthoLang.Types
 import Data.Maybe                     (fromMaybe)
 import System.FilePath                (takeFileName)
 import System.Time.Utils (renderSecs)
-
 import GHC.Conc                   (getNumProcessors)
--- import GHC.Conc                   (getNumProcessors)
 
+pDelay :: Int
+pDelay = 100000 -- in microseconds
 
 -- TODO what's with the a?
 myShakeProgress :: P.Meter' EvalProgress -> IO Progress -> IO a
-myShakeProgress pm = updateLoop delay . updateProgress pm
-  where
-    delay = 10000
+myShakeProgress pm = updateLoop pDelay . updateProgress pm
 
 initProgress :: Config -> Handle -> IO (P.Progress EvalProgress)
 initProgress cfg hdl = do
   start <- getCurrentTime
   nproc <- getNumProcessors
-  -- TODO move to Progress?
   let ep = EvalProgress
              { epTitle = takeFileName $ fromMaybe "ortholang" $ script cfg
              , epStart  = start
@@ -44,8 +41,6 @@ initProgress cfg hdl = do
              , epArrowShaft = '—'
              , epArrowHead = '▶'
              }
-      -- TODO move to Progress?
-      pDelay = 100000 -- in microseconds
       opts = P.Progress
                 { progressDelay = pDelay
                 , progressHandle = hdl
