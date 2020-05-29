@@ -24,7 +24,6 @@ module OrthoLang.Interpreter.Eval
   )
   where
 
-import OrthoLang.Debug
 import OrthoLang.Errors (oneLineShakeErrors)
 import Development.Shake
 import Text.PrettyPrint.HughesPJClass hiding ((<>))
@@ -41,8 +40,8 @@ import Data.Dynamic (Dynamic, toDyn, dynTypeRep)
 import Data.Typeable (TypeRep)
 -- import Data.List (isPrefixOf)
 
-import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
-import OrthoLang.Interpreter.Compile         (compileScript, rExpr, newRules)
+import Data.Maybe                     (maybeToList)
+import OrthoLang.Interpreter.Compile         (compileScript, newRules)
 import OrthoLang.Interpreter.Parse            (parseFileIO)
 import OrthoLang.Interpreter.Paths            (Path, toPath, fromPath)
 import OrthoLang.Locks            (withReadLock')
@@ -50,23 +49,23 @@ import OrthoLang.Interpreter.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Interpreter.Actions          (readLits, readPaths)
 import OrthoLang.Util             (ignoreErrors)
 import System.IO                      (Handle)
-import System.FilePath                ((</>), takeFileName)
+import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
-import Control.Monad                  (when)
+-- import Control.Monad                  (when)
 -- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
 -- import Control.Retry          (rsIterNumber)
 -- import Control.Exception.Safe (catchAny)
 
-import Control.Concurrent
+-- import Control.Concurrent
 -- import Data.Foldable
 import qualified System.Progress as P
 -- import Data.IORef
 -- import Data.Monoid
 -- import Control.Monad
 
-import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
-import System.Time.Utils (renderSecs)
+-- import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
+-- import System.Time.Utils (renderSecs)
 
 import GHC.Conc                   (getNumProcessors)
 

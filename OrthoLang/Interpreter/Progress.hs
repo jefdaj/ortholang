@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module OrthoLang.Interpreter.Progress
@@ -16,8 +14,8 @@ import qualified System.Progress as P
 import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
 import System.IO                      (Handle)
 import OrthoLang.Types
-import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
-import System.FilePath                ((</>), takeFileName)
+import Data.Maybe                     (fromMaybe)
+import System.FilePath                (takeFileName)
 import System.Time.Utils (renderSecs)
 
 import GHC.Conc                   (getNumProcessors)
