@@ -279,18 +279,16 @@ withWriteOnce path actFn = withWriteLock' path $ do
   fBefore <- liftIO $ doesFileExist path      -- Do not use Shake's version here
   dBefore <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here
   let before = fBefore || dBefore
-  when before $ return ()
+  when (not before) actFn
 
-  actFn
+  -- fAfter <- liftIO $ doesFileExist path      -- Do not use Shake's version here
+  -- dAfter <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here
+  -- let after = fAfter || dAfter
 
-  fAfter <- liftIO $ doesFileExist path      -- Do not use Shake's version here
-  dAfter <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here
-  let after = fAfter || dAfter
-
-  when fAfter $ liftIO $ catch (do
-    isLink <- liftIO $ pathIsSymbolicLink path
-    when (fAfter && not isLink)
-      (setFileMode path 444)) handleExists -- TODO resolve symlinks without cfg?
+  -- when fAfter $ liftIO $ catch (do
+  --   isLink <- liftIO $ pathIsSymbolicLink path
+  --   when (fAfter && not isLink)
+  --     (setFileMode path 444)) handleExists -- TODO resolve symlinks without cfg?
 
   -- when (after && not before) $ trackWrite [path] -- TODO only for files?
 
