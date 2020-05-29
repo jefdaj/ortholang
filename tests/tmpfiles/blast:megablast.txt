@@ -14,10 +14,7 @@
 |           |-- result.err
 |           |-- result.nhr
 |           |-- result.nin
-|           |-- result.nsq
-|           |-- result.phr
-|           |-- result.pin
-|           `-- result.psq
+|           `-- result.nsq
 |-- exprs
 |   |-- any
 |   |   `-- 1788925caa
@@ -74,4 +71,4 @@
     |-- result -> ../exprs/any/1788925caa/result
     `-- single.str.list -> ../exprs/extract_queries/49ac2bd97a/result
 
-42 directories, 32 files
+42 directories, 29 files

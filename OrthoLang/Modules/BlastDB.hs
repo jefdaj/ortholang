@@ -444,7 +444,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
       dbOut  = dbDir </> "result"
       dbOut' = toPath loc cfg dbOut
       out''  = traceA loc out' [ext dbType, out', dbOut, fasPath']
-      dbPtn  = dbDir </> "*" -- TODO does this actually help?
+      -- dbPtn  = dbDir </> "*" -- TODO does this actually help?
       dbg = debugA' loc
 
   -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
@@ -472,7 +472,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   dbg $ "dbType': "    ++ dbType'
   dbg $ "cfg: "        ++ show cfg
   dbg $ "fixedPaths: " ++ show fixedPaths
-  dbg $ "dbPtn: "      ++ dbPtn
+  -- dbg $ "dbPtn: "      ++ dbPtn
   dbg $ "dbOut: "      ++ dbOut
 
   -- liftIO $ createDirectoryIfMissing True dbDir
@@ -482,10 +482,10 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
     { cmdParallel = False
     , cmdFixEmpties = True
     , cmdOutPath = dbOut
-    , cmdInPatterns = [dbPtn]
+    , cmdInPatterns = []
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
-    , cmdOptions =[]
+    , cmdOptions = []
     , cmdBinary = "makeblastdb.sh"
     , cmdArguments = [dbOut, fixedPaths, dbType']
     , cmdExitCode = ExitSuccess
@@ -493,10 +493,10 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
     }
 
   -- check that all the right files were created
-  after <- liftIO $ listPrefixFiles dbPtn
+  -- after <- liftIO $ listPrefixFiles dbPtn
   -- liftIO $ putStrLn "running makeblastdb"
-  dbg $ "after: " ++ show after
-  trackWrite' after
+  -- dbg $ "after: " ++ show after
+  -- trackWrite' after
 
   -- usually there's an index file too, but not always
   -- TODO put these back? they sometimes fail when it splits into .00.pin etc.

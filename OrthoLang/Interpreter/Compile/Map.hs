@@ -155,7 +155,7 @@ aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
       mappedArgList' = fromPath loc cfg mappedArg
       mapTmpDir'     = fromPath loc cfg mapTmpDir
       loc = "ortholang.core.compile.map.aMapMain"
-  need' loc regularArgs'
+  need' loc regularArgs' -- TODO remove?
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
   mappedPaths  <- readPaths loc mappedArgList'
   mappedPaths' <- liftIO $ mapM resolve $ map (fromPath loc cfg) mappedPaths
@@ -163,7 +163,7 @@ aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
   mapM_ (aMapArgs mapIndex eType regularArgs'' mapTmpDir')
         (map (toPath loc cfg) mappedPaths') -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
-  need' loc outPaths
+  need' loc outPaths -- TODO remove?
   outPaths' <- liftIO $ mapM resolve outPaths
   let out = traceA "aMapMain" outPath
               (outPath:regularArgs' ++ [mapTmpDir', mappedArgList'])
@@ -227,7 +227,7 @@ aMapElem eType tmpFn actFn singleName mSeed out = do
   cfg <- fmap fromJust getShakeExtra
   let args' = map (fromPath loc cfg) args
   args'' <- liftIO $ mapM (resolveSymlinks $ Just [tmpdir cfg </> "cache" </> "each", tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]) args' -- TODO remove?
-  need' loc args'
+  need' loc args' -- TODO remove?
   debugA loc $ "out: " ++ show out
   dir <- liftIO $ case tmpFn of
     Nothing -> return $ cacheDir cfg "each" -- TODO any better option than this or undefined?

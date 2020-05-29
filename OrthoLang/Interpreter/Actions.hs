@@ -421,7 +421,7 @@ writeCachedVersion loc outPath inPath = do
 -- TODO take Path Abs File and convert them... or Path Rel File?
 -- TODO explicit case for empty lists that isn't just an empty file!
 writePaths :: DebugLocation -> FilePath -> [Path] -> Action ()
-writePaths loc out cpaths = writeCachedLines loc' out paths >> trackWrite paths -- TODO trackwrite'?
+writePaths loc out cpaths = writeCachedLines loc' out paths -- >> trackWrite paths -- TODO trackwrite'?
   where
     loc' = loc ++ ".writePaths"
     paths = if null cpaths then ["<<emptylist>>"] else map pathString cpaths
@@ -509,6 +509,9 @@ OrthoLang requires explicit empty files with contents like "<<emptylist>>" to
 distinguish them from runtime errors. This function replaces those with
 actual empty files before passing them to a cmd, so logic for that
 doesn't have to be duplicated over and over.
+
+TODO do that only once after a command runs, before tracking it written
+TODO and merge with sanitizing the output files?
 -}
 fixEmptyText :: FilePath -> Action FilePath
 fixEmptyText path = do
@@ -568,12 +571,15 @@ runCmd d = do
 
   dbg $ "running command " ++ show d
 
+  -- TODO is this part causing the extra rebuilds?
   inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns d
-  inPaths' <- if cmdFixEmpties d
-                then mapM (fixEmptyText) inPaths
-                else need' "interpreter.actions.runCmd" inPaths >> return inPaths
+  -- inPaths' <- if cmdFixEmpties d
+  --               then mapM (fixEmptyText) inPaths
+  --               else need' "interpreter.actions.runCmd" inPaths >> return inPaths
+  need' "interpreter.actions.runCmd" inPaths
+
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory stdoutPath
-  dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
+  dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
   (lRef :: LocksRef) <- fmap fromJust getShakeExtra
   (disk, par, _) <- liftIO $ readIORef lRef
@@ -756,7 +762,7 @@ symlink src dst = do
   withWriteOnce src' $ do
     liftIO $ createDirectoryIfMissing True $ takeDirectory src'
     liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
-    trackWrite' [src']
+    -- trackWrite' [src']
 
 -- Apply toGeneric to sanitize the output(s) of a script
 -- Should be done before trackWrite to avoid confusing Shake

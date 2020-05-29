@@ -259,7 +259,7 @@ aListLits paths outPath = do
       out'   = fromPath loc cfg outPath
       out''  = traceA "aListLits" out' (out':paths')
       paths' = map (fromPath loc cfg) paths
-  need' loc paths' -- TODO remove?
+  -- need' loc paths' -- TODO remove?
   lits <- mapM (readLit loc) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
   debugA loc $ "lits': " ++ show lits'
@@ -309,7 +309,7 @@ aListPaths paths outPath = do
       paths' = map (fromPath loc cfg) paths -- TODO remove this
   need' loc paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just [tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]) paths'
-  need' loc paths''
+  -- need' loc paths''
   let paths''' = map (toPath loc cfg) paths'' -- TODO not working?
   writePaths loc out'' paths'''
 

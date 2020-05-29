@@ -18,10 +18,7 @@
 |   |       |-- result.err
 |   |       |-- result.nhr
 |   |       |-- result.nin
-|   |       |-- result.nsq
-|   |       |-- result.phr
-|   |       |-- result.pin
-|   |       `-- result.psq
+|   |       `-- result.nsq
 |   `-- seqio
 |-- exprs
 |   |-- any
@@ -97,4 +94,4 @@
     |-- result -> ../exprs/any/cb5def04a1/result
     `-- single.str.list -> ../exprs/extract_queries/cb374c8a0d/result
 
-54 directories, 43 files
+54 directories, 40 files

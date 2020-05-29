@@ -16,10 +16,7 @@
 |           |-- result.err
 |           |-- result.nhr
 |           |-- result.nin
-|           |-- result.nsq
-|           |-- result.phr
-|           |-- result.pin
-|           `-- result.psq
+|           `-- result.nsq
 |-- exprs
 |   |-- all
 |   |   `-- 92f543964f
@@ -84,4 +81,4 @@
     |-- result -> ../exprs/all/92f543964f/result
     `-- single.str.list -> ../exprs/extract_queries/ae599d611e/result
 
-47 directories, 37 files
+47 directories, 34 files
