@@ -74,7 +74,7 @@ import OrthoLang.Interpreter.Paths        (Path, toPath, fromPath, checkLit, isG
                                    stringPath, toGeneric, sharedPath, addDigest)
 import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
-import OrthoLang.Locks        (withReadLock', withReadLocks',
+import OrthoLang.Locks        (withReadLock', withReadLocks', markDone,
                                    withWriteLock', withWriteLocks', withWriteOnce)
 import System.Directory           (doesFileExist, createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
 import System.Exit                (ExitCode(..))
@@ -488,8 +488,10 @@ trackWrite' fs = do
   -- mapM_ (assertNonEmptyFile) fs
   -- also ensure it only gets written once:
   -- liftIO $ mapM_ (\f -> setFileMode f 444) fs -- TODO is 444 right? test it
-  cfg <- fmap fromJust getShakeExtra
-  liftIO $ mapM_ ((\f -> catchAny f (\_ -> return ())) . setReadOnly cfg) fs -- TODO is 444 right? test it
+  -- cfg <- fmap fromJust getShakeExtra
+  -- liftIO $ mapM_ ((\f -> catchAny f (\_ -> return ())) . setReadOnly cfg) fs -- TODO is 444 right? test it
+  lRef <- fmap fromJust getShakeExtra
+  liftIO $ mapM_ (markDone lRef) fs
   trackWrite $ traceShow "interpreter.actions.trackWrite'" fs
 
 setReadOnly :: Config -> FilePath -> IO ()
@@ -620,9 +622,9 @@ runCmd d = do
     -- let sPaths = stdoutPath:stderrPath:cmdSanitizePaths d -- TODO main outpath too?
     -- sanitizeFilesInPlace sPaths
 
-    let written = writeDir:cmdOutPath d:stdoutPath:stderrPath:cmdExtraOutPaths d
-    trackWrite' written
-    dbg $ "runCmd tracked these written: " ++ show written
+  let written = writeDir:cmdOutPath d:stdoutPath:stderrPath:cmdExtraOutPaths d
+  trackWrite' written
+  dbg $ "runCmd tracked these written: " ++ show written
 
   -- return () -- TODO out, err, code here?
 

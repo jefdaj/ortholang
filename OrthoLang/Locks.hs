@@ -14,6 +14,8 @@ module OrthoLang.Locks
   , withWriteLocks'
   , withWriteOnce
   -- , randomDelay
+
+  , markDone
   )
   where
 
