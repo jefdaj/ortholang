@@ -18,4 +18,4 @@ DBOUT="$(dirname "$DBOUT")/result"
 makeblastdb -in "$FIXEDPATHS" -out "$DBOUT" -title "$TITLE" -dbtype "$DBTYPE" > "$DBOUT" 2> "${DBOUT}.err"
 
 # remove empty stderr files
-[ ! -s "${DBOUT}.err" ] && rm "${DBOUT}.err"
+[ ! -s "${DBOUT}.err" ] && rm -f "${DBOUT}.err"

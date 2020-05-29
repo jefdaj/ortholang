@@ -404,8 +404,8 @@ writeCachedLines loc outPath content = do
   let cache = cachedLinesPath cfg content
   let loc' = loc ++ ".writeCachedLines" 
   debugA' loc' $ first50 content ++ " -> " ++ last50 cache
-  withWriteOnce cache $ do
-    liftIO $ writeFile' cache $ unlines content -- TODO writeFile'?
+  -- withWriteOnce cache $ do
+  writeFile' cache $ unlines content -- TODO writeFile'?
     -- trackWrite' [cache]
   produces [cache]
   symlink (toPath loc' cfg outPath) (toPath loc' cfg cache)
@@ -565,7 +565,8 @@ TODO if stdout == outfile, put it there and skip the .out file altogether, or sy
 
 -- TODO how to prevent this re-running on makeblastdb?
 runCmd :: CmdDesc -> Action ()
-runCmd d = withWriteOnce (cmdOutPath d) $ do
+-- runCmd d = withWriteOnce (cmdOutPath d) $ do
+runCmd d = do
   -- liftIO $ randomDelay
 
   cfg <- fmap fromJust getShakeExtra
@@ -766,10 +767,10 @@ symlink src dst = do
       dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
   -- TODO why does this break it?
   need' "interpreter.actions.symlink" [dst']
-  withWriteOnce src' $ do
-    liftIO $ createDirectoryIfMissing True $ takeDirectory src'
-    liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
-    trackWrite' [src']
+  -- withWriteOnce src' $ do
+  liftIO $ createDirectoryIfMissing True $ takeDirectory src'
+  liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
+  trackWrite' [src']
 
 -- Apply toGeneric to sanitize the output(s) of a script
 -- Should be done before trackWrite to avoid confusing Shake

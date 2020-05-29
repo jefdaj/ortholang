@@ -54,19 +54,19 @@ bht = Type
 -- TODO need a separate db type for reverse fns?
 type BlastDesc =
   ( String  -- name and also system command to call
-  , Type -- query fasta type
-  , Type -- subject type when starting from fasta
-  , Type -- subject type when starting from db
+  , Type   -- query fasta type
+  , Type   -- subject type when starting from fasta
+  , String -- subject type when starting from db
   )
 
 blastDescs :: [BlastDesc]
 blastDescs =
-  [ ( "blastn"   , fna, fna, fna) -- old blastn default for more distant sequences
-  , ( "megablast", fna, fna, fna) -- new blastn default (highly similar sequences)
-  , ( "blastp"   , faa, faa, faa)
-  , ( "blastx"   , fna, faa, faa)
-  , ("tblastn"   , faa, fna, fna)
-  , ("tblastx"   , fna, fna, fna)
+  [ ( "blastn"   , fna, fna, "nucl") -- old blastn default for more distant sequences
+  , ( "megablast", fna, fna, "nucl") -- new blastn default (highly similar sequences)
+  , ( "blastp"   , faa, faa, "prot")
+  , ( "blastx"   , fna, faa, "prot")
+  , ("tblastn"   , faa, fna, "nucl")
+  , ("tblastx"   , fna, fna, "nucl")
   ]
 
 ----------------
@@ -74,12 +74,14 @@ blastDescs =
 ----------------
 
 mkBlastFromDb :: BlastDesc -> Function
-mkBlastFromDb (bCmd, qType, _, sType) = newFnA3
-  (bCmd ++ "_db")
-  (Exactly num, Exactly qType, Exactly (EncodedAs blastdb sType))
-  (Exactly bht)
-  (aMkBlastFromDb2 bCmd)
-  [Nondeterministic]
+mkBlastFromDb (bCmd, qType, _, np) =
+  let dbType = if np == "nucl" then fna else faa
+  in newFnA3
+       (bCmd ++ "_db")
+       (Exactly num, Exactly qType, Exactly (EncodedAs blastdb dbType))
+       (Exactly bht)
+       (aMkBlastFromDb2 bCmd)
+       [Nondeterministic]
 
 -- TODO remove tmp?
 -- rMkBlastFromDb :: BlastDesc -> RulesFn
@@ -158,6 +160,7 @@ aMkBlastFromDb bCmd [o, e, q, p] = do
   let stdoutPath = replaceBaseName o'' "out"
       stderrPath = replaceBaseName o'' "err"
   ref <- fmap fromJust getShakeExtra
+  need' loc [prefix']
   liftIO $ removeIfExists ref stdoutPath
   liftIO $ removeIfExists ref stderrPath
   runCmd $ CmdDesc
@@ -181,19 +184,20 @@ aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
 -------------
 
 mkBlastFromFa :: BlastDesc -> Function
-mkBlastFromFa d@(bCmd, qType, sType, _) = newExprExpansion
+mkBlastFromFa d@(bCmd, qType, faType, _) = newExprExpansion
   bCmd
-  [Exactly num, Exactly qType, Exactly sType]
+  [Exactly num, Exactly qType, Exactly faType]
   (Exactly bht)
   (mMkBlastFromFa d)
   [Nondeterministic]
 
 mMkBlastFromFa :: BlastDesc -> ExprExpansion
-mMkBlastFromFa (bCmd,_,_,sType) _ _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
+mMkBlastFromFa (bCmd, _, _, np) _ _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
   where
+    dbType = if np == "nucl" then fna else faa
     name1 = bCmd ++ "_db"
-    name2 = "makeblastdb_" ++ ext sType -- TODO would the _all version withSingleton arg be better?
-    expr = Fun (EncodedAs blastdb sType) Nothing (depsOf s) name2 [s]
+    name2 = "makeblastdb_" ++ np -- TODO would the _all version withSingleton arg be better?
+    expr = Fun (EncodedAs blastdb dbType) Nothing (depsOf s) name2 [s]
 mMkBlastFromFa _ _ _ e = error "ortholang.modules.blast.mkBlastFromFa" $ "bad arg: " ++ show e
 
 
@@ -203,12 +207,14 @@ mMkBlastFromFa _ _ _ e = error "ortholang.modules.blast.mkBlastFromFa" $ "bad ar
 
 -- TODO why no re-running bug here?
 mkBlastFromDbEach :: BlastDesc -> Function
-mkBlastFromDbEach (bCmd, qType, _, sType) = newFnA3
-  (bCmd ++ "_db_each")
-  (Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb sType)))
-  (Exactly (ListOf bht))
-  (newMap3of3 $ bCmd ++ "_db")
-  [Nondeterministic]
+mkBlastFromDbEach (bCmd, qType, _, np) =
+  let dbType = if np == "nucl" then fna else faa
+  in newFnA3
+       (bCmd ++ "_db_each")
+       (Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb dbType)))
+       (Exactly (ListOf bht))
+       (newMap3of3 $ bCmd ++ "_db")
+       [Nondeterministic]
 
 
 ------------------
@@ -225,10 +231,11 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = newExprExpansion
   [Nondeterministic]
 
 mBlastFromFaEach :: BlastDesc -> ExprExpansion
-mBlastFromFaEach d@(_, _, _, sType) _ _ (Fun rtn seed deps _   [e, q, ss])
-  =                                     (Fun rtn seed deps fn2 [e, q, ss'])
+mBlastFromFaEach d@(_, _, _, np) _ _ (Fun rtn seed deps _   [e, q, ss])
+  =                                  (Fun rtn seed deps fn2 [e, q, ss'])
   where
-    ss'   = Fun (ListOf (EncodedAs blastdb sType)) Nothing (depsOf ss) fn1 [ss]
-    fn1   = "makeblastdb_" ++ ext sType ++ "_each"
+    dbType = if np == "nucl" then fna else faa
+    ss'   = Fun (ListOf (EncodedAs blastdb dbType)) Nothing (depsOf ss) fn1 [ss]
+    fn1   = "makeblastdb_" ++ np ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
 mBlastFromFaEach _ _ _ e = error "ortholang.modules.blast.mkBlastFromFaEach" $  "bad arg: " ++ show e
