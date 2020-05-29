@@ -16,9 +16,9 @@ import OrthoLang.Types
 import OrthoLang.Locks
 import OrthoLang.Interpreter
 import OrthoLang.Modules.SeqIO      (faa, fna)
-import OrthoLang.Modules.Singletons (withSingleton, withSingletons, withSingletonArg, singletons)
+import OrthoLang.Modules.Singletons (withSingleton, singletons)
 
-import Control.Monad           (when, forM)
+-- import Control.Monad           (when, forM)
 import Data.Char               (toLower)
 import Data.List               (isInfixOf)
 import Data.List               (isPrefixOf)
@@ -26,7 +26,7 @@ import Data.Maybe              (isJust, fromJust)
 import Data.String.Utils       (split)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
-import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
+import System.FilePath         (takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
 import System.Process          (readCreateProcess, proc)
 
 {- There are a few types of BLAST database files. For nucleic acids:
@@ -49,7 +49,7 @@ debugA' :: String -> String -> Action ()
 debugA' name = debugA ("modules.blastdb." ++ name)
 
 debugR' :: (Pretty a, Show b) => Config -> String -> a -> b -> b
-debugR' cfg name = debugRules ("modules.blastdb." ++ name)
+debugR' _ name = debugRules ("modules.blastdb." ++ name)
 
 olModule :: Module
 olModule = Module
@@ -104,7 +104,10 @@ blastdb = Encoding
   }
 
 -- shorthand
+ndb :: Type
 ndb = EncodedAs blastdb fna
+
+pdb :: Type
 pdb = EncodedAs blastdb faa
 
 -- TODO remove?
@@ -344,16 +347,16 @@ aBlastdbget dbPrefix tmpDir nPath = do
 -- TODO silence output?
 -- TODO does this have an error where db path depends on the outer expression
 --      in addition to actual inputs?
-makeblastdbFnaAll :: Function
-makeblastdbFnaAll = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
-  , fOutput =  Exactly ndb
-  , fTags = [] -- TODO is it deterministic though? double-check
-  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
-  }
-  where
-    name = "makeblastdb_fna_all"
+-- makeblastdbFnaAll :: Function
+-- makeblastdbFnaAll = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
+--   , fOutput =  Exactly ndb
+--   , fTags = [] -- TODO is it deterministic though? double-check
+--   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
+--   }
+--   where
+--     name = "makeblastdb_fna_all"
 
 -- makeblastdbFaaAll :: Function
 -- makeblastdbFaaAll = Function
@@ -365,6 +368,14 @@ makeblastdbFnaAll = Function
 --   }
 --   where
 --     name = "makeblastdb_faa_all"
+
+makeblastdbFnaAll :: Function
+makeblastdbFnaAll = newFnA1
+  "makeblastdb_fna_all"
+  (Exactly (ListOf fna))
+  (Exactly ndb)
+  (aMakeblastdbAll2 fna)
+  []
 
 makeblastdbFaaAll :: Function
 makeblastdbFaaAll = newFnA1
@@ -387,30 +398,30 @@ makeblastdbFaaAll = newFnA1
 -- TODO is rtn always the same as dbType?
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
-rMakeblastdbAll :: RulesFn
-rMakeblastdbAll scr e@(Fun rtn _ _ _ [fas]) = do
-  (ExprPath fasPath) <- rExpr scr fas
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.blastdb.rMakeblastdbAll"
-      out       = exprPath cfg dRef scr e
-      out'      = debugR' cfg loc e $ fromPath loc cfg out
-      cDir      = makeblastdbCache cfg
-      fasPath'  = toPath loc cfg fasPath
+-- rMakeblastdbAll :: RulesFn
+-- rMakeblastdbAll scr e@(Fun rtn _ _ _ [fas]) = do
+--   (ExprPath fasPath) <- rExpr scr fas
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   let loc = "modules.blastdb.rMakeblastdbAll"
+--       out       = exprPath cfg dRef scr e
+--       out'      = debugR' cfg loc e $ fromPath loc cfg out
+--       cDir      = makeblastdbCache cfg
+--       fasPath'  = toPath loc cfg fasPath
+-- 
+--   -- TODO need new shake first:
+--   -- out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
+-- 
+--   out' %> \_ -> aMakeblastdbAll rtn cDir [out, fasPath']
+--   -- TODO what's up with the linking? just write the prefix to the outfile!
+--   return (ExprPath out')
+-- rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e
 
-  -- TODO need new shake first:
-  -- out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
-
-  out' %> \_ -> aMakeblastdbAll rtn cDir [out, fasPath']
-  -- TODO what's up with the linking? just write the prefix to the outfile!
-  return (ExprPath out')
-rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e
-
-listPrefixFiles :: FilePattern -> IO [FilePath]
-listPrefixFiles prefix = getDirectoryFilesIO pDir [pName] >>= return . map (pDir </>)
-  where
-    pDir  = takeDirectory prefix
-    pName = takeFileName  prefix
+-- listPrefixFiles :: FilePattern -> IO [FilePath]
+-- listPrefixFiles prefix = getDirectoryFilesIO pDir [pName] >>= return . map (pDir </>)
+--   where
+--     pDir  = takeDirectory prefix
+--     pName = takeFileName  prefix
 
 aMakeblastdbAll2 :: Type -> NewAction1
 aMakeblastdbAll2 dbType (ExprPath out') fasPath' = do
@@ -509,6 +520,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
     
   -- dbg $ "dbOut was also created: " ++ dbOut
   -- TODO why should this work when outside the when block but not inside?? something about retries?
+  trackWrite' [dbOut]
   writePath loc out'' dbOut'
 aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
 
@@ -616,7 +628,7 @@ mkMakeblastdbAllEach faType = hidden $
     aeName
     (Exactly (ListOf (ListOf            faType)))
     (Exactly (ListOf (EncodedAs blastdb faType)))
-    (newMap1of1 aName $ aMakeblastdbAll2 faType)
+    (newMap1of1 aName)
     [Hidden]
 
 mkMakeblastdbEach :: Type -> Function

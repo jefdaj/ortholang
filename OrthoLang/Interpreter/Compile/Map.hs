@@ -53,7 +53,7 @@ import OrthoLang.Interpreter.Paths        (cacheDir, toPath, fromPath, exprPath,
                                    Path, unsafeExprPathExplicit, argHashes)
 import OrthoLang.Util         (digest, resolveSymlinks, unlessExists,
                                    popFrom, insertAt)
-import OrthoLang.Locks       (withWriteOnce)
+-- import OrthoLang.Locks       (withWriteOnce)
 import System.Directory           (createDirectoryIfMissing)
 import Data.Maybe (fromJust)
 
