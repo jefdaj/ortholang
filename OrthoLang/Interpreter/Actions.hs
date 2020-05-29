@@ -195,13 +195,13 @@ fetchShared sp path' = withWriteOnce path' $ do
 
 -- TODO and should the symlink also be created?
 -- TODO this will get the abspath of the *cache* version, right? have to get the local one!
-needLinkSrcIfAny :: String -> FilePath -> Action ()
-needLinkSrcIfAny name link = do
-  isLink <- liftIO $ pathIsSymbolicLink link
-  when isLink $ do
-    relPath <- liftIO $ readSymbolicLink link
-    absPath <- liftIO $ absolutize $ takeDirectory link </> relPath
-    need' name [absPath]
+-- needLinkSrcIfAny :: String -> FilePath -> Action ()
+-- needLinkSrcIfAny name link = do
+--   isLink <- liftIO $ pathIsSymbolicLink link
+--   when isLink $ do
+--     relPath <- liftIO $ readSymbolicLink link
+--     absPath <- liftIO $ absolutize $ takeDirectory link </> relPath
+--     need' name [absPath]
 
 {-|
 This is also a little more complicated than it would seem, because:
@@ -254,9 +254,9 @@ readFileStrict' path = do
  -}
 readLit :: DebugLocation -> FilePath -> Action String
 readLit loc path = do
-  debugA' "readLit" path
-  -- TODO need' here?
-  need [path] -- Note isEmpty also does this
+  let loc = "ortholang.interpreter.actions.readLit"
+  debugA' loc path
+  need' loc [path] -- Note isEmpty also does this
   empty <- isEmpty path
   if empty
     then return ""
