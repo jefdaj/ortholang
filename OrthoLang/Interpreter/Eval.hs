@@ -119,9 +119,12 @@ data EvalProgress = EvalProgress
 
 -- TODO hey should the state just be a Progress{..} itself? seems simpler + more flexible
 renderProgress :: EvalProgress -> String
-renderProgress EvalProgress{..}
-  | (round $ diffUTCTime epUpdate epStart) < (5 :: Int) || epDone == 0 = ""
-  | otherwise = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
+renderProgress EvalProgress{..} = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
+
+  -- this would add a delay before showing the bar for short operations:
+  -- (round $ diffUTCTime epUpdate epStart) < (5 :: Int) || epDone == 0 = ""
+  -- otherwise = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
+
   where
     -- details  = if epDone >= epTotal then [] else [fraction]
     time = renderTime epStart epUpdate
@@ -314,7 +317,7 @@ eval mods hdl cfg ref ids dr rtype p = do
                 { progressDelay = delay
                 , progressHandle = hdl
                 , progressInitial = ep
-                , progressRender = if progressbar cfg then (const "") else renderProgress
+                , progressRender = if not (progressbar cfg) then (const "") else renderProgress
                 }
   ignoreErrors $ eval' delay pOpts p -- TODO ignoreErrors again?
   where
