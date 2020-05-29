@@ -30,7 +30,7 @@ import Development.Shake
 import Text.PrettyPrint.HughesPJClass hiding ((<>))
 
 import OrthoLang.Types
-import OrthoLang.Interpreter.Progress
+import OrthoLang.Interpreter.Progress (EvalProgress(..), myShakeProgress, initProgress, completeProgress)
 import OrthoLang.Script (expandMacros)
 -- import OrthoLang.Interpreter.Pretty (renderIO)
 -- import OrthoLang.Interpreter.Config (debug)
@@ -78,8 +78,8 @@ import GHC.Conc                   (getNumProcessors)
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
 myShake :: [Module] -> Config -> LocksRef -> IDsRef -> DigestsRef
-        -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
-myShake mods cfg ref ids dr pm delay rules = do
+        -> P.Meter' EvalProgress -> Rules () -> IO ()
+myShake mods cfg ref ids dr pm rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
   nproc <- getNumProcessors
   let tDir = tmpdir cfg
@@ -91,7 +91,7 @@ myShake mods cfg ref ids dr pm delay rules = do
         , shakeAbbreviations = [(tDir, "$TMPDIR"), (workdir cfg, "$WORKDIR")]
         , shakeChange    = ChangeModtimeAndDigestInput
         -- , shakeCommandOptions = [EchoStdout True]
-        , shakeProgress = updateLoop delay . updateProgress pm
+        , shakeProgress = myShakeProgress pm
         -- , shakeShare = sharedir cfg -- TODO why doesn't this work?
         -- , shakeCloud = ["localhost"] -- TODO why doesn't this work?
         -- , shakeLineBuffering = True
@@ -223,29 +223,10 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO add a top-level retry here? seems like it would solve the read issues
 eval :: [Module] -> Handle -> Config -> LocksRef -> IDsRef -> DigestsRef -> Type -> Rules ResPath -> IO ()
 eval mods hdl cfg ref ids dr rtype p = do
-  start <- getCurrentTime
-  nproc <- getNumProcessors
-  let ep = EvalProgress
-             { epTitle = takeFileName $ fromMaybe "ortholang" $ script cfg
-             , epStart  = start
-             , epUpdate = start
-             , epDone    = 0
-             , epTotal   = 0
-             , epThreads = nproc
-             , epWidth = fromMaybe 80 $ termcolumns cfg
-             , epArrowShaft = '—'
-             , epArrowHead = '▶'
-             }
-      delay = 100000 -- in microseconds
-      pOpts = P.Progress
-                { progressDelay = delay
-                , progressHandle = hdl
-                , progressInitial = ep
-                , progressRender = if not (progressbar cfg) then (const "") else renderProgress
-                }
-  ignoreErrors $ eval' delay pOpts p -- TODO ignoreErrors again?
+  po <- initProgress cfg hdl
+  ignoreErrors $ eval' po p -- TODO ignoreErrors again?
   where
-    eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake mods cfg ref ids dr pm delay $ do
+    eval' o rpath = P.withProgress o $ \pm -> myShake mods cfg ref ids dr pm $ do
       newRules mods
       (ResPath path) <- rpath
       let loc = "interpreter.eval.eval.eval'"

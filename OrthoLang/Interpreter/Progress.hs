@@ -14,12 +14,47 @@ import qualified System.Progress as P
 -- import Control.Monad
 
 import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
+import System.IO                      (Handle)
+import OrthoLang.Types
+import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
+import System.FilePath                ((</>), takeFileName)
 import System.Time.Utils (renderSecs)
 
 import GHC.Conc                   (getNumProcessors)
+-- import GHC.Conc                   (getNumProcessors)
 
 
+-- TODO what's with the a?
+myShakeProgress :: P.Meter' EvalProgress -> IO Progress -> IO a
+myShakeProgress pm = updateLoop delay . updateProgress pm
+  where
+    delay = 10000
 
+initProgress :: Config -> Handle -> IO (P.Progress EvalProgress)
+initProgress cfg hdl = do
+  start <- getCurrentTime
+  nproc <- getNumProcessors
+  -- TODO move to Progress?
+  let ep = EvalProgress
+             { epTitle = takeFileName $ fromMaybe "ortholang" $ script cfg
+             , epStart  = start
+             , epUpdate = start
+             , epDone    = 0
+             , epTotal   = 0
+             , epThreads = nproc
+             , epWidth = fromMaybe 80 $ termcolumns cfg
+             , epArrowShaft = '—'
+             , epArrowHead = '▶'
+             }
+      -- TODO move to Progress?
+      pDelay = 100000 -- in microseconds
+      opts = P.Progress
+                { progressDelay = pDelay
+                , progressHandle = hdl
+                , progressInitial = ep
+                , progressRender = if not (progressbar cfg) then (const "") else renderProgress
+                }
+  return opts
 
 -- TODO how to update one last time at the end?
 -- sample is in milliseconds (1000 = a second)
