@@ -105,7 +105,7 @@ aLoadHash hashSeqIDs t src = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoadHash"
       src' = fromPath loc cfg src
-  need' loc [src']
+  -- need' loc [src']
   md5 <- hashContent src
   let tmpDir'   = fromPath loc cfg $ cacheDir cfg "load"
       hashPath' = tmpDir' </> md5 <.> ext t

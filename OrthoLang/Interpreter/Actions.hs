@@ -404,8 +404,10 @@ writeCachedLines loc outPath content = do
   let cache = cachedLinesPath cfg content
   let loc' = loc ++ ".writeCachedLines" 
   debugA' loc' $ first50 content ++ " -> " ++ last50 cache
-  -- TODO prevent duplicate writes here?
-  withWriteOnce cache $ liftIO $ writeFile' cache $ unlines content -- TODO writeFile'?
+  withWriteOnce cache $ do
+    liftIO $ writeFile' cache $ unlines content -- TODO writeFile'?
+    -- trackWrite' [cache]
+  produces [cache]
   symlink (toPath loc' cfg outPath) (toPath loc' cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script
