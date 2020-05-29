@@ -16,3 +16,6 @@ DBOUT="$(dirname "$DBOUT")/result"
 # Shake requires that we write something to the actual outpath,
 # and the stdout summary seems a reasonable way to go. it also makes showing the db easier:
 makeblastdb -in "$FIXEDPATHS" -out "$DBOUT" -title "$TITLE" -dbtype "$DBTYPE" > "$DBOUT" 2> "${DBOUT}.err"
+
+# remove empty stderr files
+[ ! -s "${DBOUT}.err" ] && rm "${DBOUT}.err"
