@@ -313,7 +313,7 @@ aBlastdbget dbPrefix tmpDir nPath = do
       dbPrefix'  = fromPath loc cfg dbPrefix
       loc = "ortholang.modules.blastdb.aBlastdbget"
       dbPrefix'' = traceA loc dbPrefix' [dbPrefix', tmp', nPath']
-  need' loc [nPath']
+  -- need' loc [nPath']
   dbName <- fmap stripWhiteSpace $ readLit loc nPath' -- TODO need to strip?
   let dbPath = tmp' </> dbName
   liftIO $ createDirectoryIfMissing True tmp'
