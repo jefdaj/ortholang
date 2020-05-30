@@ -57,4 +57,4 @@ TEST_ARGS="--debug '.*' --test '$TEST_FILTER'"
 # exit $code2
 
 # local tests only pending server update
-nix-run "$STACK_CMD $TEST_ARGS"
+nix-shell shell.nix --command "$STACK_CMD $TEST_ARGS"
