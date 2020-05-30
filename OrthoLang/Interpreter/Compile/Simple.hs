@@ -117,8 +117,8 @@ aSimple' ::  Path
 aSimple' outPath actFn mTmpDir argPaths = do
   -- TODO probably not "simple tmp" anymore... remove? rename?
   cfg <- fmap fromJust getShakeExtra
-  let hashes     = concat $ intersperse "/" $ map digest argPaths'
-      loc = "interpreter.compile.basic.aSimple'"
+  let loc = "interpreter.compile.basic.aSimple'"
+      hashes     = concat $ intersperse "/" $ map (digest loc) argPaths'
       argPaths'  = map (fromPath loc cfg) argPaths
       outPath'   = fromPath loc cfg outPath
       out = traceA loc outPath' (outPath':tmpDir':argPaths')
@@ -126,7 +126,7 @@ aSimple' outPath actFn mTmpDir argPaths = do
                   Nothing  -> (toPath loc cfg $ tmpdir cfg, tmpdir cfg)
                   Just dir -> let d = fromPath loc cfg dir </> hashes in (toPath loc cfg d, d)
   need' loc argPaths'
-  argPaths'' <- liftIO $ mapM (fmap (toPath loc cfg) . resolveSymlinks (Just $ tmpdir cfg)) argPaths'
+  argPaths'' <- liftIO $ mapM (fmap (toPath loc cfg) . resolveSymlinks (Just [tmpdir cfg </> "vars", tmpdir cfg </> "exprs"])) argPaths'
   let o' = debugC loc ("outPath': " ++ outPath' ++ "\"") outPath
       as = debugC loc ("argsPaths'': " ++ show argPaths'') argPaths''
   actFn tmpDir (o':as)

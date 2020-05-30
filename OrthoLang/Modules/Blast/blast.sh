@@ -43,11 +43,12 @@ PARCMD="$PARCMD $BLASTCMD -db $DBNAME -evalue $EDEC -outfmt 6 -query"
 
 # echo "PARCMD: $PARCMD"
 
-$PARCMD > "${OUTDIR}/out" 2> "${OUTDIR}/err"
+$PARCMD > "${OUTDIR}/result" 2> "${OUTDIR}/err"
 
-if [[ -z "${OUTDIR}/out" ]]; then
+# remove empty stderr files
+[ ! -s "${OUTDIR}/err" ] && rm -f "${OUTDIR}/err"
+
+# mark empty result files as "real" for ortholang
+if [[ -z "${OUTDIR}/result" ]]; then
   echo "<<emptybht>>" > "${OUTDIR}/result"
-else
-  cd "$OUTDIR"
-  ln -s out result
 fi

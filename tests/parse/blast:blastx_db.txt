@@ -9,8 +9,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mgen" 
-            , aExpr = Fun faa.blastdb 
-                ( Just ( Seed 0 ) ) [] "makeblastdb_faa" 
+            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_prot" 
                 [ Fun faa Nothing [] "gbk_to_faa" 
                     [ Lit str "cds" 
                     , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321.gbk" ]
@@ -31,8 +30,7 @@ Script
                     [ Lit num "1.0e-5" 
                     , Ref fna Nothing [] 
                         ( Var ( RepID Nothing ) "mbov" )
-                    , Ref faa.blastdb 
-                        ( Just ( Seed 0 ) ) [] 
+                    , Ref faa.blastdb Nothing [] 
                         ( Var ( RepID Nothing ) "mgen" )
                     ] 
                 ]
@@ -53,8 +51,7 @@ Script
                         ( Var ( RepID Nothing ) "mbov" )
                     , Lst faa.blastdb Nothing 
                         [ Var ( RepID Nothing ) "mgen" ] 
-                        [ Ref faa.blastdb 
-                            ( Just ( Seed 0 ) ) [] 
+                        [ Ref faa.blastdb Nothing [] 
                             ( Var ( RepID Nothing ) "mgen" )
                         ]
                     ] 

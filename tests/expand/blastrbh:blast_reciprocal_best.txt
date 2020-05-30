@@ -1,7 +1,7 @@
 maga = load_faa "examples/sequences/Mycoplasma_agalactiae_PG2_protein_refseq.faa"
 mgen = load_faa "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa"
-fwdHits = blastp 1.0e-5 maga mgen
-revHits = blastp 1.0e-5 mgen maga
+fwdHits = blastp_db 1.0e-5 maga (makeblastdb_prot_all [mgen])
+revHits = blastp_db 1.0e-5 mgen (makeblastdb_prot_all [maga])
 bestFwd = best_hits fwdHits
 bestRec = reciprocal_best fwdHits revHits
 best5fwd = repeat bestFwd maga 5

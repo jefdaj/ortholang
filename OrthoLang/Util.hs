@@ -117,10 +117,12 @@ digestLength = 10
 -- Note that MD5 is no longer considered secure
 -- But for our purposes (checking for updated files) it doesn't matter.
 -- See https://en.wikipedia.org/wiki/MD5
-digest :: (Show a) => a -> String
-digest val = take digestLength $ show (hash asBytes :: Digest MD5)
+digest :: (Show a) => DebugLocation -> a -> String
+digest loc val = res'
   where
     asBytes = (C8.pack . show) val
+    res = take digestLength $ show (hash asBytes :: Digest MD5)
+    res' = trace (loc ++ ".digest") (show val ++ " -> \"" ++ res ++ "\"") res
 
 -----------
 -- paths --
@@ -160,8 +162,8 @@ rmAll = mapM_ removePathForcibly
  -
  - TODO why would there ever be a "does not exist" error?
  -}
-resolveSymlinks :: Maybe FilePath -> FilePath -> IO FilePath
-resolveSymlinks mPrefix path = do
+resolveSymlinks :: Maybe [FilePath] -> FilePath -> IO FilePath
+resolveSymlinks mPrefixes path = do
   -- liftIO $ putStrLn $ "resolveSymlinks path: \"" ++ path ++ "\""
   isLink <- pathIsSymbolicLink path
   if not isLink
@@ -170,10 +172,10 @@ resolveSymlinks mPrefix path = do
       relPath <- readSymbolicLink path
       absPath <- absolutize $ takeDirectory path </> relPath
       -- putStrLn $ "resolveSymlinks absPath: " ++ absPath
-      case mPrefix of
-        Nothing -> resolveSymlinks mPrefix absPath
-        Just p  -> if p `isPrefixOf` absPath
-                     then resolveSymlinks mPrefix absPath
+      case mPrefixes of
+        Nothing -> resolveSymlinks mPrefixes absPath
+        Just ps -> if any (\p -> p `isPrefixOf` absPath) ps
+                     then resolveSymlinks mPrefixes absPath
                      else return path
 
 -- kind of silly that haskell doesn't have this built in, but whatever

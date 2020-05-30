@@ -90,25 +90,25 @@ renderPng path g = do
 -- TODO do use the result var if possible! just have a special constructor for it and render a different color
 --      might need to use a special _inputs naming scheme. could be simple: result_inputs. lol
 plotVars :: Function
-plotVars = newMacro
+plotVars = newExprExpansion
   "plot_vars"
   [Exactly str]
   (Exactly png)
   (mkFlowChartMacro selectAll)
   [ReadsScript]
 
-selectAll :: Script -> [Expr] -> [Var]
-selectAll scr _ = map aVar $ sAssigns scr
+selectAll :: [Module] -> Script -> [Expr] -> [Var]
+selectAll _ scr _ = map aVar $ sAssigns scr
 
 -- | This inserts a plot_dot call with the complete dot structure in its str input.
 -- TODO implement the other two by applying a function to the script first?
-mkFlowChartMacro :: (Script -> [Expr] -> [Var]) -> MacroExpansion
-mkFlowChartMacro selectFn scr (Fun t ms vs n ((Lit str title):es)) = Fun t ms vs "plot_dot" [ds]
+mkFlowChartMacro :: ([Module] -> Script -> [Expr] -> [Var]) -> ExprExpansion
+mkFlowChartMacro selectFn mods scr (Fun t ms vs n ((Lit str title):es)) = Fun t ms vs "plot_dot" [ds]
   where
-    vs = selectFn scr es
+    vs = selectFn mods scr es
     dg = dotGraph title $ filter (\a -> aVar a `elem` vs) $ sAssigns scr
     ds = Lit str (show dg)
-mkFlowChartMacro _ _ e = error "ortholang.modules.flowchart.mkFlowChartMacro" $ "bad expr arg: " ++ show e
+mkFlowChartMacro _ _ _ e = error "ortholang.modules.flowchart.mkFlowChartMacro" $ "bad expr arg: " ++ show e
 
 
 ------------------
@@ -116,7 +116,7 @@ mkFlowChartMacro _ _ e = error "ortholang.modules.flowchart.mkFlowChartMacro" $ 
 ------------------
 
 plotDepends :: Function
-plotDepends = newMacro
+plotDepends = newExprExpansion
   "plot_depends"
   [Exactly str, AnyType "type of the expr whose depends will be plotted"]
   (Exactly png)
@@ -124,9 +124,9 @@ plotDepends = newMacro
   [ReadsScript]
 
   -- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
-selectDepends :: Script -> [Expr] -> [Var]
-selectDepends _ [expr] = depsOf expr
-selectDepends _ es = error "ortholang.modules.flowchart.selectDepends" $ "bad exprs: " ++ show es
+selectDepends :: [Module] -> Script -> [Expr] -> [Var]
+selectDepends _ _ [expr] = depsOf expr
+selectDepends _ _ es = error "ortholang.modules.flowchart.selectDepends" $ "bad exprs: " ++ show es
 
 
 -------------------
@@ -134,7 +134,7 @@ selectDepends _ es = error "ortholang.modules.flowchart.selectDepends" $ "bad ex
 -------------------
 
 plotRDepends :: Function
-plotRDepends = newMacro
+plotRDepends = newExprExpansion
   "plot_rdepends"
   [Exactly str, AnyType "type of the expr whose reverse depends will be plotted"]
   (Exactly png)
@@ -142,9 +142,9 @@ plotRDepends = newMacro
   [ReadsScript]
 
   -- Ref Type (Maybe Seed) [Var] Var -- do refs need a seed? yes! (i think?)
-selectRDepends :: Script -> [Expr] -> [Var]
-selectRDepends scr [Ref _ _ _ v] = v : rDepsOf scr v
-selectRDepends _ es = error "ortholang.modules.flowchart.selectRDepends" $ "bad exprs: " ++ show es
+selectRDepends :: [Module] -> Script -> [Expr] -> [Var]
+selectRDepends _ scr [Ref _ _ _ v] = v : rDepsOf scr v
+selectRDepends _ _ es = error "ortholang.modules.flowchart.selectRDepends" $ "bad exprs: " ++ show es
 
 
 ---------------------------
@@ -247,7 +247,6 @@ inputVars (Ref _ _ vs v      ) = [v]
 inputVars (Bop _ _ vs _ e1 e2) = nub $ concatMap inputVars [e1, e2] ++ concatMap varOf [e1, e2]
 inputVars (Fun _ _ vs _ es   ) = nub $ concatMap inputVars es ++ concatMap varOf es
 inputVars (Lst _ _ vs   es   ) = nub $ concatMap inputVars es ++ concatMap varOf es
-inputVars (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
 
 -- merges input edges, as explained here:
 -- https://mike42.me/blog/2015-02-how-to-merge-edges-in-graphviz
@@ -256,13 +255,14 @@ inputVars (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instea
 mkNodes' :: [Assign] -> ([LNode NLabel], NodeMap NLabel)
 mkNodes' assigns = mkNodes new nodes'
   where
+    loc = "ortholang.modules.flowchart.mkNodes'"
     selected = map aVar assigns
     varNodes = concatMap (\(Assign (Var _ v) _) -> [NLVar v]) assigns
     tmpNodes = concatMap (\(Assign (Var _ v) e) ->
                             let inputs = filter (`elem` selected) $ inputVars e
                             in if length inputs < 2
                               then []
-                              else [NLTmp (prefixOf e) (digest e)])
+                              else [NLTmp (prefixOf e) (digest loc e)])
                          assigns
     nodes = varNodes ++ tmpNodes
     nodes' = trace "ortholang.modules.flowchart.mkNodes'" ("nodes: " ++ show nodes) nodes
@@ -281,8 +281,9 @@ mkInputEdges :: [String] -> Assign -> [(NLabel, NLabel, ELabel)]
 mkInputEdges selected (Assign (Var _ v) e) = directInputs
   where
     directInputs = if length inputs < 2 then edgesLabeled else edgesMerged
-    tmpNode      = NLTmp (prefixOf e) (digest e)
-    inputs       = filter (\i -> i `elem` selected) $ filter (/= (digest e)) $ inputNodes (digest e) e
+    loc = "ortholang.modules.flowchart.mkInputEdges"
+    tmpNode      = NLTmp (prefixOf e) (digest loc e)
+    inputs       = filter (\i -> i `elem` selected) $ filter (/= (digest loc e)) $ inputNodes (digest loc e) e
     edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow (prefixOf e))) inputs
     edgesMerged  = map (\i -> (NLVar i, tmpNode, ELTail)) inputs ++ [(tmpNode, NLVar v, ELHead)]
 

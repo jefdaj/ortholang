@@ -24,12 +24,12 @@ module OrthoLang.Interpreter.Eval
   )
   where
 
-import OrthoLang.Debug
 import OrthoLang.Errors (oneLineShakeErrors)
 import Development.Shake
 import Text.PrettyPrint.HughesPJClass hiding ((<>))
 
 import OrthoLang.Types
+import OrthoLang.Interpreter.Progress (EvalProgress(..), myShakeProgress, initProgress, completeProgress)
 import OrthoLang.Script (expandMacros)
 -- import OrthoLang.Interpreter.Pretty (renderIO)
 -- import OrthoLang.Interpreter.Config (debug)
@@ -40,32 +40,32 @@ import Data.Dynamic (Dynamic, toDyn, dynTypeRep)
 import Data.Typeable (TypeRep)
 -- import Data.List (isPrefixOf)
 
-import Data.Maybe                     (maybeToList, isJust, fromMaybe, fromJust)
-import OrthoLang.Interpreter.Compile         (compileScript, rExpr, newRules)
+import Data.Maybe                     (maybeToList)
+import OrthoLang.Interpreter.Compile         (compileScript, newRules)
 import OrthoLang.Interpreter.Parse            (parseFileIO)
 import OrthoLang.Interpreter.Paths            (Path, toPath, fromPath)
 import OrthoLang.Locks            (withReadLock')
 import OrthoLang.Interpreter.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Interpreter.Actions          (readLits, readPaths)
--- import OrthoLang.Util             (ignoreErrors)
+import OrthoLang.Util             (ignoreErrors)
 import System.IO                      (Handle)
-import System.FilePath                ((</>), takeFileName)
+import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
-import Control.Monad                  (when)
+-- import Control.Monad                  (when)
 -- import System.Directory               (createDirectoryIfMissing)
 -- import Control.Concurrent.Thread.Delay (delay)
 -- import Control.Retry          (rsIterNumber)
 -- import Control.Exception.Safe (catchAny)
 
-import Control.Concurrent
+-- import Control.Concurrent
 -- import Data.Foldable
 import qualified System.Progress as P
 -- import Data.IORef
 -- import Data.Monoid
 -- import Control.Monad
 
-import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
-import System.Time.Utils (renderSecs)
+-- import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
+-- import System.Time.Utils (renderSecs)
 
 import GHC.Conc                   (getNumProcessors)
 
@@ -74,85 +74,11 @@ import GHC.Conc                   (getNumProcessors)
 -- import qualified Data.Text.Lazy as T
 -- import Text.Pretty.Simple (pShowNoColor)
 
--- TODO how to update one last time at the end?
--- sample is in milliseconds (1000 = a second)
-updateLoop :: Int -> IO a -> IO b
-updateLoop delay updateFn = do
-  threadDelay delay
-  _ <- updateFn
-  updateLoop delay updateFn
-
-updateProgress :: P.Meter' EvalProgress -> IO Progress -> IO ()
-updateProgress pm iosp = do
-  -- putStrLn "updating progress"
-  Progress{..} <- iosp -- this is weird, but the types check!
-  let d = countBuilt + countSkipped + 1
-      t = countBuilt + countSkipped + countTodo
-  update <- getCurrentTime
-  P.modifyMeter pm (\ep -> ep {epDone = d, epTotal = t, epUpdate = update})
-  -- unless (d >= t) $ do
-    -- threadDelay $ 1000 * 100
-    -- updateProgress pm iosp
-  -- return ()
-
-completeProgress :: P.Meter' EvalProgress -> Action ()
-completeProgress pm = do
-  liftIO $ P.modifyMeter pm (\ep2 -> ep2 {epDone = epTotal ep2})
-  -- Exit _ <- command [] "sync" [] -- why is this needed?
-  return ()
-
-data EvalProgress = EvalProgress
-  { epTitle   :: String
-
-  -- together these two let you get duration,
-  -- and epUpdate alone seeds the progress bar animation (if any)
-  , epUpdate  :: UTCTime
-  , epStart   :: UTCTime
-
-  , epDone    :: Int
-  , epTotal   :: Int
-  , epThreads :: Int
-  , epWidth   :: Int
-  , epArrowHead :: Char
-  , epArrowShaft :: Char
-  }
-
--- TODO hey should the state just be a Progress{..} itself? seems simpler + more flexible
-renderProgress :: EvalProgress -> String
-renderProgress EvalProgress{..}
-  | (round $ diffUTCTime epUpdate epStart) < (5 :: Int) || epDone == 0 = ""
-  | otherwise = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [fraction, time]
-  where
-    -- details  = if epDone >= epTotal then [] else [fraction]
-    time = renderTime epStart epUpdate
-    fraction = "[" ++ working ++ "/" ++ show epTotal ++ "]" -- TODO skip fraction when done
-    firstTask = min epTotal $ epDone + 1
-    lastTask  = min epTotal $ epDone + epThreads
-    threads  = if firstTask == lastTask then 1 else lastTask - firstTask + 1
-    working  = show firstTask ++ if threads < 2 then "" else "-" ++ show lastTask
-    arrowWidth = epWidth - length epTitle - length time - length fraction
-    arrowFrac  = ((fromIntegral epDone) :: Double) / (fromIntegral epTotal)
-    arrow = if epStart == epUpdate then replicate arrowWidth ' '
-            else renderBar arrowWidth threads arrowFrac epArrowShaft epArrowHead
-
-renderTime :: UTCTime -> UTCTime -> String
-renderTime start update = renderSecs $ round $ diffUTCTime update start
-
-renderBar :: Int -> Int -> Double -> Char -> Char -> String
-renderBar total _ fraction _ _ | fraction == 0 = replicate total ' '
-renderBar total nThreads fraction shaftChar headChar = shaft ++ heads ++ blank
-  where
-    -- hl a = map (\(i, c) -> if (updates + i) `mod` 15 == 0 then '-' else c) $ zip [1..] a
-    len     = ceiling $ fraction * fromIntegral total
-    shaft   = replicate len shaftChar
-    heads   = replicate nThreads headChar
-    blank   = replicate (total - len - nThreads - 1) ' '
-
 -- TODO use hashes + dates to decide which files to regenerate?
 -- alternatives tells Shake to drop duplicate rules instead of throwing an error
 myShake :: [Module] -> Config -> LocksRef -> IDsRef -> DigestsRef
-        -> P.Meter' EvalProgress -> Int -> Rules () -> IO ()
-myShake mods cfg ref ids dr pm delay rules = do
+        -> P.Meter' EvalProgress -> Rules () -> IO ()
+myShake mods cfg ref ids dr pm rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
   nproc <- getNumProcessors
   let tDir = tmpdir cfg
@@ -164,7 +90,7 @@ myShake mods cfg ref ids dr pm delay rules = do
         , shakeAbbreviations = [(tDir, "$TMPDIR"), (workdir cfg, "$WORKDIR")]
         , shakeChange    = ChangeModtimeAndDigestInput
         -- , shakeCommandOptions = [EchoStdout True]
-        , shakeProgress = updateLoop delay . updateProgress pm
+        , shakeProgress = myShakeProgress pm
         -- , shakeShare = sharedir cfg -- TODO why doesn't this work?
         -- , shakeCloud = ["localhost"] -- TODO why doesn't this work?
         -- , shakeLineBuffering = True
@@ -176,7 +102,8 @@ myShake mods cfg ref ids dr pm delay rules = do
         -- This prints annoying errors whenever a file is accessed unexpectedly
         -- TODO remove ignore patterns as you solve them
         -- TODO is there a difference between relative and absolute paths as shake keys?
-        , shakeLint = Just LintFSATrace
+        -- , shakeLint = Just LintFSATrace
+        , shakeLint = Nothing
         , shakeLintInside =
             [ tDir </> "exprs"
             , tDir </> "cache"
@@ -187,6 +114,7 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//cache/concat/*.txt"
             , "//cache/curl/*"
             , "//cache/each//args"
+            , "//cache/each//result"
             , "//cache/hmmsearch/result"
             , "//cache/lines/*.txt"
             , "//cache/load/*.f*a"
@@ -211,6 +139,7 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//exprs/diamond_makedb//result"
             , "//exprs/extract_ids//result"
             , "//exprs/extract_queries//tmp"
+            , "//exprs/extract_queries//result"
             , "//exprs/extract_scored//tmp"
             , "//exprs/extract_scores//tmp"
             , "//exprs/extract_seqs//result"
@@ -230,6 +159,13 @@ myShake mods cfg ref ids dr pm delay rules = do
             , "//exprs/reciprocal_best//result"
             , "//exprs/tblast*//out"
             , "//exprs/translate//result"
+            , "//exprs/makeblastdb_*_all//result"
+            , "//exprs/makeblastdb_*_all_each//result"
+            , "//exprs/*blast*_db//result"
+            , "//exprs/blastp_db//out"
+            , "//exprs/blastp_db//result"
+            , "//exprs/*blast*_db_each//result"
+            , "//exprs/length//result"
             ]
         }
 
@@ -286,29 +222,10 @@ prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
 -- TODO add a top-level retry here? seems like it would solve the read issues
 eval :: [Module] -> Handle -> Config -> LocksRef -> IDsRef -> DigestsRef -> Type -> Rules ResPath -> IO ()
 eval mods hdl cfg ref ids dr rtype p = do
-  start <- getCurrentTime
-  nproc <- getNumProcessors
-  let ep = EvalProgress
-             { epTitle = takeFileName $ fromMaybe "ortholang" $ script cfg
-             , epStart  = start
-             , epUpdate = start
-             , epDone    = 0
-             , epTotal   = 0
-             , epThreads = nproc
-             , epWidth = fromMaybe 80 $ termcolumns cfg
-             , epArrowShaft = '—'
-             , epArrowHead = '▶'
-             }
-      delay = 100000 -- in microseconds
-      pOpts = P.Progress
-                { progressDelay = delay
-                , progressHandle = hdl
-                , progressInitial = ep
-                , progressRender = if progressbar cfg then (const "") else renderProgress
-                }
-  eval' delay pOpts p -- TODO ignoreErrors again?
+  po <- initProgress cfg hdl
+  ignoreErrors $ eval' po p -- TODO ignoreErrors again?
   where
-    eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake mods cfg ref ids dr pm delay $ do
+    eval' o rpath = P.withProgress o $ \pm -> myShake mods cfg ref ids dr pm $ do
       newRules mods
       (ResPath path) <- rpath
       let loc = "interpreter.eval.eval.eval'"
@@ -316,7 +233,8 @@ eval mods hdl cfg ref ids dr rtype p = do
       "eval" ~> do
         alwaysRerun
         need ["reloadids"]
-        actionRetry 9 $ need [path]
+        -- actionRetry 9 $ need [path]
+        need [path] -- TODO need'?
         completeProgress pm -- TODO only when doing the progressbar?
       -- writes unhashed output to outfile
       "outfile" ~> case outfile cfg of
@@ -374,7 +292,7 @@ printShort cfg ref idsref pm rtype path = do
 -- TODO get the type of result and pass to eval
 evalScript :: [Module] -> Handle -> GlobalEnv -> IO ()
 evalScript mods hdl (scr, c, ref, ids, dRef) =
-  let scr' = expandMacros mods scr
+  let scr' = expandMacros mods scr c dRef
       -- res  = sResult scr'
       -- as'  = sAssigns scr'
       -- as'' = trace "ortholang.core.eval.evalScript" ("after macro expansion: " ++ unlines (map show as')) as'

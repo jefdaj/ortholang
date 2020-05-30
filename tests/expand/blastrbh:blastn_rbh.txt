@@ -1,8 +1,8 @@
 mgen = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
 maga = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
 n = 1.0e-5
-fwd = blastn n mgen maga
-rev1 = blastn n maga mgen
+fwd = blastn_db n mgen (makeblastdb_fna_all [maga])
+rev1 = blastn_db n maga (makeblastdb_fna_all [mgen])
 rev2 = blastn_rev n mgen maga
 rbh1 = reciprocal_best fwd rev1
 rbh2 = reciprocal_best fwd rev2

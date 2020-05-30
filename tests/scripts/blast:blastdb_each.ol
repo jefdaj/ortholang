@@ -4,25 +4,26 @@ sfna1 = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
 sfaa1 = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
 sfna2 = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
 sfaa2 = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
-sdbfna = [blastn_db 1.0e-5 qfna (makeblastdb_fna sfna1),
-          blastn_db 1.0e-5 qfna (makeblastdb_fna sfna2)]
-sdbfaa = [blastp_db 1.0e-5 qfaa (makeblastdb_faa sfaa1),
-          blastp_db 1.0e-5 qfaa (makeblastdb_faa sfaa2)]
+sdbfna = [blastn_db 1.0e-5 qfna (makeblastdb_nucl sfna1),
+          blastn_db 1.0e-5 qfna (makeblastdb_nucl sfna2)]
+sdbfaa = [blastp_db 1.0e-5 qfaa (makeblastdb_prot sfaa1),
+          blastp_db 1.0e-5 qfaa (makeblastdb_prot sfaa2)]
 sfafna = [blastn 1.0e-5 qfna sfna1, blastn 1.0e-5 qfna sfna2]
 sfafaa = [blastp 1.0e-5 qfaa sfaa1, blastp 1.0e-5 qfaa sfaa2]
 mdbfna = blastn_db_each 1.0e-5
                         qfna
-                        [makeblastdb_fna sfna1, makeblastdb_fna sfna2]
+                        [makeblastdb_nucl sfna1, makeblastdb_nucl sfna2]
 mdbfaa = blastp_db_each 1.0e-5
                         qfaa
-                        [makeblastdb_faa sfaa1, makeblastdb_faa sfaa2]
+                        [makeblastdb_prot sfaa1, makeblastdb_prot sfaa2]
 mfafna = blastn_each 1.0e-5 qfna [sfna1, sfna2]
 mfafaa = blastp_each 1.0e-5 qfaa [sfaa1, sfaa2]
-result = any (extract_queries_each sdbfna |
-              extract_queries_each sdbfaa |
-              extract_queries_each mdbfna |
-              extract_queries_each mdbfaa |
-              extract_queries_each sfafna |
-              extract_queries_each sfafaa |
-              extract_queries_each mfafna |
-              extract_queries_each mfafaa)
+queries = any (extract_queries_each sdbfna |
+               extract_queries_each sdbfaa |
+               extract_queries_each mdbfna |
+               extract_queries_each mdbfaa |
+               extract_queries_each sfafna |
+               extract_queries_each sfafaa |
+               extract_queries_each mfafna |
+               extract_queries_each mfafaa)
+result = queries

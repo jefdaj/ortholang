@@ -54,19 +54,19 @@ bht = Type
 -- TODO need a separate db type for reverse fns?
 type BlastDesc =
   ( String  -- name and also system command to call
-  , Type -- query fasta type
-  , Type -- subject type when starting from fasta
-  , Type -- subject type when starting from db
+  , Type   -- query fasta type
+  , Type   -- subject type when starting from fasta
+  , String -- subject type when starting from db
   )
 
 blastDescs :: [BlastDesc]
 blastDescs =
-  [ ( "blastn"   , fna, fna, fna) -- old blastn default for more distant sequences
-  , ( "megablast", fna, fna, fna) -- new blastn default (highly similar sequences)
-  , ( "blastp"   , faa, faa, faa)
-  , ( "blastx"   , fna, faa, faa)
-  , ("tblastn"   , faa, fna, fna)
-  , ("tblastx"   , fna, fna, fna)
+  [ ( "blastn"   , fna, fna, "nucl") -- old blastn default for more distant sequences
+  , ( "megablast", fna, fna, "nucl") -- new blastn default (highly similar sequences)
+  , ( "blastp"   , faa, faa, "prot")
+  , ( "blastx"   , fna, faa, "prot")
+  , ("tblastn"   , faa, fna, "nucl")
+  , ("tblastx"   , fna, fna, "nucl")
   ]
 
 ----------------
@@ -74,18 +74,29 @@ blastDescs =
 ----------------
 
 mkBlastFromDb :: BlastDesc -> Function
-mkBlastFromDb d@(bCmd, qType, _, sType) = Function
-  { fOpChar = Nothing
-  , fName = bCmd ++ "_db"
-  , fInputs = [Exactly num, Exactly qType, Exactly (EncodedAs blastdb sType)]
-  , fOutput = Exactly bht
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDb d
-  }
+mkBlastFromDb (bCmd, qType, _, np) =
+  let dbType = if np == "nucl" then fna else faa
+  in newFnA3
+       (bCmd ++ "_db")
+       (Exactly num, Exactly qType, Exactly (EncodedAs blastdb dbType))
+       (Exactly bht)
+       (aMkBlastFromDb2 bCmd)
+       [Nondeterministic]
 
 -- TODO remove tmp?
-rMkBlastFromDb :: BlastDesc -> RulesFn
-rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
+-- rMkBlastFromDb :: BlastDesc -> RulesFn
+-- rMkBlastFromDb (bCmd, _, _, _) = rSimple $ aMkBlastFromDb bCmd
+
+-- TODO unify with aMkBlastFromDb below when ready
+aMkBlastFromDb2 :: String -> NewAction3
+aMkBlastFromDb2 bCmd (ExprPath o') e' q' p' = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.blast.aMkBlastFromDb2"
+      o = toPath loc cfg o'
+      q = toPath loc cfg q'
+      p = toPath loc cfg p'
+      e = toPath loc cfg e'
+  aMkBlastFromDb bCmd [o, e, q, p]
 
 aMkBlastFromDb :: String -> ([Path] -> Action ())
 aMkBlastFromDb bCmd [o, e, q, p] = do
@@ -149,6 +160,7 @@ aMkBlastFromDb bCmd [o, e, q, p] = do
   let stdoutPath = replaceBaseName o'' "out"
       stderrPath = replaceBaseName o'' "err"
   ref <- fmap fromJust getShakeExtra
+  need' loc [prefix']
   liftIO $ removeIfExists ref stdoutPath
   liftIO $ removeIfExists ref stderrPath
   runCmd $ CmdDesc
@@ -164,7 +176,7 @@ aMkBlastFromDb bCmd [o, e, q, p] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [o'' ++ "*", stdoutPath, stderrPath]
     }
-  symlink o (toPath loc cfg stdoutPath)
+  -- symlink o (toPath loc cfg stdoutPath) -- TODO reverse it? move/copy instead?
 aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
 
 -------------
@@ -172,67 +184,58 @@ aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
 -------------
 
 mkBlastFromFa :: BlastDesc -> Function
-mkBlastFromFa d@(bCmd, qType, sType, _) = Function
-  { fOpChar = Nothing
-  , fName = bCmd
-  , fInputs = [Exactly num, Exactly qType, Exactly sType]
-  , fOutput = Exactly bht
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFa d
-  }
+mkBlastFromFa d@(bCmd, qType, faType, _) = newExprExpansion
+  bCmd
+  [Exactly num, Exactly qType, Exactly faType]
+  (Exactly bht)
+  (mMkBlastFromFa d)
+  [Nondeterministic]
 
--- inserts a "makeblastdb" call and reuses the _db compiler from above
--- TODO check this works after writing the new non- _all makeblastdb fns
-rMkBlastFromFa :: BlastDesc -> RulesFn
-rMkBlastFromFa d@(_, _, _, sType) st (Fun rtn seed deps _ [e, q, s])
-  = rules st (Fun rtn seed deps name1 [e, q, dbExpr])
+mMkBlastFromFa :: BlastDesc -> ExprExpansion
+mMkBlastFromFa (bCmd, _, _, np) _ _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
   where
-    rules = fOldRules $ mkBlastFromDb d
-    name1 = fName $ mkBlastFromDb d
-    name2 = "makeblastdb_" ++ ext sType
-    dbExpr = Fun (EncodedAs blastdb sType) seed (depsOf s) name2 [s] 
-rMkBlastFromFa _ _ _ = fail "bad argument to rMkBlastFromFa"
+    dbType = if np == "nucl" then fna else faa
+    name1 = bCmd ++ "_db"
+    name2 = "makeblastdb_" ++ np -- TODO would the _all version withSingleton arg be better?
+    expr = Fun (EncodedAs blastdb dbType) Nothing (depsOf s) name2 [s]
+mMkBlastFromFa _ _ _ e = error "ortholang.modules.blast.mkBlastFromFa" $ "bad arg: " ++ show e
+
 
 ---------------------
 -- *blast*_db_each --
 ---------------------
 
+-- TODO why no re-running bug here?
 mkBlastFromDbEach :: BlastDesc -> Function
-mkBlastFromDbEach d@(bCmd, qType, _, sType) = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb sType))]
-  , fOutput = Exactly (ListOf bht)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromDbEach d
-  }
-  where
-    name = bCmd ++ "_db_each"
+mkBlastFromDbEach (bCmd, qType, _, np) =
+  let dbType = if np == "nucl" then fna else faa
+  in newFnA3
+       (bCmd ++ "_db_each")
+       (Exactly num, Exactly qType, Exactly (ListOf (EncodedAs blastdb dbType)))
+       (Exactly (ListOf bht))
+       (newMap3of3 $ bCmd ++ "_db")
+       [Nondeterministic]
 
-rMkBlastFromDbEach :: BlastDesc -> RulesFn
-rMkBlastFromDbEach (bCmd, _, _, _) = rMap 3 $ aMkBlastFromDb bCmd
 
 ------------------
 -- *blast*_each --
 ------------------
 
+-- TODO find the re-running bug here
 mkBlastFromFaEach :: BlastDesc -> Function
-mkBlastFromFaEach d@(bCmd, qType, faType, _) = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf faType)]
-  , fOutput = Exactly (ListOf bht)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaEach d
-  }
-  where
-    name = bCmd ++ "_each"
+mkBlastFromFaEach d@(bCmd, qType, faType, _) = newExprExpansion
+  (bCmd ++ "_each")
+  [Exactly num, Exactly qType, Exactly (ListOf faType)]
+  (Exactly (ListOf bht))
+  (mBlastFromFaEach d)
+  [Nondeterministic]
 
--- combination of the two above: insert the makeblastdbcall, then map
-rMkBlastFromFaEach :: BlastDesc -> RulesFn
-rMkBlastFromFaEach d@(_, _, _, sType) st (Fun rtn seed deps _   [e, q, ss])
-  =                              rules st (Fun rtn seed deps fn2 [e, q, ss'])
+mBlastFromFaEach :: BlastDesc -> ExprExpansion
+mBlastFromFaEach d@(_, _, _, np) _ _ (Fun rtn seed deps _   [e, q, ss])
+  =                                  (Fun rtn seed deps fn2 [e, q, ss'])
   where
-    rules = rMkBlastFromDbEach d
-    ss'   = Fun (ListOf (EncodedAs blastdb sType)) seed (depsOf ss) fn1 [ss]
-    fn1   = "makeblastdb_" ++ ext sType ++ "_each"
+    dbType = if np == "nucl" then fna else faa
+    ss'   = Fun (ListOf (EncodedAs blastdb dbType)) Nothing (depsOf ss) fn1 [ss]
+    fn1   = "makeblastdb_" ++ np ++ "_each"
     fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
-rMkBlastFromFaEach _ _ _ = fail "bad argument to rMkBlastFromFaEach"
+mBlastFromFaEach _ _ _ e = error "ortholang.modules.blast.mkBlastFromFaEach" $  "bad arg: " ++ show e

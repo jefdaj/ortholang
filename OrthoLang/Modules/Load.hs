@@ -105,7 +105,7 @@ aLoadHash hashSeqIDs t src = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.load.aLoadHash"
       src' = fromPath loc cfg src
-  need' loc [src']
+  -- need' loc [src']
   md5 <- hashContent src
   let tmpDir'   = fromPath loc cfg $ cacheDir cfg "load"
       hashPath' = tmpDir' </> md5 <.> ext t
@@ -177,7 +177,8 @@ aLoadListPaths hashSeqIDs o@(ExprPath out') linksPath' = do
   dRef <- fmap fromJust getShakeExtra
   (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef o -- TODO does this make sense?
   links  <- readLitPaths loc linksPath'
-  paths' <- liftIO $ mapM (resolveSymlinks $ Just $ tmpdir cfg) $ map (fromPath loc cfg) links -- TODO remove?
+  paths' <- liftIO $ mapM (resolveSymlinks $ Just [tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]) $
+                     map (fromPath loc cfg) links -- TODO remove?
   let paths = map (toPath loc cfg) paths'
   hashPaths <- mapM (aLoadHash hashSeqIDs t) paths
   let hashPaths' = map (fromPath loc cfg) hashPaths

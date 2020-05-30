@@ -52,7 +52,7 @@ mms = Type
   { tExt  = "mms"
   , tDesc = "MMSeqs2 sequence database"
   , tShow = \cfg ref path -> do
-      path' <- fmap (-<.> "lookup") $ resolveSymlinks (Just $ tmpdir cfg) path
+      path' <- fmap (-<.> "lookup") $ resolveSymlinks (Just [tmpdir cfg]) path
       Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
       let n = headOrDie "failed to read first word of MMSeqs2 db description" $ words out
       -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' path'
@@ -94,7 +94,7 @@ rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
   let out    = exprPath cfg dRef scr e
       loc = "modules.mmseqs.aMmseqsCreateDbAll"
       out'   = debugRules loc e $ fromPath loc cfg out
-      createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest fas
+      createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest loc fas
       dbPath = createDbDir </> "result" -- TODO take hash from somewhere else?
       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
   out' %> \_ -> do
@@ -189,7 +189,7 @@ rMmseqsSearchDb scr e@(Fun _ seed _ _ [n, q, s]) = do
       -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
       -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
       searchDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search"
-      outDbBase = searchDbDir </> digest out <.> "mmseqs2db"
+      outDbBase = searchDbDir </> digest loc out <.> "mmseqs2db"
       -- outDb0    = outDbBase <.> "0" -- TODO remember to remove the .0 when referencing it!
       outDbIndex = outDbBase <.> "index" -- TODO remember to remove the ext when referencing it!
   outDbIndex %> \_ -> aMmseqsSearchDb ePath qPath sPath outDbBase
@@ -200,7 +200,8 @@ rMmseqsSearchDb _ e = fail $ "bad argument to rMmseqsSearch: " ++ show e
 -- TODO how should this handle the .index and other files issue?
 resolveMmseqsDb :: FilePath -> Action FilePath
 resolveMmseqsDb path = do
-  need [path] -- path is to a symlink to the main db file
+  let loc = "modules.mmseqs.resolveMmseqsDb"
+  need' loc [path] -- path is to a symlink to the main db file
   path' <- liftIO $ resolveSymlinks Nothing path
   -- let path''  = if ".index" `isSuffixOf` path'  then dropExtension path' else path'
   --     path''' = if "_h"     `isSuffixOf` path'' then init $ init path''  else path''

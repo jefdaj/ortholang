@@ -27,7 +27,7 @@ compose1
   -> Function -- ^ first function (takes inputs, returns 1 intermediate file)
   -> Function -- ^ second function (takes intermediate file, produces output)
   -> Function -- ^ overall fn (runs fn1, then fn2 on its output)
-compose1 name ts fn1 fn2 = newMacro name (fInputs fn1) (fOutput fn2) macro' ts
+compose1 name ts fn1 fn2 = newExprExpansion name (fInputs fn1) (fOutput fn2) macro' ts
   where
     macro = mCompose1 fn1 fn2
     macro' = macro `deepseq` macro -- force composition errors immediately
@@ -45,9 +45,12 @@ the second `Function`'s only input, but otherwise assumes the 'Expr' is set up
 properly. For example, it doesn't check the names.
 
 TODO try to factor some of this boilerplate out and make a generic mCompose
+
+TODO also need to make the first function's input more specific to match the second
+     if it's not obvious how, could just take it as an arg
 -}
-mCompose1 :: Function -> Function -> MacroExpansion
-mCompose1 f1 f2 _ (Fun r2 seed deps _ es)
+mCompose1 :: Function -> Function -> ExprExpansion
+mCompose1 f1 f2 _ _ (Fun r2 seed deps _ es)
 
   -- first check that f2 expects one input
   | length (fInputs f2) /= 1 =
@@ -74,4 +77,4 @@ mCompose1 f1 f2 _ (Fun r2 seed deps _ es)
                  in Fun r2 seed deps (fName f2) [e1]
 
 -- oh, and the very first check is that mCompose1 was given a Fun
-mCompose1 _ _ _ e = err $ "bad argument: " ++ show e
+mCompose1 _ _ _ _ e = err $ "bad argument: " ++ show e

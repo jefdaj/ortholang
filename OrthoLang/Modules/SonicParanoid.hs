@@ -60,7 +60,8 @@ aSonicParanoid [out, faListPath] = do
   cfg <- fmap fromJust getShakeExtra
   let cDir    = tmpdir cfg </> "cache" </> "sonicparanoid"
       sharedDir   = cDir </> "shared"
-      tmpDir      = cDir </> digest faListPath
+      loc = "modules.sonicparanoid.aSonicParanoid"
+      tmpDir      = cDir </> digest loc faListPath
       -- mmseqsDir   = sharedDir </> "mmseqs2_db"
       dbDir       = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" -- this is shared with the MMSeqs module TODO make explicit
       -- outDir      = tmpDir </> "result" -- TODO copy input files here?
@@ -72,7 +73,6 @@ aSonicParanoid [out, faListPath] = do
 
       faListPath' = fromPath loc cfg faListPath
       out'        = fromPath loc cfg out
-      loc = "modules.sonicparanoid.aSonicParanoid"
       statsPath''    = traceA loc out' [out', statsPath', faListPath']
   liftIO $ createDirectoryIfMissing True sharedDir
 

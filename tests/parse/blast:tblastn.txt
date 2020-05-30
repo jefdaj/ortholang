@@ -1,0 +1,120 @@
+Script 
+    { sAssigns = 
+        [ Assign 
+            { aVar = Var ( RepID Nothing ) "maga5" 
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "maga" 
+            , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "single" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "maga5" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "extract_queries" 
+                [ Fun bht 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "maga5" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] "tblastn" 
+                    [ Lit num "1.0e-5" 
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "maga5" )
+                    , Ref fna Nothing [] 
+                        ( Var ( RepID Nothing ) "maga" )
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "mapped" 
+            , aExpr = Fun str.list.list Nothing 
+                [ Var ( RepID Nothing ) "maga5" 
+                , Var ( RepID Nothing ) "maga" 
+                ] "extract_queries_each" 
+                [ Fun bht.list 
+                    ( Just ( Seed 0 ) ) 
+                    [ Var ( RepID Nothing ) "maga5" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] "tblastn_each" 
+                    [ Lit num "1.0e-5" 
+                    , Ref faa Nothing [] 
+                        ( Var ( RepID Nothing ) "maga5" )
+                    , Lst fna Nothing 
+                        [ Var ( RepID Nothing ) "maga" ] 
+                        [ Ref fna Nothing [] 
+                            ( Var ( RepID Nothing ) "maga" )
+                        ]
+                    ] 
+                ]
+            } 
+        , Assign 
+            { aVar = Var ( RepID Nothing ) "result" 
+            , aExpr = Fun str.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "maga5" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mapped" 
+                ] "all" 
+                [ Bop str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "maga5" 
+                    , Var ( RepID Nothing ) "maga" 
+                    , Var ( RepID Nothing ) "mapped" 
+                    ] "|" 
+                    ( Lst str.list Nothing 
+                        [ Var ( RepID Nothing ) "single" 
+                        , Var ( RepID Nothing ) "maga5" 
+                        , Var ( RepID Nothing ) "maga" 
+                        ] 
+                        [ Ref str.list Nothing 
+                            [ Var ( RepID Nothing ) "maga5" 
+                            , Var ( RepID Nothing ) "maga" 
+                            ] 
+                            ( Var ( RepID Nothing ) "single" )
+                        ]
+                    ) 
+                    ( Ref str.list.list Nothing 
+                        [ Var ( RepID Nothing ) "maga5" 
+                        , Var ( RepID Nothing ) "maga" 
+                        ] 
+                        ( Var ( RepID Nothing ) "mapped" )
+                    )
+                ]
+            } 
+        ] 
+    , sResult = Just 
+        ( Fun str.list Nothing 
+            [ Var ( RepID Nothing ) "single" 
+            , Var ( RepID Nothing ) "maga5" 
+            , Var ( RepID Nothing ) "maga" 
+            , Var ( RepID Nothing ) "mapped" 
+            ] "all" 
+            [ Bop str.list.list Nothing 
+                [ Var ( RepID Nothing ) "single" 
+                , Var ( RepID Nothing ) "maga5" 
+                , Var ( RepID Nothing ) "maga" 
+                , Var ( RepID Nothing ) "mapped" 
+                ] "|" 
+                ( Lst str.list Nothing 
+                    [ Var ( RepID Nothing ) "single" 
+                    , Var ( RepID Nothing ) "maga5" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    [ Ref str.list Nothing 
+                        [ Var ( RepID Nothing ) "maga5" 
+                        , Var ( RepID Nothing ) "maga" 
+                        ] 
+                        ( Var ( RepID Nothing ) "single" )
+                    ]
+                ) 
+                ( Ref str.list.list Nothing 
+                    [ Var ( RepID Nothing ) "maga5" 
+                    , Var ( RepID Nothing ) "maga" 
+                    ] 
+                    ( Var ( RepID Nothing ) "mapped" )
+                )
+            ]
+        )
+    } 

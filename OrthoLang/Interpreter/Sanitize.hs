@@ -58,7 +58,8 @@ import System.Exit                (ExitCode(..))
 hashIDsLine :: String -> (String, Maybe (String, String))
 hashIDsLine ('>':seqID) = ('>':idHash, Just (idHash, seqID)) -- TODO issue dropping newlines here?
   where
-    idHash = "seqid_" ++ digest seqID -- TODO does storing the extra seqid_ prefix slow it down?
+    loc = "ortholang.interpreter.sanitize.hashIDsLine"
+    idHash = "seqid_" ++ digest loc seqID -- TODO does storing the extra seqid_ prefix slow it down?
 hashIDsLine txt = (txt, Nothing)
 
 -- return the FASTA content with hashed IDs, along with a map of hashes -> original IDs

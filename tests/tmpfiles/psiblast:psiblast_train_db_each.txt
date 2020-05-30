@@ -8,29 +8,29 @@
 |   |   |-- 36189032ad.faa
 |   |   `-- 36189032ad.faa.ids
 |   |-- makeblastdb
-|   |   |-- c1b08194e1
+|   |   |-- 4ce56bb067
 |   |   |   |-- result
 |   |   |   |-- result.err
 |   |   |   |-- result.phr
 |   |   |   |-- result.pin
 |   |   |   `-- result.psq
-|   |   `-- d77632b774
+|   |   `-- 9223533d98
 |   |       |-- result
 |   |       |-- result.err
 |   |       |-- result.phr
 |   |       |-- result.pin
 |   |       `-- result.psq
 |   |-- map
-|   |   |-- 9e3a912f0e
+|   |   |-- 35872e75dd
 |   |   |   |-- result -> ../../../cache/lines/...
 |   |   |   `-- result.tmp.err
-|   |   `-- ea221ca111
+|   |   `-- da4a6b690a
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- result.tmp.err
 |   `-- psiblast
 |-- exprs
 |   |-- list
-|   |   |-- 43e27cd20e
+|   |   |-- 64d121d2ae
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 7666691bcd
 |   |   |   `-- result -> ../../../cache/lines/...
@@ -43,21 +43,19 @@
 |   |   |   `-- result -> ../../../cache/load/28e059b2a9.faa
 |   |   `-- f8a41afad4
 |   |       `-- result -> ../../../cache/load/11bbf54fc6.faa
-|   |-- makeblastdb_faa
+|   |-- makeblastdb_faa_all
 |   |   |-- 1898488812
-|   |   |   `-- 0
-|   |   |       `-- result -> ../../../../cache/lines/...
+|   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- 329cb2539d
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- c23938f494
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- psiblast_train_db_each
 |   |   `-- 0c631e7663
 |   |       `-- ec1f6f502d
-|   |           `-- 7d321eb17d
-|   |               `-- 0
+|   |           `-- 5a46b286da
+|   |               `-- s0
 |   |                   `-- result -> ../../../../../../cache/lines/...
 |   `-- str
 |       |-- 1e020faf26
@@ -67,10 +65,10 @@
 |       `-- 824ccbd8b2
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- magadb.faa.blastdb -> ../exprs/makeblastdb_faa/329cb2539d/0/result
-    |-- mgendb.faa.blastdb -> ../exprs/makeblastdb_faa/1898488812/0/result
-    |-- pssm.pssm.list -> ../exprs/psiblast_train_db_each/0c631e7663/ec1f6f502d/7d321eb17d/0/result
+    |-- magadb.faa.blastdb -> ../exprs/makeblastdb_faa_all/329cb2539d/result
+    |-- mgendb.faa.blastdb -> ../exprs/makeblastdb_faa_all/1898488812/result
+    |-- pssm.pssm.list -> ../exprs/psiblast_train_db_each/0c631e7663/ec1f6f502d/5a46b286da/s0/result
     |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
     `-- result -> ../vars/pssm.pssm.list
 
-35 directories, 38 files
+33 directories, 38 files

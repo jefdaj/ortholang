@@ -7,7 +7,7 @@
 |   |   |-- a34f77fb3c.fna
 |   |   `-- a34f77fb3c.fna.ids
 |   |-- makeblastdb
-|   |   `-- e2c09fad14
+|   |   `-- ec98a107d2
 |   |       |-- result
 |   |       |-- result.err
 |   |       |-- result.nhr
@@ -16,10 +16,10 @@
 |   `-- seqio
 |-- exprs
 |   |-- all
-|   |   `-- c094809a72
+|   |   `-- eed7f9cd53
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- extract_queries
-|   |   `-- 42c6ff5d9c
+|   |   `-- 3dc800ef80
 |   |       |-- result -> ../../../cache/lines/...
 |   |       `-- tmp
 |   |-- gbk_to_fna_rawids
@@ -40,15 +40,14 @@
 |   |-- load_gbk
 |   |   `-- b5a17d977e
 |   |       `-- result -> ../../../cache/load/28ce925871.gbk
-|   |-- makeblastdb_fna
+|   |-- makeblastdb_fna_all
 |   |   `-- bc5062d574
-|   |       `-- 0
-|   |           `-- result -> ../../../../cache/lines/...
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- num
 |   |   `-- a53b190835
 |   |       `-- result -> ../../../cache/lines/...
 |   |-- repeat
-|   |   `-- 31b0f38b7e
+|   |   `-- 621750630d
 |   |       `-- 494baa00c6
 |   |           `-- 723ab8a8d7
 |   |               `-- result -> ../../../../../cache/lines/...
@@ -62,16 +61,15 @@
 |   `-- tblastx_db
 |       `-- b6d4e4cdf4
 |           `-- 494baa00c6
-|               `-- f456b46f19
-|                   `-- 0
-|                       `-- result -> out
+|               `-- 78e97d02c8
+|                   `-- s0
+|                       `-- result
 |-- reps
-|   `-- c7c8a2a2e7
-|       |-- hits.str.list -> ../../exprs/extract_queries/42c6ff5d9c/result
-|       `-- result -> ../../reps/c7c8a2a2e7/hits.str.list
+|   `-- de68903918
+|       |-- hits.str.list -> ../../exprs/extract_queries/3dc800ef80/result
+|       `-- result -> ../../reps/de68903918/hits.str.list
 `-- vars
-    |-- genes5.fna -> ../exprs/load_fna/821d1bdfd1/result
     |-- maga.fna -> ../exprs/load_fna_path/fe2757ed86/result
-    `-- result -> ../exprs/all/c094809a72/result
+    `-- result -> ../exprs/all/eed7f9cd53/result
 
-43 directories, 31 files
+42 directories, 30 files

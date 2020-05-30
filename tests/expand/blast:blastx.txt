@@ -2,6 +2,8 @@ mbov = load_fna_path (gbk_to_fna_rawids "cds"
                                         (load_gbk "examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk"))
 mgen = load_faa_path (gbk_to_faa_rawids "cds"
                                         (load_gbk "examples/sequences/Mycoplasma_genitalium_M2321.gbk"))
-single = extract_queries (blastx 1.0e-5 mbov mgen)
-mapped = extract_queries_each (blastx_each 1.0e-5 mbov [mgen])
+single = extract_queries (blastx_db 1.0e-5 mbov (makeblastdb_prot_all [mgen]))
+mapped = extract_queries_each (blastx_db_each 1.0e-5
+                                              mbov
+                                              (makeblastdb_prot_all_each (singletons [mgen])))
 result = [single] | mapped

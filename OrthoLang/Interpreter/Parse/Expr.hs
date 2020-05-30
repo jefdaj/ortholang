@@ -135,7 +135,7 @@ mkBop bop = return $ \e1 e2 ->
          case typecheckFn [fromJust $ fOpChar bop] (fOutput bop) (bopInputs $ fInputs bop) [typeOf e1, typeOf e2] of
            Left  msg -> error "mkBop" msg -- TODO can't `fail` because not in monad here?
            -- TODO is the seed thing right here?
-           Right _ -> let seed = if Nondeterministic `elem` (fTags bop) then (Just $ Seed 0) else Nothing
+           Right _ -> let seed = if usesSeed bop then (Just $ Seed 0) else Nothing
                       in Bop r1 seed (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
 
         -- TODO is naming it after the opchar wrong now?
@@ -233,7 +233,7 @@ typecheckArgs fn args = case typecheckFn (fName fn) (fOutput fn) (fInputs fn) (m
   Left  msg -> parseFail msg
   Right rtn -> do
     -- TODO is the seed thing right here?
-    let seed = if Nondeterministic `elem` (fTags fn) then Just (Seed 0) else Nothing
+    let seed = if usesSeed fn then Just (Seed 0) else Nothing
         expr = Fun rtn seed deps (fName fn) args
         deps = foldr1 union $ map depsOf args
         -- TODO hey should ParseM be ReaderT Config, StateT Script ... instead of StateT both?

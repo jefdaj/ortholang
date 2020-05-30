@@ -211,7 +211,7 @@ mkExpandTest cfg ref ids dRef name cut expand = goldenDiff d expand expAct
     d = name ++ ".ol expands macros as expected"
     expAct = withTmpDirLock cfg ref $ do
       scr <- parseFileIO modules (emptyScript, cfg, ref, ids, dRef) cut
-      let scr' = expandMacros modules scr
+      let scr' = expandMacros modules scr cfg dRef
       txt <- renderIO cfg $ pPrint scr'
       return $ B8.pack txt
 

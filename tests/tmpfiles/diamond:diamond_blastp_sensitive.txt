@@ -9,12 +9,12 @@
 |   |-- diamond_blastp
 |   |   `-- 87c44c2675
 |   |       `-- ccc25bfe26
-|   |           `-- 926f3e2ba1
-|   |               `-- 0
+|   |           `-- 4421e53da1
+|   |               `-- s0
 |   |                   `-- result
 |   |-- diamond_makedb
 |   |   `-- afa6e907a5
-|   |       `-- 0
+|   |       `-- s0
 |   |           `-- result
 |   |-- load_faa
 |   |   |-- 1e0498b59a
@@ -32,6 +32,6 @@
 `-- vars
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
-    `-- result -> ../exprs/diamond_blastp/87c44c2675/ccc25bfe26/926f3e2ba1/0/result
+    `-- result -> ../exprs/diamond_blastp/87c44c2675/ccc25bfe26/4421e53da1/s0/result
 
 20 directories, 14 files

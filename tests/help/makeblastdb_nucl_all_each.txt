@@ -1,0 +1,5 @@
+makeblastdb_nucl_all_each : fa.list -> fna.blastdb.list
+
+where
+  fa = a fasta file (fna or faa)
+  fna = FASTA nucleic acid

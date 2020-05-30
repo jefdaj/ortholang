@@ -9,7 +9,6 @@ module OrthoLang.Types
   , hasVar
   , delVar
   , CacheDir(..)
-  , CompiledExpr(..)
   , Config(..)
   , DigestMap
   , DigestsRef
@@ -72,6 +71,7 @@ module OrthoLang.Types
   , runRulesR
   , seedOf
   , setSeed
+  , usesSeed
   , str
   , isLit
   , typeOf
@@ -196,32 +196,13 @@ data Expr
   | Bop Type (Maybe Seed) [Var] String  Expr Expr -- TODO remove seed?
   | Fun Type (Maybe Seed) [Var] String [Expr] -- TODO is the Eq instance wrong?
   | Lst Type (Maybe Seed) [Var] [Expr]
-  | Com CompiledExpr -- wrapper around previously-compiled rules (see below)
   deriving (Eq, Show)
 
 -- TODO remove?
 -- repOf :: Var -> RepID
 -- repOf (Var r _) = r
 
--- An expression that has already been compiled to Rules, wrapped so it can be
--- passed to another function. Because Rules can't be shown or compared, we
--- also carry around the original Expr. TODO is the expr necessary? helpful?
--- The CompiledExpr constructor is just here so we can customize the Show and Eq instances.
--- The extra ExprPath is weird, but seems to be required since we can't get at the second one.
--- TODO can it be removed? seems like a crutch/kludge
--- TODO but try re-implementing map first and see if it's useful for that
-data CompiledExpr = CompiledExpr Type ExprPath (Rules ExprPath)
 
--- TODO is it a bad idea to hide the compiled-ness?
--- TODO can this be made into a Path?
--- TODO is show ever really needed?
--- TODO remove show instance!
-instance Show CompiledExpr where
-  show (CompiledExpr t p _) = "CompiledExpr " ++ ext t ++ " " ++ show p ++ " <<Rules ExprPath>>"
-
--- CompiledExprs are compared by the expressions they were compiled from.
-instance Eq CompiledExpr where
-  (CompiledExpr _ p1 _) == (CompiledExpr _ p2 _) = p1 == p2
 
 -- TODO actual Eq instance, or what? how do we compare types?
 instance Pretty Expr where
@@ -231,7 +212,6 @@ instance Pretty Expr where
   pPrint (Ref _ _ _ v)    = pPrint v
   pPrint (Fun _ _ _ s es) = PP.text s <+> PP.sep (map pNested es)
   pPrint (Lst _ _ _ es)  = pList es
-  pPrint (Com (CompiledExpr t (ExprPath p) _)) = PP.text $ "Compiled " ++ ext t ++ " " ++ p
 
   -- this is almost right except it breaks lines too early (always nesting),
   -- which looks super weird for short bops:
@@ -263,8 +243,7 @@ pNested e = pPrint e
 
 -- TODO is this not actually needed? seems "show expr" handles it?
 seedOf :: Expr -> Maybe Seed
-seedOf (Lit _ _)                  = Nothing
-seedOf (Com (CompiledExpr _ _ _)) = Nothing -- TODO this makes sense right?
+seedOf (Lit _ _)          = Nothing
 seedOf (Lst _ ms _ _)     = ms
 seedOf (Ref _ ms _ _)     = ms
 seedOf (Bop _ ms _ _ _ _) = ms
@@ -278,7 +257,6 @@ setSeed r (Ref t ms ds v)       = Ref t (fmap (const $ Seed r) ms) ds v
 setSeed r (Bop t ms ds s e1 e2) = Bop t (fmap (const $ Seed r) ms) ds s (setSeed r e1) (setSeed r e2)
 setSeed r (Lst t ms ds   es   ) = Lst t (fmap (const $ Seed r) ms) ds   $ map (setSeed r) es
 setSeed r (Fun t ms ds s es)    = Fun t (fmap (const $ Seed r) ms) ds s $ map (setSeed r) es
-setSeed _ (Com (CompiledExpr _ _ _)) = error "types.setSeed" "not implemented for compiled rules" -- TODO should it be?
 
 
 -------------
@@ -367,7 +345,6 @@ typeOf (Ref  t _ _ _    ) = t
 typeOf (Bop  t _ _ _ _ _) = t
 typeOf (Fun  t _ _ _ _  ) = t
 typeOf (Lst  t _ _ _    ) = ListOf t
-typeOf (Com (CompiledExpr t _ _)) = t
 
 varOf :: Expr -> [Var]
 varOf (Ref _ _ _ v) = [v]
@@ -379,7 +356,6 @@ depsOf (Ref _ _ vs v      ) = v:vs -- TODO redundant?
 depsOf (Bop _ _ vs _ e1 e2) = nub $ vs ++ concatMap varOf [e1, e2]
 depsOf (Fun _ _ vs _ es   ) = nub $ vs ++ concatMap varOf es
 depsOf (Lst _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
-depsOf (Com (CompiledExpr _ _ _)) = [] -- TODO should this be an error instead? their deps are accounted for
 
 
 -----------
@@ -678,6 +654,9 @@ findFun mods name =
        (f:[]) -> Right f
        _      -> Left $ "function name collision! multiple fns match \"" ++ name ++ "\""
 
+usesSeed :: Function -> Bool
+usesSeed f = Nondeterministic `elem` fTags f
+
 findType :: [Module] -> String -> Maybe Type
 findType mods e = find (\t -> ext t == e') ts
   where
@@ -801,7 +780,7 @@ instance Pretty Function where
 
 data NewRules
   = NewRules (Rules ())
-  | NewMacro (Script -> Expr -> Expr) -- type alias in NewRules.hs for now
+  | NewMacro ([Module] -> Script -> Expr -> Expr) -- type alias in NewRules.hs for now
   | NewNotImplemented -- TODO remove
 
 -- this mostly checks equality, but also has to deal with how an empty list can

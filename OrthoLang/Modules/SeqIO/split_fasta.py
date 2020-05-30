@@ -3,7 +3,6 @@
 # Split one multifasta file into multiple single-sequences ones.
 # Names sequences sequentially to avoid any quoting issues.
 # Usage: split_fasta.py <outdir> <inprefix> <infasta>
-# TODO test this one
 
 from sys     import argv
 from os      import rename, remove, makedirs
@@ -76,9 +75,9 @@ def split_fasta(outlist, outdir, infasta, prefix, suffix):
         of.close()
         place_by_hash(oh, tmpfile, outdir, md5sum, suffix)
 
-def main(outlist, outdir, prefix, infasta):
-    ext = splitext(infasta)[-1]
-    split_fasta(outlist, outdir, infasta, prefix, ext)
+def main(outlist, outdir, prefix, infasta, ext):
+    suffix = '.' + ext
+    split_fasta(outlist, outdir, infasta, prefix, suffix)
 
 if __name__ == '__main__':
     main(*argv[1:])

@@ -17,7 +17,7 @@ module OrthoLang.Interpreter
   , aNewRulesS1
   , aNewRulesS2
   , aNewRulesS3
-  , newMacro
+  , newExprExpansion
   -- , ActionR
   , NewAction1
   , NewAction2
@@ -26,7 +26,12 @@ module OrthoLang.Interpreter
   -- , Function(..)
   -- , FnTag(..)
   -- , NewRules(..)
-  , MacroExpansion
+  , newMap1of1
+  , newMap2of2
+  , newMap2of3
+  , newMap3of3
+
+  , ExprExpansion
   , addDigest
   , decodeNewRulesType
   , decodeNewRulesDeps
@@ -112,7 +117,7 @@ module OrthoLang.Interpreter
 --   , typeOf
 
   -- * Old module API: Actions
-  -- , CompiledExpr(..)
+  -- , MappedExpr(..)
   , absolutizePaths
   , cachedLinesPath
   , debugA
@@ -170,6 +175,8 @@ module OrthoLang.Interpreter
   , fromGeneric
   , fromPath
   , toPath
+  , pathString
+  , stringPath
   , upBy
   , isURL
 

@@ -1,2 +1,2 @@
-$TMPDIR/cache/lines/efbda18116.txt
-$TMPDIR/cache/lines/2f5d57adc4.txt
+$TMPDIR/exprs/busco_list_lineages/4f1d387677/result
+$TMPDIR/exprs/busco_list_lineages/a10bc5cbb6/result
