@@ -156,7 +156,7 @@ aReplaceEachLinks outPath subPaths resPaths = do
       resPaths' = map (fromPath loc cfg) resPaths
       loc = "modules.summarize.aReplaceEachLinks"
       out = traceA loc outPath' (outPath':subPaths':resPaths')
-  -- need' loc (subPaths':resPaths') -- TODO is needing subPaths required?
+  need' loc (subPaths':resPaths') -- TODO is needing subPaths required?
 
   -- this fixes load:faa.ol but breaks repeat:load.ol and repeat:replace_each_recursive.ol
   -- wait no, it doesn't fix that either lol
