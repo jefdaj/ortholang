@@ -257,7 +257,7 @@ readLit :: DebugLocation -> FilePath -> Action String
 readLit loc path = do
   let loc = "ortholang.interpreter.actions.readLit"
   debugA' loc path
-  -- need' loc [path] -- Note isEmpty also does this
+  need' loc [path] -- note: this does actually seem to be important for reps!
   empty <- isEmpty path
   if empty
     then return ""

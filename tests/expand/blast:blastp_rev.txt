@@ -1,10 +1,10 @@
 maga5 = load_faa "examples/sequences/Mycoplasma_genitalium_M2321_5genes.faa"
 maga = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
 n = 1.0e-5
-singleFwd = extract_queries (blastp_db n maga5 (makeblastdb_faa_all [maga]))
+singleFwd = extract_queries (blastp_db n maga5 (makeblastdb_prot_all [maga]))
 mappedFwd = extract_queries_each (blastp_db_each n
                                                  maga5
-                                                 (makeblastdb_faa_all_each (singletons [maga])))
+                                                 (makeblastdb_prot_all_each (singletons [maga])))
 result = mappedFwd
 singleRev = extract_queries (blastp_rev n maga maga5)
 single = singleFwd | singleRev

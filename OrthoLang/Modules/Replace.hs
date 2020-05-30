@@ -131,6 +131,7 @@ rReplace' scr resExpr subVar@(Var _ _) subExpr = do
 {- Helper function to write the final list when the results are literals
  - TODO factor out, and maybe unify with rListLits
  - TODO subPaths is only one path? if so, rename it
+ - TODO what are the subpaths even used for?
  -}
 aReplaceEachLits :: Type -> Path -> Path -> [Path] -> Action ()
 aReplaceEachLits _ outPath subPaths resPaths = do
@@ -155,7 +156,7 @@ aReplaceEachLinks outPath subPaths resPaths = do
       resPaths' = map (fromPath loc cfg) resPaths
       loc = "modules.summarize.aReplaceEachLinks"
       out = traceA loc outPath' (outPath':subPaths':resPaths')
-  need' loc (subPaths':resPaths') -- TODO is needing subPaths required?
+  -- need' loc (subPaths':resPaths') -- TODO is needing subPaths required?
 
   -- this fixes load:faa.ol but breaks repeat:load.ol and repeat:replace_each_recursive.ol
   -- wait no, it doesn't fix that either lol

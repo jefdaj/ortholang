@@ -1,0 +1,4 @@
+makeblastdb_prot_all : faa.list -> faa.blastdb
+
+where
+  faa = FASTA amino acid

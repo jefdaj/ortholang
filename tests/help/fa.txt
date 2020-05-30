@@ -3,10 +3,11 @@ The fa extension is for FASTA nucleic OR amino acid.
 You can create them with these 1 functions:
   extract_seqs : fa str.list -> fa
 
-And use them with these 6 functions:
+And use them with these 7 functions:
   crb_blast : fna fa -> crb
   extract_ids : fa -> str.list
   extract_seqs : fa str.list -> fa
   extract_seqs_each : fa str.list.list -> fa.list
+  makeblastdb_nucl : fa -> fna.blastdb
   mmseqs_createdb : fa -> mms
   mmseqs_search_db : num fa mms -> bht

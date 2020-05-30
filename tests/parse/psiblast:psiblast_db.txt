@@ -6,7 +6,7 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "maga" 
-            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_prot" 
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
             } 
         , Assign 

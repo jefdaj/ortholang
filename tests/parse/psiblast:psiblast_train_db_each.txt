@@ -6,12 +6,12 @@ Script
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "mgendb" 
-            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_prot" 
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa" ] ]
             } 
         , Assign 
             { aVar = Var ( RepID Nothing ) "magadb" 
-            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_faa" 
+            , aExpr = Fun faa.blastdb Nothing [] "makeblastdb_prot" 
                 [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ] ]
             } 
         , Assign 
