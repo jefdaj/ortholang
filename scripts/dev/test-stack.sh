@@ -9,7 +9,7 @@ TEST_FILTER='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~
 # add module-specific scripts if any
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 [[ "$BRANCH" =~ module ]] \
-  && TEST_FILTER="$TEST_FILTER && \$5 ~/$(echo "$BRANCH" | cut -d'-' -f2):/"
+  && TEST_FILTER="$TEST_FILTER || \$5 ~/$(echo "$BRANCH" | cut -d'-' -f2):/"
 
 # override from the command line
 [[ -z "$1" ]] || TEST_FILTER="$1"
