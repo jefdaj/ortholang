@@ -7,9 +7,10 @@ set -o pipefail
 testfilter='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
 
 # add module-specific scripts if any
-BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-[[ "$BRANCH" =~ module ]] \
-  && testfilter="$testfilter || \$5 ~/$(echo "$BRANCH" | cut -d'-' -f2):/"
+branch="$TRAVIS_BRANCH"
+[[ -z "$branch" ]] && branch="$(git rev-parse --abbrev-ref HEAD)"
+[[ "$branch" =~ module ]] \
+  && testfilter="$testfilter || \$5 ~/$(echo "$branch" | cut -d'-' -f2):/"
 
 # override from the command line
 [[ -z "$1" ]] || testfilter="$1"
