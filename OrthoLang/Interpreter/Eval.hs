@@ -32,7 +32,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter.Progress (EvalProgress(..), myShakeProgress, initProgress, completeProgress)
 import OrthoLang.Script (expandMacros)
 -- import OrthoLang.Interpreter.Pretty (renderIO)
--- import OrthoLang.Interpreter.Config (debug)
+import OrthoLang.Interpreter.Config (os)
 
 -- import Control.Applicative ((<>))
 import qualified Data.HashMap.Strict as M
@@ -102,8 +102,8 @@ myShake mods cfg ref ids dr pm rules = do
         -- This prints annoying errors whenever a file is accessed unexpectedly
         -- TODO remove ignore patterns as you solve them
         -- TODO is there a difference between relative and absolute paths as shake keys?
-        -- , shakeLint = Just LintFSATrace
-        , shakeLint = Nothing -- fsatrace not made for darwin?
+        -- fsatrace not available on mac
+        , shakeLint = if os == "linux" then (Just LintFSATrace) else Nothing
         , shakeLintInside =
             [ tDir </> "exprs"
             , tDir </> "cache"
