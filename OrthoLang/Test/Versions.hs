@@ -13,11 +13,7 @@ import Test.Tasty                 (TestTree, TestName, testGroup)
 import Test.Tasty.Golden          (goldenVsString)
 import qualified Data.ByteString.Lazy.Char8 as C8
 import System.FilePath.Posix      (takeBaseName)
-
-import qualified System.Info as I
-
-os :: String
-os = if I.os == "darwin" then "mac" else I.os
+import OrthoLang.Interpreter.Config (os)
 
 -- TODO blastdbget makeblastdb cut blast tar hmmsearch orthogroups.py?
 --      greencut psiblast? seqiostuff sonicparanoid
