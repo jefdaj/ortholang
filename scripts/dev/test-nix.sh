@@ -34,7 +34,7 @@ bin-run() {
   rm -f $LOGFILE
   ./result/bin/ortholang $@ 2>&1 | tee -a $LOGFILE
   code="$?"
-  [[ $code == 0 ]] || cat $LOGFILE | tee -a "$LOGFILE"
+  [[ $code == 0 ]] || cat $LOGFILE
   return $code
 }
 
@@ -53,9 +53,11 @@ TEST_ARGS="--debug '.*' --test $TEST_FILTER"
 # code1="$?"
 
 # then locally to verify everything really works
-bin-run $TEST_ARGS
-code2="$?"
-
+# bin-run $TEST_ARGS
+# code2="$?"
 # exit nonzero if either run failed
 # [[ $code1 == 0 ]] || exit $code1
-exit $code2
+# exit $code2
+
+# local tests only pending server update
+bin-run $TEST_ARGS
