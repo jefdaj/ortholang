@@ -176,7 +176,8 @@ myShake mods cfg ref ids dr pm delay rules = do
         -- This prints annoying errors whenever a file is accessed unexpectedly
         -- TODO remove ignore patterns as you solve them
         -- TODO is there a difference between relative and absolute paths as shake keys?
-        , shakeLint = Just LintFSATrace
+        -- , shakeLint = Just LintFSATrace
+        , shakeLint = Nothing -- fsatrace not made for darwin?
         , shakeLintInside =
             [ tDir </> "exprs"
             , tDir </> "cache"

@@ -20,7 +20,7 @@ let
     stdenv
     bash
     bashInteractive
-    fsatrace # for shake linting
+    # fsatrace # for shake linting. none for darwin?
     coreutils
     diffutils
     glibcLocales # TODO even on mac?
