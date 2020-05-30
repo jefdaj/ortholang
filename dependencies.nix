@@ -32,7 +32,7 @@ let
     cacert # for curl https
     fontconfig.lib # for R plotting scripts
     graphviz
-  ] ++ lib.optional stdenv.isLinux [
+  ] ++ pkgs.lib.optionals (stdenv.isLinux) [
     fsatrace # for Shake linting. still not available on Mac?
   ];
 
