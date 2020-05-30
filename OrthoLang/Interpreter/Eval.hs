@@ -103,7 +103,7 @@ myShake mods cfg ref ids dr pm rules = do
         -- TODO remove ignore patterns as you solve them
         -- TODO is there a difference between relative and absolute paths as shake keys?
         -- , shakeLint = Just LintFSATrace
-        , shakeLint = Nothing
+        , shakeLint = Nothing -- fsatrace not made for darwin?
         , shakeLintInside =
             [ tDir </> "exprs"
             , tDir </> "cache"
