@@ -17,7 +17,7 @@ Script
             , aExpr = Fun faa.blastdb Nothing 
                 [ Var ( RepID Nothing ) "mgen" 
                 , Var ( RepID Nothing ) "maga" 
-                ] "makeblastdb_faa_all" 
+                ] "makeblastdb_prot_all" 
                 [ Lst faa Nothing 
                     [ Var ( RepID Nothing ) "mgen" 
                     , Var ( RepID Nothing ) "maga" 

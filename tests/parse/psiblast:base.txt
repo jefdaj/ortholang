@@ -11,7 +11,7 @@ Script
         , Assign 
             { aVar = Var ( RepID Nothing ) "magadb" 
             , aExpr = Fun faa.blastdb Nothing 
-                [ Var ( RepID Nothing ) "maga" ] "makeblastdb_faa" 
+                [ Var ( RepID Nothing ) "maga" ] "makeblastdb_prot" 
                 [ Ref faa Nothing [] 
                     ( Var ( RepID Nothing ) "maga" )
                 ]

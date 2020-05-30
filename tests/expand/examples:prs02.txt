@@ -4,7 +4,7 @@ pcc7942 = concat_faa [load_faa_path (gbk_to_faa_rawids "cds"
                       load_faa_path (gbk_to_faa_rawids "cds"
                                                        (load_gbk "examples/sequences/PCC_7942_pANL.gbk"))]
 cutoff = 1.0e-10
-hits = extract_queries (blastp_db cutoff pcc7942 (makeblastdb_faa_all [pcc6803]))
+hits = extract_queries (blastp_db cutoff pcc7942 (makeblastdb_prot_all [pcc6803]))
 cutoffs = [1.0e-5, 1.0e-10, 1.0e-20, 1.0e-50, 1.0e-100]
 lengths = replace_each (length hits) cutoff cutoffs
 result = lengths
