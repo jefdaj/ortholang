@@ -1,1 +1,1 @@
-R scripting front-end version 3.6.1 (2019-07-05)
+R scripting front-end version 3.6.2 (2019-12-12)
