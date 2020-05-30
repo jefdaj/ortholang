@@ -26,7 +26,7 @@ NIX_ARGS="" # TODO put back --pure?
 # LOGFILE="ortholang_${TEST_FILTER}_${TIMESTAMP}.log"
 LOGFILE='test.log'
 
-# nix-build $NIX_ARGS 2>&1 | tee -a $LOGFILE
+nix-build $NIX_ARGS 2>&1 | tee -a $LOGFILE
 # code0=$?
 # [[ $code0 == 0 ]] || exit $code0
 
