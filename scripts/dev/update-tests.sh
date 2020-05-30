@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 
 # Usage:
-# 1) nix-shell
-# 2) ./scripts/dev/update-tests.sh [filter]
-# 3) while that runs, periodically:
-#      git diff tests
-#      check that the changes make sense
-#      git add tests
+# ./scripts/dev/update-tests.sh [filter]
 #
 # Optional test filter follows this format:
 # https://ro-che.info/articles/2018-01-08-tasty-new-patterns
 #
 # For example:
 # ./scripts/dev/update-tests.sh '$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/'
+#
+# while that runs, periodically:
+#   git diff tests
+#   check that the changes make sense
+#   git add tests
 
 set -e
 
@@ -20,7 +20,7 @@ logfile="test.log"
 testdir="tests"
 [[ -z "$1" ]] && testfilter="all" || testfilter="$1"
 
-stack build
+nix-shell shell.nix --command 'stack build'
 
 stacktestdir="$(find .stack-work -type d -name tests)"
 
@@ -36,7 +36,7 @@ rsync_every_10sec() { while sleep 10; do  rsync_tests; done; }
 # run tests to remake them, while syncing back to main tests dir
 rsync_every_10sec & disown
 
-stack exec ortholang -- --test "$testfilter" 2>&1 | tee "$logfile"
+nix-shell shell.nix --command "stack exec ortholang -- --test '$testfilter' 2>&1 | tee '$logfile'"
 
 # one last sync
 rsync_tests
