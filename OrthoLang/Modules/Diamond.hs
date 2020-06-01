@@ -48,14 +48,23 @@ dmnd = Type
 -- diamond_makedb --
 --------------------
 
+-- diamondmakedb :: Function
+-- diamondmakedb = let name = "diamond_makedb" in Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly faa]
+--   , fOutput = Exactly dmnd
+--   , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
+--   , fNewRules = NewNotImplemented, fOldRules = rSimpleScriptPar "diamond_makedb.sh"
+--   }
+
 diamondmakedb :: Function
-diamondmakedb = let name = "diamond_makedb" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly faa]
-  , fOutput = Exactly dmnd
-  , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
-  , fNewRules = NewNotImplemented, fOldRules = rSimpleScriptPar "diamond_makedb.sh"
-  }
+diamondmakedb = newFnS1
+  "diamond_makedb"
+  (Exactly faa)
+  (Exactly dmnd)
+  "diamond_makedb.sh"
+  [Nondeterministic]
+  id
 
 -------------------------
 -- diamond_makedb_each --
@@ -63,43 +72,60 @@ diamondmakedb = let name = "diamond_makedb" in Function
 
 -- TODO does this only work when --debug is disabled because of a Map .args issue?
 
+-- diamondmakedbEach :: Function
+-- diamondmakedbEach = let name = "diamond_makedb_each" in Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly (ListOf faa)]
+--   , fOutput = Exactly (ListOf dmnd)
+--   , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
+--   , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "diamond_makedb.sh"
+--   }
+
 diamondmakedbEach :: Function
-diamondmakedbEach = let name = "diamond_makedb_each" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf faa)]
-  , fOutput = Exactly (ListOf dmnd)
-  , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
-  , fNewRules = NewNotImplemented, fOldRules = rMapSimpleScript 1 "diamond_makedb.sh"
-  }
+diamondmakedbEach = newFnA1
+  "diamond_makedb_each"
+  (Exactly $ ListOf faa)
+  (Exactly $ ListOf dmnd)
+  (newMap1of1 "diamond_makedb")
+  [Nondeterministic]
  
 ------------------------
 -- diamond_makedb_all --
 ------------------------
 
-diamondmakedbAll :: Function
-diamondmakedbAll = let name = "diamond_makedb_all" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf faa)]
-  , fOutput = Exactly dmnd
-  , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
-  , fNewRules = NewNotImplemented, fOldRules = rDiamondmakedbAll
-  }
-
--- TODO should the reading the list + paths thing be included in rSimpleScript?
-rDiamondmakedbAll :: RulesFn
-rDiamondmakedbAll scr e@(Fun _ _ _ _ [fas]) = do
-  (ExprPath fasPath) <- rExpr scr fas
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let out  = exprPath cfg dRef scr e
-      loc = "modules.diamond.aDiamondmakedbAll"
-      out' = debugRules loc e $ fromPath loc cfg out
-  out' %> \_ -> do
-    faPaths <- readPaths loc fasPath
-    aSimpleScriptPar "diamond_makedb_all.sh" (out:faPaths)
-  return (ExprPath out')
-rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
+-- diamondmakedbAll :: Function
+-- diamondmakedbAll = let name = "diamond_makedb_all" in Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly (ListOf faa)]
+--   , fOutput = Exactly dmnd
+--   , fTags = [Nondeterministic] -- TODO double check: is it deterministic?
+--   , fNewRules = NewNotImplemented, fOldRules = rDiamondmakedbAll
+--   }
+-- 
+-- -- TODO should the reading the list + paths thing be included in rSimpleScript?
+-- rDiamondmakedbAll :: RulesFn
+-- rDiamondmakedbAll scr e@(Fun _ _ _ _ [fas]) = do
+--   (ExprPath fasPath) <- rExpr scr fas
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   let out  = exprPath cfg dRef scr e
+--       loc = "modules.diamond.aDiamondmakedbAll"
+--       out' = debugRules loc e $ fromPath loc cfg out
+--   out' %> \_ -> do
+--     faPaths <- readPaths loc fasPath
+--     aSimpleScriptPar "diamond_makedb_all.sh" (out:faPaths)
+--   return (ExprPath out')
+-- rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
  
+diamondmakedbAll :: Function
+diamondmakedbAll = newFnS1
+  "diamond_makedb_all"
+  (Exactly $ ListOf faa)
+  (Exactly dmnd)
+  "diamond_makedb_all.sh"
+  [Nondeterministic]
+  (\d -> d)
+
 --------------------
 -- diamond_blast* --
 --------------------
