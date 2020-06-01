@@ -659,6 +659,7 @@ mkMakeblastdbProtEach = compose1
 showBlastDb :: Config -> LocksRef -> FilePath -> IO String
 showBlastDb cfg ref path = do
   let loc = "modules.blastdb.showBlastDb"
+  -- TODO wait, wouldn't generic paths be better to leave in?
   path' <- fmap (fromGeneric loc cfg . stripWhiteSpace) $ readFileStrict ref path
   let dbDir = takeDirectory path'
       -- dbBase = takeBaseName  dbDir

@@ -613,7 +613,6 @@ runCmd d = do
           dbg $ "runCmd acquired extra write locks: " ++ show (cmdExtraOutPaths d)
           parLockFn fn
 
-  -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
   -- writeLockFn $ withReadLocks' inPaths' $ do
   writeLockFn $ do
     -- TODO remove opts?
@@ -632,8 +631,9 @@ runCmd d = do
       let rmPatterns = (takeDirectory (cmdOutPath d) </> "*"):(cmdRmPatterns d)
       in handleCmdError (cmdBinary d) code stderrPath rmPatterns
 
-    -- let sPaths = stdoutPath:stderrPath:cmdSanitizePaths d -- TODO main outpath too?
-    -- sanitizeFilesInPlace sPaths
+    let sPaths = stdoutPath:stderrPath:cmdSanitizePaths d -- TODO main outpath too?
+    sanitizeFilesInPlace sPaths
+    dbg $ "runCmd sanitized these files: " ++ show sPaths
 
     -- TODO what about when stderr isn't written?
     let written = nub $ cmdOutPath d:stdoutPath:stderrPath:cmdExtraOutPaths d
