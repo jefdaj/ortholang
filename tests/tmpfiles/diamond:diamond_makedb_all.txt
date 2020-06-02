@@ -22,7 +22,6 @@
 |       `-- f9b7f821c1
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- mycoplasma.faa.list -> ../exprs/load_faa_each/a314fec5c1/result
     `-- result -> ../exprs/diamond_makedb_all/d951085e67/s0/result
 
-13 directories, 12 files
+13 directories, 11 files

@@ -45,7 +45,6 @@
 `-- vars
     |-- db.dmnd -> ../exprs/diamond_makedb/afa6e907a5/s0/result
     |-- maga.fna -> ../exprs/load_fna_path/593ca3842e/result
-    |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
     `-- result -> ../exprs/diamond_blastx_db_sensitive/87c44c2675/b6deebbe38/4421e53da1/s0/result
 
-29 directories, 19 files
+29 directories, 18 files

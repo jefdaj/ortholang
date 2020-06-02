@@ -31,7 +31,6 @@
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
-    |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
     `-- result -> ../exprs/diamond_blastp/87c44c2675/ccc25bfe26/4421e53da1/s0/result
 
-20 directories, 14 files
+20 directories, 13 files
