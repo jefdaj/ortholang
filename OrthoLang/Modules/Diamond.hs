@@ -118,13 +118,23 @@ diamondmakedbEach = newFnA1
 -- rDiamondmakedbAll _ e = error $ "bad argument to rDiamondmakedbAll: " ++ show e
  
 diamondmakedbAll :: Function
-diamondmakedbAll = newFnS1
+diamondmakedbAll = newFnA1
   "diamond_makedb_all"
   (Exactly $ ListOf faa)
   (Exactly dmnd)
-  "diamond_makedb_all.sh"
+  -- "diamond_makedb_all.sh"
+  aDiamondmakedbAll
   [Nondeterministic]
-  (\d -> d)
+
+aDiamondmakedbAll :: NewAction1
+aDiamondmakedbAll (ExprPath out') fasPath' = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.blastdb.aDiamondmakedbAll2"
+      out     = toPath loc cfg out'
+      fasPath = toPath loc cfg fasPath'
+  faPaths <- readPaths loc fasPath'
+  aSimpleScriptPar "diamond_makedb_all.sh" (out:faPaths)
+
 
 --------------------
 -- diamond_blast* --
