@@ -17,6 +17,7 @@ import System.FilePath         (replaceBaseName)
 import System.Process          (readProcess)
 import Data.Maybe (fromJust)
 
+
 olModule :: Module
 olModule = Module
   { mName = "Diamond"
@@ -25,11 +26,15 @@ olModule = Module
   , mGroups = []
   , mEncodings = []
   , mFunctions =
+
+      -- database functions
       [ diamondmakedb
       , diamondmakedbEach
       , diamondmakedbAll
       ]
-      ++ map mkDiamondBlast variants -- includes the _each ones too
+
+      -- search functions
+      ++ map mkDiamondBlast variants
   }
 
 -- TODO figure out how to prettyCat/show/whatever the encoded types, probably with a typeclass
@@ -44,9 +49,10 @@ dmnd = Type
       return d
   }
 
---------------------
--- diamond_makedb --
---------------------
+
+---------------------
+-- diamond_makedb* --
+---------------------
 
 diamondmakedb :: Function
 diamondmakedb = newFnS1
@@ -57,10 +63,6 @@ diamondmakedb = newFnS1
   [Nondeterministic]
   id
 
--------------------------
--- diamond_makedb_each --
--------------------------
-
 diamondmakedbEach :: Function
 diamondmakedbEach = newFnA1
   "diamond_makedb_each"
@@ -69,10 +71,6 @@ diamondmakedbEach = newFnA1
   (newMap1of1 "diamond_makedb")
   [Nondeterministic]
  
-------------------------
--- diamond_makedb_all --
-------------------------
-
 diamondmakedbAll :: Function
 diamondmakedbAll = newFnA1
   "diamond_makedb_all"
@@ -85,8 +83,7 @@ aDiamondmakedbAll :: NewAction1
 aDiamondmakedbAll (ExprPath out') fasPath' = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.blastdb.aDiamondmakedbAll2"
-      out     = toPath loc cfg out'
-      fasPath = toPath loc cfg fasPath'
+      out = toPath loc cfg out'
   faPaths <- readPaths loc fasPath'
   aSimpleScriptPar "diamond_makedb_all.sh" (out:faPaths)
 
@@ -96,11 +93,19 @@ aDiamondmakedbAll (ExprPath out') fasPath' = do
 --------------------
 
 -- type RulesFn     = RulesFn
-type DiamondBlastDesc = (String, [String] -> RulesFn, [String], Type, Type, Type)
+type DiamondBlastDesc =
+  ( String              -- name
+  , [String] -> RulesFn -- rules, which will take cli args
+  , [String]            -- cli args
+  , Type                -- query type
+  , Type                -- subject type
+  , Type                -- result type
+  )
 
 -- TODO can some of these be replaced by a numeric sensitivity arg?
 variants :: [DiamondBlastDesc]
 variants =
+  -- TODO rewrite as exprExpansion
   [ ("blastp"                       , rDiamondFromFa, ["blastp"                    ], faa, faa , bht)
   , ("blastp_sensitive"             , rDiamondFromFa, ["blastp", "--sensitive"     ], faa, faa , bht)
   , ("blastp_more_sensitive"        , rDiamondFromFa, ["blastp", "--more-sensitive"], faa, faa , bht)
@@ -160,6 +165,7 @@ variants =
   -- , ("blastx_db_more_sensitive_rev_each", rFlip23 . rMap 2 . aDiamondFromDb, ["blastx", "--more-sensitive"], dmnd, ListOf fna, ListOf bht)
   ]
 
+-- TODO rewrite as NewAction3 -> NewAction3 for here only for now
 -- TODO make into a more general utility?
 rFlip23 :: RulesFn -> RulesFn
 rFlip23 rFn scr (Fun rtn seed deps ids args) = rFn scr (Fun rtn seed deps ids $ fn args)
@@ -215,6 +221,7 @@ rDiamondFromFa dCmd st (Fun rtn seed deps _ [e, q, s])
     dbExpr = Fun dmnd seed (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"
 
+-- TODO separate into two things: an exprExpansion and a newMap
 -- same, but inserts a "makedb_each" call and maps over it
 rDiamondFromFaEach :: [String] -> RulesFn
 rDiamondFromFaEach dCmd st (Fun rtn seed deps name [e, q, ss])
