@@ -95,42 +95,6 @@ mkBlastFromFaRevEach (bCmd, sType, qType, _) = newFnA3
 
 -- TODO rewrite with newFnS3 (do this one first!)
 
--- reciprocalBest :: Function
--- reciprocalBest = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly bht, Exactly bht] -- TODO any ht would work right?
---   , fOutput = Exactly bht
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rSimple aReciprocalBest
---   }
---   where
---     name = "reciprocal_best"
-
--- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
--- TODO why is this the only one that fails, and only when called from repeat??
--- aReciprocalBest :: [Path] -> Action ()
--- aReciprocalBest [out, left, right] = do
---   cfg <- fmap fromJust getShakeExtra
---   let loc = "modules.blastrbh.aReciprocalBest"
---       out'   = fromPath loc cfg out
---       left'  = fromPath loc cfg left
---       right' = fromPath loc cfg right
---       out''  = traceA loc out' [out', left', right']
---   runCmd $ CmdDesc
---     { cmdParallel = False
---     , cmdFixEmpties = True
---     , cmdOutPath = out''
---     , cmdInPatterns = [left', right']
---     , cmdExtraOutPaths = []
---     , cmdSanitizePaths = []
---     , cmdOptions =[]
---     , cmdBinary = "reciprocal_best.R"
---     , cmdArguments = [out', left', right']
---     , cmdExitCode = ExitSuccess
---     , cmdRmPatterns = [out']
---     }
--- aReciprocalBest args = error $ "bad argument to aReciprocalBest: " ++ show args
-
 reciprocalBest :: Function
 reciprocalBest = newFnS2
   "reciprocal_best"
@@ -145,29 +109,6 @@ reciprocalBest = newFnS2
 -------------------------
 
 -- TODO rewrite with newFnS2
-
--- reciprocalBestAll :: Function
--- reciprocalBestAll = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly (ListOf bht), Exactly (ListOf bht)] -- TODO any ht would work right?
---   , fOutput = Exactly bht
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rSimple aReciprocalBestAll
---   }
---   where
---     name = "reciprocal_best_all"
-
--- aReciprocalBestAll :: [Path] -> Action ()
--- aReciprocalBestAll (out:ins) = do
---   cfg <- fmap fromJust getShakeExtra
---   let cDir = fromPath loc cfg $ cacheDir cfg "blastrbh"
---       loc = "modules.blastrbh.aReciprocalBestAll"
---       tmpPath p = cDir </> digest loc p <.> "bht"
---       ins' = map (\p -> (p, tmpPath p)) $ map (fromPath loc cfg) ins
---   liftIO $ createDirectoryIfMissing True cDir
---   mapM_ (\(inPath, outPath) -> absolutizePaths loc inPath outPath) ins'
---   aSimpleScriptNoFix "reciprocal_best_all.R" (out:map (toPath loc cfg . snd) ins')
--- aReciprocalBestAll ps = error $ "bad argument to aReciprocalBestAll: " ++ show ps
 
 reciprocalBestAll :: Function
 reciprocalBestAll = newFnS2
