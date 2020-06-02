@@ -53,6 +53,8 @@ blastDescsRev = filter isReversible blastDescs
 -- *blast*_rev --
 -----------------
 
+-- TODO rewrite with newExprExpansion
+
 mkBlastFromFaRev :: BlastDesc -> Function
 mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in Function
   { fOpChar = Nothing, fName = name
@@ -75,6 +77,8 @@ rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
 ----------------------
 -- *blast*_rev_each --
 ----------------------
+
+-- TODO rewrite with newMap (but do it last)
 
 -- TODO fix expression paths!
 mkBlastFromFaRevEach :: BlastDesc -> Function
@@ -117,6 +121,8 @@ aMkBlastFromDbRev _ _ = fail "bad argument to aMkBlastFromDbRev"
 
 -- TODO move to Tables.hs? And rename that to BlastHits?
 
+-- TODO rewrite with newFnS3 (do this one first!)
+
 reciprocalBest :: Function
 reciprocalBest = Function
   { fOpChar = Nothing, fName = name
@@ -157,6 +163,8 @@ aReciprocalBest args = error $ "bad argument to aReciprocalBest: " ++ show args
 -- reciprocal_best_each --
 --------------------------
 
+-- TODO rewrite with newFnS2
+
 reciprocalBestAll :: Function
 reciprocalBestAll = Function
   { fOpChar = Nothing, fName = name
@@ -184,6 +192,8 @@ aReciprocalBestAll ps = error $ "bad argument to aReciprocalBestAll: " ++ show p
 -- *blast*_rbh --
 -----------------
 
+-- TODO rewrite with newExprExpansion
+
 mkBlastRbh :: BlastDesc -> Function
 mkBlastRbh d@(bCmd, qType, sType, _) = Function
   { fOpChar = Nothing, fName = name
@@ -207,6 +217,8 @@ rMkBlastRbh _ _ _ = fail "bad argument to rMkBlastRbh"
 ----------------------
 -- *blast*_rbh_each --
 ----------------------
+
+-- TODO rewrite with newExprExpansion
 
 mkBlastRbhEach :: BlastDesc -> Function
 mkBlastRbhEach d@(bCmd, qType, sType, _) = Function
