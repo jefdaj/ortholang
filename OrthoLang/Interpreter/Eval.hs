@@ -314,7 +314,7 @@ eval mods hdl cfg ref ids dr rtype p = do
                 { progressDelay = delay
                 , progressHandle = hdl
                 , progressInitial = ep
-                , progressRender = if progressbar cfg then (const "") else renderProgress
+                , progressRender = if not (progressbar cfg) then (const "") else renderProgress
                 }
   eval' delay pOpts p -- TODO ignoreErrors again?
   where
