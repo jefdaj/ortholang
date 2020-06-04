@@ -47,7 +47,7 @@ import OrthoLang.Interpreter.Paths            (Path, toPath, fromPath)
 import OrthoLang.Locks            (withReadLock')
 import OrthoLang.Interpreter.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Interpreter.Actions          (readLits, readPaths)
--- import OrthoLang.Util             (ignoreErrors)
+import OrthoLang.Util             (ignoreErrors)
 import System.IO                      (Handle)
 import System.FilePath                ((</>), takeFileName)
 import Data.IORef                     (readIORef)
@@ -316,7 +316,7 @@ eval mods hdl cfg ref ids dr rtype p = do
                 , progressInitial = ep
                 , progressRender = if not (progressbar cfg) then (const "") else renderProgress
                 }
-  eval' delay pOpts p -- TODO ignoreErrors again?
+  ignoreErrors $ eval' delay pOpts p -- TODO ignoreErrors again?
   where
     eval' delay pOpts rpath = P.withProgress pOpts $ \pm -> myShake mods cfg ref ids dr pm delay $ do
       newRules mods
