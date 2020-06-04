@@ -35,8 +35,7 @@ rsync_tests() { rsync -qr ${stacktestdir}/* ${testdir}/; }
 rsync_every_10sec() { while sleep 10; do rsync_tests || break; done || true; }
 
 # run tests to remake them, while syncing back to main tests dir
-rsync_every_10sec &
-rsync_pid=$!
+rsync_every_10sec &>/dev/null &
 
 nix-shell --command "stack --allow-different-user exec ortholang -- --test '$testfilter' 2>&1 | tee '$logfile'"
 
