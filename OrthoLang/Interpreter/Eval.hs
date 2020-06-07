@@ -103,7 +103,11 @@ myShake mods cfg ref ids dr pm rules = do
         -- TODO remove ignore patterns as you solve them
         -- TODO is there a difference between relative and absolute paths as shake keys?
         -- fsatrace not available on mac
-        , shakeLint = if os == "linux" then (Just LintFSATrace) else Nothing
+        -- , shakeLint = if os == "linux" then (Just LintFSATrace) else Nothing
+        --
+        -- and either way, we don't want it on for releases:
+        -- , shakeLint = Just LintFSATrace
+        , shakeLint = Nothing
         , shakeLintInside =
             [ tDir </> "exprs"
             , tDir </> "cache"

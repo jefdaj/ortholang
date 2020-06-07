@@ -32,8 +32,12 @@ let
     cacert # for curl https
     fontconfig.lib # for R plotting scripts
     graphviz
+    rsync
   ] ++ pkgs.lib.optionals (stdenv.isLinux) [
-    fsatrace # for Shake linting. still not available on Mac?
+
+    # works, but remove for release
+    # fsatrace # for Shake linting. still not available on Mac?
+
   ];
 
   # TODO why is patching shebangs on the wrapped scripts necessary??
