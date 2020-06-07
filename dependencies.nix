@@ -33,6 +33,7 @@ let
     cacert # for curl https
     fontconfig.lib # for R plotting scripts
     graphviz
+    rsync
   ];
 
   # TODO why is patching shebangs on the wrapped scripts necessary??
