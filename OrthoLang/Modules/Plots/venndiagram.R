@@ -49,7 +49,8 @@ plot_lists <- function(lists, filename) {
   png(filename=filename, width=600, height=600)
   if (nlists > 5) {
     suppressPackageStartupMessages(require(UpSetR))
-    upset(fromList(lists))
+    p <- upset(fromList(lists))
+    print(p) # for some reason, "print"ing it is necessary
   } else {
     suppressPackageStartupMessages(require(VennDiagram))
     # adding 2 makes it a nice green/blue/purple theme
