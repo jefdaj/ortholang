@@ -7,12 +7,12 @@
 # so there should be a hit at any e-value
 query   = load_faa "examples/sequences/Mycoplasma_genitalium_single.faa"
 maga = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
-magadb  = makeblastdb_faa maga
+magadb  = makeblastdb_prot maga
 
 # there's no perfect hit in another cyano though,
 # so below a certain cutoff an empty pssm will be created if trained on mgen
 mgen = load_faa "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa"
-mgendb  = makeblastdb_faa mgen
+mgendb  = makeblastdb_prot mgen
 
 # check that psiblast itself works by training a pssm on each
 cutoff   = 0.5
@@ -30,7 +30,7 @@ pssmsmgen = replace_each pssmmgen cutoff cutoffs
 
 # finally, try doing searches on all of them.
 # the overly strict ones should have 0 hits rather than throwing an error
-# TODO this fails in the makeblastdb_faa step
+# TODO this fails in the makeblastdb_prot step
 hitsmaga = psiblast_each_pssm cutoff pssmsmaga maga
 hitsmgen = psiblast_each_pssm cutoff pssmsmgen mgen
 

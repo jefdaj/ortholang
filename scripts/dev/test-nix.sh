@@ -3,10 +3,17 @@
 set -x
 set -o pipefail
 
-BRANCH="$TRAVIS_BRANCH"
-[[ -z "$BRANCH" ]] && BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-[[ "$BRANCH" =~ module ]] && DEFAULT_FILTER="$(echo "$BRANCH" | cut -d'-' -f2)" || DEFAULT_FILTER='version'
-[[ -z "$1" ]] && TEST_FILTER="$DEFAULT_FILTER" || TEST_FILTER="$1"
+# start with the basic tests
+testfilter='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
+
+# add module-specific scripts if any
+branch="$TRAVIS_BRANCH"
+[[ -z "$branch" ]] && branch="$(git rev-parse --abbrev-ref HEAD)"
+[[ "$branch" =~ module ]] \
+  && testfilter="$testfilter || \$5 ~/$(echo "$branch" | cut -d'-' -f2):/"
+
+# override from the command line
+[[ -z "$1" ]] || testfilter="$1"
 
 if [[ -z "$TMPDIR" ]]; then
   export TMPDIR=$PWD/.stack-work/tmp
@@ -15,21 +22,22 @@ fi
 
 ### build the binary ###
 
-NIX_ARGS="--pure"
-TIMESTAMP=$(date '+%Y-%m-%d_%H:%M')
-LOGFILE="ortholang_${TEST_FILTER}_${TIMESTAMP}.log"
+NIX_ARGS="" # TODO put back --pure?
+# TIMESTAMP=$(date '+%Y-%m-%d_%H:%M')
+# LOGFILE="ortholang_${testfilter}_${TIMESTAMP}.log"
+LOGFILE='test.log'
 
 nix-build $NIX_ARGS 2>&1 | tee -a $LOGFILE
 code0=$?
 [[ $code0 == 0 ]] || exit $code0
 
-bin-run() {
-  rm -f $LOGFILE
-  ./result/bin/ortholang $@ 2>&1 | tee -a $LOGFILE
-  code="$?"
-  [[ $code == 0 ]] || cat $LOGFILE | tee -a "$LOGFILE"
-  return $code
-}
+# bin-run() {
+#   rm -f $LOGFILE
+#   ./result/bin/ortholang $@ 2>&1 | tee -a $LOGFILE
+#   code="$?"
+#   [[ $code == 0 ]] || cat $LOGFILE
+#   return $code
+# }
 
 ### run tests ###
 
@@ -38,17 +46,17 @@ export TASTY_QUICKCHECK_TESTS=1000
 export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
 
-TEST_ARGS="--debug '.*' --test $TEST_FILTER"
-
+# TEST_ARGS=bin-run "debug '.*' --test $testfilter"
 # test using shared cache first because it's faster
 # TODO put back once server is back up
 # bin-run --shared http://shortcut.pmb.berkeley.edu/shared $TEST_ARGS
 # code1="$?"
-
 # then locally to verify everything really works
-bin-run $TEST_ARGS
-code2="$?"
-
+# bin-run $TEST_ARGS
+# code2="$?"
 # exit nonzero if either run failed
 # [[ $code1 == 0 ]] || exit $code1
-exit $code2
+# exit $code2
+
+# local tests only pending server update
+./result/bin/ortholang --debug '.*' --test "$testfilter" 2>&1 | tee -a $LOGFILE

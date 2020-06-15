@@ -1,6 +1,6 @@
 query = load_faa "examples/sequences/Mycoplasma_genitalium_single.faa"
 mgen = load_faa "examples/sequences/Mycoplasma_genitalium_G37_protein_refseq.faa"
-hits = blastp_db 0.1 query (makeblastdb_faa_all [mgen])
+hits = blastp_db 0.1 query (makeblastdb_prot_all [mgen])
 hits_ids = extract_targets hits
 hits_faa = extract_seqs mgen (extract_targets hits)
 hits_aln = muscle hits_faa

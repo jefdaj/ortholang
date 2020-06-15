@@ -23,6 +23,11 @@ import System.Directory           (doesFileExist)
 import System.FilePath            ((</>), (<.>))
 import Text.Read.HT               (maybeRead)
 import System.Directory           (createDirectoryIfMissing)
+import qualified System.Info as I
+
+os :: String
+os = if I.os == "darwin" then "mac" else I.os
+
 
 {- The logging module keeps its own state in an IORef, so no need to include
  - this in the main OrthoLang config below.

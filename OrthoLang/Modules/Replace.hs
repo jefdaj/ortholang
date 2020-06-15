@@ -131,6 +131,7 @@ rReplace' scr resExpr subVar@(Var _ _) subExpr = do
 {- Helper function to write the final list when the results are literals
  - TODO factor out, and maybe unify with rListLits
  - TODO subPaths is only one path? if so, rename it
+ - TODO what are the subpaths even used for?
  -}
 aReplaceEachLits :: Type -> Path -> Path -> [Path] -> Action ()
 aReplaceEachLits _ outPath subPaths resPaths = do

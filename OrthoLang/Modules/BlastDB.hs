@@ -15,10 +15,10 @@ import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Locks
 import OrthoLang.Interpreter
-import OrthoLang.Modules.SeqIO      (faa, fna)
-import OrthoLang.Modules.Singletons (withSingleton, withSingletons, withSingletonArg, singletons)
+import OrthoLang.Modules.SeqIO      (faa, fna, fa)
+import OrthoLang.Modules.Singletons (withSingleton, singletons)
 
-import Control.Monad           (when, forM)
+-- import Control.Monad           (when, forM)
 import Data.Char               (toLower)
 import Data.List               (isInfixOf)
 import Data.List               (isPrefixOf)
@@ -26,7 +26,7 @@ import Data.Maybe              (isJust, fromJust)
 import Data.String.Utils       (split)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
-import System.FilePath         (takeFileName, takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
+import System.FilePath         (takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
 import System.Process          (readCreateProcess, proc)
 
 {- There are a few types of BLAST database files. For nucleic acids:
@@ -49,7 +49,7 @@ debugA' :: String -> String -> Action ()
 debugA' name = debugA ("modules.blastdb." ++ name)
 
 debugR' :: (Pretty a, Show b) => Config -> String -> a -> b -> b
-debugR' cfg name = debugRules ("modules.blastdb." ++ name)
+debugR' _ name = debugRules ("modules.blastdb." ++ name)
 
 olModule :: Module
 olModule = Module
@@ -70,22 +70,22 @@ olModule = Module
     -- these are actually the most basic ones, because that way we can have
     -- only one main action function that takes a quoted list of paths, rather
     -- than that + a regular non-quoted one
-    , makeblastdbFnaAll -- makeblastdb_fna_all : fa.list  -> ndb
-    , makeblastdbFaaAll -- makeblastdb_faa_all : faa.list -> pdb
+    , makeblastdbNuclAll -- makeblastdb_fna_all : fa.list  -> ndb
+    , makeblastdbProtAll -- makeblastdb_faa_all : faa.list -> pdb
 
     -- these are implemented using the _all versions above and singleton lists
     -- you can make a nucl db from either, but a protein db only from faa.. backward?
     -- TODO replace most of the singleton lists in test cuts with these
-    , makeblastdbFna    -- makeblastdb_fna     : fa       -> ndb
-    , makeblastdbFaa    -- makeblastdb_faa     : faa      -> pdb
+    , makeblastdbNucl    -- makeblastdb_fna     : fa       -> ndb
+    , makeblastdbProt    -- makeblastdb_faa     : faa      -> pdb
 
     -- these are used in the _rbh machinery
     -- they're a little weird because they are implemented using the non _all
     -- versions, so they internally make their args into lists of singleton lists
-    , mkMakeblastdbEach fna -- makeblastdb_fna_each : fa.list  -> ndb.list
-    , mkMakeblastdbEach faa -- makeblastdb_faa_each : faa.list -> pdb.list
-    , mkMakeblastdbAllEach fna
-    , mkMakeblastdbAllEach faa
+    , mkMakeblastdbNuclEach -- makeblastdb_fna_each : fa.list  -> ndb.list
+    , mkMakeblastdbProtEach -- makeblastdb_faa_each : faa.list -> pdb.list
+    , mkMakeblastdbNuclAllEach
+    , mkMakeblastdbProtAllEach
 
     , blastdbgetFna -- TODO mapped version so you can list -> git at once?
     , blastdbgetFaa -- TODO mapped version so you can list -> git at once?
@@ -104,7 +104,10 @@ blastdb = Encoding
   }
 
 -- shorthand
+ndb :: Type
 ndb = EncodedAs blastdb fna
+
+pdb :: Type
 pdb = EncodedAs blastdb faa
 
 -- TODO remove?
@@ -313,7 +316,7 @@ aBlastdbget dbPrefix tmpDir nPath = do
       dbPrefix'  = fromPath loc cfg dbPrefix
       loc = "ortholang.modules.blastdb.aBlastdbget"
       dbPrefix'' = traceA loc dbPrefix' [dbPrefix', tmp', nPath']
-  need' loc [nPath']
+  -- need' loc [nPath']
   dbName <- fmap stripWhiteSpace $ readLit loc nPath' -- TODO need to strip?
   let dbPath = tmp' </> dbName
   liftIO $ createDirectoryIfMissing True tmp'
@@ -344,19 +347,19 @@ aBlastdbget dbPrefix tmpDir nPath = do
 -- TODO silence output?
 -- TODO does this have an error where db path depends on the outer expression
 --      in addition to actual inputs?
-makeblastdbFnaAll :: Function
-makeblastdbFnaAll = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
-  , fOutput =  Exactly ndb
-  , fTags = [] -- TODO is it deterministic though? double-check
-  , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
-  }
-  where
-    name = "makeblastdb_fna_all"
+-- makeblastdbNuclAll :: Function
+-- makeblastdbNuclAll = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly (ListOf fna)] -- TODO can this also take faas?
+--   , fOutput =  Exactly ndb
+--   , fTags = [] -- TODO is it deterministic though? double-check
+--   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdbAll
+--   }
+--   where
+--     name = "makeblastdb_fna_all"
 
--- makeblastdbFaaAll :: Function
--- makeblastdbFaaAll = Function
+-- makeblastdbProtAll :: Function
+-- makeblastdbProtAll = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly (ListOf faa)]
 --   , fOutput = Exactly pdb
@@ -366,12 +369,21 @@ makeblastdbFnaAll = Function
 --   where
 --     name = "makeblastdb_faa_all"
 
-makeblastdbFaaAll :: Function
-makeblastdbFaaAll = newFnA1
-  "makeblastdb_faa_all"
+makeblastdbNuclAll :: Function
+makeblastdbNuclAll = newFnA1
+  "makeblastdb_nucl_all"
+  -- (Exactly (ListOf fna))
+  (ListSigs $ Some fa "a fasta file")
+  (Exactly ndb)
+  (aMakeblastdbAll2 "nucl")
+  []
+
+makeblastdbProtAll :: Function
+makeblastdbProtAll = newFnA1
+  "makeblastdb_prot_all"
   (Exactly (ListOf faa))
   (Exactly pdb)
-  (aMakeblastdbAll2 faa)
+  (aMakeblastdbAll2 "prot")
   []
 
 -- (ListOf (Some fa "a fasta file")) (Encoded blastdb (Some fa "a fasta file"))
@@ -387,32 +399,32 @@ makeblastdbFaaAll = newFnA1
 -- TODO is rtn always the same as dbType?
 -- TODO get the blast fn to need this!
 -- <tmpdir>/cache/makeblastdb_<dbType>/<faHash>
-rMakeblastdbAll :: RulesFn
-rMakeblastdbAll scr e@(Fun rtn _ _ _ [fas]) = do
-  (ExprPath fasPath) <- rExpr scr fas
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.blastdb.rMakeblastdbAll"
-      out       = exprPath cfg dRef scr e
-      out'      = debugR' cfg loc e $ fromPath loc cfg out
-      cDir      = makeblastdbCache cfg
-      fasPath'  = toPath loc cfg fasPath
+-- rMakeblastdbAll :: RulesFn
+-- rMakeblastdbAll scr e@(Fun rtn _ _ _ [fas]) = do
+--   (ExprPath fasPath) <- rExpr scr fas
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   let loc = "modules.blastdb.rMakeblastdbAll"
+--       out       = exprPath cfg dRef scr e
+--       out'      = debugR' cfg loc e $ fromPath loc cfg out
+--       cDir      = makeblastdbCache cfg
+--       fasPath'  = toPath loc cfg fasPath
+-- 
+--   -- TODO need new shake first:
+--   -- out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
+-- 
+--   out' %> \_ -> aMakeblastdbAll rtn cDir [out, fasPath']
+--   -- TODO what's up with the linking? just write the prefix to the outfile!
+--   return (ExprPath out')
+-- rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e
 
-  -- TODO need new shake first:
-  -- out' %> \_ -> actionRetry 3 $ aMakeblastdbAll rtn cfg ref cDir [out, fasPath']
+-- listPrefixFiles :: FilePattern -> IO [FilePath]
+-- listPrefixFiles prefix = getDirectoryFilesIO pDir [pName] >>= return . map (pDir </>)
+--   where
+--     pDir  = takeDirectory prefix
+--     pName = takeFileName  prefix
 
-  out' %> \_ -> aMakeblastdbAll rtn cDir [out, fasPath']
-  -- TODO what's up with the linking? just write the prefix to the outfile!
-  return (ExprPath out')
-rMakeblastdbAll _ e = error $ "bad argument to rMakeblastdbAll: " ++ show e
-
-listPrefixFiles :: FilePattern -> IO [FilePath]
-listPrefixFiles prefix = getDirectoryFilesIO pDir [pName] >>= return . map (pDir </>)
-  where
-    pDir  = takeDirectory prefix
-    pName = takeFileName  prefix
-
-aMakeblastdbAll2 :: Type -> NewAction1
+aMakeblastdbAll2 :: String -> NewAction1
 aMakeblastdbAll2 dbType (ExprPath out') fasPath' = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.blastdb.aMakeblastdbAll2"
@@ -423,7 +435,7 @@ aMakeblastdbAll2 dbType (ExprPath out') fasPath' = do
 
 -- TODO why does this randomly fail by producing only two files?
 -- TODO why is cDir just the top-level cache without its last dir component?
-aMakeblastdbAll :: Type -> Path -> [Path] -> Action ()
+aMakeblastdbAll :: String -> Path -> [Path] -> Action ()
 aMakeblastdbAll dbType cDir [out, fasPath] = do
   -- TODO exprPath handles this now?
   -- let relDb = makeRel_ ative (tmpdir cfg) dbOut
@@ -432,7 +444,7 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
       out'     = fromPath loc cfg out
       cDir'    = fromPath loc cfg cDir
       fasPath' = fromPath loc cfg fasPath
-  let dbType' = if dbType == ndb then "nucl" else "prot"
+  -- let dbType' = if dbType == ndb then "nucl" else "prot"
   need' loc [fasPath']
 
   -- The idea was to hash content here, but it took a long time.
@@ -443,8 +455,8 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   let dbDir  = cDir' </> fasHash
       dbOut  = dbDir </> "result"
       dbOut' = toPath loc cfg dbOut
-      out''  = traceA loc out' [ext dbType, out', dbOut, fasPath']
-      dbPtn  = dbDir </> "*" -- TODO does this actually help?
+      out''  = traceA loc out' [dbType, out', dbOut, fasPath']
+      -- dbPtn  = dbDir </> "*" -- TODO does this actually help?
       dbg = debugA' loc
 
   -- Quoting is tricky here because makeblastdb expects multiple -in fastas to
@@ -469,34 +481,34 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
   dbg $ "cDir: "       ++ show cDir
   dbg $ "cDir': "      ++ cDir'
   dbg $ "dbOut': "     ++ show dbOut'
-  dbg $ "dbType': "    ++ dbType'
+  dbg $ "dbType: "    ++ dbType
   dbg $ "cfg: "        ++ show cfg
   dbg $ "fixedPaths: " ++ show fixedPaths
-  dbg $ "dbPtn: "      ++ dbPtn
+  -- dbg $ "dbPtn: "      ++ dbPtn
   dbg $ "dbOut: "      ++ dbOut
 
-  -- liftIO $ createDirectoryIfMissing True dbDir
+  liftIO $ createDirectoryIfMissing True dbDir
   -- before <- liftIO $ listPrefixFiles dbPtn
   -- when (length before < 5) $ do
   runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
     , cmdOutPath = dbOut
-    , cmdInPatterns = [dbPtn]
+    , cmdInPatterns = []
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
-    , cmdOptions =[]
+    , cmdOptions = []
     , cmdBinary = "makeblastdb.sh"
-    , cmdArguments = [dbOut, fixedPaths, dbType']
+    , cmdArguments = [dbOut, fixedPaths, dbType]
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [dbDir]
     }
 
   -- check that all the right files were created
-  after <- liftIO $ listPrefixFiles dbPtn
+  -- after <- liftIO $ listPrefixFiles dbPtn
   -- liftIO $ putStrLn "running makeblastdb"
-  dbg $ "after: " ++ show after
-  trackWrite' after
+  -- dbg $ "after: " ++ show after
+  -- trackWrite' after
 
   -- usually there's an index file too, but not always
   -- TODO put these back? they sometimes fail when it splits into .00.pin etc.
@@ -509,6 +521,8 @@ aMakeblastdbAll dbType cDir [out, fasPath] = do
     
   -- dbg $ "dbOut was also created: " ++ dbOut
   -- TODO why should this work when outside the when block but not inside?? something about retries?
+  produces [dbOut]
+  -- trackWrite' [dbOut]
   writePath loc out'' dbOut'
 aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show paths
 
@@ -519,8 +533,8 @@ aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show 
 -- these are oddly implemented in terms of the _all ones above,
 -- because that turned out to be easier
 
--- makeblastdbFna :: Function
--- makeblastdbFna = Function
+-- makeblastdbNucl :: Function
+-- makeblastdbNucl = Function
 --   { fOpChar = Nothing, fName = "makeblastdb_fna"
 --   , fInputs = [Exactly fna] -- TODO can't do it from faa right?
 --   , fOutput =  Exactly ndb
@@ -528,16 +542,16 @@ aMakeblastdbAll _ _ paths = error $ "bad argument to aMakeblastdbAll: " ++ show 
 --   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
 --   }
 
-makeblastdbFna :: Function
-makeblastdbFna = newExprExpansion
-  "makeblastdb_fna"
-  [Exactly fna]
+makeblastdbNucl :: Function
+makeblastdbNucl = newExprExpansion
+  "makeblastdb_nucl"
+  [Some fa "a fasta file"]
   (Exactly ndb)
   mMakeblastdb
   [] -- TODO is it though?
 
--- makeblastdbFaa :: Function
--- makeblastdbFaa = Function
+-- makeblastdbProt :: Function
+-- makeblastdbProt = Function
 --   { fOpChar = Nothing, fName = "makeblastdb_faa"
 --   , fInputs = [Exactly faa] -- TODO can't do it from faa right?
 --   , fOutput =  Exactly pdb
@@ -545,9 +559,9 @@ makeblastdbFna = newExprExpansion
 --   , fNewRules = NewNotImplemented, fOldRules = rMakeblastdb
 --   }
 
-makeblastdbFaa :: Function
-makeblastdbFaa = newExprExpansion
-  "makeblastdb_faa"
+makeblastdbProt :: Function
+makeblastdbProt = newExprExpansion
+  "makeblastdb_prot"
   [Exactly faa]
   (Exactly pdb)
   mMakeblastdb
@@ -607,24 +621,35 @@ mMakeblastdb _ _ e = error "ortholang.modules.blastdb.mMakeblastdb" $ "bad arg: 
 -- mMakeblastdbEach :: ExprExpansion
 -- mMakeblastdbEach = undefined -- TODO oh, have to solve mapping first :/
 
--- | Hidden helper function that helps define makeblastdb_faa_each etc.
-mkMakeblastdbAllEach :: Type -> Function
-mkMakeblastdbAllEach faType = hidden $
-  let aName  = "makeblastdb_" ++ ext faType ++ "_all"
-      aeName = "makeblastdb_" ++ ext faType ++ "_all_each"
-  in newFnA1
-    aeName
-    (Exactly (ListOf (ListOf            faType)))
-    (Exactly (ListOf (EncodedAs blastdb faType)))
-    (newMap1of1 aName $ aMakeblastdbAll2 faType)
-    [Hidden]
+mkMakeblastdbNuclAllEach :: Function
+mkMakeblastdbNuclAllEach = hidden $ newFnA1
+  "makeblastdb_nucl_all_each"
+  (ListSigs $ Some fa "a fasta file")
+  (Exactly $ ListOf $ EncodedAs blastdb fna)
+  (newMap1of1 "makeblastdb_nucl_all")
+  [Hidden]
 
-mkMakeblastdbEach :: Type -> Function
-mkMakeblastdbEach faType = compose1
-  ("makeblastdb_" ++ ext faType ++ "_each")
+mkMakeblastdbProtAllEach :: Function
+mkMakeblastdbProtAllEach = hidden $ newFnA1
+  "makeblastdb_prot_all_each"
+  (Exactly $ ListOf $ ListOf faa)
+  (Exactly $ ListOf $ EncodedAs blastdb faa)
+  (newMap1of1 "makeblastdb_prot_all")
+  [Hidden]
+
+mkMakeblastdbNuclEach :: Function
+mkMakeblastdbNuclEach = compose1
+  "makeblastdb_nucl_each"
   []
   singletons
-  (mkMakeblastdbAllEach faType)
+  mkMakeblastdbNuclAllEach
+
+mkMakeblastdbProtEach :: Function
+mkMakeblastdbProtEach = compose1
+  "makeblastdb_prot_each"
+  []
+  singletons
+  mkMakeblastdbProtAllEach
 
 ------------------
 -- show db info --
@@ -634,6 +659,7 @@ mkMakeblastdbEach faType = compose1
 showBlastDb :: Config -> LocksRef -> FilePath -> IO String
 showBlastDb cfg ref path = do
   let loc = "modules.blastdb.showBlastDb"
+  -- TODO wait, wouldn't generic paths be better to leave in?
   path' <- fmap (fromGeneric loc cfg . stripWhiteSpace) $ readFileStrict ref path
   let dbDir = takeDirectory path'
       -- dbBase = takeBaseName  dbDir

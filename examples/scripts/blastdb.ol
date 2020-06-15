@@ -21,8 +21,8 @@ swissprot = blastdbget_faa "swissprot"
 #
 # Note the types: the _all functions take a list of inputs and make one output.
 # If you wanted a list of databases, one for each proteome, you would use
-# makeblastdb_faa_each instead.
-mycodb = makeblastdb_faa_all (load_faa_glob "examples/sequences/Mycoplasma_*_refseq.faa")
+# makeblastdb_prot_each instead.
+mycodb = makeblastdb_prot_all (load_faa_glob "examples/sequences/Mycoplasma_*_refseq.faa")
 
 # The convention in OrthoLang is that BLAST functions expect to be passed FASTA
 # files and make any needed databases themselves. But for each function that
@@ -31,9 +31,9 @@ mycodb = makeblastdb_faa_all (load_faa_glob "examples/sequences/Mycoplasma_*_ref
 pcc7942 = load_faa "examples/sequences/PCC_7942_genes.faa"
 pcc6803 = load_fna "examples/sequences/PCC_6803_genes.fna"
 hits1 = tblastn    1e-50 pcc7942  pcc6803
-hits2 = tblastn_db 1e-50 pcc7942 (makeblastdb_fna pcc6803)
+hits2 = tblastn_db 1e-50 pcc7942 (makeblastdb_nucl pcc6803)
 
 # TODO what should be evaluated?
-# result = [human, swissprot, mycodb, makeblastdb_faa pcc6803]
+# result = [human, swissprot, mycodb, makeblastdb_prot pcc6803]
 # result = [human, swissprot, mycodb]
 result = "nothing so far"

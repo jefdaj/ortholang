@@ -89,6 +89,7 @@ TODO remove the insert digests hack? or is this the main entry point for that to
 
 TODO are the extra rExpr steps needed in most cases, or only for rNamedFunction?
 -}
+-- TODO could this be the cause of the big parsing slowdown?
 rExpr :: RulesFn
 rExpr s e@(Lit _ _       ) = rLit s e
 rExpr s e@(Ref _ _ _ _   ) = rRef s e
@@ -165,7 +166,7 @@ compileScript scr = do
           rp' = fromPath loc cfg rp
       (ExprPath ep') <- rExpr scr' re
       let ep = toPath loc cfg ep'
-      rp' %> \_ -> need' loc [ep'] >> symlink rp ep
+      rp' %> \_ -> symlink rp ep
       return $ ResPath rp'
   return rp
 
@@ -259,7 +260,7 @@ aListLits paths outPath = do
       out'   = fromPath loc cfg outPath
       out''  = traceA "aListLits" out' (out':paths')
       paths' = map (fromPath loc cfg) paths
-  need' loc paths' -- TODO remove?
+  need' loc paths' -- note: this is actually important. do not remove
   lits <- mapM (readLit loc) paths'
   let lits' = map stripWhiteSpace lits -- TODO insert <<emptylist>> here?
   debugA loc $ "lits': " ++ show lits'
@@ -309,7 +310,7 @@ aListPaths paths outPath = do
       paths' = map (fromPath loc cfg) paths -- TODO remove this
   need' loc paths'
   paths'' <- liftIO $ mapM (resolveSymlinks $ Just [tmpdir cfg </> "vars", tmpdir cfg </> "exprs"]) paths'
-  need' loc paths''
+  -- need' loc paths''
   let paths''' = map (toPath loc cfg) paths'' -- TODO not working?
   writePaths loc out'' paths'''
 

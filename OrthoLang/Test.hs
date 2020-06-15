@@ -81,7 +81,7 @@ runTests args cfg ref ids dRef = withArgs [] $ do
     -- each test can be multithreaded, but running more than one at a time
     -- confuses the stdout/stderr capturing
     setEnv "TASTY_NUM_THREADS" "1"
-    setEnv "TASTY_TIMEOUT" "5m" -- TODO configure this?
+    setEnv "TASTY_TIMEOUT" "2m" -- TODO configure this?
     -- TODO can you also just export this before running ortholang?
     case getArg args $ longOption "test" of
       Nothing -> return ()

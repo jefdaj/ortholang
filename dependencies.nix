@@ -20,7 +20,6 @@ let
     stdenv
     bash
     bashInteractive
-    # fsatrace # for shake linting. none for darwin?
     coreutils
     diffutils
     glibcLocales # TODO even on mac?
@@ -34,6 +33,11 @@ let
     fontconfig.lib # for R plotting scripts
     graphviz
     rsync
+  ] ++ pkgs.lib.optionals (stdenv.isLinux) [
+
+    # works, but remove for release
+    # fsatrace # for Shake linting. still not available on Mac?
+
   ];
 
   # TODO why is patching shebangs on the wrapped scripts necessary??

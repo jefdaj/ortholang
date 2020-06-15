@@ -1,39 +1,42 @@
 #!/usr/bin/env bash
 
 # Usage:
-# 1) nix-shell
-# 2) ./scripts/dev/update-tests.sh
-# 3) while that runs, periodically:
-#      git diff tests
-#      check that the changes make sense
-#      git add tests
+# ./scripts/dev/update-tests.sh [filter]
+#
+# Optional test filter follows this format:
+# https://ro-che.info/articles/2018-01-08-tasty-new-patterns
+#
+# For example:
+# ./scripts/dev/update-tests.sh '$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/'
+#
+# while that runs, periodically:
+#   git diff tests
+#   check that the changes make sense
+#   git add tests
 
 set -e
 
-[[ -z "$1" ]] && TEST_FILTER="all" || TEST_FILTER="$1"
-
-stack build
-
 logfile="test.log"
 testdir="tests"
+[[ -z "$1" ]] && testfilter="all" || testfilter="$1"
+
+nix-shell shell.nix --command 'stack build'
+
 stacktestdir="$(find .stack-work -type d -name tests)"
 
-# delete golden files
+# delete golden files so they'll be recreated
 for d in ${stacktestdir}/*; do
   [[ $d =~ 'scripts' ]] || rm -rf  $d/*
 done
 
-update_tests() {
-  while sleep 10; do
-    rsync -r ${stacktestdir}/* ${testdir}/
-  done
-}
+rsync_tests() { rsync -qr ${stacktestdir}/* ${testdir}/; }
+
+rsync_every_10sec() { while sleep 10; do  rsync_tests; done; }
 
 # run tests to remake them, while syncing back to main tests dir
-update_tests &
-pid=$?
-stack exec ortholang -- --test "$TEST_FILTER" 2>&1 | tee "$logfile"
+rsync_every_10sec & disown
 
-# wait for one last rsync, then kill it
-sleep 15
-kill -9 $pid || true
+nix-shell shell.nix --command "stack exec ortholang -- --test '$testfilter' 2>&1 | tee '$logfile'"
+
+# one last sync
+rsync_tests

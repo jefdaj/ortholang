@@ -32,11 +32,11 @@
 |   |       |-- 0018afe231
 |   |       |   `-- e71f48fb53
 |   |       |       `-- s0
-|   |       |           `-- result -> out
+|   |       |           `-- result
 |   |       `-- 69be998a0e
 |   |           `-- 8ea5d5eb81
 |   |               `-- s0
-|   |                   `-- result -> out
+|   |                   `-- result
 |   |-- extract_queries
 |   |   `-- 0920cb5bc0
 |   |       |-- result -> ../../../cache/lines/...

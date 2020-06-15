@@ -1,9 +1,9 @@
 maga = load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"
 mbov = load_faa "examples/sequences/Mycoplasma_bovis_small.fa"
-maga_mbov = blastp_db 1.0e-10 maga (makeblastdb_faa_all [mbov])
+maga_mbov = blastp_db 1.0e-10 maga (makeblastdb_prot_all [mbov])
 maga_mbov_stringent = filter_evalue 1.0e-50 maga_mbov
 maga_best_mbov = best_hits maga_mbov
-maga_mbov_rev = blastp_db 1.0e-10 mbov (makeblastdb_faa_all [maga])
+maga_mbov_rev = blastp_db 1.0e-10 mbov (makeblastdb_prot_all [maga])
 maga_mbov_rbh = reciprocal_best maga_mbov maga_mbov_rev
 maga_ids = extract_queries maga_mbov_rbh
 mbov_ids = extract_targets maga_mbov_rbh

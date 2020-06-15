@@ -1,7 +1,7 @@
 maga5 = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
 maga = load_fna "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna"
-single = extract_queries (megablast_db 1.0e-5 maga5 (makeblastdb_fna_all [maga]))
+single = extract_queries (megablast_db 1.0e-5 maga5 (makeblastdb_nucl_all [maga]))
 mapped = extract_queries_each (megablast_db_each 1.0e-5
                                                  maga5
-                                                 (makeblastdb_fna_all_each (singletons [maga])))
+                                                 (makeblastdb_nucl_all_each (singletons [maga])))
 result = [single] | mapped

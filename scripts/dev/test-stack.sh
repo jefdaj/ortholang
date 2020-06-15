@@ -3,10 +3,16 @@
 set -x
 set -o pipefail
 
-# only run tests matching this filter string:
+# start with the basic tests
+TEST_FILTER='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
+
+# add module-specific scripts if any
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-[[ "$BRANCH" =~ module ]] && DEFAULT_FILTER="$(echo "$BRANCH" | cut -d'-' -f2)" || DEFAULT_FILTER='version'
-[[ -z "$1" ]] && TEST_FILTER="$DEFAULT_FILTER" || TEST_FILTER="$1"
+[[ "$BRANCH" =~ module ]] \
+  && TEST_FILTER="$TEST_FILTER || \$5 ~/$(echo "$BRANCH" | cut -d'-' -f2):/"
+
+# override from the command line
+[[ -z "$1" ]] || TEST_FILTER="$1"
 
 if [[ -z "$TMPDIR" ]]; then
   export TMPDIR=$PWD/.stack-work/tmp
@@ -15,15 +21,16 @@ fi
 
 ### build the binary ###
 
-NIX_ARGS="--pure"
-TIMESTAMP=$(date '+%Y-%m-%d_%H:%M')
-LOGFILE="ortholang_${TEST_FILTER}_${TIMESTAMP}.log"
+NIX_ARGS="" # TODO put back --pure?
+# TIMESTAMP=$(date '+%Y-%m-%d_%H:%M')
+# LOGFILE="ortholang_${TEST_FILTER}_${TIMESTAMP}.log"
+LOGFILE='test.log'
 
 nix-run() {
-  rm -f ortholang.log
+  rm -f "$LOGFILE"
   nix-shell shell.nix $NIX_ARGS --run "$@" 2>&1 | tee -a "$LOGFILE"
   code="$?"
-  [[ $code == 0 ]] || cat ortholang.log | tee -a "$LOGFILE"
+  [[ $code == 0 ]] || cat "$LOGFILE"
   return $code
 }
 
@@ -40,13 +47,14 @@ STACK_CMD="stack exec ortholang --"
 TEST_ARGS="--debug '.*' --test '$TEST_FILTER'"
 
 # test using shared cache first because it's faster
-nix-run "$STACK_CMD --shared http://shortcut.pmb.berkeley.edu/shared $TEST_ARGS"
-code1="$?"
-
+# nix-run "$STACK_CMD --shared http://shortcut.pmb.berkeley.edu/shared $TEST_ARGS"
+# code1="$?"
 # then locally to verify everything really works
-nix-run "$STACK_CMD $TEST_ARGS"
-code2="$?"
-
+# nix-run "$STACK_CMD $TEST_ARGS"
+# code2="$?"
 # exit nonzero if either run failed
-[[ $code1 == 0 ]] || exit $code1
-exit $code2
+# [[ $code1 == 0 ]] || exit $code1
+# exit $code2
+
+# local tests only pending server update
+nix-shell shell.nix --command "$STACK_CMD $TEST_ARGS; exit"

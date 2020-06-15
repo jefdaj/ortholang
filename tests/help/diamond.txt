@@ -5,6 +5,12 @@ Functions:
 diamond_makedb
 diamond_makedb_each
 diamond_makedb_all
+diamond_blastp_db
+diamond_blastp_db_sensitive
+diamond_blastp_db_more_sensitive
+diamond_blastx_db
+diamond_blastx_db_sensitive
+diamond_blastx_db_more_sensitive
 diamond_blastp
 diamond_blastp_sensitive
 diamond_blastp_more_sensitive
@@ -17,12 +23,6 @@ diamond_blastp_more_sensitive_rev
 diamond_blastx_rev
 diamond_blastx_sensitive_rev
 diamond_blastx_more_sensitive_rev
-diamond_blastp_db
-diamond_blastp_db_sensitive
-diamond_blastp_db_more_sensitive
-diamond_blastx_db
-diamond_blastx_db_sensitive
-diamond_blastx_db_more_sensitive
 diamond_blastp_db_rev
 diamond_blastp_db_sensitive_rev
 diamond_blastp_db_more_sensitive_rev

@@ -13,6 +13,9 @@ module OrthoLang.Locks
   , withWriteLock'
   , withWriteLocks'
   , withWriteOnce
+  -- , randomDelay
+
+  , markDone
   )
   where
 
@@ -31,7 +34,7 @@ import OrthoLang.Debug
 import qualified Data.Map.Strict                  as Map
 import qualified Control.Concurrent.ReadWriteLock as RWLock
 
-import Development.Shake hiding (doesFileExist)
+import Development.Shake hiding (doesFileExist, doesDirectoryExist)
 import Control.Concurrent.ReadWriteLock (RWLock)
 import Control.Monad                    (when)
 import Data.List                        (nub)
@@ -40,8 +43,8 @@ import Data.IORef                       (IORef, newIORef, atomicModifyIORef')
 import Data.Map.Strict                  (Map)
 import Control.Exception.Safe     (bracket_)
 import System.Directory           (createDirectoryIfMissing, doesFileExist,
-                                   pathIsSymbolicLink)
-import System.FilePath            (takeDirectory)
+                                   doesDirectoryExist, pathIsSymbolicLink)
+import System.FilePath            (takeDirectory, (<.>))
 import System.Posix.Files         (setFileMode)
 import Control.Exception.Safe     (catch, throwM)
 import System.IO.Error            (isDoesNotExistError)
@@ -53,6 +56,8 @@ import Text.Regex.Posix           ((=~))
 -- import Data.IORef (readIORef)
 
 -- import Control.Concurrent.Thread.Delay (delay)
+import Control.Concurrent (threadDelay)
+import System.Random
 
 -- TODO move these to Types?
 
@@ -100,6 +105,13 @@ getReadLock lRef path = do
         ((d,p,Map.insert path (l', Attempt (n+1)) c), l')
     Just (l', ReadOnly ) -> ((d,p,c), l')
     Just (l', Success _) -> ((d,p,c), l')
+
+-- just a test to see if locks are the problem
+-- randomDelay :: IO ()
+-- randomDelay = do
+--   microseconds <- getStdRandom (randomR (1000,10000))
+--   threadDelay microseconds
+--   return ()
 
 getWriteLock :: LocksRef -> FilePath -> IO RWLock
 getWriteLock lRef path = do
@@ -221,6 +233,7 @@ but sometimes a lock is just a lock. Then you want this function instead.
 withWriteLockEmpty :: LocksRef -> FilePath -> IO a -> IO a
 withWriteLockEmpty ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
+  -- randomDelay
   l <- liftIO $ getWriteLock ref path
   res <- bracket_
     (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
@@ -263,13 +276,22 @@ withWriteLock' path actFn = do
 withWriteOnce :: FilePath -> Action () -> Action ()
 withWriteOnce path actFn = withWriteLock' path $ do
   -- liftIO $ delay 500000 -- 1/2 second
-  exists <- liftIO $ doesFileExist path -- Do not use Shake's version here
-  when (not exists) actFn
-  when exists $ liftIO $ catch (do
-    isLink <- liftIO $ pathIsSymbolicLink path
-    when (not isLink)
-      (setFileMode path 444)) handleExists -- TODO resolve symlinks without cfg?
-  when exists $ trackWrite [path]
+  fBefore <- liftIO $ doesFileExist path      -- Do not use Shake's version here
+  dBefore <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here
+  let before = fBefore || dBefore
+  when (not before) actFn
+
+  -- fAfter <- liftIO $ doesFileExist path      -- Do not use Shake's version here
+  -- dAfter <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here
+  -- let after = fAfter || dAfter
+
+  -- when fAfter $ liftIO $ catch (do
+  --   isLink <- liftIO $ pathIsSymbolicLink path
+  --   when (fAfter && not isLink)
+  --     (setFileMode path 444)) handleExists -- TODO resolve symlinks without cfg?
+
+  -- when (after && not before) $ trackWrite [path] -- TODO only for files?
+
   where
     handleExists e
       | isDoesNotExistError e = return ()

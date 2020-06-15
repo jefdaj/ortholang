@@ -67,15 +67,15 @@ import OrthoLang.Types
 import Control.Monad              (when)
 import Data.List                  (sort, nub, isPrefixOf, isInfixOf, isSuffixOf)
 import Data.List.Split            (splitOneOf)
-import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative)
+import Development.Shake.FilePath ((</>), isAbsolute, pathSeparators, makeRelative, splitPath)
 -- import OrthoLang.Interpreter.Debug        (debug)
 import OrthoLang.Interpreter.Paths        (Path, toPath, fromPath, checkLit, isGeneric, fromGeneric,
                                    checkLits, cacheDir, pathString, isURL,
                                    stringPath, toGeneric, sharedPath, addDigest)
 import OrthoLang.Util         (digest, digestLength, rmAll, readFileStrict, absolutize, resolveSymlinks,
                                    ignoreExistsError, digest, globFiles, isEmpty, headOrDie)
-import OrthoLang.Locks        (withReadLock', withReadLocks',
-                                   withWriteLock', withWriteLocks', withWriteOnce)
+import OrthoLang.Locks        (withReadLock', withReadLocks', markDone, withWriteOnce,
+                                   withWriteLock', withWriteLocks')
 import System.Directory           (doesFileExist, createDirectoryIfMissing, pathIsSymbolicLink, copyFile, renameFile)
 import System.Exit                (ExitCode(..))
 import System.FilePath            ((<.>), takeDirectory, takeExtension, takeBaseName)
@@ -94,6 +94,7 @@ import Network.Download (openURIString)
 import Control.Exception.Safe (catchAny)
 import Data.Scientific            (Scientific())
 import Data.IORef (readIORef)
+import qualified System.IO.Strict as Strict
 
 ---------------
 -- debugging --
@@ -185,7 +186,7 @@ needShared name path@(Path p) = do
 -- TODO figure out better criteria for download
 -- TODO and do it via macro expansion rather than as a case in here
 fetchShared :: FilePath -> FilePath -> Action ()
-fetchShared sp path' = withWriteOnce path' $ do
+fetchShared sp path' = do
   liftIO $ createDirectoryIfMissing True $ takeDirectory path'
   liftIO $ if "download" `isInfixOf` sp
              then renameFile sp path'
@@ -194,13 +195,13 @@ fetchShared sp path' = withWriteOnce path' $ do
 
 -- TODO and should the symlink also be created?
 -- TODO this will get the abspath of the *cache* version, right? have to get the local one!
-needLinkSrcIfAny :: String -> FilePath -> Action ()
-needLinkSrcIfAny name link = do
-  isLink <- liftIO $ pathIsSymbolicLink link
-  when isLink $ do
-    relPath <- liftIO $ readSymbolicLink link
-    absPath <- liftIO $ absolutize $ takeDirectory link </> relPath
-    need' name [absPath]
+-- needLinkSrcIfAny :: String -> FilePath -> Action ()
+-- needLinkSrcIfAny name link = do
+--   isLink <- liftIO $ pathIsSymbolicLink link
+--   when isLink $ do
+--     relPath <- liftIO $ readSymbolicLink link
+--     absPath <- liftIO $ absolutize $ takeDirectory link </> relPath
+--     need' name [absPath]
 
 {-|
 This is also a little more complicated than it would seem, because:
@@ -243,7 +244,8 @@ readFileStrict' :: FilePath -> Action String
 readFileStrict' path = do
   ref <- fmap fromJust getShakeExtra
   need' "interpreter.actions.readFileStrict'" [path]
-  withReadLock' path $ liftIO (readFileStrict ref path)
+  -- withReadLock' path $ liftIO (readFileStrict ref path)
+  liftIO (readFileStrict ref path)
 -- {-# INLINE readFileStrict' #-}
 
 {- OrthoLang requires empty strings to contain the text <<emptystr>> so we
@@ -253,9 +255,9 @@ readFileStrict' path = do
  -}
 readLit :: DebugLocation -> FilePath -> Action String
 readLit loc path = do
-  debugA' "readLit" path
-  -- TODO need' here?
-  need [path] -- Note isEmpty also does this
+  let loc = "ortholang.interpreter.actions.readLit"
+  debugA' loc path
+  need' loc [path] -- note: this does actually seem to be important for reps!
   empty <- isEmpty path
   if empty
     then return ""
@@ -273,9 +275,9 @@ readPath loc path = readPaths loc path >>= return . headOrDie "readPath failed"
 readPaths :: DebugLocation -> FilePath -> Action [Path]
 readPaths loc path = do
   paths <- (fmap . map) stringPath $ readList loc path
-  cfg <- fmap fromJust getShakeExtra
-  let loc' = loc ++ ".readPaths"
-  need' loc' $ map (fromPath loc' cfg) paths -- TODO remove? seems like it would kill laziness
+  -- cfg <- fmap fromJust getShakeExtra
+  -- let loc' = loc ++ ".readPaths"
+  -- need' loc' $ map (fromPath loc' cfg) paths -- TODO remove? seems like it would kill laziness
   return paths
 
 -- makes a copy of a list of paths without ortholang funny business,
@@ -307,7 +309,7 @@ readLitPaths loc path = do
   let ls'  = map toAbs ls
       ls'' = map (toPath loc cfg) ls'
   -- Note: need' causes infinite recursion here, so we skip to needDebug
-  needDebug loc' ls'
+  -- needDebug loc' ls'
   return ls''
 
 readLitPath :: DebugLocation -> FilePath -> Action Path
@@ -343,7 +345,7 @@ readList :: DebugLocation -> FilePath -> Action [String]
 readList loc path = do
   let loc' = loc ++ ".readList"
   debugA' loc' $ show path
-  need' loc' [path] -- Note isEmpty also does this
+  -- need' loc' [path] -- Note isEmpty also does this
   empty <- isEmpty path
   if empty
     then return []
@@ -403,11 +405,14 @@ writeCachedLines loc outPath content = do
   let cache = cachedLinesPath cfg content
   let loc' = loc ++ ".writeCachedLines" 
   debugA' loc' $ first50 content ++ " -> " ++ last50 cache
-  withWriteOnce cache $ writeFile' cache $ unlines content
+  -- withWriteOnce cache $ do
+  writeFile' cache $ unlines content -- TODO writeFile'?
+    -- trackWrite' [cache]
+  produces [cache]
   symlink (toPath loc' cfg outPath) (toPath loc' cfg cache)
 
 -- like writeCachedLines but starts from a file written by a script
--- TODO remove in favor of sanitizeFileInPlace?
+-- TODO remove in favor of anitizeFileInPlace?
 writeCachedVersion :: DebugLocation -> FilePath -> FilePath -> Action ()
 writeCachedVersion loc outPath inPath = do
   let loc' = loc ++ ".writeCachedVersion"
@@ -420,7 +425,7 @@ writeCachedVersion loc outPath inPath = do
 -- TODO take Path Abs File and convert them... or Path Rel File?
 -- TODO explicit case for empty lists that isn't just an empty file!
 writePaths :: DebugLocation -> FilePath -> [Path] -> Action ()
-writePaths loc out cpaths = writeCachedLines loc' out paths >> trackWrite paths -- TODO trackwrite'?
+writePaths loc out cpaths = writeCachedLines loc' out paths -- >> trackWrite paths -- TODO trackwrite'?
   where
     loc' = loc ++ ".writePaths"
     paths = if null cpaths then ["<<emptylist>>"] else map pathString cpaths
@@ -487,8 +492,10 @@ trackWrite' fs = do
   -- mapM_ (assertNonEmptyFile) fs
   -- also ensure it only gets written once:
   -- liftIO $ mapM_ (\f -> setFileMode f 444) fs -- TODO is 444 right? test it
-  cfg <- fmap fromJust getShakeExtra
-  liftIO $ mapM_ ((\f -> catchAny f (\_ -> return ())) . setReadOnly cfg) fs -- TODO is 444 right? test it
+  -- cfg <- fmap fromJust getShakeExtra
+  -- liftIO $ mapM_ ((\f -> catchAny f (\_ -> return ())) . setReadOnly cfg) fs -- TODO is 444 right? test it
+  lRef <- fmap fromJust getShakeExtra
+  liftIO $ mapM_ (markDone lRef) fs
   trackWrite $ traceShow "interpreter.actions.trackWrite'" fs
 
 setReadOnly :: Config -> FilePath -> IO ()
@@ -506,12 +513,15 @@ OrthoLang requires explicit empty files with contents like "<<emptylist>>" to
 distinguish them from runtime errors. This function replaces those with
 actual empty files before passing them to a cmd, so logic for that
 doesn't have to be duplicated over and over.
+
+TODO do that only once after a command runs, before tracking it written
+TODO and merge with sanitizing the output files?
 -}
-fixEmptyText :: FilePath -> Action FilePath
-fixEmptyText path = do
-  need' "interpreter.actions.fixEmptyText" [path] -- Note isEmpty does this too
-  empty <- isEmpty path
-  return $ if empty then "/dev/null" else path -- TODO will /dev/null work?
+-- fixEmptyText :: FilePath -> Action FilePath
+-- fixEmptyText path = do
+--   need' "interpreter.actions.fixEmptyText" [path] -- Note isEmpty does this too
+--   empty <- isEmpty path
+--   return $ if empty then "/dev/null" else path -- TODO will /dev/null work?
 
 -- TODO call this when exiting nonzero and/or exception thrown
 -- TODO take a list of globs and resolve them to files
@@ -538,6 +548,7 @@ data CmdDesc = CmdDesc
   , cmdParallel      :: Bool
   , cmdExitCode      :: ExitCode -- expected exit code (others are errors)
   }
+  deriving (Show)
 
 {-|
 One wrappedCmd equivalent function to rule them all.
@@ -552,48 +563,67 @@ TODO if exit is wrong (usually non-zero), cat out stderr for user
 
 TODO if stdout == outfile, put it there and skip the .out file altogether, or symlink it?
 -}
+
+-- TODO how to prevent this re-running on makeblastdb?
 runCmd :: CmdDesc -> Action ()
+-- runCmd d = withWriteOnce (cmdOutPath d) $ do
 runCmd d = do
+  -- liftIO $ randomDelay
+
   cfg <- fmap fromJust getShakeExtra
-  let stdoutPath = takeDirectory (cmdOutPath d) </> "out"
+  let stdoutPath = takeDirectory (cmdOutPath d) </> "out" -- TODO what about when this is the outpath too?
       stderrPath = takeDirectory (cmdOutPath d) </> "err"
       dbg = debugA' "runCmd"
   -- liftIO $ delay 1000000
 
+  dbg $ "running command " ++ show d
+
+  -- TODO is this part causing the extra rebuilds?
   inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns d
-  inPaths' <- if cmdFixEmpties d
-                then mapM (fixEmptyText) inPaths
-                else need' "interpreter.actions.runCmd" inPaths >> return inPaths
+  -- inPaths' <- if cmdFixEmpties d
+  --               then mapM (fixEmptyText) inPaths
+  --               else need' "interpreter.actions.runCmd" inPaths >> return inPaths
+  need' "interpreter.actions.runCmd" inPaths
+
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory stdoutPath
-  dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
+  dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
   (lRef :: LocksRef) <- fmap fromJust getShakeExtra
   (disk, par, _) <- liftIO $ readIORef lRef
+
+  -- TODO need to have this whole operation run on the mapped elements too, right?
   let parLockFn = if cmdParallel d
                     then \f -> withResource par 1 f
                     else id
+
       -- TODO any problem locking the whole dir?
       -- TODO and if not, can the other locks inside that be removed?
-      writeDir = takeDirectory $ cmdOutPath d
-      writeLockFn fn = (if (takeBaseName $ takeDirectory writeDir) == "exprs" then withWriteLock' writeDir else id) $ do
-        -- dbg $ "runCmd acquired expr dir write lock: " ++ show writeDir
-        withWriteOnce (cmdOutPath d) $ do
-          dbg $ "runCmd acquired outpath write lock: " ++ show (cmdOutPath d)
-          withWriteLocks' (cmdExtraOutPaths d) $ do
-            dbg $ "runCmd acquired extra write locks: " ++ show (cmdExtraOutPaths d)
-            parLockFn fn
+      -- writeDir = takeDirectory $ cmdOutPath d
+      -- withDirLock fn = if "exprs/" `elem` splitPath writeDir then do
+      --                    dbg $ "runCmd acquired dir lock: " ++ writeDir
+      --                    withWriteLock' writeDir fn
+      --                  else id fn
 
-  -- TODO is 5 a good number of times to retry? can there be increasing delay or something?
-  writeLockFn $ withReadLocks' inPaths' $ do
+      -- writeLockFn fn = withDirLock $ do
+      writeLockFn fn = do
+        -- dbg $ "runCmd acquired expr dir write lock: " ++ show writeDir
+        -- withWriteOnce (cmdOutPath d) $ do
+        dbg $ "runCmd acquired outpath write lock: " ++ show (cmdOutPath d)
+        withWriteLocks' (cmdExtraOutPaths d) $ do
+          dbg $ "runCmd acquired extra write locks: " ++ show (cmdExtraOutPaths d)
+          parLockFn fn
+
+  -- writeLockFn $ withReadLocks' inPaths' $ do
+  writeLockFn $ do
     -- TODO remove opts?
     -- TODO always assume disk is 1?
+    dbg $ "runCmd proper starting"
     Exit code <- withResource disk (length inPaths + 1) $ case wrapper cfg of
       Nothing -> command (cmdOptions d) (cmdBinary d) (cmdArguments d)
       Just w  -> command (Shell:cmdOptions d) w [escape $ unwords (cmdBinary d:cmdArguments d)]
     -- Exit _ <- command [] "sync" [] -- TODO is this needed?
     -- This is disabled because it can make the logs really big
     -- dbg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')
-    trackWrite' (cmdOutPath d:stdoutPath:stderrPath:cmdExtraOutPaths d)
     -- return ()
 
     -- TODO use exitWith here?
@@ -601,11 +631,16 @@ runCmd d = do
       let rmPatterns = (takeDirectory (cmdOutPath d) </> "*"):(cmdRmPatterns d)
       in handleCmdError (cmdBinary d) code stderrPath rmPatterns
 
-  let sPaths = stdoutPath:stderrPath:cmdSanitizePaths d -- TODO main outpath too?
-  -- sanitizeFilesInPlace $ cmdSanitizePaths d
-  sanitizeFilesInPlace sPaths
+    let sPaths = stdoutPath:stderrPath:cmdSanitizePaths d -- TODO main outpath too?
+    sanitizeFilesInPlace sPaths
+    dbg $ "runCmd sanitized these files: " ++ show sPaths
 
-  return () -- TODO out, err, code here?
+    -- TODO what about when stderr isn't written?
+    let written = nub $ cmdOutPath d:stdoutPath:stderrPath:cmdExtraOutPaths d
+    trackWrite' written
+    dbg $ "runCmd tracked these written: " ++ show written
+
+  -- return () -- TODO out, err, code here?
 
 -- TODO does this do directories?
 -- TODO does this work on absolute paths?
@@ -691,7 +726,7 @@ withBinHash uniq outPath actFn = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "interpreter.actions.withBinHash"
       binDir'  = fromPath loc cfg $ cacheDir cfg "bin"
-      outPath' = fromPath loc cfg outPath
+      -- outPath' = fromPath loc cfg outPath
   liftIO $ createDirectoryIfMissing True binDir'
   let binTmp' = binDir' </> digest loc uniq -- <.> takeExtension outPath'
       binTmp  = toPath loc cfg binTmp'
@@ -723,6 +758,7 @@ Note that src here means what's sometimes called the destination. The first arg
 should be the symlink path and the second the file it points to. (it was going
 to be kind of confusing either way)
 -}
+-- TODO prevent duplicate writes here?
 symlink :: Path -> Path -> Action ()
 symlink src dst = do
   cfg <- fmap fromJust getShakeExtra
@@ -731,11 +767,11 @@ symlink src dst = do
       dst' = fromPath loc cfg dst
       dstr = tmpLink cfg src' dst' -- TODO use cutpaths here too?
   -- TODO why does this break it?
-  -- need' "interpreter.actions.symlink" [dst']
-  withWriteOnce src' $ do
-    liftIO $ createDirectoryIfMissing True $ takeDirectory src'
-    liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
-    trackWrite' [src']
+  need' "interpreter.actions.symlink" [dst']
+  -- withWriteOnce src' $ do
+  liftIO $ createDirectoryIfMissing True $ takeDirectory src'
+  liftIO $ ignoreExistsError $ createSymbolicLink dstr src'
+  trackWrite' [src']
 
 -- Apply toGeneric to sanitize the output(s) of a script
 -- Should be done before trackWrite to avoid confusing Shake
@@ -744,8 +780,7 @@ sanitizeFileInPlace path = do
   -- txt <- readFileStrict' path
   exists <- liftIO $ doesFileExist path
   when exists $ do
-    ref <- fmap fromJust getShakeExtra
-    txt <- liftIO $ readFileStrict ref path -- can't use need here
+    txt <- liftIO $ Strict.readFile path -- avoid using need or readFileStrict here for simplicity
     cfg <- fmap fromJust getShakeExtra
     let txt' = toGeneric cfg txt
     -- liftIO $ putStrLn $ "txt': \"" ++ txt' ++ "\""

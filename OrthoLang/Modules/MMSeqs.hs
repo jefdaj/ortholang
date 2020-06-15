@@ -200,7 +200,8 @@ rMmseqsSearchDb _ e = fail $ "bad argument to rMmseqsSearch: " ++ show e
 -- TODO how should this handle the .index and other files issue?
 resolveMmseqsDb :: FilePath -> Action FilePath
 resolveMmseqsDb path = do
-  need [path] -- path is to a symlink to the main db file
+  let loc = "modules.mmseqs.resolveMmseqsDb"
+  need' loc [path] -- path is to a symlink to the main db file
   path' <- liftIO $ resolveSymlinks Nothing path
   -- let path''  = if ".index" `isSuffixOf` path'  then dropExtension path' else path'
   --     path''' = if "_h"     `isSuffixOf` path'' then init $ init path''  else path''
