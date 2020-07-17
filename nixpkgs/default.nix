@@ -7,17 +7,18 @@ let
   # see https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
   # to update the the sha256sum:
   # nix-prefetch-url --unpack https://github.com/jefdaj/nixpkgs/archive/<rev>.tar.gz
-  pkgs = let
-    inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
-  in import (fetchFromGitHub {
-    owner  = "jefdaj";
-    repo   = "nixpkgs";
-    rev    = "2020-02-01_ortholang";
-    sha256 = "1sxicczxc3hdjyrbhmg3dvmkq2q6dzqyrv272ksxvgr8vfamdd2h";
-  }) {};
+  # pkgs = let
+  #   inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
+  # in import (fetchFromGitHub {
+  #   owner  = "jefdaj";
+  #   repo   = "nixpkgs";
+  #   rev    = "2020-02-01_ortholang";
+  #   sha256 = "1sxicczxc3hdjyrbhmg3dvmkq2q6dzqyrv272ksxvgr8vfamdd2h";
+  # }) {};
 
   # use this instead to try to build it with your system's current nixpkgs:
-  # pkgs = import <nixpkgs> {};
+  # TODO will this pick up the pinned knlab-nixops version?
+  pkgs = import <nixpkgs> {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
