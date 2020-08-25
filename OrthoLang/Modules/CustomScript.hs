@@ -38,6 +38,27 @@ import Development.Shake
 -- import OrthoLang.Types (typeError)
 import OrthoLang.Types
 
+import Development.Shake
+import OrthoLang.Types
+import OrthoLang.Script (rDepsOf)
+import OrthoLang.Interpreter.Paths (prefixOf)
+import OrthoLang.Interpreter
+import OrthoLang.Util (digest, justOrDie)
+import OrthoLang.Debug (error, trace)
+import Prelude hiding (error)
+import Data.GraphViz
+import Data.Graph.Inductive hiding (nodes, edges)
+import qualified Data.Graph.Inductive.Graph as G
+import Data.GraphViz.Attributes.Complete
+import Data.Maybe (fromJust)
+import System.Directory (renameFile)
+import System.FilePath (combine)
+import qualified Data.Text.Lazy as T
+import Control.Monad.IO.Class (liftIO)
+import Data.List (sort, nub, isSuffixOf)
+import OrthoLang.Modules.Plots (png)
+
+
 olModule :: Module
 olModule = Module
   { mName = "CustomScript"
@@ -48,17 +69,17 @@ olModule = Module
   , mFunctions = [customScript]
   }
 
-customScript :: Function
-customScript = Function
-  { fOpChar = Nothing, fName = "custom_script"
-  -- , fTypeCheck = cheatTypeCheck
-  -- , fTypeDesc  = "cheat : ??? (implement this)"
-  , fInputs = [Exactly str, ListSigs (Exactly Untyped)]
-  , fOutput = Exactly Untyped
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rCustomScript
-  }
+-- customScript :: Function
+-- customScript = Function
+--   { fOpChar = Nothing, fName = "custom_script"
+--   -- , fTypeCheck = cheatTypeCheck
+--   -- , fTypeDesc  = "cheat : ??? (implement this)"
+--   , fInputs = [Exactly str, ListSigs (Exactly Untyped)]
+--   , fOutput = Exactly Untyped
+--   , fTags = []
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rCustomScript
+--   }
 
 -- TODO detect return type based on string contents,
 --      and make a new temporary type if the given one doesn't exist
@@ -72,5 +93,27 @@ customScript = Function
 -- cheatTypeCheck _ = Left $ "error! the first two arguments to cheat should \
 --                           \be strings specifying the script path and return type"
 
-rCustomScript :: RulesFn
-rCustomScript = undefined
+-- rCustomScript :: RulesFn
+-- rCustomScript = undefined
+
+-- first attempt, based on FlowChart.hs
+
+-- | Hidden function for rendering the raw Haskell Graphviz data structure passed as a string
+customScript :: Function
+customScript = newFnA2
+  "custom_script"
+  (Exactly str, ListSigs (Exactly Untyped))
+  (Exactly Untyped)
+  undefined
+  []
+
+-- aPlotDot :: NewAction1
+-- aPlotDot (ExprPath out) inDot = do
+--   let loc = "ortholang.modules.flowchart.aPlotDot"
+--   txt <- readLit loc inDot
+--   cfg <- fmap fromJust $ getShakeExtra
+--   let g = read txt :: DotGraph Node
+--       out' = toPath loc cfg out
+--   withBinHash out out' $ \tmpPath -> do
+--     let tmpPath' = fromPath loc cfg tmpPath
+--     renderPng tmpPath' g
