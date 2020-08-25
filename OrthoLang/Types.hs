@@ -366,7 +366,8 @@ depsOf (Lst _ _ vs   es   ) = nub $ vs ++ concatMap varOf es
 -- TODO how to make the record fields not partial functions?
 -- TODO remove tShow and make a separate typeclass for "showable from filepath" so this can be Eq, Ord, ...
 data Type
-  = Empty -- ^ used in (ListOf Empty) to denote empty lists
+  = Empty   -- ^ used in (ListOf Empty) to denote empty lists
+  | Untyped -- ^ used as a fallback for edge cases where type inference breaks
   | ListOf    Type
   | ScoresOf  Type
   | EncodedAs Encoding Type
