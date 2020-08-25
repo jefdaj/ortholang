@@ -482,13 +482,12 @@ class Desc a where
 -- and that there will be an issue if it's called on Empty alone
 instance Ext Type where
   ext Empty             = "empty" -- special case for empty lists with no element type
-  ext Untyped           = "txt" -- TODO is this a good idea?
+  ext Untyped           = "untyped"
   ext (ListOf        t) = ext t ++ ".list"
   ext (ScoresOf      t) = ext t ++ ".scores"
   ext (EncodedAs   e t) = ext t ++ "." ++ ext e
   ext (Type {tExt = e}) = e
 
--- TODO separate Desc typeclass would be more obvious, and easy
 instance Desc Type where
   desc Empty           = "empty list" -- for lists with nothing in them yet
   desc Untyped         = "untyped file"
