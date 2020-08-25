@@ -383,6 +383,7 @@ data Type
 -- TODO should this use typeSigsMatch?
 instance Eq Type where
   Empty              == Empty              = True
+  Untyped            == Untyped            = True
   (ListOf t1)        == (ListOf t2)        = t1 == t2
   (ScoresOf t1)      == (ScoresOf t2)      = t1 == t2
   (EncodedAs e1 t1)  == (EncodedAs e2 t2)  = e1 == e2 && t1 == t2
@@ -397,7 +398,9 @@ instance Show Type where
 
 instance Pretty Type where
   pPrint Empty           = error "type.prettytype" "should never need to print Empty"
+  pPrint Untyped         = PP.text "untyped file"
   pPrint (ListOf  Empty) = PP.text "empty list"
+  pPrint (ListOf Untyped) = PP.text "untyped list"
   pPrint (ListOf      t) = PP.text "list of" <+> pPrint t <> PP.text "s"
   pPrint (ScoresOf    t) = PP.text "list of" <+> pPrint t <> PP.text "s with scores"
   pPrint (EncodedAs e t) = pPrint t <+> PP.text "encoded as" <+> PP.text (enExt e)
@@ -479,6 +482,7 @@ class Desc a where
 -- and that there will be an issue if it's called on Empty alone
 instance Ext Type where
   ext Empty             = "empty" -- special case for empty lists with no element type
+  ext Untyped           = "txt" -- TODO is this a good idea?
   ext (ListOf        t) = ext t ++ ".list"
   ext (ScoresOf      t) = ext t ++ ".scores"
   ext (EncodedAs   e t) = ext t ++ "." ++ ext e
@@ -487,6 +491,8 @@ instance Ext Type where
 -- TODO separate Desc typeclass would be more obvious, and easy
 instance Desc Type where
   desc Empty           = "empty list" -- for lists with nothing in them yet
+  desc Untyped         = "untyped file"
+  desc (ListOf Untyped) = "untyped list"
   desc (ListOf      t) = "list of " ++ desc t
   desc (ScoresOf    t) = "scores for " ++ desc t
   desc (EncodedAs e t) = desc t ++ " encoded as " ++ desc e
@@ -791,6 +797,8 @@ data NewRules
 typeSigMatches :: TypeSig -> Type -> Bool
 typeSigMatches (AnyType _)       _                = True
 typeSigMatches (Exactly (ListOf _)) (ListOf Empty) = True
+typeSigMatches (Exactly (ListOf Untyped)) (ListOf _) = True -- any list can be used as untyped
+typeSigMatches (Exactly (ListOf _)) (ListOf Untyped) = False -- ... but not the other way around
 typeSigMatches (Exactly t1)      t2               = t1 == t2
 typeSigMatches (ListSigs _)      (ListOf Empty)   = True
 typeSigMatches (ListSigs s)      (ListOf t)       = typeSigMatches s t
