@@ -53,7 +53,7 @@ customScript = Function
   { fOpChar = Nothing, fName = "custom_script"
   -- , fTypeCheck = cheatTypeCheck
   -- , fTypeDesc  = "cheat : ??? (implement this)"
-  , fInputs = [ListSigs (Exactly Untyped)]
+  , fInputs = [Exactly str, ListSigs (Exactly Untyped)]
   , fOutput = Exactly Untyped
   , fTags = []
   , fNewRules = NewNotImplemented

@@ -491,7 +491,6 @@ instance Ext Type where
 instance Desc Type where
   desc Empty           = "empty list" -- for lists with nothing in them yet
   desc Untyped         = "untyped file"
-  desc (ListOf Untyped) = "untyped list"
   desc (ListOf      t) = "list of " ++ desc t
   desc (ScoresOf    t) = "scores for " ++ desc t
   desc (EncodedAs e t) = desc t ++ " encoded as " ++ desc e
