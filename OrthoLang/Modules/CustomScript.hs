@@ -104,7 +104,7 @@ customScript = newFnA2
   "custom_script"
   (Exactly str, ListSigs (Exactly Untyped))
   (Exactly Untyped)
-  undefined
+  aCustomScript
   []
 
 -- aPlotDot :: NewAction1
@@ -117,3 +117,14 @@ customScript = newFnA2
 --   withBinHash out out' $ \tmpPath -> do
 --     let tmpPath' = fromPath loc cfg tmpPath
 --     renderPng tmpPath' g
+
+aCustomScript :: NewAction2
+aCustomScript out inScript inList = do
+  -- cfg <- fmap fromJust getShakeExtra
+  -- let loc = "modules.customscript.aCustomScript"
+      -- tmp  = fromPath loc cfg $ cacheDir cfg "custom_script" -- TODO bin cache? use script name? hash?
+      -- ids  = tmp </> digest loc (toPath loc cfg inList) <.> "txt"
+      -- ids' = toPath loc cfg ids
+  -- TODO these should be the seqid_... ids themselves, not unhashed?
+  -- unhashIDsFile (toPath loc cfg inList) ids -- TODO implement as a macro?
+  aNewRulesS1 inScript id out inList -- TODO is it an S1 at this point? might need custom code
