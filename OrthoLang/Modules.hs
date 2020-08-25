@@ -18,7 +18,7 @@ import qualified OrthoLang.Modules.BlastHits     as BlastHits
 import qualified OrthoLang.Modules.BlastRBH      as BlastRBH
 import qualified OrthoLang.Modules.Busco         as Busco
 import qualified OrthoLang.Modules.CRBBlast      as CRBBlast
-import qualified OrthoLang.Modules.Cheat         as Cheat
+import qualified OrthoLang.Modules.CustomScript  as CustomScript
 import qualified OrthoLang.Modules.FlowChart     as FlowChart
 import qualified OrthoLang.Modules.Diamond       as Diamond
 import qualified OrthoLang.Modules.GreenCut      as GreenCut
@@ -96,7 +96,7 @@ modules =
 
   -- works in progress and/or tests
   , AllVsAll.olModule
-  , Cheat.olModule
+  , CustomScript.olModule
   , GreenCut.olModule
   , NewRulesTest.olModule
   , Summarize.olModule

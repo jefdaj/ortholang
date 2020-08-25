@@ -28,11 +28,11 @@
 
 -- TODO write examples
 -- TODO write cheatTypeCheck
--- TODO write rCheat
+-- TODO write rCustomScript
 -- TODO come up with more neutral word than cheat?
 -- TODO have a help menu that lists current types? not until after meeting!
 
-module OrthoLang.Modules.Cheat where
+module OrthoLang.Modules.CustomScript where
 
 import Development.Shake
 -- import OrthoLang.Types (typeError)
@@ -40,24 +40,24 @@ import OrthoLang.Types
 
 olModule :: Module
 olModule = Module
-  { mName = "Cheat"
+  { mName = "CustomScript"
   , mDesc = "Run your own script and OrthoLang will assume the types are valid"
   , mTypes = []
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [cheat]
+  , mFunctions = [customScript]
   }
 
-cheat :: Function
-cheat = Function
-  { fOpChar = Nothing, fName = "cheat"
+customScript :: Function
+customScript = Function
+  { fOpChar = Nothing, fName = "custom_script"
   -- , fTypeCheck = cheatTypeCheck
   -- , fTypeDesc  = "cheat : ??? (implement this)"
-  , fInputs = [Exactly str, AnyType "the return type", Exactly str] -- TODO variable args needed?
-  , fOutput = AnyType "the return type"
+  , fInputs = [ListSigs (Exactly Untyped)]
+  , fOutput = Exactly Untyped
   , fTags = []
   , fNewRules = NewNotImplemented
-  , fOldRules = rCheat
+  , fOldRules = rCustomScript
   }
 
 -- TODO detect return type based on string contents,
@@ -72,5 +72,5 @@ cheat = Function
 -- cheatTypeCheck _ = Left $ "error! the first two arguments to cheat should \
 --                           \be strings specifying the script path and return type"
 
-rCheat :: RulesFn
-rCheat = undefined
+rCustomScript :: RulesFn
+rCustomScript = undefined
