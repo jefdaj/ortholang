@@ -128,3 +128,4 @@ aCustomScript out inScript inList = do
   -- TODO these should be the seqid_... ids themselves, not unhashed?
   -- unhashIDsFile (toPath loc cfg inList) ids -- TODO implement as a macro?
   aNewRulesS1 inScript id out inList -- TODO is it an S1 at this point? might need custom code
+  -- TODO with bin hash, since we don't know what the user will return?

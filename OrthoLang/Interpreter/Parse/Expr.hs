@@ -274,8 +274,8 @@ typecheckFn' name outSig inSigs inTypes =
     sigMatch (n,s,t) = if typeSigMatches s t then Nothing else Just $ explain (n,s,t)
     errHeader = name ++ " has the type signature " ++ show inSigs
                      ++ ",\nwhich doesn't match its inputs "   ++ show inTypes
-                     ++ "\nSpecifically..."
-    explain (n,s,t) = "The " ++ show t ++ " in position " ++ show (n :: Int)
+                     ++ "\nSpecifically, "
+    explain (n,s,t) = "the " ++ show t ++ " in position " ++ show (n :: Int)
                       ++ " doesn't match " ++ show s ++ "."
 
 {-|
