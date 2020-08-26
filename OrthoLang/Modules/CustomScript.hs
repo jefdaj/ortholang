@@ -35,28 +35,11 @@
 module OrthoLang.Modules.CustomScript where
 
 import Development.Shake
--- import OrthoLang.Types (typeError)
 import OrthoLang.Types
-
-import Development.Shake
-import OrthoLang.Types
-import OrthoLang.Script (rDepsOf)
-import OrthoLang.Interpreter.Paths (prefixOf)
 import OrthoLang.Interpreter
-import OrthoLang.Util (digest, justOrDie)
-import OrthoLang.Debug (error, trace)
+import OrthoLang.Debug (error)
 import Prelude hiding (error)
-import Data.GraphViz
-import Data.Graph.Inductive hiding (nodes, edges)
-import qualified Data.Graph.Inductive.Graph as G
-import Data.GraphViz.Attributes.Complete
 import Data.Maybe (fromJust)
-import System.Directory (renameFile)
-import System.FilePath (combine)
-import qualified Data.Text.Lazy as T
-import Control.Monad.IO.Class (liftIO)
-import Data.List (sort, nub, isSuffixOf)
-import OrthoLang.Modules.Plots (png)
 import OrthoLang.Modules.Load (mkLoad)
 
 
@@ -77,6 +60,10 @@ scr = Type
   , tShow = defaultShow -- TODO what if it's binary? maybe use file command to show?
   }
 
+-----------------
+-- load_script --
+-----------------
+
 loadScript :: Function
 loadScript = mkLoad False "load_script" (Exactly scr)
 
@@ -92,29 +79,14 @@ runScriptRaw = hidden $ newFnA2
   aRunScriptRaw
   [Hidden]
 
--- aPlotDot :: NewAction1
--- aPlotDot (ExprPath out) inDot = do
---   let loc = "ortholang.modules.flowchart.aPlotDot"
---   txt <- readLit loc inDot
---   cfg <- fmap fromJust $ getShakeExtra
---   let g = read txt :: DotGraph Node
---       out' = toPath loc cfg out
---   withBinHash out out' $ \tmpPath -> do
---     let tmpPath' = fromPath loc cfg tmpPath
---     renderPng tmpPath' g
-
 aRunScriptRaw :: NewAction2
-aRunScriptRaw out inScr inList = do
-  -- let loc = "modules.customscript.aRunScriptRaw"
-  aNewRulesS1 inScr id out inList
-
-  -- cfg <- fmap fromJust getShakeExtra
-      -- tmp  = fromPath loc cfg $ cacheDir cfg "run_script" -- TODO bin cache? use script name? hash?
-      -- ids  = tmp </> digest loc (toPath loc cfg inList) <.> "txt"
-      -- ids' = toPath loc cfg ids
-  -- TODO these should be the seqid_... ids themselves, not unhashed?
-  -- unhashIDsFile (toPath loc cfg inList) ids -- TODO implement as a macro?
-  -- TODO with bin hash, since we don't know what the user will return?
+aRunScriptRaw (ExprPath out) inScr inList = do
+  cfg <- fmap fromJust $ getShakeExtra
+  let loc  = "modules.customscript.aRunScriptRaw"
+      out' = toPath loc cfg out
+  withBinHash out out' $ \tmpPath -> do
+    let tmp' = fromPath loc cfg tmpPath
+    aNewRulesS1 inScr id (ExprPath tmp') inList
 
 ----------------
 -- run_script --
@@ -129,7 +101,8 @@ runScript = newExprExpansion
   [ReadsFile]
 
 mRunScript :: ExprExpansion
-mRunScript _ _ (Fun r _ ds n [sStr, iList]) = Fun r Nothing ds "run_script_raw" [s, iList]
+mRunScript _ _ (Fun r _ ds _ [sStr, iList]) = runFn
   where
-    s = Fun scr Nothing ds "load_script" [sStr]
+    loadFn = Fun scr Nothing ds "load_script"    [sStr]
+    runFn  = Fun r   Nothing ds "run_script_raw" [s, iList]
 mRunScript _ _ e = error "modules.customscript.mRunScript" $ "bad argument: " ++ show e
