@@ -67,7 +67,7 @@ olModule = Module
   , mTypes = [scr]
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [loadScript, runScript]
+  , mFunctions = [loadScript, runScriptRaw, runScript]
   }
 
 scr :: Type
@@ -77,52 +77,20 @@ scr = Type
   , tShow = defaultShow -- TODO what if it's binary? maybe use file command to show?
   }
 
--- runScript :: Function
--- runScript = Function
---   { fOpChar = Nothing, fName = "run_script"
---   -- , fTypeCheck = cheatTypeCheck
---   -- , fTypeDesc  = "cheat : ??? (implement this)"
---   , fInputs = [Exactly str, ListSigs (Exactly Untyped)]
---   , fOutput = Exactly Untyped
---   , fTags = []
---   , fNewRules = NewNotImplemented
---   , fOldRules = rCustomScript
---   }
-
--- TODO detect return type based on string contents,
---      and make a new temporary type if the given one doesn't exist
--- TODO guess that requires either compile-time or runtime list of types?
---      do you keep a global runtime list of them, or have separate "cheat" types?
--- cheatTypeCheck :: [Type] -> Either String Type
--- cheatTypeCheck (script : rtype : _)
---   | script == str && rtype == str = findOrMake $ tExt rtype
---   where
---     findOrMake _ = undefined
--- cheatTypeCheck _ = Left $ "error! the first two arguments to cheat should \
---                           \be strings specifying the script path and return type"
-
--- rCustomScript :: RulesFn
--- rCustomScript = undefined
-
------------------
--- load_script --
------------------
-
 loadScript :: Function
 loadScript = mkLoad False "load_script" (Exactly scr)
 
-----------------
--- run_script --
-----------------
+--------------------
+-- run_script_raw --
+--------------------
 
--- | Hidden function for rendering the raw Haskell Graphviz data structure passed as a string
-runScript :: Function
-runScript = newFnA2
-  "run_script"
+runScriptRaw :: Function
+runScriptRaw = hidden $ newFnA2
+  "run_script_raw"
   (Exactly scr, ListSigs (Exactly Untyped))
   (Exactly Untyped)
-  aRunScript
-  []
+  aRunScriptRaw
+  [Hidden]
 
 -- aPlotDot :: NewAction1
 -- aPlotDot (ExprPath out) inDot = do
@@ -135,11 +103,10 @@ runScript = newFnA2
 --     let tmpPath' = fromPath loc cfg tmpPath
 --     renderPng tmpPath' g
 
-aRunScript :: NewAction2
-aRunScript out inScr inList = do
-  -- let loc = "modules.customscript.aRunScript"
-  -- bin <- readLit loc inStr
-  aNewRulesS1 inScr id out inList -- TODO is it an S1 at this point? might need custom code
+aRunScriptRaw :: NewAction2
+aRunScriptRaw out inScr inList = do
+  -- let loc = "modules.customscript.aRunScriptRaw"
+  aNewRulesS1 inScr id out inList
 
   -- cfg <- fmap fromJust getShakeExtra
       -- tmp  = fromPath loc cfg $ cacheDir cfg "run_script" -- TODO bin cache? use script name? hash?
@@ -148,3 +115,21 @@ aRunScript out inScr inList = do
   -- TODO these should be the seqid_... ids themselves, not unhashed?
   -- unhashIDsFile (toPath loc cfg inList) ids -- TODO implement as a macro?
   -- TODO with bin hash, since we don't know what the user will return?
+
+----------------
+-- run_script --
+----------------
+
+runScript :: Function
+runScript = newExprExpansion
+  "run_script"
+  [Exactly str, ListSigs (Exactly Untyped)]
+  (Exactly Untyped)
+  mRunScript
+  [ReadsFile]
+
+mRunScript :: ExprExpansion
+mRunScript _ _ (Fun r _ ds n [sStr, iList]) = Fun r Nothing ds "run_script_raw" [s, iList]
+  where
+    s = Fun scr Nothing ds "load_script" [sStr]
+mRunScript _ _ e = error "modules.customscript.mRunScript" $ "bad argument: " ++ show e
