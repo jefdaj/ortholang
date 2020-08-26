@@ -95,6 +95,7 @@ import Control.Exception.Safe (catchAny)
 import Data.Scientific            (Scientific())
 import Data.IORef (readIORef)
 import qualified System.IO.Strict as Strict
+-- import System.Environment (getEnv)
 
 ---------------
 -- debugging --
@@ -613,14 +614,17 @@ runCmd d = do
           dbg $ "runCmd acquired extra write locks: " ++ show (cmdExtraOutPaths d)
           parLockFn fn
 
+  path <- fmap fromJust $ getEnv "PATH"
+  let envDirs = Env [("PATH", path), ("TMPDIR", tmpdir cfg), ("WORKDIR", workdir cfg)]
+
   -- writeLockFn $ withReadLocks' inPaths' $ do
   writeLockFn $ do
     -- TODO remove opts?
     -- TODO always assume disk is 1?
     dbg $ "runCmd proper starting"
     Exit code <- withResource disk (length inPaths + 1) $ case wrapper cfg of
-      Nothing -> command (cmdOptions d) (cmdBinary d) (cmdArguments d)
-      Just w  -> command (Shell:cmdOptions d) w [escape $ unwords (cmdBinary d:cmdArguments d)]
+      Nothing -> command (envDirs:cmdOptions d) (cmdBinary d) (cmdArguments d)
+      Just w  -> command (envDirs:Shell:cmdOptions d) w [escape $ unwords (cmdBinary d:cmdArguments d)]
     -- Exit _ <- command [] "sync" [] -- TODO is this needed?
     -- This is disabled because it can make the logs really big
     -- dbg $ "wrappedCmd: " ++ bin ++ " " ++ show args ++ " -> " ++ show (out, err, code')

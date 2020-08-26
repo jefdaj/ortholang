@@ -23,7 +23,7 @@ read.num.list <- function(filename)
   filename %>% fix_ol_path %>% scan(what=numeric(), quiet=TRUE)
 
 plot_venn_diagram <- function(lists, filename) {
-	# the default ortholang version switches to upset plots here:
+	# the default ortholang version switches to upset plots for >5 lists,
 	# but for this custom one we'll skip that and make bigger venn diagrams instead
 
   png(filename=filename, width=600, height=600)
@@ -42,17 +42,33 @@ plot_venn_diagram <- function(lists, filename) {
 }
 
 main <- function() {
+
+	# This part is a little weird. First you have to get the actual R args like this:
   args <- commandArgs(trailingOnly = TRUE)
-  plotPath  <- args[[1]]
+
+	# There will always be args: the output path first, then the input path. 
+  # The output path is directly usable:
+  plotPath <- args[[1]]
+
+	# TODO add this to run_script
   # namesPath <- args[[2]]
   namesPath <- '/home/jefdaj/ortholang/names.txt'
-  listsPath <- args[[3]]
-	
-	# reads a num.list.list and naming the inner lists by ortholang variables
-  vennsets <- read.str.list(listsPath) %>% lapply(read.num.list)
-  names(vennsets) <- read.str.list(namesPath)
 
-	# plots a venn diagram and saves it to the plotPath
+	# The input path is the path to the list you gave the run_script function.
+	# So you read that to get the list of arguments you really wanted:
+	args_ol <- read.str.list(args[[2]])
+
+	# In our case there's only one, corresponding to the `lol` variable
+  listsPath <- args_ol[[1]]
+	
+	# it's a num.list.list. here's how we can read it:
+  vennsets <- read.str.list(listsPath) %>% lapply(read.num.list)
+
+	# and here's how we can add the set names based on ortholang variables:
+  names(vennsets) <- read.str.list(namesPath)
+	# print(vennsets)
+
+	# finally, we plot a venn diagram and save it to the plotPath
 	plot_venn_diagram(vennsets, plotPath)
 }
 
