@@ -48,6 +48,7 @@ let
 
     # TODO is this a good idea?
     myR
+    gettext # for envsubst in custom scripts
 
   ] ++ pkgs.lib.optionals (stdenv.isLinux) [
 
