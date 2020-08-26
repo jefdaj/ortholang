@@ -67,7 +67,7 @@ olModule = Module
   , mTypes = [scr]
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [loadScript, customScript]
+  , mFunctions = [loadScript, runScript]
   }
 
 scr :: Type
@@ -77,9 +77,9 @@ scr = Type
   , tShow = defaultShow -- TODO what if it's binary? maybe use file command to show?
   }
 
--- customScript :: Function
--- customScript = Function
---   { fOpChar = Nothing, fName = "custom_script"
+-- runScript :: Function
+-- runScript = Function
+--   { fOpChar = Nothing, fName = "run_script"
 --   -- , fTypeCheck = cheatTypeCheck
 --   -- , fTypeDesc  = "cheat : ??? (implement this)"
 --   , fInputs = [Exactly str, ListSigs (Exactly Untyped)]
@@ -111,17 +111,17 @@ scr = Type
 loadScript :: Function
 loadScript = mkLoad False "load_script" (Exactly scr)
 
--------------------
--- custom_script --
--------------------
+----------------
+-- run_script --
+----------------
 
 -- | Hidden function for rendering the raw Haskell Graphviz data structure passed as a string
-customScript :: Function
-customScript = newFnA2
-  "custom_script"
-  (Exactly str, ListSigs (Exactly Untyped))
+runScript :: Function
+runScript = newFnA2
+  "run_script"
+  (Exactly scr, ListSigs (Exactly Untyped))
   (Exactly Untyped)
-  aCustomScript
+  aRunScript
   []
 
 -- aPlotDot :: NewAction1
@@ -135,14 +135,14 @@ customScript = newFnA2
 --     let tmpPath' = fromPath loc cfg tmpPath
 --     renderPng tmpPath' g
 
-aCustomScript :: NewAction2
-aCustomScript out inStr inList = do
-  let loc = "modules.customscript.aCustomScript"
-  bin <- readLit loc inStr
-  aNewRulesS1 bin id out inList -- TODO is it an S1 at this point? might need custom code
+aRunScript :: NewAction2
+aRunScript out inScr inList = do
+  -- let loc = "modules.customscript.aRunScript"
+  -- bin <- readLit loc inStr
+  aNewRulesS1 inScr id out inList -- TODO is it an S1 at this point? might need custom code
 
   -- cfg <- fmap fromJust getShakeExtra
-      -- tmp  = fromPath loc cfg $ cacheDir cfg "custom_script" -- TODO bin cache? use script name? hash?
+      -- tmp  = fromPath loc cfg $ cacheDir cfg "run_script" -- TODO bin cache? use script name? hash?
       -- ids  = tmp </> digest loc (toPath loc cfg inList) <.> "txt"
       -- ids' = toPath loc cfg ids
   -- TODO these should be the seqid_... ids themselves, not unhashed?
