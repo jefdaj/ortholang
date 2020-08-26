@@ -30,7 +30,34 @@ read.num.list <- function(filename)
 # combined example of reading a num.list.list:
 # first read the outer list to a character vector,
 # then for each element read the inner num.list
-# read.str.list('$TMPDIR/vars/lol.num.list.list') %>% lapply(read.num.list)
+#
+# > lol <- read.str.list('$TMPDIR/vars/lol.num.list.list') %>% lapply(read.num.list)
+# > lol
+# [[1]]
+# [1] 1 2 3
+# 
+# [[2]]
+# [1] 3 4 5
+# 
+# [[3]]
+# [1] 5 6 7
+# 
+# > 
+
+# if you also want to label the inner lists with their ortholang variable names:
+#
+# > names(lol) <- read.str.list('names.txt')
+# > lol
+# $list1
+# [1] 1 2 3
+# 
+# $listtwo
+# [1] 3 4 5
+# 
+# $list3
+# [1] 5 6 7
+# 
+# > 
 
 # end library #
 
