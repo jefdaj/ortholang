@@ -57,6 +57,7 @@ import qualified Data.Text.Lazy as T
 import Control.Monad.IO.Class (liftIO)
 import Data.List (sort, nub, isSuffixOf)
 import OrthoLang.Modules.Plots (png)
+import OrthoLang.Modules.Load (mkLoad)
 
 
 olModule :: Module
@@ -67,6 +68,13 @@ olModule = Module
   , mGroups = []
   , mEncodings = []
   , mFunctions = [loadScript, customScript]
+  }
+
+scr :: Type
+scr = Type
+  { tExt  = "scr"
+  , tDesc = "custom scripts"
+  , tShow = defaultShow -- TODO what if it's binary? maybe use file command to show?
   }
 
 -- customScript :: Function
@@ -96,40 +104,12 @@ olModule = Module
 -- rCustomScript :: RulesFn
 -- rCustomScript = undefined
 
-scr = Type
-  { tExt  = "scr"
-  , tDesc = "Custom scripts"
-  , tShow = defaultShow -- TODO what if it's binary? maybe use file command to show?
-  }
-
 -----------------
 -- load_script --
 -----------------
 
--- loadFnaPath     = mkLoadPath     True "load_fna_path"      (Exactly fna)
-
--- | For loading directly from a path, as opposed to the normal "read a str,
---   then load that path" indirection. Used in macro expansions for
---   "re-loading" a file after processing it.
--- mkLoadPath :: Bool -> String -> TypeSig -> Function
--- mkLoadPath hashSeqIDs name oSig = hidden $ newFnA1 name (Exactly str) oSig (aLoadPath hashSeqIDs) [ReadsFile]
-
 loadScript :: Function
-loadScript = hidden $ newFnA1 "load_script" (Exactly str) (Exactly scr) aLoadScript [ReadsFile]
-
-aLoadScript :: NewAction1
-aLoadScript o@(ExprPath out') loadPath' = do
-  -- alwaysRerun
-  cfg  <- fmap fromJust getShakeExtra
-  let loc = "modules.customscript.aLoadScript"
-      out = toPath loc cfg out'
-      loadPath = toPath loc cfg loadPath'
-  -- dRef <- fmap fromJust getShakeExtra
-  undefined
-  -- t    <- liftIO $ decodeNewRulesType cfg dRef o
-  -- hashPath <- aLoadHash hashSeqIDs t loadPath
-  -- symlink out hashPath
-
+loadScript = mkLoad False "load_script" (Exactly scr)
 
 -------------------
 -- custom_script --
