@@ -15,6 +15,18 @@ let
     fontDirectories = [ ];
   };
 
+  myR = rWrapper.override { packages = with rPackages; [
+    dplyr
+    ggplot2
+    readr
+    tidyr
+    UpSetR
+    VennDiagram
+    biomartr
+    data_table
+    futile_logger
+  ];};
+
   myEnv = [
     # TODO which of these are needed?
     stdenv
@@ -33,6 +45,10 @@ let
     fontconfig.lib # for R plotting scripts
     graphviz
     rsync
+
+    # TODO is this a good idea?
+    myR
+
   ] ++ pkgs.lib.optionals (stdenv.isLinux) [
 
     # works, but remove for release
@@ -95,18 +111,6 @@ in rec {
       scipy
     ];
   };
-
-  myR = rWrapper.override { packages = with rPackages; [
-    dplyr
-    ggplot2
-    readr
-    tidyr
-    UpSetR
-    VennDiagram
-    biomartr
-    data_table
-    futile_logger
-  ];};
 
   ortholang-biomartr      = mkModule ./OrthoLang/Modules/BioMartR      [ myR ] "";
   ortholang-blasthits     = mkModule ./OrthoLang/Modules/BlastHits     [ myR ] "";
