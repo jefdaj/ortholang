@@ -197,6 +197,9 @@ plotLabel :: Config -> DigestsRef -> Script -> Expr -> String
 plotLabel _ _ _ (Ref _ _ _ (Var _ v)) = v
 plotLabel cfg dRef scr expr = let (Path p) = exprPath cfg dRef scr expr in takeBaseName p
 
+extractVarNames :: Config -> DigestsRef -> Script -> Expr -> [String]
+extractVarNames cfg dRef scr expr = map (plotLabel cfg dRef scr) (extractExprs scr expr)
+
 plotCache :: Config -> Path
 plotCache cfg = cacheDir cfg "plots"
 
@@ -204,7 +207,7 @@ rPlotListOfLists :: FilePath -> RulesFn
 rPlotListOfLists sPath scr expr@(Fun _ _ _ _ [lol]) = do
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
-  let labels = map (plotLabel cfg dRef scr) (extractExprs scr lol)
+  let labels = extractVarNames cfg dRef scr lol
       lists  = map (exprPath  cfg dRef scr) (extractExprs scr lol)
       outPath   = exprPath cfg dRef scr expr
       outPath'  = fromPath loc cfg outPath

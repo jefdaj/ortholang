@@ -8,7 +8,7 @@ import OrthoLang.Debug (error)
 import Prelude hiding (error)
 import Data.Maybe (fromJust)
 import OrthoLang.Modules.Load (mkLoad)
-import OrthoLang.Modules.Plots (extractListVarNames)
+import OrthoLang.Modules.Plots (extractVarNames)
 
 
 olModule :: Module
