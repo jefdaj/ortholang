@@ -8,22 +8,25 @@ import OrthoLang.Debug (error)
 import Prelude hiding (error)
 import Data.Maybe (fromJust)
 import OrthoLang.Modules.Load (mkLoad)
-import OrthoLang.Modules.Plots (extractVarNames)
+import OrthoLang.Modules.Plots (varName)
 
+------------
+-- module --
+------------
 
 olModule :: Module
 olModule = Module
   { mName = "CustomScript"
   , mDesc = "Run your own script and OrthoLang will assume the types are valid"
-  , mTypes = [scr]
+  , mTypes = [bin]
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [loadScript, runScriptRaw, runScript]
+  , mFunctions = [loadScript, runScriptExplicit, runScript]
   }
 
-scr :: Type
-scr = Type
-  { tExt  = "scr"
+bin :: Type
+bin = Type
+  { tExt  = "bin"
   , tDesc = "custom scripts"
   , tShow = defaultShow -- TODO what if it's binary? maybe use file command to show?
   }
@@ -33,26 +36,27 @@ scr = Type
 -----------------
 
 loadScript :: Function
-loadScript = mkLoad False "load_script" (Exactly scr)
+loadScript = mkLoad False "load_script" (Exactly bin)
 
---------------------
--- run_script_raw --
---------------------
+-------------------------
+-- run_script_explicit --
+-------------------------
 
 -- TODO have to replace the shorthand somewhere in here to get at the list element exprs
 -- TODO maybe that could be another macro fn?
-runScriptRaw :: Function
-runScriptRaw = hidden $ newFnA2
-  "run_script_raw"
-  (Exactly scr, ListSigs (Exactly Untyped))
+-- | Hidden version of `runScript` that takes an explicit pre-loaded script and varnames file.
+runScriptExplicit :: Function
+runScriptExplicit = hidden $ newFnA2
+  "run_script_explicit"
+  (Exactly bin, ListSigs (Exactly Untyped))
   (Exactly Untyped)
-  aRunScriptRaw
+  aRunScriptExplicit
   [Hidden]
 
-aRunScriptRaw :: NewAction2
-aRunScriptRaw (ExprPath out) inScr inList = do
+aRunScriptExplicit :: NewAction2
+aRunScriptExplicit (ExprPath out) inScr inList = do
   cfg <- fmap fromJust $ getShakeExtra
-  let loc  = "modules.customscript.aRunScriptRaw"
+  let loc  = "modules.customscript.aRunScriptExplicit"
       out' = toPath loc cfg out
   withBinHash out out' $ \tmpPath -> do
     let tmp' = fromPath loc cfg tmpPath
@@ -62,6 +66,7 @@ aRunScriptRaw (ExprPath out) inScr inList = do
 -- run_script --
 ----------------
 
+-- | User-facing version that auto-loads the script and captures any varnames in the untyped list.
 runScript :: Function
 runScript = newExprExpansion
   "run_script"
@@ -71,7 +76,7 @@ runScript = newExprExpansion
   [ReadsFile]
 
 mRunScript :: ExprExpansion
-mRunScript _ _ (Fun r _ ds _ [sStr, iList]) =
-  let f = Fun scr Nothing ds "load_script"    [sStr]
-  in      Fun r   Nothing ds "run_script_raw" [f, iList]
+mRunScript _ _ (Fun r _ ds _ [bStr, iList]) =
+  let b = Fun bin Nothing ds "load_script"    [bStr]
+  in      Fun r   Nothing ds "run_script_explicit" [b, iList]
 mRunScript _ _ e = error "modules.customscript.mRunScript" $ "bad argument: " ++ show e

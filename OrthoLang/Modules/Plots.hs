@@ -45,8 +45,8 @@ png = Type
  - "num_genomes", this will write that name to a string for use in the plot.
  - Otherwise it will return an empty string, which the script should ignore.
  -}
-varName :: RulesFn
-varName scr expr = rExpr scr $ Lit str $ case expr of
+varName :: Expr -> Expr
+varName expr = Lit str $ case expr of
   (Ref _ _ _ (Var _ name)) -> name
   _ -> ""
 
@@ -83,10 +83,10 @@ histogram = let name = "histogram" in Function
 --   return paths'
 
 rPlotNumList :: FilePath -> RulesFn
-rPlotNumList script scr expr@(Fun _ _ _ _ [title, nums]) = do
+rPlotNumList binPath scr expr@(Fun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr scr title
   numsPath  <- rExpr scr nums
-  xlabPath  <- varName scr nums
+  xlabPath  <- rExpr scr $ varName nums
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let loc = "modules.plots.rPlotNumList"
@@ -96,7 +96,7 @@ rPlotNumList script scr expr@(Fun _ _ _ _ [title, nums]) = do
       args      = [titlePath, numsPath, xlabPath]
       args'     = map (\(ExprPath p) -> toPath loc cfg p) args
   outPath' %> \_ -> withBinHash expr outPath $ \out ->
-                      aSimpleScript script (out:args')
+                      aSimpleScript binPath (out:args')
   return outPath''
 rPlotNumList _ _ _ = fail "bad argument to rPlotNumList"
 
