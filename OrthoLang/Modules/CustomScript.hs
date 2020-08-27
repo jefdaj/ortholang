@@ -8,6 +8,7 @@ import OrthoLang.Debug (error)
 import Prelude hiding (error)
 import Data.Maybe (fromJust)
 import OrthoLang.Modules.Load (mkLoad)
+import OrthoLang.Modules.Plots (extractListVarNames)
 
 
 olModule :: Module
@@ -38,6 +39,8 @@ loadScript = mkLoad False "load_script" (Exactly scr)
 -- run_script_raw --
 --------------------
 
+-- TODO have to replace the shorthand somewhere in here to get at the list element exprs
+-- TODO maybe that could be another macro fn?
 runScriptRaw :: Function
 runScriptRaw = hidden $ newFnA2
   "run_script_raw"
