@@ -1,8 +1,5 @@
 #!/usr/bin/env Rscript
 
-# TODO for consistency, should all scripts recieve the names?
-# TODO pass env vars to run_script
-
 suppressPackageStartupMessages(require(dplyr))
 suppressPackageStartupMessages(require(tidyr))
 suppressPackageStartupMessages(require(VennDiagram))
@@ -54,36 +51,34 @@ plot_venn_diagram <- function(lists, filename) {
 }
 
 main <- function() {
-	# cat('\n\n')
-
 	# This part is a little weird. First you have to get the actual R args like this:
   args <- commandArgs(trailingOnly = TRUE)
 
-	# There will always be args: the output path first, then the input path. 
+	# There will always be 3 of them:
+  #
+  # 1. the final path where this script should write its result
+  # 2. a list of variable names, which may be empty or incomplete depending on the orhtholang script
+  # 3. a list of the corresponding variable values
+
   # The output path is directly usable:
   plotPath <- fix_ol_path(args[[1]])
-	# cat(paste0('plotPath: ', plotPath, '\n'))
 
-	# cat(paste0('args 2: ', args[[2]], '\n'))
-  set_names <- read.list(args[[2]]) # %>% sapply(read.list)
-	# cat(paste0('names: ', ns, '\n'))
+	# So are the variable names, although depending on the script you may not need them:
+  set_names <- read.list(args[[2]])
 
-	# The input path is the path to the list you gave the run_script function.
-	# So you read that to get the list of arguments you really wanted:
-	# cat(paste0('args 3: ', args[[3]], '\n'))
+	# How you should parse the variable paths depends on what type of data you sent to the script.
+	# In this example they're a list of lists of numbers, and we want to make a Venn diagram
+	# of how many numbers overlap between the lists. So there are 3 steps:
+	#
+	# 1. read the arguments file, which gives a list of list files
+	# 2. for each list file, read it as a list of numbers
+	# 3. name the lists by their ortholang variable names
+
+	# steps 1-2
 	sets <- read.list(args[[3]]) %>% lapply(read.num.list)
-	# cat(paste0('sets: ', sets, '\n'))
 
-	# In our case there's only one, corresponding to the `lol` variable
-  # listPaths <- read.list(args_ol) %>% lapply(fix_ol_path)
-	# cat(paste0('listPaths: ', listPaths, '\n'))
-	
-	# it's a num.list.list. here's how we can read it:
-  # vennsets <- lapply(sets, read.num.list)
-
-	# and here's how we can add the set names based on ortholang variables:
+	# step 3
   names(sets) <- set_names
-	# print(vennsets)
 
 	# finally, we plot a venn diagram and save it to the plotPath
 	plot_venn_diagram(sets, plotPath)
