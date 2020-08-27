@@ -1,8 +1,8 @@
 This is a special function for using your own scripts in OrthoLang. The first
-argument is the script to run, and the second is a "list of whatever". That is,
-it ignores the type system and lets you pass it any mixture of values. You'll
-need to make sure your script expects the type of files you give it and returns
-something formatted reasonably.
+str argument is name/path of the script to run, and the second is a "list of
+whatever". That is, it ignores the type system and lets you pass it any mixture
+of values. You'll need to make sure your script expects the type of files you
+give it and returns something formatted reasonably.
 
 If you want to use the result in further OrthoLang functions, follow the same
 conventions they do. This is easiest if you copy one of the existing scripts to

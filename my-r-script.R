@@ -15,12 +15,18 @@ fix_ol_path <- function(filename)
 # Because single strings are also vectors in R, this also works as `read.str`.
 # It also works for a list of anything other than str or num: str.list.list, bht.list, etc.
 # In that case it returns raw paths that look something like '$TMPDIR/exprs/list/7d4fb3401b/result'.
-read.str.list <- function(filename)
-  filename %>% fix_ol_path %>% scan(what=character(), quiet=TRUE)
+read.list <- function(filename) {
+  lst <- filename %>% fix_ol_path %>% scan(what=character(), quiet=TRUE)
+  if (length(lst) == 1 && lst == '<<emptylist>>') {
+	  return(c())
+	} else {
+	  return(lapply(lst, fix_ol_path))
+	}
+}
 
 # because single numbers are also vectors in R, this also works as read.num
 read.num.list <- function(filename)
-  filename %>% fix_ol_path %>% scan(what=numeric(), quiet=TRUE)
+  read.list(filename) %>% as.numeric
 
 plot_venn_diagram <- function(lists, filename) {
 	# the default ortholang version switches to upset plots for >5 lists,
@@ -42,30 +48,32 @@ plot_venn_diagram <- function(lists, filename) {
 }
 
 main <- function() {
+	cat('\n\n')
 
 	# This part is a little weird. First you have to get the actual R args like this:
   args <- commandArgs(trailingOnly = TRUE)
 
 	# There will always be args: the output path first, then the input path. 
   # The output path is directly usable:
-  plotPath <- args[[1]]
+  plotPath <- fix_ol_path(args[[1]])
+	cat(paste0('plotPath: ', plotPath, '\n'))
 
-	# TODO add this to run_script
-  # namesPath <- args[[2]]
-  namesPath <- '/home/jefdaj/ortholang/names.txt'
+  ns <- read.list(args[[2]]) %>% sapply(read.list)
+	cat(paste0('names: ', ns, '\n'))
 
 	# The input path is the path to the list you gave the run_script function.
 	# So you read that to get the list of arguments you really wanted:
-	args_ol <- read.str.list(args[[2]])
+	args_ol <- read.list(args[[3]])
 
 	# In our case there's only one, corresponding to the `lol` variable
-  listsPath <- args_ol[[1]]
+  listPaths <- args_ol %>% lapply(fix_ol_path)
+	cat(paste0('listPaths: ', listPaths, '\n'))
 	
 	# it's a num.list.list. here's how we can read it:
-  vennsets <- read.str.list(listsPath) %>% lapply(read.num.list)
+  vennsets <- lapply(listPaths, read.num.list)
 
 	# and here's how we can add the set names based on ortholang variables:
-  names(vennsets) <- read.str.list(namesPath)
+  names(vennsets) <- ns
 	# print(vennsets)
 
 	# finally, we plot a venn diagram and save it to the plotPath

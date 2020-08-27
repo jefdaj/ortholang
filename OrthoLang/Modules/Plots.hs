@@ -45,18 +45,16 @@ png = Type
  - "num_genomes", this will write that name to a string for use in the plot.
  - Otherwise it will return an empty string, which the script should ignore.
  -}
-varName :: Expr -> Expr
-varName expr = Lit str $ case expr of
+varName :: String -> Expr -> Expr
+varName def expr = Lit str $ case expr of
   (Ref _ _ _ (Var _ name)) -> name
-  _ -> ""
+  _ -> def
 
 -- Like varName, but for a list of names
-varNames :: RulesFn
-varNames _ expr = undefined lits -- TODO implement this
-  where
-    lits = Lit str $ case expr of
-             (Ref _ _ _ (Var _ name)) -> name
-             _ -> ""
+varNames :: Expr -> Expr
+varNames expr = Lst (typeOf expr) (seedOf expr) (depsOf expr) $ case expr of
+  (Lst _ _ _ es) -> map (\(n, e) -> varName ("input" ++ show n) e) (zip [1..] es)
+  _ -> []
 
 ---------------------
 -- plot a num.list --
@@ -86,7 +84,7 @@ rPlotNumList :: FilePath -> RulesFn
 rPlotNumList binPath scr expr@(Fun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr scr title
   numsPath  <- rExpr scr nums
-  xlabPath  <- rExpr scr $ varName nums
+  xlabPath  <- rExpr scr $ varName "nums" nums -- TODO better default name
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let loc = "modules.plots.rPlotNumList"

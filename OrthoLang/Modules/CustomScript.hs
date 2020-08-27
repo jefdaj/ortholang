@@ -8,7 +8,7 @@ import OrthoLang.Debug (error)
 import Prelude hiding (error)
 import Data.Maybe (fromJust)
 import OrthoLang.Modules.Load (mkLoad)
-import OrthoLang.Modules.Plots (varName)
+import OrthoLang.Modules.Plots (varNames)
 
 ------------
 -- module --
@@ -46,21 +46,21 @@ loadScript = mkLoad False "load_script" (Exactly bin)
 -- TODO maybe that could be another macro fn?
 -- | Hidden version of `runScript` that takes an explicit pre-loaded script and varnames file.
 runScriptExplicit :: Function
-runScriptExplicit = hidden $ newFnA2
+runScriptExplicit = hidden $ newFnA3
   "run_script_explicit"
-  (Exactly bin, ListSigs (Exactly Untyped))
+  (Exactly bin, ListSigs (Exactly str), ListSigs (Exactly Untyped))
   (Exactly Untyped)
   aRunScriptExplicit
   [Hidden]
 
-aRunScriptExplicit :: NewAction2
-aRunScriptExplicit (ExprPath out) inScr inList = do
+aRunScriptExplicit :: NewAction3
+aRunScriptExplicit (ExprPath out) inScr inNames inList = do
   cfg <- fmap fromJust $ getShakeExtra
   let loc  = "modules.customscript.aRunScriptExplicit"
       out' = toPath loc cfg out
   withBinHash out out' $ \tmpPath -> do
     let tmp' = fromPath loc cfg tmpPath
-    aNewRulesS1 inScr id (ExprPath tmp') inList
+    aNewRulesS2 inScr id (ExprPath tmp') inNames inList
 
 ----------------
 -- run_script --
@@ -75,8 +75,9 @@ runScript = newExprExpansion
   mRunScript
   [ReadsFile]
 
+-- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
 mRunScript :: ExprExpansion
 mRunScript _ _ (Fun r _ ds _ [bStr, iList]) =
   let b = Fun bin Nothing ds "load_script"    [bStr]
-  in      Fun r   Nothing ds "run_script_explicit" [b, iList]
+  in      Fun r   Nothing ds "run_script_explicit" [b, varNames iList, iList]
 mRunScript _ _ e = error "modules.customscript.mRunScript" $ "bad argument: " ++ show e
