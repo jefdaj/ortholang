@@ -68,8 +68,7 @@ runScript = newExprExpansion
   [ReadsFile]
 
 mRunScript :: ExprExpansion
-mRunScript _ _ (Fun r _ ds _ [sStr, iList]) = runFn
-  where
-    loadFn = Fun scr Nothing ds "load_script"    [sStr]
-    runFn  = Fun r   Nothing ds "run_script_raw" [s, iList]
+mRunScript _ _ (Fun r _ ds _ [sStr, iList]) =
+  let f = Fun scr Nothing ds "load_script"    [sStr]
+  in      Fun r   Nothing ds "run_script_raw" [f, iList]
 mRunScript _ _ e = error "modules.customscript.mRunScript" $ "bad argument: " ++ show e
