@@ -50,11 +50,30 @@ varName def expr = Lit str $ case expr of
   (Ref _ _ _ (Var _ name)) -> name
   _ -> def
 
--- Like varName, but for a list of names
-varNames :: Expr -> Expr
-varNames expr = Lst (typeOf expr) (seedOf expr) (depsOf expr) $ case expr of
-  (Lst _ _ _ es) -> map (\(n, e) -> varName ("input" ++ show n) e) (zip [1..] es)
-  _ -> []
+{- Like varName, but for a list of names. Cases it can handle:
+ - 1. list contains a single list or ref to a list -> recurse
+ - 2. list contains multiple elements -> get their names or default to 'unnamed1', 'unnamed2`, ...
+ - 3. anything else -> default to one 'unnamed' element?
+ -}
+listVarNames :: Script -> [Expr] -> Expr
+listVarNames scr es = case es of
+  [Lst _ _ _ es'] -> listVarNames scr es'
+  [Ref _ _ _ (Var _ name)] -> let e = fromJust $ lookupExpr name (sAssigns scr)
+                              in listVarNames scr [e]
+  es' -> let indexed = zip [(1 :: Int)..] es'
+             varNameDef (i, e) = varName ("input" ++ show i) e
+             mapped = map varNameDef indexed
+         in Lst str Nothing [] mapped -- TODO should deps be empty, or contain the mapped vars?
+  
+--   let r  = typeOf expr
+--       ms = seedOf expr
+--       ds = depsOf expr
+--   in case expr of
+--     (Lst _ _ _ [e]) -> case e of
+--                          (Lst _ _ _ _) -> varNames e -- TODO what if this is a ref to a list
+--                          _ -> varName "input1" e
+--     (Lst _ _ _  es) -> Lst r ms ds $ map (\(n, e) -> varName ("input" ++ show n) e) (zip [(1 :: Int)..] es)
+--     _               -> Lst r ms ds []
 
 ---------------------
 -- plot a num.list --

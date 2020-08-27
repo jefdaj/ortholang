@@ -8,7 +8,7 @@ import OrthoLang.Debug (error)
 import Prelude hiding (error)
 import Data.Maybe (fromJust)
 import OrthoLang.Modules.Load (mkLoad)
-import OrthoLang.Modules.Plots (varNames)
+import OrthoLang.Modules.Plots (listVarNames)
 
 ------------
 -- module --
@@ -77,7 +77,8 @@ runScript = newExprExpansion
 
 -- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
 mRunScript :: ExprExpansion
-mRunScript _ _ (Fun r _ ds _ [bStr, iList]) =
-  let b = Fun bin Nothing ds "load_script"    [bStr]
-  in      Fun r   Nothing ds "run_script_explicit" [b, varNames iList, iList]
+mRunScript _ scr (Fun r _ ds _ [bStr, iList]) =
+  let b  = Fun bin Nothing ds "load_script" [bStr]
+      ns = listVarNames scr [iList]
+  in Fun r Nothing ds "run_script_explicit" [b, ns, iList]
 mRunScript _ _ e = error "modules.customscript.mRunScript" $ "bad argument: " ++ show e

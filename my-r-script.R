@@ -7,6 +7,12 @@ suppressPackageStartupMessages(require(dplyr))
 suppressPackageStartupMessages(require(tidyr))
 suppressPackageStartupMessages(require(VennDiagram))
 
+# turn off the .log files
+# from https://stackoverflow.com/a/36812214
+# TODO allow them, but make sure they go in the exprs/run_script_explicit dirs?
+suppressPackageStartupMessages(require(futile.logger))
+invisible(futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger"))
+
 # used in the read functions below
 fix_ol_path <- function(filename)
   gsub('\\$TMPDIR' , Sys.getenv('TMPDIR') ,
@@ -34,9 +40,9 @@ plot_venn_diagram <- function(lists, filename) {
 
   png(filename=filename, width=600, height=600)
 
-  # adding 2 gives it the default green/blue/purple theme, so let's go with 3 here
+  # adding 2 gives it the default green/blue/purple theme, so let's go with something else (9) here
   nlists <- length(lists)
-  v <- venn.diagram(lists, fill = 3+(1:nlists), alpha=0.5, filename=NULL)
+  v <- venn.diagram(lists, fill = 9+(1:nlists), alpha=0.5, filename=NULL)
 
   # viewport prevents labels getting cut off
   # from https://stackoverflow.com/a/22826211
@@ -48,7 +54,7 @@ plot_venn_diagram <- function(lists, filename) {
 }
 
 main <- function() {
-	cat('\n\n')
+	# cat('\n\n')
 
 	# This part is a little weird. First you have to get the actual R args like this:
   args <- commandArgs(trailingOnly = TRUE)
@@ -56,28 +62,31 @@ main <- function() {
 	# There will always be args: the output path first, then the input path. 
   # The output path is directly usable:
   plotPath <- fix_ol_path(args[[1]])
-	cat(paste0('plotPath: ', plotPath, '\n'))
+	# cat(paste0('plotPath: ', plotPath, '\n'))
 
-  ns <- read.list(args[[2]]) %>% sapply(read.list)
-	cat(paste0('names: ', ns, '\n'))
+	# cat(paste0('args 2: ', args[[2]], '\n'))
+  set_names <- read.list(args[[2]]) # %>% sapply(read.list)
+	# cat(paste0('names: ', ns, '\n'))
 
 	# The input path is the path to the list you gave the run_script function.
 	# So you read that to get the list of arguments you really wanted:
-	args_ol <- read.list(args[[3]])
+	# cat(paste0('args 3: ', args[[3]], '\n'))
+	sets <- read.list(args[[3]]) %>% lapply(read.num.list)
+	# cat(paste0('sets: ', sets, '\n'))
 
 	# In our case there's only one, corresponding to the `lol` variable
-  listPaths <- args_ol %>% lapply(fix_ol_path)
-	cat(paste0('listPaths: ', listPaths, '\n'))
+  # listPaths <- read.list(args_ol) %>% lapply(fix_ol_path)
+	# cat(paste0('listPaths: ', listPaths, '\n'))
 	
 	# it's a num.list.list. here's how we can read it:
-  vennsets <- lapply(listPaths, read.num.list)
+  # vennsets <- lapply(sets, read.num.list)
 
 	# and here's how we can add the set names based on ortholang variables:
-  names(vennsets) <- ns
+  names(sets) <- set_names
 	# print(vennsets)
 
 	# finally, we plot a venn diagram and save it to the plotPath
-	plot_venn_diagram(vennsets, plotPath)
+	plot_venn_diagram(sets, plotPath)
 }
 
 main()
