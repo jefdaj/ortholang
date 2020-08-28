@@ -8,7 +8,8 @@ s = "a string"
 n = 1.4e7
 nl = [1,2,3,100]
 sl = ["another string", "and another", "and a third"]
+nll = [nl, [1,2,3]]
 
-txt = run_script "examples/scripts/custom-bash-script.sh" [s, n, nl, sl]
+txt = run_script "examples/scripts/custom-bash-script.sh" [s, n, nl, sl, nll]
 
 result = txt
