@@ -1,4 +1,4 @@
-module OrthoLang.Modules.CustomScript where
+module OrthoLang.Modules.Script where
 
 import Development.Shake
 import OrthoLang.Types
@@ -16,8 +16,8 @@ import OrthoLang.Modules.Plots (listVarNames)
 
 olModule :: Module
 olModule = Module
-  { mName = "CustomScript"
-  , mDesc = "Run your own script and OrthoLang will assume the types are valid"
+  { mName = "Script"
+  , mDesc = "Plug custom scripts into OrthoLang"
   , mTypes = [bin]
   , mGroups = []
   , mEncodings = []
