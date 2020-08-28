@@ -794,7 +794,8 @@ data NewRules
 -- TODO do we still need an empty list case here?
 typeSigMatches :: TypeSig -> Type -> Bool
 typeSigMatches (AnyType _)       _                = True
-typeSigMatches (Exactly Untyped)       _                = True -- TODO is this right?
+typeSigMatches _                  Untyped         = True -- TODO is this right?
+typeSigMatches (ListSigs (Exactly Untyped)) (ListOf _) = True -- TODO is this right?
 typeSigMatches (Exactly (ListOf _)) (ListOf Empty) = True
 typeSigMatches (Exactly (ListOf Untyped)) (ListOf _) = True -- any list can be used as untyped
 typeSigMatches (Exactly (ListOf _)) (ListOf Untyped) = False -- ... but not the other way around

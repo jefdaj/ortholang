@@ -53,6 +53,7 @@ runScriptExplicit = hidden $ newFnA3
   aRunScriptExplicit
   [Hidden, ReadsFile]
 
+-- TODO have to delete the script first if it exists? why doesn't ortholang do that?
 aRunScriptExplicit :: NewAction3
 aRunScriptExplicit (ExprPath out) inScr inNames inList = do
   cfg <- fmap fromJust $ getShakeExtra
