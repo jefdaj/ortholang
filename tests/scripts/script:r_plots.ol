@@ -18,4 +18,6 @@ plot2 = run_script r lol2
 # should call them 's1', 's2', 'genomes'
 plot3 = run_script r [s1, s2, genomes]
 
+# these plots are still untyped; ortholang has no idea they should be .png files
+# you'll need to rename them yourself from .untyped -> .png to open them
 result = [plot1, plot2, plot3]
