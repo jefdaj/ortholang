@@ -4,6 +4,10 @@
 # e-value cutoff. Here we filter by alignment length + bitscore, just to show
 # that you can customize the criteria.
 
+# Most of this script is boilerplate--that is, code you can paste as-is into
+# any similar script. The only part you would need to customize to make your
+# own filter script is lines 53-54.
+
 suppressPackageStartupMessages(require(dplyr))
 
 # Used in the read functions below.
@@ -36,15 +40,12 @@ read_hits <- function(filename)
 # This is copied from filter_hits.R
 # You can re-use it in any custom R script.
 write_hits <- function(hits, filename) {
-  if (length(hits) == 0) {
-      hits <- "<<emptybht>>"
-  }
-  write.table(hits, filename, sep="\t",
-              quote=FALSE, row.names=FALSE, col.names=FALSE)
+  if (length(hits) == 0) { hits <- "<<emptybht>>" }
+  write.table(hits, filename, sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
 }
 
 filter_hits <- function(inPath, outPath) {
-	# Standard read step, but we need to make sure alignment lengths are numbers
+	# Standard read step
 	df <- read_hits(inPath)
 
   # Custom filter for alignment length + bitscore
@@ -64,7 +65,7 @@ main <- function() {
   #
   # 1. the final path where this script should write its result
   # 2. a list of variable names, which may be empty or incomplete depending on the orhtholang script
-  # 3. a list of the corresponding variable values
+  # 3. a list of the corresponding variable paths
   outPath  <- fix_ol_path(args[[1]]) # TODO is fixing this one necessary?
   varNames <- read.list(args[[2]]) # not used in this script
 	varPaths <- read.list(args[[3]])
