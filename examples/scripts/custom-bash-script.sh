@@ -5,7 +5,7 @@
 # order. It demonstrates how to work with each one in Bash, and writes everything
 # to the main output file. As you can see, the quoting and echoing and
 # envsubsting get complicated! I suggest switching to R, Python, or a similar
-# scripting language if you need to read nested lists.
+# scripting language if you need to read more than a couple nested lists.
 
 # There will always be 3 arguments from OrthoLang:
 #
@@ -20,11 +20,11 @@ paths_path="$3"
 log_path="${output_path}.log"
 
 # This reads a single name from the names file
-echo_varname() { sed -n ${1}p "$names_path"; }
+varname() { sed -n ${1}p "$names_path"; }
 
 # This reads a single line from the values file and "absolutizes" the path
 # by substituting in OrthoLang's TMPDIR and WORKDIR environment variables.
-echo_varpath() { sed -n ${1}p "$paths_path" | envsubst; }
+varpath() { sed -n ${1}p "$paths_path" | envsubst; }
 
 # We'll follow best practices by only "echoing" to the output file. You can
 # print stuff while debugging of course, but for production it's better to be
@@ -32,29 +32,29 @@ echo_varpath() { sed -n ${1}p "$paths_path" | envsubst; }
 output() { echo "$@" &>> "$output_path"; }
 
 # The simplest way to read a string is to cat out the corresponding path.
-output "the str has is named '`echo_varname 1`' and contains the value '`cat $(echo_varpath 1)`'"
+output "input 1 is a str named '`varname 1`' with the value '`cat $(varpath 1)`'"
 output
 
 # Same with a num,
-output "the num has is named '`echo_varname 2`' and contains the value '`cat $(echo_varpath 2)`'"
+output "input 2 is a num named '`varname 2`' with the value '`cat $(varpath 2)`'"
 output
 
 # or a num.list,
-output "the num.list is named '`echo_varname 3`' and contains these values:"
-output "`cat $(echo_varpath 3)`"
+output "input 3 is a num.list named '`varname 3`' and contains these nums:"
+output "`cat $(varpath 3)`"
 output
 
 # or a str.list. Here we also demonstrate quoting the individual strings though.
-output "the str.list is named '`echo_varname 4`' and contains these values:"
-cat $(echo_varpath 4) | while read line; do
+output "input 4 is a str.list named '`varname 4`' and contains these strs:"
+cat $(varpath 4) | while read line; do
   output "'$line'"
 done
 output
 
 # To read a nested list of lists, you just have to remember to use envsubst each time.
 # Here we show the raw path from OrthoLang, then use envsubst before reading it.
-output "the num.list.list is named '`echo_varname 5`' and contains these num.lists:"
-cat $(echo_varpath 5) | while read list_path; do
+output "input 5 is a num.list.list named '`varname 5`' and contains these num.lists:"
+cat $(varpath 5) | while read list_path; do
   output "  '$list_path', which contains these nums:"
 	cat `echo "$list_path" | envsubst` | while read n; do
 	  output "    $n"
