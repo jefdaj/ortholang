@@ -172,6 +172,7 @@ library
                     OrthoLang.Modules.Singletons,
                     OrthoLang.Modules.SonicParanoid,
                     OrthoLang.Modules.Summarize,
+                    OrthoLang.Modules.Zip,
                     OrthoLang.Test,
                     OrthoLang.Test.Parse,
                     OrthoLang.Test.Parse.Arbitrary,

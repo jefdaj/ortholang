@@ -28,7 +28,7 @@ bin :: Type
 bin = Type
   { tExt  = "bin"
   , tDesc = "custom scripts"
-  , tShow = defaultShow -- TODO what if it's binary? maybe use file command to show?
+  , tShow = defaultShow -- TODO write this using the file command? default keeps failing
   }
 
 -----------------

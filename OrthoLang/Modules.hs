@@ -46,6 +46,7 @@ import qualified OrthoLang.Modules.SetsTable     as SetsTable
 import qualified OrthoLang.Modules.Singletons    as Singletons
 import qualified OrthoLang.Modules.SonicParanoid as SonicParanoid
 import qualified OrthoLang.Modules.Summarize     as Summarize
+import qualified OrthoLang.Modules.Zip           as Zip
 
 modules :: [Module]
 modules =
@@ -102,5 +103,6 @@ modules =
   , Summarize.olModule
   , OrthoFinder.olModule
   , Singletons.olModule
+  , Zip.olModule
 
   ]

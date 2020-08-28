@@ -128,6 +128,7 @@ in rec {
   ortholang-mmseqs        = mkModule ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
   ortholang-muscle        = mkModule ./OrthoLang/Modules/Muscle        [ muscle ] "";
   ortholang-psiblast      = mkModule ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
+  ortholang-zip           = mkModule ./OrthoLang/Modules/Zip           [ ] "";
 
   # TODO should the wrap not be necessary?
   ortholang-seqio         = mkModule ./OrthoLang/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
@@ -173,6 +174,7 @@ in rec {
     ortholang-range
     ortholang-orthogroups
     ortholang-greencut
+    ortholang-zip
   ];
 
   runDepends = modules ++ myEnv;
