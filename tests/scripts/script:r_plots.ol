@@ -1,4 +1,8 @@
-r = "examples/scripts/custom-r-script.R"
+# This runs custom-r-venn.R on several lists of lists to demonstrate how named
+# variables can be used to label plots. See also r_filter.ol for a simpler
+# example that ignores names and just filters a table of BLAST hits.
+
+r = "examples/scripts/custom-r-venn.R"
 
 # named list of unnamed args
 # should call them 'input1', 'input2', 'input3'
