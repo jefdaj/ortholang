@@ -76,14 +76,14 @@ pList = debugParser "pList" $ do
 Searches for the first non-empty type to determine the type of a list.
 -}
 listElemType :: [Type] -> Either String Type
-listElemType ts = if typesOK then Right elemType else Left errorMsg
+listElemType ts = if typesOK then Right elemType else Right Untyped -- TODO is this right?
   where
     nonEmpty = filter isNonEmpty ts
     elemType = if      null ts       then Empty
                else if null nonEmpty then headOrDie "listElemType failed" ts -- for example (ListOf Empty)
                else    headOrDie "listElemType failed" nonEmpty
     typesOK  = all (== elemType) nonEmpty -- TODO is this where we could allow heterogenous lists?
-    errorMsg = "list elements have different types: " ++ show ts
+    -- errorMsg = "list elements have different types: " ++ show ts
 
 isNonEmpty :: Type -> Bool
 isNonEmpty Empty      = False
