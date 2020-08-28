@@ -51,7 +51,7 @@ runScriptExplicit = hidden $ newFnA3
   (Exactly bin, ListSigs (Exactly str), ListSigs (Exactly Untyped))
   (Exactly Untyped)
   aRunScriptExplicit
-  [Hidden]
+  [Hidden, ReadsFile]
 
 aRunScriptExplicit :: NewAction3
 aRunScriptExplicit (ExprPath out) inScr inNames inList = do
@@ -73,7 +73,7 @@ runScript = newExprExpansion
   [Exactly str, ListSigs (Exactly Untyped)]
   (Exactly Untyped)
   mRunScript
-  [ReadsFile]
+  [ReadsFile, ReadsScript]
 
 -- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
 mRunScript :: ExprExpansion
