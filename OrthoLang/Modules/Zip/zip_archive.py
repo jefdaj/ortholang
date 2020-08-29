@@ -5,7 +5,6 @@
 # simplified BSD license.
 
 # TODO use this to write an example custom python script too
-# TODO redirect stderr to log file
 
 import os
 import stat
@@ -50,31 +49,21 @@ def deterministic_zip(output_path, input_paths):
     return 0
 
 def main(output_path, names_path, paths_path):
-
     output_dir = os.path.dirname(output_path)
     os.chdir(output_dir)
 
     # put files in a uniquely-named dir to avoid confusion when unzipping
-    uniq = abs(hash(os.path.relpath(output_dir, os.path.expandvars('$TMPDIR'))))
+    uniq = str(abs(hash(os.path.relpath(output_dir, os.path.expandvars('$TMPDIR')))))[:10]
     input_dir = os.path.join(output_dir, 'ortholang_{}'.format(uniq))
-
-    # print('input_dir: {}'.format(input_dir))
     os.makedirs(input_dir, exist_ok=True)
 
-    # note that this is an unrelated meaning for zip
     with open(names_path, 'r') as f:
         names = [l.rstrip() for l in f.readlines()]
-    # TODO is this sometimes paths and sometimes str literals?
-    #      i guess it's either *all* the same type of literal, or a mixed thing with paths?
-    #      so the logic would be: check if num/str/num.list,str.list, and zip one file if so
-    #                             and otherwise make a folder like this
-    # TODO it could also just be <<emptylist>>, in which case we return an empty zip file
-    # TODO or, alternate method: just check if each one is a file and treat as literal if not?
     with open(paths_path, 'r') as f:
         paths = [l.rstrip() for l in f.readlines()]
-    pairs = list(zip(paths, names))
-    # print('pairs: {}'.format(pairs))
-    for (path, name) in pairs:
+
+    # note that this is an unrelated meaning for zip
+    for (path, name) in zip(paths, names):
         path = os.path.expandvars(path)
 
         if path == '<<emptylist>>':
@@ -84,15 +73,13 @@ def main(output_path, names_path, paths_path):
 
         elif os.path.isfile(path):
             # Most OrthoLang types appear as paths which should be copied over
-            # ext = os.path.splitext(path)[1]
             dst = os.path.join(input_dir, name)
-            # print('dst: {}'.format(dst))
             shutil.copyfile(path, dst)
 
         else:
             # But literals and lists of them (str.list, num.list) are included
             # directly for efficiency, so they have to be written to files instead
-            ext = 'txt' # TODO is this right?
+            ext = 'txt'
             dst = os.path.join(input_dir, name + '.txt')
             with open(dst, 'w') as f:
                 f.write(path + '\n')

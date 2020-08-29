@@ -22,4 +22,13 @@ a5 = zip_archive []
 # almost works, but needs to learn the extension; pass explicitly?
 a6 = zip_archive [a1, a2, a3, a4, a5]
 
-result = a6
+# now all the same things, but with nums
+n1 = 34
+a7 = zip_archive [1e-45]
+a8 = zip_archive [n1]
+a9 = zip_archive [n1, 2]
+n2 = 4
+a10 = zip_archive [n1, n2]
+a11 = zip_archive [a7, a8, a9, a10]
+
+result = zip_archive [a6, a11]
