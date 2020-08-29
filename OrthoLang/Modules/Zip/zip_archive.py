@@ -80,8 +80,8 @@ def main(output_path, names_path, paths_path):
 
         elif os.path.isfile(path):
             # Most OrthoLang types appear as paths which should be copied over
-            ext = os.path.splitext(path)[1]
-            dst = os.path.join(input_dir, name + '.' + ext)
+            # ext = os.path.splitext(path)[1]
+            dst = os.path.join(input_dir, name)
             print('dst: {}'.format(dst))
             shutil.copyfile(path, dst)
 
@@ -89,7 +89,7 @@ def main(output_path, names_path, paths_path):
             # But literals and lists of them (str.list, num.list) are included
             # directly for efficiency, so they have to be written to files instead
             ext = 'txt' # TODO is this right?
-            dst = os.path.join(input_dir, name + '.' + ext)
+            dst = os.path.join(input_dir, name + '.txt')
             with open(dst, 'w') as f:
                 f.write(path + '\n')
 

@@ -77,5 +77,5 @@ zipArchive = newExprExpansion
 mZipArchive :: ExprExpansion
 mZipArchive _ scr (Fun r ms ds _ [iList]) =
   let ns = listVarNames scr [iList]
-  in Fun r ms ds "zip_archive_explicit" [trace "ns" (show ns) ns, trace "ilist" (show iList) iList]
+  in Fun r ms ds "zip_archive_explicit" [ns, iList]
 mZipArchive _ _ e = error "modules.zip.mZipArchive" $ "bad argument: " ++ show e

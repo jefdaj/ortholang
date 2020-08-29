@@ -47,7 +47,7 @@ png = Type
  -}
 varName :: String -> Expr -> Expr
 varName def expr = Lit str $ case expr of
-  (Ref _ _ _ (Var _ name)) -> name
+  (Ref r _ _ (Var _ name)) -> name ++ "." ++ ext r
   _ -> def
 
 {- Like varName, but for a list of names. Cases it can handle:
