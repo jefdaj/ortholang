@@ -9,6 +9,8 @@ import Prelude hiding (error)
 import Data.Maybe (fromJust)
 import OrthoLang.Modules.Load (mkLoad)
 import OrthoLang.Modules.Plots (listVarNames)
+import OrthoLang.Locks (withReadLock)
+import System.Process          (readProcess)
 
 ------------
 -- module --
@@ -28,7 +30,10 @@ bin :: Type
 bin = Type
   { tExt  = "bin"
   , tDesc = "custom scripts"
-  , tShow = defaultShow -- TODO write this using the file command? default keeps failing
+  , tShow = \_ ref path -> do
+      path' <- resolveSymlinks Nothing path
+      out <- withReadLock ref path' $ readProcess "file" [path'] []
+      return $ "untyped OrthoLang file:\n" ++ out
   }
 
 -----------------

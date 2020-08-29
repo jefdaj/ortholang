@@ -1,13 +1,15 @@
 module OrthoLang.Modules.Zip
   where
 
-import Development.Shake
+-- import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
 
 import Prelude hiding (zip)
-import Data.Maybe (fromJust)
+-- import Data.Maybe (fromJust)
 import OrthoLang.Modules.Plots (listVarNames)
+import OrthoLang.Locks (withReadLock)
+import System.Process          (readProcess)
 
 ------------
 -- module --
@@ -27,7 +29,10 @@ zip :: Type
 zip = Type
   { tExt  = "zip"
   , tDesc = "zip archives"
-  , tShow = defaultShow -- TODO use zipinfo
+  , tShow = \cfg ref path -> do
+      path' <- resolveSymlinks Nothing path
+      out <- withReadLock ref path' $ readProcess "zipinfo" [path'] []
+      return $ toGeneric cfg out
   }
 
 --------------------------
