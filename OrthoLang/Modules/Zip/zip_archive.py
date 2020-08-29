@@ -69,8 +69,15 @@ def main(output_path, names_path, paths_path):
         if path == '<<emptylist>>':
             # You might get an empty list. In that case there's nothing to do!
             # We just return an empty zip archive.
+            # TODO can there be other <<empty types here?
             break
 
+        # TODO does this need to be done recursively for nested lists? probably factor a fn out for that
+        # TODO come up with ideal output first:
+        #        write a text file with the list contents
+        #        if they're named variables, write them at the top level like we've been doing (unnecessary?)
+        #          go ahead and duplicate them for now; clarity > space efficiency
+        #        if not, make nested folders: input1/input2.txt etc.
         elif os.path.isfile(path):
             # Most OrthoLang types appear as paths which should be copied over
             dst = os.path.join(input_dir, name)

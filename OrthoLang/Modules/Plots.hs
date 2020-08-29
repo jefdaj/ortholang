@@ -61,8 +61,10 @@ listVarNames scr es = case es of
   [Ref _ _ _ (Var _ name)] -> let e = fromJust $ lookupExpr name (sAssigns scr)
                               in listVarNames scr [e]
   es' -> let indexed = zip [(1 :: Int)..] es'
-             varNameDef (i, e) = varName ("input" ++ show i) e
-             mapped = map varNameDef indexed
+             varNameDef  (i, e) = varName ("input" ++ show i) e
+             varNameDef' (i, e) = let r = varNameDef (i, e)
+                                  in trace "listVarNames" (show (i, e)) r
+             mapped = map varNameDef' indexed
          in Lst str Nothing [] mapped -- TODO should deps be empty, or contain the mapped vars?
 
 ---------------------

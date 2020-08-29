@@ -38,7 +38,7 @@ a12 = zip_archive [f1]
 a13 = zip_archive [f2, f1]
 
 hits = blastp 1e-20 f1 f2
-a14 = zip_archive [hits] # missing .bht extension
+a14 = zip_archive [hits]
 a15 = zip_archive [f1, f2, hits]
 a16 = zip_archive [load_faa "examples/sequences/Mycoplasma_pulmonis_protein_refseq.faa",
                    blastp 1e-20 f1 f2]
@@ -46,18 +46,18 @@ a17 = zip_archive [a14, a16, a15]
 
 # and finally nested lists of all of the above
 l1 = [n1, n2]
-a18 = zip_archive [l1] # TODO error?
+a18 = zip_archive [l1] # TODO got n1, but missing n2
 
 l2 = [a7, a8, a9] # TODO error?
-a19 = zip_archive [l2] # TODO error?
+a19 = zip_archive [l2] # TODO got a7, but missing 8 + 9
 a20 = zip_archive [a7, a8, a9] # works
 
 l3 = [f1, f2]
-a21 = zip_archive [l3] # TODO missing f2?
+a21 = zip_archive [l3] # TODO got f1, but missing f2
 
 l4 = [hits]
-a22 = zip_archive [[hits]] # TODO missing name?
-a23 = zip_archive [l4] # TODO missing name?
+a22 = zip_archive [[hits]] # TODO misinterpreted this one! it creates a .bht file with the *path* to the bht in it
+a23 = zip_archive [l4] # TODO exact same as a22, which is cool but still wrong lol
 
 a24 = zip_archive [a19, a20, a21, a22, a23]
 
