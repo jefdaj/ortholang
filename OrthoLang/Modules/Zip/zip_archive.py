@@ -79,8 +79,7 @@ def main(output_path, names_path, paths_path):
         else:
             # But literals and lists of them (str.list, num.list) are included
             # directly for efficiency, so they have to be written to files instead
-            ext = 'txt'
-            dst = os.path.join(input_dir, name + '.txt')
+            dst = os.path.join(input_dir, name)
             with open(dst, 'w') as f:
                 f.write(path + '\n')
 

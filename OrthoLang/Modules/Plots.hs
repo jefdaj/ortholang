@@ -48,7 +48,7 @@ png = Type
 varName :: String -> Expr -> Expr
 varName def expr = Lit str $ case expr of
   (Ref r _ _ (Var _ name)) -> name ++ "." ++ ext r
-  _ -> def
+  e -> def ++ "." ++ ext (typeOf e)
 
 {- Like varName, but for a list of names. Cases it can handle:
  - 1. list contains a single list or ref to a list -> recurse
