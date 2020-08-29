@@ -56,7 +56,7 @@ aZipArchiveExplicit (ExprPath out) inNames inList = do
       out' = toPath loc cfg out
   withBinHash out out' $ \tmpPath -> do
     let tmp' = fromPath loc cfg tmpPath
-    aNewRulesS2 "zip_archive.sh" id (ExprPath tmp') inNames inList
+    aNewRulesS2 "zip_archive.py" id (ExprPath tmp') inNames inList
 
 -----------------
 -- zip_archive --

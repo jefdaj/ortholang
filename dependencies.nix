@@ -99,7 +99,7 @@ in rec {
 
   # TODO remove these in favor of buildPythonPath!
   myPy2Wrap = "--prefix PYTHONPATH : \"$out/bin:${myPy2.python.sitePackages}\"";
-  myPy3Wrap = "--prefix PYTHONPATH : \"$out/bin:${python36.python.sitePackages}\"";
+  myPy3Wrap = "--prefix PYTHONPATH : \"$out/bin:${myPy3.python.sitePackages}\"";
 
   myPy2 = python27.buildEnv.override {
 
@@ -110,6 +110,16 @@ in rec {
       biopython
       numpy
       scipy
+    ];
+  };
+
+  myPy3 = python3.buildEnv.override {
+
+    # see https://github.com/NixOS/nixpkgs/issues/22319
+    ignoreCollisions = true;
+
+    extraLibs = with python3Packages; [
+      # TODO add deterministic_zip
     ];
   };
 
@@ -128,7 +138,7 @@ in rec {
   ortholang-mmseqs        = mkModule ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
   ortholang-muscle        = mkModule ./OrthoLang/Modules/Muscle        [ muscle ] "";
   ortholang-psiblast      = mkModule ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
-  ortholang-zip           = mkModule ./OrthoLang/Modules/Zip           [ ] "";
+  ortholang-zip           = mkModule ./OrthoLang/Modules/Zip           [ myPy3 ] myPy3Wrap;
 
   # TODO should the wrap not be necessary?
   ortholang-seqio         = mkModule ./OrthoLang/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
