@@ -26,6 +26,7 @@ versionScripts = map (\(a,b) -> (a, os ++ ":" ++ b))
   , ("sed"          , "sed.sh")
   , ("tree"         , "tree.sh") -- TODO where should this go?
   , ("awk"          , "awk.sh") -- TODO where should this go?
+  , ("file"         , "file.sh") -- TODO where should this go?
   , ("zip"          , "zip.sh")
 
   , ("blast"        , "blast.sh")
