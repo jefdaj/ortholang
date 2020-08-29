@@ -64,16 +64,6 @@ listVarNames scr es = case es of
              varNameDef (i, e) = varName ("input" ++ show i) e
              mapped = map varNameDef indexed
          in Lst str Nothing [] mapped -- TODO should deps be empty, or contain the mapped vars?
-  
---   let r  = typeOf expr
---       ms = seedOf expr
---       ds = depsOf expr
---   in case expr of
---     (Lst _ _ _ [e]) -> case e of
---                          (Lst _ _ _ _) -> varNames e -- TODO what if this is a ref to a list
---                          _ -> varName "input1" e
---     (Lst _ _ _  es) -> Lst r ms ds $ map (\(n, e) -> varName ("input" ++ show n) e) (zip [(1 :: Int)..] es)
---     _               -> Lst r ms ds []
 
 ---------------------
 -- plot a num.list --

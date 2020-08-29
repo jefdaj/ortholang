@@ -11,6 +11,8 @@ import Data.Maybe (fromJust)
 -- import OrthoLang.Modules.Load (mkLoad)
 import OrthoLang.Modules.Plots (listVarNames)
 
+-- import Debug.Trace
+
 ------------
 -- module --
 ------------
@@ -22,7 +24,7 @@ olModule = Module
   , mTypes = [zip]
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [zipArchive]
+  , mFunctions = [zipArchive, zipArchiveExplicit]
   }
 
 zip :: Type
@@ -39,24 +41,24 @@ zip = Type
 -- | Hidden version of `zipArchive` that takes an explicit pre-loaded script and varnames file.
 -- TODO with bin hash?
 -- TODO also pass types explicitly?
--- TODO https://medium.com/@pat_wilson/building-deterministic-zip-files-with-built-in-commands-741275116a19
 zipArchiveExplicit :: Function
-zipArchiveExplicit = newFnA2
+zipArchiveExplicit = newFnS2
   "zip_archive_explicit"
   (ListSigs (Exactly str), ListSigs (Exactly Untyped))
   (Exactly zip)
-  aZipArchiveExplicit
-  [Hidden, Nondeterministic]
+  "zip_archive.py"
+  [Hidden]
+  id
 
 -- TODO have to delete the script first if it exists? why doesn't ortholang do that?
-aZipArchiveExplicit :: NewAction2
-aZipArchiveExplicit (ExprPath out) inNames inList = do
-  cfg <- fmap fromJust $ getShakeExtra
-  let loc  = "modules.customscript.aZipArchiveExplicit"
-      out' = toPath loc cfg out
-  withBinHash out out' $ \tmpPath -> do
-    let tmp' = fromPath loc cfg tmpPath
-    aNewRulesS2 "zip_archive.py" id (ExprPath tmp') inNames inList
+-- aZipArchiveExplicit :: NewAction2
+-- aZipArchiveExplicit (ExprPath out) inNames inList = do
+--   cfg <- fmap fromJust $ getShakeExtra
+--   let loc  = "modules.customscript.aZipArchiveExplicit"
+--       out' = toPath loc cfg out
+--   withBinHash out out' $ \tmpPath -> do
+--     let tmp' = fromPath loc cfg tmpPath
+--     aNewRulesS2 "zip_archive.py" id (ExprPath tmp') inNames inList
 
 -----------------
 -- zip_archive --
@@ -69,11 +71,11 @@ zipArchive = newExprExpansion
   [ListSigs (Exactly Untyped)]
   (Exactly zip)
   mZipArchive
-  [ReadsFile, Nondeterministic]
+  []
 
 -- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
 mZipArchive :: ExprExpansion
-mZipArchive _ scr (Fun r _ ds _ [iList]) =
+mZipArchive _ scr (Fun r ms ds _ [iList]) =
   let ns = listVarNames scr [iList]
-  in Fun r Nothing ds "zip_archive_explicit" [ns, iList]
+  in Fun r ms ds "zip_archive_explicit" [trace "ns" (show ns) ns, trace "ilist" (show iList) iList]
 mZipArchive _ _ e = error "modules.zip.mZipArchive" $ "bad argument: " ++ show e
