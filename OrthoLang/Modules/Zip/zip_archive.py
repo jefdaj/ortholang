@@ -53,8 +53,12 @@ def main(output_path, names_path, paths_path):
 
     output_dir = os.path.dirname(output_path)
     os.chdir(output_dir)
-    input_dir = os.path.join(output_dir, 'ortholang_result') # TODO better name with hash(es)?
-    print('input_dir: {}'.format(input_dir))
+
+    # put files in a uniquely-named dir to avoid confusion when unzipping
+    uniq = abs(hash(os.path.relpath(output_dir, os.path.expandvars('$TMPDIR'))))
+    input_dir = os.path.join(output_dir, 'ortholang_{}'.format(uniq))
+
+    # print('input_dir: {}'.format(input_dir))
     os.makedirs(input_dir, exist_ok=True)
 
     # note that this is an unrelated meaning for zip
@@ -69,7 +73,7 @@ def main(output_path, names_path, paths_path):
     with open(paths_path, 'r') as f:
         paths = [l.rstrip() for l in f.readlines()]
     pairs = list(zip(paths, names))
-    print('pairs: {}'.format(pairs))
+    # print('pairs: {}'.format(pairs))
     for (path, name) in pairs:
         path = os.path.expandvars(path)
 
@@ -82,7 +86,7 @@ def main(output_path, names_path, paths_path):
             # Most OrthoLang types appear as paths which should be copied over
             # ext = os.path.splitext(path)[1]
             dst = os.path.join(input_dir, name)
-            print('dst: {}'.format(dst))
+            # print('dst: {}'.format(dst))
             shutil.copyfile(path, dst)
 
         else:

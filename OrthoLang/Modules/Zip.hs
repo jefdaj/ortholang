@@ -5,13 +5,9 @@ import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
 
--- import OrthoLang.Debug (error)
 import Prelude hiding (zip)
 import Data.Maybe (fromJust)
--- import OrthoLang.Modules.Load (mkLoad)
 import OrthoLang.Modules.Plots (listVarNames)
-
--- import Debug.Trace
 
 ------------
 -- module --
@@ -34,13 +30,11 @@ zip = Type
   , tShow = defaultShow -- TODO use zipinfo
   }
 
------------------
--- zip_archive --
------------------
+--------------------------
+-- zip_archive_explicit --
+--------------------------
 
 -- | Hidden version of `zipArchive` that takes an explicit pre-loaded script and varnames file.
--- TODO with bin hash?
--- TODO also pass types explicitly?
 zipArchiveExplicit :: Function
 zipArchiveExplicit = newFnS2
   "zip_archive_explicit"
@@ -49,16 +43,6 @@ zipArchiveExplicit = newFnS2
   "zip_archive.py"
   [Hidden]
   id
-
--- TODO have to delete the script first if it exists? why doesn't ortholang do that?
--- aZipArchiveExplicit :: NewAction2
--- aZipArchiveExplicit (ExprPath out) inNames inList = do
---   cfg <- fmap fromJust $ getShakeExtra
---   let loc  = "modules.customscript.aZipArchiveExplicit"
---       out' = toPath loc cfg out
---   withBinHash out out' $ \tmpPath -> do
---     let tmp' = fromPath loc cfg tmpPath
---     aNewRulesS2 "zip_archive.py" id (ExprPath tmp') inNames inList
 
 -----------------
 -- zip_archive --
