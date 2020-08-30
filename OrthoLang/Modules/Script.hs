@@ -59,6 +59,7 @@ runScriptExplicit = hidden $ newFnA3
   [Hidden, ReadsFile]
 
 -- TODO have to delete the script first if it exists? why doesn't ortholang do that?
+-- TODO adjust scripts to handle the case where the list of names is nested?
 aRunScriptExplicit :: NewAction3
 aRunScriptExplicit (ExprPath out) inScr inNames inList = do
   cfg <- fmap fromJust $ getShakeExtra

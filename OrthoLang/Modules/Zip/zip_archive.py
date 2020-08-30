@@ -66,8 +66,7 @@ def write_ortholang_list(input_dir, path, name):
 def write_ortholang_arg(input_dir, path, name):
     dst = os.path.join(input_dir, name)
     exts = name.split('.')[1:]
-    # print('dst: {}'.format(dst))
-    # print('exts: {}'.format(exts))
+    print('locals:', locals())
 
     if exts == ['str'] or exts == ['num']:
         # case 1: "path" is actually a single lit (num or str) which should be written to a file
@@ -98,6 +97,16 @@ def main(output_path, names_path, paths_path):
         names = f.readlines()
     with open(paths_path, 'r') as f:
         paths = f.readlines()
+
+    # TODO this shouldn't be needed!
+    # fix for the case where the only arg is a list, and the names have been picked from inside it
+    while 'exprs/list/' in paths[0] and not names[0].endswith('.list'):
+        paths_path = os.path.expandvars(paths[0].rstrip())
+        # print('locals:', locals())
+        with open(paths_path, 'r') as f:
+            paths = f.readlines()
+    # print('paths_path: {}'.format(paths_path))
+
     for (path, name) in zip(paths, names):
         path = os.path.expandvars(path.rstrip())
         name = name.rstrip()

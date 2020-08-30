@@ -54,6 +54,7 @@ varName def expr = Lit str $ case expr of
  - 1. list contains a single list or ref to a list -> recurse
  - 2. list contains multiple elements -> get their names or default to 'unnamed1', 'unnamed2`, ...
  - 3. anything else -> default to one 'unnamed' element?
+ - TODO this is wrong when the only arg is a list, because it un-nests but the paths don't
  -}
 listVarNames :: Script -> [Expr] -> Expr
 listVarNames scr es = case es of

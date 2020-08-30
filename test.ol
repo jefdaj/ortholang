@@ -47,14 +47,14 @@ a17 = zip_archive [a14, a16, a15]
 
 # and finally nested lists of all of the above
 l1 = [n1, n2]
-a18 = zip_archive [l1] # TODO got n1, but missing n2
+a18 = zip_archive [l1] # works, but required a kludge
 
-l2 = [a7, a8, a9] # TODO error?
-a19 = zip_archive [l2] # TODO got a7, but missing 8 + 9
+l2 = [a7, a8, a9]
+a19 = zip_archive [l2] # works
 a20 = zip_archive [a7, a8, a9] # works
 
 l3 = [f1, f2]
-a21 = zip_archive [l3] # TODO got f1, but missing f2
+a21 = zip_archive [l3] # works, but required a kludge
 
 l4 = [hits]
 a22 = zip_archive [[hits]] # TODO misinterpreted this one! it creates a .bht file with the *path* to the bht in it
