@@ -119,9 +119,9 @@ def main(output_path, names_path, paths_path):
             f.write(names[0] + '\n')
 
     elif names[0].endswith('.str.list') or names[0].endswith('.num.list'):
-        with open(names[0], 'w') as f:
-            for p in paths:
-                f.write(p + '\n')
+        path = os.path.expandvars(paths[0])
+        dst = os.path.join(input_dir, names[0])
+        shutil.copyfile(path, dst)
 
     else:
         for (path, name) in zip(paths, names):

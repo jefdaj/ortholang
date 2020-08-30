@@ -54,6 +54,6 @@ l4 = [hits]
 a22 = zip_archive [[hits]]
 a23 = zip_archive [l4]
 
-a24 = zip_archive [a19, a20, a21, a22, a23] # TODO almost, but this has an extra input1 dir
+a24 = zip_archive [a19, a20, a21, a22, a23]
 
 result = zip_archive [a6, a11, a17, a24]
