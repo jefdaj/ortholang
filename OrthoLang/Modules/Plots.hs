@@ -45,28 +45,33 @@ png = Type
  - "num_genomes", this will write that name to a string for use in the plot.
  - Otherwise it will return an empty string, which the script should ignore.
  -}
-varName :: String -> Expr -> Expr
-varName def expr = Lit str $ case expr of
-  (Ref r _ _ (Var _ name)) -> name ++ "." ++ ext r
-  e -> def ++ "." ++ ext (typeOf e)
+varName' :: String -> Expr -> String
+varName' _ (Ref r _ _ (Var _ name)) = name ++ "." ++ ext r
+varName' def expr = def ++ "." ++ ext (typeOf expr)
+
+varName d e = let r = varName' d e
+                  m = "varName " ++ show d ++ " " ++ show e ++ " -> " ++ show r
+              in trace "ortholang.modules.plots.varName" m r
 
 {- Like varName, but for a list of names. Cases it can handle:
  - 1. list contains a single list or ref to a list -> recurse
  - 2. list contains multiple elements -> get their names or default to 'unnamed1', 'unnamed2`, ...
  - 3. anything else -> default to one 'unnamed' element?
  - TODO this is wrong when the only arg is a list, because it un-nests but the paths don't
+ -      solve by not recursing at all? just make a dir + name its elements the defaults
+ - TODO use the var name as default name for its list elements: hits1, hits2, ...
+ - TODO remove the Lst wrapping part and do it separately?
  -}
-listVarNames :: Script -> [Expr] -> Expr
-listVarNames scr es = case es of
-  [Lst _ _ _ es'] -> listVarNames scr es'
-  [Ref _ _ _ (Var _ name)] -> let e = fromJust $ lookupExpr name (sAssigns scr)
-                              in listVarNames scr [e]
-  es' -> let indexed = zip [(1 :: Int)..] es'
-             varNameDef  (i, e) = varName ("input" ++ show i) e
-             varNameDef' (i, e) = let r = varNameDef (i, e)
-                                  in trace "listVarNames" (show (i, e)) r
-             mapped = map varNameDef' indexed
-         in Lst str Nothing [] mapped -- TODO should deps be empty, or contain the mapped vars?
+listVarNames' :: String -> Script -> [Expr] -> Expr
+listVarNames' def scr es =
+  let indexed = zip [(1 :: Int)..] es
+      varNameDef (i, e) = varName (def ++ show i) e -- TODO bug here?
+      names = map varNameDef indexed
+  in Lst str Nothing [] (map (Lit str) names) -- TODO should deps be empty, or contain the mapped vars?
+
+listVarNames d s es = let r = listVarNames' d s es
+                          m = "listVarNames " ++ show d ++ " " ++ show es ++ " -> " ++ show r
+                      in trace "ortholang.modules.plots.listVarNames" m r
 
 ---------------------
 -- plot a num.list --
@@ -96,7 +101,7 @@ rPlotNumList :: FilePath -> RulesFn
 rPlotNumList binPath scr expr@(Fun _ _ _ _ [title, nums]) = do
   titlePath <- rExpr scr title
   numsPath  <- rExpr scr nums
-  xlabPath  <- rExpr scr $ varName "nums" nums -- TODO better default name
+  xlabPath  <- rExpr scr $ Lit str $ varName "nums" nums -- TODO better default name
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
   let loc = "modules.plots.rPlotNumList"

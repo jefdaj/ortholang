@@ -8,9 +8,10 @@ import OrthoLang.Debug (error)
 import Prelude hiding (error)
 import Data.Maybe (fromJust)
 import OrthoLang.Modules.Load (mkLoad)
-import OrthoLang.Modules.Plots (listVarNames)
+import OrthoLang.Modules.Plots (varName, listVarNames)
 import OrthoLang.Locks (withReadLock)
 import System.Process          (readProcess)
+import Data.List.Split (splitOn)
 
 ------------
 -- module --
@@ -86,6 +87,7 @@ runScript = newExprExpansion
 mRunScript :: ExprExpansion
 mRunScript _ scr (Fun r _ ds _ [bStr, iList]) =
   let b  = Fun bin Nothing ds "load_script" [bStr]
-      ns = listVarNames scr [iList]
+      n  = head $ splitOn "." $ varName "input1" iList -- TODO should this ever actually show up in files?
+      ns = listVarNames n scr [iList]
   in Fun r Nothing ds "run_script_explicit" [b, ns, iList]
 mRunScript _ _ e = error "modules.customscript.mRunScript" $ "bad argument: " ++ show e

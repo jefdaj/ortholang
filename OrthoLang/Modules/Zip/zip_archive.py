@@ -50,17 +50,17 @@ def deterministic_zip(output_path, input_paths):
 
 def write_ortholang_list(input_dir, path, name):
     input_dir = os.path.join(input_dir, name.split('.')[0])
-    ext = name[name.find('.'):]
+    ext = '.'.join(name.split('.')[1:-1])
     os.makedirs(input_dir, exist_ok=True)
-    os.chdir(dst)
+    os.chdir(input_dir)
     with open(path, 'r') as f:
-        paths = [l.rstrip() for l in f.readlines()]
+        paths = [os.path.expandvars(l.rstrip()) for l in f.readlines()]
     # picking up nested list names sounds too error-prone, so we just do "element1", ...
     # TODO pad with zeros?
     index = 0
     for path in paths:
         index += 1
-        name = "element" + str(index) + ext
+        name = "element" + str(index) + '.' + ext
         write_ortholang_arg(input_dir, path, name) # is the recursion ok?
 
 def write_ortholang_arg(input_dir, path, name):
@@ -69,17 +69,20 @@ def write_ortholang_arg(input_dir, path, name):
     print('locals:', locals())
 
     if exts == ['str'] or exts == ['num']:
+        print('case 1')
         # case 1: "path" is actually a single lit (num or str) which should be written to a file
         with open(dst, 'w') as f:
             f.write(path + '\n')
 
-    elif exts == ['str', 'list'] or exts == ['num', 'list'] or exts[-1] is not 'list':
+    elif exts == ['str', 'list'] or exts == ['num', 'list'] or exts[-1] != 'list':
+        print('case 2/3')
         # case 2: path is to a literal list (num.list, str.list) which should be copied over as is
         # case 3: path is to a single non-lit type and should be copied over as is
         shutil.copyfile(path, dst)
 
     else:
         # case 4: path is to a list of non-lit type, so we should make a dir + copy elements into it
+        print('case 4')
         write_ortholang_list(input_dir, path, name) # is the recursion ok?
 
 def main(output_path, names_path, paths_path):
@@ -94,31 +97,35 @@ def main(output_path, names_path, paths_path):
     # pair names with their paths
     # note that this is an unrelated meaning of zip
     with open(names_path, 'r') as f:
-        names = f.readlines()
+        names = [l.rstrip() for l in f.readlines()]
     with open(paths_path, 'r') as f:
-        paths = f.readlines()
+        paths = [l.rstrip() for l in f.readlines()]
+    # paths = [paths_path]
 
+    # paths = [paths_path]
     # TODO this shouldn't be needed!
     # fix for the case where the only arg is a list, and the names have been picked from inside it
-    while 'exprs/list/' in paths[0] and not names[0].endswith('.list'):
-        paths_path = os.path.expandvars(paths[0].rstrip())
-        # print('locals:', locals())
-        with open(paths_path, 'r') as f:
-            paths = f.readlines()
-    # print('paths_path: {}'.format(paths_path))
+    # if len(paths) == 1 and paths[0].startswith('$TMPDIR'):
+    #     paths_path = os.path.expandvars(paths[0])
+    #     print('locals:', locals())
+    #     with open(paths_path, 'r') as f:
+    #         paths = [l.rstrip() for l in f.readlines()]
+    print('paths_path: {}'.format(paths_path))
 
-    for (path, name) in zip(paths, names):
-        path = os.path.expandvars(path.rstrip())
-        name = name.rstrip()
+    if names[0] == '<<emptylist>>':
+        # argument list is empty; write a single text file signifying that
+        path = os.path.join(input_dir, 'result.list')
+        with open(path, 'w') as f:
+            f.write(names[0] + '\n')
 
-        if name == '<<emptylist>>':
-            # argument list is empty; write a single text file signifying that
-            path = os.path.join(input_dir, 'result.list')
-            with open(path, 'w') as f:
-                f.write(name + '\n')
-            break
+    elif names[0].endswith('.str.list') or names[0].endswith('.num.list'):
+        with open(names[0], 'w') as f:
+            for p in paths:
+                f.write(p + '\n')
 
-        else:
+    else:
+        for (path, name) in zip(paths, names):
+            path = os.path.expandvars(path)
             # write the arguments to a folder as planned
             write_ortholang_arg(input_dir, path, name)
 

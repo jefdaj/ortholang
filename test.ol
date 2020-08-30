@@ -1,26 +1,19 @@
 # This tests the zip_archive function.
-
 # works except the name isn't being picked up
 s1 = "first, a single string (text file)"
 a1 = zip_archive [s1]
 
-# works
 a2 = zip_archive ["same, but with no variable name"]
 
-# works 
-# TODO except, should this be one file? no two makes more sense
 s2 = "how about two strings?"
 a3 = zip_archive [s1, s2]
 
-# works
 a4 = zip_archive [s1, s2, "how about two strings and another unnamed one?"]
 
 # or nothing at all
-# works
 a5 = zip_archive []
 
 # finally, what about recursively zipping zip files?
-# almost works, but needs to learn the extension; pass explicitly?
 a6 = zip_archive [a1, a2, a3, a4, a5]
 
 # now all the same things, but with nums
@@ -47,19 +40,20 @@ a17 = zip_archive [a14, a16, a15]
 
 # and finally nested lists of all of the above
 l1 = [n1, n2]
-a18 = zip_archive [l1] # works, but required a kludge
+a18 = zip_archive [l1] # TODO this is the only broken one, because it expects a dir but creates num.list
+# TODO add a similar str.list test too
 
 l2 = [a7, a8, a9]
-a19 = zip_archive [l2] # works
-a20 = zip_archive [a7, a8, a9] # works
+a19 = zip_archive [l2]
+a20 = zip_archive [a7, a8, a9]
 
 l3 = [f1, f2]
-a21 = zip_archive [l3] # works, but required a kludge
+a21 = zip_archive [l3]
 
 l4 = [hits]
-a22 = zip_archive [[hits]] # TODO misinterpreted this one! it creates a .bht file with the *path* to the bht in it
-a23 = zip_archive [l4] # TODO exact same as a22, which is cool but still wrong lol
+a22 = zip_archive [[hits]]
+a23 = zip_archive [l4]
 
-a24 = zip_archive [a19, a20, a21, a22, a23]
+a24 = zip_archive [a19, a20, a21, a22, a23] # TODO almost, but this has an extra input1 dir
 
 result = zip_archive [a6, a11, a17, a24]
