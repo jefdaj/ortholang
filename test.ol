@@ -40,8 +40,9 @@ a17 = zip_archive [a14, a16, a15]
 
 # and finally nested lists of all of the above
 l1 = [n1, n2]
-a18 = zip_archive [l1] # TODO this is the only broken one, because it expects a dir but creates num.list
-# TODO add a similar str.list test too
+a18 = zip_archive [l1]
+l1b = [s1, s2]
+a18b = zip_archive [l1b]
 
 l2 = [a7, a8, a9]
 a19 = zip_archive [l2]
@@ -54,6 +55,6 @@ l4 = [hits]
 a22 = zip_archive [[hits]]
 a23 = zip_archive [l4]
 
-a24 = zip_archive [a19, a20, a21, a22, a23]
+a24 = zip_archive [a18, a18b, a19, a20, a21, a22, a23]
 
 result = zip_archive [a6, a11, a17, a24]
