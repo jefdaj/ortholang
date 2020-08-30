@@ -48,6 +48,41 @@ def deterministic_zip(output_path, input_paths):
     sys.stderr.write('Wrote {}'.format(output_path))
     return 0
 
+def write_ortholang_list(input_dir, path, name):
+    input_dir = os.path.join(input_dir, name.split('.')[0])
+    ext = name[name.find('.'):]
+    os.makedirs(input_dir, exist_ok=True)
+    os.chdir(dst)
+    with open(path, 'r') as f:
+        paths = [l.rstrip() for l in f.readlines()]
+    # picking up nested list names sounds too error-prone, so we just do "element1", ...
+    # TODO pad with zeros?
+    index = 0
+    for path in paths:
+        index += 1
+        name = "element" + str(index) + ext
+        write_ortholang_arg(input_dir, path, name) # is the recursion ok?
+
+def write_ortholang_arg(input_dir, path, name):
+    dst = os.path.join(input_dir, name)
+    exts = name.split('.')[1:]
+    # print('dst: {}'.format(dst))
+    # print('exts: {}'.format(exts))
+
+    if exts == ['str'] or exts == ['num']:
+        # case 1: "path" is actually a single lit (num or str) which should be written to a file
+        with open(dst, 'w') as f:
+            f.write(path + '\n')
+
+    elif exts == ['str', 'list'] or exts == ['num', 'list'] or exts[-1] is not 'list':
+        # case 2: path is to a literal list (num.list, str.list) which should be copied over as is
+        # case 3: path is to a single non-lit type and should be copied over as is
+        shutil.copyfile(path, dst)
+
+    else:
+        # case 4: path is to a list of non-lit type, so we should make a dir + copy elements into it
+        write_ortholang_list(input_dir, path, name) # is the recursion ok?
+
 def main(output_path, names_path, paths_path):
     output_dir = os.path.dirname(output_path)
     os.chdir(output_dir)
@@ -57,39 +92,28 @@ def main(output_path, names_path, paths_path):
     input_dir = os.path.join(output_dir, 'ortholang_{}'.format(uniq))
     os.makedirs(input_dir, exist_ok=True)
 
+    # pair names with their paths
+    # note that this is an unrelated meaning of zip
     with open(names_path, 'r') as f:
-        names = [l.rstrip() for l in f.readlines()]
+        names = f.readlines()
     with open(paths_path, 'r') as f:
-        paths = [l.rstrip() for l in f.readlines()]
-
-    # note that this is an unrelated meaning for zip
+        paths = f.readlines()
     for (path, name) in zip(paths, names):
-        path = os.path.expandvars(path)
+        path = os.path.expandvars(path.rstrip())
+        name = name.rstrip()
 
-        if path == '<<emptylist>>':
-            # You might get an empty list. In that case there's nothing to do!
-            # We just return an empty zip archive.
-            # TODO can there be other <<empty types here?
+        if name == '<<emptylist>>':
+            # argument list is empty; write a single text file signifying that
+            path = os.path.join(input_dir, 'result.list')
+            with open(path, 'w') as f:
+                f.write(name + '\n')
             break
 
-        # TODO does this need to be done recursively for nested lists? probably factor a fn out for that
-        # TODO come up with ideal output first:
-        #        write a text file with the list contents
-        #        if they're named variables, write them at the top level like we've been doing (unnecessary?)
-        #          go ahead and duplicate them for now; clarity > space efficiency
-        #        if not, make nested folders: input1/input2.txt etc.
-        elif os.path.isfile(path):
-            # Most OrthoLang types appear as paths which should be copied over
-            dst = os.path.join(input_dir, name)
-            shutil.copyfile(path, dst)
-
         else:
-            # But literals and lists of them (str.list, num.list) are included
-            # directly for efficiency, so they have to be written to files instead
-            dst = os.path.join(input_dir, name)
-            with open(dst, 'w') as f:
-                f.write(path + '\n')
+            # write the arguments to a folder as planned
+            write_ortholang_arg(input_dir, path, name)
 
+    # zip up and delete the input_dir
     deterministic_zip(output_path, [input_dir])
     shutil.rmtree(input_dir)
 

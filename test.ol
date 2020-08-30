@@ -8,6 +8,7 @@ a1 = zip_archive [s1]
 a2 = zip_archive ["same, but with no variable name"]
 
 # works 
+# TODO except, should this be one file? no two makes more sense
 s2 = "how about two strings?"
 a3 = zip_archive [s1, s2]
 
