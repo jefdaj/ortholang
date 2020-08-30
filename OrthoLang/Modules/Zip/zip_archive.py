@@ -66,23 +66,23 @@ def write_ortholang_list(input_dir, path, name):
 def write_ortholang_arg(input_dir, path, name):
     dst = os.path.join(input_dir, name)
     exts = name.split('.')[1:]
-    print('locals:', locals())
+    # print('locals:', locals())
 
     if exts == ['str'] or exts == ['num']:
-        print('case 1')
+        # print('case 1')
         # case 1: "path" is actually a single lit (num or str) which should be written to a file
         with open(dst, 'w') as f:
             f.write(path + '\n')
 
     elif exts == ['str', 'list'] or exts == ['num', 'list'] or exts[-1] != 'list':
-        print('case 2/3')
+        # print('case 2/3')
         # case 2: path is to a literal list (num.list, str.list) which should be copied over as is
         # case 3: path is to a single non-lit type and should be copied over as is
         shutil.copyfile(path, dst)
 
     else:
         # case 4: path is to a list of non-lit type, so we should make a dir + copy elements into it
-        print('case 4')
+        # print('case 4')
         write_ortholang_list(input_dir, path, name) # is the recursion ok?
 
 def main(output_path, names_path, paths_path):
@@ -110,7 +110,7 @@ def main(output_path, names_path, paths_path):
     #     print('locals:', locals())
     #     with open(paths_path, 'r') as f:
     #         paths = [l.rstrip() for l in f.readlines()]
-    print('paths_path: {}'.format(paths_path))
+    # print('paths_path: {}'.format(paths_path))
 
     if names[0] == '<<emptylist>>':
         # argument list is empty; write a single text file signifying that
