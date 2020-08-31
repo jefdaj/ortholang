@@ -290,6 +290,7 @@ rOrthologFilterStr fnName pickerFn scr e@(Fun _ _ _ _ [groupLists, idLists]) = d
       , cmdFixEmpties = True
       , cmdOutPath = out'
       , cmdInPatterns = [ogsPath, idsPath]
+      , cmdNoNeedDirs = []
       , cmdExtraOutPaths = []
       , cmdSanitizePaths = [out'] -- TODO is this right?
       , cmdOptions =[]
@@ -383,6 +384,7 @@ rOrthologFilterStrFrac fnName pickerFn scr e@(Fun _ _ _ _ [frac, groupLists, idL
       , cmdFixEmpties = True
       , cmdOutPath = out'
       , cmdInPatterns = [ogsPath, idsPath]
+      , cmdNoNeedDirs = []
       , cmdExtraOutPaths = []
       , cmdSanitizePaths = [out'] -- TODO is this right?
       , cmdOptions =[]

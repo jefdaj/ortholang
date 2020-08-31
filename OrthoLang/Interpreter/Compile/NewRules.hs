@@ -170,6 +170,7 @@ aNewRulesS sname opts (ExprPath out) args = do
     , cmdFixEmpties    = True     -- TODO any cases where you wouldn't want to?
     , cmdParallel      = False    -- TODO how to handle this?
     , cmdInPatterns    = args     -- TODO remove and always use the whole folder?
+    , cmdNoNeedDirs = []
     , cmdOutPath       = out      -- TODO remove and always use the whole folder?
     , cmdExtraOutPaths = []       -- TODO should this just refer to cache paths/dirs?
     , cmdSanitizePaths = []

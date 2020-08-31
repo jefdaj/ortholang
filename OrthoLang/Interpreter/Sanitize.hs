@@ -107,6 +107,7 @@ hashIDsFile inFa outFa = do
     , cmdParallel = False
     , cmdOptions = []
     , cmdInPatterns = [inFa']
+    , cmdNoNeedDirs = []
     , cmdOutPath = outFa'
     , cmdExtraOutPaths = [outIDs']
     , cmdSanitizePaths = []

@@ -204,6 +204,7 @@ aDiamondFromDb dCmd [o, e, q, db] = do
     , cmdParallel = False -- TODO fix the resource bug
     , cmdOptions = []
     , cmdInPatterns = []
+    , cmdNoNeedDirs = []
     , cmdOutPath = o''
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = [replaceBaseName o'' "out"]

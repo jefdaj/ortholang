@@ -267,6 +267,7 @@ aBioMartR out bmFn bmTmp sTable = do
     , cmdFixEmpties = True
     , cmdParallel = False
     , cmdInPatterns = [bmFn', sTable']
+    , cmdNoNeedDirs = []
     , cmdExtraOutPaths = []
     , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
     , cmdSanitizePaths = []

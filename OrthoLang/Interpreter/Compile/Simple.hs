@@ -83,6 +83,7 @@ aSimpleScript' parCmd fixEmpties script (out:ins) = do
                          , cmdFixEmpties = fixEmpties
                          , cmdParallel = parCmd
                          , cmdInPatterns = is'
+                         , cmdNoNeedDirs = []
                          , cmdOutPath = o'
                          , cmdExtraOutPaths = []
                          , cmdSanitizePaths = []

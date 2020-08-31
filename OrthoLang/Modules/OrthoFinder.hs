@@ -85,6 +85,7 @@ aOrthofinder [out, faListPath] = do
       , cmdParallel = False -- TODO fix this? it fails because of withResource somehow
       , cmdOptions = []
       , cmdInPatterns = faPaths'
+      , cmdNoNeedDirs = []
       , cmdOutPath = replaceBaseName out'' "out"
       , cmdExtraOutPaths = [replaceBaseName out'' "err"] -- TODO statsPath'? seems to break it
       , cmdSanitizePaths = [] -- TODO use this?

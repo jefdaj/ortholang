@@ -170,6 +170,7 @@ aMkBlastFromDb bCmd [o, e, q, p] = do
     , cmdParallel = False -- TODO make it parallel again?
     , cmdOptions = []
     , cmdInPatterns = [ptn]
+    , cmdNoNeedDirs = []
     , cmdOutPath = o''
     , cmdExtraOutPaths = [] -- TODO stderrPath?
     , cmdSanitizePaths = []

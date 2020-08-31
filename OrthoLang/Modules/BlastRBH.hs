@@ -143,6 +143,7 @@ aReciprocalBest [out, left, right] = do
     , cmdFixEmpties = True
     , cmdOutPath = out''
     , cmdInPatterns = [left', right']
+    , cmdNoNeedDirs = []
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
     , cmdOptions =[]

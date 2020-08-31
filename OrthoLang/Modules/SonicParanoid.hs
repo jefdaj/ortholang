@@ -94,6 +94,7 @@ aSonicParanoid [out, faListPath] = do
       , cmdParallel = False -- TODO fix shake error associated with this
       , cmdOptions = []
       , cmdInPatterns = faPaths'
+      , cmdNoNeedDirs = []
       , cmdOutPath = statsPath''
       , cmdExtraOutPaths = [] -- TODO what to do about this? there are a lot, sort of
       , cmdSanitizePaths = []

@@ -200,6 +200,7 @@ aPsiblastDb writingPssm args oPath ePath qPath dbPath = do
       runCmd $ CmdDesc
         { cmdBinary = "psiblast.sh"
         , cmdInPatterns = [dbPre' ++ ".*"]
+        , cmdNoNeedDirs = []
         , cmdExtraOutPaths = []
         , cmdSanitizePaths = []
         , cmdOptions = []

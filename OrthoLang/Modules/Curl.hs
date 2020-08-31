@@ -33,6 +33,7 @@ curl url = do
     , cmdFixEmpties = False
     , cmdParallel = False
     , cmdInPatterns = []
+    , cmdNoNeedDirs = []
     , cmdOutPath = outPath
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []

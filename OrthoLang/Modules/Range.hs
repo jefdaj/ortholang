@@ -55,6 +55,7 @@ rRange scr e@(Fun _ _ _ name args) = do
       , cmdParallel = False
       , cmdOptions = []
       , cmdInPatterns = as
+      , cmdNoNeedDirs = []
       , cmdOutPath = out'
       , cmdExtraOutPaths = []
       , cmdSanitizePaths = []

@@ -115,6 +115,7 @@ aCRBBlast tmpDir [o, q, t] = do
     , cmdFixEmpties = True
     , cmdOutPath = oPath
     , cmdInPatterns = [qSrc, tSrc]
+    , cmdNoNeedDirs = []
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
     , cmdOptions =[Cwd tmp'] -- TODO remove?
