@@ -39,8 +39,12 @@ zip = Type
   , tDesc = "zip archives"
   , tShow = \cfg ref path -> do
       path' <- resolveSymlinks Nothing path
-      out <- withReadLock ref path' $ readProcess "zipinfo" [path'] []
-      return $ toGeneric cfg out
+      out <- fmap lines $ withReadLock ref path' $ readProcess "zipinfo" [path'] []
+      let header = fmap (toGeneric cfg) $ take 2 out
+          files  = map (drop 53) $ drop 2 $ init out
+          footer = last out
+          out' = unlines $ header ++ files ++ [footer]
+      return out'
   }
 
 --------------------------
@@ -71,13 +75,13 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
   names <- readLits loc inNames
   paths <- fmap lines $ readFileStrict' inList -- TODO warning! these are probably not lits
 
-  liftIO $ putStrLn $ "names: " ++ show names
-  liftIO $ putStrLn $ "paths: " ++ show paths
+  -- liftIO $ putStrLn $ "names: " ++ show names
+  -- liftIO $ putStrLn $ "paths: " ++ show paths
 
   if null names
     then do
       -- case 1: entire list is empty (no args given)
-      liftIO $ putStrLn $ "chose case 1"
+      -- liftIO $ putStrLn $ "chose case 1"
       liftIO $ writeFile (inputDir </> "empty.list") "<<emptylist>>"
 
     else
@@ -87,14 +91,14 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
       in if (".str.list" `isSuffixOf` n1 || ".num.list" `isSuffixOf` n1)
         then do
           -- case 2: entire list is a list of lits, and the first path points to it
-          liftIO $ putStrLn $ "chose case 2"
+          -- liftIO $ putStrLn $ "chose case 2"
           liftIO $ copyFile p1 dst
 
         else do
           -- case 3: handle each arg individually
           -- at this point we still don't know whether each path is really a path or a lit
           -- TODO rename var to reflect that
-          liftIO $ putStrLn $ "chose case 3"
+          -- liftIO $ putStrLn $ "chose case 3"
           let pairs = Prelude.zip paths names
           forM_ pairs $ \(path, name) -> writeOrtholangArg inputDir path name
 
@@ -116,7 +120,7 @@ writeOrtholangArg inputDir path name = do
     then do
       -- case 3a: "path" was actually a single lit which should be written to file
       -- TODO rename var to reflect ambiguity
-      liftIO $ putStrLn $ "chose case 3a"
+      -- liftIO $ putStrLn $ "chose case 3a"
       writeLit loc dst path
 
     else
@@ -126,13 +130,13 @@ writeOrtholangArg inputDir path name = do
         then do
           -- case 3b: path is a lit.list or a single non-lit type, and should be copied over
           -- (same action as case 2, but this one may be called recursively)
-          liftIO $ putStrLn $ "chose case 3b"
+          -- liftIO $ putStrLn $ "chose case 3b"
           liftIO $ copyFile (fromPath loc cfg path') dst
 
         else do
           -- case 4: path is to a non-lit list type, so we should make a dir + copy elements into it
           -- this one may recursively call writeOrtholangArg again
-          liftIO $ putStrLn $ "chose case 3c"
+          -- liftIO $ putStrLn $ "chose case 3c"
           writeOrtholangList inputDir path' name
 
 writeOrtholangList :: FilePath -> Path -> String -> Action ()
@@ -142,19 +146,19 @@ writeOrtholangList inputDir path name = do
       name' = takeWhile (/= '.') name
       ext'  = concat $ intersperse "." $ tail $ init $ splitOn "." name
       iDir  = inputDir </> name'
-  liftIO $ putStrLn $ "writeOrtholangList path: " ++ show path
-  liftIO $ putStrLn $ "writeOrtholangList name': " ++ name'
-  liftIO $ putStrLn $ "writeOrtholangList ext': " ++ ext'
-  liftIO $ putStrLn $ "writeOrtholangList iDir: " ++ iDir
+  -- liftIO $ putStrLn $ "writeOrtholangList path: " ++ show path
+  -- liftIO $ putStrLn $ "writeOrtholangList name': " ++ name'
+  -- liftIO $ putStrLn $ "writeOrtholangList ext': " ++ ext'
+  -- liftIO $ putStrLn $ "writeOrtholangList iDir: " ++ iDir
   liftIO $ createDirectoryIfMissing True iDir
   -- TODO no need to chdir right?
   paths <- readPaths loc $ fromPath loc cfg path -- now we know these are actual Paths
-  liftIO $ putStrLn $ "writeOrtholangList paths: " ++ show paths
+  -- liftIO $ putStrLn $ "writeOrtholangList paths: " ++ show paths
   let defNames = map (\i -> "item" ++ show i <.> ext') [(1 :: Int)..]
       named = Prelude.zip paths defNames -- note: unrelated meaning of zip
   forM_ named $ \(p, n) -> do
-    liftIO $ putStrLn $ "recursing with p: " ++ show p
-    liftIO $ putStrLn $ "recursing with n: " ++ show n
+    -- liftIO $ putStrLn $ "recursing with p: " ++ show p
+    -- liftIO $ putStrLn $ "recursing with n: " ++ show n
     writeOrtholangArg iDir (fromPath loc cfg p) n
 
 -----------------
