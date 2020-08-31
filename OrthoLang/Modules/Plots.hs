@@ -25,8 +25,8 @@ olModule = Module
   , mEncodings = []
   , mFunctions =
       [ histogram, histogramExplicit
-      , linegraph
-      , scatterplot
+      , linegraph, linegraphExplicit
+      -- , scatterplot
       , venndiagram
       ] -- TODO bargraph
   }
@@ -100,7 +100,7 @@ histogram = newExprExpansion
   mHistogram
   []
 
--- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
+-- | Macro that adds the xlab str
 mHistogram :: ExprExpansion
 mHistogram _ scr (Fun r ms ds _ [title, ns]) =
   let xlab = Lit str $ varName "" ns
@@ -111,6 +111,34 @@ mHistogram _ _ e = error "modules.plots.mHistogram" $ "bad argument: " ++ show e
 -- plot num.scores --
 ---------------------
 
+-- TODO any reason this wouldn't work with other things besides the .scores files?
+linegraphExplicit :: Function
+linegraphExplicit = newFnS3
+  "linegraph_explicit"
+  (Exactly str, Exactly str, ScoresSigs (Exactly num))
+  (Exactly png)
+  "linegraph.R"
+  [Hidden]
+  id
+
+-- | User-facing version that auto-loads the script and captures any varnames in the untyped list.
+linegraph :: Function
+linegraph = newExprExpansion
+  "linegraph"
+  [Exactly str, ScoresSigs (Exactly num)]
+  (Exactly png)
+  mLinegraph
+  []
+
+-- | Macro that adds the xlab str
+mLinegraph :: ExprExpansion
+mLinegraph _ scr (Fun r ms ds _ [title, ns]) =
+  let xlab = Lit str $ varName "" ns
+  in Fun r ms ds "linegraph_explicit" [title, xlab, ns]
+mLinegraph _ _ e = error "modules.plots.mLinegraph" $ "bad argument: " ++ show e
+
+scatterplot = undefined
+
 -- (str, ScoresOf num) png
 -- shown as "str num.scores -> png"
 -- tPlotScores :: TypeChecker
@@ -118,62 +146,62 @@ mHistogram _ _ e = error "modules.plots.mHistogram" $ "bad argument: " ++ show e
 -- tPlotScores _ = Left "expected a title and scores"
 
 -- TODO line graph should label axis by input var name (always there!)
-linegraph :: Function
-linegraph = let name = "linegraph" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = tPlotScores
-  -- , fTypeDesc  = name ++ " : str num.scores -> png"
-  , fInputs = [Exactly str, Exactly (ScoresOf num)]
-  , fOutput =  Exactly png
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "linegraph.R"
-  }
+-- linegraph :: Function
+-- linegraph = let name = "linegraph" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeCheck = tPlotScores
+--   -- , fTypeDesc  = name ++ " : str num.scores -> png"
+--   , fInputs = [Exactly str, Exactly (ScoresOf num)]
+--   , fOutput =  Exactly png
+--   ,fTags = []
+--   , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "linegraph.R"
+--   }
 
 -- TODO scatterplot should label axis by input var name (always there!)
-scatterplot :: Function
-scatterplot = let name = "scatterplot" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = tPlotScores
-  -- , fTypeDesc  = name ++ " : str num.scores -> png"
-  , fInputs = [Exactly str, Exactly (ScoresOf num)]
-  , fOutput =  Exactly png
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "scatterplot.R"
-  }
+-- scatterplot :: Function
+-- scatterplot = let name = "scatterplot" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeCheck = tPlotScores
+--   -- , fTypeDesc  = name ++ " : str num.scores -> png"
+--   , fInputs = [Exactly str, Exactly (ScoresOf num)]
+--   , fOutput =  Exactly png
+--   ,fTags = []
+--   , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "scatterplot.R"
+--   }
 
 -- TODO take an argument for extracting the axis name
 -- TODO also get y axis from dependent variable?
-rPlotNumScores :: RulesFn -> FilePath -> RulesFn
-rPlotNumScores xFn sPath scr expr@(Fun _ _ _ _ [title, nums]) = do
-  titlePath <- rExpr scr title
-  numsPath  <- rExpr scr nums
-  xlabPath  <- xFn   scr nums
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  -- ylabPath  <- yFn   st nums
-  let loc = "modules.plots.rPlotNumScores"
-      outPath   = exprPath cfg dRef scr expr
-      outPath'  = fromPath loc cfg outPath
-      outPath'' = ExprPath outPath'
-      args      = [titlePath, numsPath, xlabPath]
-      args'     = map (\(ExprPath p) -> toPath loc cfg p) args
-  outPath' %> \_ -> withBinHash expr outPath $ \out ->
-                      aSimpleScript sPath (out:args')
-  return outPath''
-rPlotNumScores _ _ _ _ = fail "bad argument to rPlotNumScores"
+-- rPlotNumScores :: RulesFn -> FilePath -> RulesFn
+-- rPlotNumScores xFn sPath scr expr@(Fun _ _ _ _ [title, nums]) = do
+--   titlePath <- rExpr scr title
+--   numsPath  <- rExpr scr nums
+--   xlabPath  <- xFn   scr nums
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   -- ylabPath  <- yFn   st nums
+--   let loc = "modules.plots.rPlotNumScores"
+--       outPath   = exprPath cfg dRef scr expr
+--       outPath'  = fromPath loc cfg outPath
+--       outPath'' = ExprPath outPath'
+--       args      = [titlePath, numsPath, xlabPath]
+--       args'     = map (\(ExprPath p) -> toPath loc cfg p) args
+--   outPath' %> \_ -> withBinHash expr outPath $ \out ->
+--                       aSimpleScript sPath (out:args')
+--   return outPath''
+-- rPlotNumScores _ _ _ _ = fail "bad argument to rPlotNumScores"
+-- 
+-- rPlotRepeatScores :: FilePath -> RulesFn
+-- rPlotRepeatScores = rPlotNumScores indRepeatVarName
+-- 
+-- indRepeatVarName :: RulesFn
+-- indRepeatVarName scr expr = rExpr scr $ Lit str $ case expr of
+--   (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
+--   _ -> ""
 
-rPlotRepeatScores :: FilePath -> RulesFn
-rPlotRepeatScores = rPlotNumScores indRepeatVarName
-
-indRepeatVarName :: RulesFn
-indRepeatVarName scr expr = rExpr scr $ Lit str $ case expr of
-  (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
-  _ -> ""
-
-depRepeatVarName :: RulesFn
-depRepeatVarName scr expr = rExpr scr $ Lit str $ case expr of
-  (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
-  _ -> ""
+-- depRepeatVarName :: RulesFn
+-- depRepeatVarName scr expr = rExpr scr $ Lit str $ case expr of
+  -- (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
+  -- _ -> ""
 
 ----------------------
 -- plot X.list.list --

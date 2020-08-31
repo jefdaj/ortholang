@@ -8,18 +8,21 @@ suppressPackageStartupMessages(require(readr))
 
 # TODO read scores and plot two variables here
 
-read_nums <- function(numsPath)
+read_scores <- function(numsPath)
   read.table(numsPath, col.names=c('score', 'value')) %>% tbl_df
 
-plot_nums <- function(nums, titlePath, xlabPath) {
+plot_scores <- function(nums, titlePath, xlabPath) {
   p <- ggplot(data=nums, aes(x=value, y=score)) +
          geom_line() +
-	 geom_point(size=2) +
-	 scale_x_log10()
+   geom_point(size=2) +
+   scale_x_log10()
   title <- read_string(titlePath)
-  label <- read_string(xlabPath)
+
+  # label includes the type, which we cut off because it will always be 'num.list'
+  label <- strsplit(read_string(xlabPath), split='\\.')[[1]][1]
+
   if (title != "<<emptystr>>") { p <- p + ggtitle(title) }
-  # TODO do this in read_nums?
+  # TODO do this in read_scores?
   if (label != "<<emptystr>>") {
     p <- p + xlab(label)
   } else {
@@ -39,10 +42,10 @@ main <- function() {
   args <- commandArgs(trailingOnly = TRUE)
   plotPath  <- args[[1]]
   titlePath <- args[[2]] # might contain "<<emptystr>>"
-  numsPath  <- args[[3]]
-  xlabPath  <- args[[4]] # might contain "<<emptystr>>"
-  read_nums(numsPath) %>%
-    plot_nums(titlePath, xlabPath) %>%
+  xlabPath  <- args[[3]] # might contain "<<emptystr>>"
+  numsPath  <- args[[4]]
+  read_scores(numsPath) %>%
+    plot_scores(titlePath, xlabPath) %>%
     save_plot(plotPath)
 }
 
