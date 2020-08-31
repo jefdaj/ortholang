@@ -43,11 +43,11 @@ import Data.Typeable (TypeRep)
 import Data.Maybe                     (maybeToList)
 import OrthoLang.Interpreter.Compile         (compileScript, newRules)
 import OrthoLang.Interpreter.Parse            (parseFileIO)
-import OrthoLang.Interpreter.Paths            (Path, toPath, fromPath)
-import OrthoLang.Locks            (withReadLock')
+import OrthoLang.Interpreter.Paths            (Path, toPath, fromPath, toGeneric)
+import OrthoLang.Locks            (withReadLock, withReadLock')
 import OrthoLang.Interpreter.Sanitize         (unhashIDs, unhashIDsFile)
 import OrthoLang.Interpreter.Actions          (readLits, readPaths)
-import OrthoLang.Util             (ignoreErrors)
+import OrthoLang.Util             (ignoreErrors, resolveSymlinks)
 import System.IO                      (Handle)
 import System.FilePath                ((</>))
 import Data.IORef                     (readIORef)
@@ -66,6 +66,8 @@ import qualified System.Progress as P
 
 -- import Data.Time.Clock (UTCTime, getCurrentTime, diffUTCTime)
 -- import System.Time.Utils (renderSecs)
+
+import System.Process (readProcess)
 
 import GHC.Conc                   (getNumProcessors)
 
@@ -211,6 +213,12 @@ prettyResult cfg ref (EncodedAs e _)  f = liftIO $ fmap text $ enShow e cfg ref 
   where
     f' = fromPath loc cfg f
     loc = "interpreter.eval.eval.prettyResult"
+
+prettyResult cfg ref Untyped path = do
+  let loc = "interpreter.eval.eval.prettyResult"
+  path' <- liftIO $ resolveSymlinks Nothing $ fromPath loc cfg path
+  out <- fmap init $ liftIO $ withReadLock ref path' $ readProcess "file" [path'] []
+  return $ text $ "Untyped file " ++ toGeneric cfg out
 
 prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
   where
