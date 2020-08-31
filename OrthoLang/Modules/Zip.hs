@@ -78,7 +78,7 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
 
     else
       let n1 = head names
-          p1 = head paths
+          p1 = fromPath loc cfg $ Path (head paths)
           dst = inputDir </> n1
       in if (".str.list" `isSuffixOf` n1 || ".num.list" `isSuffixOf` n1)
         then do
