@@ -99,7 +99,7 @@ writeOrtholangArg :: FilePath -> String -> String -> Action ()
 writeOrtholangArg inputDir path' name = do
   cfg <- fmap fromJust $ getShakeExtra
   let loc  = "modules.zip.writeOrtholangArg"
-      path = toPath loc cfg path'
+      path = fromPath loc cfg (Path path') -- TODO error here
       dst  = inputDir </> name
       exts = tail $ splitOn "." name
   if exts `elem` [["str"], ["num"]]
@@ -110,7 +110,7 @@ writeOrtholangArg inputDir path' name = do
     else if (exts `elem` [["str", "list"], ["num", "list"]] || last exts /= "list")
       then do
         liftIO $ putStrLn $ "copyFile case 2: " ++ show path ++ " -> " ++ show dst
-        liftIO $ copyFile (fromPath loc cfg path) dst
+        liftIO $ copyFile path dst
 
       -- case 4: path is to a non-lit list type, so we should make a dir + copy elements into it
       else writeOrtholangList inputDir path' name
