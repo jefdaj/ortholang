@@ -12,9 +12,10 @@ import Data.Maybe (fromJust)
 import OrthoLang.Modules.Plots (listVarNames)
 import OrthoLang.Locks (withReadLock)
 import System.Process          (readProcess)
+import Data.List (intersperse)
 import Data.List.Split (splitOn)
 import System.Directory           (createDirectoryIfMissing, removeDirectoryRecursive, copyFile)
-import System.FilePath        ((</>), takeDirectory)
+import System.FilePath        ((</>), (<.>), takeDirectory)
 import Data.List (isSuffixOf)
 import Control.Monad (forM_)
 
@@ -74,7 +75,10 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
   liftIO $ putStrLn $ "paths: " ++ show paths
 
   if null names
-    then liftIO $ writeFile (inputDir </> "empty.list") "<<emptylist>>"
+    then do
+      -- case 1: entire list is empty (no args given)
+      liftIO $ putStrLn $ "chose case 1"
+      liftIO $ writeFile (inputDir </> "empty.list") "<<emptylist>>"
 
     else
       let n1 = head names
@@ -82,10 +86,15 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
           dst = inputDir </> n1
       in if (".str.list" `isSuffixOf` n1 || ".num.list" `isSuffixOf` n1)
         then do
-          liftIO $ putStrLn $ "copyFile case 1: " ++ show p1 ++ " -> " ++ show dst
+          -- case 2: entire list is a list of lits, and the first path points to it
+          liftIO $ putStrLn $ "chose case 2"
           liftIO $ copyFile p1 dst
 
         else do
+          -- case 3: handle each arg individually
+          -- at this point we still don't know whether each path is really a path or a lit
+          -- TODO rename var to reflect that
+          liftIO $ putStrLn $ "chose case 3"
           let pairs = Prelude.zip paths names
           forM_ pairs $ \(path, name) -> writeOrtholangArg inputDir path name
 
@@ -96,38 +105,57 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
 
 -- TODO should just be Path right?
 writeOrtholangArg :: FilePath -> String -> String -> Action ()
-writeOrtholangArg inputDir path' name = do
+writeOrtholangArg inputDir path name = do
   cfg <- fmap fromJust $ getShakeExtra
   let loc  = "modules.zip.writeOrtholangArg"
-      path = fromPath loc cfg (Path path') -- TODO error here
+      -- path = fromPath loc cfg (Path path') -- TODO error here
       dst  = inputDir </> name
       exts = tail $ splitOn "." name
+
   if exts `elem` [["str"], ["num"]]
-    -- case 1: "path'" was actually a single lit which should be written to file
-    then writeLit loc dst path'
+    then do
+      -- case 3a: "path" was actually a single lit which should be written to file
+      -- TODO rename var to reflect ambiguity
+      liftIO $ putStrLn $ "chose case 3a"
+      writeLit loc dst path
 
-    -- case 2/3: path is a lit.list or a single non-lit type, and should be copied over
-    else if (exts `elem` [["str", "list"], ["num", "list"]] || last exts /= "list")
-      then do
-        liftIO $ putStrLn $ "copyFile case 2: " ++ show path ++ " -> " ++ show dst
-        liftIO $ copyFile path dst
+    else
+      -- at this point we know the path is an actual Path, so treat it that way
+      let path' = Path path
+      in if (exts `elem` [["str", "list"], ["num", "list"]] || last exts /= "list")
+        then do
+          -- case 3b: path is a lit.list or a single non-lit type, and should be copied over
+          -- (same action as case 2, but this one may be called recursively)
+          liftIO $ putStrLn $ "chose case 3b"
+          liftIO $ copyFile (fromPath loc cfg path') dst
 
-      -- case 4: path is to a non-lit list type, so we should make a dir + copy elements into it
-      else writeOrtholangList inputDir path' name
+        else do
+          -- case 4: path is to a non-lit list type, so we should make a dir + copy elements into it
+          -- this one may recursively call writeOrtholangArg again
+          liftIO $ putStrLn $ "chose case 3c"
+          writeOrtholangList inputDir path' name
 
-writeOrtholangList :: FilePath -> FilePath -> String -> Action ()
+writeOrtholangList :: FilePath -> Path -> String -> Action ()
 writeOrtholangList inputDir path name = do
   cfg <- fmap fromJust $ getShakeExtra
   let loc   = "modules.zip.writeOrtholangList"
       name' = takeWhile (/= '.') name
-      ext'  = dropWhile (/= '.') name
+      ext'  = concat $ intersperse "." $ tail $ init $ splitOn "." name
       iDir  = inputDir </> name'
+  liftIO $ putStrLn $ "writeOrtholangList path: " ++ show path
+  liftIO $ putStrLn $ "writeOrtholangList name': " ++ name'
+  liftIO $ putStrLn $ "writeOrtholangList ext': " ++ ext'
+  liftIO $ putStrLn $ "writeOrtholangList iDir: " ++ iDir
   liftIO $ createDirectoryIfMissing True iDir
   -- TODO no need to chdir right?
-  paths <- readPaths loc path -- now we know these are actual Paths
-  let defNames = map (\i -> "item" ++ show i ++ ext') [(1 :: Int)..]
+  paths <- readPaths loc $ fromPath loc cfg path -- now we know these are actual Paths
+  liftIO $ putStrLn $ "writeOrtholangList paths: " ++ show paths
+  let defNames = map (\i -> "item" ++ show i <.> ext') [(1 :: Int)..]
       named = Prelude.zip paths defNames -- note: unrelated meaning of zip
-  forM_ named $ \(p, n) -> writeOrtholangArg iDir (fromPath loc cfg p) n
+  forM_ named $ \(p, n) -> do
+    liftIO $ putStrLn $ "recursing with p: " ++ show p
+    liftIO $ putStrLn $ "recursing with n: " ++ show n
+    writeOrtholangArg iDir (fromPath loc cfg p) n
 
 -----------------
 -- zip_archive --
