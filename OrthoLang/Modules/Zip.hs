@@ -42,10 +42,10 @@ zip = Type
   , tShow = \cfg ref path -> do
       path' <- resolveSymlinks Nothing path
       out <- fmap lines $ withReadLock ref path' $ readProcess "zipinfo" [path'] []
-      let header = fmap (toGeneric cfg) $ take 2 out
+      let header = toGeneric cfg $ head out
           files  = map (drop 53) $ drop 2 $ init out
           footer = last out
-          out' = unlines $ header ++ files ++ [footer]
+          out' = unlines $ [header] ++ files ++ [footer]
       return out'
   }
 
