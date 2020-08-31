@@ -26,7 +26,7 @@ olModule = Module
   , mFunctions =
       [ histogram, histogramExplicit
       , linegraph, linegraphExplicit
-      -- , scatterplot
+      , scatterplot, scatterplotExplicit
       , venndiagram
       ] -- TODO bargraph
   }
@@ -137,7 +137,31 @@ mLinegraph _ scr (Fun r ms ds _ [title, ns]) =
   in Fun r ms ds "linegraph_explicit" [title, xlab, ns]
 mLinegraph _ _ e = error "modules.plots.mLinegraph" $ "bad argument: " ++ show e
 
-scatterplot = undefined
+-- TODO any reason this wouldn't work with other things besides the .scores files?
+scatterplotExplicit :: Function
+scatterplotExplicit = newFnS3
+  "scatterplot_explicit"
+  (Exactly str, Exactly str, ScoresSigs (Exactly num))
+  (Exactly png)
+  "scatterplot.R"
+  [Hidden]
+  id
+
+-- | User-facing version that auto-loads the script and captures any varnames in the untyped list.
+scatterplot :: Function
+scatterplot = newExprExpansion
+  "scatterplot"
+  [Exactly str, ScoresSigs (Exactly num)]
+  (Exactly png)
+  mScatterplot
+  []
+
+-- | Macro that adds the xlab str
+mScatterplot :: ExprExpansion
+mScatterplot _ scr (Fun r ms ds _ [title, ns]) =
+  let xlab = Lit str $ varName "" ns
+  in Fun r ms ds "scatterplot_explicit" [title, xlab, ns]
+mScatterplot _ _ e = error "modules.plots.mScatterplot" $ "bad argument: " ++ show e
 
 -- (str, ScoresOf num) png
 -- shown as "str num.scores -> png"
