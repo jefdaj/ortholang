@@ -85,9 +85,12 @@ runScript = newExprExpansion
 
 -- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
 mRunScript :: ExprExpansion
-mRunScript _ scr (Fun r _ ds _ [bStr, iList]) =
+mRunScript mods scr (Fun r ms ds n [bStr, e@(Ref _ _ _ (Var _ name))]) = case lookupExpr name (sAssigns scr) of
+  Nothing -> error "modules.customscript.mRunScript" $ "no such var: " ++ name
+  Just e -> mRunScript mods scr (Fun r ms ds n [bStr, e]) -- TODO is this the right way to handle it?
+mRunScript _ scr (Fun r _ ds _ [bStr, e@(Lst _ _ _ es)]) =
   let b  = Fun bin Nothing ds "load_script" [bStr]
-      n  = head $ splitOn "." $ varName "input1" iList -- TODO should this ever actually show up in files?
-      ns = listVarNames n scr [iList]
-  in Fun r Nothing ds "run_script_explicit" [b, ns, iList]
+      -- n  = head $ splitOn "." $ varName "input1" iList -- TODO should this ever actually show up in files?
+      ns = listVarNames "item" scr es
+  in Fun r Nothing ds "run_script_explicit" [b, ns, e]
 mRunScript _ _ e = error "modules.customscript.mRunScript" $ "bad argument: " ++ show e

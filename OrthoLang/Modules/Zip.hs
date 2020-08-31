@@ -177,6 +177,6 @@ zipArchive = newExprExpansion
 -- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
 mZipArchive :: ExprExpansion
 mZipArchive _ scr (Fun r ms ds _ [e@(Lst _ _ _ es)]) =
-  let ns = listVarNames "input" scr es -- TODO pick up overall list name here?
+  let ns = listVarNames "item" scr es -- TODO pick up overall list name here?
   in Fun r ms ds "zip_archive_explicit" [ns, e]
 mZipArchive _ _ e = error "modules.zip.mZipArchive" $ "bad argument: " ++ show e
