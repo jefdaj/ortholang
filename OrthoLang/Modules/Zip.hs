@@ -14,11 +14,12 @@ import OrthoLang.Locks (withReadLock)
 import System.Process          (readProcess)
 import Data.List (intersperse)
 import Data.List.Split (splitOn)
-import System.Directory           (createDirectoryIfMissing, removeDirectoryRecursive, copyFile)
+import System.Directory           (createDirectoryIfMissing, removeDirectoryRecursive)
 import System.FilePath        ((</>), (<.>), takeDirectory)
 import Data.List (isSuffixOf)
 import Control.Monad (forM_)
 import OrthoLang.Util (trim)
+import OrthoLang.Interpreter.Sanitize (unhashIDsFile)
 
 ------------
 -- module --
@@ -87,13 +88,13 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
 
     else
       let n1 = head names
-          p1 = fromPath loc cfg $ Path (head paths)
+          p1 = Path (head paths)
           dst = inputDir </> n1
       in if (".str.list" `isSuffixOf` n1 || ".num.list" `isSuffixOf` n1)
         then do
           -- case 2: entire list is a list of lits, and the first path points to it
           -- liftIO $ putStrLn $ "chose case 2"
-          liftIO $ copyFile p1 dst
+          unhashIDsFile p1 dst
 
         else do
           -- case 3: handle each arg individually
@@ -139,7 +140,7 @@ writeOrtholangArg inputDir path name = do
                        guess <- guessUntypedExtension cfg lRef path'
                        return $ inputDir </> (head $ splitOn "." name) <.> guess
                      else return dst
-          liftIO $ copyFile (fromPath loc cfg path') dst'
+          unhashIDsFile path' dst'
 
         else do
           -- case 4: path is to a non-lit list type, so we should make a dir + copy elements into it
