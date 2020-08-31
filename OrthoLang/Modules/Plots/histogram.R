@@ -12,7 +12,10 @@ read_nums <- function(numsPath)
 plot_nums <- function(nums, titlePath, xlabPath) {
   p <- ggplot(data=nums, aes(x=V1)) + geom_histogram()
   title <- read_string(titlePath)
-  label <- read_string(xlabPath)
+
+  # label includes the type, which we cut off because it will always be 'num.list'
+  label <- strsplit(read_string(xlabPath), split='\\.')[[1]][1]
+
   if (title != "<<emptystr>>") { p <- p + ggtitle(title) }
   if (label != "<<emptystr>>") {
     p <- p + xlab(label)

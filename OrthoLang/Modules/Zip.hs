@@ -194,6 +194,9 @@ zipArchive = newExprExpansion
 
 -- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
 mZipArchive :: ExprExpansion
+mZipArchive mods scr (Fun r ms ds n [e@(Ref _ _ _ (Var _ name))]) = case lookupExpr name (sAssigns scr) of
+  Nothing -> error "modules.zip.mZipArchive" $ "no such var: " ++ name
+  Just e -> mZipArchive mods scr (Fun r ms ds n [e]) -- TODO is this the right way to handle it?
 mZipArchive _ scr (Fun r ms ds _ [e@(Lst _ _ _ es)]) =
   let ns = listVarNames "item" scr es -- TODO pick up overall list name here?
   in Fun r ms ds "zip_archive_explicit" [ns, e]

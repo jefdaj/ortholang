@@ -82,44 +82,6 @@ listVarNames d s es = let r = listVarNames' d s es
 -- plot a num.list --
 ---------------------
 
--- histogram :: Function
--- histogram = let name = "histogram" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeCheck = defaultTypeCheck name [str, ListOf num] png
---   -- , fTypeDesc  = name ++ " : str num.list -> png"
---   , fInputs = [Exactly str, Exactly (ListOf num)]
---   , fOutput =  Exactly png
---   , fTags = []
---   , fNewRules = NewNotImplemented
---   , fOldRules = rPlotNumList "histogram.R"
---   }
-
--- for reference:
--- dedupByContent :: Config -> LocksRef -> [FilePath] -> Action [FilePath]
--- dedupByContent cfg ref paths = do
---   -- TODO if the paths are already in the load cache, no need for content?
---   hashes <- mapM (hashContent cfg ref) $ map (toPath loc cfg) paths
---   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
---   return paths'
-
--- rPlotNumList :: FilePath -> RulesFn
--- rPlotNumList binPath scr expr@(Fun _ _ _ _ [title, nums]) = do
---   titlePath <- rExpr scr title
---   numsPath  <- rExpr scr nums
---   xlabPath  <- rExpr scr $ Lit str $ varName "nums" nums -- TODO better default name
---   cfg  <- fmap fromJust getShakeExtraRules
---   dRef <- fmap fromJust getShakeExtraRules
---   let loc = "modules.plots.rPlotNumList"
---       outPath   = exprPath cfg dRef scr expr
---       outPath'  = fromPath loc cfg outPath
---       outPath'' = ExprPath outPath'
---       args      = [titlePath, numsPath, xlabPath]
---       args'     = map (\(ExprPath p) -> toPath loc cfg p) args
---   outPath' %> \_ -> withBinHash expr outPath $ \out ->
---                       aSimpleScript binPath (out:args')
---   return outPath''
--- rPlotNumList _ _ _ = fail "bad argument to rPlotNumList"
-
 histogramExplicit :: Function
 histogramExplicit = newFnS3
   "histogram_explicit"
@@ -141,7 +103,7 @@ histogram = newExprExpansion
 -- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
 mHistogram :: ExprExpansion
 mHistogram _ scr (Fun r ms ds _ [title, ns]) =
-  let xlab = Lit str $ varName "nums" ns
+  let xlab = Lit str $ varName "" ns
   in Fun r ms ds "histogram_explicit" [title, xlab, ns]
 mHistogram _ _ e = error "modules.plots.mHistogram" $ "bad argument: " ++ show e
 
