@@ -4,6 +4,9 @@
 # https://pypi.org/project/deterministic-zip v0.1 and uses the
 # simplified BSD license.
 
+# TODO have to unhash seqids before zipping it up... split into first and second scripts?
+#        second one could just be deterministic_zip
+#        could write a haskell function unhashIDsDir or something, then zip that up
 # TODO use this to write an example custom python script too
 
 import os

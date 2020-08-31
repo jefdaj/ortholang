@@ -180,6 +180,11 @@ unhashIDsFile inPath outPath = do
   withWriteLock' outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
   trackWrite' [outPath]
 
+unhashIDsDir :: Path -> FilePath -> Action ()
+unhashIDsDir = undefined
+  -- TODO find dirs in input dir, then create matching ones in output dir
+  -- TODO find files in input dir, then unhashIDsFile to output dir
+
 -- from: https://stackoverflow.com/a/40297465
 splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
