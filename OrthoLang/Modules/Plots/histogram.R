@@ -34,8 +34,8 @@ main <- function() {
   # args <- c('testplot.png', 'testtitle.txt', 'testnums.txt', 'testxlab.txt')
   plotPath  <- args[[1]]
   titlePath <- args[[2]] # might contain "<<emptystr>>"
-  numsPath  <- args[[3]]
-  xlabPath  <- args[[4]] # might contain "<<emptystr>>"
+  xlabPath  <- args[[3]] # might contain "<<emptystr>>"
+  numsPath  <- args[[4]]
   read_nums(numsPath) %>%
     plot_nums(titlePath, xlabPath) %>%
     save_plot(plotPath)

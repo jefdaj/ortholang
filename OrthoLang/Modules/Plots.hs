@@ -23,7 +23,12 @@ olModule = Module
   , mTypes = [png]
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [histogram, linegraph, scatterplot, venndiagram] -- TODO bargraph
+  , mFunctions =
+      [ histogram, histogramExplicit
+      , linegraph
+      , scatterplot
+      , venndiagram
+      ] -- TODO bargraph
   }
 
 png :: Type
@@ -34,7 +39,7 @@ png = Type
       -- resolving symlinks fixes a bug in the jupyter kernel when returning multiple plots
       -- (without it they'd all just be vars/result and erroneously return the last result)
       path' <- resolveSymlinks (Just [tmpdir cfg]) path
-      return $ "plot image \"" ++ path' ++ "\""
+      return $ "plot image \"" ++ toGeneric cfg path' ++ "\""
   }
 
 -------------------
@@ -77,17 +82,17 @@ listVarNames d s es = let r = listVarNames' d s es
 -- plot a num.list --
 ---------------------
 
-histogram :: Function
-histogram = let name = "histogram" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [str, ListOf num] png
-  -- , fTypeDesc  = name ++ " : str num.list -> png"
-  , fInputs = [Exactly str, Exactly (ListOf num)]
-  , fOutput =  Exactly png
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rPlotNumList "histogram.R"
-  }
+-- histogram :: Function
+-- histogram = let name = "histogram" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeCheck = defaultTypeCheck name [str, ListOf num] png
+--   -- , fTypeDesc  = name ++ " : str num.list -> png"
+--   , fInputs = [Exactly str, Exactly (ListOf num)]
+--   , fOutput =  Exactly png
+--   , fTags = []
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rPlotNumList "histogram.R"
+--   }
 
 -- for reference:
 -- dedupByContent :: Config -> LocksRef -> [FilePath] -> Action [FilePath]
@@ -97,23 +102,48 @@ histogram = let name = "histogram" in Function
 --   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
 --   return paths'
 
-rPlotNumList :: FilePath -> RulesFn
-rPlotNumList binPath scr expr@(Fun _ _ _ _ [title, nums]) = do
-  titlePath <- rExpr scr title
-  numsPath  <- rExpr scr nums
-  xlabPath  <- rExpr scr $ Lit str $ varName "nums" nums -- TODO better default name
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.plots.rPlotNumList"
-      outPath   = exprPath cfg dRef scr expr
-      outPath'  = fromPath loc cfg outPath
-      outPath'' = ExprPath outPath'
-      args      = [titlePath, numsPath, xlabPath]
-      args'     = map (\(ExprPath p) -> toPath loc cfg p) args
-  outPath' %> \_ -> withBinHash expr outPath $ \out ->
-                      aSimpleScript binPath (out:args')
-  return outPath''
-rPlotNumList _ _ _ = fail "bad argument to rPlotNumList"
+-- rPlotNumList :: FilePath -> RulesFn
+-- rPlotNumList binPath scr expr@(Fun _ _ _ _ [title, nums]) = do
+--   titlePath <- rExpr scr title
+--   numsPath  <- rExpr scr nums
+--   xlabPath  <- rExpr scr $ Lit str $ varName "nums" nums -- TODO better default name
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   let loc = "modules.plots.rPlotNumList"
+--       outPath   = exprPath cfg dRef scr expr
+--       outPath'  = fromPath loc cfg outPath
+--       outPath'' = ExprPath outPath'
+--       args      = [titlePath, numsPath, xlabPath]
+--       args'     = map (\(ExprPath p) -> toPath loc cfg p) args
+--   outPath' %> \_ -> withBinHash expr outPath $ \out ->
+--                       aSimpleScript binPath (out:args')
+--   return outPath''
+-- rPlotNumList _ _ _ = fail "bad argument to rPlotNumList"
+
+histogramExplicit :: Function
+histogramExplicit = newFnS3
+  "histogram_explicit"
+  (Exactly str, Exactly str, ListSigs (Exactly num))
+  (Exactly png)
+  "histogram.R"
+  [Hidden]
+  id
+
+-- | User-facing version that auto-loads the script and captures any varnames in the untyped list.
+histogram :: Function
+histogram = newExprExpansion
+  "histogram"
+  [Exactly str, ListSigs (Exactly num)]
+  (Exactly png)
+  mHistogram
+  []
+
+-- TODO rewrite Plots.hs functions to use expr expansions with varNames, like this
+mHistogram :: ExprExpansion
+mHistogram _ scr (Fun r ms ds _ [title, ns]) =
+  let xlab = Lit str $ varName "nums" ns
+  in Fun r ms ds "histogram_explicit" [title, xlab, ns]
+mHistogram _ _ e = error "modules.plots.mHistogram" $ "bad argument: " ++ show e
 
 ---------------------
 -- plot num.scores --
