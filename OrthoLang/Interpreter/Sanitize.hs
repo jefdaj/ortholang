@@ -45,11 +45,12 @@ import Data.Maybe            (catMaybes, mapMaybe, fromJust)
 import Data.List             (isPrefixOf, intersperse, nub)
 import Data.List.Utils       (split, subIndex)
 import System.FilePath (takeFileName, takeDirectory, (<.>))
-import System.Directory           (createDirectoryIfMissing)
+import System.Directory           (createDirectoryIfMissing, copyFile)
 import Data.IORef                  (readIORef)
 import System.Exit                (ExitCode(..))
 -- import qualified Data.Text.Lazy as T
 -- import Text.Pretty.Simple (pShowNoColor)
+import Control.Exception (SomeException)
 
 -- type HashedIDList = D.DList (String, String)
 
@@ -164,13 +165,16 @@ unhashIDs longIDs ids t = case findNext t of
 
 -- This sometimes operates internally, but also writes the final result of the cut to a file.
 -- In that case the outpath might not be able to be a cutpath.
-unhashIDsFile :: Path -> FilePath -> Action ()
-unhashIDsFile inPath outPath = do
+unhashIDsFile' :: Path -> FilePath -> Action ()
+unhashIDsFile' inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "interpreter.sanitize.unhashIDsFile"
       inPath'  = fromPath loc cfg inPath
   -- txt <- withReadLock' inPath' $ readFile' $ fromPath loc cfg inPath
+
+  -- TODO if the file turns out to be binary, just copy rather than unhashing anything
   txt <- readFileStrict' inPath'
+
   -- liftIO $ putStrLn $ "txt: \"" ++ txt ++ "\""
   -- let txt' = unhashIDs ids txt
   idref <- fmap fromJust getShakeExtra
@@ -181,10 +185,14 @@ unhashIDsFile inPath outPath = do
   withWriteLock' outPath $ liftIO $ writeFile outPath txt' -- TODO be strict?
   trackWrite' [outPath]
 
-unhashIDsDir :: Path -> FilePath -> Action ()
-unhashIDsDir = undefined
-  -- TODO find dirs in input dir, then create matching ones in output dir
-  -- TODO find files in input dir, then unhashIDsFile to output dir
+-- unhashIDsFile' fails on binary files. for now, the simplest fix seems to be
+-- to skip it and copy instead
+unhashIDsFile :: Path -> FilePath -> Action ()
+unhashIDsFile inPath outPath = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "interpreter.sanitize.unhashIDsFile'"
+      in' = fromPath loc cfg inPath
+  (unhashIDsFile' inPath outPath) `actionCatch` (\(_ :: SomeException) -> liftIO $ copyFile in' outPath)
 
 -- from: https://stackoverflow.com/a/40297465
 splitAtFirst :: Eq a => a -> [a] -> ([a], [a])

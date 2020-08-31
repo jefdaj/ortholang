@@ -140,7 +140,8 @@ writeOrtholangArg inputDir path name = do
                        guess <- guessUntypedExtension cfg lRef path'
                        return $ inputDir </> (head $ splitOn "." name) <.> guess
                      else return dst
-          unhashIDsFile path' dst'
+          -- liftIO $ putStrLn $ "unhashIDsFile " ++ show path' ++ " " ++ show dst'
+          unhashIDsFile path' dst' -- TODO this fails on binary files? i guess skip it in that case
 
         else do
           -- case 4: path is to a non-lit list type, so we should make a dir + copy elements into it

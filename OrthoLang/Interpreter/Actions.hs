@@ -242,6 +242,7 @@ download cfg url = do
 
 -- Action version of readFileStrict. This is used for all reads during a cut;
 -- the raw one is just for showing results, reading cmd files etc.
+-- TODO this fails on binary files?
 readFileStrict' :: FilePath -> Action String
 readFileStrict' path = do
   ref <- fmap fromJust getShakeExtra
