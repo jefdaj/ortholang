@@ -18,6 +18,7 @@ import System.Directory           (createDirectoryIfMissing, removeDirectoryRecu
 import System.FilePath        ((</>), (<.>), takeDirectory)
 import Data.List (isSuffixOf)
 import Control.Monad (forM_)
+import OrthoLang.Util (trim)
 
 ------------
 -- module --
@@ -110,7 +111,8 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
 -- TODO should just be Path right?
 writeOrtholangArg :: FilePath -> String -> String -> Action ()
 writeOrtholangArg inputDir path name = do
-  cfg <- fmap fromJust $ getShakeExtra
+  cfg  <- fmap fromJust $ getShakeExtra
+  lRef <- fmap fromJust $ getShakeExtra
   let loc  = "modules.zip.writeOrtholangArg"
       -- path = fromPath loc cfg (Path path') -- TODO error here
       dst  = inputDir </> name
@@ -131,7 +133,13 @@ writeOrtholangArg inputDir path name = do
           -- case 3b: path is a lit.list or a single non-lit type, and should be copied over
           -- (same action as case 2, but this one may be called recursively)
           -- liftIO $ putStrLn $ "chose case 3b"
-          liftIO $ copyFile (fromPath loc cfg path') dst
+          -- TODO can this also be applied to other uses of untyped files?
+          dst' <- if exts == ["untyped"]
+                     then do
+                       guess <- guessUntypedExtension cfg lRef path'
+                       return $ inputDir </> (head $ splitOn "." name) <.> guess
+                     else return dst
+          liftIO $ copyFile (fromPath loc cfg path') dst'
 
         else do
           -- case 4: path is to a non-lit list type, so we should make a dir + copy elements into it
@@ -150,7 +158,6 @@ writeOrtholangList inputDir path name = do
   -- liftIO $ putStrLn $ "writeOrtholangList name': " ++ name'
   -- liftIO $ putStrLn $ "writeOrtholangList ext': " ++ ext'
   -- liftIO $ putStrLn $ "writeOrtholangList iDir: " ++ iDir
-  liftIO $ createDirectoryIfMissing True iDir
   -- TODO no need to chdir right?
   paths <- readPaths loc $ fromPath loc cfg path -- now we know these are actual Paths
   -- liftIO $ putStrLn $ "writeOrtholangList paths: " ++ show paths
@@ -160,6 +167,15 @@ writeOrtholangList inputDir path name = do
     -- liftIO $ putStrLn $ "recursing with p: " ++ show p
     -- liftIO $ putStrLn $ "recursing with n: " ++ show n
     writeOrtholangArg iDir (fromPath loc cfg p) n
+
+guessUntypedExtension :: Config -> LocksRef -> Path -> Action String
+guessUntypedExtension cfg lRef path = do
+  let loc   = "modules.zip.guessUntypedExtension"
+      path' = fromPath loc cfg path
+  out <- liftIO $ withReadLock lRef path' $ readProcess "file" ["--extension", path'] []
+  case splitOn ":" out of
+    (_:x:[]) -> return $ trim x
+    _ -> return "untyped"
 
 -----------------
 -- zip_archive --

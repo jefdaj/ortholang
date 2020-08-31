@@ -36,6 +36,7 @@ module OrthoLang.Util
   , insertAt
   , justOrDie
   , headOrDie
+  , trim
   )
   where
 
@@ -289,3 +290,8 @@ justOrDie msg val = case val of
 headOrDie :: String -> [a] -> a
 headOrDie msg [] = error "headOrDie" msg
 headOrDie _ lst = head lst
+
+-- from http://stackoverflow.com/a/6270337
+trim :: String -> String
+trim = f . f
+   where f = reverse . dropWhile isSpace

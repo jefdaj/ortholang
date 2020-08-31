@@ -41,6 +41,7 @@ import Development.Shake.FilePath ((</>))
 -- import OrthoLang.Types   (traceA)
 import System.Directory (createDirectoryIfMissing)
 import System.Exit (ExitCode(..))
+import OrthoLang.Util (trim)
 
 ------------------------
 -- module description --
@@ -131,11 +132,6 @@ type Identifier = String
 
 data Search = Search Species (Maybe Database) (Maybe Identifier)
   deriving (Eq, Show)
-
--- from http://stackoverflow.com/a/6270337
-trim :: String -> String
-trim = f . f
-   where f = reverse . dropWhile isSpace
 
 pSpecies :: Parser Species
 pSpecies = fmap trim $ many1 $ alphaNum <|> oneOf ". "
