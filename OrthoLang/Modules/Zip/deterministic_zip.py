@@ -1,4 +1,6 @@
-# This code was copied from https://pypi.org/project/deterministic-zip
+#!/usr/bin/env python3
+
+# This code was modified from https://pypi.org/project/deterministic-zip
 # v0.1 and uses a simplified BSD license.
 # Usage in Ortholang: deterministic_zip.py outfile indir
 
@@ -6,10 +8,6 @@ import os
 import stat
 import sys
 import zipfile
-
-
-__version__ = '0.1'
-
 
 def add_directory(zip_file, path, zip_path):
     for item in sorted(os.listdir(path)):
@@ -20,7 +18,6 @@ def add_directory(zip_file, path, zip_path):
         else:
             add_directory(zip_file, current_path, current_zip_path)
 
-
 def add_file(zip_file, path, zip_path=None):
     permission = 0o555 if os.access(path, os.X_OK) else 0o444
     zip_info = zipfile.ZipInfo.from_file(path, zip_path)
@@ -29,7 +26,6 @@ def add_file(zip_file, path, zip_path=None):
     with open(path, 'rb') as fp:
         zip_file.writestr(zip_info, fp.read(),
                           compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
-
 
 def main():
     if sys.version_info < (3, 7):
@@ -57,5 +53,8 @@ def main():
         os.unlink(output_path)
         return 1
 
-    print('Wrote {}'.format(output_path))
+    # print('Wrote {}'.format(output_path))
     return 0
+
+if __name__ == '__main__':
+    main()

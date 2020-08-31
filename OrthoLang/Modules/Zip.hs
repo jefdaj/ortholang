@@ -68,42 +68,49 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
   -- pair names with their paths
   -- note that this is an unrelated meaning of zip
   names <- readLits loc inNames
-  paths <- readLits loc inList -- TODO warning! these are probably not lits
+  paths <- fmap lines $ readFileStrict' inList -- TODO warning! these are probably not lits
 
-  -- TODO will <<emptylist>> come through here, or be an empty list?
+  liftIO $ putStrLn $ "names: " ++ show names
+  liftIO $ putStrLn $ "paths: " ++ show paths
+
   if null names
-    then writeLits loc (inputDir </> "result.list") ["<<emptylist>>"]
+    then liftIO $ writeFile (inputDir </> "empty.list") "<<emptylist>>"
 
     else
       let n1 = head names
-          p1 = fromGeneric loc cfg $ head paths -- TODO is head safe here?
+          p1 = head paths
           dst = inputDir </> n1
       in if (".str.list" `isSuffixOf` n1 || ".num.list" `isSuffixOf` n1)
-        then liftIO $ copyFile p1 dst
+        then do
+          liftIO $ putStrLn $ "copyFile case 1: " ++ show p1 ++ " -> " ++ show dst
+          liftIO $ copyFile p1 dst
 
         else do
           let pairs = Prelude.zip paths names
           forM_ pairs $ \(path, name) -> writeOrtholangArg inputDir path name
 
   -- last step is to zip up the input dir and remove it
-  aNewRulesS1 "deterministic_zip.py" id (ExprPath out') inputDir
+  -- this should probably depend on inputDir, but that causes a shake error
+  aNewRulesS1 "deterministic_zip.py" (\d -> d {cmdNoNeedDirs = [inputDir]}) (ExprPath out') inputDir
   liftIO $ removeDirectoryRecursive inputDir
 
 -- TODO should just be Path right?
 writeOrtholangArg :: FilePath -> String -> String -> Action ()
 writeOrtholangArg inputDir path' name = do
-  -- cfg <- fmap fromJust $ getShakeExtra
+  cfg <- fmap fromJust $ getShakeExtra
   let loc  = "modules.zip.writeOrtholangArg"
-      -- path = toPath loc cfg path'
+      path = toPath loc cfg path'
       dst  = inputDir </> name
-      exts = splitOn "." name
+      exts = tail $ splitOn "." name
   if exts `elem` [["str"], ["num"]]
     -- case 1: "path'" was actually a single lit which should be written to file
     then writeLit loc dst path'
 
     -- case 2/3: path is a lit.list or a single non-lit type, and should be copied over
     else if (exts `elem` [["str", "list"], ["num", "list"]] || last exts /= "list")
-      then liftIO $ copyFile path' dst
+      then do
+        liftIO $ putStrLn $ "copyFile case 2: " ++ show path ++ " -> " ++ show dst
+        liftIO $ copyFile (fromPath loc cfg path) dst
 
       -- case 4: path is to a non-lit list type, so we should make a dir + copy elements into it
       else writeOrtholangList inputDir path' name
@@ -113,12 +120,12 @@ writeOrtholangList inputDir path name = do
   cfg <- fmap fromJust $ getShakeExtra
   let loc   = "modules.zip.writeOrtholangList"
       name' = takeWhile (/= '.') name
-      ext   = dropWhile (/= '.') name
+      ext'  = dropWhile (/= '.') name
       iDir  = inputDir </> name'
   liftIO $ createDirectoryIfMissing True iDir
   -- TODO no need to chdir right?
   paths <- readPaths loc path -- now we know these are actual Paths
-  let defNames = map (\i -> "item" ++ show i ++ ext) [(1 :: Int)..]
+  let defNames = map (\i -> "item" ++ show i ++ ext') [(1 :: Int)..]
       named = Prelude.zip paths defNames -- note: unrelated meaning of zip
   forM_ named $ \(p, n) -> writeOrtholangArg iDir (fromPath loc cfg p) n
 

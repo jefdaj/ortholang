@@ -96,6 +96,7 @@ import Data.Scientific            (Scientific())
 import Data.IORef (readIORef)
 import qualified System.IO.Strict as Strict
 -- import System.Environment (getEnv)
+import Data.Set (toList, fromList, difference)
 
 ---------------
 -- debugging --
@@ -541,6 +542,7 @@ data CmdDesc = CmdDesc
   , cmdArguments     :: [String] -- TODO auto-include outpath before these?
   , cmdFixEmpties    :: Bool -- TODO version for after too?
   , cmdInPatterns    :: [String]
+  , cmdNoNeedDirs    :: [FilePath] -- for dirs to be removed from cmdInPatterns
   , cmdExtraOutPaths :: [FilePath]
   , cmdSanitizePaths :: [FilePath]
   , cmdRmPatterns    :: [String]
@@ -581,13 +583,14 @@ runCmd d = do
 
   -- TODO is this part causing the extra rebuilds?
   inPaths  <- fmap concat $ liftIO $ mapM globFiles $ cmdInPatterns d
+  let inPaths' = toList $ difference (fromList inPaths) (fromList $ cmdNoNeedDirs d)
   -- inPaths' <- if cmdFixEmpties d
   --               then mapM (fixEmptyText) inPaths
   --               else need' "interpreter.actions.runCmd" inPaths >> return inPaths
-  need' "interpreter.actions.runCmd" inPaths
+  need' "interpreter.actions.runCmd" inPaths'
 
   -- liftIO $ createDirectoryIfMissing True $ takeDirectory stdoutPath
-  dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths
+  dbg $ "wrappedCmd acquiring read locks on " ++ show inPaths'
   -- dbg $ pack $ "wrappedCmd cfg: " ++ show cfg
   (lRef :: LocksRef) <- fmap fromJust getShakeExtra
   (disk, par, _) <- liftIO $ readIORef lRef
@@ -622,7 +625,7 @@ runCmd d = do
     -- TODO remove opts?
     -- TODO always assume disk is 1?
     dbg $ "runCmd proper starting"
-    Exit code <- withResource disk (length inPaths + 1) $ case wrapper cfg of
+    Exit code <- withResource disk (length inPaths' + 1) $ case wrapper cfg of
       Nothing -> command (envDirs:cmdOptions d) (cmdBinary d) (cmdArguments d)
       Just w  -> command (envDirs:Shell:cmdOptions d) w [escape $ unwords (cmdBinary d:cmdArguments d)]
     -- Exit _ <- command [] "sync" [] -- TODO is this needed?
