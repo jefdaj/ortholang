@@ -182,7 +182,8 @@ aNewRulesS sname opts (ExprPath out) args = do
 -- $fromactions
 -- Use these functions when writing a "script" that would be easier in Haskell, or benefit from Shake integration.
 -- The NewAction{1,2,3} types enforce that the 'Development.Shake.Action'
--- expects the same number of input files that the 'Function' will pass it.
+-- expects the same number of input files that the 'Function' will pass it,
+-- but says nothing about their types.
 
 type NewAction1 = ExprPath -> FilePath                         -> Action ()
 type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()

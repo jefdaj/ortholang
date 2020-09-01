@@ -52,6 +52,11 @@ sample = newFnA2
 -- tSample [n, ListOf x] | n == num = Right $ ListOf x
 -- tSample _ = Left "sample requires a num and a list"
 
+-- TODO make versions of newFn** that also pass the random seed, like newFnAR2
+--      then this becomes easy, and you can have it auto-add Nondeterministic
+--           then this becomes easy, and you can have it auto-add Nondeterministic
+-- TODO actually, shouldn't all nondeterministic fns get their random seed? maybe that's the only version
+
 rSample :: RulesFn
 rSample scr expr@(Fun _ (Just seed) _ _ [n, lst]) = do
   (ExprPath nPath' ) <- rExpr scr n
