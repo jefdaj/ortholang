@@ -51,7 +51,6 @@ import qualified OrthoLang.Modules.Zip           as Zip
 modules :: [Module]
 modules =
   [
-
   -- core language features
     Math.olModule
   -- , Curl.olModule
@@ -64,27 +63,26 @@ modules =
   , Sample.olModule   -- could do rSample
   , Scores.olModule   -- looks semi complicated to convert
   , Sets.olModule     -- could do it same as math?
-  , FlowChart.olModule -- work in progress
 
   -- load, download, and convert sequences
   , BioMartR.olModule -- rewrite without the parse searches thing
-  , SeqIO.olModule    -- mix of rSimple* and rMap* functions
+  , SeqIO.olModule    -- mix of rSimple* and rMap* functions (next)
 
   -- BLAST
-  , Blast.olModule      -- surprisingly, looks doable via rSimple
-  , BlastDB.olModule    -- could do some, some will require expr transforms too
-  , BlastHits.olModule  -- simplest case of rMap use? aCutCol etc.
+  , Blast.olModule      -- rewrite done
+  , BlastDB.olModule    -- could do some, some will require expr transforms too (next)
+  , BlastHits.olModule  -- simplest case of rMap use? aCutCol etc. (next)
   , PsiBlast.olModule   -- complicated :(
 
   -- BLAST reciprocal best hits
-  , BlastRBH.olModule -- fairly simple but some minor rMap
-  , CRBBlast.olModule -- rSimpleTmp, rMapTmps
+  , BlastRBH.olModule -- fairly simple but some minor rMap (next)
+  , CRBBlast.olModule -- rSimpleTmp, rMapTmps (next)
 
   -- other sequence search programs
   , Diamond.olModule -- long, and uses rSimple + rMap
-  , Hmmer.olModule   -- short, uses rSimple + rMap
+  , Hmmer.olModule   -- short, uses rSimple + rMap (next)
   , MMSeqs.olModule  -- custom Actions, but Rules look reasonably easy
-  , Muscle.olModule  -- very short use of rSimple
+  , Muscle.olModule  -- very short use of rSimple (next)
 
   -- orthogroup search programs
   , Busco.olModule         -- medium complicated
@@ -92,8 +90,9 @@ modules =
   , SonicParanoid.olModule -- short and simple Rules
 
   -- plots and figures
-  , Plots.olModule     -- somewhat complicated Rules... Script transform?
-  , SetsTable.olModule -- implemented in terms of plots
+  , Plots.olModule     -- rewrite done
+  , SetsTable.olModule -- rewrite done
+  , FlowChart.olModule -- rewrite done
 
   -- works in progress and/or tests
   , AllVsAll.olModule
@@ -103,6 +102,6 @@ modules =
   , Summarize.olModule
   , OrthoFinder.olModule
   , Singletons.olModule
-  , Zip.olModule
+  , Zip.olModule -- rewrite done
 
   ]
