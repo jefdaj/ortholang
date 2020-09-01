@@ -2,6 +2,9 @@
 
 # This one is pretty messy. Is there a much simpler way to express it?
 
+read_num <- function(filename)
+  scan(filename, what=numeric(), quiet=T)
+
 range_multiply <- function(start, stop, factor) {
   if (start == stop) { 
 		# singleton, so factor doesn't matter
@@ -47,9 +50,9 @@ save_list <- function(outPath, elems) {
 main <- function() {
   args   <- commandArgs(trailingOnly = TRUE)
   path   <- args[[1]]
-  start  <- as.numeric(args[[2]])
-  stop   <- as.numeric(args[[3]])
-  factor <- as.numeric(args[[4]])
+  start  <- read_num(args[[2]])
+  stop   <- read_num(args[[3]])
+  factor <- read_num(args[[4]])
 	nums   <- range_multiply(start, stop, factor)
   save_list(path, nums)
 }

@@ -1,5 +1,8 @@
 #!/usr/bin/env Rscript
 
+read_num <- function(filename)
+  scan(filename, what=numeric(), quiet=T)
+
 range_integers <- function(start, stop)
   seq.int(start, stop)
 
@@ -15,8 +18,8 @@ save_list <- function(outPath, elems) {
 main <- function() {
   args  <- commandArgs(trailingOnly = TRUE)
   path  <- args[[1]]
-  start <- as.numeric(args[[2]])
-  stop  <- as.numeric(args[[3]])
+  start <- read_num(args[[2]])
+  stop  <- read_num(args[[3]])
 	nums  <- range_integers(start, stop)
   save_list(path, nums)
 }
