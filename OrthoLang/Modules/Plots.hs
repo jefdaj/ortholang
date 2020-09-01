@@ -24,10 +24,10 @@ olModule = Module
   , mGroups = []
   , mEncodings = []
   , mFunctions =
-      [ histogram, histogramExplicit
-      , linegraph, linegraphExplicit
+      [ histogram  , histogramExplicit
+      , linegraph  , linegraphExplicit
       , scatterplot, scatterplotExplicit
-      , venndiagram
+      , venndiagram, venndiagramExplicit
       ] -- TODO bargraph
   }
 
@@ -78,9 +78,9 @@ listVarNames d s es = let r = listVarNames' d s es
                           m = "listVarNames " ++ show d ++ " " ++ show es ++ " -> " ++ show r
                       in trace "ortholang.modules.plots.listVarNames" m r
 
----------------------
--- plot a num.list --
----------------------
+----------------------
+-- plot a histogram --
+----------------------
 
 histogramExplicit :: Function
 histogramExplicit = newFnS3
@@ -107,9 +107,9 @@ mHistogram _ scr (Fun r ms ds _ [title, ns]) =
   in Fun r ms ds "histogram_explicit" [title, xlab, ns]
 mHistogram _ _ e = error "modules.plots.mHistogram" $ "bad argument: " ++ show e
 
----------------------
--- plot num.scores --
----------------------
+---------------
+-- linegraph --
+---------------
 
 -- TODO any reason this wouldn't work with other things besides the .scores files?
 linegraphExplicit :: Function
@@ -137,6 +137,10 @@ mLinegraph _ scr (Fun r ms ds _ [title, ns]) =
   in Fun r ms ds "linegraph_explicit" [title, xlab, ns]
 mLinegraph _ _ e = error "modules.plots.mLinegraph" $ "bad argument: " ++ show e
 
+-----------------
+-- scatterplot --
+-----------------
+
 -- TODO any reason this wouldn't work with other things besides the .scores files?
 scatterplotExplicit :: Function
 scatterplotExplicit = newFnS3
@@ -163,95 +167,52 @@ mScatterplot _ scr (Fun r ms ds _ [title, ns]) =
   in Fun r ms ds "scatterplot_explicit" [title, xlab, ns]
 mScatterplot _ _ e = error "modules.plots.mScatterplot" $ "bad argument: " ++ show e
 
--- (str, ScoresOf num) png
--- shown as "str num.scores -> png"
--- tPlotScores :: TypeChecker
--- tPlotScores [s, ScoresOf n] | s == str && n == num = Right png
--- tPlotScores _ = Left "expected a title and scores"
+-----------------
+-- venndiagram --
+-----------------
 
--- TODO line graph should label axis by input var name (always there!)
--- linegraph :: Function
--- linegraph = let name = "linegraph" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeCheck = tPlotScores
---   -- , fTypeDesc  = name ++ " : str num.scores -> png"
---   , fInputs = [Exactly str, Exactly (ScoresOf num)]
---   , fOutput =  Exactly png
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "linegraph.R"
---   }
+-- TODO any reason this wouldn't work with other things besides the .scores files?
+venndiagramExplicit :: Function
+venndiagramExplicit = newFnS3
+  "venndiagram_explicit"
+  (Exactly str, Exactly str, ListSigs (ListSigs (AnyType "the type to count unique values of")))
+  (Exactly png)
+  "venndiagram.R"
+  [Hidden]
+  id
 
--- TODO scatterplot should label axis by input var name (always there!)
--- scatterplot :: Function
--- scatterplot = let name = "scatterplot" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeCheck = tPlotScores
---   -- , fTypeDesc  = name ++ " : str num.scores -> png"
---   , fInputs = [Exactly str, Exactly (ScoresOf num)]
---   , fOutput =  Exactly png
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rPlotRepeatScores "scatterplot.R"
---   }
-
--- TODO take an argument for extracting the axis name
--- TODO also get y axis from dependent variable?
--- rPlotNumScores :: RulesFn -> FilePath -> RulesFn
--- rPlotNumScores xFn sPath scr expr@(Fun _ _ _ _ [title, nums]) = do
---   titlePath <- rExpr scr title
---   numsPath  <- rExpr scr nums
---   xlabPath  <- xFn   scr nums
---   cfg  <- fmap fromJust getShakeExtraRules
---   dRef <- fmap fromJust getShakeExtraRules
---   -- ylabPath  <- yFn   st nums
---   let loc = "modules.plots.rPlotNumScores"
---       outPath   = exprPath cfg dRef scr expr
---       outPath'  = fromPath loc cfg outPath
---       outPath'' = ExprPath outPath'
---       args      = [titlePath, numsPath, xlabPath]
---       args'     = map (\(ExprPath p) -> toPath loc cfg p) args
---   outPath' %> \_ -> withBinHash expr outPath $ \out ->
---                       aSimpleScript sPath (out:args')
---   return outPath''
--- rPlotNumScores _ _ _ _ = fail "bad argument to rPlotNumScores"
--- 
--- rPlotRepeatScores :: FilePath -> RulesFn
--- rPlotRepeatScores = rPlotNumScores indRepeatVarName
--- 
--- indRepeatVarName :: RulesFn
--- indRepeatVarName scr expr = rExpr scr $ Lit str $ case expr of
---   (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
---   _ -> ""
-
--- depRepeatVarName :: RulesFn
--- depRepeatVarName scr expr = rExpr scr $ Lit str $ case expr of
-  -- (Fun _ _ _ _ [_, (Ref _ _ _ (Var _ v)), _]) -> v
-  -- _ -> ""
-
-----------------------
--- plot X.list.list --
-----------------------
-
+-- | User-facing version that auto-loads the script and captures any varnames in the untyped list.
 venndiagram :: Function
-venndiagram = let name = "venndiagram" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = tPlotListOfLists
-  -- , fTypeDesc  = name ++ " : X.list.list -> png"
-  , fInputs = [ListSigs (ListSigs (AnyType "the type to count unique values of"))]
-  , fOutput = Exactly png
-  , fTags = [] -- TODO add set names as an input str.list so they get included in hashes!
-  , fNewRules = NewNotImplemented
-  , fOldRules = rPlotListOfLists "venndiagram.R"
-  }
+venndiagram = newExprExpansion
+  "venndiagram"
+  [Exactly str, ListSigs (ListSigs (AnyType "the type to count unique values of"))]
+  (Exactly png)
+  mVenndiagram
+  []
 
--- (ListOf (ListOf (Some ot "any type"))) png
--- shown as "t.list.list -> png, where t is any type"
--- TODO does that actually make sense for specifying something you can plot?
---      yes but only for venn diagrams
--- tPlotListOfLists :: TypeChecker
--- tPlotListOfLists [(ListOf (ListOf _))] = Right png
--- tPlotListOfLists _ = Left "expected a list of lists"
+-- | Macro that adds the xlab str
+mVenndiagram :: ExprExpansion
+mVenndiagram mods scr (Fun r ms ds n [title, (Ref _ _ _ (Var _ name))]) = case lookupExpr name (sAssigns scr) of
+  Nothing -> error "modules.plots.mVenndiagram" $ "no such var: " ++ name
+  Just e -> mVenndiagram mods scr (Fun r ms ds n [title, e]) -- TODO is this the right way to handle it?
+mVenndiagram _ scr (Fun r ms ds _ [title, e@(Lst _ _ _ es)]) =
+  let names = listVarNames "list" scr es
+  in Fun r ms ds "venndiagram_explicit" [title, names, e]
+mVenndiagram _ _ e = error "modules.plots.mVenndiagram" $ "bad argument: " ++ show e
 
--- TODO is this a reasonable way to do it for now?
+-------------------
+-- plot X.scores --
+-------------------
+
+bargraph :: Function
+bargraph = undefined
+
+---------------
+-- old stuff --
+---------------
+
+-- TODO remove these after rewriting SetsTable:
+
 plotLabel :: Config -> DigestsRef -> Script -> Expr -> String
 plotLabel _ _ _ (Ref _ _ _ (Var _ v)) = v
 plotLabel cfg dRef scr expr = let (Path p) = exprPath cfg dRef scr expr in takeBaseName p
@@ -288,9 +249,4 @@ rPlotListOfLists sPath scr expr@(Fun _ _ _ _ [lol]) = do
   return outPath''
 rPlotListOfLists _ _ _ = fail "bad argument to rPlotListOfLists"
 
--------------------
--- plot X.scores --
--------------------
 
-bargraph :: Function
-bargraph = undefined
