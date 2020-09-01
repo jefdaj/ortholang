@@ -6,18 +6,18 @@ module OrthoLang.Modules.Sets where
 
 import Development.Shake
 import OrthoLang.Types
-
+import OrthoLang.Interpreter
 import qualified Data.Set as Set
 
-import Data.Function               (on)
-import Data.List                   (nubBy)
-import Data.Set                    (Set, union, difference, intersection, fromList,
-                                    toList)
-import Data.IORef                  (readIORef)
-import Development.Shake.FilePath  ((</>))
-import OrthoLang.Types
-import OrthoLang.Interpreter
-import Data.Maybe (fromJust)
+import Data.Set      (Set, union, difference, intersection, fromList, toList)
+import Data.Function (on)
+import Data.IORef    (readIORef)
+import Data.List     (nubBy)
+import Data.Maybe    (fromJust)
+
+------------
+-- module --
+------------
 
 olModule :: Module
 olModule = Module
@@ -28,6 +28,10 @@ olModule = Module
   , mEncodings = []
   , mFunctions = some : map mkSetFunction setOpDescs
   }
+
+--------------------
+-- any, all, diff --
+--------------------
 
 type SetOpDesc =
   ( String -- name of the prefix function
@@ -51,64 +55,33 @@ setOpDescs =
   ]
 
 mkSetFunction :: SetOpDesc -> Function
-mkSetFunction (foldName, opChar, setFn) = setFold
+mkSetFunction (foldName, opChar, setFn) = newBop foldName opChar al al (aSetFold setFn)
+  [] -- TODO nondeterministic?
   where
-    -- mkBopDesc  name = name ++ " : X.list -> X.list -> X.list"
-    -- mkFoldDesc name = name ++ " : X.list.list -> X.list"
-    setFold = Function
-      { fName = foldName
-      , fOpChar    = Just opChar
-      -- , fTypeCheck = tSetFold
-      -- , fTypeDesc  = mkFoldDesc foldName
-      , fInputs = [ListSigs (ListSigs (AnyType "any type"))]
-      , fOutput =  ListSigs (AnyType "any type")
-      , fTags = []
-      , fNewRules = NewNotImplemented, fOldRules = rSetFold (foldr1 setFn)
-      }
+    al = ListSigs $ AnyType "the type of the list elements"
 
--- (ListOf (ListOf (Some ot "any type"))) (ListOf (Some ot "any type"))
--- shown as "t.list.list -> t.list, where t is any type"
---
--- TODO generate the two-arg version for the bops too though:
--- (ListOf (Some ot "any type"), ListOf (Some ot "any type")) (ListOf ot "any type")
--- shown as "t.list t.list -> t.list, where t is any type"
-tSetFold :: [Type] -> Either String Type
-tSetFold [ListOf (ListOf x)] = Right $ ListOf x
-tSetFold _ = Left "expecting a list of lists"
-
-rSetFold :: ([Set String] -> Set String) -> RulesFn
-rSetFold fn scr e@(Fun _ _ _ _ [lol]) = do
-  (ExprPath setsPath) <- rExpr scr lol
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.sets.rSetFold"
-      oPath      = fromPath loc cfg $ exprPath cfg dRef scr e
-      oPath'     = tmpdir cfg </> oPath
-      oPath''    = debugRules "rSetFold" e oPath
-      (ListOf t) = typeOf lol
-  oPath %> \_ -> aSetFold fn t oPath' setsPath
-  return (ExprPath oPath'')
-rSetFold _ _ _ = fail "bad argument to rSetFold"
-
-aSetFold :: ([Set String] -> Set String)
-         -> Type -> FilePath -> FilePath -> Action ()
-aSetFold fn (ListOf etype) oPath setsPath = do
+-- TODO where is the setFn used?
+-- aSetFold :: NewAction1
+aSetFold :: (Set String -> Set String -> Set String)
+         -> ExprPath -> FilePath -> Action ()
+aSetFold setFn (ExprPath oPath) setsPath = do
   let loc = "modules.sets.aSetFold"
   setPaths  <- readPaths loc setsPath
-  cfg <- fmap fromJust getShakeExtra
-  setElems  <- mapM (readStrings loc etype) (map (fromPath loc cfg) setPaths)
-  setElems' <- liftIO $ mapM (canonicalLinks cfg etype) setElems
+  cfg  <- fmap fromJust getShakeExtra
+  dRef <- fmap fromJust getShakeExtra
+  (ListOf (ListOf eType)) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath setsPath) -- TODO convenience fn for this as Action
+  setElems  <- mapM (readStrings loc eType) (map (fromPath loc cfg) setPaths)
+  setElems' <- liftIO $ mapM (canonicalLinks cfg eType) setElems
   idsRef <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef idsRef
   let sets = map fromList setElems'
       sets' = (map . Set.map) (unhashIDs False ids) sets -- TODO will this work?
-      oLst = toList $ fn sets'
+      oLst = toList $ (foldr1 setFn) sets'
       oPath' = traceA loc oPath [oPath, setsPath]
-  oLst'' <- if etype `elem` [str, num]
+  oLst'' <- if eType `elem` [str, num]
               then mapM return oLst
               else dedupByContent oLst -- TODO remove?
-  writeStrings loc etype oPath' oLst''
-aSetFold _ _ _ _ = fail "bad argument to aSetFold"
+  writeStrings loc eType oPath' oLst''
 
 -- a kludge to resolve the difference between load_* and load_*_each paths
 -- TODO remove this or shunt it into Paths.hs or something!
@@ -129,6 +102,10 @@ dedupByContent paths = do
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'
 
+----------
+-- some --
+----------
+
 some :: Function
 some = Function
   { fOpChar = Nothing, fName = "some"
@@ -140,6 +117,7 @@ some = Function
   , fNewRules = NewNotImplemented, fOldRules = rSome
   }
 
+-- TODO rewrite as an ExprExpansion
 rSome :: RulesFn
 rSome s (Fun rtn seed deps _ lol) = rExpr s diffExpr
   where
