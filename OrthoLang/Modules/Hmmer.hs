@@ -2,6 +2,11 @@ module OrthoLang.Modules.Hmmer
   where
 
 -- TODO add hht to ht group?
+-- TODO then could make extract_targets work on it too!
+-- TODO add to hit tables types in length, extract_hits etc.
+
+-- TODO hmmfetch : str -> hmm
+-- TODO hmmfetch_each : str.list -> hmm.list
 
 import Development.Shake
 import OrthoLang.Types
@@ -15,6 +20,10 @@ import System.Exit              (ExitCode(..))
 import System.FilePath          (takeFileName, (</>))
 import Data.Maybe (fromJust)
 import Data.List (isInfixOf)
+
+------------
+-- module --
+------------
 
 olModule :: Module
 olModule = Module
@@ -37,7 +46,6 @@ hmm = Type
                       in defaultShowN 13 c r p >>= return . rmDate
   }
 
--- TODO add to hit tables types in length, extract_hits etc.
 hht :: Type
 hht = Type
   { tExt  = "hht"
@@ -45,20 +53,9 @@ hht = Type
   , tShow = defaultShow
   }
 
--- TODO hmmfetch : str -> hmm
--- TODO hmmfetch_each : str.list -> hmm.list
-
--- hmmbuild :: Function
--- hmmbuild = let name = "hmmbuild" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeCheck = defaultTypeCheck name [aln] hmm
---   -- , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
---   , fInputs = [Exactly aln]
---   , fOutput =  Exactly hmm
---   , fTags = []
---   , fNewRules = NewNotImplemented
---   , fOldRules = rSimpleScript "hmmbuild.sh"
---   }
+---------------
+-- hmmbuild* --
+---------------
 
 hmmbuild :: Function
 hmmbuild = newFnS1
@@ -69,18 +66,6 @@ hmmbuild = newFnS1
   [] -- TODO nondeterministic?
   id
 
--- hmmbuildEach :: Function
--- hmmbuildEach = let name = "hmmbuild_each" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeCheck = defaultTypeCheck name [ListOf aln] (ListOf hmm)
---   -- , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
---   , fInputs = [Exactly (ListOf aln)]
---   , fOutput =  Exactly (ListOf hmm)
---   , fTags = []
---   , fNewRules = NewNotImplemented
---   , fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
---   }
-
 hmmbuildEach :: Function
 hmmbuildEach = newFnA1
   "hmmbuild_each"
@@ -89,17 +74,9 @@ hmmbuildEach = newFnA1
   (newMap1of1 "hmmbuild")
   [] -- TODO nondeterministic?
 
--- hmmsearch :: Function
--- hmmsearch = let name = "hmmsearch" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeCheck = defaultTypeCheck name [num, hmm, faa] hht
---   -- , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
---   , fInputs = [Exactly num, Exactly hmm, Exactly faa] 
---   , fOutput =  Exactly hht -- TODO add to ht group?
---   , fTags = []
---   , fNewRules = NewNotImplemented
---   , fOldRules = rSimple aHmmsearch
---   }
+----------------
+-- hmmsearch* --
+----------------
 
 hmmsearch :: Function
 hmmsearch = newFnA3
@@ -109,19 +86,6 @@ hmmsearch = newFnA3
   aHmmsearch
   [] -- TODO nondeterministic?
 
--- TODO is this the right name for mapping over arg 2?
--- hmmsearchEach :: Function
--- hmmsearchEach = let name = "hmmsearch_each" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, faa] (ListOf hht)
---   -- , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
---   , fInputs = [Exactly num, Exactly (ListOf hmm), Exactly faa]
---   , fOutput =  Exactly hht
---   , fTags = []
---   , fNewRules = NewNotImplemented
---   , fOldRules = rMap 2 aHmmsearch
---   }
-
 hmmsearchEach :: Function
 hmmsearchEach = newFnA3
   "hmmsearch_each"
@@ -130,31 +94,7 @@ hmmsearchEach = newFnA3
   (newMap2of3 "hmmsearch")
   [] -- TODO nondeterministic?
 
--- TODO better name, or is this actually the most descriptive way?
--- hmmsearchEachEach :: Function
--- hmmsearchEachEach = let name = "hmmsearch_each_each" in Function
---   { fOpChar = Nothing, fName = name
---   , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, ListOf faa] (ListOf $ ListOf hht)
---   , fTypeDesc  = name ++ " : num hmm.list faa.list -> hht.list.list" -- TODO generate
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aHmmsearch -- TODO this won't work right?
---   }
-
--- TODO is it parallel?
--- TODO reverse order? currently matches blast fns but not native hmmbuild args
--- TODO convert to rSimpleScript?
--- aHmmbuild :: [Path] -> Action ()
--- aHmmbuild cfg ref _ [out, fa] = do
---   wrappedCmdWrite False True cfg ref out'' [fa'] [] [] "hmmbuild" [out', fa']
---   where
---     out'  = fromPath loc cfg out
---     out'' = traceA "aHmmbuild" out' [out', fa']
---     fa'   = fromPath loc cfg fa
--- aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
-
 -- TODO make it parallel and mark as such if possible
--- aHmmsearch :: [Path] -> Action ()
--- aHmmsearch [out, e, hm, fa] = do
 aHmmsearch :: NewAction3
 aHmmsearch (ExprPath out) ePath hmPath faPath = do
   cfg <- fmap fromJust getShakeExtra
@@ -190,50 +130,35 @@ aHmmsearch (ExprPath out) ePath hmPath faPath = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out'', tmpOut]
     }
--- aHmmsearch args = error $ "bad argument to aHmmsearch: " ++ show args
+
+--------------------------
+-- extract_hmm_targets* --
+--------------------------
 
 extractHmmTargets :: Function
-extractHmmTargets = let name = "extract_hmm_targets" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [hht] (ListOf str)
-  -- , fTypeDesc  = name ++ " : hht -> str.list"
-  , fInputs = [Exactly hht]
-  , fOutput = Exactly (ListOf str)
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aExtractHmm 1
-  }
+extractHmmTargets = newFnA1
+  "extract_hmm_targets"
+  (Exactly hht)
+  (Exactly $ ListOf str)
+  (aExtractHmm 1)
+  []
 
 extractHmmTargetsEach :: Function
-extractHmmTargetsEach = let name = "extract_hmm_targets_each" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [ListOf hht] (ListOf $ ListOf str)
-  -- , fTypeDesc  = name ++ " : hht.list -> str.list.list"
-  , fInputs = [Exactly (ListOf hht)]
-  , fOutput = Exactly (ListOf (ListOf str))
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 1 $ aExtractHmm 1
-  }
+extractHmmTargetsEach = newFnA1
+  "extract_hmm_targets_each"
+  (Exactly $ ListOf hht)
+  (Exactly $ ListOf $ ListOf str)
+  (newMap1of1 "extract_hmm_targets")
+  []
 
--- TODO clean this up! it's pretty ugly
--- TODO how to integrate the script since it needs the colnum?
-aExtractHmm :: Int -> [Path] -> Action ()
-aExtractHmm n [outPath, tsvPath] = do
-  -- lits <- readLits tsvPath'
-  -- let lits'   = filter (\l -> not $ "#" `isPrefixOf` l) lits
-  --     lits''  = if uniq then sort $ nub lits' else lits'
-  --     lits''' = map (\l -> (words l) !! (n - 1)) lits''
-  -- writeLits outPath'' lits'''
-  -- wrappedCmdWrite False True cfg ref outPath'' [outPath'] [] [] "extract-hmm.py" [outPath', tsvPath', show n]
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.hmmer.aExtractHmm"
-      outPath'  = fromPath loc cfg outPath
-      outPath'' = traceA "aExtractHmm" outPath' [show n, outPath', tsvPath']
-      tsvPath'  = fromPath loc cfg tsvPath
+-- TODO any good way to pass an arg without making a custom action fn?
+aExtractHmm :: Int -> NewAction1
+aExtractHmm n (ExprPath outPath) tsvPath = do
+  -- let loc = "modules.hmmer.aExtractHmm"
+  let outPath'' = traceA "aExtractHmm" outPath [show n, outPath, tsvPath]
   runCmd $ CmdDesc
     { cmdBinary = "extract-hmm.py"
-    , cmdArguments = [outPath', tsvPath', show n]
+    , cmdArguments = [outPath, tsvPath, show n]
     , cmdParallel = False
     , cmdFixEmpties = True
     , cmdOptions = []
@@ -243,6 +168,5 @@ aExtractHmm n [outPath, tsvPath] = do
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = [] -- TODO sanitize outpath?
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [outPath']
+    , cmdRmPatterns = [outPath]
     }
-aExtractHmm _ _ = fail "bad arguments to aExtractHmm"
