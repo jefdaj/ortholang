@@ -26,8 +26,8 @@ debugA' name msg = debugA ("ortholang.modules.singletons." ++ name) msg
 
 olModule :: Module
 olModule = Module
-  { mName = "BlastDB"
-  , mDesc = "Create, load, and download BLAST databases"
+  { mName = "Singletons"
+  , mDesc = "Singleton-related utilities"
   , mTypes = []
   , mGroups = []
   , mEncodings = []
