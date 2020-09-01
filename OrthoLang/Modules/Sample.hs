@@ -5,6 +5,7 @@ module OrthoLang.Modules.Sample where
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
+import OrthoLang.Interpreter.Paths (getExprPathSeed)
 
 import Data.Scientific       (formatScientific, FPFormat(..))
 import System.Random         (StdGen)
@@ -24,64 +25,21 @@ olModule = Module
   , mFunctions = [sample]
   }
 
--- sample :: Function
--- sample = Function
---   { fOpChar = Nothing, fName = name
---   ,fTags = [Nondeterministic]
---   -- , fTypeCheck = tSample
---   -- , fTypeDesc  = name ++ " : num X.list -> X.list"
---   , fInputs = [Exactly num, ListSigs (AnyType "any type")]
---   , fOutput =  ListSigs (AnyType "any type")
---   , fOldRules = rSample
---   , fNewRules = NewNotImplemented
---   }
---   where
---     name = "sample"
-
 sample :: Function
-sample = newFnA2
-  "sample"
-  (Exactly num, ListSigs $ AnyType "type of the thing to sample")
-  (             ListSigs $ AnyType "type of the thing to sample")
-  undefined
-  []
+sample = newFnA2 "sample" (Exactly num, la) la aSample []
+  where
+    la = ListSigs $ AnyType "type of the thing to sample"
 
--- (num, ListOf (Some ot "any type")) (ListOf ot "any type")
--- shown as "num t.list -> t.list, where t is any type"
--- tSample :: [Type] -> Either String Type
--- tSample [n, ListOf x] | n == num = Right $ ListOf x
--- tSample _ = Left "sample requires a num and a list"
-
--- TODO make versions of newFn** that also pass the random seed, like newFnAR2
---      then this becomes easy, and you can have it auto-add Nondeterministic
---           then this becomes easy, and you can have it auto-add Nondeterministic
--- TODO actually, shouldn't all nondeterministic fns get their random seed? maybe that's the only version
-
-rSample :: RulesFn
-rSample scr expr@(Fun _ (Just seed) _ _ [n, lst]) = do
-  (ExprPath nPath' ) <- rExpr scr n
-  (ExprPath inPath') <- rExpr scr lst
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.sample.rSample"
-      nPath    = toPath loc cfg nPath'
-      inPath   = toPath loc cfg inPath'
-      outPath  = exprPath cfg dRef scr expr
-      outPath' = fromPath loc cfg outPath
-      (ListOf t) = typeOf lst
-  outPath' %> \_ -> aSample seed t outPath nPath inPath
-  return $ ExprPath outPath'
-rSample _ _ = fail "bad argument to rSample"
-
-aSample :: Seed -> Type -> Action2
-aSample seed t outPath nPath lstPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let nPath'   = fromPath loc cfg nPath
-      lstPath' = fromPath loc cfg lstPath
-      outPath' = fromPath loc cfg outPath
-      loc = "ortholang.modules.sample.aSample"
-  nStr <- readLit loc nPath'
-  lst  <- readStrings loc t lstPath'
+aSample :: NewAction2
+aSample (ExprPath outPath') nPath lstPath = do
+  let loc = "ortholang.modules.sample.aSample"
+      -- (ListOf t) = undefined outPath' -- TODO write this
+      seed = fromJust $ getExprPathSeed outPath'
+  cfg  <- fmap fromJust getShakeExtra
+  dRef <- fmap fromJust getShakeExtra
+  (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath outPath') -- TODO convenience fn for this as Action
+  nStr <- readLit loc nPath
+  lst  <- readStrings loc t lstPath
   debugA loc ("seed: " ++ show seed)
   let n         = read $ formatScientific Fixed (Just 0) $ read nStr
       elements' = randomSample seed n lst
