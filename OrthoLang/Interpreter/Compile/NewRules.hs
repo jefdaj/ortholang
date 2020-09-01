@@ -31,12 +31,14 @@ module OrthoLang.Interpreter.Compile.NewRules
     newFnS1
   , newFnS2
   , newFnS3
+  , newFnS4
 
   -- * Functions from Actions
   -- $fromactions
   , NewAction1
   , NewAction2
   , NewAction3
+  , NewAction4
   , newFnA1
   , newFnA2
   , newFnA3
@@ -72,6 +74,7 @@ module OrthoLang.Interpreter.Compile.NewRules
   , aNewRulesS1
   , aNewRulesS2
   , aNewRulesS3
+  , aNewRulesS4
   , aNewRulesS
   , aNewRules
   , aLoadIDs -- TODO where should this go? Actions?
@@ -152,6 +155,19 @@ newFnS3 n (i1, i2, i3) r s ts os = newFn n Nothing [i1, i2, i3] r rNewRulesA3 (a
 aNewRulesS3 :: String -> (CmdDesc -> CmdDesc) -> NewAction3
 aNewRulesS3 sname opts o i1 i2 i3 = aNewRulesS sname opts o [i1, i2, i3]
 
+newFnS4
+  :: String                               -- ^ name
+  -> (TypeSig, TypeSig, TypeSig, TypeSig) -- ^ 4 argument types
+  -> TypeSig                              -- ^ return type
+  -> String                               -- ^ script basename
+  -> [FnTag]                              -- ^ tags
+  -> (CmdDesc -> CmdDesc)                 -- ^ extra options
+  -> Function
+newFnS4 n (i1, i2, i3, i4) r s ts os = newFn n Nothing [i1, i2, i3, i4] r rNewRulesA4 (aNewRulesS4 s os) ts
+
+aNewRulesS4 :: String -> (CmdDesc -> CmdDesc) -> NewAction4
+aNewRulesS4 sname opts o i1 i2 i3 i4 = aNewRulesS sname opts o [i1, i2, i3, i4]
+
 {-|
 Approximate rewrite of 'OrthoLang.Interpreter.Compile.Simple.aSimpleScript'.
 Use the safer versions above if possible; this one does not check number of arguments.
@@ -185,9 +201,10 @@ aNewRulesS sname opts (ExprPath out) args = do
 -- expects the same number of input files that the 'Function' will pass it,
 -- but says nothing about their types.
 
-type NewAction1 = ExprPath -> FilePath                         -> Action ()
-type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
-type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
+type NewAction1 = ExprPath -> FilePath                                     -> Action ()
+type NewAction2 = ExprPath -> FilePath -> FilePath                         -> Action ()
+type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath             -> Action ()
+type NewAction4 = ExprPath -> FilePath -> FilePath -> FilePath -> FilePath -> Action ()
 
 -- TODO all these could pass the return type, but not the script ones right? :/
 newFnA1
@@ -374,6 +391,14 @@ applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> A
 applyList3 fn deps = do
   deps' <- canonicalExprLinks deps
   fn (deps' !! 0) (deps' !! 1) (deps' !! 2)
+
+rNewRulesA4 :: TypeSig -> String -> NewAction4 -> Rules ()
+rNewRulesA4 = rNewRules 4 applyList4
+
+applyList4 :: (FilePath -> FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
+applyList4 fn deps = do
+  deps' <- canonicalExprLinks deps
+  fn (deps' !! 0) (deps' !! 1) (deps' !! 2) (deps' !! 3)
 
 {-|
 -}

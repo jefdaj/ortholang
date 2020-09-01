@@ -14,6 +14,7 @@ module OrthoLang.Interpreter
   , newFnS1
   , newFnS2
   , newFnS3
+  , newFnS4
   , aNewRulesS1
   , aNewRulesS2
   , aNewRulesS3
@@ -22,6 +23,7 @@ module OrthoLang.Interpreter
   , NewAction1
   , NewAction2
   , NewAction3
+  , NewAction4
   , newRules
   -- , Function(..)
   -- , FnTag(..)
