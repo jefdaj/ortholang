@@ -24,25 +24,33 @@ olModule = Module
   , mFunctions = [sample]
   }
 
+-- sample :: Function
+-- sample = Function
+--   { fOpChar = Nothing, fName = name
+--   ,fTags = [Nondeterministic]
+--   -- , fTypeCheck = tSample
+--   -- , fTypeDesc  = name ++ " : num X.list -> X.list"
+--   , fInputs = [Exactly num, ListSigs (AnyType "any type")]
+--   , fOutput =  ListSigs (AnyType "any type")
+--   , fOldRules = rSample
+--   , fNewRules = NewNotImplemented
+--   }
+--   where
+--     name = "sample"
+
 sample :: Function
-sample = Function
-  { fOpChar = Nothing, fName = name
-  ,fTags = [Nondeterministic]
-  -- , fTypeCheck = tSample
-  -- , fTypeDesc  = name ++ " : num X.list -> X.list"
-  , fInputs = [Exactly num, ListSigs (AnyType "any type")]
-  , fOutput =  ListSigs (AnyType "any type")
-  , fOldRules = rSample
-  , fNewRules = NewNotImplemented
-  }
-  where
-    name = "sample"
+sample = newFnA2
+  "sample"
+  (Exactly num, ListSigs $ AnyType "type of the thing to sample")
+  (             ListSigs $ AnyType "type of the thing to sample")
+  undefined
+  []
 
 -- (num, ListOf (Some ot "any type")) (ListOf ot "any type")
 -- shown as "num t.list -> t.list, where t is any type"
-tSample :: [Type] -> Either String Type
-tSample [n, ListOf x] | n == num = Right $ ListOf x
-tSample _ = Left "sample requires a num and a list"
+-- tSample :: [Type] -> Either String Type
+-- tSample [n, ListOf x] | n == num = Right $ ListOf x
+-- tSample _ = Left "sample requires a num and a list"
 
 rSample :: RulesFn
 rSample scr expr@(Fun _ (Just seed) _ _ [n, lst]) = do
