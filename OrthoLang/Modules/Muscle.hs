@@ -1,7 +1,6 @@
 module OrthoLang.Modules.Muscle
   where
 
--- import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Modules.SeqIO (faa)
@@ -25,25 +24,18 @@ aln = Type
   }
 
 muscle :: Function
-muscle = let name = "muscle" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [faa] aln
-  -- , fTypeDesc  = name ++ " : faa -> aln"
-  , fInputs = [Exactly faa]
-  , fOutput = Exactly aln
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimpleScript "muscle.sh"
-  }
+muscle = newFnS1
+  "muscle"
+  (Exactly faa)
+  (Exactly aln)
+  "muscle.sh"
+  [] -- TODO nondeterministic?
+  id
 
 muscleEach :: Function
-muscleEach = let name = "muscle_each" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [ListOf faa] (ListOf aln)
-  -- , fTypeDesc  = name ++ " : faa.list -> aln.list"
-  , fInputs = [Exactly (ListOf faa)]
-  , fOutput =  Exactly (ListOf aln)
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMapSimpleScript 1 "muscle.sh"
-  }
+muscleEach = newFnA1
+  "muscle_each"
+  (Exactly $ ListOf faa)
+  (Exactly $ ListOf aln)
+  (newMap1of1 "muscle")
+  [] -- TODO nondeterministic?
