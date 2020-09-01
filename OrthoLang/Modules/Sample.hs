@@ -26,21 +26,23 @@ olModule = Module
   }
 
 sample :: Function
-sample = newFnA2 "sample" (Exactly num, la) la aSample []
+sample = newFnA2 "sample" (Exactly num, la) la aSample [Nondeterministic] -- TODO is that really the right word?
   where
     la = ListSigs $ AnyType "type of the thing to sample"
 
 aSample :: NewAction2
 aSample (ExprPath outPath') nPath lstPath = do
-  let loc = "ortholang.modules.sample.aSample"
-      -- (ListOf t) = undefined outPath' -- TODO write this
+  let loc  = "ortholang.modules.sample.aSample"
       seed = fromJust $ getExprPathSeed outPath'
+  debugA loc ("seed: " ++ show seed)
+  nStr <- readLit loc nPath
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
-  (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath outPath') -- TODO convenience fn for this as Action
-  nStr <- readLit loc nPath
+  -- TODO do we need to `need` the path before decoding its type? seems like it would be 'no'
+  (ListOf t) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath lstPath) -- TODO convenience fn for this as Action
+  -- liftIO $ putStrLn $ "t: " ++ show t
+  -- let (ListOf t') = t
   lst  <- readStrings loc t lstPath
-  debugA loc ("seed: " ++ show seed)
   let n         = read $ formatScientific Fixed (Just 0) $ read nStr
       elements' = randomSample seed n lst
   writeStrings loc t outPath' elements'

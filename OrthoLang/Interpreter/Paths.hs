@@ -502,12 +502,17 @@ listDigestsInPath cfg
   . makeRelative (tmpdir cfg)
 
 -- TODO restrict to ExprPath?
-getExprPathSeed :: FilePath -> Maybe Seed
-getExprPathSeed p = case comps of
+getExprPathSeed' :: FilePath -> Maybe Seed
+getExprPathSeed' p = case comps of
   [] -> Nothing
   (('s':seed):_) -> let n = filter (/= '/') seed
-                        n' = trace "ortholang.interpreter.paths.getExprPathSeed" ("n: " ++ show n) n
-                    in Just $ Seed (read n' :: Int)
+                    in Just $ Seed (read n :: Int)
   _ -> Nothing
   where
     comps = dropWhile (== "result") $ reverse $ splitPath p
+
+getExprPathSeed :: FilePath -> Maybe Seed
+getExprPathSeed p = trace loc (show p ++ " -> " ++ show r) r
+  where
+    loc = "ortholang.interpreter.paths.getExprPathSeed"
+    r = getExprPathSeed' p
