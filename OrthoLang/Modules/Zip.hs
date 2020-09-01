@@ -94,6 +94,7 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
         then do
           -- case 2: entire list is a list of lits, and the first path points to it
           -- liftIO $ putStrLn $ "chose case 2"
+          need' loc [fromPath loc cfg p1] -- TODO rework imports so this can go in unhashIDsFile directly?
           unhashIDsFile p1 dst
 
         else do
@@ -141,6 +142,7 @@ writeOrtholangArg inputDir path name = do
                        return $ inputDir </> (head $ splitOn "." name) <.> guess
                      else return dst
           -- liftIO $ putStrLn $ "unhashIDsFile " ++ show path' ++ " " ++ show dst'
+          need' loc [fromPath loc cfg path'] -- TODO rework imports so this can go in unhashIDsFile directly?
           unhashIDsFile path' dst' -- TODO this fails on binary files? i guess skip it in that case
 
         else do

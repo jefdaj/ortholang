@@ -192,7 +192,12 @@ unhashIDsFile inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "interpreter.sanitize.unhashIDsFile'"
       in' = fromPath loc cfg inPath
-  (unhashIDsFile' inPath outPath) `actionCatch` (\(_ :: SomeException) -> liftIO $ copyFile in' outPath)
+
+  -- TODO rework imports so you can do this?
+  -- need' "interpreter.paths.unhashIDsFile" [inPath]
+  need [in']
+
+  (unhashIDsFile' inPath outPath) `actionCatch` (\(_ :: SomeException) -> need [in'] >> liftIO (copyFile in' outPath))
 
 -- from: https://stackoverflow.com/a/40297465
 splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
