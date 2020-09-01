@@ -314,6 +314,7 @@ prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    "|" -> "any"
                                    "&" -> "all"
                                    "~" -> "diff"
+                                   "?" -> "some"
                                    x   -> error "prefixOf" $ "unknown Bop: \"" ++ x ++ "\""
 
 

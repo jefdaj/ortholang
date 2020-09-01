@@ -15,10 +15,6 @@ import Data.IORef    (readIORef)
 import Data.List     (nubBy)
 import Data.Maybe    (fromJust)
 
-------------
--- module --
-------------
-
 olModule :: Module
 olModule = Module
   { mName = "Sets"
@@ -26,12 +22,8 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
-  , mFunctions = some : map mkSetFunction setOpDescs
+  , mFunctions = map mkSetFunction setOpDescs
   }
-
---------------------
--- any, all, diff --
---------------------
 
 type SetOpDesc =
   ( String -- name of the prefix function
@@ -44,7 +36,6 @@ type SetOpDesc =
  - work on two lists and can be chained together; the prefix (regular function)
  - ones work on lists of lists.
  -
- - TODO rename these all -> union, any -> intersection?
  - TODO rename diff -> only? difference? missing?
  -}
 setOpDescs :: [SetOpDesc]
@@ -52,16 +43,18 @@ setOpDescs =
   [ ("any" , '|', union)
   , ("all" , '&', intersection)
   , ("diff", '~', difference)
+  , ("some", '?', symmetricDifference)
   ]
 
-mkSetFunction :: SetOpDesc -> Function
-mkSetFunction (foldName, opChar, setFn) = newBop foldName opChar al al (aSetFold setFn)
-  [] -- TODO nondeterministic?
-  where
-    al = ListSigs $ AnyType "the type of the list elements"
+-- from https://mail.haskell.org/pipermail/haskell-cafe/2015-June/120206.html
+symmetricDifference :: Ord a => Set a -> Set a -> Set a
+symmetricDifference a b = (a `difference` b) `union` (b `difference` a)
 
--- TODO where is the setFn used?
--- aSetFold :: NewAction1
+mkSetFunction :: SetOpDesc -> Function
+mkSetFunction (foldName, opChar, setFn) = newBop foldName opChar la la (aSetFold setFn) []
+  where
+    la = ListSigs $ AnyType "the type of the list elements"
+
 aSetFold :: (Set String -> Set String -> Set String)
          -> ExprPath -> FilePath -> Action ()
 aSetFold setFn (ExprPath oPath) setsPath = do
@@ -101,27 +94,3 @@ dedupByContent paths = do
   hashes <- mapM hashContent $ map (toPath loc cfg) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'
-
-----------
--- some --
-----------
-
-some :: Function
-some = Function
-  { fOpChar = Nothing, fName = "some"
-  -- , fTypeCheck = tSetFold
-  -- , fTypeDesc  = "some : X.list.list -> X.list"
-  , fInputs = [ListSigs (ListSigs (AnyType "any type"))]
-  , fOutput =  ListSigs (AnyType "any type")
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSome
-  }
-
--- TODO rewrite as an ExprExpansion
-rSome :: RulesFn
-rSome s (Fun rtn seed deps _ lol) = rExpr s diffExpr
-  where
-    anyExpr  = Fun rtn seed deps "any" lol
-    allExpr  = Fun rtn seed deps "all" lol
-    diffExpr = Bop rtn seed deps "~" anyExpr allExpr
-rSome _ _ = fail "bad argument to rSome"
