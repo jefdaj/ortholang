@@ -1,6 +1,8 @@
 module OrthoLang.Modules.Hmmer
   where
 
+-- TODO add hht to ht group?
+
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
@@ -46,54 +48,87 @@ hht = Type
 -- TODO hmmfetch : str -> hmm
 -- TODO hmmfetch_each : str.list -> hmm.list
 
+-- hmmbuild :: Function
+-- hmmbuild = let name = "hmmbuild" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeCheck = defaultTypeCheck name [aln] hmm
+--   -- , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
+--   , fInputs = [Exactly aln]
+--   , fOutput =  Exactly hmm
+--   , fTags = []
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rSimpleScript "hmmbuild.sh"
+--   }
+
 hmmbuild :: Function
-hmmbuild = let name = "hmmbuild" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [aln] hmm
-  -- , fTypeDesc  = name ++ " : aln -> hmm" -- TODO generate
-  , fInputs = [Exactly aln]
-  , fOutput =  Exactly hmm
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimpleScript "hmmbuild.sh"
-  }
+hmmbuild = newFnS1
+  "hmmbuild"
+  (Exactly aln)
+  (Exactly hmm)
+  "hmmbuild.sh"
+  [] -- TODO nondeterministic?
+  id
+
+-- hmmbuildEach :: Function
+-- hmmbuildEach = let name = "hmmbuild_each" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeCheck = defaultTypeCheck name [ListOf aln] (ListOf hmm)
+--   -- , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
+--   , fInputs = [Exactly (ListOf aln)]
+--   , fOutput =  Exactly (ListOf hmm)
+--   , fTags = []
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
+--   }
 
 hmmbuildEach :: Function
-hmmbuildEach = let name = "hmmbuild_each" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [ListOf aln] (ListOf hmm)
-  -- , fTypeDesc  = name ++ " : aln.list -> hmm.list" -- TODO generate
-  , fInputs = [Exactly (ListOf aln)]
-  , fOutput =  Exactly (ListOf hmm)
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMapSimpleScript 1 "hmmbuild.sh"
-  }
+hmmbuildEach = newFnA1
+  "hmmbuild_each"
+  (Exactly $ ListOf aln)
+  (Exactly $ ListOf hmm)
+  (newMap1of1 "hmmbuild")
+  [] -- TODO nondeterministic?
+
+-- hmmsearch :: Function
+-- hmmsearch = let name = "hmmsearch" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeCheck = defaultTypeCheck name [num, hmm, faa] hht
+--   -- , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
+--   , fInputs = [Exactly num, Exactly hmm, Exactly faa] 
+--   , fOutput =  Exactly hht -- TODO add to ht group?
+--   , fTags = []
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rSimple aHmmsearch
+--   }
 
 hmmsearch :: Function
-hmmsearch = let name = "hmmsearch" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [num, hmm, faa] hht
-  -- , fTypeDesc  = name ++ " : num hmm faa -> hht" -- TODO generate
-  , fInputs = [Exactly num, Exactly hmm, Exactly faa] 
-  , fOutput =  Exactly hht -- TODO add to ht group?
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple aHmmsearch
-  }
+hmmsearch = newFnA3
+  "hmmsearch"
+  (Exactly num, Exactly hmm, Exactly faa)
+  (Exactly hht)
+  aHmmsearch
+  [] -- TODO nondeterministic?
 
 -- TODO is this the right name for mapping over arg 2?
+-- hmmsearchEach :: Function
+-- hmmsearchEach = let name = "hmmsearch_each" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, faa] (ListOf hht)
+--   -- , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
+--   , fInputs = [Exactly num, Exactly (ListOf hmm), Exactly faa]
+--   , fOutput =  Exactly hht
+--   , fTags = []
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rMap 2 aHmmsearch
+--   }
+
 hmmsearchEach :: Function
-hmmsearchEach = let name = "hmmsearch_each" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = defaultTypeCheck name [num, ListOf hmm, faa] (ListOf hht)
-  -- , fTypeDesc  = name ++ " : num hmm.list faa -> hht.list" -- TODO generate
-  , fInputs = [Exactly num, Exactly (ListOf hmm), Exactly faa]
-  , fOutput =  Exactly hht
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 2 aHmmsearch
-  }
+hmmsearchEach = newFnA3
+  "hmmsearch_each"
+  (Exactly num, Exactly (ListOf hmm), Exactly faa)
+  (Exactly $ ListOf hht) -- TODO this should be a list right?
+  (newMap2of3 "hmmsearch")
+  [] -- TODO nondeterministic?
 
 -- TODO better name, or is this actually the most descriptive way?
 -- hmmsearchEachEach :: Function
@@ -118,16 +153,18 @@ hmmsearchEach = let name = "hmmsearch_each" in Function
 -- aHmmbuild _ _ _ args = error $ "bad argument to aHmmbuild: " ++ show args
 
 -- TODO make it parallel and mark as such if possible
-aHmmsearch :: [Path] -> Action ()
-aHmmsearch [out, e, hm, fa] = do
+-- aHmmsearch :: [Path] -> Action ()
+-- aHmmsearch [out, e, hm, fa] = do
+aHmmsearch :: NewAction3
+aHmmsearch (ExprPath out) ePath hmPath faPath = do
   cfg <- fmap fromJust getShakeExtra
-  let out'  = fromPath loc cfg out
-      loc = "modules.hmmer.aHmmsearch"
-      out'' = traceA loc out' [out', fa']
-      e'    = fromPath loc cfg e
-      hm'   = fromPath loc cfg hm
-      fa'   = fromPath loc cfg fa
-  eStr <- readLit loc e'
+  -- let out'  = fromPath loc cfg out
+  let loc = "modules.hmmer.aHmmsearch"
+      out'' = traceA loc out [out, faPath]
+      -- e'    = fromPath loc cfg e
+      -- hm'   = fromPath loc cfg hm
+      -- fa'   = fromPath loc cfg fa
+  eStr <- readLit loc ePath
   let eDec   = formatScientific Fixed Nothing (read eStr) -- format as decimal
 
       -- TODO warn users about this? hmmer fails on smaller values than ~1e-307 on my machine
@@ -135,17 +172,17 @@ aHmmsearch [out, e, hm, fa] = do
       eDec'  = if eDec < eMin then eMin else eDec
 
       tmpDir = tmpdir cfg </> "cache" </> "hmmsearch"
-      tmpOut = tmpDir </> takeFileName out'
+      tmpOut = tmpDir </> takeFileName out
   liftIO $ createDirectoryIfMissing True tmpDir
-  -- wrappedCmdWrite False True cfg ref out'' [e', hm', fa'] [tmpOut] []
-  --   "hmmsearch.sh" [out'', eDec', tmpOut, hm', fa']
+  -- wrappedCmdWrite False True cfg ref out'' [ePath, hmPath, faPath] [tmpOut] []
+  --   "hmmsearch.sh" [out'', eDec', tmpOut, hmPath, faPath]
   runCmd $ CmdDesc
     { cmdBinary = "hmmsearch.sh"
-    , cmdArguments = [out'', eDec', tmpOut, hm', fa']
+    , cmdArguments = [out'', eDec', tmpOut, hmPath, faPath]
     , cmdFixEmpties = True
     , cmdParallel = False
     , cmdOptions = []
-    , cmdInPatterns = [e', hm', fa']
+    , cmdInPatterns = [ePath, hmPath, faPath]
     , cmdNoNeedDirs = []
     , cmdOutPath = out''
     , cmdExtraOutPaths = [tmpOut]
@@ -153,7 +190,7 @@ aHmmsearch [out, e, hm, fa] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out'', tmpOut]
     }
-aHmmsearch args = error $ "bad argument to aHmmsearch: " ++ show args
+-- aHmmsearch args = error $ "bad argument to aHmmsearch: " ++ show args
 
 extractHmmTargets :: Function
 extractHmmTargets = let name = "extract_hmm_targets" in Function
