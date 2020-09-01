@@ -20,8 +20,8 @@ olModule = Module
   , mGroups = [fa]
   , mEncodings = []
   , mFunctions =
-    [ blastCRB
-    , blastCRBEach -- TODO someting nicer than this!
+    [ crbBlast
+    , crbBlastEach
     ]
   }
 
@@ -47,30 +47,21 @@ crb = Type
   , tShow  = defaultShow
   }
 
-blastCRB :: Function
-blastCRB = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly fna, Some fa "any fasta file"]
-  , fOutput = Exactly crb
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimpleTmp name aCRBBlast
-  }
-  where
-    name = "crb_blast"
+crbBlast :: Function
+crbBlast = newFnA2
+  "crb_blast"
+  (Exactly fna, Some fa "any fasta file")
+  (Exactly crb)
+  aCRBBlast
+  [Nondeterministic]
 
--- TODO hey can you pass it the entire blastCRB fn instead so it also gets the name?
--- and then you can dispense with ll the rest of this stuff! it's just `mkEach blastCRB`
-blastCRBEach :: Function
-blastCRBEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly fna, ListSigs (Some fa "any fasta file")]
-  , fOutput = Exactly (ListOf crb)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMapTmps 2 aCRBBlast "crb_blast"
-  }
-  where
-    name = "crb_blast_each"
+crbBlastEach :: Function
+crbBlastEach = newFnA2
+  "crb_blast_each"
+  (Exactly fna, ListSigs (Some fa "any fasta file"))
+  (Exactly $ ListOf crb)
+  (newMap2of2 "crb_blast")
+  [Nondeterministic]
 
 {- CRB-BLAST has pretty bad file naming practices, so to prevent conflicts it
  - needs to be run on unique filenames in a unique directory. Also, it only
@@ -79,37 +70,34 @@ blastCRBEach = Function
  -
  - TODO adjust cache paths to be deterministic!
  -}
-aCRBBlast :: Path -> [Path] -> Action ()
-aCRBBlast tmpDir [o, q, t] = do
+aCRBBlast :: NewAction2
+aCRBBlast (ExprPath out) qPath tPath = do
   cfg <- fmap fromJust getShakeExtra
+  let tmpDir = cacheDir cfg "crb-blast"
   let loc = "modules.crbblast.aCRBBlast"
-      o'   = fromPath loc cfg o
-      o''  = traceA loc o [fromPath loc cfg tmpDir, o', q', t']
       tmp' = fromPath loc cfg tmpDir
-      q'   = fromPath loc cfg q
-      t'   = fromPath loc cfg t
-  need' loc [q', t']
+      out' = traceA loc out [tmp', out, qPath, tPath]
   -- get the hashes from the cacnonical path, but can't link to that
-  qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just [tmpdir cfg]) q'
-  tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just [tmpdir cfg]) t'
+  qName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just [tmpdir cfg]) qPath
+  tName <- fmap takeFileName $ liftIO $ resolveSymlinks (Just [tmpdir cfg]) tPath
   -- liftIO $ putStrLn $ "qName: " ++ qName
   -- liftIO $ putStrLn $ "tName: " ++ tName
   -- instead, need to link to the actual input files
-  qDst <- liftIO $ resolveSymlinks Nothing q' -- link directly to the file
-  tDst <- liftIO $ resolveSymlinks Nothing t' -- link directly to the file
+  qDst <- liftIO $ resolveSymlinks Nothing qPath -- link directly to the file
+  tDst <- liftIO $ resolveSymlinks Nothing tPath -- link directly to the file
   -- liftIO $ putStrLn $ "qDst: " ++ qDst
   -- liftIO $ putStrLn $ "tDst: " ++ tDst
   let qSrc  = tmp' </> qDst
       tSrc  = tmp' </> tName
       qSrc' = toPath loc cfg qSrc
-      qDst' = toPath loc cfg qDst
+      qDstPath = toPath loc cfg qDst
       tSrc' = toPath loc cfg tSrc
-      tDst' = toPath loc cfg tDst
+      tDstPath = toPath loc cfg tDst
       oPath = tmp' </> "results.crb"
       oPath' = toPath loc cfg oPath
   need' loc [qDst, tDst]
-  symlink qSrc' qDst'
-  symlink tSrc' tDst'
+  symlink qSrc' qDstPath
+  symlink tSrc' tDstPath
   runCmd $ CmdDesc
     { cmdParallel = False -- TODO true?
     , cmdFixEmpties = True
@@ -122,7 +110,6 @@ aCRBBlast tmpDir [o, q, t] = do
     , cmdBinary = "crb-blast.sh"
     , cmdArguments = [oPath, tmp', qSrc, tSrc]
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [o', tmp'] -- TODO the whole thing, right?
+    , cmdRmPatterns = [out, tmp'] -- TODO the whole thing, right?
     }
-  symlink o'' oPath'
-aCRBBlast _ args = error $ "bad argument to aCRBBlast: " ++ show args
+  symlink (toPath loc cfg out) oPath'
