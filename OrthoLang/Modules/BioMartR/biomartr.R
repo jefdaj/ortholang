@@ -22,6 +22,8 @@
 suppressPackageStartupMessages(require(biomartr))
 suppressPackageStartupMessages(require(dplyr))
 
+# TODO ref and non-ref versions to get around the annoying different arguments
+
 assert_single_matches <- function(schTable) {
   # Checks that each row in the search table has a single match
   apply(schTable, 1, function(row) stopifnot(
@@ -37,10 +39,14 @@ assert_single_matches <- function(schTable) {
 # 'Synechococcus sp. strain PCC 7002'. Thus, download for this species has been
 # omitted.
 
-download_matches <- function(fnName, schTable)
+download_matches <- function(fnName, schTable, tmpDir) {
   # Calls biomartr and collects the output files
+
+  # seems to be required for caching the ftp files
+  setwd(tmpDir)
+
   # print(system("pwd"))
-  apply(schTable, 1, function(row) {
+  files <- apply(schTable, 1, function(row) {
     # sink("/dev/null", type=c("output", "message"))
     # g <- capture.output(suppressMessages(
     # ))
@@ -49,8 +55,12 @@ download_matches <- function(fnName, schTable)
     # return(g)
     # getGenome(row["organism"], db=row["database"], path=tmpDir)
     # do.call(fnName, list(row["organism"], db=row["database"], path=tmpDir))
-    do.call(fnName, list(row["organism"], db=row["database"]))
+    do.call(fnName, list(row["organism"], db=row["database"], reference=FALSE))
   })
+
+  files <- file.path(tmpDir, files)
+  return(files)
+}
 
 save_list <- function(files, outPath) {
   con <- file(outPath)
@@ -64,19 +74,18 @@ save_list <- function(files, outPath) {
 main <- function() {
 
   args     <- commandArgs(trailingOnly = TRUE)
-  # tmpDir   <- args[[1]]
   outPath  <- args[[1]]
-  logPath  <- paste0(outPath, '.log')
+  logPath  <- gsub('result$', 'log', outPath) # TODO use out/err instead?
   fnName   <- readLines(args[[2]])
+  tmpDir <- file.path(Sys.getenv('TMPDIR'), "cache", "biomartr") # TODO pass directly?
 
-  # send stderr to logfile (TODO name it 'err'?)
-  con <- file(logPath, open="wt")
-  sink(con)
-  sink(con, type='message')
+  # con <- file(logPath, open="wt")
+  # sink(con)
+  # sink(con, type='message')
 
   schTable <- read.table(args[[3]], sep="\t", header=TRUE) 
   assert_single_matches(schTable)
-  download_matches(fnName, schTable) %>% save_list(outPath)
+  download_matches(fnName, schTable, tmpDir) %>% save_list(outPath)
 }
 
 main()

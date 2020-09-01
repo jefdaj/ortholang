@@ -75,7 +75,7 @@ gz :: Encoding
 gz = Encoding
   { enExt = "gz"
   , enDesc = "gunzip archive" -- TODO and maybe also tarballed?
-  , enShow = \_ _ path -> return $ "gunzip archive '" ++ path ++ "'"
+  , enShow = \cfg _ path -> return $ "gunzip archive '" ++ toGeneric cfg path ++ "'"
   }
 
 fnagz :: Type
