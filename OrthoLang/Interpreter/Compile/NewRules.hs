@@ -180,13 +180,26 @@ aNewRulesS sname opts (ExprPath out) args = do
     }
 
 -- $fromactions
--- Use these functions when writing a "script" that would be easier in Haskell, or benefit from Shake integration.
--- The NewAction{1,2,3} types enforce that the 'Development.Shake.Action'
--- expects the same number of input files that the 'Function' will pass it.
+-- Use these functions when writing a "script" that would be easier in Haskell,
+-- or benefit from Shake integration. The NewAction* types enforce that the
+-- 'Development.Shake.Action' expects the same number of input files that the
+-- 'Function' will pass it, but says nothing about their types. The `R`
+-- versions also enforce passing the random seed.
 
 type NewAction1 = ExprPath -> FilePath                         -> Action ()
 type NewAction2 = ExprPath -> FilePath -> FilePath             -> Action ()
 type NewAction3 = ExprPath -> FilePath -> FilePath -> FilePath -> Action ()
+
+-- versions that also take a random seed (the actual Action may ignore it so far)
+-- TODO make this the default and only specifically mention when functions *are* deterministic
+-- type NewActionR1 = Seed -> NewAction1
+-- type NewActionR2 = Seed -> NewAction2
+-- type NewActionR3 = Seed -> NewAction3
+
+type NewActionR1 = Seed -> ExprPath ->  FilePath                                -> Action ()
+type NewActionR2 = Seed -> ExprPath -> (FilePath, FilePath)                     -> Action ()
+type NewActionR3 = Seed -> ExprPath -> (FilePath, FilePath, FilePath)           -> Action ()
+type NewActionR4 = Seed -> ExprPath -> (FilePath, FilePath, FilePath, FilePath) -> Action ()
 
 -- TODO all these could pass the return type, but not the script ones right? :/
 newFnA1
