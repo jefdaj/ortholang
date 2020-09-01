@@ -49,11 +49,11 @@ read_lol <- function(filename) {
 
 read_named_lol <- function(namesfile, listsfile) {
   # listnames <- read_list(namesfile)
-	# cat(paste0('listnames:', listnames, '\n'))
+  # cat(paste0('listnames:', listnames, '\n'))
   listnames <- read_list(namesfile) %>% shorten_labels # %>% fix_unnamed
-	# cat(paste0('listnames:', listnames, '\n'))
+  # cat(paste0('listnames:', listnames, '\n'))
   lists <- read_lol(listsfile)
-	# cat(paste0('lists:', lists, '\n'))
+  # cat(paste0('lists:', lists, '\n'))
   stopifnot(length(listnames) == length(lists))
   names(lists) <- listnames
   return(lists)
@@ -67,27 +67,35 @@ plot_lists <- function(lists, titlePath, outPath) {
   # of Venn diagrams people expect with up to 5 sets, and switch to upset for more.
 
   title <- read_string(titlePath)
-  if (title == "<<emptystr>>") { title <- "" }
+  if (title == "<<emptystr>>")
+    title <- ""
+  else
+    title <- paste0(title, '\n') # for spacing
  
   nlists <- length(lists)
-  png(filename=outPath, width=600, height=600)
   if (nlists > 5) {
     suppressPackageStartupMessages(require(UpSetR))
-    p <- upset(fromList(lists), title=title)
+    png(filename=outPath, width=1200, height=800)
+    # TODO figure out how to add title here too
+    p <- upset(fromList(lists), text.scale=2, point.size=5)
     print(p) # for some reason, "print"ing it is necessary
-		# TODO does this work? https://github.com/hms-dbmi/UpSetR/issues/76
-		# grid.text(,x = 0.65, y=0.95, gp=gpar(fontsize=20))
+    # TODO does this work? https://github.com/hms-dbmi/UpSetR/issues/76
+    # grid.text(,x = 0.65, y=0.95, gp=gpar(fontsize=20))
+    #grid.edit('arrange', name='tmp')
+    #p <- grid.grab()
+    #grid.arrange(grobs=list(p), top=title, cols=1)
   } else {
     suppressPackageStartupMessages(require(gridExtra))
     suppressPackageStartupMessages(require(VennDiagram))
+    png(filename=outPath, width=600, height=600)
     # adding 2 makes it a nice green/blue/purple theme
-    v <- venn.diagram(lists, fill = 2+(1:nlists), alpha=0.5, filename=NULL)
+    p <- venn.diagram(lists, fill = 2+(1:nlists), alpha=0.5, filename=NULL)
     # viewport prevents labels getting cut off
     # from https://stackoverflow.com/a/22826211
     # grid.newpage()
     # pushViewport(viewport(width=unit(0.95, "npc"), height = unit(1, "npc")))
     # grid.draw(v)
-		grid.arrange(gTree(children=v), top=title)
+    grid.arrange(gTree(children=p), top=title)
   }
   invisible(dev.off())
 }
