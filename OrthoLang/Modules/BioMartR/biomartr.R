@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# TODO separate this into the current "rewrite" and new features afterward
+
 # TODO: cache results in ortholang to prevent wasting time on FTP stuff
 # TODO: hardcode args for development
 
@@ -23,6 +25,20 @@ suppressPackageStartupMessages(require(biomartr))
 suppressPackageStartupMessages(require(dplyr))
 
 # TODO ref and non-ref versions to get around the annoying different arguments
+# TODO correct the absolute paths in haskell
+# TODO non-vectorized version? maybe later
+# TODO return the error if a search is unsuccessful
+# TODO have to encode the date in order to be reproducible when downloading? or just say to provide the file?
+# TODO rename to biomartr_proteomes, biomartr_genomes, biomartr_parse
+# TODO new functions! biomartr_list_{proteomes,genomes,kingdoms,groups}
+# TODO new functions! matching "get" ones to download
+# TODO auto-unzip them until you get a chance to default to zipped files
+# TODO then re-load before returning using the seqio fns too
+# TODO add reference TRUE or FALSE to the tables
+# TODO can you get it to cache the ftp lists? maybe use them as an implicit str.list input
+# TODO upgrade to the latest version before working on new features
+# TODO add get_cds function
+# TODO add list_groups function
 
 assert_single_matches <- function(schTable) {
   # Checks that each row in the search table has a single match
@@ -79,9 +95,9 @@ main <- function() {
   fnName   <- readLines(args[[2]])
   tmpDir <- file.path(Sys.getenv('TMPDIR'), "cache", "biomartr") # TODO pass directly?
 
-  # con <- file(logPath, open="wt")
-  # sink(con)
-  # sink(con, type='message')
+  con <- file(logPath, open="wt")
+  sink(con)
+  sink(con, type='message')
 
   schTable <- read.table(args[[3]], sep="\t", header=TRUE) 
   assert_single_matches(schTable)
