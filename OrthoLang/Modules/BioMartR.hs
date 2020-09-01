@@ -36,16 +36,16 @@ import Text.Parsec.Combinator (between, optionMaybe)
 import Data.Maybe (fromMaybe, fromJust)
 import Data.List (intercalate)
 import Data.Either (partitionEithers)
-import Data.Char (isSpace)
+-- import Data.Char (isSpace)
 import Development.Shake.FilePath ((</>))
 -- import OrthoLang.Types   (traceA)
 import System.Directory (createDirectoryIfMissing)
 import System.Exit (ExitCode(..))
 import OrthoLang.Util (trim)
 
-------------------------
--- module description --
-------------------------
+------------
+-- module --
+------------
 
 olModule :: Module
 olModule = Module
@@ -83,16 +83,6 @@ fnagz = EncodedAs gz fna
 
 faagz :: Type
 faagz = EncodedAs gz faa
-
--- TODO does this work at all?
-parseSearches :: Function
-parseSearches = let name = "parse_searches" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf str)]
-  , fOutput = Exactly search
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rParseSearches
-  }
 
 -----------------
 -- get_genomes --
@@ -165,8 +155,8 @@ pSearch = do
     Nothing    -> return $ Search species Nothing Nothing
     Just (n,i) -> return $ Search species n i
   where
-    inParens = between (pSym '(') (pSym ')')
-    pSym     = void . char 
+    inParens = between (pSym' '(') (pSym' ')')
+    pSym'    = void . char 
 
 -- TODO bug: this is getting passed a filepath and is partially parsing it
 --           it expects a single filepath but gets a list of them
@@ -182,6 +172,16 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
   where
     header             = ["organism", "database", "identifier"]
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
+
+-- TODO hide this, and rename to start with biomartr
+parseSearches :: Function
+parseSearches = let name = "parse_searches" in Function
+  { fOpChar = Nothing, fName = name
+  , fInputs = [Exactly (ListOf str)]
+  , fOutput = Exactly search
+  , fTags = []
+  , fNewRules = NewNotImplemented, fOldRules = rParseSearches
+  }
 
 rParseSearches :: RulesFn
 rParseSearches scr expr@(Fun _ _ _ _ [searches]) = do
@@ -213,6 +213,8 @@ aParseSearches sList out = do
 ------------------
 -- run biomartr --
 ------------------
+
+-- TODO rewrite part of this to re-load like the seqio functions do
 
 -- TODO move nearer the top?
 

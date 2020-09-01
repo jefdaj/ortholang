@@ -25,7 +25,7 @@ suppressPackageStartupMessages(require(dplyr))
 assert_single_matches <- function(schTable) {
   # Checks that each row in the search table has a single match
   apply(schTable, 1, function(row) stopifnot(
-    nrow(is.genome.available(row["organism"], details=TRUE)) == 1
+    nrow(is.genome.available(db=row["database"], row["organism"], details=TRUE)) == 1
   ))
 }
 
@@ -41,31 +41,39 @@ download_matches <- function(fnName, schTable)
   # Calls biomartr and collects the output files
   # print(system("pwd"))
   apply(schTable, 1, function(row) {
-	  # sink("/dev/null", type=c("output", "message"))
+    # sink("/dev/null", type=c("output", "message"))
     # g <- capture.output(suppressMessages(
-		# ))
-	  # sink()
-		# cat(paste0(c("Got '", g, "'\n")))
-		# return(g)
-		# getGenome(row["organism"], db=row["database"], path=tmpDir)
-		# do.call(fnName, list(row["organism"], db=row["database"], path=tmpDir))
-		do.call(fnName, list(row["organism"], db=row["database"]))
+    # ))
+    # sink()
+    # cat(paste0(c("Got '", g, "'\n")))
+    # return(g)
+    # getGenome(row["organism"], db=row["database"], path=tmpDir)
+    # do.call(fnName, list(row["organism"], db=row["database"], path=tmpDir))
+    do.call(fnName, list(row["organism"], db=row["database"]))
   })
 
 save_list <- function(files, outPath) {
-	con <- file(outPath)
+  con <- file(outPath)
   if (length(files) == 0) {
       files <- "<<emptylist>>"
   }
   writeLines(files, con)
-	close(con)
+  close(con)
 }
 
 main <- function() {
+
   args     <- commandArgs(trailingOnly = TRUE)
   # tmpDir   <- args[[1]]
   outPath  <- args[[1]]
+  logPath  <- paste0(outPath, '.log')
   fnName   <- readLines(args[[2]])
+
+  # send stderr to logfile (TODO name it 'err'?)
+  con <- file(logPath, open="wt")
+  sink(con)
+  sink(con, type='message')
+
   schTable <- read.table(args[[3]], sep="\t", header=TRUE) 
   assert_single_matches(schTable)
   download_matches(fnName, schTable) %>% save_list(outPath)
