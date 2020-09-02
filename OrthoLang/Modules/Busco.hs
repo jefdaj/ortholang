@@ -211,15 +211,23 @@ aBuscoFetchLineage (ExprPath out') namePath = do
 -- busco_{genome,proteins,transcriptome} --
 -------------------------------------------
 
+-- mkBusco :: String -> String -> Type -> Function
+-- mkBusco name mode inType = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly blh, Exactly inType]
+--   , fOutput = Exactly bsr
+--   , fTags = [Nondeterministic] -- TODO double check nondeterminism
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rSimple $ aBusco mode
+--   }
+
 mkBusco :: String -> String -> Type -> Function
-mkBusco name mode inType = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly blh, Exactly inType]
-  , fOutput = Exactly bsr
-  , fTags = [Nondeterministic] -- TODO double check nondeterminism
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aBusco mode
-  }
+mkBusco name mode inType = newFnA2
+  name
+  (Exactly blh, Exactly inType)
+  (Exactly bsr)
+  (aBusco mode)
+  [Nondeterministic] -- TODO double-check this
 
 buscoProteins, buscoTranscriptome :: Function
 buscoProteins      = mkBusco "busco_proteins"      "prot" faa
@@ -227,56 +235,65 @@ buscoTranscriptome = mkBusco "busco_transcriptome" "tran" fna
 -- buscoGenome = mkBusco "busco_genome" "geno"
 
 -- TODO looks like you have to follow the final result symlink to cd into the dir with dataset.cfg?
-aBusco :: String -> ([Path] -> Action ())
-aBusco mode [outPath, blhPath, faaPath] = do
+-- aBusco :: String -> ([Path] -> Action ())
+-- aBusco mode [outPath, blhPath, faaPath] = do
+aBusco :: String -> NewAction2
+aBusco mode (ExprPath outPath) blhPath faaPath = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.busco.aBusco"
-      out' = fromPath loc cfg outPath
-      blh' = takeDirectory $ fromPath loc cfg blhPath
+      out' = toPath loc cfg outPath
+      blh' = takeDirectory blhPath
       cDir = fromPath loc cfg $ buscoCache cfg
       rDir = cDir </> "runs" -- TODO need digest here?
-      faa' = fromPath loc cfg faaPath
+      -- faa' = fromPath loc cfg faaPath
   blh'' <- liftIO $ resolveSymlinks (Just [tmpdir cfg]) blh'
   liftIO $ createDirectoryIfMissing True rDir
   runCmd $ CmdDesc
     { cmdBinary = "busco.sh"
-    , cmdArguments = [out', faa', blh'', mode, cDir] -- TODO cfgtemplate, tdir
+    , cmdArguments = [outPath, faaPath, blh'', mode, cDir] -- TODO cfgtemplate, tdir
     , cmdFixEmpties = False
     , cmdParallel = False -- TODO fix shake error and set to True
-    , cmdInPatterns = [faa']
+    , cmdInPatterns = [faaPath]
     , cmdNoNeedDirs = []
-    , cmdOutPath = out'
+    , cmdOutPath = outPath
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
     , cmdOptions = []
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [out']
+    , cmdRmPatterns = [outPath]
     }
   -- This is rediculous but I haven't been able to shorten it...
-  let oBasePtn = "*" ++ takeBaseName out' ++ "*"
+  let oBasePtn = "*" ++ takeBaseName outPath ++ "*"
       tmpOutPtn = rDir </> oBasePtn </> "short_summary*.txt"
   tmpOut <- liftIO $ fmap (headOrDie "failed to read BUSCO summary in aBusco") $ glob tmpOutPtn
   sanitizeFileInPlace tmpOut -- will this confuse shake?
-  symlink outPath $ toPath loc cfg tmpOut
-aBusco _ as = error $ "bad argument to aBusco: " ++ show as
+  symlink out' $ toPath loc cfg tmpOut
 
 ------------------------------------------------
 -- busco_{genome,proteins,transcriptome}_each --
 ------------------------------------------------
 
-mkBuscoEach :: String -> String -> Type -> Function
-mkBuscoEach name mode inType = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly blh, Exactly (ListOf inType)]
-  , fOutput = Exactly (ListOf bsr)
-  , fTags = [Nondeterministic] -- TODO double check nondeterminism
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 2 $ aBusco mode
-  }
+-- mkBuscoEach :: String -> String -> Type -> Function
+-- mkBuscoEach name mode inType = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly blh, Exactly (ListOf inType)]
+--   , fOutput = Exactly (ListOf bsr)
+--   , fTags = [Nondeterministic] -- TODO double check nondeterminism
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rMap 2 $ aBusco mode
+--   }
+
+mkBuscoEach :: String -> Type -> Function
+mkBuscoEach name inType = newFnA2
+  (name ++ "_each")
+  (Exactly blh, Exactly $ ListOf inType)
+  (Exactly $ ListOf bsr)
+  (newMap2of2 name)
+  [Nondeterministic] -- TODO double-check this
 
 buscoProteinsEach, buscoTranscriptomeEach :: Function
-buscoProteinsEach      = mkBuscoEach "busco_proteins_each"      "prot" faa
-buscoTranscriptomeEach = mkBuscoEach "busco_transcriptome_each" "tran" fna
+buscoProteinsEach      = mkBuscoEach "busco_proteins"      faa
+buscoTranscriptomeEach = mkBuscoEach "busco_transcriptome" fna
 -- buscoGenomeEach = mkBusco "busco_genome_each" "geno"
 
 -----------------------------
