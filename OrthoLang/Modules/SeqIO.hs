@@ -192,28 +192,21 @@ aGenbankToFasta rtn st (ExprPath outPath') ftPath' faPath' = do
 -- TODO also extract them from genbank files
 
 extractIds :: Function
-extractIds = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Some fa "any fasta file"]
-  , fOutput = Exactly (ListOf str)
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimpleScript "extract_ids.py"
-  }
-  where
-    name = "extract_ids"
+extractIds = newFnS1
+  "extract_ids"
+  (Some fa "any fasta file")
+  (Exactly $ ListOf str)
+  "extract_ids.py"
+  []
+  id
 
 extractIdsEach :: Function
-extractIdsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [ListSigs (Some fa "any fasta file")]
-  , fOutput = Exactly (ListOf (ListOf str))
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMapSimpleScript 1 "extract_ids.py"
-  }
-  where
-    name = "extract_ids_each"
+extractIdsEach = newFnA1
+  "extract_ids_each"
+  (ListSigs $ Some fa "any fasta file")
+  (Exactly $ ListOf $ ListOf str)
+  (newMap1of1 "extract_ids")
+  []
 
 -------------------------
 -- extract_seqs(_each) --
