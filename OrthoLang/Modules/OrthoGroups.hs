@@ -49,7 +49,7 @@ olModule = Module
       [ orthogroups
       , orthogroupContaining
       , orthogroupsContaining
-      -- these four are meant to be user-facing
+      -- these four are user-facing macros that expand to the Str versions
       , orthologInAny
       , orthologInAll
       , orthologInMin
@@ -228,17 +228,17 @@ containsOneOf lists elems = filter (flip any elems . flip elem) lists
 
 -- TODO should this error when not finding one too, like aOrthogroupContaining?
 aOrthogroupsFilter :: FilterFn -> NewAction2
-aOrthogroupsFilter filterFn (ExprPath out') ofrPath idsPath = do
+aOrthogroupsFilter filterFn (ExprPath out') ofrPath' idsPath = do
   ids  <- fmap fromJust getShakeExtra
   ids' <- liftIO $ readIORef ids
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.orthogroups.aOrthogroupsFilter"
       out = toPath loc cfg out'
-      ofr = toPath loc cfg ofrPath
+      ofrPath = toPath loc cfg ofrPath'
   lookups <- fmap (map $ lookupID ids') $ readLits loc idsPath
   when (not $ all isJust lookups) $ error "unable to find some seqids! probably a programming error"
   let geneIds = catMaybes lookups
-  groups <- parseOrthoFinder ofr -- TODO handle the others!
+  groups <- parseOrthoFinder ofrPath -- TODO handle the others!
   let groups' = filterFn groups geneIds
   writeOrthogroups out groups'
 
@@ -246,23 +246,23 @@ aOrthogroupsFilter filterFn (ExprPath out') ofrPath idsPath = do
 -- ortholog_in_any --
 ---------------------
 
--- TODO flip args so it reads more naturally?
 orthologInAny :: Function
-orthologInAny = let name = "ortholog_in_any" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "any orthogroup", Exactly (ListOf faa)]
-  , fOutput = Exactly sll
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules name
-  }
+orthologInAny =
+  let name = "ortholog_in_any"
+  in newExprExpansion
+       name
+       [Some og "any orthogroup", Exactly $ ListOf faa]
+       (Exactly sll)
+       (mOrthologInStr name)
+       []
 
-mkOrthologsStrRules :: String -> RulesFn
-mkOrthologsStrRules name st (Fun rType seed deps _  [groups , faas]) =
-  rExpr st $ Fun rType seed deps (name ++ "_str")   [groups', faas']
+mOrthologInStr :: String -> ExprExpansion
+mOrthologInStr name _ _ (Fun rType seed deps _  [groups , faas]) =
+  Fun rType seed deps (name ++ "_str")   [groups', faas']
   where
     groups' = Fun sll seed (depsOf groups) "orthogroups"      [groups]
     faas'   = Fun sll seed (depsOf faas  ) "extract_ids_each" [faas]
-mkOrthologsStrRules _ _ _ = error "bad arguments to mkOrthologsStrRules"
+mOrthologInStr _ _ _ _ = error "bad arguments to mOrthologInStr"
 
 -- TODO can this be removed somehow?
 -- TODO flip args so it reads more naturally?
@@ -322,14 +322,16 @@ rOrthologFilterStr _ _ _ _ = error "bad arguments to rOrthologFilterStr"
 
 -- TODO flip args so it reads more naturally?
 
+-- TODO fn to generate this + orthologInAny
 orthologInAll :: Function
-orthologInAll = let name = "ortholog_in_all" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "any orthogroup", Exactly (ListOf faa)]
-  , fOutput = Exactly sll
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrRules "ortholog_in_all"
-  }
+orthologInAll =
+  let name = "ortholog_in_all"
+  in newExprExpansion
+       name
+       [Some og "any orthogroup", Exactly $ ListOf faa]
+       (Exactly sll)
+       (mOrthologInStr name)
+       []
 
 orthologInAllStr :: Function
 orthologInAllStr = let name = "ortholog_in_all_str" in Function
