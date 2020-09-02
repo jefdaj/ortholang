@@ -30,7 +30,7 @@ olModule = Module
   { mName = "BlastRBH"
   , mDesc = "Reciprocal BLAST+ best hits"
   , mTypes = [fna, faa, bht]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = [blastdb]
   , mFunctions =
     -- TODO also work with the non-symmetric ones that have an obvious way to do it?

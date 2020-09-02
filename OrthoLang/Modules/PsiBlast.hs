@@ -71,7 +71,7 @@ olModule = Module
             \TODO individual help descriptions for each fn"
 
   , mTypes = [faa, bht, pssm, pdb]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions =
 

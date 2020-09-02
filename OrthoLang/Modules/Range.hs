@@ -11,7 +11,7 @@ olModule = Module
   { mName = "Range"
   , mDesc = "Generate ranges of numbers"
   , mTypes = [num]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions =
     [ rangeIntegers

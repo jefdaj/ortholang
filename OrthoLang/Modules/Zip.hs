@@ -30,7 +30,7 @@ olModule = Module
   { mName = "Zip"
   , mDesc = "Archive lists of variables"
   , mTypes = [zip]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions = [zipArchive, zipArchiveExplicit]
   }

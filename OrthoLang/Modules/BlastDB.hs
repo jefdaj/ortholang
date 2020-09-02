@@ -56,7 +56,7 @@ olModule = Module
   { mName = "BlastDB"
   , mDesc = "Create, load, and download BLAST databases"
   , mTypes = [fna, faa, ndb, pdb]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = [blastdb]
   , mFunctions =
 

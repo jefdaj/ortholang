@@ -14,7 +14,7 @@ olModule = Module
   { mName = "All-Vs-All"
   , mDesc = "Creates all-vs-all hit tables from any BLAST-like search for use in ortholog finding algorithms"
   , mTypes = [ava]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions = [] -- TODO put the functions here, or in their respective modules?
   }

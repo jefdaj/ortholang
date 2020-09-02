@@ -22,7 +22,7 @@ olModule = Module
   { mName = "Script"
   , mDesc = "Plug custom scripts into OrthoLang"
   , mTypes = [bin]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions = [loadScript, runScriptExplicit, runScript]
   }

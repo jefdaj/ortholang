@@ -15,7 +15,7 @@ olModule = Module
   { mName = "Math"
   , mDesc = "Basic math"
   , mTypes = [num]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions =
     [ mkMathBop "add"      '+' (+)

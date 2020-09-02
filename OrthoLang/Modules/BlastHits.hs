@@ -19,6 +19,7 @@ olModule = Module
   , mDesc = "Work with BLAST hit tables"
   , mTypes = [bht, crb]
   , mGroups = [ht]
+  , mRules = return ()
   , mEncodings = []
   , mFunctions =
     [ extractQueries, extractQueriesEach

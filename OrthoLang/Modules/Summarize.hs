@@ -13,7 +13,7 @@ olModule = Module
   { mName = "Summarize"
   , mDesc = "Collapse a list of results into a single summary"
   , mTypes = []
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions =
     [

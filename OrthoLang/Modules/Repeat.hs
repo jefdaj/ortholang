@@ -23,7 +23,7 @@ olModule = Module
   { mName = "Repeat"
   , mDesc = "Repeatdly re-calculate variables using different random seeds"
   , mTypes = []
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions = [repeatN]
   }

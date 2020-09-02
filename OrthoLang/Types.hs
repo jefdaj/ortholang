@@ -621,6 +621,7 @@ data Module = Module
   , mGroups    :: [TypeGroup]
   , mEncodings :: [Encoding]
   , mFunctions :: [Function]
+  , mRules     :: Rules () -- ^ extra Rules not associated with a function
   }
 
 -- TODO what about prettyShow in Pretty.hs?

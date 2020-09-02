@@ -45,7 +45,7 @@ olModule = Module
   { mName = "BiomartR"
   , mDesc = "Search + download genomes and proteomes from Biomart"
   , mTypes = [search, fna, faa, fnagz, faagz]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = [gz]
   , mFunctions =
     [ parseSearches -- TODO hide from end users?

@@ -257,6 +257,8 @@ The load_* functions handle hashing seqids of newly-loaded files the first
 time, but they fail to enfore re-loading them during the next program run when
 they might still be needed. This is a bit of a hack, but does enforce it
 properly (so far!)
+
+TODO move to seqio, or sanitize maybe?
 -}
 rReloadIDs :: Rules ()
 rReloadIDs = "reloadids" ~> do
@@ -321,10 +323,11 @@ isn't implemented yet.
 TODO get modules via getShakeExtraRules here?
 -}
 newRules :: [Module] -> Rules ()
-newRules mods = sequence_ $ rReloadIDs : fnRules
+newRules mods = sequence_ $ rReloadIDs : modRules : fnRules
   where
     fns     = concatMap mFunctions mods
     fnRules = catRules $ map fNewRules fns
+    modRules = sequence_ $ map mRules mods
     catRules [] = []
     catRules ((NewRules r):xs) = r : catRules xs
     catRules (_:xs) = catRules xs

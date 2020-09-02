@@ -10,7 +10,7 @@ olModule = Module
   { mName = "Test"
   , mDesc = "Test module for the 'new rules' infrastructure"
   , mTypes = [str]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions =
       [ test1

@@ -44,7 +44,7 @@ olModule = Module
   { mName = "FlowChart"
   , mDesc = "Draw flowchart representing OrthoLang scripts"
   , mTypes = [png]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions = [plotDot, plotVars, plotDepends, plotRDepends]
   }

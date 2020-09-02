@@ -44,6 +44,7 @@ olModule = Module
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
   , mTypes = [ofr, spr, gcr]
   , mGroups = [og]
+  , mRules = return ()
   , mEncodings = []
   , mFunctions =
       [ orthogroups

@@ -29,7 +29,7 @@ olModule = Module
   { mName = "BLAST+"
   , mDesc = "Standard NCBI BLAST+ functions"
   , mTypes = [bht] -- TODO ndb, pdb?
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = [blastdb]
   , mFunctions =
     -- TODO remove the ones that don't apply to each fn type!

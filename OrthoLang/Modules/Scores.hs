@@ -27,7 +27,7 @@ olModule = Module
   { mName = "Scores"
   , mDesc = "Score repeated variables for plotting"
   , mTypes = []
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions =
     [ scoreRepeats

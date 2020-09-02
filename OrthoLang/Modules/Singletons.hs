@@ -29,7 +29,7 @@ olModule = Module
   { mName = "Singletons"
   , mDesc = "Singleton-related utilities"
   , mTypes = []
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions =
     [ singletons -- TODO non-plural version too

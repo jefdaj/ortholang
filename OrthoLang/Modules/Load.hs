@@ -35,7 +35,7 @@ olModule = Module
   { mName = "Load"
   , mDesc = "Load generic lists"
   , mTypes = [str]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions =
     [ loadList

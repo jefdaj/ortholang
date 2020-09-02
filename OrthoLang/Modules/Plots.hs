@@ -21,7 +21,7 @@ olModule = Module
   { mName = "Plots"
   , mDesc = "Generate half-decent plots"
   , mTypes = [png]
-  , mGroups = []
+  , mGroups = [], mRules = return ()
   , mEncodings = []
   , mFunctions =
       [ histogram  , histogramExplicit
