@@ -54,7 +54,7 @@ olModule = Module
       , orthologInAll
       , orthologInMin
       , orthologInMax
-      -- and these four implement them (TODO hide?)
+      -- and these four expose the implementation for easier testing
       , orthologInAnyStr
       , orthologInAllStr
       , orthologInMinStr
@@ -80,18 +80,26 @@ og = TypeGroup
 -- TODO separate module that works with multiple ortholog programs?
 -- TODO version to get the group matching an ID
 -- TODO this works with ofr files too; put them back using a type group!
-orthogroups :: Function
-orthogroups = let name = "orthogroups" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "orthogroup"]
-  , fOutput =  Exactly sll
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rOrthogroups
-  }
+-- orthogroups :: Function
+-- orthogroups = let name = "orthogroups" in Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Some og "orthogroup"]
+--   , fOutput =  Exactly sll
+--   , fTags = []
+--   , fNewRules = NewNotImplemented, fOldRules = rOrthogroups
+--   }
 
-rOrthogroups :: RulesFn
-rOrthogroups st e@(Fun _ _ _ _ [arg]) = (rSimple $ aOrthogroups $ typeOf arg) st e
-rOrthogroups _ e = error $ "bad argument to rOrthogroups: " ++ show e
+-- rOrthogroups :: RulesFn
+-- rOrthogroups st e@(Fun _ _ _ _ [arg]) = (rSimple $ aOrthogroups $ typeOf arg) st e
+-- rOrthogroups _ e = error $ "bad argument to rOrthogroups: " ++ show e
+
+orthogroups :: Function
+orthogroups = newFnA1
+  "orthogroups"
+  (Some og "orthogroup")
+  (Exactly sll)
+  aOrthogroups -- TODO detect arg type inside
+  []
 
 -- TODO move parse fns to their respective modules for easier maintenance
 
@@ -152,15 +160,21 @@ writeOrthogroups out groups = do
 -- TODO something wrong with the paths/lits here, and it breaks parsing the script??
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
 -- TODO translate hashes back into actual seqids here?
-aOrthogroups :: Type -> [Path] -> Action ()
-aOrthogroups rtn [out, ogPath] = do
+aOrthogroups :: NewAction1
+aOrthogroups (ExprPath out') ogPath = do
   -- liftIO $ putStrLn $ "ogPath: " ++ show ogPath
   -- TODO extract this into a parseOrthogroups function
+  cfg  <- fmap fromJust getShakeExtra
+  dRef <- fmap fromJust getShakeExtra
+  rtn <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out')
   let parser = if      rtn == spr then parseSonicParanoid
                else if rtn == ofr then parseOrthoFinder
                else if rtn == gcr then parseGreenCut
                else error $ "bad type for aOrthogroups: " ++ show rtn
-  groups <- parser ogPath
+      loc = "modules.orthogroups.aOrthogroups"
+      out = toPath loc cfg out'
+      og  = toPath loc cfg ogPath
+  groups <- parser og
   writeOrthogroups out groups
 aOrthogroups _ args = error $ "bad argument to aOrthogroups: " ++ show args
 
