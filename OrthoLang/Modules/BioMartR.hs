@@ -173,37 +173,23 @@ toTsvRows ss = map (intercalate "\t") (header:map row ss)
     header             = ["organism", "database", "identifier"]
     row (Search s d i) = [s, fromMaybe "NA" d, fromMaybe "NA" i]
 
--- TODO hide this, and rename to start with biomartr
+-- TODO rename to start with biomartr
 parseSearches :: Function
-parseSearches = let name = "parse_searches" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf str)]
-  , fOutput = Exactly search
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rParseSearches
-  }
+parseSearches = newFnA1
+  "parse_searches"
+  (Exactly $ ListOf str)
+  (Exactly search)
+  aParseSearches
+  [Hidden, ReadsURL]
 
-rParseSearches :: RulesFn
-rParseSearches scr expr@(Fun _ _ _ _ [searches]) = do
-  (ExprPath sList) <- rExpr scr searches
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.biomartr.rParseSearches"
-      searchTable  = exprPath cfg dRef scr expr
-      searchTable' = fromPath loc cfg searchTable
-      sList' = toPath loc cfg sList
-  searchTable' %> \_ -> aParseSearches sList' searchTable
-  return (ExprPath searchTable')
-rParseSearches _ e = error $ "bad arguments to rParseSearches: " ++ show e
-
-aParseSearches :: Path -> Path -> Action ()
-aParseSearches sList out = do
-  cfg <- fmap fromJust getShakeExtra
-  let sList' = fromPath loc cfg sList
-      out'   = fromPath loc cfg out
-      loc = "modules.biomartr.aParseSearches"
-      out''  = traceA loc out' [sList', out']
-  parses <- (fmap . map) readSearch (readLits loc sList')
+aParseSearches :: NewAction1
+aParseSearches (ExprPath out) sList = do
+  -- cfg <- fmap fromJust getShakeExtra
+  -- let sList' = fromPath loc cfg sList
+      -- out'   = fromPath loc cfg out
+  let loc = "modules.biomartr.aParseSearches"
+      out''  = traceA loc out [sList, out]
+  parses <- (fmap . map) readSearch (readLits loc sList)
   let (errors, searches') = partitionEithers parses
   -- TODO better error here
   if (not . null) errors
