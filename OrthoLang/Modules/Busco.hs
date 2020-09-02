@@ -1,8 +1,10 @@
 module OrthoLang.Modules.Busco
   where
 
--- TODO update to BUSCO v4.0.0
+-- TODO update to BUSCO v4.0.0 (after the rewrite, separately!)
 -- TODO add old datasets? maybe no need
+-- TODO for rewrite, need to follow the datasets.cfg link into the lineage cache dir?
+-- TODO later, also add a function to fetch/load the hmms for use with hmmer? if they're compatible
 
 import Development.Shake
 import OrthoLang.Types
@@ -256,6 +258,7 @@ buscoProteins      = mkBusco "busco_proteins"      "prot" faa
 buscoTranscriptome = mkBusco "busco_transcriptome" "tran" fna
 -- buscoGenome = mkBusco "busco_genome" "geno"
 
+-- TODO looks like you have to follow the final result symlink to cd into the dir with dataset.cfg?
 aBusco :: String -> ([Path] -> Action ())
 aBusco mode [outPath, blhPath, faaPath] = do
   cfg <- fmap fromJust getShakeExtra
@@ -263,7 +266,7 @@ aBusco mode [outPath, blhPath, faaPath] = do
       out' = fromPath loc cfg outPath
       blh' = takeDirectory $ fromPath loc cfg blhPath
       cDir = fromPath loc cfg $ buscoCache cfg
-      rDir = cDir </> "runs"
+      rDir = cDir </> "runs" -- TODO need digest here?
       faa' = fromPath loc cfg faaPath
   blh'' <- liftIO $ resolveSymlinks (Just [tmpdir cfg]) blh'
   liftIO $ createDirectoryIfMissing True rDir
