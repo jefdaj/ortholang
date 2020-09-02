@@ -99,16 +99,12 @@ mGbkToFaa _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_faa_path" [Fun r No
 mGbkToFaa _ _ e = error "modules.seqio.mGbkToFaa" $ "bad argument: " ++ show e
 
 gbkToFaaRawIDs :: Function
-gbkToFaaRawIDs = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str, Exactly gbk]
-  , fOutput = Exactly faa
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aGenbankToFasta faa "aa"
-  }
-  where
-    name = "gbk_to_faa_rawids"
+gbkToFaaRawIDs = newFnA2
+  "gbk_to_faa_rawids"
+  (Exactly str, Exactly gbk)
+  (Exactly faa)
+  (aGenbankToFasta faa "aa")
+  [Hidden]
 
 gbkToFna :: Function
 gbkToFna = newExprExpansion "gbk_to_fna" [Exactly str, Exactly gbk] (Exactly fna) mGbkToFna [ReadsFile]
@@ -118,16 +114,12 @@ mGbkToFna _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_fna_path" [Fun r No
 mGbkToFna _ _ e = error "modules.seqio.mGbkToFna" $ "bad argument: " ++ show e
 
 gbkToFnaRawIDs :: Function
-gbkToFnaRawIDs = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str, Exactly gbk]
-  , fOutput = Exactly fna
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
-  }
-  where
-    name = "gbk_to_fna_rawids"
+gbkToFnaRawIDs = newFnA2
+  "gbk_to_fna_rawids"
+  (Exactly str, Exactly gbk)
+  (Exactly fna)
+  (aGenbankToFasta fna "nt") -- TODO add --qualifiers all?
+  [Hidden]
 
 gbkToFaaEach :: Function
 gbkToFaaEach = newExprExpansion "gbk_to_faa_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf faa) mGbkToFaaEach [ReadsFile]
@@ -137,16 +129,12 @@ mGbkToFaaEach _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_faa_path_each" 
 mGbkToFaaEach _ _ e = error "modules.seqio.mGbkToFaaEach" $ "bad argument: " ++ show e
 
 gbkToFaaRawIDsEach :: Function
-gbkToFaaRawIDsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str, Exactly (ListOf gbk)]
-  , fOutput = Exactly (ListOf faa)
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 2 $ aGenbankToFasta faa "nt" -- TODO add --qualifiers all?
-  }
-  where
-    name = "gbk_to_faa_rawids_each"
+gbkToFaaRawIDsEach = newFnA2
+  "gbk_to_faa_rawids_each"
+  (Exactly str, Exactly $ ListOf gbk)
+  (Exactly $ ListOf faa)
+  (newMap2of2 "gbk_to_faa_rawids")
+  [Hidden]
 
 gbkToFnaEach :: Function
 gbkToFnaEach = newExprExpansion "gbk_to_fna_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf fna) mGbkToFnaEach [ReadsFile]
@@ -155,31 +143,23 @@ mGbkToFnaEach :: ExprExpansion
 mGbkToFnaEach _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_fna_path_each" [Fun r Nothing ds (replace "_each" "_rawids_each" n) [s, g]]
 mGbkToFnaEach _ _ e = error "modules.seqio.mGbkToFnaEach" $ "bad argument: " ++ show e
 
-
 gbkToFnaRawIDsEach :: Function
-gbkToFnaRawIDsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str, Exactly (ListOf gbk)]
-  , fOutput = Exactly (ListOf fna)
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
-  }
-  where
-    name = "gbk_to_fna_rawids_each"
+gbkToFnaRawIDsEach = newFnA2
+  "gbk_to_fna_rawids_each"
+  (Exactly str, Exactly $ ListOf gbk)
+  (Exactly $ ListOf fna)
+  (newMap2of2 "gbk_to_fna_rawids")
+  [Hidden]
 
 -- TODO error if no features extracted since it probably means a wrong ft string
 -- TODO silence the output? or is it helpful?
-aGenbankToFasta :: Type -> String -> ([Path] -> Action ())
-aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
+aGenbankToFasta :: Type -> String -> NewAction2
+aGenbankToFasta rtn st (ExprPath outPath') ftPath' faPath' = do
   cfg <- fmap fromJust getShakeExtra
-  let faPath'   = fromPath loc cfg faPath
-      ftPath'   = fromPath loc cfg ftPath
+  let loc = "modules.seqio.aGenbankToFasta"
       exprDir'  = tmpdir cfg </> "exprs"
       tmpDir'   = fromPath loc cfg $ cacheDir cfg "seqio"
       outDir'   = exprDir' </> "load_" ++ ext rtn
-      outPath'  = fromPath loc cfg outPath
-      loc = "modules.seqio.aGenbankToFasta"
       outPath'' = traceA loc outPath' [outPath', faPath']
   ft <- readLit loc ftPath'
   let ft' = if ft  == "cds" then "CDS" else ft
@@ -204,7 +184,6 @@ aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath'']
     }
-aGenbankToFasta _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show paths
 
 ------------------------
 -- extract_ids(_each) --
@@ -213,28 +192,21 @@ aGenbankToFasta _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show 
 -- TODO also extract them from genbank files
 
 extractIds :: Function
-extractIds = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Some fa "any fasta file"]
-  , fOutput = Exactly (ListOf str)
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimpleScript "extract_ids.py"
-  }
-  where
-    name = "extract_ids"
+extractIds = newFnS1
+  "extract_ids"
+  (Some fa "any fasta file")
+  (Exactly $ ListOf str)
+  "extract_ids.py"
+  []
+  id
 
 extractIdsEach :: Function
-extractIdsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [ListSigs (Some fa "any fasta file")]
-  , fOutput = Exactly (ListOf (ListOf str))
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMapSimpleScript 1 "extract_ids.py"
-  }
-  where
-    name = "extract_ids_each"
+extractIdsEach = newFnA1
+  "extract_ids_each"
+  (ListSigs $ Some fa "any fasta file")
+  (Exactly $ ListOf $ ListOf str)
+  (newMap1of1 "extract_ids")
+  []
 
 -------------------------
 -- extract_seqs(_each) --
@@ -266,51 +238,35 @@ aExtractSeqs out inFa inList = do
   -- unhashIDsFile (toPath loc cfg inList) ids -- TODO implement as a macro?
   aNewRulesS2 "extract_seqs.py" id out inFa inList
 
--- TODO remove by rewriting map functions to work on the new one above
-aExtractSeqsOld :: [Path] -> Action ()
-aExtractSeqsOld [outPath, inFa, inList] = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.seqio.aExtractSeqsOld"
-      cDir     = fromPath loc cfg $ cacheDir cfg "seqio"
-      tmpList' = cDir </> digest loc inList <.> "txt"
-      tmpList  = toPath loc cfg tmpList'
-  liftIO $ createDirectoryIfMissing True cDir
-  -- lookupIDsFile inList tmpList
-  aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, inList]
-aExtractSeqsOld ps = error $ "bad argument to aExtractSeqs: " ++ show ps
-
--- TODO does this one even make sense? maybe only as an _all version for mixed id lists?
---      or maybe for singletons or something?
+-- TODO does this one make sense? is the mapping right?
 extractSeqsEach :: Function
-extractSeqsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Some fa "any fasta file", Exactly (ListOf (ListOf str))]
-  , fOutput = ListSigs (Some fa "any fasta file")
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 1 aExtractSeqsOld
-  }
-  where
-    name = "extract_seqs_each"
+extractSeqsEach = newFnA2
+  "extract_seqs_each"
+  (Some fa "any fasta file", Exactly $ ListOf $ ListOf str)
+  (ListSigs $ Some fa "any fasta file")
+  (newMap2of2 "extract_seqs")
+  []
 
 ----------------------
 -- translate(_each) --
 ----------------------
 
 translate :: Function
-translate = newFnS1 "translate" (Exactly fna) (Exactly faa) "translate.py" [ReadsFile] id
+translate = newFnS1
+  "translate"
+  (Exactly fna)
+  (Exactly faa)
+  "translate.py"
+  [ReadsFile]
+  id
 
 translateEach :: Function
-translateEach = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly (ListOf fna)]
-  , fOutput =  Exactly (ListOf faa)
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMapSimpleScript 1 "translate.py"
-  }
-  where
-    name = "translate_each"
+translateEach = newFnA1
+  "translate_each"
+  (Exactly $ ListOf fna)
+  (Exactly $ ListOf faa)
+  (newMap1of1 "translate")
+  [ReadsFile]
 
 --------------
 -- concat_* --
@@ -319,28 +275,20 @@ translateEach = Function
 -- TODO separate concat module? or maybe this goes in ListLike?
 
 mkConcat :: Type -> Function
-mkConcat cType = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly (ListOf cType)]
-  , fOutput =  Exactly cType
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aConcat cType
-  }
-  where
-    name = "concat_" ++ ext cType
+mkConcat cType = newFnA1
+  ("concat_" ++ ext cType)
+  (Exactly $ ListOf cType)
+  (Exactly cType)
+  (aConcat cType)
+  []
 
 mkConcatEach :: Type -> Function
-mkConcatEach cType = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly (ListOf (ListOf cType))]
-  , fOutput =  Exactly (ListOf cType)
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 1 $ aConcat cType
-  }
-  where
-    name = "concat_" ++ ext cType ++ "_each"
+mkConcatEach cType = newFnA1
+  ("concat_" ++ ext cType ++ "_each")
+  (Exactly $ ListOf $ ListOf cType)
+  (Exactly $ ListOf cType)
+  (newMap1of1 $ "concat_" ++ ext cType)
+  []
 
 {- This is just a fancy `cat`, with handling for a couple cases:
  - * some args are empty and their <<emptywhatever>> should be removed
@@ -348,8 +296,8 @@ mkConcatEach cType = Function
  -
  - TODO special case of error handling here, since cat errors are usually temporary?
  -}
-aConcat :: Type -> ([Path] -> Action ())
-aConcat cType [outPath, inList] = do
+aConcat :: Type -> NewAction1
+aConcat cType (ExprPath outPath') inList' = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
   cfg <- fmap fromJust getShakeExtra
@@ -357,57 +305,54 @@ aConcat cType [outPath, inList] = do
       emptyPath = tmpDir' </> ("empty" ++ ext cType) <.> "txt"
       emptyStr  = "<<empty" ++ ext cType ++ ">>"
       loc = "ortholang.modules.seqio.aConcat"
-      inList'   = tmpDir' </> digest loc inList <.> "txt" -- TODO is that right?
+      outPath = toPath loc cfg outPath'
+      inList    = toPath loc cfg inList'
+      inList''  = tmpDir' </> digest loc inList <.> "txt" -- TODO is that right?
   liftIO $ createDirectoryIfMissing True tmpDir'
-  liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromPath loc cfg outPath
+  liftIO $ createDirectoryIfMissing True $ takeDirectory outPath'
   writeCachedLines loc emptyPath [emptyStr]
-  inPaths <- readPaths loc $ fromPath loc cfg inList
+  inPaths <- readPaths loc inList'
   let inPaths' = map (fromPath loc cfg) inPaths
   need' loc inPaths'
-  writeCachedLines loc inList' inPaths'
-  aSimpleScriptNoFix "cat.py" [ outPath
-                              , toPath loc cfg inList'
-                              , toPath loc cfg emptyPath]
-aConcat _ _ = fail "bad argument to aConcat"
+  writeCachedLines loc inList'' inPaths'
+  aSimpleScriptNoFix "cat.py" [ outPath, inList, toPath loc cfg emptyPath]
 
 ------------------------
 -- split_fasta(_each) --
 ------------------------
 
 splitFasta :: Type -> Function
-splitFasta faType = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly faType]
-  , fOutput =  Exactly (ListOf faType)
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aSplit name $ ext faType
-  }
-  where
-    name = "split_" ++ ext faType
+splitFasta faType =
+  let name = "split_" ++ ext faType
+  in newFnA1
+       name
+       (Exactly faType)
+       (Exactly $ ListOf faType)
+       (aSplit name $ ext faType)
+       []
 
 splitFastaEach :: Type -> Function
-splitFastaEach faType = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly (ListOf faType)]
-  , fOutput =  Exactly (ListOf (ListOf faType))
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 1 $ aSplit name $ ext faType -- TODO is 1 wrong?
-  }
-  where
-    name = "split_" ++ ext faType ++ "_each"
+splitFastaEach faType =
+  let n2 = "split_" ++ ext faType
+      n1 = n2 ++ "_each"
+  in newFnA1
+       n1
+       (Exactly $ ListOf faType)
+       (Exactly $ ListOf $ ListOf faType)
+       (newMap1of1 n2)
+       []
 
-aSplit :: String -> String -> ([Path] -> Action ())
-aSplit name e [outPath, faPath] = do
+aSplit :: String -> String -> NewAction1
+aSplit name e (ExprPath outPath') faPath' = do
   cfg <- fmap fromJust getShakeExtra
-  let faPath'   = fromPath loc cfg faPath
+  -- let faPath'   = fromPath loc cfg faPath
+  let loc = "ortholang.modules.seqio.aSplit"
       exprDir'  = tmpdir cfg </> "exprs"
       tmpDir'   = tmpdir cfg </> "cache" </> name -- TODO is there a fn for this?
-      loc = "ortholang.modules.seqio.aSplit"
+      faPath    = toPath loc cfg faPath'
       prefix'   = tmpDir' </> digest loc faPath ++ "/"
       outDir'   = exprDir' </> "load_" ++ e
-      outPath'  = fromPath loc cfg outPath
+      -- outPath'  = fromPath loc cfg outPath
       outPath'' = traceA loc outPath' [outPath', faPath']
       tmpList   = tmpDir' </> takeFileName outPath' <.> "tmp"
       args      = [tmpList, outDir', prefix', faPath', e]
@@ -438,4 +383,3 @@ aSplit name e [outPath, faPath] = do
   -- when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
   -- writePaths outPath'' loadPaths
   writeCachedVersion loc outPath'' tmpList
-aSplit _ _ paths = error $ "bad argument to aSplit: " ++ show paths
