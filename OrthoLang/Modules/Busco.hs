@@ -199,6 +199,7 @@ untar from to = do
   let loc = "modules.busco.untar"
       from' = fromPath loc cfg from
       to' = fromPath loc cfg to
+  liftIO $ createDirectoryIfMissing True to'
   runCmd $ CmdDesc
     { cmdBinary = "tar"
     , cmdArguments = ["-xf", from', "-C", takeDirectory to']

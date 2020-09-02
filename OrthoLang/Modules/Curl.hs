@@ -7,6 +7,8 @@ module OrthoLang.Modules.Curl
   )
   where
 
+-- TODO include in the load function too if given a url?
+
 import OrthoLang.Types
 import OrthoLang.Interpreter
 
