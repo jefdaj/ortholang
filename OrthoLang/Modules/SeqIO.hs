@@ -275,28 +275,20 @@ translateEach = newFnA1
 -- TODO separate concat module? or maybe this goes in ListLike?
 
 mkConcat :: Type -> Function
-mkConcat cType = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly (ListOf cType)]
-  , fOutput =  Exactly cType
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aConcat cType
-  }
-  where
-    name = "concat_" ++ ext cType
+mkConcat cType = newFnA1
+  ("concat_" ++ ext cType)
+  (Exactly $ ListOf cType)
+  (Exactly cType)
+  (aConcat cType)
+  []
 
 mkConcatEach :: Type -> Function
-mkConcatEach cType = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly (ListOf (ListOf cType))]
-  , fOutput =  Exactly (ListOf cType)
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 1 $ aConcat cType
-  }
-  where
-    name = "concat_" ++ ext cType ++ "_each"
+mkConcatEach cType = newFnA1
+  ("concat_" ++ ext cType ++ "_each")
+  (Exactly $ ListOf $ ListOf cType)
+  (Exactly $ ListOf cType)
+  (newMap1of1 $ "concat_" ++ ext cType)
+  []
 
 {- This is just a fancy `cat`, with handling for a couple cases:
  - * some args are empty and their <<emptywhatever>> should be removed
@@ -304,8 +296,8 @@ mkConcatEach cType = Function
  -
  - TODO special case of error handling here, since cat errors are usually temporary?
  -}
-aConcat :: Type -> ([Path] -> Action ())
-aConcat cType [outPath, inList] = do
+aConcat :: Type -> NewAction1
+aConcat cType (ExprPath outPath') inList = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
   cfg <- fmap fromJust getShakeExtra
@@ -313,18 +305,18 @@ aConcat cType [outPath, inList] = do
       emptyPath = tmpDir' </> ("empty" ++ ext cType) <.> "txt"
       emptyStr  = "<<empty" ++ ext cType ++ ">>"
       loc = "ortholang.modules.seqio.aConcat"
+      outPath = toPath loc cfg outPath'
       inList'   = tmpDir' </> digest loc inList <.> "txt" -- TODO is that right?
   liftIO $ createDirectoryIfMissing True tmpDir'
-  liftIO $ createDirectoryIfMissing True $ takeDirectory $ fromPath loc cfg outPath
+  liftIO $ createDirectoryIfMissing True $ takeDirectory outPath'
   writeCachedLines loc emptyPath [emptyStr]
-  inPaths <- readPaths loc $ fromPath loc cfg inList
+  inPaths <- readPaths loc inList
   let inPaths' = map (fromPath loc cfg) inPaths
   need' loc inPaths'
   writeCachedLines loc inList' inPaths'
   aSimpleScriptNoFix "cat.py" [ outPath
                               , toPath loc cfg inList'
                               , toPath loc cfg emptyPath]
-aConcat _ _ = fail "bad argument to aConcat"
 
 ------------------------
 -- split_fasta(_each) --
