@@ -297,7 +297,7 @@ mkConcatEach cType = newFnA1
  - TODO special case of error handling here, since cat errors are usually temporary?
  -}
 aConcat :: Type -> NewAction1
-aConcat cType (ExprPath outPath') inList = do
+aConcat cType (ExprPath outPath') inList' = do
   -- This is all so we can get an example <<emptywhatever>> to cat.py
   -- ... there's gotta be a simpler way right?
   cfg <- fmap fromJust getShakeExtra
@@ -306,56 +306,53 @@ aConcat cType (ExprPath outPath') inList = do
       emptyStr  = "<<empty" ++ ext cType ++ ">>"
       loc = "ortholang.modules.seqio.aConcat"
       outPath = toPath loc cfg outPath'
-      inList'   = tmpDir' </> digest loc inList <.> "txt" -- TODO is that right?
+      inList    = toPath loc cfg inList'
+      inList''  = tmpDir' </> digest loc inList <.> "txt" -- TODO is that right?
   liftIO $ createDirectoryIfMissing True tmpDir'
   liftIO $ createDirectoryIfMissing True $ takeDirectory outPath'
   writeCachedLines loc emptyPath [emptyStr]
-  inPaths <- readPaths loc inList
+  inPaths <- readPaths loc inList'
   let inPaths' = map (fromPath loc cfg) inPaths
   need' loc inPaths'
-  writeCachedLines loc inList' inPaths'
-  aSimpleScriptNoFix "cat.py" [ outPath
-                              , toPath loc cfg inList'
-                              , toPath loc cfg emptyPath]
+  writeCachedLines loc inList'' inPaths'
+  aSimpleScriptNoFix "cat.py" [ outPath, inList, toPath loc cfg emptyPath]
 
 ------------------------
 -- split_fasta(_each) --
 ------------------------
 
 splitFasta :: Type -> Function
-splitFasta faType = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly faType]
-  , fOutput =  Exactly (ListOf faType)
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aSplit name $ ext faType
-  }
-  where
-    name = "split_" ++ ext faType
+splitFasta faType =
+  let name = "split_" ++ ext faType
+  in newFnA1
+       name
+       (Exactly faType)
+       (Exactly $ ListOf faType)
+       (aSplit name $ ext faType)
+       []
 
 splitFastaEach :: Type -> Function
-splitFastaEach faType = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly (ListOf faType)]
-  , fOutput =  Exactly (ListOf (ListOf faType))
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 1 $ aSplit name $ ext faType -- TODO is 1 wrong?
-  }
-  where
-    name = "split_" ++ ext faType ++ "_each"
+splitFastaEach faType =
+  let n2 = "split_" ++ ext faType
+      n1 = n2 ++ "_each"
+  in newFnA1
+       n1
+       (Exactly $ ListOf faType)
+       (Exactly $ ListOf $ ListOf faType)
+       (newMap1of1 n2)
+       []
 
-aSplit :: String -> String -> ([Path] -> Action ())
-aSplit name e [outPath, faPath] = do
+aSplit :: String -> String -> NewAction1
+aSplit name e (ExprPath outPath') faPath' = do
   cfg <- fmap fromJust getShakeExtra
-  let faPath'   = fromPath loc cfg faPath
+  -- let faPath'   = fromPath loc cfg faPath
+  let loc = "ortholang.modules.seqio.aSplit"
       exprDir'  = tmpdir cfg </> "exprs"
       tmpDir'   = tmpdir cfg </> "cache" </> name -- TODO is there a fn for this?
-      loc = "ortholang.modules.seqio.aSplit"
+      faPath    = toPath loc cfg faPath'
       prefix'   = tmpDir' </> digest loc faPath ++ "/"
       outDir'   = exprDir' </> "load_" ++ e
-      outPath'  = fromPath loc cfg outPath
+      -- outPath'  = fromPath loc cfg outPath
       outPath'' = traceA loc outPath' [outPath', faPath']
       tmpList   = tmpDir' </> takeFileName outPath' <.> "tmp"
       args      = [tmpList, outDir', prefix', faPath', e]
@@ -386,4 +383,3 @@ aSplit name e [outPath, faPath] = do
   -- when (null loadPaths) $ error $ "no fasta file written: " ++ tmpList
   -- writePaths outPath'' loadPaths
   writeCachedVersion loc outPath'' tmpList
-aSplit _ _ paths = error $ "bad argument to aSplit: " ++ show paths
