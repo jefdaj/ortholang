@@ -239,31 +239,40 @@ aExtractSeqs out inFa inList = do
   aNewRulesS2 "extract_seqs.py" id out inFa inList
 
 -- TODO remove by rewriting map functions to work on the new one above
-aExtractSeqsOld :: [Path] -> Action ()
-aExtractSeqsOld [outPath, inFa, inList] = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.seqio.aExtractSeqsOld"
-      cDir     = fromPath loc cfg $ cacheDir cfg "seqio"
-      tmpList' = cDir </> digest loc inList <.> "txt"
-      tmpList  = toPath loc cfg tmpList'
-  liftIO $ createDirectoryIfMissing True cDir
-  -- lookupIDsFile inList tmpList
-  aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, inList]
-aExtractSeqsOld ps = error $ "bad argument to aExtractSeqs: " ++ show ps
+-- aExtractSeqsOld :: [Path] -> Action ()
+-- aExtractSeqsOld [outPath, inFa, inList] = do
+--   cfg <- fmap fromJust getShakeExtra
+--   let loc = "modules.seqio.aExtractSeqsOld"
+--       cDir     = fromPath loc cfg $ cacheDir cfg "seqio"
+--       tmpList' = cDir </> digest loc inList <.> "txt"
+--       tmpList  = toPath loc cfg tmpList'
+--   liftIO $ createDirectoryIfMissing True cDir
+--   -- lookupIDsFile inList tmpList
+--   aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, inList]
+-- aExtractSeqsOld ps = error $ "bad argument to aExtractSeqs: " ++ show ps
 
 -- TODO does this one even make sense? maybe only as an _all version for mixed id lists?
 --      or maybe for singletons or something?
+-- extractSeqsEach :: Function
+-- extractSeqsEach = Function
+--   { fOpChar = Nothing, fName = name
+--   , fTags = []
+--   , fInputs = [Some fa "any fasta file", Exactly (ListOf (ListOf str))]
+--   , fOutput = ListSigs (Some fa "any fasta file")
+--   , fNewRules = NewNotImplemented
+--   , fOldRules = rMap 1 aExtractSeqsOld
+--   }
+--   where
+--     name = "extract_seqs_each"
+
+-- TODO does this one make sense? is the mapping right?
 extractSeqsEach :: Function
-extractSeqsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Some fa "any fasta file", Exactly (ListOf (ListOf str))]
-  , fOutput = ListSigs (Some fa "any fasta file")
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 1 aExtractSeqsOld
-  }
-  where
-    name = "extract_seqs_each"
+extractSeqsEach = newFnA2
+  "extract_seqs_each"
+  (Some fa "any fasta file", Exactly $ ListOf $ ListOf str)
+  (ListSigs $ Some fa "any fasta file")
+  (newMap2of2 "extract_seqs")
+  []
 
 ----------------------
 -- translate(_each) --
