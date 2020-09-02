@@ -136,45 +136,26 @@ pdb = EncodedAs blastdb faa
  - files that you can read to get the proper prefix pattern.
  -}
 
--- TODO have to implement new rules before blast will work?
 mkLoadDB :: String -> Type -> Function
-mkLoadDB name faType = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str]
-  , fOutput =  Exactly (EncodedAs blastdb faType)
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rLoadDB
-  }
+mkLoadDB name faType = newFnA1
+  name
+  (Exactly str)
+  (Exactly $ EncodedAs blastdb faType)
+  aLoadDB
+  []
 
--- TODO have to implement new rules before blast will work?
 mkLoadDBEach :: String -> Type -> Function
-mkLoadDBEach name faType = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf str)]
-  , fOutput =  Exactly (ListOf (EncodedAs blastdb faType))
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = undefined -- TODO write this!
-  }
+mkLoadDBEach name faType = newFnA1
+  (name ++ "_each")
+  (Exactly $ ListOf str)
+  (Exactly $ ListOf $ EncodedAs blastdb faType)
+  (newMap1of1 name)
+  []
 
-rLoadDB :: RulesFn
-rLoadDB scr e@(Fun _ _ _ _ [s]) = do
-  (ExprPath sPath) <- rExpr scr s
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.blastdb.rLoadDB"
-      oPath  = exprPath cfg dRef scr e
-      oPath' = fromPath loc cfg oPath
-  let sPath' = toPath loc cfg sPath
-  oPath' %> \_ -> aLoadDB oPath sPath'
-  return (ExprPath oPath')
-rLoadDB _ _ = fail "bad argument to rLoadDB"
-
-aLoadDB :: Path -> Path -> Action ()
-aLoadDB oPath sPath = do
+aLoadDB :: NewAction1
+aLoadDB (ExprPath oPath') sPath' = do
   cfg <- fmap fromJust getShakeExtra
-  let oPath'  = fromPath loc cfg oPath
-      sPath'  = fromPath loc cfg sPath
-      loc = "modules.blastdb.aLoadDB"
+  let loc = "modules.blastdb.aLoadDB"
       oPath'' = traceA loc oPath' [oPath', sPath']
   pattern <- readLit loc sPath'
   let pattern' = makeRelative (tmpdir cfg) pattern -- TODO is this right??
@@ -187,10 +168,10 @@ loadFaaDb :: Function
 loadFaaDb = mkLoadDB "load_faa_db" faa
 
 loadFnaDbEach :: Function
-loadFnaDbEach = mkLoadDBEach "load_fna_db_each" fna
+loadFnaDbEach = mkLoadDBEach "load_fna_db" fna
 
 loadFaaDbEach :: Function
-loadFaaDbEach = mkLoadDBEach "load_faa_db_each" faa
+loadFaaDbEach = mkLoadDBEach "load_faa_db" faa
 
 ------------------------
 -- download from NCBI --
