@@ -267,54 +267,61 @@ mOrthologInStr _ _ _ _ = error "bad arguments to mOrthologInStr"
 -- TODO can this be removed somehow?
 -- TODO flip args so it reads more naturally?
 
+-- orthologInAnyStr :: Function
+-- orthologInAnyStr = let name = "ortholog_in_any_str" in Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly sll, Exactly sll]
+--   , fOutput = Exactly sll
+--   , fTags = [Hidden]
+--   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAny
+--   }
+
+-- TODO generate this?
 orthologInAnyStr :: Function
-orthologInAnyStr = let name = "ortholog_in_any_str" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly sll, Exactly sll]
-  , fOutput = Exactly sll
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAny
-  }
+orthologInAnyStr = newFnA2
+  "ortholog_in_any_str"
+  (Exactly sll, Exactly sll)
+  (Exactly sll)
+  (aOrthologFilterStr "min" pickAny)
+  [Hidden]
 
 pickAny :: Int -> Int
 pickAny _ = 1
 
-rOrthologFilterStr :: String -> PickerFn -> RulesFn
-rOrthologFilterStr fnName pickerFn scr e@(Fun _ _ _ _ [groupLists, idLists]) = do
-  (ExprPath groupListsPath) <- rExpr scr groupLists
-  (ExprPath idListsPath   ) <- rExpr scr idLists
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let out     = exprPath cfg dRef scr e
-      loc = "modules.orthogroups.rOrthologFilterStr"
-      out'    = debugRules loc e $ fromPath loc cfg out
+aOrthologFilterStr :: String -> PickerFn -> NewAction2
+aOrthologFilterStr fnName pickerFn (ExprPath out) groupListsPath idListsPath = do
+  -- (ExprPath groupListsPath) <- rExpr scr groupLists
+  -- (ExprPath idListsPath   ) <- rExpr scr idLists
+  cfg  <- fmap fromJust getShakeExtra
+  -- dRef <- fmap fromJust getShakeExtra
+  -- let out     = exprPath cfg dRef scr e
+  let loc = "modules.orthogroups.rOrthologFilterStr"
+      out'    = debugRules loc cfg out
       ogDir   = fromPath loc cfg $ ogCache cfg
       ogsPath = ogDir </> digest loc groupListsPath <.> "txt"
       idsPath = ogDir </> digest loc idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir
-  ogsPath %> absolutizePaths loc groupListsPath
-  idsPath %> absolutizePaths loc idListsPath
-  out' %> \_ -> do
-    -- TODO is there a way to avoid reading this?
-    nIDs  <- fmap length $ readPaths loc idListsPath
-    let fnArg' = show $ pickerFn nIDs
-    need' loc [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
-    runCmd $ CmdDesc
-      { cmdParallel = False
-      , cmdFixEmpties = True
-      , cmdOutPath = out'
-      , cmdInPatterns = [ogsPath, idsPath]
-      , cmdNoNeedDirs = []
-      , cmdExtraOutPaths = []
-      , cmdSanitizePaths = [out'] -- TODO is this right?
-      , cmdOptions =[]
-      , cmdBinary = "orthogroups.py"
-      , cmdArguments = [out', fnName, fnArg', ogsPath, idsPath]
-      , cmdRmPatterns = []
-      , cmdExitCode = ExitSuccess
-      }
-  return (ExprPath out')
-rOrthologFilterStr _ _ _ _ = error "bad arguments to rOrthologFilterStr"
+  absolutizePaths loc groupListsPath ogsPath -- TODO separate function?
+  absolutizePaths loc idListsPath idsPath -- TODO separate function?
+  -- out' %> \_ -> do
+  -- TODO is there a way to avoid reading this?
+  nIDs  <- fmap length $ readPaths loc idListsPath
+  let fnArg' = show $ pickerFn nIDs
+  -- need' loc [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
+  runCmd $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = out'
+    , cmdInPatterns = [ogsPath, idsPath]
+    , cmdNoNeedDirs = []
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = [out'] -- TODO is this right?
+    , cmdOptions =[]
+    , cmdBinary = "orthogroups.py"
+    , cmdArguments = [out', fnName, fnArg', ogsPath, idsPath]
+    , cmdRmPatterns = []
+    , cmdExitCode = ExitSuccess
+    }
 
 ---------------------
 -- ortholog_in_all --
@@ -333,14 +340,23 @@ orthologInAll =
        (mOrthologInStr name)
        []
 
+-- orthologInAllStr :: Function
+-- orthologInAllStr = let name = "ortholog_in_all_str" in Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly sll, Exactly sll]
+--   , fOutput = Exactly sll
+--   , fTags = [Hidden]
+--   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAll
+--   }
+
+-- TODO generate this?
 orthologInAllStr :: Function
-orthologInAllStr = let name = "ortholog_in_all_str" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly sll, Exactly sll]
-  , fOutput = Exactly sll
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAll
-  }
+orthologInAllStr = newFnA2
+  "ortholog_in_all_str"
+  (Exactly sll, Exactly sll)
+  (Exactly sll)
+  (aOrthologFilterStr "min" pickAll)
+  [Hidden]
 
 pickAll :: Int -> Int
 pickAll nIDs = nIDs
