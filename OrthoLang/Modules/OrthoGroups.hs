@@ -211,14 +211,14 @@ aOrthogroupContaining (ExprPath out) ofrPath' idPath = do
 ----------------------------
 
 -- TODO think of a better name for this
+
 orthogroupsContaining :: Function
-orthogroupsContaining = let name = "orthogroups_containing" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "any orthogroup", Exactly (ListOf str)]
-  , fOutput = Exactly sll
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aOrthogroupsFilter containsOneOf
-  }
+orthogroupsContaining = newFnA2
+  "orthogroups_containing"
+  (Some og "any orthogroup", Exactly $ ListOf str)
+  (Exactly sll)
+  (aOrthogroupsFilter containsOneOf)
+  []
 
 type FilterFn = [[String]] -> [String] -> [[String]]
 
@@ -227,19 +227,20 @@ containsOneOf :: FilterFn
 containsOneOf lists elems = filter (flip any elems . flip elem) lists
 
 -- TODO should this error when not finding one too, like aOrthogroupContaining?
-aOrthogroupsFilter :: FilterFn -> [Path] -> Action ()
-aOrthogroupsFilter filterFn [out, ofrPath, idsPath] = do
+aOrthogroupsFilter :: FilterFn -> NewAction2
+aOrthogroupsFilter filterFn (ExprPath out') ofrPath idsPath = do
   ids  <- fmap fromJust getShakeExtra
   ids' <- liftIO $ readIORef ids
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.orthogroups.aOrthogroupsFilter"
-  lookups <- fmap (map $ lookupID ids') $ readLits loc $ fromPath loc cfg idsPath
+      out = toPath loc cfg out'
+      ofr = toPath loc cfg ofrPath
+  lookups <- fmap (map $ lookupID ids') $ readLits loc idsPath
   when (not $ all isJust lookups) $ error "unable to find some seqids! probably a programming error"
   let geneIds = catMaybes lookups
-  groups <- parseOrthoFinder ofrPath -- TODO handle the others!
+  groups <- parseOrthoFinder ofr -- TODO handle the others!
   let groups' = filterFn groups geneIds
   writeOrthogroups out groups'
-aOrthogroupsFilter _ args = error $ "bad argument to aOrthogroupContaining: " ++ show args
 
 ---------------------
 -- ortholog_in_any --
