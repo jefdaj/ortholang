@@ -99,16 +99,12 @@ mGbkToFaa _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_faa_path" [Fun r No
 mGbkToFaa _ _ e = error "modules.seqio.mGbkToFaa" $ "bad argument: " ++ show e
 
 gbkToFaaRawIDs :: Function
-gbkToFaaRawIDs = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str, Exactly gbk]
-  , fOutput = Exactly faa
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aGenbankToFasta faa "aa"
-  }
-  where
-    name = "gbk_to_faa_rawids"
+gbkToFaaRawIDs = newFnA2
+  "gbk_to_faa_rawids"
+  (Exactly str, Exactly gbk)
+  (Exactly faa)
+  (aGenbankToFasta faa "aa")
+  [Hidden]
 
 gbkToFna :: Function
 gbkToFna = newExprExpansion "gbk_to_fna" [Exactly str, Exactly gbk] (Exactly fna) mGbkToFna [ReadsFile]
@@ -118,16 +114,12 @@ mGbkToFna _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_fna_path" [Fun r No
 mGbkToFna _ _ e = error "modules.seqio.mGbkToFna" $ "bad argument: " ++ show e
 
 gbkToFnaRawIDs :: Function
-gbkToFnaRawIDs = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str, Exactly gbk]
-  , fOutput = Exactly fna
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
-  }
-  where
-    name = "gbk_to_fna_rawids"
+gbkToFnaRawIDs = newFnA2
+  "gbk_to_fna_rawids"
+  (Exactly str, Exactly gbk)
+  (Exactly fna)
+  (aGenbankToFasta fna "nt") -- TODO add --qualifiers all?
+  [Hidden]
 
 gbkToFaaEach :: Function
 gbkToFaaEach = newExprExpansion "gbk_to_faa_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf faa) mGbkToFaaEach [ReadsFile]
@@ -137,16 +129,12 @@ mGbkToFaaEach _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_faa_path_each" 
 mGbkToFaaEach _ _ e = error "modules.seqio.mGbkToFaaEach" $ "bad argument: " ++ show e
 
 gbkToFaaRawIDsEach :: Function
-gbkToFaaRawIDsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str, Exactly (ListOf gbk)]
-  , fOutput = Exactly (ListOf faa)
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 2 $ aGenbankToFasta faa "nt" -- TODO add --qualifiers all?
-  }
-  where
-    name = "gbk_to_faa_rawids_each"
+gbkToFaaRawIDsEach = newFnA2
+  "gbk_to_faa_rawids_each"
+  (Exactly str, Exactly $ ListOf gbk)
+  (Exactly $ ListOf faa)
+  (newMap2of2 "gbk_to_faa_rawids")
+  [Hidden]
 
 gbkToFnaEach :: Function
 gbkToFnaEach = newExprExpansion "gbk_to_fna_each" [Exactly str, Exactly $ ListOf gbk] (Exactly $ ListOf fna) mGbkToFnaEach [ReadsFile]
@@ -155,31 +143,23 @@ mGbkToFnaEach :: ExprExpansion
 mGbkToFnaEach _ _ (Fun r _ ds n [s, g]) = Fun r Nothing ds "load_fna_path_each" [Fun r Nothing ds (replace "_each" "_rawids_each" n) [s, g]]
 mGbkToFnaEach _ _ e = error "modules.seqio.mGbkToFnaEach" $ "bad argument: " ++ show e
 
-
 gbkToFnaRawIDsEach :: Function
-gbkToFnaRawIDsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str, Exactly (ListOf gbk)]
-  , fOutput = Exactly (ListOf fna)
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMap 2 $ aGenbankToFasta fna "nt" -- TODO add --qualifiers all?
-  }
-  where
-    name = "gbk_to_fna_rawids_each"
+gbkToFnaRawIDsEach = newFnA2
+  "gbk_to_fna_rawids_each"
+  (Exactly str, Exactly $ ListOf gbk)
+  (Exactly $ ListOf fna)
+  (newMap2of2 "gbk_to_fna_rawids")
+  [Hidden]
 
 -- TODO error if no features extracted since it probably means a wrong ft string
 -- TODO silence the output? or is it helpful?
-aGenbankToFasta :: Type -> String -> ([Path] -> Action ())
-aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
+aGenbankToFasta :: Type -> String -> NewAction2
+aGenbankToFasta rtn st (ExprPath outPath') ftPath' faPath' = do
   cfg <- fmap fromJust getShakeExtra
-  let faPath'   = fromPath loc cfg faPath
-      ftPath'   = fromPath loc cfg ftPath
+  let loc = "modules.seqio.aGenbankToFasta"
       exprDir'  = tmpdir cfg </> "exprs"
       tmpDir'   = fromPath loc cfg $ cacheDir cfg "seqio"
       outDir'   = exprDir' </> "load_" ++ ext rtn
-      outPath'  = fromPath loc cfg outPath
-      loc = "modules.seqio.aGenbankToFasta"
       outPath'' = traceA loc outPath' [outPath', faPath']
   ft <- readLit loc ftPath'
   let ft' = if ft  == "cds" then "CDS" else ft
@@ -204,7 +184,6 @@ aGenbankToFasta rtn st [outPath, ftPath, faPath] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath'']
     }
-aGenbankToFasta _ _ paths = error $ "bad argument to aGenbankToFasta: " ++ show paths
 
 ------------------------
 -- extract_ids(_each) --
