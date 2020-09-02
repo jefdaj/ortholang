@@ -163,7 +163,6 @@ aOrthogroups (ExprPath out') ogPath' = do
       ogPath = toPath loc cfg ogPath'
   groups <- parser ogPath
   writeOrthogroups out groups
-aOrthogroups _ args = error $ "bad argument to aOrthogroups: " ++ show args
 
 ---------------------------
 -- orthogroup_containing --
@@ -333,14 +332,14 @@ pickMin userNum nGroups
   | userNum < 0 = pickMin (fromIntegral nGroups + userNum) nGroups
   | otherwise = ceiling userNum -- TODO floor?
 
+-- TODO generate this?
 orthologInMinStr :: Function
-orthologInMinStr = let name = "ortholog_in_min_str" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly sll, Exactly sll]
-  , fOutput = Exactly sll
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStrFrac "min" pickMin
-  }
+orthologInMinStr = newFnA3
+  "ortholog_in_min_str"
+  (Exactly num, Exactly sll, Exactly sll)
+  (Exactly sll)
+  (aOrthologFilterStrFrac "min" pickMin)
+  [Hidden]
 
 -- read a scientific and print again as a string
 -- toDecimal :: String -> String
@@ -349,83 +348,80 @@ orthologInMinStr = let name = "ortholog_in_min_str" in Function
 ogCache :: Config -> Path
 ogCache cfg = cacheDir cfg "orthogroups"
 
-rOrthologFilterStrFrac :: String -> PickerFn2 -> RulesFn
-rOrthologFilterStrFrac fnName pickerFn scr e@(Fun _ _ _ _ [frac, groupLists, idLists]) = do
-  (ExprPath fracPath      ) <- rExpr scr frac
-  (ExprPath groupListsPath) <- rExpr scr groupLists
-  (ExprPath idListsPath   ) <- rExpr scr idLists
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let out     = exprPath cfg dRef scr e
-      loc = "modules.orthogroups.rOrthologFilterStrFrac"
-      out'    = debugRules loc e $ fromPath loc cfg out
+aOrthologFilterStrFrac :: String -> PickerFn2 -> NewAction3
+aOrthologFilterStrFrac fnName pickerFn (ExprPath out) fracPath groupListsPath idListsPath = do
+  cfg  <- fmap fromJust getShakeExtra
+  let loc = "modules.orthogroups.rOrthologFilterStr"
+      out'    = debugRules loc cfg out
       ogDir   = fromPath loc cfg $ ogCache cfg
       ogsPath = ogDir </> digest loc groupListsPath <.> "txt"
       idsPath = ogDir </> digest loc idListsPath    <.> "txt"
   liftIO $ createDirectoryIfMissing True ogDir
-  ogsPath %> absolutizePaths loc groupListsPath
-  idsPath %> absolutizePaths loc idListsPath
-  out' %> \_ -> do
-    -- TODO is there a way to avoid reading this?
-    nIDs  <- fmap length $ readPaths loc idListsPath
-    fnArg <- readLit loc fracPath
-    let fnArg' = show $ pickerFn (toRealFloat (read fnArg) :: Double) nIDs
-    need' loc [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
-    runCmd $ CmdDesc
-      { cmdParallel = False
-      , cmdFixEmpties = True
-      , cmdOutPath = out'
-      , cmdInPatterns = [ogsPath, idsPath]
-      , cmdNoNeedDirs = []
-      , cmdExtraOutPaths = []
-      , cmdSanitizePaths = [out'] -- TODO is this right?
-      , cmdOptions =[]
-      , cmdBinary = "orthogroups.py"
-      , cmdArguments = [out', fnName, fnArg', ogsPath, idsPath]
-      , cmdRmPatterns = []
-      , cmdExitCode = ExitSuccess
-      }
-  return (ExprPath out')
-rOrthologFilterStrFrac _ _ _ _ = error "bad arguments to rOrthologFilterStrFrac"
+  absolutizePaths loc groupListsPath ogsPath -- TODO separate function?
+  absolutizePaths loc idListsPath idsPath -- TODO separate function?
+  -- TODO is there a way to avoid reading this?
+  fnArg <- readLit loc fracPath
+  nIDs  <- fmap length $ readPaths loc idListsPath
+  -- let fnArg' = show $ pickerFn nIDs
+  let fnArg' = show $ pickerFn (toRealFloat (read fnArg) :: Double) nIDs
+  -- need' loc [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
+  runCmd $ CmdDesc
+    { cmdParallel = False
+    , cmdFixEmpties = True
+    , cmdOutPath = out'
+    , cmdInPatterns = [ogsPath, idsPath]
+    , cmdNoNeedDirs = []
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = [out'] -- TODO is this right?
+    , cmdOptions =[]
+    , cmdBinary = "orthogroups.py"
+    , cmdArguments = [out', fnName, fnArg', ogsPath, idsPath]
+    , cmdRmPatterns = []
+    , cmdExitCode = ExitSuccess
+    }
 
+-- TODO fn to generate this
 orthologInMin :: Function
-orthologInMin = let name = "ortholog_in_min" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Some og "any orthogroup", Exactly (ListOf faa)]
-  , fOutput = Exactly sll
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
-  }
+orthologInMin =
+  let name = "ortholog_in_min"
+  in newExprExpansion
+       name
+       [Exactly num, Some og "any orthogroup", Exactly $ ListOf faa]
+       (Exactly sll)
+       (mOrthologInStr name)
+       []
 
-mkOrthologsStrFracRules :: String -> RulesFn
-mkOrthologsStrFracRules name st (Fun rType seed deps _ [frac, groups , faas]) =
-  rExpr st $ Fun rType seed deps (name ++ "_str")  [frac, groups', faas']
+mOrthologInStrFrac :: String -> ExprExpansion
+mOrthologInStrFrac name _ _ (Fun rType seed deps _  [frac, groups , faas]) =
+  Fun rType seed deps (name ++ "_str")   [frac, groups', faas']
   where
     groups' = Fun sll seed (depsOf groups) "orthogroups"      [groups]
     faas'   = Fun sll seed (depsOf faas  ) "extract_ids_each" [faas]
-mkOrthologsStrFracRules _ _ _ = error "bad arguments to mkOrthologStrFracRules"
+mOrthologInStrFrac _ _ _ _ = error "bad arguments to mOrthologInStrFrac"
 
 ---------------------
 -- ortholog_in_max --
 ---------------------
 
+-- TODO fn to generate this
 orthologInMax :: Function
-orthologInMax = let name = "ortholog_in_max" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Some og "any orthogroup", Exactly (ListOf faa)]
-  , fOutput = Exactly sll
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = mkOrthologsStrFracRules name
-  }
+orthologInMax =
+  let name = "ortholog_in_max"
+  in newExprExpansion
+       name
+       [Exactly num, Some og "any orthogroup", Exactly $ ListOf faa]
+       (Exactly sll)
+       (mOrthologInStrFrac name)
+       []
 
+-- TODO generate this?
 orthologInMaxStr :: Function
-orthologInMaxStr = let name = "ortholog_in_max_str" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly sll, Exactly sll]
-  , fOutput = Exactly sll
-  , fTags = [Hidden]
-  , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStrFrac "max" pickMax
-  }
+orthologInMaxStr = newFnA3
+  "ortholog_in_max_str"
+  (Exactly num, Exactly sll, Exactly sll)
+  (Exactly sll)
+  (aOrthologFilterStrFrac "max" pickMax)
+  [Hidden]
 
 pickMax :: (RealFrac a, Integral b) => a -> b -> b
 pickMax userNum nGroups
