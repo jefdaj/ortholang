@@ -183,29 +183,28 @@ aOrthogroups _ args = error $ "bad argument to aOrthogroups: " ++ show args
 ---------------------------
 
 orthogroupContaining :: Function
-orthogroupContaining = let name = "orthogroup_containing" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Some og "any orthogroup", Exactly str]
-  , fOutput = Exactly (ListOf str)
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple aOrthogroupContaining
-  }
+orthogroupContaining = newFnA2
+  "orthogroup_containing"
+  (Some og "any orthogroup", Exactly str)
+  (Exactly $ ListOf str)
+  aOrthogroupContaining
+  []
 
-aOrthogroupContaining :: [Path] -> Action ()
-aOrthogroupContaining [out, ofrPath, idPath] = do
+aOrthogroupContaining :: NewAction2
+aOrthogroupContaining (ExprPath out) ofrPath' idPath = do
   ids  <- fmap fromJust getShakeExtra
   ids' <- liftIO $ readIORef ids
   cfg  <- fmap fromJust getShakeExtra
   let loc = "modules.orthogroups.aOrthogroupContaining"
-  partialID <- readLit loc $ fromPath loc cfg idPath
+      ofrPath = toPath loc cfg ofrPath'
+  partialID <- readLit loc idPath
   -- TODO should there be a separate case for multiple matches?
   let geneId = case lookupID ids' partialID of
                  Just k -> k
                  Nothing -> error $ "ERROR: id \"" ++ partialID ++ "' not found"
   groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder ofrPath -- TODO handle the others!
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
-  writeLits loc (fromPath loc cfg out) group
-aOrthogroupContaining args = error $ "bad argument to aOrthogroupContaining: " ++ show args
+  writeLits loc out group
 
 ----------------------------
 -- orthogroups_containing --
