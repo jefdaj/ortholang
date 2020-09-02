@@ -90,9 +90,10 @@ save_list <- function(files, outPath) {
 main <- function() {
 
   args     <- commandArgs(trailingOnly = TRUE)
-  outPath  <- args[[1]]
+  # print(args)
+  fnName   <- args[[1]]
+  outPath  <- args[[2]]
   logPath  <- gsub('result$', 'log', outPath) # TODO use out/err instead?
-  fnName   <- readLines(args[[2]])
   tmpDir <- file.path(Sys.getenv('TMPDIR'), "cache", "biomartr") # TODO pass directly?
 
   con <- file(logPath, open="wt")

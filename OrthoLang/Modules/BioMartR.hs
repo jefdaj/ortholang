@@ -25,9 +25,6 @@ import OrthoLang.Types
 import OrthoLang.Interpreter
 import Development.Shake
 import OrthoLang.Modules.SeqIO (fna, faa)
--- import OrthoLang.Types (readLits, writeLits, traceA, need', runCmd, CmdDesc(..))
--- import OrthoLang.Types  (exprPath, Path, toPath, fromPath)
--- import OrthoLang.Types (rExpr)
 import Control.Monad (void)
 import Text.Parsec            (spaces, runParser)
 import Text.Parsec (Parsec, try, choice, (<|>), many1)
@@ -36,11 +33,7 @@ import Text.Parsec.Combinator (between, optionMaybe)
 import Data.Maybe (fromMaybe, fromJust)
 import Data.List (intercalate)
 import Data.Either (partitionEithers)
--- import Data.Char (isSpace)
-import Development.Shake.FilePath ((</>))
--- import OrthoLang.Types   (traceA)
 import System.Directory (createDirectoryIfMissing)
-import System.Exit (ExitCode(..))
 import OrthoLang.Util (trim)
 
 ------------
@@ -57,9 +50,8 @@ olModule = Module
   , mFunctions =
     [ parseSearches -- TODO hide from end users?
     -- TODO single and _each versions?
-    , getGenomes
-    , getProteomes
-    -- , getGenome
+    , getGenomesExplicit, getGenomes
+    , getProteomesExplicit, getProteomes
     ]
   }
 
@@ -88,27 +80,62 @@ faagz = EncodedAs gz faa
 -- get_genomes --
 -----------------
 
+-- TODO add a temporary outpath and clean up after it?
+aBiomartrExplicit :: String -> NewAction1
+aBiomartrExplicit bmFn (ExprPath out) sTable = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.biomartr.aBiomartrExplicit"
+      tmpDir = fromPath loc cfg $ cacheDir cfg "biomartr"
+  liftIO $ createDirectoryIfMissing True tmpDir
+  aNewRulesS1 "biomartr.R" (\d -> d {cmdArguments = [bmFn, out, sTable]}) (ExprPath out) sTable
+
+getGenomesExplicit :: Function
+getGenomesExplicit = newFnA1
+  "get_genomes_explicit"
+  (Exactly $ ListOf str)
+  (Exactly $ ListOf fnagz)
+  (aBiomartrExplicit "getGenome")
+  [ReadsURL]
+
 getGenomes :: Function
-getGenomes = let name = "get_genomes" in Function
-  { fOpChar = Nothing, fName = name 
-  , fInputs = [Exactly (ListOf str)]
-  , fOutput = Exactly (ListOf fnagz)
-  , fTags = [ReadsURL]
-  , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getGenome"
-  }
+getGenomes = newExprExpansion
+  "get_genomes"
+  [Exactly $ ListOf str]
+  (Exactly $ ListOf fnagz)
+  mGetGenomes
+  [ReadsURL]
+
+mGetGenomes :: ExprExpansion
+mGetGenomes _ _ (Fun r _ ds _ [ss]) = Fun r Nothing ds "get_genomes_explicit" [fn]
+  where
+    fn = Fun search Nothing ds "parse_searches" [ss]
+mGetGenomes _ _ e = error "modules.biomartr.mGetGenomes" $ "bad argument: " ++ show e
 
 -------------------
 -- get_proteomes --
 -------------------
 
+getProteomesExplicit :: Function
+getProteomesExplicit = newFnA1
+  "get_proteomes_explicit"
+  (Exactly search)
+  (Exactly $ ListOf fnagz)
+  (aBiomartrExplicit "getProteome")
+  [ReadsURL]
+
 getProteomes :: Function
-getProteomes = let name = "get_proteomes" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf str)]
-  , fOutput = Exactly (ListOf faagz)
-  , fTags = [ReadsURL]
-  , fNewRules = NewNotImplemented, fOldRules = rBioMartR "getProteome"
-  }
+getProteomes = newExprExpansion
+  "get_proteomes"
+  [Exactly $ ListOf str]
+  (Exactly $ ListOf fnagz)
+  mGetProteomes
+  [ReadsURL]
+
+mGetProteomes :: ExprExpansion
+mGetProteomes _ _ (Fun r _ ds _ [ss]) = Fun r Nothing ds "get_proteomes_explicit" [fn]
+  where
+    fn = Fun search Nothing ds "parse_searches" [ss]
+mGetProteomes _ _ e = error "modules.biomartr.mGetProteomes" $ "bad argument: " ++ show e
 
 --------------------
 -- parse_searches --
@@ -184,9 +211,6 @@ parseSearches = newFnA1
 
 aParseSearches :: NewAction1
 aParseSearches (ExprPath out) sList = do
-  -- cfg <- fmap fromJust getShakeExtra
-  -- let sList' = fromPath loc cfg sList
-      -- out'   = fromPath loc cfg out
   let loc = "modules.biomartr.aParseSearches"
       out''  = traceA loc out [sList, out]
   parses <- (fmap . map) readSearch (readLits loc sList)
@@ -195,65 +219,3 @@ aParseSearches (ExprPath out) sList = do
   if (not . null) errors
     then error "invalid search!"
     else writeLits loc out'' $ toTsvRows searches'
-
-------------------
--- run biomartr --
-------------------
-
--- TODO rewrite part of this to re-load like the seqio functions do
-
--- TODO move nearer the top?
-
--- TODO this is where to parse the searches?
--- cGetGenome :: Config -> Expr -> Rules ExprPath
--- cGetGenome (scr,cfg) expr@(Fun _ _ _ [s]) = undefined
--- cGetGenome _ _ = error "bad cGetGenome call"
-
--- TODO rewrite in expression editing style, inserting parse_searches
-rBioMartR :: String -> RulesFn
-rBioMartR fn scr expr@(Fun rtn seed _ _ [ss]) = do
-  (ExprPath bmFn  ) <- rExpr scr (Lit str fn)
-  -- (ExprPath sTable) <- rParseSearches s ss
-  (ExprPath sTable) <- rExpr scr $ Fun rtn seed (depsOf ss) "parse_searches" [ss]
-  -- TODO separate tmpDirs for genomes, proteomes, etc?
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.biomartr.rBioMartR"
-      bmTmp   = tmpdir cfg </> "cache" </> "biomartr"
-      tmp'    = toPath loc cfg bmTmp
-      out     = exprPath cfg dRef scr expr
-      out'    = fromPath loc cfg out
-      sTable' = toPath loc cfg sTable
-      bmFn'   = toPath loc cfg bmFn
-  out' %> \_ -> aBioMartR out bmFn' tmp' sTable'
-  return (ExprPath out')
-rBioMartR _ _ _ = error "bad rBioMartR call"
-
-aBioMartR :: Path -> Path -> Path -> Path -> Action ()
-aBioMartR out bmFn bmTmp sTable = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.biomartr.aBioMartR"
-      out'    = fromPath loc cfg out
-      bmFn'   = fromPath loc cfg bmFn
-      bmTmp'  = fromPath loc cfg bmTmp
-      sTable' = fromPath loc cfg sTable
-      out'' = traceA "aBioMartR" out' [out', bmFn', bmTmp', sTable']
-  need' loc [bmFn', sTable']
-  -- TODO should biomartr get multiple output paths?
-  liftIO $ createDirectoryIfMissing True bmTmp'
-  -- wrappedCmdWrite False True cfg ref out'' [bmFn', sTable'] [] [Cwd bmTmp']
-  --   "biomartr.R" [out'', bmFn', sTable']
-  runCmd $ CmdDesc
-    { cmdBinary = "biomartr.R"
-    , cmdArguments = [out'', bmFn', sTable']
-    , cmdExitCode = ExitSuccess
-    , cmdOutPath = out''
-    , cmdFixEmpties = True
-    , cmdParallel = False
-    , cmdInPatterns = [bmFn', sTable']
-    , cmdNoNeedDirs = []
-    , cmdExtraOutPaths = []
-    , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
-    , cmdSanitizePaths = []
-    , cmdOptions = [Cwd bmTmp'] -- TODO remove?
-    }
