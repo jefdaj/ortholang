@@ -238,33 +238,6 @@ aExtractSeqs out inFa inList = do
   -- unhashIDsFile (toPath loc cfg inList) ids -- TODO implement as a macro?
   aNewRulesS2 "extract_seqs.py" id out inFa inList
 
--- TODO remove by rewriting map functions to work on the new one above
--- aExtractSeqsOld :: [Path] -> Action ()
--- aExtractSeqsOld [outPath, inFa, inList] = do
---   cfg <- fmap fromJust getShakeExtra
---   let loc = "modules.seqio.aExtractSeqsOld"
---       cDir     = fromPath loc cfg $ cacheDir cfg "seqio"
---       tmpList' = cDir </> digest loc inList <.> "txt"
---       tmpList  = toPath loc cfg tmpList'
---   liftIO $ createDirectoryIfMissing True cDir
---   -- lookupIDsFile inList tmpList
---   aSimpleScriptNoFix "extract_seqs.py" [outPath, inFa, inList]
--- aExtractSeqsOld ps = error $ "bad argument to aExtractSeqs: " ++ show ps
-
--- TODO does this one even make sense? maybe only as an _all version for mixed id lists?
---      or maybe for singletons or something?
--- extractSeqsEach :: Function
--- extractSeqsEach = Function
---   { fOpChar = Nothing, fName = name
---   , fTags = []
---   , fInputs = [Some fa "any fasta file", Exactly (ListOf (ListOf str))]
---   , fOutput = ListSigs (Some fa "any fasta file")
---   , fNewRules = NewNotImplemented
---   , fOldRules = rMap 1 aExtractSeqsOld
---   }
---   where
---     name = "extract_seqs_each"
-
 -- TODO does this one make sense? is the mapping right?
 extractSeqsEach :: Function
 extractSeqsEach = newFnA2
@@ -279,19 +252,21 @@ extractSeqsEach = newFnA2
 ----------------------
 
 translate :: Function
-translate = newFnS1 "translate" (Exactly fna) (Exactly faa) "translate.py" [ReadsFile] id
+translate = newFnS1
+  "translate"
+  (Exactly fna)
+  (Exactly faa)
+  "translate.py"
+  [ReadsFile]
+  id
 
 translateEach :: Function
-translateEach = Function
-  { fOpChar = Nothing, fName = name
-  , fTags = []
-  , fInputs = [Exactly (ListOf fna)]
-  , fOutput =  Exactly (ListOf faa)
-  , fNewRules = NewNotImplemented
-  , fOldRules = rMapSimpleScript 1 "translate.py"
-  }
-  where
-    name = "translate_each"
+translateEach = newFnA1
+  "translate_each"
+  (Exactly $ ListOf fna)
+  (Exactly $ ListOf faa)
+  (newMap1of1 "translate")
+  [ReadsFile]
 
 --------------
 -- concat_* --
