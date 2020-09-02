@@ -87,42 +87,8 @@ buscoListLineages = newFnA1
   aBuscoListLineages
   []
 
--- buscoListLineages = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly str]
---   , fOutput = Exactly (ListOf str)
---   , fTags = [] -- TODO make it read a URL?
---   , fNewRules = NewNotImplemented
---   , fOldRules = rBuscoListLineages
---   }
---   where
---     name = "busco_list_lineages"
-
--- rBuscoListLineages :: RulesFn
--- rBuscoListLineages scr e@(Fun _ _ _ _ [f]) = do
---   (ExprPath fPath) <- rExpr scr f
---   cfg  <- fmap fromJust getShakeExtraRules
---   dRef <- fmap fromJust getShakeExtraRules
---   let loc = "modules.busco.rBuscoListLineages"
---       oPath   = exprPath cfg dRef scr e
---       tmpDir  = buscoCache cfg
---       tmpDir' = fromPath loc cfg tmpDir
---       listTmp = tmpDir' </> "dblist" <.> "txt"
---       oPath'  = fromPath loc cfg oPath
---       lTmp'   = toPath loc cfg listTmp
---       fPath' = toPath loc cfg fPath
---   listTmp %> \_ -> aBuscoListLineages lTmp'
---   oPath'  %> \_ -> aFilterList oPath lTmp' fPath'
---   return (ExprPath oPath')
--- rBuscoListLineages _ _ = fail "bad argument to rBuscoListLineages"
-
 aBuscoListLineages :: NewAction1
 aBuscoListLineages (ExprPath oPath) fPath = do
-  -- cfg <- fmap fromJust getShakeExtra
-  -- let listTmp' = fromPath loc cfg listTmp
-  -- let tmpDir   = takeDirectory $ listTmp
-      -- oPath    = traceA loc listTmp [listTmp]
-  -- liftIO $ createDirectoryIfMissing True tmpDir
   let loc = "modules.busco.rBuscoListLineages"
   fStr <- readLit loc fPath
   let matches = filter (fStr `isInfixOf`) allLineages
@@ -195,16 +161,12 @@ aBuscoListLineages (ExprPath oPath) fPath = do
 -- TODO busco_fetch_lineages? (the _each version)
 
 buscoFetchLineage :: Function
-buscoFetchLineage  = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str]
-  , fOutput = Exactly blh
-  , fTags = [ReadsURL]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rBuscoFetchLineage
-  }
-  where
-    name = "busco_fetch_lineage"
+buscoFetchLineage = newFnA1
+  "busco_fetch_lineage"
+  (Exactly str)
+  (Exactly blh)
+  aBuscoFetchLineage
+  [ReadsURL]
 
 -- TODO move to Util?
 untar :: Path -> Path -> Action ()
@@ -229,28 +191,22 @@ untar from to = do
     , cmdRmPatterns = [to']
     }
 
-rBuscoFetchLineage :: RulesFn
-rBuscoFetchLineage scr expr@(Fun _ _ _ _ [nPath]) = do
-  (ExprPath namePath) <- rExpr scr nPath
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let outPath  = exprPath cfg dRef scr expr
-      outPath' = fromPath loc cfg outPath
+aBuscoFetchLineage :: NewAction1
+aBuscoFetchLineage (ExprPath out') namePath = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "modules.busco.aBuscoFetchLineage"
+  nameStr <- readLit loc namePath
+  let out = toPath loc cfg out'
       blhDir   = (fromPath loc cfg $ buscoCache cfg) </> "lineages"
-      loc = "modules.busco.rBuscoFetchLineage"
-  outPath' %> \_ -> do
-    nameStr <- readLit loc namePath
-    let untarPath = blhDir </> nameStr
-        url       = toPath loc cfg $ "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
-        datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
-        datasetPath   = toPath loc cfg datasetPath'
-    tarPath <- fmap (fromPath loc cfg) $ curl url
-    unlessExists untarPath $ do
-      untar (toPath loc cfg tarPath) (toPath loc cfg untarPath)
-    symlink outPath datasetPath
-  return $ ExprPath outPath'
-rBuscoFetchLineage _ e = error $ "bad argument to rBuscoFetchLineage: " ++ show e
-
+      untarPath = blhDir </> nameStr
+      url       = toPath loc cfg $ "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
+      datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
+      datasetPath   = toPath loc cfg datasetPath'
+  tarPath <- fmap (fromPath loc cfg) $ curl url
+  unlessExists untarPath $ do
+    untar (toPath loc cfg tarPath) (toPath loc cfg untarPath)
+  symlink out datasetPath
+ 
 -------------------------------------------
 -- busco_{genome,proteins,transcriptome} --
 -------------------------------------------
