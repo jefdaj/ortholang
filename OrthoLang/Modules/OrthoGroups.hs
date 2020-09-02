@@ -80,19 +80,6 @@ og = TypeGroup
 -- TODO separate module that works with multiple ortholog programs?
 -- TODO version to get the group matching an ID
 -- TODO this works with ofr files too; put them back using a type group!
--- orthogroups :: Function
--- orthogroups = let name = "orthogroups" in Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Some og "orthogroup"]
---   , fOutput =  Exactly sll
---   , fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rOrthogroups
---   }
-
--- rOrthogroups :: RulesFn
--- rOrthogroups st e@(Fun _ _ _ _ [arg]) = (rSimple $ aOrthogroups $ typeOf arg) st e
--- rOrthogroups _ e = error $ "bad argument to rOrthogroups: " ++ show e
-
 orthogroups :: Function
 orthogroups = newFnA1
   "orthogroups"
@@ -161,7 +148,7 @@ writeOrthogroups out groups = do
 -- TODO separate haskell fn to just list groups, useful for extracting only one too?
 -- TODO translate hashes back into actual seqids here?
 aOrthogroups :: NewAction1
-aOrthogroups (ExprPath out') ogPath = do
+aOrthogroups (ExprPath out') ogPath' = do
   -- liftIO $ putStrLn $ "ogPath: " ++ show ogPath
   -- TODO extract this into a parseOrthogroups function
   cfg  <- fmap fromJust getShakeExtra
@@ -173,8 +160,8 @@ aOrthogroups (ExprPath out') ogPath = do
                else error $ "bad type for aOrthogroups: " ++ show rtn
       loc = "modules.orthogroups.aOrthogroups"
       out = toPath loc cfg out'
-      og  = toPath loc cfg ogPath
-  groups <- parser og
+      ogPath = toPath loc cfg ogPath'
+  groups <- parser ogPath
   writeOrthogroups out groups
 aOrthogroups _ args = error $ "bad argument to aOrthogroups: " ++ show args
 
@@ -242,9 +229,9 @@ aOrthogroupsFilter filterFn (ExprPath out') ofrPath' idsPath = do
   let groups' = filterFn groups geneIds
   writeOrthogroups out groups'
 
----------------------
--- ortholog_in_any --
----------------------
+----------------------------
+-- ortholog_in_{any,all}* --
+----------------------------
 
 orthologInAny :: Function
 orthologInAny =
@@ -267,15 +254,6 @@ mOrthologInStr _ _ _ _ = error "bad arguments to mOrthologInStr"
 -- TODO can this be removed somehow?
 -- TODO flip args so it reads more naturally?
 
--- orthologInAnyStr :: Function
--- orthologInAnyStr = let name = "ortholog_in_any_str" in Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly sll, Exactly sll]
---   , fOutput = Exactly sll
---   , fTags = [Hidden]
---   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAny
---   }
-
 -- TODO generate this?
 orthologInAnyStr :: Function
 orthologInAnyStr = newFnA2
@@ -288,13 +266,34 @@ orthologInAnyStr = newFnA2
 pickAny :: Int -> Int
 pickAny _ = 1
 
+-- TODO flip args so it reads more naturally?
+
+-- TODO fn to generate this + orthologInAny
+orthologInAll :: Function
+orthologInAll =
+  let name = "ortholog_in_all"
+  in newExprExpansion
+       name
+       [Some og "any orthogroup", Exactly $ ListOf faa]
+       (Exactly sll)
+       (mOrthologInStr name)
+       []
+
+-- TODO generate this?
+orthologInAllStr :: Function
+orthologInAllStr = newFnA2
+  "ortholog_in_all_str"
+  (Exactly sll, Exactly sll)
+  (Exactly sll)
+  (aOrthologFilterStr "min" pickAll)
+  [Hidden]
+
+pickAll :: Int -> Int
+pickAll nIDs = nIDs
+
 aOrthologFilterStr :: String -> PickerFn -> NewAction2
 aOrthologFilterStr fnName pickerFn (ExprPath out) groupListsPath idListsPath = do
-  -- (ExprPath groupListsPath) <- rExpr scr groupLists
-  -- (ExprPath idListsPath   ) <- rExpr scr idLists
   cfg  <- fmap fromJust getShakeExtra
-  -- dRef <- fmap fromJust getShakeExtra
-  -- let out     = exprPath cfg dRef scr e
   let loc = "modules.orthogroups.rOrthologFilterStr"
       out'    = debugRules loc cfg out
       ogDir   = fromPath loc cfg $ ogCache cfg
@@ -303,7 +302,6 @@ aOrthologFilterStr fnName pickerFn (ExprPath out) groupListsPath idListsPath = d
   liftIO $ createDirectoryIfMissing True ogDir
   absolutizePaths loc groupListsPath ogsPath -- TODO separate function?
   absolutizePaths loc idListsPath idsPath -- TODO separate function?
-  -- out' %> \_ -> do
   -- TODO is there a way to avoid reading this?
   nIDs  <- fmap length $ readPaths loc idListsPath
   let fnArg' = show $ pickerFn nIDs
@@ -322,44 +320,6 @@ aOrthologFilterStr fnName pickerFn (ExprPath out) groupListsPath idListsPath = d
     , cmdRmPatterns = []
     , cmdExitCode = ExitSuccess
     }
-
----------------------
--- ortholog_in_all --
----------------------
-
--- TODO flip args so it reads more naturally?
-
--- TODO fn to generate this + orthologInAny
-orthologInAll :: Function
-orthologInAll =
-  let name = "ortholog_in_all"
-  in newExprExpansion
-       name
-       [Some og "any orthogroup", Exactly $ ListOf faa]
-       (Exactly sll)
-       (mOrthologInStr name)
-       []
-
--- orthologInAllStr :: Function
--- orthologInAllStr = let name = "ortholog_in_all_str" in Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly sll, Exactly sll]
---   , fOutput = Exactly sll
---   , fTags = [Hidden]
---   , fNewRules = NewNotImplemented, fOldRules = rOrthologFilterStr "min" pickAll
---   }
-
--- TODO generate this?
-orthologInAllStr :: Function
-orthologInAllStr = newFnA2
-  "ortholog_in_all_str"
-  (Exactly sll, Exactly sll)
-  (Exactly sll)
-  (aOrthologFilterStr "min" pickAll)
-  [Hidden]
-
-pickAll :: Int -> Int
-pickAll nIDs = nIDs
 
 ---------------------
 -- ortholog_in_min --
