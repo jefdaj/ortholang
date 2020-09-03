@@ -62,22 +62,20 @@ cacheToday cacheDir cachePath = do
   return dated
 
 -- | Entry point for finding a cached file from a user-specified date.
---   It silently defaults to the cache path for today's date unless it can find
---   a valid one matching the user input.
-cacheUser :: FilePath -> FilePath -> String -> IO FilePath
+--   If this returns Nothing, it means we'll need to download the file.
+--
+--   TODO confirmation dialog before downloading, or just assume?
+cacheUser :: FilePath -> FilePath -> String -> IO (Maybe FilePath)
 cacheUser cacheDir cachePath userInput = do
   let userDay = parseDate userInput
   userCache <- case userDay of
     Nothing -> return Nothing
     Just d -> existingCacheDated cacheDir cachePath d
   latest  <- existingCacheLatest cacheDir cachePath
-  today   <- cacheToday          cacheDir cachePath
-  if userInput == "latest" then case latest of
-    Nothing -> return today
-    Just c  -> return c
-  else case userCache of
-    Nothing -> return today
-    Just c  -> return c
+  today   <- cacheToday cacheDir cachePath
+  return $ if      userInput == "latest" then latest
+           else if userInput == "today"  then Just today
+           else    userCache
 
 main :: IO ()
 main = undefined
