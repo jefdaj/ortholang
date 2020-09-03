@@ -1,19 +1,7 @@
 module Main where
 
--- TODO looking good! next step is to add parsing
--- minimum parsing that would work:
---   always require an exact YYYY-MM-DD, but ignore seconds
---   if it's in the future/past/not available/invalid, ask to switch to today and re-run
---   conflicting files: overwrite the same day, assuming it's fixing an error, and re-run everything
-
--- TODO cases:
---        if re-download config, default to "today"
---        if "latest", pick the latest cache or default to "today"
---        if exact date, use it if its valid + exists of default to "today"
---        if invalid date, default to "today"
---        if "today", re-download unless today's cache exists already
---        so default to "today" if: :config redownload, invalid date, "latest" but no cache, exact date but no cache
---        only times *not* to use today: "latest" and cache exists, exact date and cache exists
+-- TODO have cacheUser check the cfg and default to today if we're re-downloading everything
+-- TODO add a warning message when we're about to re-download
 
 import Data.Time
 import Text.Printf
@@ -23,11 +11,6 @@ import OrthoLang.Util (absolutize, globFiles)
 import Data.List (sort)
 import System.Directory (doesPathExist)
 
--- nowDatedDir :: IO FilePath
--- nowDatedDir = do
-  -- (UTCTime date _) <- getCurrentTime
-  -- return $ dayToDir date
-
 dayToDir :: Day -> FilePath
 dayToDir date = sYear </> sMonth </> sDay
   where
@@ -36,7 +19,6 @@ dayToDir date = sYear </> sMonth </> sDay
     sMonth = printf "%02d" month
     sDay   = printf "%02d" day
 
--- TODO return a Maybe?
 dirToDay :: FilePath -> Day
 dirToDay dir = fromGregorian nYear nMonth nDay
   where
@@ -53,16 +35,7 @@ getToday = do
 parseDate :: String -> Maybe Day
 parseDate = parseTimeM True defaultTimeLocale "%Y-%m-%d"
 
--- parseDateToday :: String -> IO Day
--- parseDateToday input = do
---   today <- getToday
---   if input == "today" then return today
---   else case parseDate input of
---     Just day -> return day
---     Nothing -> do
---       putStrLn $ "Invalid date '" ++ input ++ "'. Defaulting to the current UTC date."
---       return today
-
+-- | Returns an existing cache matching a specific path + date, or Nothing
 existingCacheDated :: FilePath -> FilePath -> Day -> IO (Maybe FilePath)
 existingCacheDated cacheDir cachePath day = do
   cacheDir' <- absolutize cacheDir
@@ -72,48 +45,39 @@ existingCacheDated cacheDir cachePath day = do
     then Just dated
     else Nothing
 
-  -- exists <- doesDirectoryExist dated
-  -- if exists || day == today
-    -- then return dated
-    -- else do
-      -- putStrLn $ "No existing cache in '" ++ cacheDir ++
-                 -- "' from '" ++ date ++ "'. Defaulting to the current UTC date."
-      -- existingCacheDated cacheDir "today"
-
--- warning: assumes all files in the cache dir are yyyy/mm/dd formatted
+-- | Returns the latest existing cache matching a specific path, or Nothing
+--   Warning: assumes all files in the cache dir are yyyy/mm/dd formatted
 existingCacheLatest :: FilePath -> FilePath -> IO (Maybe FilePath)
 existingCacheLatest cacheDir cachePath = do
   matches <- globFiles $ cacheDir </> "*" </> "*" </> "*" </> cachePath
   if null matches then return Nothing
   else return $ Just $ head $ sort matches
 
--- note: this is the only one that returns a result even if the path doesn't exist yet
-cacheToday :: FilePath -> IO FilePath
-cacheToday cacheDir = do
+-- | Returns today's cache for a specific file, whether or not it exists yet
+cacheToday :: FilePath -> FilePath -> IO FilePath
+cacheToday cacheDir cachePath = do
   today <- getToday
   cacheDir' <- absolutize cacheDir
-  let dated = cacheDir' </> dayToDir today
+  let dated = cacheDir' </> dayToDir today </> cachePath
   return dated
 
--- | Entry point for finding a cached file from a user-specified date
--- TODO need to take the relpath inside the cache dir into account too
--- cacheDirUser :: FilePath -> String -> IO FilePath
--- cacheDirUser cacheDir input = do
---   latest <- existingCacheLatest cacheDir
---   case input of
---     "latest" -> case latest of
---       Nothing -> do
---         putStrLn $ "No existing cache in '" ++ cacheDir ++ "'. Defaulting to the current UTC date."
---         existingCacheDated cacheDir "today"
---       Just d -> do
---         putStrLn $ "Using the latest cached version of '" ++ cacheDir ++ "', which is from '" ++ d ++ "'."
---         return d
---     _ -> existingCacheDated cacheDir input
+-- | Entry point for finding a cached file from a user-specified date.
+--   It silently defaults to the cache path for today's date unless it can find
+--   a valid one matching the user input.
+cacheUser :: FilePath -> FilePath -> String -> IO FilePath
+cacheUser cacheDir cachePath userInput = do
+  let userDay = parseDate userInput
+  userCache <- case userDay of
+    Nothing -> return Nothing
+    Just d -> existingCacheDated cacheDir cachePath d
+  latest  <- existingCacheLatest cacheDir cachePath
+  today   <- cacheToday          cacheDir cachePath
+  if userInput == "latest" then case latest of
+    Nothing -> return today
+    Just c  -> return c
+  else case userCache of
+    Nothing -> return today
+    Just c  -> return c
 
 main :: IO ()
 main = undefined
---   cDir <- nowDatedDir
---   let dlDir = "~/.ortholang/cache/download/" ++ cDir
---   putStrLn $ "download dir based on current time is " ++ dlDir
---   let cDay = dirToDay dlDir
---   putStrLn $ "converting it back to a Day, we get " ++ show cDay
