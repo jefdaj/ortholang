@@ -166,6 +166,7 @@ curlDate = newFnA2
 --      except we don't want to mess up the expr path mapping stuff! that's fiddly
 --      so do the date-overwriting thing during macro expansion, then pass as a regular str to the rest
 --      but inside the Action you *can* access the date and use it to control the cache dir
+--      so expand the macro to get a cache date, then read + use that in the action
 
 aCurlDate :: NewAction2
 aCurlDate (ExprPath outPath') userCacheDescPath' urlPath' = do
