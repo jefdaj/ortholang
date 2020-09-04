@@ -124,6 +124,7 @@ aLoadHash hashSeqIDs t src = do
 
 
 -- TODO problem when the str is a url? shouldn't `need` it then
+-- TODO remove this "url as path" idea and use dated curl fn instead once it works
 aLoad :: Bool -> NewAction1
 aLoad hashSeqIDs o@(ExprPath out') strPath' = do
   cfg <- fmap fromJust getShakeExtra

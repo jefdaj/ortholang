@@ -15,6 +15,7 @@ module OrthoLang.Modules.Curl
 
 import OrthoLang.Types
 import OrthoLang.Interpreter
+import Development.Shake
 
 import Control.Monad.IO.Class     (liftIO)
 import Data.Maybe                 (fromJust)
@@ -71,23 +72,18 @@ olModule = Module
 ---------------
 
 curlDate :: Function
-curlDate = newExprExpansion
+curlDate = newFnA2
   "curl_date"
-  [Exactly str, Exactly str]
+  (Exactly str, Exactly str)
   (Exactly Untyped)
-  mCurlDate
+  aCurlDate
   [ReadsURL]
 
-mCurlDate :: ExprExpansion
-mCurlDate _ _ (Fun r ms ds n [dateStr, urlStr]) = undefined
-  where
-    datePath = undefined
-mCurlDate _ _ e = error $ "bad argument to mCurlDate: " ++ show e
-
--- mOrthologInStr :: String -> ExprExpansion
--- mOrthologInStr name _ _ (Fun rType seed deps _  [groups , faas]) =
---   Fun rType seed deps (name ++ "_str")   [groups', faas']
---   where
---     groups' = Fun sll seed (depsOf groups) "orthogroups"      [groups]
---     faas'   = Fun sll seed (depsOf faas  ) "extract_ids_each" [faas]
--- mOrthologInStr _ _ _ _ = error "bad arguments to mOrthologInStr"
+aCurlDate :: NewAction2
+aCurlDate (ExprPath outPath') _ urlPath' = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "ortholang.modules.curl.aCurlDate"
+      urlPath = toPath loc cfg urlPath'
+      outPath = toPath loc cfg outPath'
+  tmpPath <- curl urlPath
+  symlink outPath tmpPath
