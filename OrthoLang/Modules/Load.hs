@@ -135,7 +135,7 @@ aLoad hashSeqIDs o@(ExprPath out') strPath' = do
   pth'  <- readLit loc strPath'
   let pth = toPath loc cfg pth'
   -- TODO is this the proper place to actually do the download?
-  pth'' <- if isURL pth' then curl pth else return pth
+  pth'' <- if isURL pth' then undefined pth else return pth -- TODO fix this with new curl!
   hashPath <- aLoadHash hashSeqIDs t pth''
   symlink out hashPath
 

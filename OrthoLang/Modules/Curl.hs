@@ -31,6 +31,7 @@ import Data.List.Split (splitOn)
 import OrthoLang.Util (absolutize, globFiles)
 import Data.List (sort)
 import System.Directory (doesPathExist)
+import System.FilePath (takeBaseName, takeDirectory)
 
 
 ----------------------
@@ -38,29 +39,30 @@ import System.Directory (doesPathExist)
 ----------------------
 
 -- TODO make it a NewAction1? 2?
-curl :: Path -> Action Path
-curl url = do
+curl :: Path -> Path -> Action ()
+curl outPath urlPath = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.curl.curl"
-      url'    = fromPath loc cfg url
-      cDir    = fromPath loc cfg $ cacheDir cfg "curl"
-      outPath = cDir </> digest loc url
+      urlPath' = fromPath loc cfg urlPath
+      outPath' = fromPath loc cfg outPath
+      cDir     = fromPath loc cfg $ cacheDir cfg "curl"
+      -- outPath  = cDir </> digest loc url
   liftIO $ createDirectoryIfMissing True cDir
   runCmd $ CmdDesc
     { cmdBinary = "curl.sh"
-    , cmdArguments = [outPath, url']
+    , cmdArguments = [outPath', urlPath']
     , cmdFixEmpties = False
     , cmdParallel = False
     , cmdInPatterns = []
     , cmdNoNeedDirs = []
-    , cmdOutPath = outPath
+    , cmdOutPath = outPath'
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
     , cmdOptions = []
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [outPath]
+    , cmdRmPatterns = [outPath']
     }
-  return $ toPath loc cfg outPath
+  -- return $ toPath loc cfg outPath
 
 ----------------------
 -- ortholang module --
@@ -158,6 +160,13 @@ curlDate = newFnA2
   aCurlDate
   [ReadsURL]
 
+-- TODO should this be the regular "curl" as a macro expansion?
+-- TODO basically, we want the final date decided on to be one of the args right?
+--      path could be like: exprs/curl_date/2020-09-04/<the other hash>/result
+--      except we don't want to mess up the expr path mapping stuff! that's fiddly
+--      so do the date-overwriting thing during macro expansion, then pass as a regular str to the rest
+--      but inside the Action you *can* access the date and use it to control the cache dir
+
 aCurlDate :: NewAction2
 aCurlDate (ExprPath outPath') userCacheDescPath' urlPath' = do
   cfg <- fmap fromJust getShakeExtra
@@ -165,27 +174,33 @@ aCurlDate (ExprPath outPath') userCacheDescPath' urlPath' = do
       urlPath = toPath loc cfg urlPath'
       outPath = toPath loc cfg outPath'
 
+  liftIO $ putStrLn $ "userCacheDescPath': " ++ userCacheDescPath'
+  liftIO $ putStrLn $ "urlPath': " ++ urlPath'
+
   -- decide on the dated cache path
   userCacheDesc <- readLit loc userCacheDescPath'
   let cacheDir' = fromPath loc cfg $ cacheDir cfg "curl"
-      cachePath = digest loc urlPath' </> "result"
+      -- cachePath = digest loc urlPath' </> "result" -- TODO actually we want the digest of the url right?
+      urlDigest = takeBaseName $ takeDirectory urlPath' -- this is the cachePath within the dated dir
 
   liftIO $ putStrLn $ "userCacheDesc: " ++ userCacheDesc
   liftIO $ putStrLn $ "cacheDir': " ++ cacheDir'
-  liftIO $ putStrLn $ "cachePath: " ++ cachePath
+  liftIO $ putStrLn $ "urlDigest: " ++ urlDigest
 
   -- if the cache path resolution works, this is Just something
   -- TODO if not, just return cacheToday here? or should the distinction be used for a warning?
-  mUserCachePath <- liftIO $ cacheUser cacheDir' cachePath userCacheDesc
+  mUserCachePath <- liftIO $ cacheUser cacheDir' urlDigest userCacheDesc
   cachePath' <- case mUserCachePath of
-    Nothing -> liftIO $ cacheToday cacheDir' cachePath
+    Nothing -> liftIO $ cacheToday cacheDir' urlDigest
     Just p -> return p
+
+  -- TODO the final output path should depend on this rather than the initial userCacheDescPath', right?
   let cachePath = toPath loc cfg cachePath'
+  liftIO $ createDirectoryIfMissing True $ takeDirectory cachePath'
 
   -- download the file if needed
   -- TODO this has to be a separate rule though, right?
   -- TODO merge it into the curl function itself by adding an outpath?
   -- TODO are both symlinks here really necessary?
-  tmpPath <- curl urlPath
-  symlink cachePath tmpPath
+  curl cachePath urlPath
   symlink outPath cachePath

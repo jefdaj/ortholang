@@ -203,7 +203,7 @@ aBuscoFetchLineage (ExprPath out') namePath = do
       url       = toPath loc cfg $ "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
       datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
       datasetPath   = toPath loc cfg datasetPath'
-  tarPath <- fmap (fromPath loc cfg) $ curl url
+  tarPath <- fmap (fromPath loc cfg) $ undefined url -- TODO fix this with new curl!
   unlessExists untarPath $ do
     untar (toPath loc cfg tarPath) (toPath loc cfg untarPath)
   symlink out datasetPath
