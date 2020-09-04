@@ -27,6 +27,7 @@ import System.Exit                (ExitCode(..))
 -- haskell function --
 ----------------------
 
+-- TODO make it a NewAction1? 2?
 curl :: Path -> Action Path
 curl url = do
   cfg <- fmap fromJust getShakeExtra
@@ -62,5 +63,20 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
-  , mFunctions = []
+  , mFunctions = [curlDate]
   }
+
+---------------
+-- curl_date --
+---------------
+
+curlDate :: Function
+curlDate = newExprExpansion
+  "curl_date"
+  [Exactly str, Exactly str]
+  (Exactly Untyped)
+  mCurlDate
+  [ReadsURL]
+
+mCurlDate :: ExprExpansion
+mCurlDate = undefined
