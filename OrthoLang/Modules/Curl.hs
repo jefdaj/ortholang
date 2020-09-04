@@ -140,9 +140,9 @@ cacheUser cacheDir cachePath userInput = do
   userCache <- case userDay of
     Nothing -> return Nothing
     Just d -> existingCacheDated cacheDir cachePath d
-  latest  <- existingCacheLatest cacheDir cachePath
+  cached  <- existingCacheLatest cacheDir cachePath
   today   <- cacheToday cacheDir cachePath
-  return $ if      userInput == "latest" then latest
+  return $ if      userInput == "cached" then cached
            else if userInput == "today"  then Just today
            else    userCache
 
@@ -159,10 +159,33 @@ curlDate = newFnA2
   [ReadsURL]
 
 aCurlDate :: NewAction2
-aCurlDate (ExprPath outPath') _ urlPath' = do
+aCurlDate (ExprPath outPath') userCacheDescPath' urlPath' = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "ortholang.modules.curl.aCurlDate"
       urlPath = toPath loc cfg urlPath'
       outPath = toPath loc cfg outPath'
+
+  -- decide on the dated cache path
+  userCacheDesc <- readLit loc userCacheDescPath'
+  let cacheDir' = fromPath loc cfg $ cacheDir cfg "curl"
+      cachePath = digest loc urlPath' </> "result"
+
+  liftIO $ putStrLn $ "userCacheDesc: " ++ userCacheDesc
+  liftIO $ putStrLn $ "cacheDir': " ++ cacheDir'
+  liftIO $ putStrLn $ "cachePath: " ++ cachePath
+
+  -- if the cache path resolution works, this is Just something
+  -- TODO if not, just return cacheToday here? or should the distinction be used for a warning?
+  mUserCachePath <- liftIO $ cacheUser cacheDir' cachePath userCacheDesc
+  cachePath' <- case mUserCachePath of
+    Nothing -> liftIO $ cacheToday cacheDir' cachePath
+    Just p -> return p
+  let cachePath = toPath loc cfg cachePath'
+
+  -- download the file if needed
+  -- TODO this has to be a separate rule though, right?
+  -- TODO merge it into the curl function itself by adding an outpath?
+  -- TODO are both symlinks here really necessary?
   tmpPath <- curl urlPath
-  symlink outPath tmpPath
+  symlink cachePath tmpPath
+  symlink outPath cachePath
