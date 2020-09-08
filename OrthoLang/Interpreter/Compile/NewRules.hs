@@ -403,7 +403,7 @@ applyList4 fn deps = do
 {-|
 -}
 aNewRules
-  :: (t -> [FilePath] -> Action ()) -- ^ one of the apply{1,2,3} fns
+  :: (t -> [FilePath] -> Action ()) -- ^ one of the apply{1..4} fns
   -> TypeSig
   -> (ExprPath -> t)
   ->  ExprPath -> Action ()

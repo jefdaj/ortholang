@@ -160,6 +160,16 @@ curlDate = newFnA2
   aCurlDate
   [ReadsURL]
 
+{- Explain that the valid date strs are:
+ -
+ - * a specific date in "yyyy-mm-dd" format, which requires that day's cache to exist
+ -     (in case of conflicts, the latest-timestamped version with the same date wins)
+ - * "today", which acts like today's date and can download + cache new files
+ - * "cached", which picks the most recent existing cache or acts like "today" if there is none
+ -
+ - Date ranges or other expressions might be added in the future.
+ -}
+
 -- TODO should this be the regular "curl" as a macro expansion?
 -- TODO basically, we want the final date decided on to be one of the args right?
 --      path could be like: exprs/curl_date/2020-09-04/<the other hash>/result
@@ -167,6 +177,21 @@ curlDate = newFnA2
 --      so do the date-overwriting thing during macro expansion, then pass as a regular str to the rest
 --      but inside the Action you *can* access the date and use it to control the cache dir
 --      so expand the macro to get a cache date, then read + use that in the action
+
+-- | `cacheDir` and `cachePath` are properties of the `Action` to be performed,
+--   while `dateDescPath` is a path to a user-supplied date description. It can
+--   be "today", "cached", or a specific date in "yyyy-mm-dd" format. This
+--   function returns a valid path to the cached file. The file must either exist
+--   already or be described by a separate `Rules` entry, or Shake will fail to
+--   build it. The path after the dated part must also be unique.
+withDatedCache :: FilePath               -- ^ path before the dated part
+               -> FilePath               -- ^ path after  the dated part
+               -> FilePath               -- ^ path to user-supplied description of the date
+               -> (FilePath -> Action a) -- ^ fn to pass the cached downloaded file to
+               -> Action a
+withDatedCache cacheDir cachePath dateDescPath actFn = do
+  let resolvedCachePath = undefined dateDescPath
+  actFn resolvedCachePath
 
 aCurlDate :: NewAction2
 aCurlDate (ExprPath outPath') userCacheDescPath' urlPath' = do
