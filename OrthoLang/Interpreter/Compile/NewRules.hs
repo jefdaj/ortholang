@@ -693,6 +693,7 @@ newDate1of4 :: Prefix -> NewAction4
 newDate1of4 prefix out a1 _ _ _ = newDate prefix out a1
 
 -- TODO should the prefix here have _date added?
+-- TODO should the actual date be used instead of the hash in these expr paths?
 newDate :: Prefix -> ExprPath -> FilePath -> Action ()
 newDate prefix (ExprPath outPath) userPath = do
   cfg  <- fmap fromJust getShakeExtra
