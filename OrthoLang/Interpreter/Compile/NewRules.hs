@@ -58,6 +58,10 @@ module OrthoLang.Interpreter.Compile.NewRules
   , newMap2of2
   , newMap2of3
   , newMap3of3
+  , newDate1of1
+  , newDate1of2
+  , newDate1of3
+  , newDate1of4
 
   -- * Implementation details
   , rReloadIDs
@@ -542,14 +546,7 @@ hidden fn = fn { fTags = Hidden : fTags fn }
 type Prefix = String
 
 -- the Action here is required because one of the input paths will normally be
--- needed + read to generate the list of output paths. The One variant means
--- the macro returns one path, which will be symlinked to the actual outpath.
--- Many means it returns a list of paths, which will be written to the actual
--- outpath.
---
--- TODO put the Maybe Seed back? Not sure how to pass it here
---
--- TODO should there be 1,2, and 3-arg versions?
+-- needed + read to generate the list of output paths.
 --
 -- type PathChange    = Prefix -> Maybe Seed -> [FilePath] -> Action  FilePath
 -- type PathExpansion = Prefix -> [FilePath] -> Action [FilePath]
@@ -664,3 +661,30 @@ replace (x:xs) (n,a) =
   if n < 0
     then (x:xs)
     else x: replace xs (n-1,a)
+
+------------------------------------------------------
+-- expand user-supplied cache dates to proper dates --
+------------------------------------------------------
+
+-- | Expands a 1-argument function to the corresponding _date version
+newDate1of1 :: Prefix -> NewAction1
+newDate1of1 prefix out a1 = newDate prefix out a1
+
+-- | Expands a 2-argument function to the corresponding _date version
+newDate1of2 :: Prefix -> NewAction2
+newDate1of2 prefix out a1 _ = newDate prefix out a1
+
+-- | Expands a 3-argument function to the corresponding _date version
+newDate1of3 :: Prefix -> NewAction3
+newDate1of3 prefix out a1 _ _ = newDate prefix out a1
+
+-- | Expands a 4-argument function to the corresponding _date version
+newDate1of4 :: Prefix -> NewAction4
+newDate1of4 prefix out a1 _ _ _ = newDate prefix out a1
+
+newDate :: Prefix -> ExprPath -> FilePath -> Action ()
+newDate prefix outPath datePath = undefined
+-- TODO read datePath and resolve it to a proper date
+-- TODO write the proper date as a str path, in case that's needed
+-- TODO digest the old + new datePaths, replace old with new, and replace prefix with prefix_date
+-- TODO end by needing the replaced path
