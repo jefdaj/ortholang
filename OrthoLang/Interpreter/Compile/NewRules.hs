@@ -92,7 +92,7 @@ import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
-import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite')
+import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite', readLit, writeLit)
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Locks (withWriteOnce)
 import OrthoLang.Types
@@ -102,12 +102,22 @@ import System.Exit (ExitCode(..))
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
-import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName)
+import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName, makeRelative)
 import OrthoLang.Interpreter.Actions     (need', readPaths)
-import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest)
+import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest, exprPath, pathDigest)
 import qualified Data.Map.Strict as M
 import Data.IORef                 (atomicModifyIORef')
 import System.Directory           (createDirectoryIfMissing)
+
+import Data.Time
+import Text.Printf
+-- import System.FilePath ((</>))
+import Data.List.Split (splitOn)
+import OrthoLang.Util (absolutize, globFiles)
+import Data.List (sort)
+import Data.List.Utils (replace)
+import System.Directory (doesPathExist)
+import System.FilePath (takeBaseName, takeDirectory)
 
 ---------
 -- API --
@@ -298,7 +308,7 @@ aLoadIDs idsPath' = do
   alwaysRerun
   liftIO $ debug "interpreter.sanitize.aLoadIDs" $ "idsPath': " ++ idsPath'
   cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.load.aLoadIDs"
+  let loc = "ortholang.interpreter.compile.newrules.aLoadIDs"
       idsPath = toPath loc cfg idsPath'
   newIDs <- readIDs idsPath
   -- TODO what should the keys actually be? probably not the idsPath
@@ -647,20 +657,20 @@ newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cf
                                       Nothing -> "result" -- TODO what if only the new fn needs it?
                                       Just (Seed n) -> ('s':show n) </> "result" -- TODO could this be the read issue?
     newDigests path = map (\(PathDigest s) -> s) $
-                      replace oldDigests' (mapIndex - 1, pathDigest path)
+                      replaceN oldDigests' (mapIndex - 1, pathDigest path)
     mkPath p = tmpdir cfg </> "exprs" </> newFnName </>
                (foldl1 (</>) (newDigests p)) </>
                newSuffix
 
 -- replace the Nth element in a list
 -- old.reddit.com/r/haskell/comments/8jui5k/how_to_replace_an_element_at_an_index_in_a_list/dz2i8rj/
-replace :: [a] -> (Int, a) -> [a]
-replace [] _ = []
-replace (_:xs) (0,a) = a:xs
-replace (x:xs) (n,a) =
+replaceN :: [a] -> (Int, a) -> [a]
+replaceN [] _ = []
+replaceN (_:xs) (0,a) = a:xs
+replaceN (x:xs) (n,a) =
   if n < 0
     then (x:xs)
-    else x: replace xs (n-1,a)
+    else x: replaceN xs (n-1,a)
 
 ------------------------------------------------------
 -- expand user-supplied cache dates to proper dates --
@@ -682,9 +692,107 @@ newDate1of3 prefix out a1 _ _ = newDate prefix out a1
 newDate1of4 :: Prefix -> NewAction4
 newDate1of4 prefix out a1 _ _ _ = newDate prefix out a1
 
+-- TODO should the prefix here have _date added?
 newDate :: Prefix -> ExprPath -> FilePath -> Action ()
-newDate prefix outPath datePath = undefined
--- TODO read datePath and resolve it to a proper date
--- TODO write the proper date as a str path, in case that's needed
--- TODO digest the old + new datePaths, replace old with new, and replace prefix with prefix_date
--- TODO end by needing the replaced path
+newDate prefix (ExprPath outPath) userPath = do
+  cfg  <- fmap fromJust getShakeExtra
+  dRef <- fmap fromJust getShakeExtra
+  let loc = "ortholang.interpreter.compile.newrules.newDate"
+      cacheDir   = tmpdir cfg </> "exprs" </> prefix
+      cachePath  = makeRelative (cacheDir) outPath
+      cacheDirD  = cacheDir ++ "_date"
+  userDate   <- readLit loc userPath
+  properDate <- liftIO $ resolveCache cacheDirD cachePath userDate
+  let properPath   = exprPath cfg dRef emptyScript $ Lit str properDate
+      properPath'  = fromPath loc cfg properPath
+      (PathDigest old) = pathDigest $ toPath loc cfg userPath
+      (PathDigest new) = pathDigest properPath
+      outPathD     = cacheDirD </> replace old new outPath
+  writeLit loc properPath' properDate    -- TODO remove?
+  liftIO $ addDigest dRef str properPath -- TODO remove?
+  need' loc [outPathD]
+
+-----------------------------------
+-- future core library functions --
+-----------------------------------
+
+dayToDir :: Day -> FilePath
+dayToDir date = sYear </> sMonth </> sDay
+  where
+    (year, month, day) = toGregorian date
+    sYear  = printf "%04d" year
+    sMonth = printf "%02d" month
+    sDay   = printf "%02d" day
+
+dirToDay :: FilePath -> Day
+dirToDay dir = fromGregorian nYear nMonth nDay
+  where
+    (day:month:year:_) = reverse $ splitOn "/" dir
+    nYear  = read year  :: Integer
+    nMonth = read month :: Int
+    nDay   = read day   :: Int
+
+getToday :: IO Day
+getToday = do
+  (UTCTime today _) <- getCurrentTime
+  return today
+
+parseDate :: String -> Maybe Day
+parseDate = parseTimeM True defaultTimeLocale "%Y-%m-%d"
+
+-- | Returns an existing cache matching a specific path + date, or Nothing
+existingCacheDated :: FilePath -> FilePath -> Day -> IO (Maybe FilePath)
+existingCacheDated cacheDir cachePath day = do
+  cacheDir' <- absolutize cacheDir
+  let dated = cacheDir' </> dayToDir day </> cachePath
+  exists <- doesPathExist dated
+  return $ if exists
+    then Just dated
+    else Nothing
+
+-- | Returns the latest existing cache matching a specific path, or Nothing
+--   Warning: assumes all files in the cache dir are yyyy/mm/dd formatted
+existingCacheLatest :: FilePath -> FilePath -> IO (Maybe FilePath)
+existingCacheLatest cacheDir cachePath = do
+  matches <- globFiles $ cacheDir </> "*" </> "*" </> "*" </> cachePath
+  if null matches then return Nothing
+  else return $ Just $ head $ sort matches
+
+-- | Returns today's cache for a specific file, whether or not it exists yet
+cacheToday :: FilePath -> FilePath -> IO FilePath
+cacheToday cacheDir cachePath = do
+  today <- getToday
+  cacheDir' <- absolutize cacheDir
+  let dated = cacheDir' </> dayToDir today </> cachePath
+  return dated
+
+-- | Entry point for finding a cached file from a user-specified date.
+--   If this returns Nothing, it means we'll need to download the file.
+--
+--   TODO confirmation dialog before downloading, or just assume?
+cacheUser :: FilePath -> FilePath -> String -> IO (Maybe FilePath)
+cacheUser cacheDir cachePath userInput = do
+  let userDay = parseDate userInput
+  userCache <- case userDay of
+    Nothing -> return Nothing
+    Just d -> existingCacheDated cacheDir cachePath d
+  cached  <- existingCacheLatest cacheDir cachePath
+  today   <- cacheToday cacheDir cachePath
+  return $ if      userInput == "cached" then cached
+           else if userInput == "today"  then Just today
+           else    userCache
+
+-- | Overall entry point, which would include user-facing warnings (if any).
+resolveCache :: FilePath -> FilePath -> String -> IO FilePath
+resolveCache cacheDir cachePath userInput = do
+  -- if the cache path resolution works, this is Just something
+  -- TODO if not, just return cacheToday here? or should the distinction be used for a warning?
+  mUserCachePath <- liftIO $ cacheUser cacheDir cachePath userInput
+  cachePath' <- case mUserCachePath of
+    Nothing -> liftIO $ cacheToday cacheDir cachePath
+    Just p -> return p
+
+  -- TODO the final output path should depend on this rather than the initial userCacheDescPath', right?
+  -- let cachePath = toPath loc cfg cachePath'
+  -- liftIO $ createDirectoryIfMissing True $ takeDirectory cachePath'
+  return cachePath'
