@@ -31,11 +31,9 @@ olModule = Module
   , mEncodings = [blastdb]
   , mRules = []
   , mFunctions =
-
     [ blastdblist
     , blastdbgetFna -- TODO mapped version so you can list -> git at once?
     , blastdbgetFaa -- TODO mapped version so you can list -> git at once?
-    -- , TODO write loadBlastdbget
     ]
   }
 
