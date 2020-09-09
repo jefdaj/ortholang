@@ -15,7 +15,7 @@ module OrthoLang.Modules.Curl
 
 import OrthoLang.Types
 import OrthoLang.Interpreter
-import OrthoLang.Interpreter.Paths (listDigestsInPath)
+import OrthoLang.Interpreter.Paths (listDigestsInPath, pathDigest)
 import Development.Shake
 
 import Control.Monad.IO.Class     (liftIO)
@@ -154,6 +154,7 @@ olModule = Module
 -- curl* --
 -----------
 
+-- | Version that auto-finds the proper date based on user input
 curlImplicit :: Function
 curlImplicit = newFnA2
   "curl"
@@ -162,13 +163,14 @@ curlImplicit = newFnA2
   (newDate1of2 "curl")
   [ReadsURL, ReadsFile]
 
+-- | Version that assumes the date is properly formatted
 curlDate :: Function
 curlDate = newFnA2
   "curl_date"
   (Exactly str, Exactly str)
   (Exactly Untyped)
   aCurlDate
-  [ReadsURL]
+  [ReadsURL, Hidden]
 
 {- Explain that the valid date strs are:
  -
@@ -242,5 +244,6 @@ aCurlDate (ExprPath outPath') datePath' urlPath' = do
   -- TODO merge it into the curl function itself by adding an outpath?
   -- TODO are both symlinks here really necessary?
   curl cachePath urlPath -- TODO move this to a Rules pattern
+  liftIO $ putStrLn $ "aCurlDate cachePath, which should be handled by a separate Rule: " ++ render (pPrint cachePath)
   liftIO $ putStrLn $ "aCurlDate symlink: " ++ show outPath ++ " -> " ++ show cachePath
   symlink outPath cachePath

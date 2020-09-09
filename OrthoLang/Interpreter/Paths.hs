@@ -170,6 +170,7 @@ import Data.String.Utils              (replace)
 import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
 import Path                           (parseAbsFile, fromAbsFile)
 -- import Text.PrettyPrint.HughesPJClass (Pretty)
+import qualified Text.PrettyPrint as PP
 
 import qualified Data.Text.Lazy as T
 import Text.Pretty.Simple (pShowNoColor)
@@ -411,6 +412,10 @@ unsafeExprPathExplicit cfg dRef prefix rtype mSeed hashes =
 
 pathDigest :: Path -> PathDigest
 pathDigest = PathDigest . digest "interpreter.paths.pathDigest"
+
+-- TODO where should this go?
+instance Pretty Path
+  where pPrint p@(Path fp) = PP.text $ "Path '" ++ fp ++ "' (" ++ show (pathDigest p) ++ ")"
 
 exprDigest :: Config -> DigestsRef -> Script -> Expr -> DigestMap
 exprDigest cfg dRef scr expr = traceShow "interpreter.paths.exprDigest" res
