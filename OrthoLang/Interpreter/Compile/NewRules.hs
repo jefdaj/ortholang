@@ -709,8 +709,6 @@ aNewDate prefix (ExprPath outPath') userPath = do
   -- userDate   <- readLit loc userPath
   -- liftIO $ putStrLn $ "userDate: '" ++ userDate ++ "'"
 
-  liftIO $ addDigest dRef Untyped $ toPath loc cfg outPath' -- TODO fix type?
-
   -- TODO fix this! it's actually a cache path
   -- properDate <- liftIO $ resolveCache cacheDir cachePath userDate
   properDate <- fmap show $ resolveCacheDay cacheDir cachePath userPath
@@ -727,6 +725,11 @@ aNewDate prefix (ExprPath outPath') userPath = do
   liftIO $ putStrLn $ "outPathD': '" ++ outPathD' ++ "'"
   writeLit loc properPath' properDate    -- TODO remove?
   -- liftIO $ addDigest dRef str properPath -- TODO remove?
+
+
+  liftIO $ addDigest dRef Untyped $ toPath loc cfg outPath' -- TODO fix type by getting it from the corresponding _date path
+  liftIO $ addDigest dRef Untyped $ toPath loc cfg outPathD' -- TODO fix type by getting it from the corresponding _date path
+
   need' loc [outPathD']    -- TODO remove?
   symlink outPath outPathD -- TODO remove?
 

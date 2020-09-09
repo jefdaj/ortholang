@@ -206,7 +206,7 @@ curlImplicit = newFnA2
   "curl"
   (Exactly str, Exactly str)
   (Exactly Untyped)
-  (newDate1of2 "curl")
+  (newDate1of2 "curl") -- TODO main remaining bug is that this doesn't add its outpath digest?
   [ReadsURL, ReadsFile]
 
 -- | Version that assumes the date is properly formatted
