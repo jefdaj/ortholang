@@ -29,7 +29,6 @@ olModule = Module
   , mTypes = [fna, faa, ndb, pdb]
   , mGroups = []
   , mEncodings = [blastdb]
-  , mRules = []
   , mFunctions =
     [ blastdblist
     , blastdbgetFna -- TODO mapped version so you can list -> git at once?
@@ -44,6 +43,10 @@ blastdbgetCache cfg = cacheDir cfg "blastdbget"
 -----------------
 -- blastdblist --
 -----------------
+
+{- This is a two-part thing where we only want to download the full list once
+ - per day at the most, but instantly filter it by different strings.
+ -}
 
 -- takes a filter string (leave empty for all results)
 blastdblist :: Function
@@ -123,14 +126,22 @@ aFilterList oPath listTmp fPath = do
 -- blastdbget_* --
 ------------------
 
+-- mkBlastdbget :: String -> Type -> Function
+-- mkBlastdbget name faType = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly str]
+--   , fOutput =  Exactly (EncodedAs blastdb faType)
+--   , fTags = []
+--   , fNewRules = NewNotImplemented, fOldRules = rBlastdbget
+--   }
+
 mkBlastdbget :: String -> Type -> Function
-mkBlastdbget name faType = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str]
-  , fOutput =  Exactly (EncodedAs blastdb faType)
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rBlastdbget
-  }
+mkBlastdbget name faType = newFnA1 -- TODO add date arg
+  name
+  (Exactly str)
+  (Exactly $ EncodedAs blastdb faType)
+  undefined -- TODO write this: aBlastdbget
+  [ReadsURL]
 
 -- TODO rename with fna
 blastdbgetFna :: Function
@@ -140,27 +151,27 @@ blastdbgetFna = mkBlastdbget "blastdbget_fna" fna
 blastdbgetFaa :: Function
 blastdbgetFaa = mkBlastdbget "blastdbget_faa" faa
 
-rBlastdbget :: RulesFn
-rBlastdbget scr e@(Fun _ _ _ _ [name]) = do
-  (ExprPath nPath) <- rExpr scr name
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.blastdb.rBlastdbget"
-      tmpDir    = blastdbgetCache cfg
-      dbPrefix  = exprPath cfg dRef scr e -- final prefix
-      dbPrefix' = fromPath loc cfg dbPrefix
-      nPath'    = toPath loc cfg nPath
-  dbPrefix' %> \_ -> aBlastdbget dbPrefix tmpDir nPath'
-  return (ExprPath dbPrefix')
-rBlastdbget _ _ = fail "bad argument to rBlastdbget"
+-- rBlastdbget :: RulesFn
+-- rBlastdbget scr e@(Fun _ _ _ _ [name]) = do
+--   (ExprPath nPath) <- rExpr scr name
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   let loc = "modules.blastdb.rBlastdbget"
+--       tmpDir    = blastdbgetCache cfg
+--       dbPrefix  = exprPath cfg dRef scr e -- final prefix
+--       dbPrefix' = fromPath loc cfg dbPrefix
+--       nPath'    = toPath loc cfg nPath
+--   dbPrefix' %> \_ -> aBlastdbget dbPrefix tmpDir nPath'
+--   return (ExprPath dbPrefix')
+-- rBlastdbget _ _ = fail "bad argument to rBlastdbget"
 
-aBlastdbget :: Path -> Path -> Path -> Action ()
-aBlastdbget dbPrefix tmpDir nPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let tmp'       = fromPath loc cfg tmpDir
-      nPath'     = fromPath loc cfg nPath
-      dbPrefix'  = fromPath loc cfg dbPrefix
-      loc = "ortholang.modules.blastdb.aBlastdbget"
+aBlastdbget :: NewAction2
+aBlastdbget (ExprPath dbPrefix') tmp' nPath' = do
+  -- cfg <- fmap fromJust getShakeExtra
+  -- let tmp'       = fromPath loc cfg tmpDir
+      -- nPath'     = fromPath loc cfg nPath
+      -- dbPrefix'  = fromPath loc cfg dbPrefix
+  let loc = "ortholang.modules.blastdb.aBlastdbget"
       dbPrefix'' = traceA loc dbPrefix' [dbPrefix', tmp', nPath']
   -- need' loc [nPath']
   dbName <- fmap stripWhiteSpace $ readLit loc nPath' -- TODO need to strip?
