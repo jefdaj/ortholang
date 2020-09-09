@@ -5,37 +5,16 @@ import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Locks
 import OrthoLang.Interpreter
-import OrthoLang.Modules.SeqIO      (faa, fna, fa)
-import OrthoLang.Modules.Singletons (withSingleton, singletons)
+import OrthoLang.Modules.SeqIO      (faa, fna)
 
 import OrthoLang.Modules.BlastDB (blastdb, ndb, pdb)
 
--- import Control.Monad           (when, forM)
 import Data.Char               (toLower)
 import Data.List               (isInfixOf)
-import Data.List               (isPrefixOf)
-import Data.Maybe              (isJust, fromJust)
-import Data.String.Utils       (split)
+import Data.Maybe              (fromJust)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
-import System.FilePath         (takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
-import System.Process          (readCreateProcess, proc)
-
-{- There are a few types of BLAST database files. For nucleic acids:
- - <prefix>.nhr, <prefix>.nin, <prefix>.nog, ...
- -
- - And for proteins:
- - <prefix>.phr, <prefix>.pin, <prefix>.pog, ...
- -
- - The BLAST programs just expect to be passed the prefix, which is fine for
- - most purposes but difficult in Shake; since it's not actually a file Shake
- - will complain that the Action failed to generate it. My solution for
- - now is to make a text file with the prefix pattern in it. The contents are
- - passed to BLAST functions.
- -
- - TODO does it work properly when the input fasta file changes and the database
- -      needs to be rebuilt?
- -}
+import System.FilePath         ((</>), (<.>), takeDirectory)
 
 debugA' :: String -> String -> Action ()
 debugA' name = debugA ("modules.blastdbget." ++ name)
@@ -46,10 +25,11 @@ debugR' _ name = debugRules ("modules.blastdbget." ++ name)
 olModule :: Module
 olModule = Module
   { mName = "Blastdbget"
-  , mDesc = "Create, load, and download BLAST databases"
+  , mDesc = "Download BLAST databases from NCBI"
   , mTypes = [fna, faa, ndb, pdb]
   , mGroups = []
   , mEncodings = [blastdb]
+  , mRules = []
   , mFunctions =
 
     [ blastdblist
@@ -58,6 +38,14 @@ olModule = Module
     -- , TODO write loadBlastdbget
     ]
   }
+
+-- we use two different ones here because it matches the rMap behavior of using just fn name
+blastdbgetCache :: Config -> Path
+blastdbgetCache cfg = cacheDir cfg "blastdbget"
+
+-----------------
+-- blastdblist --
+-----------------
 
 -- takes a filter string (leave empty for all results)
 blastdblist :: Function
@@ -73,10 +61,6 @@ filterNames :: String -> [String] -> [String]
 filterNames s cs = filter matchFn cs
   where
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
-
--- we use two different ones here because it matches the rMap behavior of using just fn name
-blastdbgetCache :: Config -> Path
-blastdbgetCache cfg = cacheDir cfg "blastdbget"
 
 rBlastdblist :: RulesFn
 rBlastdblist scr e@(Fun _ _ _ _ [f]) = do
@@ -136,6 +120,10 @@ aFilterList oPath listTmp fPath = do
       names' = if null filterStr then names else filterNames filterStr names
   debugA' loc $ "names': " ++ show names'
   writeLits loc oPath'' names'
+
+------------------
+-- blastdbget_* --
+------------------
 
 mkBlastdbget :: String -> Type -> Function
 mkBlastdbget name faType = Function
