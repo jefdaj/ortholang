@@ -140,6 +140,7 @@ library
                     OrthoLang.Modules.BioMartR,
                     OrthoLang.Modules.Blast,
                     OrthoLang.Modules.BlastDB,
+                    OrthoLang.Modules.Blastdbget,
                     OrthoLang.Modules.BlastHits,
                     OrthoLang.Modules.BlastRBH,
                     OrthoLang.Modules.Busco,
