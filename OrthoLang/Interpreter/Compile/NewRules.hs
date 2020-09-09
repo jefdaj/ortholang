@@ -325,7 +325,7 @@ newRules mods = sequence_ $ rReloadIDs : (fnRules ++ modRules)
   where
     fns     = concatMap mFunctions mods
     fnRules = catRules $ map fNewRules fns
-    modRules = map mRules mods
+    modRules = concatMap mRules mods
     catRules [] = []
     catRules ((NewRules r):xs) = r : catRules xs
     catRules (_:xs) = catRules xs

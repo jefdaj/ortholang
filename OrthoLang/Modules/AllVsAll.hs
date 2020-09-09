@@ -16,7 +16,7 @@ olModule = Module
   , mTypes = [ava]
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions = [] -- TODO put the functions here, or in their respective modules?
   }
 

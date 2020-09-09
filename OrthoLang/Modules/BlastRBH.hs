@@ -32,7 +32,7 @@ olModule = Module
   , mTypes = [fna, faa, bht]
   , mGroups = []
   , mEncodings = [blastdb]
-  , mRules = return ()
+  , mRules = []
   , mFunctions =
     -- TODO also work with the non-symmetric ones that have an obvious way to do it?
     map mkBlastFromFaRev     blastDescsRev ++

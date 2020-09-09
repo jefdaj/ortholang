@@ -17,7 +17,7 @@ olModule = Module
   , mTypes = [num]
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions =
     [ mkMathBop "add"      '+' (+)
     , mkMathBop "subtract" '-' (-)

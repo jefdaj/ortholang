@@ -32,7 +32,7 @@ olModule = Module
   , mTypes = [zip]
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions = [zipArchive, zipArchiveExplicit]
   }
 

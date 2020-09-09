@@ -12,7 +12,7 @@ olModule = Module
   , mTypes = [str]
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions =
       [ test1
       , test2
