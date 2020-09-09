@@ -734,49 +734,41 @@ aNewDate prefix (ExprPath outPath') userPath = do
 -- future library functions --
 ------------------------------
 
-dayToDir :: Day -> FilePath
-dayToDir date = sYear </> sMonth </> sDay
-  where
-    (year, month, day) = toGregorian date
-    sYear  = printf "%04d" year
-    sMonth = printf "%02d" month
-    sDay   = printf "%02d" day
-
-parseDate :: String -> Maybe Day
-parseDate = parseTimeM True defaultTimeLocale "%Y-%m-%d"
+parseDay :: String -> Maybe Day
+parseDay = parseTimeM True defaultTimeLocale "%Y-%m-%d"
 
 -- | Returns the latest existing cache matching a specific path, or Nothing
-cachedVersion :: FilePath -> FilePath -> Action (Maybe Day)
-cachedVersion cacheDir cachePath = do
+cachedDay :: FilePath -> FilePath -> Action (Maybe Day)
+cachedDay cacheDir cachePath = do
   matches <- liftIO $ globFiles $ cacheDir </> "*" </> cachePath
   let dateOf dir = head $ splitDirectories $ makeRelative cachePath dir
       dated = map (\m -> (dateOf m, m)) matches
   if null matches then return Nothing
-  else return $ parseDate $ snd $ head $ sort dated
+  else return $ parseDay $ snd $ head $ sort dated
 
 -- | Entry point for finding a cached file from a user-specified date.
 --   If this returns Nothing, it means we'll need to download the file.
-cacheUser :: FilePath -> FilePath -> String -> Action (Maybe Day)
-cacheUser cacheDir cachePath userPath = do
-  let loc = "ortholang.interpreter.compile.newrules.cacheUser"
+userDay :: FilePath -> FilePath -> String -> Action (Maybe Day)
+userDay cacheDir cachePath userPath = do
+  let loc = "ortholang.interpreter.compile.newrules.userDay"
   userInput <- readLit loc userPath
-  let userDay = parseDate userInput
-  cached  <- cachedVersion cacheDir cachePath
+  let parsed = parseDay userInput
+  cached  <- cachedDay cacheDir cachePath
   today <- fmap fromJust getShakeExtra
   return $ if      userInput == "cached" then cached
            else if userInput == "today"  then Just today
-           else    userDay
+           else    parsed
 
 -- | Overall entry point, which would include user-facing warnings (if any).
 properDay :: FilePath -> FilePath -> String -> Action Day
 properDay cacheDir cachePath userInput = do
   let loc = "ortholang.interpreter.compile.newrules.properDay"
   today <- fmap fromJust getShakeExtra
-  mUserCachePath <- cacheUser cacheDir cachePath userInput
+  mUserCachePath <- userDay cacheDir cachePath userInput
   cachePath' <- case mUserCachePath of
     Nothing -> do
       userDate <- readLit loc userInput
-      liftIO $ putStrLn $ "Warning: no cache found for '" ++ userDate ++ "'. " ++
+      liftIO $ putStrLn $ "Warning: no cache found for \"" ++ userDate ++ "\". " ++
                           "Defaulting to the current UTC date, " ++ show today ++ "."
       return today
     Just p -> return p

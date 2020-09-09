@@ -14,3 +14,5 @@ URL="$(cat "$URLPATH")"
 curl --silent --show-error -L --max-redirs 3 \
   --retry 3 --retry-connrefused --retry-delay 2 --retry-max-time 60 \
   "$URL" -o "$OUTPATH" &> "$ERRPATH"
+
+[[ -z "$ERRPATH" ]] && rm "$ERRPATH"
