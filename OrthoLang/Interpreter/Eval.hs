@@ -68,10 +68,14 @@ import qualified System.Progress as P
 -- import System.Time.Utils (renderSecs)
 
 import System.Process (readProcess)
+import Data.Time (UTCTime(..), getCurrentTime, Day(..))
 
 import GHC.Conc                   (getNumProcessors)
 
-
+getToday :: IO Day
+getToday = do
+  (UTCTime today _) <- getCurrentTime
+  return today
 
 -- import qualified Data.Text.Lazy as T
 -- import Text.Pretty.Simple (pShowNoColor)
@@ -83,6 +87,7 @@ myShake :: [Module] -> Config -> LocksRef -> IDsRef -> DigestsRef
 myShake mods cfg ref ids dr pm rules = do
   -- ref <- newIORef (return mempty :: IO Progress)
   nproc <- getNumProcessors
+  day <- getToday
   let tDir = tmpdir cfg
       shakeOpts = shakeOptions
         { shakeFiles     = tDir
@@ -99,7 +104,7 @@ myShake mods cfg ref ids dr pm rules = do
         -- , shakeStaunch = True -- TODO is this a good idea?
         -- , shakeColor = True
         -- TODO shakeShare to implement shared cache on the demo site!
-        , shakeExtra = shakeEnv mods cfg ref ids dr
+        , shakeExtra = shakeEnv mods cfg ref ids dr day
 
         -- This prints annoying errors whenever a file is accessed unexpectedly
         -- TODO remove ignore patterns as you solve them
@@ -259,14 +264,15 @@ eval mods hdl cfg ref ids dr rtype p = do
                Nothing -> if interactive cfg then ["head"] else ["cat"]
                Just _  -> if interactive cfg then ["outfile", "head"] else ["outfile"]
 
-shakeEnv :: [Module] -> Config -> LocksRef -> IDsRef -> DigestsRef -> M.HashMap TypeRep Dynamic
-shakeEnv mods cfg lRef iRef dRef =
+shakeEnv :: [Module] -> Config -> LocksRef -> IDsRef -> DigestsRef -> Day -> M.HashMap TypeRep Dynamic
+shakeEnv mods cfg lRef iRef dRef day =
   M.fromList $ map (\v -> (dynTypeRep v, v))
     [ toDyn mods
     , toDyn cfg
     , toDyn lRef
     , toDyn iRef
     , toDyn dRef
+    , toDyn day
     ]
 
 writeResult :: Config -> LocksRef -> IDsRef -> Path -> FilePath -> Action ()

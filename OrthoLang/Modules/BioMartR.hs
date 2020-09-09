@@ -47,6 +47,7 @@ olModule = Module
   , mTypes = [search, fna, faa, fnagz, faagz]
   , mGroups = []
   , mEncodings = [gz]
+  , mRules = return ()
   , mFunctions =
     [ parseSearches -- TODO hide from end users?
     -- TODO single and _each versions?

@@ -31,6 +31,7 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
+  , mRules = return ()
   , mFunctions =
     [ singletons -- TODO non-plural version too
     ]
