@@ -97,7 +97,7 @@ olModule = Module
   , mGroups = []
   , mEncodings = []
   , mRules = [rCurl]
-  , mFunctions = [curlImplicit, curlDate]
+  , mFunctions = [curl, curlDate]
   }
 
 -------------------------
@@ -105,15 +105,15 @@ olModule = Module
 -------------------------
 
 -- | Version that auto-finds the proper date based on user input
-curlImplicit :: Function
-curlImplicit = newFnA2
+curl :: Function
+curl = newFnA2
   "curl"
   (Exactly str, Exactly str)
   (Exactly Untyped)
   (newDate1of2 "curl") -- TODO main remaining bug is that this doesn't add its outpath digest?
   [ReadsURL, ReadsFile]
 
--- | Version that assumes the date is properly formatted
+-- | Hidden version that assumes the date is properly formatted
 curlDate :: Function
 curlDate = newFnA2
   "curl_date"
