@@ -93,7 +93,7 @@ import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
-import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite', readLit, writeLit, symlink)
+import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite', readLit, writeLit, symlink, debugA)
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Locks (withWriteOnce)
 import OrthoLang.Types
@@ -119,6 +119,12 @@ import Data.List (sort)
 import Data.List.Utils (replace)
 import System.Directory (doesPathExist)
 import System.FilePath (takeBaseName, takeDirectory)
+
+---------------
+-- debugging --
+---------------
+
+debugA' loc = debugA ("ortholang.interpreter.compile.newrules." ++ loc)
 
 ---------
 -- API --
@@ -707,13 +713,13 @@ aNewDate prefix (ExprPath outPath') userPath = do
       cachePath  = makeRelative (cacheDir) outPath'
       -- cacheDirD  = cacheDir ++ "_date"
   -- userDate   <- readLit loc userPath
-  -- liftIO $ putStrLn $ "userDate: '" ++ userDate ++ "'"
+  -- debugA' $ "userDate: '" ++ userDate ++ "'"
 
   -- TODO fix this! it's actually a cache path
   -- properDate <- liftIO $ resolveCache cacheDir cachePath userDate
   properDate <- fmap show $ resolveCacheDay cacheDir cachePath userPath
 
-  liftIO $ putStrLn $ "properDate: '" ++ properDate ++ "'"
+  debugA' "aNewDate" $ "properDate: '" ++ properDate ++ "'"
   let properPath   = exprPath cfg dRef emptyScript $ Lit str properDate
       properPath'  = fromPath loc cfg properPath
       (PathDigest old) = pathDigest $ toPath loc cfg userPath
@@ -721,8 +727,8 @@ aNewDate prefix (ExprPath outPath') userPath = do
       outPathD'    = replace prefix (prefix ++ "_date") $ replace old new outPath' -- TODO make this less brittle
       outPath  = toPath loc cfg outPath'
       outPathD = toPath loc cfg outPathD'
-  liftIO $ putStrLn $ "properPath: '" ++ show properPath ++ "'"
-  liftIO $ putStrLn $ "outPathD': '" ++ outPathD' ++ "'"
+  debugA' "aNewDate" $ "properPath: '" ++ show properPath ++ "'"
+  debugA' "aNewDate" $ "outPathD': '" ++ outPathD' ++ "'"
   writeLit loc properPath' properDate    -- TODO remove?
   -- liftIO $ addDigest dRef str properPath -- TODO remove?
 

@@ -39,6 +39,14 @@ import System.FilePath (takeDirectory, takeBaseName)
 import qualified Data.Map.Strict as M
 import Data.IORef (readIORef)
 
+import OrthoLang.Interpreter.Actions (debugA)
+
+---------------
+-- debugging --
+---------------
+
+debugA' loc = debugA ("ortholang.modules.curl." ++ loc)
+
 ----------------------
 -- haskell function --
 ----------------------
@@ -46,7 +54,7 @@ import Data.IORef (readIORef)
 -- TODO make it a NewAction1? 2?
 curl :: Path -> Path -> Action ()
 curl outPath urlPath = do
-  liftIO $ putStrLn $ "running curl '" ++ show urlPath ++ "'"
+  debugA' "curl" $ "running curl '" ++ show urlPath ++ "'"
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.curl.curl"
       urlPath' = fromPath loc cfg urlPath
@@ -95,9 +103,9 @@ aCurl outPath' = do
   let loc = "modules.curl.aCurl"
   cfg <- fmap fromJust getShakeExtra
   -- dRef <- fmap fromJust getShakeExtra
-  liftIO $ putStrLn $ "aCurl outPath': " ++ outPath'
+  debugA' "aCurl" $ "aCurl outPath': " ++ outPath'
   let d = takeBaseName outPath'
-  liftIO $ putStrLn $ "aCurl d: " ++ show d
+  debugA' "aCurl" $ "aCurl d: " ++ show d
 
   -- TODO error has to be about here right?
   let urlPath' = tmpdir cfg </> "exprs" </> "str" </> d </> "result"
@@ -107,7 +115,7 @@ aCurl outPath' = do
   -- let urlPath' = fromPath loc cfg urlPath
 
   -- need' loc [urlPath']
-  liftIO $ putStrLn $ "aCurl urlPath: " ++ render (pPrint urlPath)
+  debugA' "aCurl" $ "aCurl urlPath: " ++ render (pPrint urlPath)
   curl (toPath loc cfg outPath') urlPath
   -- liftIO $ addDigest dRef Untyped (toPath loc cfg outPath')
 
@@ -258,8 +266,8 @@ aCurlDate (ExprPath outPath') datePath' urlPath' = do
       urlPath = toPath loc cfg urlPath'
       outPath = toPath loc cfg outPath'
 
-  liftIO $ putStrLn $ "datePath': " ++ datePath'
-  liftIO $ putStrLn $ "urlPath': " ++ urlPath'
+  debugA' "aCurlDate" $ "datePath': " ++ datePath'
+  debugA' "aCurlDate" $ "urlPath': " ++ urlPath'
 
   -- decide on the dated cache path
   date <- readLit loc datePath'
@@ -269,9 +277,9 @@ aCurlDate (ExprPath outPath') datePath' urlPath' = do
       (PathDigest urlDigest) = last $ listDigestsInPath cfg urlPath'
       -- cachePath = urlDigest </> "result"
 
-  liftIO $ putStrLn $ "date: " ++ date
-  liftIO $ putStrLn $ "cacheDir': " ++ cacheDir'
-  liftIO $ putStrLn $ "urlDigest: " ++ urlDigest
+  debugA' "aCurlDate" $ "date: " ++ date
+  debugA' "aCurlDate" $ "cacheDir': " ++ cacheDir'
+  debugA' "aCurlDate" $ "urlDigest: " ++ urlDigest
 
   -- if the cache path resolution works, this is Just something
   -- TODO if not, just return cacheToday here? or should the distinction be used for a warning?
@@ -290,7 +298,7 @@ aCurlDate (ExprPath outPath') datePath' urlPath' = do
   -- TODO merge it into the curl function itself by adding an outpath?
   -- TODO are both symlinks here really necessary?
   -- curl cachePath urlPath -- TODO move this to a Rules pattern
-  -- liftIO $ putStrLn $ "aCurlDate cachePath, which should be handled by a separate Rule: " ++ render (pPrint cachePath)
+  -- debugA' "aCurlDate" $ "cachePath, which should be handled by a separate Rule: " ++ render (pPrint cachePath)
   need' loc [cachePath']
-  liftIO $ putStrLn $ "aCurlDate symlink: " ++ show outPath ++ " -> " ++ show cachePath
+  debugA' "aCurlDate" $ "symlink: " ++ show outPath ++ " -> " ++ show cachePath
   symlink outPath cachePath
