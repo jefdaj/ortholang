@@ -92,7 +92,7 @@ import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
-import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite', readLit, writeLit)
+import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite', readLit, writeLit, symlink)
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Locks (withWriteOnce)
 import OrthoLang.Types
@@ -102,7 +102,7 @@ import System.Exit (ExitCode(..))
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
-import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName, makeRelative)
+import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName, makeRelative, splitDirectories)
 import OrthoLang.Interpreter.Actions     (need', readPaths)
 import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest, exprPath, pathDigest)
 import qualified Data.Map.Strict as M
@@ -695,23 +695,34 @@ newDate1of4 prefix out a1 _ _ _ = newDate prefix out a1
 -- TODO should the prefix here have _date added?
 -- TODO should the actual date be used instead of the hash in these expr paths?
 newDate :: Prefix -> ExprPath -> FilePath -> Action ()
-newDate prefix (ExprPath outPath) userPath = do
+newDate prefix (ExprPath outPath') userPath = do
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
   let loc = "ortholang.interpreter.compile.newrules.newDate"
       cacheDir   = tmpdir cfg </> "exprs" </> prefix
-      cachePath  = makeRelative (cacheDir) outPath
-      cacheDirD  = cacheDir ++ "_date"
-  userDate   <- readLit loc userPath
-  properDate <- liftIO $ resolveCache cacheDirD cachePath userDate
+      cachePath  = makeRelative (cacheDir) outPath'
+      -- cacheDirD  = cacheDir ++ "_date"
+  -- userDate   <- readLit loc userPath
+  -- liftIO $ putStrLn $ "userDate: '" ++ userDate ++ "'"
+
+  -- TODO fix this! it's actually a cache path
+  -- properDate <- liftIO $ resolveCache cacheDir cachePath userDate
+  properDate <- fmap show $ resolveCacheDay cacheDir cachePath userPath
+
+  liftIO $ putStrLn $ "properDate: '" ++ properDate ++ "'"
   let properPath   = exprPath cfg dRef emptyScript $ Lit str properDate
       properPath'  = fromPath loc cfg properPath
       (PathDigest old) = pathDigest $ toPath loc cfg userPath
       (PathDigest new) = pathDigest properPath
-      outPathD     = cacheDirD </> replace old new outPath
+      outPathD'    = replace prefix (prefix ++ "_date") $ replace old new outPath' -- TODO make this less brittle
+      outPath  = toPath loc cfg outPath'
+      outPathD = toPath loc cfg outPathD'
+  liftIO $ putStrLn $ "properPath: '" ++ show properPath ++ "'"
+  liftIO $ putStrLn $ "outPathD': '" ++ outPathD' ++ "'"
   writeLit loc properPath' properDate    -- TODO remove?
   liftIO $ addDigest dRef str properPath -- TODO remove?
-  need' loc [outPathD]
+  need' loc [outPathD']
+  symlink outPath outPathD
 
 -----------------------------------
 -- future core library functions --
@@ -742,22 +753,25 @@ parseDate :: String -> Maybe Day
 parseDate = parseTimeM True defaultTimeLocale "%Y-%m-%d"
 
 -- | Returns an existing cache matching a specific path + date, or Nothing
-existingCacheDated :: FilePath -> FilePath -> Day -> IO (Maybe FilePath)
+existingCacheDated :: FilePath -> FilePath -> Day -> Action (Maybe FilePath)
 existingCacheDated cacheDir cachePath day = do
-  cacheDir' <- absolutize cacheDir
+  cacheDir' <- liftIO $ absolutize cacheDir
   let dated = cacheDir' </> dayToDir day </> cachePath
-  exists <- doesPathExist dated
+  exists <- liftIO $ doesPathExist dated
   return $ if exists
     then Just dated
     else Nothing
 
 -- | Returns the latest existing cache matching a specific path, or Nothing
 --   Warning: assumes all files in the cache dir are yyyy/mm/dd formatted
-existingCacheLatest :: FilePath -> FilePath -> IO (Maybe FilePath)
+existingCacheLatest :: FilePath -> FilePath -> Action (Maybe Day)
 existingCacheLatest cacheDir cachePath = do
-  matches <- globFiles $ cacheDir </> "*" </> "*" </> "*" </> cachePath
+  -- matches <- globFiles $ cacheDir </> "*" </> "*" </> "*" </> cachePath -- TODO much easier with one level!
+  matches <- liftIO $ globFiles $ cacheDir </> "*" </> cachePath
+  let dateOf dir = head $ splitDirectories $ makeRelative cachePath dir
+      dated = map (\m -> (dateOf m, m)) matches
   if null matches then return Nothing
-  else return $ Just $ head $ sort matches
+  else return $ parseDate $ snd $ head $ sort dated -- TODO finish writing this?
 
 -- | Returns today's cache for a specific file, whether or not it exists yet
 cacheToday :: FilePath -> FilePath -> IO FilePath
@@ -771,26 +785,29 @@ cacheToday cacheDir cachePath = do
 --   If this returns Nothing, it means we'll need to download the file.
 --
 --   TODO confirmation dialog before downloading, or just assume?
-cacheUser :: FilePath -> FilePath -> String -> IO (Maybe FilePath)
-cacheUser cacheDir cachePath userInput = do
+cacheUser :: FilePath -> FilePath -> String -> Action (Maybe Day)
+cacheUser cacheDir cachePath userPath = do
+  let loc = "ortholang.interpreter.compile.newrules.cacheUser"
+  userInput <- readLit loc userPath
   let userDay = parseDate userInput
-  userCache <- case userDay of
-    Nothing -> return Nothing
-    Just d -> existingCacheDated cacheDir cachePath d
+  -- userCache <- case userDay of
+  --   Nothing -> return Nothing
+  --   Just d -> existingCacheDated cacheDir cachePath d
   cached  <- existingCacheLatest cacheDir cachePath
-  today   <- cacheToday cacheDir cachePath
+  -- today   <- cacheToday cacheDir cachePath
+  today   <- liftIO $ getToday
   return $ if      userInput == "cached" then cached
            else if userInput == "today"  then Just today
-           else    userCache
+           else    userDay
 
 -- | Overall entry point, which would include user-facing warnings (if any).
-resolveCache :: FilePath -> FilePath -> String -> IO FilePath
-resolveCache cacheDir cachePath userInput = do
+resolveCacheDay :: FilePath -> FilePath -> String -> Action Day
+resolveCacheDay cacheDir cachePath userInput = do
   -- if the cache path resolution works, this is Just something
   -- TODO if not, just return cacheToday here? or should the distinction be used for a warning?
-  mUserCachePath <- liftIO $ cacheUser cacheDir cachePath userInput
+  mUserCachePath <- cacheUser cacheDir cachePath userInput
   cachePath' <- case mUserCachePath of
-    Nothing -> liftIO $ cacheToday cacheDir cachePath
+    Nothing -> liftIO $ getToday
     Just p -> return p
 
   -- TODO the final output path should depend on this rather than the initial userCacheDescPath', right?

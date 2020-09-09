@@ -76,7 +76,7 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
-  , mFunctions = [curlDate]
+  , mFunctions = [curlImplicit, curlDate]
   }
 
 -----------------------------------
@@ -149,9 +149,17 @@ olModule = Module
 --            else if userInput == "today"  then Just today
 --            else    userCache
 
----------------
--- curl_date --
----------------
+-----------
+-- curl* --
+-----------
+
+curlImplicit :: Function
+curlImplicit = newFnA2
+  "curl"
+  (Exactly str, Exactly str)
+  (Exactly Untyped)
+  (newDate1of2 "curl")
+  [ReadsURL, ReadsFile]
 
 curlDate :: Function
 curlDate = newFnA2
