@@ -26,7 +26,7 @@ import Data.List                  (sort)
 import Data.Maybe                 (fromJust)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>), takeFileName, takeBaseName)
-import OrthoLang.Modules.Curl     (curl)
+-- import OrthoLang.Modules.Curl     (curl)
 import OrthoLang.Util             (absolutize, resolveSymlinks, unlessExists)
 import System.FilePath.Glob       (glob)
 

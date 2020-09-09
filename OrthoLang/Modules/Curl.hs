@@ -4,10 +4,10 @@ module OrthoLang.Modules.Curl
   (
 
   -- * Function for use in Haskell code in other modules
-    curl
+    -- curl
 
   -- * OrthoLang module with function for end users
-  , olModule
+    olModule
 
   )
   where
@@ -17,7 +17,7 @@ module OrthoLang.Modules.Curl
 
 import OrthoLang.Types
 import OrthoLang.Interpreter
-import OrthoLang.Interpreter.Paths (listDigestsInPath, pathDigest)
+import OrthoLang.Interpreter.Paths (listDigestsInPath)
 import Development.Shake
 
 import Control.Monad.IO.Class     (liftIO)
@@ -28,11 +28,7 @@ import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 
 import Data.Time
-import Text.Printf
 import System.FilePath (takeDirectory, takeBaseName)
-
-import qualified Data.Map.Strict as M
-import Data.IORef (readIORef)
 
 import OrthoLang.Interpreter.Actions (debugA)
 
@@ -40,20 +36,39 @@ import OrthoLang.Interpreter.Actions (debugA)
 -- debugging --
 ---------------
 
+debugA' :: String -> String -> Action ()
 debugA' loc = debugA ("ortholang.modules.curl." ++ loc)
 
 ---------------
 -- curl rule --
 ---------------
 
-curl :: Path -> Path -> Action ()
-curl outPath urlPath = do
-  debugA' "curl" $ "running curl '" ++ show urlPath ++ "'"
+-- TODO think it works? move to a utility module?
+-- lookupPath :: PathDigest -> Action (Maybe Path)
+-- lookupPath d = do
+--   (dRef :: DigestsRef) <- fmap (justOrDie "lookupPath") getShakeExtra
+--   dm <- liftIO $ readIORef dRef
+--   return $ fmap snd $ M.lookup d dm
+
+rCurl :: Rules ()
+rCurl = do
+  cfg <- fmap fromJust getShakeExtraRules
+  (day :: Day) <- fmap fromJust getShakeExtraRules
+  let cDir = tmpdir cfg </> "cache" </> "curl" </> show day
+      ptn = cDir </> "*"
+  ptn %> aCurl
+
+aCurl :: FilePath -> Action ()
+aCurl outPath' = do
+  let loc = "modules.curl.aCurl"
   cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.curl.curl"
-      urlPath' = fromPath loc cfg urlPath
-      outPath' = fromPath loc cfg outPath
-      cDir     = fromPath loc cfg $ cacheDir cfg "curl"
+  debugA' "aCurl" $ "outPath': " ++ outPath'
+  let d = takeBaseName outPath'
+  debugA' "aCurl" $ "d: " ++ show d
+  let urlPath' = tmpdir cfg </> "exprs" </> "str" </> d </> "result"
+      urlPath = toPath loc cfg urlPath'
+  debugA' "aCurl" $ "urlPath: " ++ render (pPrint urlPath)
+  let cDir = fromPath loc cfg $ cacheDir cfg "curl"
   liftIO $ createDirectoryIfMissing True cDir
   runCmd $ CmdDesc
     { cmdBinary = "curl.sh"
@@ -69,44 +84,6 @@ curl outPath urlPath = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outPath']
     }
-
--- TODO move to a utility module?
-lookupPath :: PathDigest -> Action (Maybe Path)
-lookupPath d = do
-  (dRef :: DigestsRef) <- fmap (justOrDie "lookupPath") getShakeExtra
-  dm <- liftIO $ readIORef dRef
-  return $ fmap snd $ M.lookup d dm
-
-rCurl :: Rules ()
-rCurl = do
-  cfg <- fmap fromJust getShakeExtraRules
-  day <- fmap fromJust getShakeExtraRules
-  let loc = "modules.curl.rCurl"
-      cDir = tmpdir cfg </> "cache" </> "curl" </> dayToDir day
-      ptn = cDir </> "*"
-  ptn %> aCurl
-
-dayToDir :: Day -> FilePath
-dayToDir date = sYear ++ "-" ++ sMonth ++ "-" ++ sDay
-  where
-    (year, month, day) = toGregorian date
-    sYear  = printf "%04d" year
-    sMonth = printf "%02d" month
-    sDay   = printf "%02d" day
-
-aCurl :: FilePath -> Action ()
-aCurl outPath' = do
-  let loc = "modules.curl.aCurl"
-  cfg <- fmap fromJust getShakeExtra
-  debugA' "aCurl" $ "aCurl outPath': " ++ outPath'
-  let d = takeBaseName outPath'
-  debugA' "aCurl" $ "aCurl d: " ++ show d
-
-  let urlPath' = tmpdir cfg </> "exprs" </> "str" </> d </> "result"
-      urlPath = toPath loc cfg urlPath'
-
-  debugA' "aCurl" $ "aCurl urlPath: " ++ render (pPrint urlPath)
-  curl (toPath loc cfg outPath') urlPath
 
 ----------------------
 -- ortholang module --
@@ -159,25 +136,19 @@ aCurlDate :: NewAction2
 aCurlDate (ExprPath outPath') datePath' urlPath' = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "ortholang.modules.curl.aCurlDate"
-      urlPath = toPath loc cfg urlPath'
       outPath = toPath loc cfg outPath'
-
   debugA' "aCurlDate" $ "datePath': " ++ datePath'
   debugA' "aCurlDate" $ "urlPath': " ++ urlPath'
-
   date <- readLit loc datePath'
   let cacheDir' = fromPath loc cfg $ cacheDir cfg "curl"
       (PathDigest urlDigest) = last $ listDigestsInPath cfg urlPath'
-
   debugA' "aCurlDate" $ "date: " ++ date
   debugA' "aCurlDate" $ "cacheDir': " ++ cacheDir'
   debugA' "aCurlDate" $ "urlDigest: " ++ urlDigest
-
   -- TODO the final output path should depend on this rather than the initial userCacheDescPath', right?
   let cachePath' = cacheDir' </> date </> urlDigest -- TODO make this a dir and add /result?
       cachePath  = toPath loc cfg cachePath'
   liftIO $ createDirectoryIfMissing True $ takeDirectory cachePath'
-
   need' loc [cachePath']
   debugA' "aCurlDate" $ "symlink: " ++ show outPath ++ " -> " ++ show cachePath
   symlink outPath cachePath

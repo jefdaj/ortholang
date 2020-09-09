@@ -9,7 +9,7 @@ module OrthoLang.Modules.Busco
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
-import OrthoLang.Modules.Curl (curl)
+-- import OrthoLang.Modules.Curl (curl)
 import OrthoLang.Modules.Load (mkLoad)
 
 import Control.Monad             (when)
