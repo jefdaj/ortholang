@@ -24,6 +24,7 @@ olModule = Module
   , mTypes = [bin]
   , mGroups = []
   , mEncodings = []
+  , mRules = return ()
   , mFunctions = [loadScript, runScriptExplicit, runScript]
   }
 

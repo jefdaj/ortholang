@@ -29,6 +29,7 @@ olModule = Module
   , mTypes = [blh, bsr, bst, faa]
   , mGroups = []
   , mEncodings = []
+  , mRules = return ()
   , mFunctions =
       [ loadLineage
       , buscoListLineages

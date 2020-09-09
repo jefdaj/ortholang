@@ -20,6 +20,7 @@ olModule = Module
   , mTypes = [bht, crb]
   , mGroups = [ht]
   , mEncodings = []
+  , mRules = return ()
   , mFunctions =
     [ extractQueries, extractQueriesEach
     , extractTargets, extractTargetsEach

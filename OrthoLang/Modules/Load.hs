@@ -37,6 +37,7 @@ olModule = Module
   , mTypes = [str]
   , mGroups = []
   , mEncodings = []
+  , mRules = return ()
   , mFunctions =
     [ loadList
     , globFiles

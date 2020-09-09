@@ -31,6 +31,7 @@ olModule = Module
   , mTypes = [bht] -- TODO ndb, pdb?
   , mGroups = []
   , mEncodings = [blastdb]
+  , mRules = return ()
   , mFunctions =
     -- TODO remove the ones that don't apply to each fn type!
     -- TODO psiblast, dbiblast, deltablast, rpsblast, rpsblastn?
