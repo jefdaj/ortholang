@@ -46,7 +46,7 @@ olModule = Module
   , mTypes = [png]
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions = [plotDot, plotVars, plotDepends, plotRDepends]
   }
 

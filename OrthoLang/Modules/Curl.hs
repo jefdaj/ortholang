@@ -77,6 +77,7 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
+  , mRules = []
   , mFunctions = [curlImplicit, curlDate]
   }
 

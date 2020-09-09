@@ -38,7 +38,7 @@ olModule = Module
   , mTypes = [faa, fna, bht, mms]
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions =
       [ mmseqsCreateDbAll
       , mmseqsCreateDb

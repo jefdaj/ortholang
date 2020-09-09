@@ -25,7 +25,7 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions = [repeatN]
   }
 

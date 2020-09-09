@@ -73,7 +73,7 @@ olModule = Module
   , mTypes = [faa, bht, pssm, pdb]
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions =
 
     -- runs without obvious errors, but needs more careful verification:
