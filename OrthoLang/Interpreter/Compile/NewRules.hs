@@ -437,7 +437,7 @@ aNewRules applyFn oSig aFn o@(ExprPath out) = do
     error "aNewRules" $ "typechecking error: " ++ show oSig ++ " /= " ++ show oType
 
   -- dRef <- fmap fromJust $ getShakeExtra
-  liftIO $ addDigest dRef oType $ toPath loc cfg out
+  liftIO $ addDigest dRef oType $ toPath loc cfg out -- TODO have to do this for newDate too?
 
   let dPaths' = map (fromPath loc cfg) dPaths
   need' loc dPaths'
@@ -708,6 +708,8 @@ aNewDate prefix (ExprPath outPath') userPath = do
       -- cacheDirD  = cacheDir ++ "_date"
   -- userDate   <- readLit loc userPath
   -- liftIO $ putStrLn $ "userDate: '" ++ userDate ++ "'"
+
+  liftIO $ addDigest dRef Untyped $ toPath loc cfg outPath' -- TODO fix type?
 
   -- TODO fix this! it's actually a cache path
   -- properDate <- liftIO $ resolveCache cacheDir cachePath userDate

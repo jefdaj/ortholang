@@ -742,7 +742,6 @@ newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
 type DigestMap = Map PathDigest (Type, Path)
 type DigestsRef = IORef DigestMap
 
-
 ---------------
 -- functions --
 ---------------

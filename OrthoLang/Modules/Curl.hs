@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module OrthoLang.Modules.Curl
   (
 
@@ -25,15 +27,17 @@ import Development.Shake.FilePath ((</>))
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))
 
--- import Data.Time
--- import Text.Printf
+import Data.Time
+import Text.Printf
 -- import System.FilePath ((</>))
 -- import Data.List.Split (splitOn)
 -- import OrthoLang.Util (absolutize, globFiles)
 -- import Data.List (sort)
 -- import System.Directory (doesPathExist)
-import System.FilePath (takeDirectory)
+import System.FilePath (takeDirectory, takeBaseName)
 
+import qualified Data.Map.Strict as M
+import Data.IORef (readIORef)
 
 ----------------------
 -- haskell function --
@@ -66,6 +70,47 @@ curl outPath urlPath = do
     }
   -- return $ toPath loc cfg outPath
 
+-- TODO move to a utility module?
+lookupPath :: PathDigest -> Action (Maybe Path)
+lookupPath d = do
+  (dRef :: DigestsRef) <- fmap (justOrDie "lookupPath") getShakeExtra
+  dm <- liftIO $ readIORef dRef
+  return $ fmap snd $ M.lookup d dm
+
+rCurl :: Rules ()
+rCurl = do
+  cfg <- fmap fromJust getShakeExtraRules
+  day <- fmap fromJust getShakeExtraRules
+  let loc = "modules.curl.rCurl"
+      cDir = tmpdir cfg </> "cache" </> "curl" </> dayToDir day
+      ptn = cDir </> "*"
+  -- TODO find todays cache dir
+  -- TODO find the url to download by reading the digest in the path pattern (needs an Action)
+  ptn %> aCurl
+
+aCurl :: FilePath -> Action ()
+aCurl outPath' = do
+  -- TODO decode url path from outpath
+  -- TODO other than that it's the same as `curl` right?
+  let loc = "modules.curl.aCurl"
+  cfg <- fmap fromJust getShakeExtra
+  -- dRef <- fmap fromJust getShakeExtra
+  liftIO $ putStrLn $ "aCurl outPath': " ++ outPath'
+  let d = takeBaseName outPath'
+  liftIO $ putStrLn $ "aCurl d: " ++ show d
+
+  -- TODO error has to be about here right?
+  let urlPath' = tmpdir cfg </> "exprs" </> "str" </> d </> "result"
+      urlPath = toPath loc cfg urlPath'
+  -- need' loc [urlPath]
+  -- urlPath <- fmap (justOrDie "failed to lookup urlPath") $ lookupPath (PathDigest d)
+  -- let urlPath' = fromPath loc cfg urlPath
+
+  -- need' loc [urlPath']
+  liftIO $ putStrLn $ "aCurl urlPath: " ++ render (pPrint urlPath)
+  curl (toPath loc cfg outPath') urlPath
+  -- liftIO $ addDigest dRef Untyped (toPath loc cfg outPath')
+
 ----------------------
 -- ortholang module --
 ----------------------
@@ -77,7 +122,7 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
-  , mRules = []
+  , mRules = [rCurl]
   , mFunctions = [curlImplicit, curlDate]
   }
 
@@ -85,14 +130,14 @@ olModule = Module
 -- future core library functions --
 -----------------------------------
 
--- dayToDir :: Day -> FilePath
--- dayToDir date = sYear </> sMonth </> sDay
---   where
---     (year, month, day) = toGregorian date
---     sYear  = printf "%04d" year
---     sMonth = printf "%02d" month
---     sDay   = printf "%02d" day
--- 
+dayToDir :: Day -> FilePath
+dayToDir date = sYear ++ "-" ++ sMonth ++ "-" ++ sDay
+  where
+    (year, month, day) = toGregorian date
+    sYear  = printf "%04d" year
+    sMonth = printf "%02d" month
+    sDay   = printf "%02d" day
+
 -- dirToDay :: FilePath -> Day
 -- dirToDay dir = fromGregorian nYear nMonth nDay
 --   where
@@ -244,7 +289,8 @@ aCurlDate (ExprPath outPath') datePath' urlPath' = do
   -- TODO this has to be a separate rule though, right?
   -- TODO merge it into the curl function itself by adding an outpath?
   -- TODO are both symlinks here really necessary?
-  curl cachePath urlPath -- TODO move this to a Rules pattern
-  liftIO $ putStrLn $ "aCurlDate cachePath, which should be handled by a separate Rule: " ++ render (pPrint cachePath)
+  -- curl cachePath urlPath -- TODO move this to a Rules pattern
+  -- liftIO $ putStrLn $ "aCurlDate cachePath, which should be handled by a separate Rule: " ++ render (pPrint cachePath)
+  need' loc [cachePath']
   liftIO $ putStrLn $ "aCurlDate symlink: " ++ show outPath ++ " -> " ++ show cachePath
   symlink outPath cachePath
