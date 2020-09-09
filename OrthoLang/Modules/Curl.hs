@@ -42,6 +42,7 @@ import System.FilePath (takeDirectory)
 -- TODO make it a NewAction1? 2?
 curl :: Path -> Path -> Action ()
 curl outPath urlPath = do
+  liftIO $ putStrLn $ "running curl '" ++ show urlPath ++ "'"
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.curl.curl"
       urlPath' = fromPath loc cfg urlPath
@@ -240,5 +241,6 @@ aCurlDate (ExprPath outPath') datePath' urlPath' = do
   -- TODO this has to be a separate rule though, right?
   -- TODO merge it into the curl function itself by adding an outpath?
   -- TODO are both symlinks here really necessary?
-  curl cachePath urlPath
+  curl cachePath urlPath -- TODO move this to a Rules pattern
+  liftIO $ putStrLn $ "aCurlDate symlink: " ++ show outPath ++ " -> " ++ show cachePath
   symlink outPath cachePath

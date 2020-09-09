@@ -721,9 +721,9 @@ aNewDate prefix (ExprPath outPath') userPath = do
   liftIO $ putStrLn $ "properPath: '" ++ show properPath ++ "'"
   liftIO $ putStrLn $ "outPathD': '" ++ outPathD' ++ "'"
   writeLit loc properPath' properDate    -- TODO remove?
-  liftIO $ addDigest dRef str properPath -- TODO remove?
-  need' loc [outPathD']
-  symlink outPath outPathD -- TODO this should be unnecessary right?
+  -- liftIO $ addDigest dRef str properPath -- TODO remove?
+  need' loc [outPathD']    -- TODO remove?
+  symlink outPath outPathD -- TODO remove?
 
 -----------------------------------
 -- future core library functions --
