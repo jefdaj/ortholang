@@ -710,7 +710,7 @@ aNewDate prefix (ExprPath outPath') userPath = do
       cacheDir   = tmpdir cfg </> "exprs" </> prefix
       cachePath  = makeRelative (cacheDir) outPath'
 
-  properDate <- fmap show $ resolveCacheDay cacheDir cachePath userPath
+  properDate <- fmap show $ properDay cacheDir cachePath userPath
 
   debugA' "aNewDate" $ "properDate: '" ++ properDate ++ "'"
   let properPath   = exprPath cfg dRef emptyScript $ Lit str properDate
@@ -730,9 +730,9 @@ aNewDate prefix (ExprPath outPath') userPath = do
   need' loc [outPathD']    -- TODO remove?
   symlink outPath outPathD -- TODO remove?
 
------------------------------------
--- future core library functions --
------------------------------------
+------------------------------
+-- future library functions --
+------------------------------
 
 dayToDir :: Day -> FilePath
 dayToDir date = sYear </> sMonth </> sDay
@@ -745,33 +745,14 @@ dayToDir date = sYear </> sMonth </> sDay
 parseDate :: String -> Maybe Day
 parseDate = parseTimeM True defaultTimeLocale "%Y-%m-%d"
 
--- | Returns an existing cache matching a specific path + date, or Nothing
---   TODO should this be used? currently it passes through the Shake error
--- existingCacheDated :: FilePath -> FilePath -> Day -> Action (Maybe FilePath)
--- existingCacheDated cacheDir cachePath day = do
---   cacheDir' <- liftIO $ absolutize cacheDir
---   let dated = cacheDir' </> dayToDir day </> cachePath
---   exists <- liftIO $ doesPathExist dated
---   return $ if exists
---     then Just dated
---     else Nothing
-
 -- | Returns the latest existing cache matching a specific path, or Nothing
-existingCacheLatest :: FilePath -> FilePath -> Action (Maybe Day)
-existingCacheLatest cacheDir cachePath = do
+cachedVersion :: FilePath -> FilePath -> Action (Maybe Day)
+cachedVersion cacheDir cachePath = do
   matches <- liftIO $ globFiles $ cacheDir </> "*" </> cachePath
   let dateOf dir = head $ splitDirectories $ makeRelative cachePath dir
       dated = map (\m -> (dateOf m, m)) matches
   if null matches then return Nothing
   else return $ parseDate $ snd $ head $ sort dated
-
--- | Returns today's cache for a specific file, whether or not it exists yet
--- cacheToday :: FilePath -> FilePath -> Action FilePath
--- cacheToday cacheDir cachePath = do
---   today <- fmap fromJust getShakeExtra
---   cacheDir' <- liftIO $ absolutize cacheDir
---   let dated = cacheDir' </> dayToDir today </> cachePath
---   return dated
 
 -- | Entry point for finding a cached file from a user-specified date.
 --   If this returns Nothing, it means we'll need to download the file.
@@ -780,18 +761,23 @@ cacheUser cacheDir cachePath userPath = do
   let loc = "ortholang.interpreter.compile.newrules.cacheUser"
   userInput <- readLit loc userPath
   let userDay = parseDate userInput
-  cached  <- existingCacheLatest cacheDir cachePath
+  cached  <- cachedVersion cacheDir cachePath
   today <- fmap fromJust getShakeExtra
   return $ if      userInput == "cached" then cached
            else if userInput == "today"  then Just today
            else    userDay
 
 -- | Overall entry point, which would include user-facing warnings (if any).
-resolveCacheDay :: FilePath -> FilePath -> String -> Action Day
-resolveCacheDay cacheDir cachePath userInput = do
+properDay :: FilePath -> FilePath -> String -> Action Day
+properDay cacheDir cachePath userInput = do
+  let loc = "ortholang.interpreter.compile.newrules.properDay"
   today <- fmap fromJust getShakeExtra
   mUserCachePath <- cacheUser cacheDir cachePath userInput
   cachePath' <- case mUserCachePath of
-    Nothing -> return today
+    Nothing -> do
+      userDate <- readLit loc userInput
+      liftIO $ putStrLn $ "Warning: no cache found for '" ++ userDate ++ "'. " ++
+                          "Defaulting to the current UTC date, " ++ show today ++ "."
+      return today
     Just p -> return p
   return cachePath'
