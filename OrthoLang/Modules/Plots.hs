@@ -23,7 +23,7 @@ olModule = Module
   , mTypes = [png]
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions =
       [ histogram  , histogramExplicit
       , linegraph  , linegraphExplicit

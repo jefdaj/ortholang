@@ -25,7 +25,7 @@ olModule = Module
   , mTypes = [fna, faa, dmnd]
   , mGroups = []
   , mEncodings = []
-  , mRules = return ()
+  , mRules = []
   , mFunctions =
 
       -- database functions
