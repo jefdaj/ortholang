@@ -29,7 +29,7 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
-  , mRules = []
+  , mRules = return ()
   , mFunctions =
     [ scoreRepeats
     , extractScores

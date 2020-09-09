@@ -13,7 +13,7 @@ olModule = Module
   , mTypes = [gcr]
   , mGroups = []
   , mEncodings = []
-  , mRules = []
+  , mRules = return ()
   , mFunctions =
       [ greencutTwoFamilies
       ]

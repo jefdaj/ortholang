@@ -22,7 +22,7 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
-  , mRules = []
+  , mRules = return ()
   , mFunctions = map mkSetFunction setOpDescs
   }
 

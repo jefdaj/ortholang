@@ -22,7 +22,7 @@ olModule = Module
   , mTypes = [bht, crb, mms]
   , mGroups = [ll]
   , mEncodings = []
-  , mRules = []
+  , mRules = return ()
   , mFunctions = [length, lengthEach]
   }
 

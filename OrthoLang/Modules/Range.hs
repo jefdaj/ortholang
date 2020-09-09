@@ -13,7 +13,7 @@ olModule = Module
   , mTypes = [num]
   , mGroups = []
   , mEncodings = []
-  , mRules = []
+  , mRules = return ()
   , mFunctions =
     [ rangeIntegers
     , rangeAdd

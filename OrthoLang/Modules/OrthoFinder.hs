@@ -24,7 +24,7 @@ olModule = Module
   , mTypes = [faa, ofr]
   , mGroups = []
   , mEncodings = []
-  , mRules = []
+  , mRules = return ()
   , mFunctions =
       [ orthofinder
       ]

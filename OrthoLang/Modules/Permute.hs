@@ -14,7 +14,7 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
-  , mRules = []
+  , mRules = return ()
   , mFunctions =
     [ leaveEachOut
     -- TODO sample n elements n times

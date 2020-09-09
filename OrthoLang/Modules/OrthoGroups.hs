@@ -45,7 +45,7 @@ olModule = Module
   , mTypes = [ofr, spr, gcr]
   , mGroups = [og]
   , mEncodings = []
-  , mRules = []
+  , mRules = return ()
   , mFunctions =
       [ orthogroups
       , orthogroupContaining
