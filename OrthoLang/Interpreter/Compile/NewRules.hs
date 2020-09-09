@@ -83,6 +83,7 @@ module OrthoLang.Interpreter.Compile.NewRules
   , aNewRules
   , aLoadIDs -- TODO where should this go? Actions?
   -- , newPathExpansion
+  , aNewDate
 
   )
   where
@@ -678,24 +679,24 @@ replaceN (x:xs) (n,a) =
 
 -- | Expands a 1-argument function to the corresponding _date version
 newDate1of1 :: Prefix -> NewAction1
-newDate1of1 prefix out a1 = newDate prefix out a1
+newDate1of1 prefix out a1 = aNewDate prefix out a1
 
 -- | Expands a 2-argument function to the corresponding _date version
 newDate1of2 :: Prefix -> NewAction2
-newDate1of2 prefix out a1 _ = newDate prefix out a1
+newDate1of2 prefix out a1 _ = aNewDate prefix out a1
 
 -- | Expands a 3-argument function to the corresponding _date version
 newDate1of3 :: Prefix -> NewAction3
-newDate1of3 prefix out a1 _ _ = newDate prefix out a1
+newDate1of3 prefix out a1 _ _ = aNewDate prefix out a1
 
 -- | Expands a 4-argument function to the corresponding _date version
 newDate1of4 :: Prefix -> NewAction4
-newDate1of4 prefix out a1 _ _ _ = newDate prefix out a1
+newDate1of4 prefix out a1 _ _ _ = aNewDate prefix out a1
 
 -- TODO should the prefix here have _date added?
 -- TODO should the actual date be used instead of the hash in these expr paths?
-newDate :: Prefix -> ExprPath -> FilePath -> Action ()
-newDate prefix (ExprPath outPath') userPath = do
+aNewDate :: Prefix -> ExprPath -> FilePath -> Action ()
+aNewDate prefix (ExprPath outPath') userPath = do
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
   let loc = "ortholang.interpreter.compile.newrules.newDate"
@@ -722,7 +723,7 @@ newDate prefix (ExprPath outPath') userPath = do
   writeLit loc properPath' properDate    -- TODO remove?
   liftIO $ addDigest dRef str properPath -- TODO remove?
   need' loc [outPathD']
-  symlink outPath outPathD
+  symlink outPath outPathD -- TODO this should be unnecessary right?
 
 -----------------------------------
 -- future core library functions --
