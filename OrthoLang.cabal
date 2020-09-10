@@ -141,6 +141,7 @@ library
                     OrthoLang.Modules.Blast,
                     OrthoLang.Modules.BlastDB,
                     OrthoLang.Modules.Blastdbget,
+                    OrthoLang.Modules.Filter,
                     OrthoLang.Modules.BlastHits,
                     OrthoLang.Modules.BlastRBH,
                     OrthoLang.Modules.Busco,

@@ -1,5 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
+-- TODO should you also cache the taxdb at the same time as dblist.txt? seems reasonable
+--      or maybe at the same time as doing the first main blastdbget
+
 module OrthoLang.Modules.Blastdbget where
 
 import Development.Shake
@@ -60,7 +63,7 @@ rBlastdblist = do
   let loc  = "ortholang.modules.blastdbget.rBlastdblist"
       tmp' = fromPath loc cfg $ blastdbgetCache cfg
       dbl' = tmp' </> show day </> "dblist.txt"
-  dbl' %> \listTmp' -> do
+  dbl' %> \_ -> do
     liftIO $ createDirectoryIfMissing True tmp'
     withWriteLock' tmp' $ do
       runCmd $ CmdDesc
@@ -73,7 +76,7 @@ rBlastdblist = do
         , cmdSanitizePaths = []
         , cmdOptions =[Cwd tmp'] -- TODO remove?
         , cmdBinary = "blastdblist.sh"
-        , cmdArguments = [tmp', listTmp']
+        , cmdArguments = [tmp', dbl']
         , cmdRmPatterns = [] -- TODO remove dblist.txt on fail?
         , cmdExitCode = ExitSuccess
         }
@@ -119,26 +122,23 @@ blastdblist = newFnA2
 -- blastdblist_date --
 ----------------------
 
--- | Hidden version that assumes a properly formatted date from newDate1of2 above
+-- | Hidden version that assumes a properly formatted date from newDate1of1 above
 blastdblistDate :: Function
-blastdblistDate = newExprExpansion
+blastdblistDate = newFnA1
   "blastdblist_date"
-  [Exactly str, Exactly str]
+  (Exactly str)
   (Exactly $ ListOf str)
-  mBlastdblistDate
+  aBlastdblistDate -- TODO does this need to be expanded again?
   [Hidden, ReadsURL]
 
--- TODO wait, how is this supposed to work? never mixed expr expansion + newdate before
-mBlastdblistDate :: ExprExpansion
--- mBlastdblistDate _ _ (Fun r ms ds _ [dateExpr, filterStr]) = undefined
-  -- where
-    -- dblist = Fun 
-mBlastdblistDate _ _ e = error "modules.blastdblist.mBlasttblistDate" $ "bad argument: " ++ show e
-
--- mZipArchive _ scr (Fun r ms ds _ [e@(Lst _ _ _ es)]) =
---   let ns = listVarNames "item" scr es -- TODO pick up overall list name here?
---   in Fun r ms ds "zip_archive_explicit" [ns, e]
--- mZipArchive _ _ e = error "modules.zip.mZipArchive" $ "bad argument: " ++ show e
+aBlastdblistDate :: NewAction1
+aBlastdblistDate (ExprPath out') datePath' = do
+  let loc = "ortholang.modules.blastdbget.aBlastdblistDate"
+  cfg <- fmap fromJust getShakeExtra
+  day <- readLit loc datePath'
+  -- TODO utility fn for finding this?
+  let dbl' = fromPath loc cfg (blastdbgetCache cfg) </> day </> "dblist.txt"
+  need' loc [dbl']
 
 ------------------------
 -- blastdblist_filter --
@@ -174,10 +174,6 @@ blastdblistFilter = newFnA2
 --   need' loc [cachePath']
 --   debugA' "aCurlDate" $ "symlink: " ++ show outPath ++ " -> " ++ show cachePath
 --   symlink outPath cachePath
-
----------------
--- old stuff --
----------------
 
 ------------------
 -- blastdbget_* --

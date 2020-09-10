@@ -130,7 +130,8 @@ in rec {
   ortholang-setstable     = mkModule ./OrthoLang/Modules/SetsTable     [ myR ] "";
   ortholang-range         = mkModule ./OrthoLang/Modules/Range         [ myR ] "";
   ortholang-blast         = mkModule ./OrthoLang/Modules/Blast         [ myBlast parallel ] "";
-  ortholang-blastdb       = mkModule ./OrthoLang/Modules/BlastDB       [ myBlast blastdbget ] "";
+  ortholang-blastdb       = mkModule ./OrthoLang/Modules/BlastDB       [ myBlast ] "";
+  ortholang-blastdbget    = mkModule ./OrthoLang/Modules/Blastdbget    [ myBlast blastdbget ] ""; # TODO remove myBlast?
   ortholang-crbblast      = mkModule ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
   ortholang-flowchart      = mkModule ./OrthoLang/Modules/FlowChart      [ graphviz ] ""; # TODO remove?
   ortholang-diamond       = mkModule ./OrthoLang/Modules/Diamond       [ diamond ] "";
@@ -162,6 +163,7 @@ in rec {
     ortholang-biomartr
     ortholang-blast
     ortholang-blastdb
+    ortholang-blastdbget
     ortholang-blasthits
     ortholang-blastrbh
     ortholang-crbblast
