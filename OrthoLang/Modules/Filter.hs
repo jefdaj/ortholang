@@ -1,5 +1,7 @@
 module OrthoLang.Modules.Filter where
 
+-- TODO add a regex version?
+
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
@@ -33,6 +35,10 @@ olModule = Module
   , mFunctions = [filterList]
   }
 
+-----------------
+-- filter_list --
+-----------------
+
 -- TODO flip the args?
 filterList :: Function
 filterList = newFnA2
@@ -42,8 +48,9 @@ filterList = newFnA2
   aFilterList
   []
 
-filterNames :: String -> [String] -> [String]
-filterNames s cs = filter matchFn cs
+-- TODO is there a more elegant way to do this?
+filterLowerInfix :: String -> [String] -> [String]
+filterLowerInfix s cs = filter matchFn cs
   where
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
 
@@ -54,6 +61,6 @@ aFilterList (ExprPath oPath') listTmp' fPath' = do
   filterStr <- readLit  loc fPath'
   out       <- readLits loc listTmp'
   let elems  = if null out then [] else tail out
-      elems' = if null filterStr then elems else filterNames filterStr elems
+      elems' = if null filterStr then elems else filterLowerInfix filterStr elems
   debugA' loc $ "elems': " ++ show elems'
   writeLits loc oPath'' elems'
