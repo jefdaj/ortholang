@@ -16,7 +16,7 @@ import Data.List               (isInfixOf)
 import Data.Maybe              (fromJust)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
-import System.FilePath         ((</>), (<.>), takeDirectory)
+import System.FilePath         ((</>))
 import Data.Time               (Day)
 
 ---------------
@@ -51,6 +51,32 @@ olModule = Module
 -- we use two different ones here because it matches the rMap behavior of using just fn name
 blastdbgetCache :: Config -> Path
 blastdbgetCache cfg = cacheDir cfg "blastdbget"
+
+-- | This downloads dblist.txt for use in the blastdblist* fns
+rBlastdblist :: Rules ()
+rBlastdblist = do
+  (cfg :: Config) <- fmap fromJust getShakeExtraRules
+  (day :: Day   ) <- fmap fromJust getShakeExtraRules
+  let loc  = "ortholang.modules.blastdbget.rBlastdblist"
+      tmp' = fromPath loc cfg $ blastdbgetCache cfg
+      dbl' = tmp' </> show day </> "dblist.txt"
+  dbl' %> \listTmp' -> do
+    liftIO $ createDirectoryIfMissing True tmp'
+    withWriteLock' tmp' $ do
+      runCmd $ CmdDesc
+        { cmdParallel = False
+        , cmdFixEmpties = True
+        , cmdOutPath = dbl'
+        , cmdInPatterns = []
+        , cmdNoNeedDirs = []
+        , cmdExtraOutPaths = []
+        , cmdSanitizePaths = []
+        , cmdOptions =[Cwd tmp'] -- TODO remove?
+        , cmdBinary = "blastdblist.sh"
+        , cmdArguments = [tmp', listTmp']
+        , cmdRmPatterns = [] -- TODO remove dblist.txt on fail?
+        , cmdExitCode = ExitSuccess
+        }
 
 -----------------
 -- blastdblist --
@@ -106,14 +132,14 @@ blastdblistDate = newExprExpansion
 mBlastdblistDate :: ExprExpansion
 mBlastdblistDate = undefined
 
------------------------------
--- blastdblist_date_filter --
------------------------------
+------------------------
+-- blastdblist_filter --
+------------------------
 
 -- | Hidden version that takes the pre-downloaded list and only filters it
 blastdblistFilter :: Function
 blastdblistFilter = newFnA2
-  "blastdblist_date_filter"
+  "blastdblist_filter"
   (Exactly $ ListOf str, Exactly str)
   (Exactly $ ListOf str)
   undefined
@@ -139,41 +165,6 @@ blastdblistFilter = newFnA2
 --   need' loc [cachePath']
 --   debugA' "aCurlDate" $ "symlink: " ++ show outPath ++ " -> " ++ show cachePath
 --   symlink outPath cachePath
-
-------------------------
--- dblist module rule --
-------------------------
-
-rBlastdblist :: Rules ()
-rBlastdblist = do
-  (cfg :: Config) <- fmap fromJust getShakeExtraRules
-  (day :: Day   ) <- fmap fromJust getShakeExtraRules
-  let loc  = "ortholang.modules.blastdbget.rBlastdblist"
-      tmp' = fromPath loc cfg $ blastdbgetCache cfg
-      dbl' = tmp' </> show day </> "dblist.txt"
-  dbl' %> aBlastdblist
-
-aBlastdblist :: FilePath -> Action ()
-aBlastdblist listTmp' = do
-  let loc = "modules.blastdb.aBlastdblist"
-      tmpDir = takeDirectory $ listTmp'
-      oPath  = traceA loc listTmp' [listTmp']
-  liftIO $ createDirectoryIfMissing True tmpDir
-  withWriteLock' tmpDir $ do
-    runCmd $ CmdDesc
-      { cmdParallel = False
-      , cmdFixEmpties = True
-      , cmdOutPath = oPath
-      , cmdInPatterns = []
-      , cmdNoNeedDirs = []
-      , cmdExtraOutPaths = []
-      , cmdSanitizePaths = []
-      , cmdOptions =[Cwd tmpDir] -- TODO remove?
-      , cmdBinary = "blastdblist.sh"
-      , cmdArguments = [tmpDir, listTmp']
-      , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
-      , cmdExitCode = ExitSuccess
-      }
 
 ---------------
 -- old stuff --
