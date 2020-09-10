@@ -15,6 +15,7 @@ import qualified OrthoLang.Modules.BioMartR      as BioMartR
 import qualified OrthoLang.Modules.Blast         as Blast
 import qualified OrthoLang.Modules.BlastDB       as BlastDB
 import qualified OrthoLang.Modules.Blastdbget    as Blastdbget
+import qualified OrthoLang.Modules.Filter        as Filter
 import qualified OrthoLang.Modules.BlastHits     as BlastHits
 import qualified OrthoLang.Modules.BlastRBH      as BlastRBH
 import qualified OrthoLang.Modules.Busco         as Busco
@@ -73,6 +74,7 @@ modules =
   , Blast.olModule      -- rewrite done
   , BlastDB.olModule    -- could do some, some will require expr transforms too (next)
   , Blastdbget.olModule
+  , Filter.olModule
   , BlastHits.olModule  -- simplest case of rMap use? aCutCol etc. (next)
   , PsiBlast.olModule   -- complicated :(
 

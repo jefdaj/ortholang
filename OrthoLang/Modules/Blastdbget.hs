@@ -107,7 +107,6 @@ rBlastdblist = do
 -----------------
 
 -- | User-facing version that takes a date expression and filter string
--- TODO expand the first (date) arg with newDate1of2
 blastdblist :: Function
 blastdblist = newFnA2
   "blastdblist"
@@ -120,7 +119,7 @@ blastdblist = newFnA2
 -- blastdblist_date --
 ----------------------
 
--- | Hidden _date version that assumes a properly formatted date from newDate1of2 above
+-- | Hidden version that assumes a properly formatted date from newDate1of2 above
 blastdblistDate :: Function
 blastdblistDate = newExprExpansion
   "blastdblist_date"
@@ -129,14 +128,24 @@ blastdblistDate = newExprExpansion
   mBlastdblistDate
   [Hidden, ReadsURL]
 
+-- TODO wait, how is this supposed to work? never mixed expr expansion + newdate before
 mBlastdblistDate :: ExprExpansion
-mBlastdblistDate = undefined
+-- mBlastdblistDate _ _ (Fun r ms ds _ [dateExpr, filterStr]) = undefined
+  -- where
+    -- dblist = Fun 
+mBlastdblistDate _ _ e = error "modules.blastdblist.mBlasttblistDate" $ "bad argument: " ++ show e
+
+-- mZipArchive _ scr (Fun r ms ds _ [e@(Lst _ _ _ es)]) =
+--   let ns = listVarNames "item" scr es -- TODO pick up overall list name here?
+--   in Fun r ms ds "zip_archive_explicit" [ns, e]
+-- mZipArchive _ _ e = error "modules.zip.mZipArchive" $ "bad argument: " ++ show e
 
 ------------------------
 -- blastdblist_filter --
 ------------------------
 
 -- | Hidden version that takes the pre-downloaded list and only filters it
+--   TODO is this actually a generic "filter any str.list" function?
 blastdblistFilter :: Function
 blastdblistFilter = newFnA2
   "blastdblist_filter"
@@ -169,46 +178,6 @@ blastdblistFilter = newFnA2
 ---------------
 -- old stuff --
 ---------------
-
-filterNames :: String -> [String] -> [String]
-filterNames s cs = filter matchFn cs
-  where
-    matchFn c = (map toLower s) `isInfixOf` (map toLower c)
-
--- rBlastdblist :: RulesFn
--- rBlastdblist scr e@(Fun _ _ _ _ [f]) = do
---   (ExprPath fPath) <- rExpr scr f
---   cfg  <- fmap fromJust getShakeExtraRules
---   dRef <- fmap fromJust getShakeExtraRules
---   let loc = "modules.blastdb.rBlastdblist"
---       fPath' = toPath loc cfg fPath
---       oPath   = exprPath cfg dRef scr e
---       tmpDir  = blastdbgetCache cfg
---       tmpDir' = fromPath loc cfg tmpDir
---       listTmp = tmpDir' </> "dblist" <.> "txt"
---       oPath'  = fromPath loc cfg oPath
---       lTmp'   = toPath loc cfg listTmp
---   listTmp %> \_ -> aBlastdblist lTmp'
---   oPath'  %> \_ -> aFilterList oPath lTmp' fPath'
---   return (ExprPath oPath')
--- rBlastdblist _ _ = fail "bad argument to rBlastdblist"
-
--- TODO generalize so it works with busco_list_lineages too?
--- TODO move to a "Filter" module once that gets started
-aFilterList :: Path -> Path -> Path -> Action ()
-aFilterList oPath listTmp fPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let fPath'   = fromPath loc cfg fPath
-      oPath'   = fromPath loc cfg oPath
-      listTmp' = fromPath loc cfg listTmp
-      loc = "modules.blastdb.aFilterList"
-      oPath''  = traceA loc oPath' [oPath', listTmp', fPath']
-  filterStr <- readLit  loc fPath'
-  out       <- readLits loc listTmp'
-  let names  = if null out then [] else tail out
-      names' = if null filterStr then names else filterNames filterStr names
-  debugA' loc $ "names': " ++ show names'
-  writeLits loc oPath'' names'
 
 ------------------
 -- blastdbget_* --
