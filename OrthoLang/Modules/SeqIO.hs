@@ -21,6 +21,7 @@ olModule = Module
   , mTypes = [gbk, faa, fna]
   , mGroups = [fa]
   , mEncodings = []
+  , mRules = []
   , mFunctions =
     [ gbkToFaaRawIDs, gbkToFaaRawIDsEach, gbkToFaa, gbkToFaaEach
     , gbkToFnaRawIDs, gbkToFnaRawIDsEach, gbkToFna, gbkToFnaEach

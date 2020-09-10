@@ -12,6 +12,7 @@ olModule = Module
   , mTypes = [faa, aln]
   , mGroups = []
   , mEncodings = []
+  , mRules = []
   , mFunctions = [muscle, muscleEach]
   }
 

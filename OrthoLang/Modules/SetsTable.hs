@@ -12,6 +12,7 @@ olModule = Module
   , mTypes = [tsv]
   , mGroups = [lit]
   , mEncodings = []
+  , mRules = []
   , mFunctions = [setsTable, setsTableExplicit]
   }
 

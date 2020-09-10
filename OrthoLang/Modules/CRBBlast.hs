@@ -19,6 +19,7 @@ olModule = Module
   , mTypes = [fna, faa, crb]
   , mGroups = [fa]
   , mEncodings = []
+  , mRules = []
   , mFunctions =
     [ crbBlast
     , crbBlastEach

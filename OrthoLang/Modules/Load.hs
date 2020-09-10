@@ -26,7 +26,7 @@ import Data.List                  (sort)
 import Data.Maybe                 (fromJust)
 import Data.String.Utils          (strip)
 import Development.Shake.FilePath ((</>), (<.>), takeFileName, takeBaseName)
-import OrthoLang.Modules.Curl     (curl)
+-- import OrthoLang.Modules.Curl     (curl)
 import OrthoLang.Util             (absolutize, resolveSymlinks, unlessExists)
 import System.FilePath.Glob       (glob)
 
@@ -37,6 +37,7 @@ olModule = Module
   , mTypes = [str]
   , mGroups = []
   , mEncodings = []
+  , mRules = []
   , mFunctions =
     [ loadList
     , globFiles
@@ -124,6 +125,7 @@ aLoadHash hashSeqIDs t src = do
 
 
 -- TODO problem when the str is a url? shouldn't `need` it then
+-- TODO remove this "url as path" idea and use dated curl fn instead once it works
 aLoad :: Bool -> NewAction1
 aLoad hashSeqIDs o@(ExprPath out') strPath' = do
   cfg <- fmap fromJust getShakeExtra
@@ -134,7 +136,7 @@ aLoad hashSeqIDs o@(ExprPath out') strPath' = do
   pth'  <- readLit loc strPath'
   let pth = toPath loc cfg pth'
   -- TODO is this the proper place to actually do the download?
-  pth'' <- if isURL pth' then curl pth else return pth
+  pth'' <- if isURL pth' then undefined pth else return pth -- TODO fix this with new curl!
   hashPath <- aLoadHash hashSeqIDs t pth''
   symlink out hashPath
 

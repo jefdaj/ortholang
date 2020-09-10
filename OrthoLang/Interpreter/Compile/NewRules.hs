@@ -58,6 +58,10 @@ module OrthoLang.Interpreter.Compile.NewRules
   , newMap2of2
   , newMap2of3
   , newMap3of3
+  , newDate1of1
+  , newDate1of2
+  , newDate1of3
+  , newDate1of4
 
   -- * Implementation details
   , rReloadIDs
@@ -79,6 +83,7 @@ module OrthoLang.Interpreter.Compile.NewRules
   , aNewRules
   , aLoadIDs -- TODO where should this go? Actions?
   -- , newPathExpansion
+  , aNewDate
 
   )
   where
@@ -88,7 +93,7 @@ import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake hiding (doesDirectoryExist)
 import System.Directory (doesDirectoryExist)
-import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite')
+import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite', readLit, writeLit, symlink, debugA)
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Locks (withWriteOnce)
 import OrthoLang.Types
@@ -98,12 +103,28 @@ import System.Exit (ExitCode(..))
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
-import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName)
+import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName, makeRelative, splitDirectories)
 import OrthoLang.Interpreter.Actions     (need', readPaths)
-import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest)
+import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest, exprPath, pathDigest)
 import qualified Data.Map.Strict as M
 import Data.IORef                 (atomicModifyIORef')
 import System.Directory           (createDirectoryIfMissing)
+
+import Data.Time
+import Text.Printf
+-- import System.FilePath ((</>))
+import Data.List.Split (splitOn)
+import OrthoLang.Util (absolutize, globFiles)
+import Data.List (sort)
+import Data.List.Utils (replace)
+import System.Directory (doesPathExist)
+import System.FilePath (takeBaseName, takeDirectory)
+
+---------------
+-- debugging --
+---------------
+
+debugA' loc = debugA ("ortholang.interpreter.compile.newrules." ++ loc)
 
 ---------
 -- API --
@@ -294,7 +315,7 @@ aLoadIDs idsPath' = do
   alwaysRerun
   liftIO $ debug "interpreter.sanitize.aLoadIDs" $ "idsPath': " ++ idsPath'
   cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.load.aLoadIDs"
+  let loc = "ortholang.interpreter.compile.newrules.aLoadIDs"
       idsPath = toPath loc cfg idsPath'
   newIDs <- readIDs idsPath
   -- TODO what should the keys actually be? probably not the idsPath
@@ -319,12 +340,15 @@ expression. They should also allow Shake to infer mapping patterns, but that
 isn't implemented yet.
 
 TODO get modules via getShakeExtraRules here?
+
+Note: this causes all evals to silently fail if one of the mRules fields is uninitialized
 -}
 newRules :: [Module] -> Rules ()
-newRules mods = sequence_ $ rReloadIDs : fnRules
+newRules mods = mconcat $ rReloadIDs : (modRules ++ fnRules)
   where
     fns     = concatMap mFunctions mods
     fnRules = catRules $ map fNewRules fns
+    modRules = concatMap mRules mods
     catRules [] = []
     catRules ((NewRules r):xs) = r : catRules xs
     catRules (_:xs) = catRules xs
@@ -403,7 +427,7 @@ applyList4 fn deps = do
 {-|
 -}
 aNewRules
-  :: (t -> [FilePath] -> Action ()) -- ^ one of the apply{1,2,3} fns
+  :: (t -> [FilePath] -> Action ()) -- ^ one of the apply{1..4} fns
   -> TypeSig
   -> (ExprPath -> t)
   ->  ExprPath -> Action ()
@@ -419,7 +443,7 @@ aNewRules applyFn oSig aFn o@(ExprPath out) = do
     error "aNewRules" $ "typechecking error: " ++ show oSig ++ " /= " ++ show oType
 
   -- dRef <- fmap fromJust $ getShakeExtra
-  liftIO $ addDigest dRef oType $ toPath loc cfg out
+  liftIO $ addDigest dRef oType $ toPath loc cfg out -- TODO have to do this for newDate too?
 
   let dPaths' = map (fromPath loc cfg) dPaths
   need' loc dPaths'
@@ -542,14 +566,7 @@ hidden fn = fn { fTags = Hidden : fTags fn }
 type Prefix = String
 
 -- the Action here is required because one of the input paths will normally be
--- needed + read to generate the list of output paths. The One variant means
--- the macro returns one path, which will be symlinked to the actual outpath.
--- Many means it returns a list of paths, which will be written to the actual
--- outpath.
---
--- TODO put the Maybe Seed back? Not sure how to pass it here
---
--- TODO should there be 1,2, and 3-arg versions?
+-- needed + read to generate the list of output paths.
 --
 -- type PathChange    = Prefix -> Maybe Seed -> [FilePath] -> Action  FilePath
 -- type PathExpansion = Prefix -> [FilePath] -> Action [FilePath]
@@ -650,17 +667,109 @@ newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cf
                                       Nothing -> "result" -- TODO what if only the new fn needs it?
                                       Just (Seed n) -> ('s':show n) </> "result" -- TODO could this be the read issue?
     newDigests path = map (\(PathDigest s) -> s) $
-                      replace oldDigests' (mapIndex - 1, pathDigest path)
+                      replaceN oldDigests' (mapIndex - 1, pathDigest path)
     mkPath p = tmpdir cfg </> "exprs" </> newFnName </>
                (foldl1 (</>) (newDigests p)) </>
                newSuffix
 
 -- replace the Nth element in a list
 -- old.reddit.com/r/haskell/comments/8jui5k/how_to_replace_an_element_at_an_index_in_a_list/dz2i8rj/
-replace :: [a] -> (Int, a) -> [a]
-replace [] _ = []
-replace (_:xs) (0,a) = a:xs
-replace (x:xs) (n,a) =
+replaceN :: [a] -> (Int, a) -> [a]
+replaceN [] _ = []
+replaceN (_:xs) (0,a) = a:xs
+replaceN (x:xs) (n,a) =
   if n < 0
     then (x:xs)
-    else x: replace xs (n-1,a)
+    else x: replaceN xs (n-1,a)
+
+------------------------------------------------------
+-- expand user-supplied cache dates to proper dates --
+------------------------------------------------------
+
+-- | Expands a 1-argument function to the corresponding _date version
+newDate1of1 :: Prefix -> NewAction1
+newDate1of1 prefix out a1 = aNewDate prefix out a1
+
+-- | Expands a 2-argument function to the corresponding _date version
+newDate1of2 :: Prefix -> NewAction2
+newDate1of2 prefix out a1 _ = aNewDate prefix out a1
+
+-- | Expands a 3-argument function to the corresponding _date version
+newDate1of3 :: Prefix -> NewAction3
+newDate1of3 prefix out a1 _ _ = aNewDate prefix out a1
+
+-- | Expands a 4-argument function to the corresponding _date version
+newDate1of4 :: Prefix -> NewAction4
+newDate1of4 prefix out a1 _ _ _ = aNewDate prefix out a1
+
+aNewDate :: Prefix -> ExprPath -> FilePath -> Action ()
+aNewDate prefix (ExprPath outPath') userPath = do
+  cfg  <- fmap fromJust getShakeExtra
+  dRef <- fmap fromJust getShakeExtra
+  let loc = "ortholang.interpreter.compile.newrules.newDate"
+      cacheDir   = tmpdir cfg </> "exprs" </> prefix
+      cachePath  = makeRelative (cacheDir) outPath'
+
+  properDate <- fmap show $ properDay cacheDir cachePath userPath
+
+  debugA' "aNewDate" $ "properDate: '" ++ properDate ++ "'"
+  let properPath   = exprPath cfg dRef emptyScript $ Lit str properDate
+      properPath'  = fromPath loc cfg properPath
+      (PathDigest old) = pathDigest $ toPath loc cfg userPath
+      (PathDigest new) = pathDigest properPath
+      outPathD'    = replace prefix (prefix ++ "_date") $ replace old new outPath' -- TODO make this less brittle
+      outPath  = toPath loc cfg outPath'
+      outPathD = toPath loc cfg outPathD'
+  debugA' "aNewDate" $ "properPath: '" ++ show properPath ++ "'"
+  debugA' "aNewDate" $ "outPathD': '" ++ outPathD' ++ "'"
+  writeLit loc properPath' properDate    -- TODO remove?
+
+  liftIO $ addDigest dRef Untyped $ toPath loc cfg outPath' -- TODO fix type by getting it from the corresponding _date path
+  liftIO $ addDigest dRef Untyped $ toPath loc cfg outPathD' -- TODO fix type by getting it from the corresponding _date path
+
+  need' loc [outPathD']    -- TODO remove?
+  symlink outPath outPathD -- TODO remove?
+
+------------------------------
+-- future library functions --
+------------------------------
+
+parseDay :: String -> Maybe Day
+parseDay = parseTimeM True defaultTimeLocale "%Y-%m-%d"
+
+-- | Returns the latest existing cache matching a specific path, or Nothing
+cachedDay :: FilePath -> FilePath -> Action (Maybe Day)
+cachedDay cacheDir cachePath = do
+  matches <- liftIO $ globFiles $ cacheDir </> "*" </> cachePath
+  let dateOf dir = head $ splitDirectories $ makeRelative cachePath dir
+      dated = map (\m -> (dateOf m, m)) matches
+  if null matches then return Nothing
+  else return $ parseDay $ snd $ head $ sort dated
+
+-- | Entry point for finding a cached file from a user-specified date.
+--   If this returns Nothing, it means we'll need to download the file.
+userDay :: FilePath -> FilePath -> String -> Action (Maybe Day)
+userDay cacheDir cachePath userPath = do
+  let loc = "ortholang.interpreter.compile.newrules.userDay"
+  userInput <- readLit loc userPath
+  let parsed = parseDay userInput
+  cached  <- cachedDay cacheDir cachePath
+  today <- fmap fromJust getShakeExtra
+  return $ if      userInput == "cached" then cached
+           else if userInput == "today"  then Just today
+           else    parsed
+
+-- | Overall entry point, which would include user-facing warnings (if any).
+properDay :: FilePath -> FilePath -> String -> Action Day
+properDay cacheDir cachePath userInput = do
+  let loc = "ortholang.interpreter.compile.newrules.properDay"
+  today <- fmap fromJust getShakeExtra
+  mUserCachePath <- userDay cacheDir cachePath userInput
+  cachePath' <- case mUserCachePath of
+    Nothing -> do
+      userDate <- readLit loc userInput
+      liftIO $ putStrLn $ "Warning: no cache found for \"" ++ userDate ++ "\". " ++
+                          "Defaulting to the current UTC date, " ++ show today ++ "."
+      return today
+    Just p -> return p
+  return cachePath'

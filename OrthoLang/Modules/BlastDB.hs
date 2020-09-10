@@ -58,6 +58,7 @@ olModule = Module
   , mTypes = [fna, faa, ndb, pdb]
   , mGroups = []
   , mEncodings = [blastdb]
+  , mRules = []
   , mFunctions =
 
     [ loadFnaDb

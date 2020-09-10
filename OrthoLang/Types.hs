@@ -621,6 +621,7 @@ data Module = Module
   , mGroups    :: [TypeGroup]
   , mEncodings :: [Encoding]
   , mFunctions :: [Function]
+  , mRules     :: [Rules ()]
   }
 
 -- TODO what about prettyShow in Pretty.hs?
@@ -740,7 +741,6 @@ newtype PathDigest = PathDigest String deriving (Read, Show, Eq, Ord)
 
 type DigestMap = Map PathDigest (Type, Path)
 type DigestsRef = IORef DigestMap
-
 
 ---------------
 -- functions --

@@ -20,6 +20,7 @@ olModule = Module
   , mTypes = [faa, fna, spr]
   , mGroups = []
   , mEncodings = []
+  , mRules = []
   , mFunctions =
       [ sonicparanoid
       ]

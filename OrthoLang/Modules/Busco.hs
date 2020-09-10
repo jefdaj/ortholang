@@ -9,7 +9,7 @@ module OrthoLang.Modules.Busco
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
-import OrthoLang.Modules.Curl (curl)
+-- import OrthoLang.Modules.Curl (curl)
 import OrthoLang.Modules.Load (mkLoad)
 
 import Control.Monad             (when)
@@ -29,6 +29,7 @@ olModule = Module
   , mTypes = [blh, bsr, bst, faa]
   , mGroups = []
   , mEncodings = []
+  , mRules = []
   , mFunctions =
       [ loadLineage
       , buscoListLineages
@@ -203,7 +204,7 @@ aBuscoFetchLineage (ExprPath out') namePath = do
       url       = toPath loc cfg $ "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
       datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
       datasetPath   = toPath loc cfg datasetPath'
-  tarPath <- fmap (fromPath loc cfg) $ curl url
+  tarPath <- fmap (fromPath loc cfg) $ undefined url -- TODO fix this with new curl!
   unlessExists untarPath $ do
     untar (toPath loc cfg tarPath) (toPath loc cfg untarPath)
   symlink out datasetPath

@@ -32,6 +32,7 @@ olModule = Module
   , mTypes = [faa, aln, hmm, hht]
   , mGroups = []
   , mEncodings = []
+  , mRules = []
   , mFunctions = [hmmbuild, hmmbuildEach,
                   hmmsearch, hmmsearchEach,
                   extractHmmTargets, extractHmmTargetsEach]

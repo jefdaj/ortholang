@@ -32,6 +32,10 @@ module OrthoLang.Interpreter
   , newMap2of2
   , newMap2of3
   , newMap3of3
+  , newDate1of1
+  , newDate1of2
+  , newDate1of3
+  , newDate1of4
 
   , ExprExpansion
   , addDigest

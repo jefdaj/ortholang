@@ -58,6 +58,7 @@ olModule = Module
   , mTypes = []
   , mGroups = []
   , mEncodings = []
+  , mRules = []
   , mFunctions =
       [ replace
       , replaceEach

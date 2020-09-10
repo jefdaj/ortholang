@@ -25,7 +25,7 @@ import qualified OrthoLang.Modules.Diamond       as Diamond
 import qualified OrthoLang.Modules.GreenCut      as GreenCut
 import qualified OrthoLang.Modules.Hmmer         as Hmmer
 import qualified OrthoLang.Modules.ListLike      as ListLike
--- import qualified OrthoLang.Modules.Curl          as Curl
+import qualified OrthoLang.Modules.Curl          as Curl
 import qualified OrthoLang.Modules.Load          as Load
 import qualified OrthoLang.Modules.MMSeqs        as MMSeqs
 import qualified OrthoLang.Modules.Math          as Math
@@ -54,7 +54,6 @@ modules =
   [
   -- core language features
     Math.olModule
-  -- , Curl.olModule
   , ListLike.olModule -- TODO expose Function fields in API
   , Load.olModule     -- TODO glob_files first, then mkGlob after Compose
   , Permute.olModule  -- could do rPermute
@@ -66,6 +65,7 @@ modules =
   , Sets.olModule     -- could do it same as math?
 
   -- load, download, and convert sequences
+  , Curl.olModule
   , BioMartR.olModule -- rewrite without the parse searches thing
   , SeqIO.olModule    -- mix of rSimple* and rMap* functions (next)
 
