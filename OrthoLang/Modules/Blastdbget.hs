@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module OrthoLang.Modules.Blastdbget where
 
 import Development.Shake
@@ -15,6 +17,7 @@ import Data.Maybe              (fromJust)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
 import System.FilePath         ((</>), (<.>), takeDirectory)
+import Data.Time               (Day)
 
 debugA' :: String -> String -> Action ()
 debugA' name = debugA ("modules.blastdbget." ++ name)
@@ -29,6 +32,7 @@ olModule = Module
   , mTypes = [fna, faa, ndb, pdb]
   , mGroups = []
   , mEncodings = [blastdb]
+  , mRules = [rBlastdblist]
   , mFunctions =
     [ blastdblist, blastdblistDate
     -- TODO rewrite: , blastdbgetFna -- TODO mapped version so you can list -> git at once?
@@ -64,6 +68,10 @@ blastdbgetCache cfg = cacheDir cfg "blastdbget"
 --   , fNewRules = NewNotImplemented, fOldRules = rBlastdblist
 --   }
 
+-----------------
+-- blastdblist --
+-----------------
+
 -- TODO expand the first (date) arg with newDate1of2
 blastdblist :: Function
 blastdblist = newFnA2
@@ -73,6 +81,10 @@ blastdblist = newFnA2
   (newDate1of2 "blastdblist")
   [ReadsURL]
 
+----------------------
+-- blastdblist_date --
+----------------------
+
 blastdblistDate :: Function
 blastdblistDate = newFnA2
   "blastdblist_date"
@@ -80,6 +92,66 @@ blastdblistDate = newFnA2
   (Exactly $ ListOf str)
   undefined
   [ReadsURL]
+
+------------------------
+-- dblist module rule --
+------------------------
+
+-- aCurlDate :: NewAction2
+-- aCurlDate (ExprPath outPath') datePath' urlPath' = do
+--   cfg <- fmap fromJust getShakeExtra
+--   let loc = "ortholang.modules.curl.aCurlDate"
+--       outPath = toPath loc cfg outPath'
+--   debugA' "aCurlDate" $ "datePath': " ++ datePath'
+--   debugA' "aCurlDate" $ "urlPath': " ++ urlPath'
+--   date <- readLit loc datePath'
+--   let cacheDir' = fromPath loc cfg $ cacheDir cfg "curl"
+--       (PathDigest urlDigest) = last $ listDigestsInPath cfg urlPath'
+--   debugA' "aCurlDate" $ "date: " ++ date
+--   debugA' "aCurlDate" $ "cacheDir': " ++ cacheDir'
+--   debugA' "aCurlDate" $ "urlDigest: " ++ urlDigest
+--   -- TODO the final output path should depend on this rather than the initial userCacheDescPath', right?
+--   let cachePath' = cacheDir' </> date </> urlDigest -- TODO make this a dir and add /result?
+--       cachePath  = toPath loc cfg cachePath'
+--   liftIO $ createDirectoryIfMissing True $ takeDirectory cachePath'
+--   need' loc [cachePath']
+--   debugA' "aCurlDate" $ "symlink: " ++ show outPath ++ " -> " ++ show cachePath
+--   symlink outPath cachePath
+
+rBlastdblist :: Rules ()
+rBlastdblist = do
+  (cfg :: Config) <- fmap fromJust getShakeExtraRules
+  (day :: Day   ) <- fmap fromJust getShakeExtraRules
+  let loc  = "ortholang.modules.blastdbget.rBlastdblist"
+      tmp' = fromPath loc cfg $ blastdbgetCache cfg
+      dbl' = tmp' </> show day </> "dblist.txt"
+  dbl' %> aBlastdblist
+
+aBlastdblist :: FilePath -> Action ()
+aBlastdblist listTmp' = do
+  let loc = "modules.blastdb.aBlastdblist"
+      tmpDir = takeDirectory $ listTmp'
+      oPath  = traceA loc listTmp' [listTmp']
+  liftIO $ createDirectoryIfMissing True tmpDir
+  withWriteLock' tmpDir $ do
+    runCmd $ CmdDesc
+      { cmdParallel = False
+      , cmdFixEmpties = True
+      , cmdOutPath = oPath
+      , cmdInPatterns = []
+      , cmdNoNeedDirs = []
+      , cmdExtraOutPaths = []
+      , cmdSanitizePaths = []
+      , cmdOptions =[Cwd tmpDir] -- TODO remove?
+      , cmdBinary = "blastdblist.sh"
+      , cmdArguments = [tmpDir, listTmp']
+      , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
+      , cmdExitCode = ExitSuccess
+      }
+
+---------------
+-- old stuff --
+---------------
 
 filterNames :: String -> [String] -> [String]
 filterNames s cs = filter matchFn cs
@@ -103,30 +175,6 @@ filterNames s cs = filter matchFn cs
 --   oPath'  %> \_ -> aFilterList oPath lTmp' fPath'
 --   return (ExprPath oPath')
 -- rBlastdblist _ _ = fail "bad argument to rBlastdblist"
-
-aBlastdblist :: Path -> Action ()
-aBlastdblist listTmp = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.blastdb.aBlastdblist"
-      listTmp' = fromPath loc cfg listTmp
-      tmpDir   = takeDirectory $ listTmp'
-      oPath    = traceA loc listTmp' [listTmp']
-  liftIO $ createDirectoryIfMissing True tmpDir
-  withWriteLock' tmpDir $ do
-    runCmd $ CmdDesc
-      { cmdParallel = False
-      , cmdFixEmpties = True
-      , cmdOutPath = oPath
-      , cmdInPatterns = []
-      , cmdNoNeedDirs = []
-      , cmdExtraOutPaths = []
-      , cmdSanitizePaths = []
-      , cmdOptions =[Cwd tmpDir] -- TODO remove?
-      , cmdBinary = "blastdblist.sh"
-      , cmdArguments = [tmpDir, listTmp']
-      , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
-      , cmdExitCode = ExitSuccess
-      }
 
 -- TODO generalize so it works with busco_list_lineages too?
 -- TODO move to a "Filter" module once that gets started
