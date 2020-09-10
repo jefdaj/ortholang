@@ -19,11 +19,19 @@ import System.Exit             (ExitCode(..))
 import System.FilePath         ((</>), (<.>), takeDirectory)
 import Data.Time               (Day)
 
+---------------
+-- debugging --
+---------------
+
 debugA' :: String -> String -> Action ()
 debugA' name = debugA ("modules.blastdbget." ++ name)
 
 debugR' :: (Pretty a, Show b) => Config -> String -> a -> b -> b
 debugR' _ name = debugRules ("modules.blastdbget." ++ name)
+
+------------
+-- module --
+------------
 
 olModule :: Module
 olModule = Module
@@ -34,7 +42,7 @@ olModule = Module
   , mEncodings = [blastdb]
   , mRules = [rBlastdblist]
   , mFunctions =
-    [ blastdblist, blastdblistDate
+    [ blastdblist, blastdblistDate, blastdblistFilter
     -- TODO rewrite: , blastdbgetFna -- TODO mapped version so you can list -> git at once?
     -- TODO rewrite: , blastdbgetFaa -- TODO mapped version so you can list -> git at once?
     ]
@@ -72,6 +80,7 @@ blastdbgetCache cfg = cacheDir cfg "blastdbget"
 -- blastdblist --
 -----------------
 
+-- | User-facing version that takes a date expression and filter string
 -- TODO expand the first (date) arg with newDate1of2
 blastdblist :: Function
 blastdblist = newFnA2
@@ -85,17 +94,30 @@ blastdblist = newFnA2
 -- blastdblist_date --
 ----------------------
 
+-- | Hidden _date version that assumes a properly formatted date from newDate1of2 above
 blastdblistDate :: Function
-blastdblistDate = newFnA2
+blastdblistDate = newExprExpansion
   "blastdblist_date"
-  (Exactly str, Exactly str)
+  [Exactly str, Exactly str]
+  (Exactly $ ListOf str)
+  mBlastdblistDate
+  [Hidden, ReadsURL]
+
+mBlastdblistDate :: ExprExpansion
+mBlastdblistDate = undefined
+
+-----------------------------
+-- blastdblist_date_filter --
+-----------------------------
+
+-- | Hidden version that takes the pre-downloaded list and only filters it
+blastdblistFilter :: Function
+blastdblistFilter = newFnA2
+  "blastdblist_date_filter"
+  (Exactly $ ListOf str, Exactly str)
   (Exactly $ ListOf str)
   undefined
-  [ReadsURL]
-
-------------------------
--- dblist module rule --
-------------------------
+  [Hidden]
 
 -- aCurlDate :: NewAction2
 -- aCurlDate (ExprPath outPath') datePath' urlPath' = do
@@ -117,6 +139,10 @@ blastdblistDate = newFnA2
 --   need' loc [cachePath']
 --   debugA' "aCurlDate" $ "symlink: " ++ show outPath ++ " -> " ++ show cachePath
 --   symlink outPath cachePath
+
+------------------------
+-- dblist module rule --
+------------------------
 
 rBlastdblist :: Rules ()
 rBlastdblist = do
