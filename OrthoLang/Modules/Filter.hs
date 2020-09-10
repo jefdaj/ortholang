@@ -59,8 +59,7 @@ aFilterList (ExprPath oPath') listTmp' fPath' = do
   let loc = "modules.blastdb.aFilterList"
       oPath''  = traceA loc oPath' [oPath', listTmp', fPath']
   filterStr <- readLit  loc fPath'
-  out       <- readLits loc listTmp'
-  let elems  = if null out then [] else tail out
-      elems' = if null filterStr then elems else filterLowerInfix filterStr elems
+  elems     <- readLits loc listTmp'
+  let elems' = if null filterStr then elems else filterLowerInfix filterStr elems
   debugA' loc $ "elems': " ++ show elems'
   writeLits loc oPath'' elems'
