@@ -30,9 +30,9 @@ olModule = Module
   , mGroups = []
   , mEncodings = [blastdb]
   , mFunctions =
-    [ blastdblist
-    , blastdbgetFna -- TODO mapped version so you can list -> git at once?
-    , blastdbgetFaa -- TODO mapped version so you can list -> git at once?
+    [ blastdblist, blastdblistDate
+    -- TODO rewrite: , blastdbgetFna -- TODO mapped version so you can list -> git at once?
+    -- TODO rewrite: , blastdbgetFaa -- TODO mapped version so you can list -> git at once?
     ]
   }
 
@@ -45,41 +45,64 @@ blastdbgetCache cfg = cacheDir cfg "blastdbget"
 -----------------
 
 {- This is a two-part thing where we only want to download the full list once
- - per day at the most, but instantly filter it by different strings.
+ - per day at the most, but instantly filter it by different strings. At the
+ - same time, we also want to break out a _date version that caches the
+ - downloaded lists by date. So the functions we need are:
+ -
+ - blastdblist : str str -> str.list (the filtering one written with newDate1of2)
+ - blasdtdblist_date : str str -> str.list (the caching one written with newFnA2)
+ - aBlastdblist (the unnamed Rules for doing the actual list download)
  -}
 
 -- takes a filter string (leave empty for all results)
+-- blastdblist :: Function
+-- blastdblist = let name = "blastdblist" in Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly str]
+--   , fOutput =  Exactly (ListOf str)
+--   , fTags = [ReadsURL]
+--   , fNewRules = NewNotImplemented, fOldRules = rBlastdblist
+--   }
+
+-- TODO expand the first (date) arg with newDate1of2
 blastdblist :: Function
-blastdblist = let name = "blastdblist" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly str]
-  , fOutput =  Exactly (ListOf str)
-  , fTags = [ReadsURL]
-  , fNewRules = NewNotImplemented, fOldRules = rBlastdblist
-  }
+blastdblist = newFnA2
+  "blastdblist"
+  (Exactly str, Exactly str)
+  (Exactly $ ListOf str)
+  (newDate1of2 "blastdblist")
+  [ReadsURL]
+
+blastdblistDate :: Function
+blastdblistDate = newFnA2
+  "blastdblist_date"
+  (Exactly str, Exactly str)
+  (Exactly $ ListOf str)
+  undefined
+  [ReadsURL]
 
 filterNames :: String -> [String] -> [String]
 filterNames s cs = filter matchFn cs
   where
     matchFn c = (map toLower s) `isInfixOf` (map toLower c)
 
-rBlastdblist :: RulesFn
-rBlastdblist scr e@(Fun _ _ _ _ [f]) = do
-  (ExprPath fPath) <- rExpr scr f
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.blastdb.rBlastdblist"
-      fPath' = toPath loc cfg fPath
-      oPath   = exprPath cfg dRef scr e
-      tmpDir  = blastdbgetCache cfg
-      tmpDir' = fromPath loc cfg tmpDir
-      listTmp = tmpDir' </> "dblist" <.> "txt"
-      oPath'  = fromPath loc cfg oPath
-      lTmp'   = toPath loc cfg listTmp
-  listTmp %> \_ -> aBlastdblist lTmp'
-  oPath'  %> \_ -> aFilterList oPath lTmp' fPath'
-  return (ExprPath oPath')
-rBlastdblist _ _ = fail "bad argument to rBlastdblist"
+-- rBlastdblist :: RulesFn
+-- rBlastdblist scr e@(Fun _ _ _ _ [f]) = do
+--   (ExprPath fPath) <- rExpr scr f
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   let loc = "modules.blastdb.rBlastdblist"
+--       fPath' = toPath loc cfg fPath
+--       oPath   = exprPath cfg dRef scr e
+--       tmpDir  = blastdbgetCache cfg
+--       tmpDir' = fromPath loc cfg tmpDir
+--       listTmp = tmpDir' </> "dblist" <.> "txt"
+--       oPath'  = fromPath loc cfg oPath
+--       lTmp'   = toPath loc cfg listTmp
+--   listTmp %> \_ -> aBlastdblist lTmp'
+--   oPath'  %> \_ -> aFilterList oPath lTmp' fPath'
+--   return (ExprPath oPath')
+-- rBlastdblist _ _ = fail "bad argument to rBlastdblist"
 
 aBlastdblist :: Path -> Action ()
 aBlastdblist listTmp = do
