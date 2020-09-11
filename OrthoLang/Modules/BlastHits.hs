@@ -200,34 +200,25 @@ aFilterHits _ args = error $ "bad argument to aFilterHits: " ++ show args
 -- TODO split into best_hits_evalue and best_hits_bitscore?
 
 bestHits :: Function
-bestHits =  Function
-  { fOpChar = Nothing, fName = name 
-  , fInputs = [Some ht "a hit table"]
-  , fOutput =  Some ht "a hit table"
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple aBestHits
-  }
-  where
-    name = "best_hits"
+bestHits = newFnA1
+  "best_hits"
+  (Some ht "a hit table")
+  (Some ht "a hit table")
+  aBestHits
+  []
 
 bestHitsEach :: Function
-bestHitsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [ListSigs (Some ht "a hit table")]
-  , fOutput =  ListSigs (Some ht "a hit table")
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aBestHits
-  }
-  where
-    name = "best_hits_each"
+bestHitsEach = newFnA1
+  "best_hits_each"
+  (ListSigs $ Some ht "a hit table")
+  (ListSigs $ Some ht "a hit table")
+  (newMap1of1 "best_hits")
+  []
 
-aBestHits :: [Path] -> Action ()
-aBestHits [out, hits] = do
-  cfg <- fmap fromJust getShakeExtra
+aBestHits :: NewAction1
+aBestHits (ExprPath out') hits' = do
   let loc = "modules.blasthits.aBestHits"
-      out'  = fromPath loc cfg out
       out'' = traceA "aBestHits" out' [out', hits']
-      hits' = fromPath loc cfg hits
   runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
@@ -242,4 +233,3 @@ aBestHits [out, hits] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out']
     }
-aBestHits args = error $ "bad argument to aBestHits: " ++ show args
