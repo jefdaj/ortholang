@@ -20,6 +20,6 @@ fi
 
 # ... and then filter out the usage info + non-tunable log output
 grep -v 'INFO' "$LISTOUT" | grep -v 'Usage:' > "$LISTRES"
-exit 0
 
-# TODO remove the .out and .err files if empty?
+rm -f "$LISTOUT" "$LISTERR"
+exit 0

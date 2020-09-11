@@ -108,12 +108,13 @@ rBlastdblist = do
 --   }
 
 -- | User-facing version that takes a date expression and filter string
+--   TODO rename this and make blastdblist be a user-facing expansion like filter_list (this) "filter str"?
 blastdblist :: Function
-blastdblist = newFnA2
+blastdblist = newFnA1
   "blastdblist"
-  (Exactly str, Exactly str)
+  (Exactly str)
   (Exactly $ ListOf str)
-  (newDate1of2 "blastdblist")
+  (newDate1of1 "blastdblist")
   [ReadsURL]
 
 ----------------------
