@@ -122,13 +122,6 @@ oldVariants =
   , ("blastx_db_sensitive_rev"      , rFlip23 . rSimple . aDiamondFromDb, ["blastx", "--sensitive"     ], dmnd, fna, bht)
   , ("blastx_db_more_sensitive_rev" , rFlip23 . rSimple . aDiamondFromDb, ["blastx", "--more-sensitive"], dmnd, fna, bht)
 
-  , ("blastp_each"                  , rDiamondFromFaEach, ["blastp"                    ], faa, ListOf faa , ListOf bht)
-  , ("blastp_sensitive_each"        , rDiamondFromFaEach, ["blastp", "--sensitive"     ], faa, ListOf faa , ListOf bht)
-  , ("blastp_more_sensitive_each"   , rDiamondFromFaEach, ["blastp", "--more-sensitive"], faa, ListOf faa , ListOf bht)
-  , ("blastx_each"                  , rDiamondFromFaEach, ["blastx"                    ], fna, ListOf faa , ListOf bht)
-  , ("blastx_sensitive_each"        , rDiamondFromFaEach, ["blastx", "--sensitive"     ], fna, ListOf faa , ListOf bht)
-  , ("blastx_more_sensitive_each"   , rDiamondFromFaEach, ["blastx", "--more-sensitive"], fna, ListOf faa , ListOf bht)
-
   -- TODO will this work with the mapping? test!
   , ("blastp_rev_each"                  , rDiamondFromFaRevEach, ["blastp"                    ], faa, ListOf faa , ListOf bht)
   , ("blastp_sensitive_rev_each"        , rDiamondFromFaRevEach, ["blastp", "--sensitive"     ], faa, ListOf faa , ListOf bht)
@@ -181,12 +174,20 @@ newVariants =
            (Exactly $ ListOf rType)
            (newMap3of3 $ "diamond_" ++ name)
            [Nondeterministic])
+
     [ ("blastp_db"               , ["blastp"                    ], faa, dmnd, bht)
     , ("blastp_db_sensitive"     , ["blastp", "--sensitive"     ], faa, dmnd, bht)
     , ("blastp_db_more_sensitive", ["blastp", "--more-sensitive"], faa, dmnd, bht)
     , ("blastx_db"               , ["blastx"                    ], fna, dmnd, bht)
     , ("blastx_db_sensitive"     , ["blastx", "--sensitive"     ], fna, dmnd, bht)
     , ("blastx_db_more_sensitive", ["blastx", "--more-sensitive"], fna, dmnd, bht)
+
+    , ("blastp"                  , ["blastp"                    ], faa, faa , bht)
+    , ("blastp_sensitive"        , ["blastp", "--sensitive"     ], faa, faa , bht)
+    , ("blastp_more_sensitive"   , ["blastp", "--more-sensitive"], faa, faa , bht)
+    , ("blastx"                  , ["blastx"                    ], fna, faa , bht)
+    , ("blastx_sensitive"        , ["blastx", "--sensitive"     ], fna, faa , bht)
+    , ("blastx_more_sensitive"   , ["blastx", "--more-sensitive"], fna, faa , bht)
     ]
 
   ++
