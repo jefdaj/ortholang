@@ -192,20 +192,17 @@ mBlastRbh _ _ _ e = error "ortholang.modules.blastrbh.mBlastRbh" $ "bad argument
 ----------------------
 
 mkBlastRbhEach :: BlastDesc -> Function
-mkBlastRbhEach d@(bCmd, qType, sType, _) = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly qType, Exactly (ListOf sType)] -- TODO any ht would work right?
-  , fOutput = Exactly (ListOf bht)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastRbhEach d
-  }
-  where
-    name = bCmd ++ "_rbh_each"
+mkBlastRbhEach d@(bCmd, qType, sType, _) = newExprExpansion
+  (bCmd ++ "_rbh_each")
+  [Exactly num, Exactly qType, Exactly sType]
+  (Exactly bht)
+  (mBlastRbhEach d)
+  []
 
-rMkBlastRbhEach :: BlastDesc -> RulesFn
-rMkBlastRbhEach (bCmd, _, _, _) s (Fun _ seed deps _ [e, l, rs]) = rExpr s main
+mBlastRbhEach :: BlastDesc -> ExprExpansion
+mBlastRbhEach (bCmd, _, _, _) _ _ (Fun _ seed deps _ [e, l, rs]) = main
   where
     main  = Fun (ListOf bht) seed deps "reciprocal_best_each" [lHits, rHits]
     lHits = Fun (ListOf bht) seed deps (bCmd ++ "_each"    )  [e, l, rs]
     rHits = Fun (ListOf bht) seed deps (bCmd ++ "_rev_each")  [e, l, rs]
-rMkBlastRbhEach _ _ _ = fail "bad argument to rMkBlastRbh"
+mBlastRbhEach _ _ _ e = error "ortholang.modules.blastrbh.mBlastRbhEach" $ "bad argument: " ++ show e
