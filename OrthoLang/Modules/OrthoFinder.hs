@@ -39,29 +39,22 @@ ofr = Type
       return $ unlines $ take 17 $ lines txt -- TODO why doesn't this limit lines?
   }
 
------------------
--- orthofinder --
------------------
-
 orthofinder :: Function
-orthofinder = let name = "orthofinder" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf faa)]
-  , fOutput = Exactly ofr
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple aOrthofinder
-  }
+orthofinder = newFnA1
+  "orthofinder"
+  (Exactly $ ListOf faa)
+  (Exactly ofr)
+  aOrthofinder
+  [Nondeterministic]
 
 -- TODO do blast separately and link to outputs from the WorkingDirectory dir, and check if same results
--- TODO what's diamond blast? do i need to add it?
-aOrthofinder :: [Path] -> Action ()
-aOrthofinder [out, faListPath] = do
+aOrthofinder :: NewAction1
+aOrthofinder (ExprPath out') faListPath' = do
   cfg <- fmap fromJust getShakeExtra
-  let out'        = fromPath loc cfg out
-      faListPath' = fromPath loc cfg faListPath
-      loc = "modules.orthofinder.aOrthofinder"
+  let loc = "modules.orthofinder.aOrthofinder"
       out''       = traceA loc out' [out', faListPath']
+      out        = toPath loc cfg out'
+      faListPath = toPath loc cfg faListPath'
       tmpDir = tmpdir cfg </> "cache" </> "orthofinder" </> digest loc faListPath
       statsPath = toPath loc cfg $ tmpDir
                     </> "OrthoFinder" </> "Results_"
@@ -98,5 +91,3 @@ aOrthofinder [out, faListPath] = do
     -- liftIO $ putStrLn $ "statsPath: " ++ show statsPath
   trackWrite' [statsPath']
   symlink out statsPath
-
-aOrthofinder args = error $ "bad argument to aOrthofinder: " ++ show args
