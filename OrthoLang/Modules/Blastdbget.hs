@@ -43,9 +43,9 @@ olModule = Module
   , mEncodings = [blastdb]
   , mRules = [rBlastdblist]
   , mFunctions =
-    [ blastdblist, blastdblistDate
-    -- TODO rewrite: , blastdbgetFna -- TODO mapped version so you can list -> git at once?
-    -- TODO rewrite: , blastdbgetFaa -- TODO mapped version so you can list -> git at once?
+    [ blastdbList, blastdbListDate
+    -- TODO rewrite: , blastdbGetFna -- TODO mapped version so you can list -> git at once?
+    -- TODO rewrite: , blastdbGetFaa -- TODO mapped version so you can list -> git at once?
     ]
   }
 
@@ -84,8 +84,8 @@ rBlastdblist = do
 -----------------
 
 -- | User-facing version that takes a date expression (date in yyyy-mm-dd format or "today" or "cached")
-blastdblist :: Function
-blastdblist = newFnA1
+blastdbList :: Function
+blastdbList = newFnA1
   "blastdb_list"
   (Exactly str)
   (Exactly $ ListOf str)
@@ -97,22 +97,22 @@ blastdblist = newFnA1
 ----------------------
 
 -- | Hidden version that assumes a properly formatted date from newDate1of1 above
-blastdblistDate :: Function
-blastdblistDate = newFnA1
+blastdbListDate :: Function
+blastdbListDate = newFnA1
   "blastdb_list_date"
   (Exactly str)
   (Exactly $ ListOf str)
-  aBlastdblistDate
+  aBlastdbListDate
   [Hidden, ReadsURL]
 
-aBlastdblistDate :: NewAction1
-aBlastdblistDate (ExprPath out') datePath' = do
-  let loc = "ortholang.modules.blastdbget.aBlastdblistDate"
+aBlastdbListDate :: NewAction1
+aBlastdbListDate (ExprPath out') datePath' = do
+  let loc = "ortholang.modules.blastdbget.aBlastdbListDate"
   cfg <- fmap fromJust getShakeExtra
   day <- readLit loc datePath'
   -- TODO utility fn for finding this?
   let dbl' = fromPath loc cfg (blastdbgetCache cfg) </> day </> "dblist.txt"
-  need' loc [dbl'] -- TODO remove?
+  -- need' loc [dbl'] -- TODO remove?
   let dbl = toPath loc cfg dbl'
       out = toPath loc cfg out'
   symlink out dbl
@@ -121,17 +121,8 @@ aBlastdblistDate (ExprPath out') datePath' = do
 -- blastdbget_* --
 ------------------
 
--- mkBlastdbget :: String -> Type -> Function
--- mkBlastdbget name faType = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly str]
---   , fOutput =  Exactly (EncodedAs blastdb faType)
---   , fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rBlastdbget
---   }
-
-mkBlastdbget :: String -> Type -> Function
-mkBlastdbget name faType = newFnA1 -- TODO add date arg
+mkBlastdbGet :: String -> Type -> Function
+mkBlastdbGet name faType = newFnA1 -- TODO add date arg
   name
   (Exactly str)
   (Exactly $ EncodedAs blastdb faType)
@@ -139,15 +130,15 @@ mkBlastdbget name faType = newFnA1 -- TODO add date arg
   [ReadsURL]
 
 -- TODO rename with fna
-blastdbgetFna :: Function
-blastdbgetFna = mkBlastdbget "blastdbget_fna" fna
+blastdbGetFna :: Function
+blastdbGetFna = mkBlastdbGet "blastdbget_fna" fna
 
 -- TODO rename with faa
-blastdbgetFaa :: Function
-blastdbgetFaa = mkBlastdbget "blastdbget_faa" faa
+blastdbGetFaa :: Function
+blastdbGetFaa = mkBlastdbGet "blastdbget_faa" faa
 
--- rBlastdbget :: RulesFn
--- rBlastdbget scr e@(Fun _ _ _ _ [name]) = do
+-- rBlastdbGet :: RulesFn
+-- rBlastdbGet scr e@(Fun _ _ _ _ [name]) = do
 --   (ExprPath nPath) <- rExpr scr name
 --   cfg  <- fmap fromJust getShakeExtraRules
 --   dRef <- fmap fromJust getShakeExtraRules
@@ -156,12 +147,12 @@ blastdbgetFaa = mkBlastdbget "blastdbget_faa" faa
 --       dbPrefix  = exprPath cfg dRef scr e -- final prefix
 --       dbPrefix' = fromPath loc cfg dbPrefix
 --       nPath'    = toPath loc cfg nPath
---   dbPrefix' %> \_ -> aBlastdbget dbPrefix tmpDir nPath'
+--   dbPrefix' %> \_ -> aBlastdbGet dbPrefix tmpDir nPath'
 --   return (ExprPath dbPrefix')
--- rBlastdbget _ _ = fail "bad argument to rBlastdbget"
+-- rBlastdbGet _ _ = fail "bad argument to rBlastdbget"
 
-aBlastdbget :: NewAction2
-aBlastdbget (ExprPath dbPrefix') tmp' nPath' = do
+aBlastdbGet :: NewAction2
+aBlastdbGet (ExprPath dbPrefix') tmp' nPath' = do
   -- cfg <- fmap fromJust getShakeExtra
   -- let tmp'       = fromPath loc cfg tmpDir
       -- nPath'     = fromPath loc cfg nPath
