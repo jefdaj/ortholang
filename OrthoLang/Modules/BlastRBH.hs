@@ -5,7 +5,7 @@ import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Interpreter.Compile as C
-import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs, aMkBlastFromDb)
+import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs)
 import OrthoLang.Modules.BlastDB (blastdb)
 import OrthoLang.Modules.SeqIO   (fna, faa)
 
@@ -73,40 +73,13 @@ mBlastFromFaRev _ _ e = error "ortholang.modules.blastrbh.mBlastFromFaRev" $ "ba
 -- *blast*_rev_each --
 ----------------------
 
--- TODO fix expression paths!
 mkBlastFromFaRevEach :: BlastDesc -> Function
-mkBlastFromFaRevEach d@(bCmd, sType, qType, _) = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly sType, Exactly (ListOf qType)]
-  , fOutput = Exactly (ListOf bht)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaRevEach d
-  }
-  where
-    name = bCmd ++ "_rev_each"
-
--- The most confusing one! Edits the expression to make the subject into a db,
--- and the action fn to take the query and subject flipped, then maps the new
--- expression over the new action fn.
--- TODO check if all this is right, since it's confusing!
-rMkBlastFromFaRevEach :: BlastDesc -> RulesFn
-rMkBlastFromFaRevEach (bCmd, qType, _, _) scr (Fun rtn seed deps _ [e, s, qs]) = do
-  let revDbAct   = aMkBlastFromDbRev bCmd
-      sList      = Lst (typeOf s) (seedOf s) (depsOf s) [s]
-      subjDbExpr = Fun dbType seed (depsOf sList) dbFnName [sList]
-      editedExpr = Fun rtn seed deps editedName [e, subjDbExpr, qs]
-      editedName = bCmd ++ "_db_each" -- TODO is this right? i think so now
-      dbFnName   = "makeblastdb_" ++ ext qType ++ "_all"
-      dbType     = EncodedAs blastdb qType
-  rMap 3 revDbAct scr editedExpr
-rMkBlastFromFaRevEach _ _ _ = fail "bad argument to rMkBlastFromFaRevEach"
-
--- TODO which blast commands make sense with this?
--- TODO is it deduplicating properly with the fn name?
-aMkBlastFromDbRev :: String -> ([Path] -> Action ())
-aMkBlastFromDbRev bCmd [oPath, eValue, dbPrefix, queryFa] =
-  aMkBlastFromDb  bCmd [oPath, eValue, queryFa, dbPrefix]
-aMkBlastFromDbRev _ _ = fail "bad argument to aMkBlastFromDbRev"
+mkBlastFromFaRevEach (bCmd, sType, qType, _) = newFnA3
+  (bCmd ++ "_rev_each")
+  (Exactly num, Exactly sType, Exactly $ ListOf qType)
+  (Exactly $ ListOf bht)
+  (newMap3of3 $ bCmd ++ "_rev")
+  []
 
 ---------------------
 -- reciprocal_best --
