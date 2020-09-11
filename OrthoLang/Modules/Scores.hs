@@ -32,8 +32,8 @@ olModule = Module
   , mRules = []
   , mFunctions =
     [ scoreRepeats
-    , extractScores, extractScoresEach
-    , extractScored, extractScoredEach
+    -- , extractScores, extractScoresEach
+    -- , extractScored, extractScoredEach
     ]
   }
 
@@ -121,7 +121,7 @@ extractScores = mkExtractCol "scores" False 1
 extractScored = mkExtractCol "scores" False 2
 
 extractScoresEach = mkExtractColEach "scores"
-extractScoredEach = mkExtractColEach "scores"
+extractScoredEach = mkExtractColEach "scored"
 
 -- TODO deduplicate with extractTargets?
 -- extractScored :: Function
