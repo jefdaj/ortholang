@@ -1,7 +1,5 @@
 module OrthoLang.Modules.Filter where
 
--- TODO add a regex version?
-
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
@@ -9,6 +7,8 @@ import OrthoLang.Interpreter
 -- import Data.Maybe              (fromJust)
 import Data.Char               (toLower)
 import Data.List               (isInfixOf)
+
+import Text.Regex.Posix ((=~))
 
 ---------------
 -- debugging --
@@ -48,11 +48,8 @@ filterList = newFnA2
   aFilterList
   []
 
--- TODO is there a more elegant way to do this?
-filterLowerInfix :: String -> [String] -> [String]
-filterLowerInfix s cs = filter matchFn cs
-  where
-    matchFn c = (map toLower s) `isInfixOf` (map toLower c)
+regexMatches :: String -> [String] -> [String]
+regexMatches s cs = filter (=~ s) cs
 
 aFilterList :: NewAction2
 aFilterList (ExprPath oPath') listTmp' fPath' = do
@@ -60,6 +57,6 @@ aFilterList (ExprPath oPath') listTmp' fPath' = do
       oPath''  = traceA loc oPath' [oPath', listTmp', fPath']
   filterStr <- readLit  loc fPath'
   elems     <- readLits loc listTmp'
-  let elems' = if null filterStr then elems else filterLowerInfix filterStr elems
+  let elems' = if null filterStr then elems else regexMatches filterStr elems
   debugA' loc $ "elems': " ++ show elems'
   writeLits loc oPath'' elems'
