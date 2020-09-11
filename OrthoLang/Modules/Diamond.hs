@@ -36,6 +36,7 @@ olModule = Module
 
       -- search functions
       ++ map mkDiamondBlast oldVariants
+      ++ newVariants
   }
 
 -- TODO figure out how to prettyCat/show/whatever the encoded types, probably with a typeclass
@@ -153,12 +154,13 @@ oldVariants =
   , ("blastx_sensitive_rev_each"        , rDiamondFromFaRevEach, ["blastx", "--sensitive"     ], faa, ListOf fna , ListOf bht)
   , ("blastx_more_sensitive_rev_each"   , rDiamondFromFaRevEach, ["blastx", "--more-sensitive"], faa, ListOf fna , ListOf bht)
 
-  , ("blastp_db_each"               , rMap 3 . aDiamondFromDb, ["blastp"                    ], faa, ListOf dmnd, ListOf bht)
-  , ("blastp_db_sensitive_each"     , rMap 3 . aDiamondFromDb, ["blastp", "--sensitive"     ], faa, ListOf dmnd, ListOf bht)
-  , ("blastp_db_more_sensitive_each", rMap 3 . aDiamondFromDb, ["blastp", "--more-sensitive"], faa, ListOf dmnd, ListOf bht)
-  , ("blastx_db_each"               , rMap 3 . aDiamondFromDb, ["blastx"                    ], fna, ListOf dmnd, ListOf bht)
-  , ("blastx_db_sensitive_each"     , rMap 3 . aDiamondFromDb, ["blastx", "--sensitive"     ], fna, ListOf dmnd, ListOf bht)
-  , ("blastx_db_more_sensitive_each", rMap 3 . aDiamondFromDb, ["blastx", "--more-sensitive"], fna, ListOf dmnd, ListOf bht)
+  -- TODO rewrite with newMap3of3
+  -- , ("blastp_db_each"               , rMap 3 . aDiamondFromDb, ["blastp"                    ], faa, ListOf dmnd, ListOf bht)
+  -- , ("blastp_db_sensitive_each"     , rMap 3 . aDiamondFromDb, ["blastp", "--sensitive"     ], faa, ListOf dmnd, ListOf bht)
+  -- , ("blastp_db_more_sensitive_each", rMap 3 . aDiamondFromDb, ["blastp", "--more-sensitive"], faa, ListOf dmnd, ListOf bht)
+  -- , ("blastx_db_each"               , rMap 3 . aDiamondFromDb, ["blastx"                    ], fna, ListOf dmnd, ListOf bht)
+  -- , ("blastx_db_sensitive_each"     , rMap 3 . aDiamondFromDb, ["blastx", "--sensitive"     ], fna, ListOf dmnd, ListOf bht)
+  -- , ("blastx_db_more_sensitive_each", rMap 3 . aDiamondFromDb, ["blastx", "--more-sensitive"], fna, ListOf dmnd, ListOf bht)
 
   -- TODO these seem to work, but do they make any sense to include?
   -- , ("blastp_db_rev_each"               , rFlip23 . rMap 2 . aDiamondFromDb, ["blastp"                    ], dmnd, ListOf faa, ListOf bht)
@@ -170,23 +172,47 @@ oldVariants =
   ]
 
 type NewDiamondBlastDesc =
-  ( String                 -- name
-  , [String] -> NewAction3 -- rules, which will take cli args
-  , [String]               -- cli args
-  , Type                   -- query type
-  , Type                   -- subject type
-  , Type                   -- result type
+  ( String   -- name
+  , [String] -- cli args
+  , Type     -- query type
+  , Type     -- subject type
+  , Type     -- result type
   )
 
-newVariants :: [NewDiamondBlastDesc]
+newVariants :: [Function]
 newVariants =
-  [ ("blastp_db"                    , aDiamondFromDb2, ["blastp"                    ], faa, dmnd, bht)
-  , ("blastp_db_sensitive"          , aDiamondFromDb2, ["blastp", "--sensitive"     ], faa, dmnd, bht)
-  , ("blastp_db_more_sensitive"     , aDiamondFromDb2, ["blastp", "--more-sensitive"], faa, dmnd, bht)
-  , ("blastx_db"                    , aDiamondFromDb2, ["blastx"                    ], fna, dmnd, bht)
-  , ("blastx_db_sensitive"          , aDiamondFromDb2, ["blastx", "--sensitive"     ], fna, dmnd, bht)
-  , ("blastx_db_more_sensitive"     , aDiamondFromDb2, ["blastx", "--more-sensitive"], fna, dmnd, bht)
-  ]
+
+  map (\(name, args, qType, sType, rType) ->
+         newFnA3
+           name
+           (Exactly num, Exactly qType, Exactly sType)
+           (Exactly rType)
+           (aDiamondFromDb2 args)
+           [Nondeterministic])
+    [ ("blastp_db"                    , ["blastp"                    ], faa, dmnd, bht)
+    , ("blastp_db_sensitive"          , ["blastp", "--sensitive"     ], faa, dmnd, bht)
+    , ("blastp_db_more_sensitive"     , ["blastp", "--more-sensitive"], faa, dmnd, bht)
+    , ("blastx_db"                    , ["blastx"                    ], fna, dmnd, bht)
+    , ("blastx_db_sensitive"          , ["blastx", "--sensitive"     ], fna, dmnd, bht)
+    , ("blastx_db_more_sensitive"     , ["blastx", "--more-sensitive"], fna, dmnd, bht)
+    ]
+
+  ++
+
+  map (\(name, _, qType, sType, rType) ->
+         newFnA3
+           (name ++ "_each")
+           (Exactly num, Exactly qType, Exactly $ ListOf sType)
+           (Exactly $ ListOf rType)
+           (newMap3of3 name)
+           [Nondeterministic])
+    [ ("blastp_db"               , ["blastp"                    ], faa, ListOf dmnd, ListOf bht)
+    , ("blastp_db_sensitive"     , ["blastp", "--sensitive"     ], faa, ListOf dmnd, ListOf bht)
+    , ("blastp_db_more_sensitive", ["blastp", "--more-sensitive"], faa, ListOf dmnd, ListOf bht)
+    , ("blastx_db"               , ["blastx"                    ], fna, ListOf dmnd, ListOf bht)
+    , ("blastx_db_sensitive"     , ["blastx", "--sensitive"     ], fna, ListOf dmnd, ListOf bht)
+    , ("blastx_db_more_sensitive", ["blastx", "--more-sensitive"], fna, ListOf dmnd, ListOf bht)
+    ]
 
 
 -- | This is the main entrypoint for generating an (old-style) OrthoLang function from the description
