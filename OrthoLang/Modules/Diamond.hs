@@ -35,7 +35,7 @@ olModule = Module
       ]
 
       -- search functions
-      ++ map mkDiamondBlast variants
+      ++ map mkDiamondBlast oldVariants
   }
 
 -- TODO figure out how to prettyCat/show/whatever the encoded types, probably with a typeclass
@@ -94,7 +94,7 @@ aDiamondmakedbAll (ExprPath out') fasPath' = do
 --------------------
 
 -- type RulesFn     = RulesFn
-type DiamondBlastDesc =
+type OldDiamondBlastDesc =
   ( String              -- name
   , [String] -> RulesFn -- rules, which will take cli args
   , [String]            -- cli args
@@ -104,32 +104,33 @@ type DiamondBlastDesc =
   )
 
 -- TODO can some of these be replaced by a numeric sensitivity arg?
-variants :: [DiamondBlastDesc]
-variants =
+oldVariants :: [OldDiamondBlastDesc]
+oldVariants =
+
   -- these are the simplest ones
   -- TODO rewrite with newFnA3
-  [ ("blastp_db"                    , rSimple . aDiamondFromDb, ["blastp"                    ], faa, dmnd, bht)
-  , ("blastp_db_sensitive"          , rSimple . aDiamondFromDb, ["blastp", "--sensitive"     ], faa, dmnd, bht)
-  , ("blastp_db_more_sensitive"     , rSimple . aDiamondFromDb, ["blastp", "--more-sensitive"], faa, dmnd, bht)
-  , ("blastx_db"                    , rSimple . aDiamondFromDb, ["blastx"                    ], fna, dmnd, bht)
-  , ("blastx_db_sensitive"          , rSimple . aDiamondFromDb, ["blastx", "--sensitive"     ], fna, dmnd, bht)
-  , ("blastx_db_more_sensitive"     , rSimple . aDiamondFromDb, ["blastx", "--more-sensitive"], fna, dmnd, bht)
+  -- [ ("blastp_db"                    , rSimple . aDiamondFromDb, ["blastp"                    ], faa, dmnd, bht)
+  -- , ("blastp_db_sensitive"          , rSimple . aDiamondFromDb, ["blastp", "--sensitive"     ], faa, dmnd, bht)
+  -- , ("blastp_db_more_sensitive"     , rSimple . aDiamondFromDb, ["blastp", "--more-sensitive"], faa, dmnd, bht)
+  -- , ("blastx_db"                    , rSimple . aDiamondFromDb, ["blastx"                    ], fna, dmnd, bht)
+  -- , ("blastx_db_sensitive"          , rSimple . aDiamondFromDb, ["blastx", "--sensitive"     ], fna, dmnd, bht)
+  -- , ("blastx_db_more_sensitive"     , rSimple . aDiamondFromDb, ["blastx", "--more-sensitive"], fna, dmnd, bht)
 
   -- TODO rewrite as exprExpansion
-  , ("blastp"                       , rDiamondFromFa, ["blastp"                    ], faa, faa , bht)
+  [ ("blastp"                       , rDiamondFromFa, ["blastp"                    ], faa, faa , bht)
   , ("blastp_sensitive"             , rDiamondFromFa, ["blastp", "--sensitive"     ], faa, faa , bht)
   , ("blastp_more_sensitive"        , rDiamondFromFa, ["blastp", "--more-sensitive"], faa, faa , bht)
   , ("blastx"                       , rDiamondFromFa, ["blastx"                    ], fna, faa , bht)
   , ("blastx_sensitive"             , rDiamondFromFa, ["blastx", "--sensitive"     ], fna, faa , bht)
   , ("blastx_more_sensitive"        , rDiamondFromFa, ["blastx", "--more-sensitive"], fna, faa , bht)
 
+  -- TODO rewrite with a new api function "newFlip23"
   , ("blastp_rev"                   , rFlip23 . rDiamondFromFa, ["blastp"                    ], faa, faa , bht)
   , ("blastp_sensitive_rev"         , rFlip23 . rDiamondFromFa, ["blastp", "--sensitive"     ], faa, faa , bht)
   , ("blastp_more_sensitive_rev"    , rFlip23 . rDiamondFromFa, ["blastp", "--more-sensitive"], faa, faa , bht)
   , ("blastx_rev"                   , rFlip23 . rDiamondFromFa, ["blastx"                    ], faa, fna , bht)
   , ("blastx_sensitive_rev"         , rFlip23 . rDiamondFromFa, ["blastx", "--sensitive"     ], faa, fna , bht)
   , ("blastx_more_sensitive_rev"    , rFlip23 . rDiamondFromFa, ["blastx", "--more-sensitive"], faa, fna , bht)
-
   , ("blastp_db_rev"                , rFlip23 . rSimple . aDiamondFromDb, ["blastp"                    ], dmnd, faa, bht)
   , ("blastp_db_sensitive_rev"      , rFlip23 . rSimple . aDiamondFromDb, ["blastp", "--sensitive"     ], dmnd, faa, bht)
   , ("blastp_db_more_sensitive_rev" , rFlip23 . rSimple . aDiamondFromDb, ["blastp", "--more-sensitive"], dmnd, faa, bht)
@@ -168,8 +169,28 @@ variants =
   -- , ("blastx_db_more_sensitive_rev_each", rFlip23 . rMap 2 . aDiamondFromDb, ["blastx", "--more-sensitive"], dmnd, ListOf fna, ListOf bht)
   ]
 
+type NewDiamondBlastDesc =
+  ( String                 -- name
+  , [String] -> NewAction3 -- rules, which will take cli args
+  , [String]               -- cli args
+  , Type                   -- query type
+  , Type                   -- subject type
+  , Type                   -- result type
+  )
+
+newVariants :: [NewDiamondBlastDesc]
+newVariants =
+  [ ("blastp_db"                    , aDiamondFromDb2, ["blastp"                    ], faa, dmnd, bht)
+  , ("blastp_db_sensitive"          , aDiamondFromDb2, ["blastp", "--sensitive"     ], faa, dmnd, bht)
+  , ("blastp_db_more_sensitive"     , aDiamondFromDb2, ["blastp", "--more-sensitive"], faa, dmnd, bht)
+  , ("blastx_db"                    , aDiamondFromDb2, ["blastx"                    ], fna, dmnd, bht)
+  , ("blastx_db_sensitive"          , aDiamondFromDb2, ["blastx", "--sensitive"     ], fna, dmnd, bht)
+  , ("blastx_db_more_sensitive"     , aDiamondFromDb2, ["blastx", "--more-sensitive"], fna, dmnd, bht)
+  ]
+
+
 -- | This is the main entrypoint for generating an (old-style) OrthoLang function from the description
-mkDiamondBlast :: DiamondBlastDesc -> Function
+mkDiamondBlast :: OldDiamondBlastDesc -> Function
 mkDiamondBlast (name, rFn, dCmd, qType, sType, rType) = let name' = "diamond_" ++ name in Function
   { fOpChar = Nothing, fName = name'
   , fInputs = [Exactly num, Exactly qType, Exactly sType]
@@ -186,6 +207,12 @@ rFlip23 rFn scr (Fun rtn seed deps ids args) = rFn scr (Fun rtn seed deps ids $ 
     fn (one:two:three:rest) = (one:three:two:rest)
     fn as = error $ "bad argument to rFlip23: " ++ show as
 rFlip23 _ _ e = error $ "bad argument to rFlip23: " ++ show e
+
+aDiamondFromDb2 :: [String] -> NewAction3
+aDiamondFromDb2 dCmd (ExprPath o') e' q' db' = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc = "ortholang.modules.diamond.aDiamondFromDb2"
+  aDiamondFromDb dCmd $ map (toPath loc cfg) [o', e', q', db']
 
 aDiamondFromDb :: [String] -> [Path] -> Action ()
 aDiamondFromDb dCmd [o, e, q, db] = do
