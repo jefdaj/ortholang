@@ -10,7 +10,8 @@ import OrthoLang.Interpreter
 import OrthoLang.Locks
 
 import Data.List.Utils         (replace)
-import OrthoLang.Modules.Blast (bht, mkBlastFromFa)
+import OrthoLang.Modules.Blast (bht)
+import OrthoLang.Modules.BlastDB (blastdb)
 import OrthoLang.Modules.SeqIO (fna, faa)
 import System.Exit             (ExitCode(..))
 import System.FilePath         (replaceBaseName)
@@ -122,14 +123,6 @@ oldVariants =
   , ("blastx_db_sensitive_rev"      , rFlip23 . rSimple . aDiamondFromDb, ["blastx", "--sensitive"     ], dmnd, fna, bht)
   , ("blastx_db_more_sensitive_rev" , rFlip23 . rSimple . aDiamondFromDb, ["blastx", "--more-sensitive"], dmnd, fna, bht)
 
-  -- TODO will this work with the mapping? test!
-  , ("blastp_rev_each"                  , rDiamondFromFaRevEach, ["blastp"                    ], faa, ListOf faa , ListOf bht)
-  , ("blastp_sensitive_rev_each"        , rDiamondFromFaRevEach, ["blastp", "--sensitive"     ], faa, ListOf faa , ListOf bht)
-  , ("blastp_more_sensitive_rev_each"   , rDiamondFromFaRevEach, ["blastp", "--more-sensitive"], faa, ListOf faa , ListOf bht)
-  , ("blastx_rev_each"                  , rDiamondFromFaRevEach, ["blastx"                    ], faa, ListOf fna , ListOf bht)
-  , ("blastx_sensitive_rev_each"        , rDiamondFromFaRevEach, ["blastx", "--sensitive"     ], faa, ListOf fna , ListOf bht)
-  , ("blastx_more_sensitive_rev_each"   , rDiamondFromFaRevEach, ["blastx", "--more-sensitive"], faa, ListOf fna , ListOf bht)
-
   -- TODO these seem to work, but do they make any sense to include?
   -- , ("blastp_db_rev_each"               , rFlip23 . rMap 2 . aDiamondFromDb, ["blastp"                    ], dmnd, ListOf faa, ListOf bht)
   -- , ("blastp_db_sensitive_rev_each"     , rFlip23 . rMap 2 . aDiamondFromDb, ["blastp", "--sensitive"     ], dmnd, ListOf faa, ListOf bht)
@@ -175,6 +168,7 @@ newVariants =
            (newMap3of3 $ "diamond_" ++ name)
            [Nondeterministic])
 
+    -- db
     [ ("blastp_db"               , ["blastp"                    ], faa, dmnd, bht)
     , ("blastp_db_sensitive"     , ["blastp", "--sensitive"     ], faa, dmnd, bht)
     , ("blastp_db_more_sensitive", ["blastp", "--more-sensitive"], faa, dmnd, bht)
@@ -182,27 +176,54 @@ newVariants =
     , ("blastx_db_sensitive"     , ["blastx", "--sensitive"     ], fna, dmnd, bht)
     , ("blastx_db_more_sensitive", ["blastx", "--more-sensitive"], fna, dmnd, bht)
 
+    -- plain
     , ("blastp"                  , ["blastp"                    ], faa, faa , bht)
     , ("blastp_sensitive"        , ["blastp", "--sensitive"     ], faa, faa , bht)
     , ("blastp_more_sensitive"   , ["blastp", "--more-sensitive"], faa, faa , bht)
     , ("blastx"                  , ["blastx"                    ], fna, faa , bht)
     , ("blastx_sensitive"        , ["blastx", "--sensitive"     ], fna, faa , bht)
     , ("blastx_more_sensitive"   , ["blastx", "--more-sensitive"], fna, faa , bht)
+
+    -- rev
+    , ("blastp_rev"                  , ["blastp"                    ], faa, faa , bht)
+    , ("blastp_sensitive_rev"        , ["blastp", "--sensitive"     ], faa, faa , bht)
+    , ("blastp_more_sensitive_rev"   , ["blastp", "--more-sensitive"], faa, faa , bht)
+    , ("blastx_rev"                  , ["blastx"                    ], faa, fna , bht)
+    , ("blastx_sensitive_rev"        , ["blastx", "--sensitive"     ], faa, fna , bht)
+    , ("blastx_more_sensitive_rev"   , ["blastx", "--more-sensitive"], faa, fna , bht)
     ]
 
   ++
 
-  -- TODO is leaving this undefined OK here?
-  -- TODO does this work with diamond_ names?
-  map (\(name, _, qType, sType, _) -> mkBlastFromFa ("diamond_" ++ name, qType, sType, undefined))
-    [ ("blastp"                       , ["blastp"                    ], faa, faa , bht)
-    , ("blastp_sensitive"             , ["blastp", "--sensitive"     ], faa, faa , bht)
-    , ("blastp_more_sensitive"        , ["blastp", "--more-sensitive"], faa, faa , bht)
-    , ("blastx"                       , ["blastx"                    ], fna, faa , bht)
-    , ("blastx_sensitive"             , ["blastx", "--sensitive"     ], fna, faa , bht)
-    , ("blastx_more_sensitive"        , ["blastx", "--more-sensitive"], fna, faa , bht)
-    ]
+  -- TODO straighten out the _db naming stuff!
+  map (\(name, _, qType, sType, dbType) -> mkDiamondBlastFromFa ("diamond_" ++ name) qType sType dbType)
+    []
+    -- [ ("blastp_db"                       , ["blastp"                    ], faa, faa , faa)
+    -- , ("blastp_db_sensitive"             , ["blastp", "--sensitive"     ], faa, faa , faa)
+    -- , ("blastp_db_more_sensitive"        , ["blastp", "--more-sensitive"], faa, faa , faa)
+    -- , ("blastx_db"                       , ["blastx"                    ], fna, faa , faa)
+    -- , ("blastx_db_sensitive"             , ["blastx", "--sensitive"     ], fna, faa , faa)
+    -- , ("blastx_db_more_sensitive"        , ["blastx", "--more-sensitive"], fna, faa , faa)
+    -- ]
 
+-- TODO straighten out the _db naming stuff!
+mkDiamondBlastFromFa :: String -> Type -> Type -> Type -> Function
+mkDiamondBlastFromFa name qType faType dbType = newExprExpansion
+  (replace "_db" "" name)
+  [Exactly num, Exactly qType, Exactly faType]
+  (Exactly bht)
+  (mDiamondBlastFromFa name dbType)
+  [Nondeterministic]
+
+-- TODO straighten out the _db naming stuff!
+mDiamondBlastFromFa :: String -> Type -> ExprExpansion
+mDiamondBlastFromFa name dbType _ _ (Fun r ms ds _ [e,q,s]) = Fun r ms ds name1 [e,q,expr]
+  where
+    np = if dbType == fna then "nucl" else "prot"
+    name1 = replace "_db" "" name
+    name2 = "makeblastdb_" ++ np -- TODO would the _all version withSingleton arg be better?
+    expr = Fun (EncodedAs blastdb dbType) Nothing (depsOf s) name2 [s]
+mDiamondBlastFromFa _ _ _ _ e = error "ortholang.modules.blast.mkDiamondBlastFromFa" $ "bad arg: " ++ show e
 
 -- | This is the main entrypoint for generating an (old-style) OrthoLang function from the description
 mkDiamondBlast :: OldDiamondBlastDesc -> Function
