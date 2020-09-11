@@ -3,8 +3,6 @@
 -- TODO should you also cache the taxdb at the same time as dblist.txt? seems reasonable
 --      or maybe at the same time as doing the first main blastdbget
 
--- TODO rename blastdblist -> blastdbget_list?
-
 module OrthoLang.Modules.Blastdbget where
 
 import Development.Shake
@@ -16,8 +14,6 @@ import OrthoLang.Modules.SeqIO      (faa, fna)
 
 import OrthoLang.Modules.BlastDB (blastdb, ndb, pdb)
 
-import Data.Char               (toLower)
-import Data.List               (isInfixOf)
 import Data.Maybe              (fromJust)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
@@ -87,34 +83,13 @@ rBlastdblist = do
 -- blastdblist --
 -----------------
 
-{- This is a two-part thing where we only want to download the full list once
- - per day at the most, but instantly filter it by different strings. At the
- - same time, we also want to break out a _date version that caches the
- - downloaded lists by date. So the functions we need are:
- -
- - blastdblist : str str -> str.list (the filtering one written with newDate1of2)
- - blasdtdblist_date : str str -> str.list (the caching one written with newFnA2)
- - aBlastdblist (the unnamed Rules for doing the actual list download)
- -}
-
--- takes a filter string (leave empty for all results)
--- blastdblist :: Function
--- blastdblist = let name = "blastdblist" in Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly str]
---   , fOutput =  Exactly (ListOf str)
---   , fTags = [ReadsURL]
---   , fNewRules = NewNotImplemented, fOldRules = rBlastdblist
---   }
-
--- | User-facing version that takes a date expression and filter string
---   TODO rename this and make blastdblist be a user-facing expansion like filter_list (this) "filter str"?
+-- | User-facing version that takes a date expression (date in yyyy-mm-dd format or "today" or "cached")
 blastdblist :: Function
 blastdblist = newFnA1
-  "blastdblist"
+  "blastdb_list"
   (Exactly str)
   (Exactly $ ListOf str)
-  (newDate1of1 "blastdblist")
+  (newDate1of1 "blastdb_list")
   [ReadsURL]
 
 ----------------------
@@ -124,10 +99,10 @@ blastdblist = newFnA1
 -- | Hidden version that assumes a properly formatted date from newDate1of1 above
 blastdblistDate :: Function
 blastdblistDate = newFnA1
-  "blastdblist_date"
+  "blastdb_list_date"
   (Exactly str)
   (Exactly $ ListOf str)
-  aBlastdblistDate -- TODO does this need to be expanded again?
+  aBlastdblistDate
   [Hidden, ReadsURL]
 
 aBlastdblistDate :: NewAction1
