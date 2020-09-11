@@ -1,10 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
--- TODO should you also cache the taxdb at the same time as dblist.txt? seems reasonable
---      or maybe at the same time as doing the first main blastdbget
-
--- TODO rename to say pdb/ndb instead of faa/fna
-
 module OrthoLang.Modules.Blastdbget where
 
 import Development.Shake
@@ -126,40 +121,42 @@ aBlastdbListDate (ExprPath out') datePath' = do
 ------------------
 
 -- | User-facing versions that take a date expression
-mkBlastdbGet :: String -> Type -> Function
-mkBlastdbGet name faType = newFnA2
-  name
-  (Exactly str, Exactly str)
-  (Exactly $ EncodedAs blastdb faType)
-  (newDate1of2 "blastdb_get")
-  [ReadsURL]
+mkBlastdbGet :: Type -> Function
+mkBlastdbGet faType =
+  let name' = "blastdb_get_" ++ ext faType
+  in newFnA2
+       name'
+       (Exactly str, Exactly str)
+       (Exactly $ EncodedAs blastdb faType)
+       (newDate1of2 name')
+       [ReadsURL]
 
 blastdbGetFna :: Function
-blastdbGetFna = mkBlastdbGet "blastdb_get_fna" fna
+blastdbGetFna = mkBlastdbGet fna
 
 blastdbGetFaa :: Function
-blastdbGetFaa = mkBlastdbGet "blastdb_get_faa" faa
+blastdbGetFaa = mkBlastdbGet faa
 
 -----------------------
 -- blastdbget_*_date --
 -----------------------
 
 -- | Hidden versions that take a proper date string sanitized by newDate1of2 above
-mkBlastdbGetDate :: String -> Type -> Function
-mkBlastdbGetDate name faType = newFnA2
-  name
-  (Exactly str, Exactly str)
-  (Exactly $ EncodedAs blastdb faType)
-  aBlastdbGetDate
-  [ReadsURL, Hidden]
+mkBlastdbGetDate :: Type -> Function
+mkBlastdbGetDate faType =
+  let name' = "blastdb_get_" ++ ext faType ++ "_date"
+  in newFnA2
+       name'
+       (Exactly str, Exactly str)
+       (Exactly $ EncodedAs blastdb faType)
+       aBlastdbGetDate
+       [ReadsURL, Hidden]
 
--- TODO flip name to _fna_date?
 blastdbGetFnaDate :: Function
-blastdbGetFnaDate = mkBlastdbGetDate "blastdb_get_date_fna" fna
+blastdbGetFnaDate = mkBlastdbGetDate fna
 
--- TODO flip name to _faa_date?
 blastdbGetFaaDate :: Function
-blastdbGetFaaDate = mkBlastdbGetDate "blastdb_get_date_faa" faa
+blastdbGetFaaDate = mkBlastdbGetDate faa
 
 aBlastdbGetDate :: NewAction2
 aBlastdbGetDate (ExprPath outPath') datePath' namePath' = do
