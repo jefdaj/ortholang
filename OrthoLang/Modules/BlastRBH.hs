@@ -171,24 +171,21 @@ aReciprocalBestAll (ExprPath out') lefts' rights' = do
 -----------------
 
 mkBlastRbh :: BlastDesc -> Function
-mkBlastRbh d@(bCmd, qType, sType, _) = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly qType, Exactly sType]
-  , fOutput = Exactly bht
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastRbh d
-  }
-  where
-    name = bCmd ++ "_rbh"
+mkBlastRbh d@(bCmd, qType, sType, _) = newExprExpansion
+  (bCmd ++ "_rbh")
+  [Exactly num, Exactly qType, Exactly sType]
+  (Exactly bht)
+  (mBlastRbh d)
+  []
 
 -- TODO this only works with symmetric fns so far... either fix or restrict to those!
-rMkBlastRbh :: BlastDesc -> RulesFn
-rMkBlastRbh (bCmd, _, _, _) s (Fun _ seed deps _ [e, l, r]) = rExpr s main
+mBlastRbh :: BlastDesc -> ExprExpansion
+mBlastRbh (bCmd, _, _, _) _ _ (Fun _ seed deps _ [e, l, r]) = main
   where
     main  = Fun bht seed deps "reciprocal_best" [lHits, rHits]
     lHits = Fun bht seed deps  bCmd            [e, l, r]
     rHits = Fun bht seed deps (bCmd ++ "_rev") [e, l, r]
-rMkBlastRbh _ _ _ = fail "bad argument to rMkBlastRbh"
+mBlastRbh _ _ _ e = error "ortholang.modules.blastrbh.mBlastRbh" $ "bad argument: " ++ show e
 
 ----------------------
 -- *blast*_rbh_each --
