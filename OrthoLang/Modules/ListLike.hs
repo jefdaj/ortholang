@@ -3,17 +3,17 @@ module OrthoLang.Modules.ListLike where
 -- TODO rename back to Length? or incorporate the ability to sample?
 -- TODO what should happen with length of a bht? currently it just prints itself!
 -- TODO make this the first typeclass
+-- TODO if given a list with empty lists, should return zeros!
+-- TODO account for the last empty line in mms files! (currently returns length + 1)
 
 import Prelude hiding (length)
 
-import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
 
 import OrthoLang.Modules.Blast    (bht)
 import OrthoLang.Modules.CRBBlast (crb)
 import OrthoLang.Modules.MMSeqs   (mms)
-import Data.Maybe (fromJust)
 
 olModule :: Module
 olModule = Module
@@ -34,58 +34,24 @@ ll = TypeGroup
   }
 
 length :: Function
-length = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Some ll "a list-like type"]
-  , fOutput = Exactly num
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rLength
-  }
-  where
-    name = "length"
-
--- tLength is (Some listlike "any list-like file") num
--- shown as "ll -> num, where ll is any list-like file"
-
--- tLengthEach is (ListOf (Some listlike "any list-like file")) (ListOf num)
--- shown as "ll.list -> num.list, where ll is any list-like file"
+length = newFnA1
+  "length"
+  (Some ll "a list-like type")
+  (Exactly num)
+  aLength
+  []
 
 lengthEach :: Function
-lengthEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [ListSigs (Some ll "a list-like type")]
-  , fOutput = Exactly (ListOf num)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aLength -- TODO is 1 wrong?
-  }
-  where
-    name = "length_each"
+lengthEach = newFnA1
+  "length_each"
+  (ListSigs $ Some ll "a list-like type")
+  (Exactly $ ListOf num)
+  (newMap1of1 "length")
+  []
 
-rLength :: RulesFn
-rLength scr e@(Fun _ _ _ _ [l]) = do
-  (ExprPath lPath) <- rExpr scr l
-  -- TODO once all modules are converted, add back phantom types!
-  -- let relPath = makeRelative (tmpdir cfg) lPath
-  -- (ExprPath outPath) = unsafeExprPathExplicit cfg True num "length" [relPath]
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.listlike.rLength"
-      outPath = exprPath cfg dRef scr e
-      out'    = fromPath loc cfg outPath
-      lPath'  = toPath loc cfg lPath
-  out' %> \_ -> aLength [outPath, lPath']
-  return (ExprPath out')
-rLength _ _ = fail "bad arguments to rLength"
-
--- TODO if given a list with empty lists, should return zeros!
--- TODO account for the last empty line in mms files! (currently returns length + 1)
-aLength :: [Path] -> Action ()
-aLength [out, lst] = do
-  cfg  <- fmap fromJust getShakeExtra
-  let out'  = fromPath loc cfg out
-      lst'  = fromPath loc cfg lst
-      loc = "modules.listlike.aLength"
+aLength :: NewAction1
+aLength (ExprPath out') lst' = do
+  let loc = "modules.listlike.aLength"
       out'' = traceA loc out' [out', lst']
   n <- countLines lst'
   writeLit loc out'' $ show n
-aLength args = error $ "bad arguments to aLength: " ++ show args
