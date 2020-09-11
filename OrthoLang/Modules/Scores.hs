@@ -17,7 +17,7 @@ import Control.Monad (when)
 import Data.Maybe (fromJust)
 
 -- import OrthoLang.Types  (rMap)
-import OrthoLang.Modules.BlastHits (aCutCol)
+import OrthoLang.Modules.BlastHits (mkExtractCol, mkExtractColEach)
 
 dbg :: String -> String -> Action ()
 dbg name = debugA ("ortholang.modules.scores." ++ name)
@@ -32,8 +32,8 @@ olModule = Module
   , mRules = []
   , mFunctions =
     [ scoreRepeats
-    , extractScores
-    , extractScored
+    , extractScores, extractScoresEach
+    , extractScored, extractScoredEach
     ]
   }
 
@@ -106,28 +106,34 @@ rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 ----------------------------------
 
 -- TODO deduplicate with extractQueries?
-extractScores :: Function
-extractScores = let name = "extract_scores" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = tExtractScores
-  -- , fTypeDesc  = name ++ " : X.scores -> num.list"
-  , fInputs = [ScoresSigs (AnyType "the input type")]
-  , fOutput = Exactly (ListOf num)
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 1
-  }
+-- extractScores :: Function
+-- extractScores = let name = "extract_scores" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeCheck = tExtractScores
+--   -- , fTypeDesc  = name ++ " : X.scores -> num.list"
+--   , fInputs = [ScoresSigs (AnyType "the input type")]
+--   , fOutput = Exactly (ListOf num)
+--   ,fTags = []
+--   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 1
+--   }
+
+extractScores = mkExtractCol "scores" False 1
+extractScored = mkExtractCol "scores" False 2
+
+extractScoresEach = mkExtractColEach "scores"
+extractScoredEach = mkExtractColEach "scores"
 
 -- TODO deduplicate with extractTargets?
-extractScored :: Function
-extractScored = let name = "extract_scored" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeCheck = tExtractScored
-  -- , fTypeDesc  = name ++ " : X.scores -> X.list"
-  , fInputs = [ScoresSigs (AnyType "the input type")]
-  , fOutput =  ListSigs (AnyType "the input type")
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 2
-  }
+-- extractScored :: Function
+-- extractScored = let name = "extract_scored" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeCheck = tExtractScored
+--   -- , fTypeDesc  = name ++ " : X.scores -> X.list"
+--   , fInputs = [ScoresSigs (AnyType "the input type")]
+--   , fOutput =  ListSigs (AnyType "the input type")
+--   ,fTags = []
+--   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 2
+--   }
 
 -- (ScoresOf (Some ot "any type")) (ListOf num)
 -- shown as "t.scores -> num.list, where t is any type"

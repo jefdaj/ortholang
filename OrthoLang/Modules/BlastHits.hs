@@ -55,61 +55,41 @@ ht = TypeGroup
 -- extract_*(_each) --
 ----------------------
 
+mkExtractCol :: String -> Bool -> Int -> Function
+mkExtractCol colname b colnum = newFnA1
+  ("extract_" ++ colname)
+  (Some ht "a hit table")
+  (Exactly $ ListOf str)
+  (aCutCol b colnum)
+  []
+
 extractQueries :: Function
-extractQueries = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Some ht "a hit table"]
-  , fOutput = Exactly (ListOf str)
-  , fTags = []
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple $ aCutCol True 1
-  }
-  where
-    name = "extract_queries"
+extractQueries = mkExtractCol "queries" True 1
 
--- TODO this should have a typeclass
-extractQueriesEach :: Function
-extractQueriesEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [ListSigs (Some ht "a hit table")]
-  , fOutput = Exactly (ListOf (ListOf str))
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 1
-  }
-  where
-    name = "extract_queries_each"
-
--- TODO this should have a typeclass
 extractTargets :: Function
-extractTargets = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Some ht "a hit table"]
-  , fOutput = Exactly (ListOf str)
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol True 2
-  }
-  where
-    name = "extract_targets"
+extractTargets = mkExtractCol "targets" True 2
+
+mkExtractColEach :: String -> Function
+mkExtractColEach colname =
+  let name = "extract_" ++ colname
+  in newFnA1
+       (name ++ "_each")
+       (ListSigs $ Some ht "a hit table")
+       (Exactly $ ListOf $ ListOf str)
+       (newMap1of1 name)
+       []
+
+extractQueriesEach :: Function
+extractQueriesEach = mkExtractColEach "queries"
 
 extractTargetsEach :: Function
-extractTargetsEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [ListSigs (Some ht "a hit table")]
-  , fOutput = Exactly (ListOf (ListOf str))
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 $ aCutCol True 2
-  }
-  where
-    name = "extract_targets_each"
+extractTargetsEach = mkExtractColEach "targets"
 
 -- TODO remove uniq, unless it's used somewhere?
-aCutCol :: Bool -> Int -> [Path] -> Action ()
-aCutCol _ n [outPath, tsvPath] = do
-  cfg <- fmap fromJust getShakeExtra
-  let outPath'  = fromPath loc cfg outPath
-      loc = "modules.blasthits.aCutCol"
+aCutCol :: Bool -> Int -> NewAction1
+aCutCol _ n (ExprPath outPath') tsvPath' = do
+  let loc = "modules.blasthits.aCutCol"
       outPath'' = traceA loc outPath' [show n, outPath', tsvPath']
-      tsvPath'  = fromPath loc cfg tsvPath
       tmpPath'  = takeDirectory outPath'' </> "tmp" -- the non-deduped version
   runCmd $ CmdDesc
     { cmdParallel = False
@@ -133,48 +113,32 @@ aCutCol _ n [outPath, tsvPath] = do
   -- unlessExists outOut $ do
   --   symlink outPath $ toPath loc cfg outOut
 
-aCutCol _ _ _ = fail "bad arguments to aCutCol"
-
 ---------------------
 -- filter_*(_each) --
 ---------------------
 
-filterEvalue :: Function
-filterEvalue = mkFilterHits "evalue"
-
 mkFilterHits :: String -> Function
-mkFilterHits colname = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Some ht "a hit table"]
-  , fOutput = Some ht "a hit table" -- TODO or bht like before?
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple $ aFilterHits colname
-  }
-  where
-    name = "filter_" ++ colname
-
-filterEvalueEach :: Function
-filterEvalueEach = mkFilterHitsEach "evalue"
+mkFilterHits colname = newFnA2
+  ("filter_" ++ colname)
+  (Exactly num, Some ht "a hit table")
+  (Some ht "a hit table")
+  (aFilterHits colname)
+  []
 
 mkFilterHitsEach :: String -> Function
-mkFilterHitsEach colname = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, ListSigs (Some ht "a hit table")]
-  , fOutput = ListSigs (Some ht "a hit table")
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 2 $ aFilterHits colname
-  }
-  where
-    name = "filter_" ++ colname ++ "_each"
+mkFilterHitsEach colname =
+  let name = "filter_" ++ colname
+  in newFnA2
+      (name ++ "_each")
+      (Exactly num, ListSigs $ Some ht "a hit table")
+      (ListSigs $ Some ht "a hit table")
+      (newMap2of2 name)
+      []
 
-aFilterHits :: String -> ([Path] -> Action ())
-aFilterHits colname [out, cutoff, hits] = do
-  cfg <- fmap fromJust getShakeExtra
+aFilterHits :: String -> NewAction2
+aFilterHits colname (ExprPath out') cutoff' hits' = do
   let loc = "modules.blasthits.aFilterHits"
-      out'    = fromPath loc cfg out
       out''   = traceA "aFilterHits" out' [out', cutoff', hits']
-      cutoff' = fromPath loc cfg cutoff
-      hits'   = fromPath loc cfg hits
   runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
@@ -189,7 +153,6 @@ aFilterHits colname [out, cutoff, hits] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out'']
     }
-aFilterHits _ args = error $ "bad argument to aFilterHits: " ++ show args
 
 ----------------
 -- best_hits* --
