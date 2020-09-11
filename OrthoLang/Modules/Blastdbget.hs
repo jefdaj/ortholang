@@ -3,6 +3,8 @@
 -- TODO should you also cache the taxdb at the same time as dblist.txt? seems reasonable
 --      or maybe at the same time as doing the first main blastdbget
 
+-- TODO rename blastdblist -> blastdbget_list?
+
 module OrthoLang.Modules.Blastdbget where
 
 import Development.Shake
@@ -45,7 +47,7 @@ olModule = Module
   , mEncodings = [blastdb]
   , mRules = [rBlastdblist]
   , mFunctions =
-    [ blastdblist, blastdblistDate, blastdblistFilter
+    [ blastdblist, blastdblistDate
     -- TODO rewrite: , blastdbgetFna -- TODO mapped version so you can list -> git at once?
     -- TODO rewrite: , blastdbgetFaa -- TODO mapped version so you can list -> git at once?
     ]
@@ -105,10 +107,6 @@ rBlastdblist = do
 --   , fNewRules = NewNotImplemented, fOldRules = rBlastdblist
 --   }
 
------------------
--- blastdblist --
------------------
-
 -- | User-facing version that takes a date expression and filter string
 blastdblist :: Function
 blastdblist = newFnA2
@@ -138,42 +136,10 @@ aBlastdblistDate (ExprPath out') datePath' = do
   day <- readLit loc datePath'
   -- TODO utility fn for finding this?
   let dbl' = fromPath loc cfg (blastdbgetCache cfg) </> day </> "dblist.txt"
-  need' loc [dbl']
-
-------------------------
--- blastdblist_filter --
-------------------------
-
--- | Hidden version that takes the pre-downloaded list and only filters it
---   TODO is this actually a generic "filter any str.list" function?
-blastdblistFilter :: Function
-blastdblistFilter = newFnA2
-  "blastdblist_filter"
-  (Exactly $ ListOf str, Exactly str)
-  (Exactly $ ListOf str)
-  undefined
-  [Hidden]
-
--- aCurlDate :: NewAction2
--- aCurlDate (ExprPath outPath') datePath' urlPath' = do
---   cfg <- fmap fromJust getShakeExtra
---   let loc = "ortholang.modules.curl.aCurlDate"
---       outPath = toPath loc cfg outPath'
---   debugA' "aCurlDate" $ "datePath': " ++ datePath'
---   debugA' "aCurlDate" $ "urlPath': " ++ urlPath'
---   date <- readLit loc datePath'
---   let cacheDir' = fromPath loc cfg $ cacheDir cfg "curl"
---       (PathDigest urlDigest) = last $ listDigestsInPath cfg urlPath'
---   debugA' "aCurlDate" $ "date: " ++ date
---   debugA' "aCurlDate" $ "cacheDir': " ++ cacheDir'
---   debugA' "aCurlDate" $ "urlDigest: " ++ urlDigest
---   -- TODO the final output path should depend on this rather than the initial userCacheDescPath', right?
---   let cachePath' = cacheDir' </> date </> urlDigest -- TODO make this a dir and add /result?
---       cachePath  = toPath loc cfg cachePath'
---   liftIO $ createDirectoryIfMissing True $ takeDirectory cachePath'
---   need' loc [cachePath']
---   debugA' "aCurlDate" $ "symlink: " ++ show outPath ++ " -> " ++ show cachePath
---   symlink outPath cachePath
+  need' loc [dbl'] -- TODO remove?
+  let dbl = toPath loc cfg dbl'
+      out = toPath loc cfg out'
+  symlink out dbl
 
 ------------------
 -- blastdbget_* --
