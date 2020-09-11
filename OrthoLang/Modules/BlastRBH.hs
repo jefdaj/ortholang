@@ -5,7 +5,7 @@ import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
 import OrthoLang.Interpreter.Compile as C
-import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs, mkBlastFromFa, aMkBlastFromDb)
+import OrthoLang.Modules.Blast   (bht, BlastDesc, blastDescs, aMkBlastFromDb)
 import OrthoLang.Modules.BlastDB (blastdb)
 import OrthoLang.Modules.SeqIO   (fna, faa)
 
@@ -34,6 +34,7 @@ olModule = Module
   , mEncodings = [blastdb]
   , mRules = []
   , mFunctions =
+
     -- TODO also work with the non-symmetric ones that have an obvious way to do it?
     map mkBlastFromFaRev     blastDescsRev ++
     map mkBlastFromFaRevEach blastDescsRev ++
@@ -42,6 +43,7 @@ olModule = Module
 
     map mkBlastRbh     blastDescsRev ++
     map mkBlastRbhEach blastDescsRev
+
   }
 
 -- note that this just filters. it doesn't "reverse" the descriptions
@@ -54,24 +56,32 @@ blastDescsRev = filter isReversible blastDescs
 -- *blast*_rev --
 -----------------
 
+-- mkBlastFromFaRev :: BlastDesc -> Function
+-- mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly num, Exactly sType, Exactly qType]
+--   , fOutput = Exactly bht
+--   ,fTags = []
+--   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaRev d
+--   }
+
 mkBlastFromFaRev :: BlastDesc -> Function
-mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly sType, Exactly qType]
-  , fOutput = Exactly bht
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaRev d
-  }
+mkBlastFromFaRev (bCmd, qType, sType, _) = newExprExpansion
+  (bCmd ++ "_rev")
+  [Exactly num, Exactly sType, Exactly qType]
+  (Exactly bht)
+  mBlastFromFaRev
+  []
 
 -- flips the query and subject arguments and reuses the regular compiler above
-rMkBlastFromFaRev :: BlastDesc -> RulesFn
-rMkBlastFromFaRev d scr (Fun rtn seed deps name [e, q, s]) = rules scr expr
-  where
-    expr  = Fun rtn seed deps name_norev [e, s, q]
-    rules = fOldRules $ mkBlastFromFa d
-    name_norev  = replace "_rev" "" name
+mBlastFromFaRev :: ExprExpansion
+mBlastFromFaRev _ _ (Fun r ms ds n [e, q, s]) = Fun r ms ds (replace "_rev" "" n) [e, s, q]
+  -- where
+    -- expr  = Fun rtn seed deps name_norev [e, s, q]
+    -- rules = fOldRules $ mkBlastFromFa d
+    -- name_norev  = replace "_rev" "" name
     -- name_norev' = debugNames "rMkBlastFromFaRev" b expr name_norev
-rMkBlastFromFaRev _ _ _ = fail "bad argument to rMkBlastFromFaRev"
+mBlastFromFaRev _ _ e = error "ortholang.modules.blastrbh.mBlastFromFaRev" $ "bad argument: " ++ show e
 
 ----------------------
 -- *blast*_rev_each --
