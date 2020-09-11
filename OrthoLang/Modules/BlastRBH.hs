@@ -56,15 +56,6 @@ blastDescsRev = filter isReversible blastDescs
 -- *blast*_rev --
 -----------------
 
--- mkBlastFromFaRev :: BlastDesc -> Function
--- mkBlastFromFaRev d@(bCmd, qType, sType, _) = let name = bCmd ++ "_rev" in Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly num, Exactly sType, Exactly qType]
---   , fOutput = Exactly bht
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rMkBlastFromFaRev d
---   }
-
 mkBlastFromFaRev :: BlastDesc -> Function
 mkBlastFromFaRev (bCmd, qType, sType, _) = newExprExpansion
   (bCmd ++ "_rev")
@@ -76,11 +67,6 @@ mkBlastFromFaRev (bCmd, qType, sType, _) = newExprExpansion
 -- flips the query and subject arguments and reuses the regular compiler above
 mBlastFromFaRev :: ExprExpansion
 mBlastFromFaRev _ _ (Fun r ms ds n [e, q, s]) = Fun r ms ds (replace "_rev" "" n) [e, s, q]
-  -- where
-    -- expr  = Fun rtn seed deps name_norev [e, s, q]
-    -- rules = fOldRules $ mkBlastFromFa d
-    -- name_norev  = replace "_rev" "" name
-    -- name_norev' = debugNames "rMkBlastFromFaRev" b expr name_norev
 mBlastFromFaRev _ _ e = error "ortholang.modules.blastrbh.mBlastFromFaRev" $ "bad argument: " ++ show e
 
 ----------------------
@@ -126,29 +112,20 @@ aMkBlastFromDbRev _ _ = fail "bad argument to aMkBlastFromDbRev"
 -- reciprocal_best --
 ---------------------
 
--- TODO move to Tables.hs? And rename that to BlastHits?
-
 reciprocalBest :: Function
-reciprocalBest = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly bht, Exactly bht] -- TODO any ht would work right?
-  , fOutput = Exactly bht
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple aReciprocalBest
-  }
-  where
-    name = "reciprocal_best"
+reciprocalBest = newFnA2
+  "reciprocal_best"
+  (Exactly bht, Exactly bht)
+  (Exactly bht)
+  aReciprocalBest
+  []
 
 -- TODO how are $TMPDIR paths getting through after conversion from cutpaths??
 -- TODO why is this the only one that fails, and only when called from repeat??
-aReciprocalBest :: [Path] -> Action ()
-aReciprocalBest [out, left, right] = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.blastrbh.aReciprocalBest"
-      out'   = fromPath loc cfg out
-      left'  = fromPath loc cfg left
-      right' = fromPath loc cfg right
-      out''  = traceA loc out' [out', left', right']
+aReciprocalBest :: NewAction2
+aReciprocalBest (ExprPath out') left' right' = do
+  let loc   = "modules.blastrbh.aReciprocalBest"
+      out'' = traceA loc out' [out', left', right']
   runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
@@ -163,7 +140,6 @@ aReciprocalBest [out, left, right] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out']
     }
-aReciprocalBest args = error $ "bad argument to aReciprocalBest: " ++ show args
 
 --------------------------
 -- reciprocal_best_each --
