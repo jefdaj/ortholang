@@ -141,32 +141,30 @@ aReciprocalBest (ExprPath out') left' right' = do
     , cmdRmPatterns = [out']
     }
 
---------------------------
--- reciprocal_best_each --
---------------------------
+-------------------------
+-- reciprocal_best_all --
+-------------------------
 
 reciprocalBestAll :: Function
-reciprocalBestAll = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly (ListOf bht), Exactly (ListOf bht)] -- TODO any ht would work right?
-  , fOutput = Exactly bht
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple aReciprocalBestAll
-  }
-  where
-    name = "reciprocal_best_all"
+reciprocalBestAll = newFnA2
+  "reciprocal_best_all"
+  (Exactly $ ListOf bht, Exactly $ ListOf bht)
+  (Exactly bht)
+  aReciprocalBestAll
+  []
 
-aReciprocalBestAll :: [Path] -> Action ()
-aReciprocalBestAll (out:ins) = do
+aReciprocalBestAll :: NewAction2
+aReciprocalBestAll (ExprPath out') lefts' rights' = do
   cfg <- fmap fromJust getShakeExtra
   let cDir = fromPath loc cfg $ cacheDir cfg "blastrbh"
       loc = "modules.blastrbh.aReciprocalBestAll"
       tmpPath p = cDir </> digest loc p <.> "bht"
-      ins' = map (\p -> (p, tmpPath p)) $ map (fromPath loc cfg) ins
+      ins' = map (\p -> (p, tmpPath p)) [lefts', rights']
+      ins  = map (toPath loc cfg . snd) ins'
+      out  = toPath loc cfg out'
   liftIO $ createDirectoryIfMissing True cDir
   mapM_ (\(inPath, outPath) -> absolutizePaths loc inPath outPath) ins'
-  aSimpleScriptNoFix "reciprocal_best_all.R" (out:map (toPath loc cfg . snd) ins')
-aReciprocalBestAll ps = error $ "bad argument to aReciprocalBestAll: " ++ show ps
+  aSimpleScriptNoFix "reciprocal_best_all.R" (out:ins)
 
 -----------------
 -- *blast*_rbh --
