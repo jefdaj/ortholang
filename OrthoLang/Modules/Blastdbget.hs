@@ -3,6 +3,8 @@
 -- TODO should you also cache the taxdb at the same time as dblist.txt? seems reasonable
 --      or maybe at the same time as doing the first main blastdbget
 
+-- TODO rename to say pdb/ndb instead of faa/fna
+
 module OrthoLang.Modules.Blastdbget where
 
 import Development.Shake
@@ -44,8 +46,10 @@ olModule = Module
   , mRules = [rBlastdblist]
   , mFunctions =
     [ blastdbList, blastdbListDate
-    -- TODO rewrite: , blastdbGetFna -- TODO mapped version so you can list -> git at once?
-    -- TODO rewrite: , blastdbGetFaa -- TODO mapped version so you can list -> git at once?
+    , blastdbGetFna -- TODO mapped version so you can list -> git at once?
+    , blastdbGetFaa -- TODO mapped version so you can list -> git at once?
+    , blastdbGetFnaDate -- TODO mapped version so you can list -> git at once?
+    , blastdbGetFaaDate -- TODO mapped version so you can list -> git at once?
     ]
   }
 
@@ -121,63 +125,64 @@ aBlastdbListDate (ExprPath out') datePath' = do
 -- blastdbget_* --
 ------------------
 
+-- | User-facing versions that take a date expression
 mkBlastdbGet :: String -> Type -> Function
-mkBlastdbGet name faType = newFnA1 -- TODO add date arg
+mkBlastdbGet name faType = newFnA2
   name
-  (Exactly str)
+  (Exactly str, Exactly str)
   (Exactly $ EncodedAs blastdb faType)
-  undefined -- TODO write this: aBlastdbget
+  (newDate1of2 "blastdb_get")
   [ReadsURL]
 
--- TODO rename with fna
 blastdbGetFna :: Function
-blastdbGetFna = mkBlastdbGet "blastdbget_fna" fna
+blastdbGetFna = mkBlastdbGet "blastdb_get_fna" fna
 
--- TODO rename with faa
 blastdbGetFaa :: Function
-blastdbGetFaa = mkBlastdbGet "blastdbget_faa" faa
+blastdbGetFaa = mkBlastdbGet "blastdb_get_faa" faa
 
--- rBlastdbGet :: RulesFn
--- rBlastdbGet scr e@(Fun _ _ _ _ [name]) = do
---   (ExprPath nPath) <- rExpr scr name
---   cfg  <- fmap fromJust getShakeExtraRules
---   dRef <- fmap fromJust getShakeExtraRules
---   let loc = "modules.blastdb.rBlastdbget"
---       tmpDir    = blastdbgetCache cfg
---       dbPrefix  = exprPath cfg dRef scr e -- final prefix
---       dbPrefix' = fromPath loc cfg dbPrefix
---       nPath'    = toPath loc cfg nPath
---   dbPrefix' %> \_ -> aBlastdbGet dbPrefix tmpDir nPath'
---   return (ExprPath dbPrefix')
--- rBlastdbGet _ _ = fail "bad argument to rBlastdbget"
+-----------------------
+-- blastdbget_*_date --
+-----------------------
 
-aBlastdbGet :: NewAction2
-aBlastdbGet (ExprPath dbPrefix') tmp' nPath' = do
-  -- cfg <- fmap fromJust getShakeExtra
-  -- let tmp'       = fromPath loc cfg tmpDir
-      -- nPath'     = fromPath loc cfg nPath
-      -- dbPrefix'  = fromPath loc cfg dbPrefix
+-- | Hidden versions that take a proper date string sanitized by newDate1of2 above
+mkBlastdbGetDate :: String -> Type -> Function
+mkBlastdbGetDate name faType = newFnA2
+  name
+  (Exactly str, Exactly str)
+  (Exactly $ EncodedAs blastdb faType)
+  aBlastdbGetDate
+  [ReadsURL, Hidden]
+
+blastdbGetFnaDate :: Function
+blastdbGetFnaDate = mkBlastdbGetDate "blastdb_get_fna_date" fna
+
+blastdbGetFaaDate :: Function
+blastdbGetFaaDate = mkBlastdbGetDate "blastdb_get_faa_date" faa
+
+aBlastdbGetDate :: NewAction2
+aBlastdbGetDate (ExprPath outPath') datePath' namePath' = do
   let loc = "ortholang.modules.blastdb.aBlastdbget"
-      dbPrefix'' = traceA loc dbPrefix' [dbPrefix', tmp', nPath']
-  -- need' loc [nPath']
-  dbName <- fmap stripWhiteSpace $ readLit loc nPath' -- TODO need to strip?
-  let dbPath = tmp' </> dbName
-  liftIO $ createDirectoryIfMissing True tmp'
-  -- TODO was taxdb needed for anything else?
-  debugA' "aBlastdbget" $ "dbPrefix'': " ++ dbPrefix''
-  debugA' "aBlastdbget" $ "dbPath: " ++ dbPath
+  cfg <- fmap fromJust getShakeExtra
+  date <- readLit loc datePath'
+  let tmpDir'    = fromPath loc cfg (blastdbgetCache cfg) </> date
+      outPath'' = traceA loc outPath' [outPath', tmpDir', namePath']
+  dbName <- fmap stripWhiteSpace $ readLit loc namePath' -- TODO need to strip?
+  liftIO $ createDirectoryIfMissing True tmpDir'
+  debugA' "aBlastdbget" $ "outPath'': " ++ outPath''
   runCmd $ CmdDesc
     { cmdParallel = False
     , cmdFixEmpties = True
-    , cmdOutPath = dbPrefix''
+    , cmdOutPath = outPath''
     , cmdInPatterns = []
     , cmdNoNeedDirs = []
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = []
-    , cmdOptions =[Cwd tmp'] -- TODO remove?
+    , cmdOptions =[Cwd tmpDir'] -- TODO remove?
     , cmdBinary = "blastdbget.sh"
-    , cmdArguments = [tmp', dbName]
+    , cmdArguments = [tmpDir', dbName]
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [] -- TODO remove tmpdir on fail? seems wasteful
+    , cmdRmPatterns = [] -- TODO remove anything on failure?
     }
-  writeLit loc dbPrefix'' dbPath -- note this writes the path itself!
+  let dbPath = toPath loc cfg $ tmpDir' </> dbName
+  debugA' "aBlastdbget" $ "dbPath: " ++ show dbPath
+  writePath loc outPath'' dbPath

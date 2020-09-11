@@ -9,3 +9,7 @@ DBNAME="$2"
 
 cd "$TDIR"
 blastdbget -d "$DBNAME" . > "${DBNAME}.out" 2> "${DBNAME}.err"
+
+# clean up if successful
+# if [[ $? -eq 0 ]]; then
+# fi
