@@ -10,7 +10,7 @@ import OrthoLang.Interpreter
 import OrthoLang.Locks
 
 import Data.List.Utils         (replace)
-import OrthoLang.Modules.Blast (bht)
+import OrthoLang.Modules.Blast (bht, mkBlastFromFa)
 import OrthoLang.Modules.SeqIO (fna, faa)
 import System.Exit             (ExitCode(..))
 import System.FilePath         (replaceBaseName)
@@ -108,25 +108,8 @@ type OldDiamondBlastDesc =
 oldVariants :: [OldDiamondBlastDesc]
 oldVariants =
 
-  -- these are the simplest ones
-  -- TODO rewrite with newFnA3
-  -- [ ("blastp_db"                    , rSimple . aDiamondFromDb, ["blastp"                    ], faa, dmnd, bht)
-  -- , ("blastp_db_sensitive"          , rSimple . aDiamondFromDb, ["blastp", "--sensitive"     ], faa, dmnd, bht)
-  -- , ("blastp_db_more_sensitive"     , rSimple . aDiamondFromDb, ["blastp", "--more-sensitive"], faa, dmnd, bht)
-  -- , ("blastx_db"                    , rSimple . aDiamondFromDb, ["blastx"                    ], fna, dmnd, bht)
-  -- , ("blastx_db_sensitive"          , rSimple . aDiamondFromDb, ["blastx", "--sensitive"     ], fna, dmnd, bht)
-  -- , ("blastx_db_more_sensitive"     , rSimple . aDiamondFromDb, ["blastx", "--more-sensitive"], fna, dmnd, bht)
-
-  -- TODO rewrite as exprExpansion
-  [ ("blastp"                       , rDiamondFromFa, ["blastp"                    ], faa, faa , bht)
-  , ("blastp_sensitive"             , rDiamondFromFa, ["blastp", "--sensitive"     ], faa, faa , bht)
-  , ("blastp_more_sensitive"        , rDiamondFromFa, ["blastp", "--more-sensitive"], faa, faa , bht)
-  , ("blastx"                       , rDiamondFromFa, ["blastx"                    ], fna, faa , bht)
-  , ("blastx_sensitive"             , rDiamondFromFa, ["blastx", "--sensitive"     ], fna, faa , bht)
-  , ("blastx_more_sensitive"        , rDiamondFromFa, ["blastx", "--more-sensitive"], fna, faa , bht)
-
   -- TODO rewrite with a new api function "newFlip23"
-  , ("blastp_rev"                   , rFlip23 . rDiamondFromFa, ["blastp"                    ], faa, faa , bht)
+  [ ("blastp_rev"                   , rFlip23 . rDiamondFromFa, ["blastp"                    ], faa, faa , bht)
   , ("blastp_sensitive_rev"         , rFlip23 . rDiamondFromFa, ["blastp", "--sensitive"     ], faa, faa , bht)
   , ("blastp_more_sensitive_rev"    , rFlip23 . rDiamondFromFa, ["blastp", "--more-sensitive"], faa, faa , bht)
   , ("blastx_rev"                   , rFlip23 . rDiamondFromFa, ["blastx"                    ], faa, fna , bht)
@@ -154,14 +137,6 @@ oldVariants =
   , ("blastx_sensitive_rev_each"        , rDiamondFromFaRevEach, ["blastx", "--sensitive"     ], faa, ListOf fna , ListOf bht)
   , ("blastx_more_sensitive_rev_each"   , rDiamondFromFaRevEach, ["blastx", "--more-sensitive"], faa, ListOf fna , ListOf bht)
 
-  -- TODO rewrite with newMap3of3
-  -- , ("blastp_db_each"               , rMap 3 . aDiamondFromDb, ["blastp"                    ], faa, ListOf dmnd, ListOf bht)
-  -- , ("blastp_db_sensitive_each"     , rMap 3 . aDiamondFromDb, ["blastp", "--sensitive"     ], faa, ListOf dmnd, ListOf bht)
-  -- , ("blastp_db_more_sensitive_each", rMap 3 . aDiamondFromDb, ["blastp", "--more-sensitive"], faa, ListOf dmnd, ListOf bht)
-  -- , ("blastx_db_each"               , rMap 3 . aDiamondFromDb, ["blastx"                    ], fna, ListOf dmnd, ListOf bht)
-  -- , ("blastx_db_sensitive_each"     , rMap 3 . aDiamondFromDb, ["blastx", "--sensitive"     ], fna, ListOf dmnd, ListOf bht)
-  -- , ("blastx_db_more_sensitive_each", rMap 3 . aDiamondFromDb, ["blastx", "--more-sensitive"], fna, ListOf dmnd, ListOf bht)
-
   -- TODO these seem to work, but do they make any sense to include?
   -- , ("blastp_db_rev_each"               , rFlip23 . rMap 2 . aDiamondFromDb, ["blastp"                    ], dmnd, ListOf faa, ListOf bht)
   -- , ("blastp_db_sensitive_rev_each"     , rFlip23 . rMap 2 . aDiamondFromDb, ["blastp", "--sensitive"     ], dmnd, ListOf faa, ListOf bht)
@@ -184,7 +159,7 @@ newVariants =
 
   map (\(name, args, qType, sType, rType) ->
          newFnA3
-           name
+           ("diamond_" ++ name)
            (Exactly num, Exactly qType, Exactly sType)
            (Exactly rType)
            (aDiamondFromDb2 args)
@@ -201,17 +176,30 @@ newVariants =
 
   map (\(name, _, qType, sType, rType) ->
          newFnA3
-           (name ++ "_each")
+           ("diamond_" ++ name ++ "_each")
            (Exactly num, Exactly qType, Exactly $ ListOf sType)
            (Exactly $ ListOf rType)
-           (newMap3of3 name)
+           (newMap3of3 $ "diamond_" ++ name)
            [Nondeterministic])
-    [ ("blastp_db"               , ["blastp"                    ], faa, ListOf dmnd, ListOf bht)
-    , ("blastp_db_sensitive"     , ["blastp", "--sensitive"     ], faa, ListOf dmnd, ListOf bht)
-    , ("blastp_db_more_sensitive", ["blastp", "--more-sensitive"], faa, ListOf dmnd, ListOf bht)
-    , ("blastx_db"               , ["blastx"                    ], fna, ListOf dmnd, ListOf bht)
-    , ("blastx_db_sensitive"     , ["blastx", "--sensitive"     ], fna, ListOf dmnd, ListOf bht)
-    , ("blastx_db_more_sensitive", ["blastx", "--more-sensitive"], fna, ListOf dmnd, ListOf bht)
+    [ ("blastp_db"               , ["blastp"                    ], faa, dmnd, bht)
+    , ("blastp_db_sensitive"     , ["blastp", "--sensitive"     ], faa, dmnd, bht)
+    , ("blastp_db_more_sensitive", ["blastp", "--more-sensitive"], faa, dmnd, bht)
+    , ("blastx_db"               , ["blastx"                    ], fna, dmnd, bht)
+    , ("blastx_db_sensitive"     , ["blastx", "--sensitive"     ], fna, dmnd, bht)
+    , ("blastx_db_more_sensitive", ["blastx", "--more-sensitive"], fna, dmnd, bht)
+    ]
+
+  ++
+
+  -- TODO is leaving this undefined OK here?
+  -- TODO does this work with diamond_ names?
+  map (\(name, _, qType, sType, _) -> mkBlastFromFa ("diamond_" ++ name, qType, sType, undefined))
+    [ ("blastp"                       , ["blastp"                    ], faa, faa , bht)
+    , ("blastp_sensitive"             , ["blastp", "--sensitive"     ], faa, faa , bht)
+    , ("blastp_more_sensitive"        , ["blastp", "--more-sensitive"], faa, faa , bht)
+    , ("blastx"                       , ["blastx"                    ], fna, faa , bht)
+    , ("blastx_sensitive"             , ["blastx", "--sensitive"     ], fna, faa , bht)
+    , ("blastx_more_sensitive"        , ["blastx", "--more-sensitive"], fna, faa , bht)
     ]
 
 
@@ -278,6 +266,10 @@ rDiamondFromFa dCmd st (Fun rtn seed deps _ [e, q, s])
     name1  = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd
     dbExpr = Fun dmnd seed (depsOf s) "diamond_makedb" [s]
 rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"
+
+-- TODO could this be rewritten to also work on other blast-like fns, for example in psiblast?
+-- mDiamondFromFa :: ExprExpansion
+-- mDiamondFromFa
 
 -- TODO separate into two things: an exprExpansion and a newMap
 -- same, but inserts a "makedb_each" call and maps over it
