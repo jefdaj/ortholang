@@ -46,8 +46,12 @@ ortholang —▶ filter_list (blastdb_list "cached") "ref"
  "refseq_protein",
  "refseq_rna"]
 
-ortholang —▶ filter_list (blastdb_list "cached") "[0-9]{1,}[Ss]_"
-["16S_ribosomal_RNA", "18S_fungal_sequences", "28S_fungal_sequences"]
+ortholang —▶ filter_list (blastdb_list "cached") "^..S_"
+["16S_ribosomal_RNA",
+ "18S_fungal_sequences",
+ "28S_fungal_sequences",
+ "ITS_RefSeq_Fungi",
+ "ITS_eukaryote_sequences"]
 
 ortholang —▶ :q
 Bye for now!
