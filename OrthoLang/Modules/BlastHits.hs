@@ -13,6 +13,10 @@ import System.Exit                (ExitCode(..))
 import System.FilePath            ((</>), takeDirectory)
 import Data.Maybe (fromJust)
 
+------------
+-- module --
+------------
+
 olModule :: Module
 olModule = Module
   { mName = "BlastHits"
@@ -22,13 +26,20 @@ olModule = Module
   , mEncodings = []
   , mRules = []
   , mFunctions =
+
+    -- extract ids
     [ extractQueries, extractQueriesEach
     , extractTargets, extractTargetsEach
+
+    -- filter hit tables by cutoff
     , mkFilterHits "evalue"  , mkFilterHitsEach "evalue"
     , mkFilterHits "bitscore", mkFilterHitsEach "bitscore"
     , mkFilterHits "pident"  , mkFilterHitsEach "pident"
+
+    -- filter hit tables by best e-value per gene
     -- TODO mkFilterHits "rawscore", mkFilterHitsEach "rawscore"
     , bestHits, bestHitsEach
+
     ]
   }
 
@@ -43,14 +54,6 @@ ht = TypeGroup
 ----------------------
 -- extract_*(_each) --
 ----------------------
-
--- tExtract :: TypeChecker
--- tExtract [x] | elem x [crb, bht] = Right $ ListOf str
--- tExtract  _ = Left "expected a blast hits table"
-
--- tExtractEach :: [Type] -> Either String Type
--- tExtractEach [ListOf x] | elem x [crb, bht] = Right $ ListOf $ ListOf str
--- tExtractEach  _ = Left "expected a list of blast hits tables"
 
 extractQueries :: Function
 extractQueries = Function
@@ -188,22 +191,21 @@ aFilterHits colname [out, cutoff, hits] = do
     }
 aFilterHits _ args = error $ "bad argument to aFilterHits: " ++ show args
 
--------------------------------
--- get the best hit per gene --
--------------------------------
+----------------
+-- best_hits* --
+----------------
 
 -- TODO move to BlastRBH?
--- TODO rename to just "best" and "best_each"?
-
 -- TODO should this return whatever hittable type it's given?
 -- TODO split into best_hits_evalue and best_hits_bitscore?
+
 bestHits :: Function
 bestHits =  Function
   { fOpChar = Nothing, fName = name 
   , fInputs = [Some ht "a hit table"]
   , fOutput =  Some ht "a hit table"
   , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimple aBestExtract
+  , fNewRules = NewNotImplemented, fOldRules = rSimple aBestHits
   }
   where
     name = "best_hits"
@@ -214,17 +216,17 @@ bestHitsEach = Function
   , fInputs = [ListSigs (Some ht "a hit table")]
   , fOutput =  ListSigs (Some ht "a hit table")
   , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aBestExtract
+  , fNewRules = NewNotImplemented, fOldRules = rMap 1 aBestHits
   }
   where
     name = "best_hits_each"
 
-aBestExtract :: [Path] -> Action ()
-aBestExtract [out, hits] = do
+aBestHits :: [Path] -> Action ()
+aBestHits [out, hits] = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.blasthits.aBestExtract"
+  let loc = "modules.blasthits.aBestHits"
       out'  = fromPath loc cfg out
-      out'' = traceA "aBestExtract" out' [out', hits']
+      out'' = traceA "aBestHits" out' [out', hits']
       hits' = fromPath loc cfg hits
   runCmd $ CmdDesc
     { cmdParallel = False
@@ -240,4 +242,4 @@ aBestExtract [out, hits] = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out']
     }
-aBestExtract args = error $ "bad argument to aBestExtract: " ++ show args
+aBestHits args = error $ "bad argument to aBestHits: " ++ show args
