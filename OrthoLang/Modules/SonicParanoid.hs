@@ -44,24 +44,22 @@ spr = Type
 -------------------
 
 sonicparanoid :: Function
-sonicparanoid = let name = "sonicparanoid" in Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly $ ListOf faa]
-  , fOutput = Exactly spr
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented
-  , fOldRules = rSimple aSonicParanoid
-  }
+sonicparanoid = newFnA1
+  "sonicparanoid"
+  (Exactly $ ListOf faa) -- TODO can this be more general?
+  (Exactly spr)
+  aSonicparanoid
+  [Nondeterministic]
 
 -- TODO run mmseqs2 separately and put the results in tmpDir first, then use -mo
 --      (or let sonicparanoid run it and link from here to the mmseqs2 tmpdir)
 -- TODO should get all results as an unusable file first, then extract what you want explicitly
-aSonicParanoid :: [Path] -> Action ()
-aSonicParanoid [out, faListPath] = do
+aSonicparanoid :: NewAction1
+aSonicparanoid (ExprPath out') faListPath' = do
   cfg <- fmap fromJust getShakeExtra
   let cDir    = tmpdir cfg </> "cache" </> "sonicparanoid"
       sharedDir   = cDir </> "shared"
-      loc = "modules.sonicparanoid.aSonicParanoid"
+      loc = "modules.sonicparanoid.aSonicparanoid"
       tmpDir      = cDir </> digest loc faListPath
       -- mmseqsDir   = sharedDir </> "mmseqs2_db"
       dbDir       = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" -- this is shared with the MMSeqs module TODO make explicit
@@ -72,8 +70,8 @@ aSonicParanoid [out, faListPath] = do
       statsPath'     = tmpDir </> "stats.tsv" -- this gets symlinked to the actual one, whose path varies
       statsPath      = toPath loc cfg statsPath'
 
-      faListPath' = fromPath loc cfg faListPath
-      out'        = fromPath loc cfg out
+      faListPath  = toPath loc cfg faListPath'
+      out         = toPath loc cfg out'
       statsPath''    = traceA loc out' [out', statsPath', faListPath']
   liftIO $ createDirectoryIfMissing True sharedDir
 
@@ -82,7 +80,7 @@ aSonicParanoid [out, faListPath] = do
 
     faPaths <- readPaths loc faListPath'
     let faPaths' = map (fromPath loc cfg) faPaths
-    need' "ortholang.moodules.sonicparanoid.aSonicParanoid" faPaths'
+    need' "ortholang.moodules.sonicparanoid.aSonicparanoid" faPaths'
     let faLinks = map (\p -> toPath loc cfg $ inDir </> (takeBaseName $ fromPath loc cfg p)) faPaths
     mapM_ (\(p, l) -> symlink l p) $ zip faPaths faLinks
 
@@ -119,5 +117,3 @@ aSonicParanoid [out, faListPath] = do
   -- TODO does this fix the "does not exist" issue?
   -- trackWrite' [statsPath']
   symlink out statsPath
-
-aSonicParanoid args = error $ "bad argument to aSonicParanoid: " ++ show args
