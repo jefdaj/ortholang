@@ -28,12 +28,10 @@ gcr = Type
   }
  
 greencutTwoFamilies :: Function
-greencutTwoFamilies = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly bht, Exactly bht]
-  , fOutput = Exactly gcr
-  , fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rSimpleScript $ name ++ ".py"
-  }
-  where
-    name = "greencut2_families"
+greencutTwoFamilies = newFnS2
+  "greencut2_families"
+  (Exactly bht, Exactly bht)
+  (Exactly gcr)
+  "greencut2_families.py"
+  []
+  id
