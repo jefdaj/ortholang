@@ -17,7 +17,7 @@ import Control.Monad (when)
 import Data.Maybe (fromJust)
 
 -- import OrthoLang.Types  (rMap)
-import OrthoLang.Modules.BlastHits (mkExtractCol, mkExtractColEach)
+import OrthoLang.Modules.BlastHits (aCutCol)
 
 dbg :: String -> String -> Action ()
 dbg name = debugA ("ortholang.modules.scores." ++ name)
@@ -32,8 +32,8 @@ olModule = Module
   , mRules = []
   , mFunctions =
     [ scoreRepeats
-    -- , extractScores, extractScoresEach
-    -- , extractScored, extractScoredEach
+    , extractScores -- TODO mapped version? , extractScoresEach
+    , extractScored -- TODO mapped version? , extractScoredEach
     ]
   }
 
@@ -105,46 +105,13 @@ rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 -- extract one col or the other --
 ----------------------------------
 
--- TODO deduplicate with extractQueries?
--- extractScores :: Function
--- extractScores = let name = "extract_scores" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeCheck = tExtractScores
---   -- , fTypeDesc  = name ++ " : X.scores -> num.list"
---   , fInputs = [ScoresSigs (AnyType "the input type")]
---   , fOutput = Exactly (ListOf num)
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 1
---   }
+mkExtractCol :: String -> Int -> Function
+mkExtractCol colname colnum = newFnA1
+  ("extract_" ++ colname)
+  (ScoresSigs $ AnyType "the input type")
+  (Exactly $ ListOf num)
+  (aCutCol False colnum)
+  []
 
-extractScores = mkExtractCol "scores" False 1
-extractScored = mkExtractCol "scores" False 2
-
-extractScoresEach = mkExtractColEach "scores"
-extractScoredEach = mkExtractColEach "scored"
-
--- TODO deduplicate with extractTargets?
--- extractScored :: Function
--- extractScored = let name = "extract_scored" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeCheck = tExtractScored
---   -- , fTypeDesc  = name ++ " : X.scores -> X.list"
---   , fInputs = [ScoresSigs (AnyType "the input type")]
---   , fOutput =  ListSigs (AnyType "the input type")
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rSimple $ aCutCol False 2
---   }
-
--- (ScoresOf (Some ot "any type")) (ListOf num)
--- shown as "t.scores -> num.list, where t is any type"
--- tExtractScores :: TypeChecker
--- tExtractScores [(ScoresOf _)]= Right $ ListOf num
--- tExtractScores _ = Left "extract_scores requires scores"
-
--- (ScoresOf (Some ot "any type")) (ListOf (SomeOt "any type"))
--- shown as "t.scores -> t.list, where t is any type"
--- tExtractScored :: TypeChecker
--- tExtractScored [(ScoresOf x)] = Right $ ListOf x
--- tExtractScored _ = Left "extract_scored requires scores"
-
--- TODO _each versions?
+extractScores = mkExtractCol "scores" 1
+extractScored = mkExtractCol "scored" 2
