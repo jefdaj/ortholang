@@ -153,11 +153,13 @@ mkBlastdbGetDate name faType = newFnA2
   aBlastdbGetDate
   [ReadsURL, Hidden]
 
+-- TODO flip name to _fna_date?
 blastdbGetFnaDate :: Function
-blastdbGetFnaDate = mkBlastdbGetDate "blastdb_get_fna_date" fna
+blastdbGetFnaDate = mkBlastdbGetDate "blastdb_get_date_fna" fna
 
+-- TODO flip name to _faa_date?
 blastdbGetFaaDate :: Function
-blastdbGetFaaDate = mkBlastdbGetDate "blastdb_get_faa_date" faa
+blastdbGetFaaDate = mkBlastdbGetDate "blastdb_get_date_faa" faa
 
 aBlastdbGetDate :: NewAction2
 aBlastdbGetDate (ExprPath outPath') datePath' namePath' = do

@@ -14,19 +14,20 @@ import Development.Shake
 
 import OrthoLang.Types
 import OrthoLang.Locks
+import OrthoLang.Util (stripWhiteSpace)
 import OrthoLang.Interpreter
 import OrthoLang.Modules.SeqIO      (faa, fna, fa)
 import OrthoLang.Modules.Singletons (withSingleton, singletons)
 
 -- import Control.Monad           (when, forM)
 import Data.Char               (toLower)
-import Data.List               (isInfixOf)
+-- import Data.List               (isInfixOf)
 import Data.List               (isPrefixOf)
 import Data.Maybe              (isJust, fromJust)
 import Data.String.Utils       (split)
 import System.Directory        (createDirectoryIfMissing)
 import System.Exit             (ExitCode(..))
-import System.FilePath         (takeBaseName, (</>), (<.>), makeRelative, takeDirectory)
+import System.FilePath         (takeBaseName, (</>), makeRelative, takeDirectory)
 import System.Process          (readCreateProcess, proc)
 
 {- There are a few types of BLAST database files. For nucleic acids:
@@ -498,14 +499,14 @@ showBlastDb cfg ref path = do
   -- TODO wait, wouldn't generic paths be better to leave in?
   path' <- fmap (fromGeneric loc cfg . stripWhiteSpace) $ readFileStrict ref path
   let dbDir = takeDirectory path'
-      -- dbBase = takeBaseName  dbDir
+      dbBase = takeBaseName path'
   debug loc $ "dbDir: \"" ++ dbDir ++ "\""
-  -- note we pass the dir here, since the filename is always result
+  debug loc $ "dbBase: \"" ++ dbBase ++ "\""
   out <- withReadLock ref path' $
-           readCreateProcess (proc "blastdbcmd.sh" [dbDir]) ""
+           readCreateProcess (proc "blastdbcmd.sh" [dbDir, dbBase]) ""
   let out1 = lines out
       out2 = concatMap (split "\t") out1
       out3 = filter (not . null) out2
       out4 = filter (\l -> not $ "Date" `isPrefixOf` l) out3
-      out5 = unlines out4
+      out5 = stripWhiteSpace $ toGeneric cfg $ unlines out4
   return out5

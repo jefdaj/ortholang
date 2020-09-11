@@ -3,6 +3,7 @@
 set -e
 
 DBDIR="$1"
+DBBASE="$2"
 
 cd "$DBDIR"
-blastdbcmd -info -db "result"
+blastdbcmd -info -db "$DBBASE"
