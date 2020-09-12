@@ -70,6 +70,10 @@ olModule = Module
       , diamondBlastpDb
       , diamondBlastxDb
 
+      -- single from fa
+      , diamondBlastp
+      , diamondBlastx
+
       -- rev from db
       , diamondBlastpDbRev
       , diamondBlastxDbRev
@@ -243,6 +247,39 @@ aDiamondFromDb bCmd (ExprPath o') s' e' q' db' = do
     , cmdRmPatterns = [o'', replaceBaseName o'' "out"]
     }
   sanitizeFileInPlace o'
+
+------------------------
+-- single fa variants --
+------------------------
+
+diamondBlastp = mkDiamondFa ("blastp", faa, faa, bht)
+diamondBlastx = mkDiamondFa ("blastx", fna, faa, bht)
+
+mkDiamondFa :: NewDiamondBlastDesc -> Function
+mkDiamondFa (name, sType, qType, rType) = newExprExpansion
+  ("diamond_" ++ name)
+  [Exactly num, Exactly num, Exactly qType, Exactly sType]
+  (Exactly rType)
+  mDiamondMakedb
+  [Nondeterministic]
+
+mDiamondMakedb :: ExprExpansion
+mDiamondMakedb _ _ (Fun r ms ds n [i1, i2, i3, i4]) = Fun r ms ds (n ++ "_db") [i1, i2, i3, fn]
+  where
+    fn = Fun dmnd ms (depsOf i4) "diamond_makedb" [i4]
+mDiamondMakedb _ _ e = error "modules.diamond.mDiamondMakedb" $ "bad argument: " ++ show e
+
+-- inserts a "makedb" call and reuses the _db compiler from above
+-- based on the version in Blast.hs but a little simpler
+-- rDiamondFromFa :: [String] -> RulesFn
+-- rDiamondFromFa dCmd st (Fun rtn seed deps _ [e, q, s])
+--   = rules st (Fun rtn seed deps name1 [e, q, dbExpr])
+--   where
+--     rules  = rSimple $ aDiamondFromDb dCmd
+--     name1  = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd
+--     dbExpr = Fun dmnd seed (depsOf s) "diamond_makedb" [s]
+-- rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"
+
 
 -------------------
 -- _rev variants --
