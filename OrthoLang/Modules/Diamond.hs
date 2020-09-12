@@ -20,6 +20,33 @@ import System.Process          (readProcess)
 import Data.Maybe (fromJust)
 import Data.Scientific        (Scientific)
 
+-- type RulesFn     = RulesFn
+type OldDiamondBlastDesc =
+  ( String              -- name
+  , [String] -> RulesFn -- rules, which will take cli args
+  , [String]            -- cli args
+  , Type                -- query type
+  , Type                -- subject type
+  , Type                -- result type
+  )
+
+-- TODO anything else needed?
+type NewDiamondBlastDesc =
+  ( String -- ^ base name
+  , Type   -- ^ query type
+  , Type   -- ^ subject type
+  , Type   -- ^ return type (TODO remove?)
+  )
+
+-- variants :: [NewDiamondDesc]
+-- variants =
+--   [ ("blastp", faa, dmnd)
+--   , ("blastx", fna, dmnd)
+--   ]
+
+-- TODO generate base functions
+-- TODO generate _rev variants
+-- TODO generate _each variants
 
 olModule :: Module
 olModule = Module
@@ -35,16 +62,20 @@ olModule = Module
       [ diamondmakedb
       , diamondmakedbEach
       , diamondmakedbAll
+
+      -- search functions
+      , diamondBlastpDb
+      , diamondBlastxDb
       ]
 
       -- search functions
       -- ++ map mkDiamondBlast oldVariants
       -- ++ newVariants
 
-      ++ map mkDiamondFromDb
-           [ ("blastp", faa, dmnd, bht)
-           , ("blastx", fna, dmnd, bht)
-           ]
+      -- ++ map mkDiamondFromDb
+           -- [ ("blastp", faa, dmnd, bht)
+           -- , ("blastx", fna, dmnd, bht)
+           -- ]
 
       ++ map mkDiamondEach
          -- _db_each
@@ -112,20 +143,6 @@ aDiamondmakedbAll (ExprPath out') fasPath' = do
   aSimpleScriptPar "diamond_makedb_all.sh" (out:faPaths)
 
 
---------------------
--- diamond_blast* --
---------------------
-
--- type RulesFn     = RulesFn
-type OldDiamondBlastDesc =
-  ( String              -- name
-  , [String] -> RulesFn -- rules, which will take cli args
-  , [String]            -- cli args
-  , Type                -- query type
-  , Type                -- subject type
-  , Type                -- result type
-  )
-
 -----------------
 -- sensitivity --
 -----------------
@@ -190,9 +207,12 @@ readSensitivity numPath = do
 -- single from db --
 --------------------
 
--- mkDiamondFromDb :: NewDiamondBlastDesc -> Function
+diamondBlastpDb = mkDiamondFromDb ("blastp", faa, dmnd, bht)
+diamondBlastxDb = mkDiamondFromDb ("blastx", fna, dmnd, bht)
+
+mkDiamondFromDb :: NewDiamondBlastDesc -> Function
 mkDiamondFromDb (name, qType, sType, rType) = newFnA4
-  ("diamond_" ++ name)
+  ("diamond_" ++ name ++ "_db")
   (Exactly num, Exactly num, Exactly qType, Exactly sType)
   (Exactly rType)
   (aDiamondFromDb name)
