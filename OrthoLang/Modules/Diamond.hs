@@ -5,6 +5,9 @@ module OrthoLang.Modules.Diamond
 
 -- TODO explain in the docs that this basically works like blastp or blastx (proteins) only. much simpler than it seems!
 
+-- TODO generate _rbh variants from regular + _rev ones?
+--      seems like a relatively straightforward edit using newExprExpansion now!
+
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
@@ -67,19 +70,14 @@ olModule = Module
       , diamondBlastpDb
       , diamondBlastxDb
 
+      -- rev from db
+      , diamondBlastpDbRev
+      , diamondBlastxDbRev
+
       -- _each variants
       , diamondBlastpDbEach
       , diamondBlastxDbEach
       ]
-
-      -- search functions
-      -- ++ map mkDiamondBlast oldVariants
-      -- ++ newVariants
-
-      -- ++ map mkDiamondFromDb
-           -- [ ("blastp", faa, dmnd, bht)
-           -- , ("blastx", fna, dmnd, bht)
-           -- ]
 
 --       ++ map mkDiamondEach
 --          -- _db_each
@@ -244,19 +242,39 @@ aDiamondFromDb bCmd (ExprPath o') s' e' q' db' = do
     }
   sanitizeFileInPlace o'
 
+-------------------
+-- _rev variants --
+-------------------
+
+diamondBlastpDbRev = mkDiamondRev ("blastp", faa, dmnd, bht)
+diamondBlastxDbRev = mkDiamondRev ("blastx", fna, dmnd, bht)
+
+mkDiamondRev :: NewDiamondBlastDesc -> Function
+mkDiamondRev (name, qType, sType, rType) = newExprExpansion
+  ("diamond_" ++ name ++ "_db_rev")
+  [Exactly num, Exactly num, Exactly sType, Exactly qType]
+  (Exactly rType)
+  (mFlip34 "_db_rev" "_db")
+  [Nondeterministic]
+
+-- TODO move to NewRules.hs?
+mFlip34 :: String -> String -> ExprExpansion
+mFlip34 old new _ _ (Fun r ms ds n [i1, i2, i3, i4]) = Fun r ms ds (replace old new n) [i1, i2, i4, i3]
+mFlip34 _ _ _ _ e = error "modules.diamond.mFlip34" $ "bad argument: " ++ show e
+
 --------------------
 -- _each variants --
 --------------------
 
-diamondBlastpDbEach = mkDiamondEach ("blastp_db", faa, dmnd, bht)
-diamondBlastxDbEach = mkDiamondEach ("blastx_db", fna, dmnd, bht)
+diamondBlastpDbEach = mkDiamondEach ("blastp", faa, dmnd, bht)
+diamondBlastxDbEach = mkDiamondEach ("blastx", fna, dmnd, bht)
 
 mkDiamondEach :: NewDiamondBlastDesc -> Function
 mkDiamondEach (name, qType, sType, rType) = newFnA4
-  ("diamond_" ++ name ++ "_each")
+  ("diamond_" ++ name ++ "_db_each")
   (Exactly num, Exactly num, Exactly qType, Exactly $ ListOf sType)
   (Exactly $ ListOf rType)
-  (newMap4of4 $ "diamond_" ++ name)
+  (newMap4of4 $ "diamond_" ++ name ++ "_db")
   [Nondeterministic]
 
   -- _each variants
