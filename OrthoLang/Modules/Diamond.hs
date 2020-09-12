@@ -79,6 +79,8 @@ olModule = Module
       , diamondBlastxDbRev
 
       -- _each variants
+      , diamondBlastpEach
+      , diamondBlastxEach
       , diamondBlastpDbEach
       , diamondBlastxDbEach
       , diamondBlastpDbRevEach
@@ -305,6 +307,8 @@ mFlip34 _ _ _ _ e = error "modules.diamond.mFlip34" $ "bad argument: " ++ show e
 -- _each variants --
 --------------------
 
+diamondBlastpEach      = mkDiamondEach "_each"        ""        ("blastp", faa, faa , bht)
+diamondBlastxEach      = mkDiamondEach "_each"        ""        ("blastx", fna, faa , bht)
 diamondBlastpDbEach    = mkDiamondEach "_db_each"     "_db"     ("blastp", faa, dmnd, bht)
 diamondBlastxDbEach    = mkDiamondEach "_db_each"     "_db"     ("blastx", fna, dmnd, bht)
 diamondBlastpDbRevEach = mkDiamondEach "_db_rev_each" "_db_rev" ("blastp", faa, dmnd, bht)
