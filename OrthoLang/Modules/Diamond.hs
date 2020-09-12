@@ -42,8 +42,8 @@ olModule = Module
       -- ++ newVariants
 
       ++ map mkDiamondFromDb
-           [ ("blastp_db", ["blastp"], faa, dmnd, bht)
-           , ("blastx_db", ["blastx"], fna, dmnd, bht)
+           [ ("blastp", faa, dmnd, bht)
+           , ("blastx", fna, dmnd, bht)
            ]
 
       ++ map mkDiamondEach
@@ -148,11 +148,11 @@ sensitivityFlags =
   , (5, "--ultra-sensitive")
   ]
 
-readSensitivity :: Path -> Action String
+readSensitivity :: FilePath -> Action String
 readSensitivity numPath = do
-  cfg <- fmap fromJust getShakeExtra
+  -- cfg <- fmap fromJust getShakeExtra
   let loc = "ortholang.modules.diamond.readSensitivity"
-  n <- fmap (read :: String -> Scientific) $ readLit loc $ fromPath loc cfg numPath
+  n <- fmap (read :: String -> Scientific) $ readLit loc numPath
   let n' = if n <= 0 then 0
            else if n >= 5 then 5
            else floor n
@@ -178,28 +178,63 @@ readSensitivity numPath = do
 --   -- , ("blastx_db_rev_each"               , rFlip23 . rMap 2 . aDiamondFromDb, ["blastx"                    ], dmnd, ListOf fna, ListOf bht)
 --   ]
 
---------------
--- new code --
---------------
+-- type NewDiamondBlastDesc =
+  -- ( String   -- name
+  -- , [String] -- cli args
+  -- , Type     -- query type
+  -- , Type     -- subject type
+  -- , Type     -- result type
+  -- )
 
-type NewDiamondBlastDesc =
-  ( String   -- name
-  , [String] -- cli args
-  , Type     -- query type
-  , Type     -- subject type
-  , Type     -- result type
-  )
+--------------------
+-- single from db --
+--------------------
+
+-- mkDiamondFromDb :: NewDiamondBlastDesc -> Function
+mkDiamondFromDb (name, qType, sType, rType) = newFnA4
+  ("diamond_" ++ name)
+  (Exactly num, Exactly num, Exactly qType, Exactly sType)
+  (Exactly rType)
+  (aDiamondFromDb name)
+  [Nondeterministic]
+
+-- TODO no [String]
+aDiamondFromDb :: String -> NewAction4
+aDiamondFromDb bCmd (ExprPath o') s' e' q' db' = do
+  -- cfg <- fmap fromJust getShakeExtra
+  let loc = "ortholang.modules.diamond.aDiamondFromDb"
+  -- aDiamondFromDb bCmd $ map (toPath loc cfg) [o', e', q', db']
+
+-- aDiamondFromDb :: [String] -> [Path] -> Action ()
+-- aDiamondFromDb bCmd [o, e, q, db] = do
+  -- wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ bCmd
+  -- cfg <- fmap fromJust getShakeExtra
+  -- let o'  = fromPath loc cfg o
+      -- e'  = fromPath loc cfg e
+      -- q'  = fromPath loc cfg q
+      -- db' = fromPath loc cfg db
+  -- let loc = "modules.diamond.aDiamondblastpdb"
+      o'' = traceA loc o' [bCmd, e', o', q', db']
+  sFlag <- readSensitivity s' -- sensitivity value
+  eStr <- readLit loc e' -- e-value cutoff (TODO is it called that in diamond?)
+  runCmd $ CmdDesc
+    { cmdBinary = "diamond.sh"
+    , cmdArguments = [o'', q', eStr, db', bCmd, sFlag]
+    , cmdFixEmpties = True
+    , cmdParallel = False -- TODO fix the resource bug
+    , cmdOptions = []
+    , cmdInPatterns = []
+    , cmdNoNeedDirs = []
+    , cmdOutPath = o''
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = [replaceBaseName o'' "out"]
+    , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [o'', replaceBaseName o'' "out"]
+    }
+  sanitizeFileInPlace o'
 
 -- newVariants :: [Function]
 -- newVariants =
-
-mkDiamondFromDb :: NewDiamondBlastDesc -> Function
-mkDiamondFromDb (name, args, qType, sType, rType) = newFnA3
-  ("diamond_" ++ name)
-  (Exactly num, Exactly qType, Exactly sType)
-  (Exactly rType)
-  (aDiamondFromDb args)
-  [Nondeterministic]
 
   -- _db variants (the simplest ones)
   -- ++
@@ -213,7 +248,7 @@ mkDiamondFromDb (name, args, qType, sType, rType) = newFnA3
 
   -- ++
 
-mkDiamondEach :: NewDiamondBlastDesc -> Function
+-- mkDiamondEach :: NewDiamondBlastDesc -> Function
 mkDiamondEach (name, _, qType, sType, rType) = newFnA3
   ("diamond_" ++ name ++ "_each")
   (Exactly num, Exactly qType, Exactly $ ListOf sType)
@@ -267,38 +302,6 @@ mkDiamondEach (name, _, qType, sType, rType) = newFnA3
 --     fn as = error $ "bad argument to rFlip23: " ++ show as
 -- rFlip23 _ _ e = error $ "bad argument to rFlip23: " ++ show e
 
-aDiamondFromDb :: [String] -> NewAction3
-aDiamondFromDb dCmd (ExprPath o') e' q' db' = do
-  -- cfg <- fmap fromJust getShakeExtra
-  let loc = "ortholang.modules.diamond.aDiamondFromDb"
-  -- aDiamondFromDb dCmd $ map (toPath loc cfg) [o', e', q', db']
-
--- aDiamondFromDb :: [String] -> [Path] -> Action ()
--- aDiamondFromDb dCmd [o, e, q, db] = do
-  -- wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ dCmd
-  -- cfg <- fmap fromJust getShakeExtra
-  -- let o'  = fromPath loc cfg o
-      -- e'  = fromPath loc cfg e
-      -- q'  = fromPath loc cfg q
-      -- db' = fromPath loc cfg db
-  -- let loc = "modules.diamond.aDiamondblastpdb"
-      o'' = traceA loc o' $ dCmd ++ [e', o', q', db']
-  eStr <- readLit loc e'
-  runCmd $ CmdDesc
-    { cmdBinary = "diamond.sh"
-    , cmdArguments = [o'', q', eStr, db'] ++ dCmd
-    , cmdFixEmpties = True
-    , cmdParallel = False -- TODO fix the resource bug
-    , cmdOptions = []
-    , cmdInPatterns = []
-    , cmdNoNeedDirs = []
-    , cmdOutPath = o''
-    , cmdExtraOutPaths = []
-    , cmdSanitizePaths = [replaceBaseName o'' "out"]
-    , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [o'', replaceBaseName o'' "out"]
-    }
-  sanitizeFileInPlace o'
 -- aDiamondFromDb _ _ = error $ "bad argument to aDiamondFromDb"
 
 -- inserts a "makedb" call and reuses the _db compiler from above

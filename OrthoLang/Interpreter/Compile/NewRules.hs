@@ -42,6 +42,7 @@ module OrthoLang.Interpreter.Compile.NewRules
   , newFnA1
   , newFnA2
   , newFnA3
+  , newFnA4
 
   -- * Binary operators from Actions
   , newBop
@@ -254,6 +255,15 @@ newFnA3
   -> [FnTag]                     -- ^ tags
   -> Function
 newFnA3 n (i1, i2, i3) r = newFn n Nothing [i1, i2, i3] r rNewRulesA3
+
+newFnA4
+  :: String                               -- ^ name
+  -> (TypeSig, TypeSig, TypeSig, TypeSig) -- ^ 4 input types
+  -> TypeSig                              -- ^ return type
+  -> NewAction4                           -- ^ 4-input action function
+  -> [FnTag]                              -- ^ tags
+  -> Function
+newFnA4 n (i1, i2, i3, i4) r = newFn n Nothing [i1, i2, i3, i4] r rNewRulesA4
 
 {-|
 This is for the specific case where you want to make a binary operator.

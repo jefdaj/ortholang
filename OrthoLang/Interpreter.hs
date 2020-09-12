@@ -11,6 +11,7 @@ module OrthoLang.Interpreter
   , newFnA1
   , newFnA2
   , newFnA3
+  , newFnA4
   , newFnS1
   , newFnS2
   , newFnS3

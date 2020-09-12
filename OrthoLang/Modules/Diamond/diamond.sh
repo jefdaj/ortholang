@@ -6,7 +6,7 @@ ODIR="$(dirname "$1")"; shift
 QPATH="$1"; shift
 ESTR="$1"; shift
 DBPATH="$1"; shift
-DCMD="$@"
+DCMD="$@" # should be something like "blastp --more-sensitive"
 
 mkdir -p "$ODIR"
 cd "$ODIR"
