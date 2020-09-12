@@ -23,6 +23,7 @@ module OrthoLang.Modules.MMSeqs
 import Development.Shake
 import OrthoLang.Types
 import OrthoLang.Interpreter
+import OrthoLang.Interpreter.Paths (pathDigest)
 import OrthoLang.Locks
 
 import OrthoLang.Modules.Blast   (bht)
@@ -83,7 +84,7 @@ mmseqsCreateDbAll = newFnA1
   "mmseqs_createdb_all"
   (ListSigs $ Some fa "any fasta type")
   (Exactly mms)
-  undefined -- aMmseqsCreateDbAll -- TODO factor this out of the rules one
+  aMmseqsCreateDbAll -- TODO factor this out of the rules one
   []
 
 -- (ListOf (Some fa "any fasta file")) (EncodedAs mmseqsdb (Some fa "any fasta file"))
@@ -92,45 +93,60 @@ mmseqsCreateDbAll = newFnA1
 -- tMmseqsCreateDbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
 -- tMmseqsCreateDbAll name types = fail $ name ++ " requires a list of fasta files, but got " ++ show types
 
+
+rMmseqsCreateDbAll = undefined
+
+-- rMmseqsCreateDbAll :: RulesFn
+-- rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
+--   (ExprPath fasPath) <- rExpr scr fas
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   let out    = exprPath cfg dRef scr e
+--       loc = "modules.mmseqs.aMmseqsCreateDbAll"
+--       out'   = debugRules loc e $ fromPath loc cfg out
+--       createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest loc fas
+--       dbPath = createDbDir </> "result" -- TODO take hash from somewhere else?
+--       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
+--   out' %> \_ -> do
+--     unlessExists dbPath $ do -- TODO any reason it would exist already?
+
 {- Looks like mmseqs2 expects later commands to be smart about index naming? It
  - doesn't always create the plain no-suffix index file, but expects that
  - instead of a .index or whatever. We'll symlink to the .index file and remove
  - its suffix later for now.
  -}
-rMmseqsCreateDbAll :: RulesFn
-rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
-  (ExprPath fasPath) <- rExpr scr fas
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let out    = exprPath cfg dRef scr e
-      loc = "modules.mmseqs.aMmseqsCreateDbAll"
-      out'   = debugRules loc e $ fromPath loc cfg out
-      createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest loc fas
-      dbPath = createDbDir </> "result" -- TODO take hash from somewhere else?
-      index  = dbPath <.> "index" -- mmseqs2 always writes this one?
-  out' %> \_ -> do
-    unlessExists dbPath $ do -- TODO any reason it would exist already?
-      faPaths <- readPaths loc fasPath
-      let faPaths' = map (fromPath loc cfg) faPaths
-      liftIO $ createDirectoryIfMissing True createDbDir
-      -- TODO does mmseqs no longer always write a plain .mmseqs2db file? maybe we have to touch that ourselves?
-      runCmd $ CmdDesc
-        { cmdParallel = False -- TODO true?
-        , cmdFixEmpties = True
-        , cmdOutPath = out'
-        , cmdInPatterns = [dbPath ++ "*"]
-        , cmdNoNeedDirs = []
-        , cmdExtraOutPaths = []
-        , cmdSanitizePaths = [] -- TODO should there be some?
-        , cmdOptions =[Cwd createDbDir] -- TODO remove?
-        , cmdBinary = "mmseqs-createdb-all.sh"
-        , cmdArguments = [dbPath] ++ faPaths'
-        , cmdExitCode = ExitSuccess
-        , cmdRmPatterns = [out', dbPath ++ "*"] -- TODO adjust the code to handle patterns!
-        }
-    symlink out $ toPath loc cfg index
-  return (ExprPath out')
-rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e
+aMmseqsCreateDbAll :: NewAction1
+aMmseqsCreateDbAll (ExprPath out') fasPath' = do
+  cfg <- fmap fromJust getShakeExtra
+  let loc         = "modules.mmseqs.aMmseqsCreateDbAll"
+      fasPath     = toPath loc cfg fasPath'
+      (PathDigest d) = pathDigest fasPath
+      createDbDir = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" </> d
+      dbPath      = createDbDir </> "result" -- TODO take hash from somewhere else?
+      index       = dbPath <.> "index" -- mmseqs2 always writes this one?
+      out         = toPath loc cfg out'
+  faPaths <- readPaths loc fasPath'
+  let faPaths' = map (fromPath loc cfg) faPaths
+  liftIO $ createDirectoryIfMissing True createDbDir
+  -- TODO does mmseqs no longer always write a plain .mmseqs2db file? maybe we have to touch that ourselves?
+  runCmd $ CmdDesc
+    { cmdParallel = False -- TODO true?
+    , cmdFixEmpties = True
+    , cmdOutPath = out'
+    , cmdInPatterns = [dbPath ++ "*"]
+    , cmdNoNeedDirs = []
+    , cmdExtraOutPaths = []
+    , cmdSanitizePaths = [] -- TODO should there be some?
+    , cmdOptions =[Cwd createDbDir] -- TODO remove?
+    , cmdBinary = "mmseqs-createdb-all.sh"
+    , cmdArguments = [dbPath] ++ faPaths'
+    , cmdExitCode = ExitSuccess
+    , cmdRmPatterns = [out', dbPath ++ "*"] -- TODO adjust the code to handle patterns!
+    }
+  symlink out $ toPath loc cfg index
+
+  -- return (ExprPath out')
+--rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e
 
 ---------------------
 -- mmseqs_createdb --
