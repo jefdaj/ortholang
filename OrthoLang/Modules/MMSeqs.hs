@@ -27,12 +27,16 @@ import OrthoLang.Interpreter.Paths (pathDigest)
 import OrthoLang.Locks
 
 import OrthoLang.Modules.Blast   (bht)
-import OrthoLang.Modules.Singletons (withSingletonArg)
+import OrthoLang.Modules.Singletons (withSingleton)
 import OrthoLang.Modules.SeqIO   (fa, fna, faa)
 import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
 import Data.Maybe (fromJust)
+
+------------
+-- module --
+------------
 
 olModule :: Module
 olModule = Module
@@ -68,47 +72,13 @@ mms = Type
 -- mmseqs_createdb_all --
 -------------------------
 
--- mmseqsCreateDbAll :: Function
--- mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeDesc  = name ++ " : fa.list -> mms"
---   -- , fTypeCheck = tMmseqsCreateDbAll name
---   , fInputs = [ListSigs (Some fa "any fasta type")]
---   , fOutput = Exactly mms
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDbAll
---   }
-
 mmseqsCreateDbAll :: Function
 mmseqsCreateDbAll = newFnA1
   "mmseqs_createdb_all"
   (ListSigs $ Some fa "any fasta type")
   (Exactly mms)
   aMmseqsCreateDbAll -- TODO factor this out of the rules one
-  []
-
--- (ListOf (Some fa "any fasta file")) (EncodedAs mmseqsdb (Some fa "any fasta file"))
--- shown as "fa.list -> fa.mmseqsdb, where fa is any fasta file"
--- tMmseqsCreateDbAll :: String -> TypeChecker
--- tMmseqsCreateDbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
--- tMmseqsCreateDbAll name types = fail $ name ++ " requires a list of fasta files, but got " ++ show types
-
-
-rMmseqsCreateDbAll = undefined
-
--- rMmseqsCreateDbAll :: RulesFn
--- rMmseqsCreateDbAll scr e@(Fun _ _ _ _ [fas]) = do
---   (ExprPath fasPath) <- rExpr scr fas
---   cfg  <- fmap fromJust getShakeExtraRules
---   dRef <- fmap fromJust getShakeExtraRules
---   let out    = exprPath cfg dRef scr e
---       loc = "modules.mmseqs.aMmseqsCreateDbAll"
---       out'   = debugRules loc e $ fromPath loc cfg out
---       createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" </> digest loc fas
---       dbPath = createDbDir </> "result" -- TODO take hash from somewhere else?
---       index  = dbPath <.> "index" -- mmseqs2 always writes this one?
---   out' %> \_ -> do
---     unlessExists dbPath $ do -- TODO any reason it would exist already?
+  [] -- TODO nondeterministic?
 
 {- Looks like mmseqs2 expects later commands to be smart about index naming? It
  - doesn't always create the plain no-suffix index file, but expects that
@@ -145,33 +115,21 @@ aMmseqsCreateDbAll (ExprPath out') fasPath' = do
     }
   symlink out $ toPath loc cfg index
 
-  -- return (ExprPath out')
---rMmseqsCreateDbAll _ e = fail $ "bad argument to rMmseqsCreateDbAll: " ++ show e
-
 ---------------------
 -- mmseqs_createdb --
 ---------------------
 
 mmseqsCreateDb :: Function
-mmseqsCreateDb = let name = "mmseqs_createdb" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = name ++ " : fa -> mms"
-  -- , fTypeCheck = tMmseqsCreateDb name
-  , fInputs = [Some fa "any fasta type"]
-  , fOutput = Exactly mms
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDb
-  }
+mmseqsCreateDb = newExprExpansion
+  "mmseqs_createdb"
+  [Some fa "any fasta type"]
+  (Exactly mms)
+  mMmseqsCreateDb
+  [] -- TODO nondeterministic?
 
--- (Some fa "any fasta file") (EncodedAs mmseqsdb (Some fa "any fasta file"))
--- shown as "fa -> fa.mmseqsdb, where fa is any fasta file"
--- tMmseqsCreateDb :: String -> TypeChecker
--- tMmseqsCreateDb _ [x] | x `elem` [fna, faa] = Right mms
--- tMmseqsCreateDb name types = fail $ name ++ " requires a fasta file, but got " ++ show types
-
--- TODO rewrite as ExprExpansion
-rMmseqsCreateDb :: RulesFn
-rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingletonArg e
+mMmseqsCreateDb :: ExprExpansion
+mMmseqsCreateDb _ _ (Fun r ms ds _ [e]) = Fun r ms ds "mmseqs_createdb_all" [withSingleton e]
+mMmseqsCreateDb _ _ e = error "orhtolang.modules.mmseqs.mMmseqsCreateDb" $ "bad argument: " ++ show e
 
 ----------------------
 -- mmseqs_search_db --
