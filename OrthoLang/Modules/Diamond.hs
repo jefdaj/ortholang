@@ -24,21 +24,21 @@ import Data.Maybe (fromJust)
 import Data.Scientific        (Scientific)
 
 -- type RulesFn     = RulesFn
-type OldDiamondBlastDesc =
-  ( String              -- name
-  , [String] -> RulesFn -- rules, which will take cli args
-  , [String]            -- cli args
-  , Type                -- query type
-  , Type                -- subject type
-  , Type                -- result type
-  )
+-- type OldDiamondBlastDesc =
+--   ( String              -- name
+--   , [String] -> RulesFn -- rules, which will take cli args
+--   , [String]            -- cli args
+--   , Type                -- query type
+--   , Type                -- subject type
+--   , Type                -- result type
+--   )
 
 -- TODO anything else needed?
 type NewDiamondBlastDesc =
-  ( String -- ^ base name
-  , Type   -- ^ query type
-  , Type   -- ^ subject type
-  , Type   -- ^ return type (TODO remove?)
+  ( String -- base name
+  , Type   -- query type
+  , Type   -- subject type
+  , Type   -- return type (TODO remove?)
   )
 
 -- variants :: [NewDiamondDesc]
@@ -75,8 +75,9 @@ olModule = Module
       , diamondBlastx
 
       -- rev from db
-      , diamondBlastpDbRev
-      , diamondBlastxDbRev
+      -- TODO do these make sense?
+      -- , diamondBlastpDbRev
+      -- , diamondBlastxDbRev
 
       -- rev from fa
       , diamondBlastpRev
@@ -279,13 +280,15 @@ mDiamondMakedb _ _ e = error "modules.diamond.mDiamondMakedb" $ "bad argument: "
 -- _rev variants --
 -------------------
 
-diamondBlastpDbRev = mkDiamondRev "_db_rev" "_db" ("blastp", faa, dmnd, bht)
-diamondBlastxDbRev = mkDiamondRev "_db_rev" "_db" ("blastx", fna, dmnd, bht)
+-- TODO do these make sense to include? maybe for the _rev_each variants?
+
+-- diamondBlastpDbRev = mkDiamondRev "_db_rev" "_db" ("blastp", faa, dmnd, bht)
+-- diamondBlastxDbRev = mkDiamondRev "_db_rev" "_db" ("blastx", fna, dmnd, bht)
 
 mkDiamondRev :: String -> String -> NewDiamondBlastDesc -> Function
 mkDiamondRev old new (name, qType, sType, rType) = newExprExpansion
   ("diamond_" ++ name ++ old)
-  [Exactly num, Exactly num, Exactly sType, Exactly qType]
+  [Exactly num, Exactly num, Exactly qType, Exactly sType]
   (Exactly rType)
   (mFlip34 old new)
   [Nondeterministic]
