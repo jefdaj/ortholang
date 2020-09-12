@@ -39,7 +39,26 @@ olModule = Module
 
       -- search functions
       -- ++ map mkDiamondBlast oldVariants
-      ++ newVariants
+      -- ++ newVariants
+
+      ++ map mkDiamondFromDb
+           [ ("blastp_db", ["blastp"], faa, dmnd, bht)
+           , ("blastx_db", ["blastx"], fna, dmnd, bht)
+           ]
+
+      ++ map mkDiamondEach
+         -- _db_each
+          [ ("blastp_db", ["blastp"], faa, dmnd, bht)
+          , ("blastx_db", ["blastx"], fna, dmnd, bht)
+          -- _each (fa variants)
+          , ("blastp", ["blastp"], faa, faa , bht)
+          , ("blastx", ["blastx"], fna, faa , bht)
+          -- TODO db rev?
+          -- _rev_each (fa variants)
+          , ("blastp_rev", ["blastp"], faa, faa , bht)
+          , ("blastx_rev", ["blastx"], faa, fna , bht)
+          ]
+
   }
 
 -- TODO figure out how to prettyCat/show/whatever the encoded types, probably with a typeclass
@@ -171,21 +190,18 @@ type NewDiamondBlastDesc =
   , Type     -- result type
   )
 
-newVariants :: [Function]
-newVariants =
+-- newVariants :: [Function]
+-- newVariants =
+
+mkDiamondFromDb :: NewDiamondBlastDesc -> Function
+mkDiamondFromDb (name, args, qType, sType, rType) = newFnA3
+  ("diamond_" ++ name)
+  (Exactly num, Exactly qType, Exactly sType)
+  (Exactly rType)
+  (aDiamondFromDb args)
+  [Nondeterministic]
 
   -- _db variants (the simplest ones)
-  map (\(name, args, qType, sType, rType) ->
-         newFnA3
-           ("diamond_" ++ name)
-           (Exactly num, Exactly qType, Exactly sType)
-           (Exactly rType)
-           (aDiamondFromDb2 args)
-           [Nondeterministic])
-    [ ("blastp_db", ["blastp"], faa, dmnd, bht)
-    , ("blastx_db", ["blastx"], fna, dmnd, bht)
-    ]
-
   -- ++
   -- non-db (fa) variants
   -- TODO straighten out the _db naming stuff!
@@ -195,33 +211,20 @@ newVariants =
     -- , ("blastx_db"                       , ["blastx"                    ], fna, faa , faa)
     -- ]
 
-  ++
+  -- ++
+
+mkDiamondEach :: NewDiamondBlastDesc -> Function
+mkDiamondEach (name, _, qType, sType, rType) = newFnA3
+  ("diamond_" ++ name ++ "_each")
+  (Exactly num, Exactly qType, Exactly $ ListOf sType)
+  (Exactly $ ListOf rType)
+  (newMap3of3 $ "diamond_" ++ name)
+  [Nondeterministic]
 
   -- _each variants
-  map (\(name, _, qType, sType, rType) ->
-         newFnA3
-           ("diamond_" ++ name ++ "_each")
-           (Exactly num, Exactly qType, Exactly $ ListOf sType)
-           (Exactly $ ListOf rType)
-           (newMap3of3 $ "diamond_" ++ name)
-           [Nondeterministic])
+  -- map (\)
 
-    -- _db_each
-    [ ("blastp_db", ["blastp"], faa, dmnd, bht)
-    , ("blastx_db", ["blastx"], fna, dmnd, bht)
-
-    -- _each (fa variants)
-    , ("blastp", ["blastp"], faa, faa , bht)
-    , ("blastx", ["blastx"], fna, faa , bht)
-
-    -- TODO db rev?
-
-    -- _rev_each (fa variants)
-    , ("blastp_rev", ["blastp"], faa, faa , bht)
-    , ("blastx_rev", ["blastx"], faa, fna , bht)
-    ]
-
--- TODO straighten out the _db naming stuff!
+ -- TODO straighten out the _db naming stuff!
 -- mkDiamondBlastFromFa :: String -> Type -> Type -> Type -> Function
 -- mkDiamondBlastFromFa name qType faType dbType = newExprExpansion
 --   (replace "_db" "" name)
@@ -264,21 +267,21 @@ newVariants =
 --     fn as = error $ "bad argument to rFlip23: " ++ show as
 -- rFlip23 _ _ e = error $ "bad argument to rFlip23: " ++ show e
 
-aDiamondFromDb2 :: [String] -> NewAction3
-aDiamondFromDb2 dCmd (ExprPath o') e' q' db' = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "ortholang.modules.diamond.aDiamondFromDb2"
-  aDiamondFromDb dCmd $ map (toPath loc cfg) [o', e', q', db']
+aDiamondFromDb :: [String] -> NewAction3
+aDiamondFromDb dCmd (ExprPath o') e' q' db' = do
+  -- cfg <- fmap fromJust getShakeExtra
+  let loc = "ortholang.modules.diamond.aDiamondFromDb"
+  -- aDiamondFromDb dCmd $ map (toPath loc cfg) [o', e', q', db']
 
-aDiamondFromDb :: [String] -> [Path] -> Action ()
-aDiamondFromDb dCmd [o, e, q, db] = do
+-- aDiamondFromDb :: [String] -> [Path] -> Action ()
+-- aDiamondFromDb dCmd [o, e, q, db] = do
   -- wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ dCmd
-  cfg <- fmap fromJust getShakeExtra
-  let o'  = fromPath loc cfg o
-      e'  = fromPath loc cfg e
-      q'  = fromPath loc cfg q
-      db' = fromPath loc cfg db
-      loc = "modules.diamond.aDiamondblastpdb"
+  -- cfg <- fmap fromJust getShakeExtra
+  -- let o'  = fromPath loc cfg o
+      -- e'  = fromPath loc cfg e
+      -- q'  = fromPath loc cfg q
+      -- db' = fromPath loc cfg db
+  -- let loc = "modules.diamond.aDiamondblastpdb"
       o'' = traceA loc o' $ dCmd ++ [e', o', q', db']
   eStr <- readLit loc e'
   runCmd $ CmdDesc
@@ -296,7 +299,7 @@ aDiamondFromDb dCmd [o, e, q, db] = do
     , cmdRmPatterns = [o'', replaceBaseName o'' "out"]
     }
   sanitizeFileInPlace o'
-aDiamondFromDb _ _ = error $ "bad argument to aDiamondFromDb"
+-- aDiamondFromDb _ _ = error $ "bad argument to aDiamondFromDb"
 
 -- inserts a "makedb" call and reuses the _db compiler from above
 -- based on the version in Blast.hs but a little simpler
