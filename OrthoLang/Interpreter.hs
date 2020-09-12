@@ -33,6 +33,7 @@ module OrthoLang.Interpreter
   , newMap2of2
   , newMap2of3
   , newMap3of3
+  , newMap4of4
   , newDate1of1
   , newDate1of2
   , newDate1of3

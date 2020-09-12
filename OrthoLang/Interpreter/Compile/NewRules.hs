@@ -59,6 +59,7 @@ module OrthoLang.Interpreter.Compile.NewRules
   , newMap2of2
   , newMap2of3
   , newMap3of3
+  , newMap4of4
   , newDate1of1
   , newDate1of2
   , newDate1of3
@@ -602,6 +603,11 @@ newMap2of3 prefix out _ lst _ = newMap prefix 2 out lst
 --   final output path.
 newMap3of3 :: Prefix -> NewAction3
 newMap3of3 prefix out _ _ lst = newMap prefix 3 out lst
+
+-- | Maps a NewAction3 over its 3rd argument and writes the result list to the
+--   final output path.
+newMap4of4 :: Prefix -> NewAction4
+newMap4of4 prefix out _ _ _ lst = newMap prefix 4 out lst
 
 -- | Pass it a 1-argument Action. It maps it over the list and writes the outputs to a list file.
 --   Used to implement all the newMapNofN fns above.

@@ -63,9 +63,13 @@ olModule = Module
       , diamondmakedbEach
       , diamondmakedbAll
 
-      -- search functions
+      -- single from db
       , diamondBlastpDb
       , diamondBlastxDb
+
+      -- _each variants
+      , diamondBlastpDbEach
+      , diamondBlastxDbEach
       ]
 
       -- search functions
@@ -77,18 +81,18 @@ olModule = Module
            -- , ("blastx", fna, dmnd, bht)
            -- ]
 
-      ++ map mkDiamondEach
-         -- _db_each
-          [ ("blastp_db", ["blastp"], faa, dmnd, bht)
-          , ("blastx_db", ["blastx"], fna, dmnd, bht)
-          -- _each (fa variants)
-          , ("blastp", ["blastp"], faa, faa , bht)
-          , ("blastx", ["blastx"], fna, faa , bht)
-          -- TODO db rev?
-          -- _rev_each (fa variants)
-          , ("blastp_rev", ["blastp"], faa, faa , bht)
-          , ("blastx_rev", ["blastx"], faa, fna , bht)
-          ]
+--       ++ map mkDiamondEach
+--          -- _db_each
+--           [ ("blastp_db", ["blastp"], faa, dmnd, bht)
+--           , ("blastx_db", ["blastx"], fna, dmnd, bht)
+--           -- _each (fa variants)
+--           , ("blastp", ["blastp"], faa, faa , bht)
+--           , ("blastx", ["blastx"], fna, faa , bht)
+--           -- TODO db rev?
+--           -- _rev_each (fa variants)
+--           , ("blastp_rev", ["blastp"], faa, faa , bht)
+--           , ("blastx_rev", ["blastx"], faa, fna , bht)
+--           ]
 
   }
 
@@ -218,25 +222,12 @@ mkDiamondFromDb (name, qType, sType, rType) = newFnA4
   (aDiamondFromDb name)
   [Nondeterministic]
 
--- TODO no [String]
 aDiamondFromDb :: String -> NewAction4
 aDiamondFromDb bCmd (ExprPath o') s' e' q' db' = do
-  -- cfg <- fmap fromJust getShakeExtra
   let loc = "ortholang.modules.diamond.aDiamondFromDb"
-  -- aDiamondFromDb bCmd $ map (toPath loc cfg) [o', e', q', db']
-
--- aDiamondFromDb :: [String] -> [Path] -> Action ()
--- aDiamondFromDb bCmd [o, e, q, db] = do
-  -- wrappedCmdWrite True True cfg ref o'' [] [] [] "diamond.sh" $ [o'', q', eStr, db'] ++ bCmd
-  -- cfg <- fmap fromJust getShakeExtra
-  -- let o'  = fromPath loc cfg o
-      -- e'  = fromPath loc cfg e
-      -- q'  = fromPath loc cfg q
-      -- db' = fromPath loc cfg db
-  -- let loc = "modules.diamond.aDiamondblastpdb"
       o'' = traceA loc o' [bCmd, e', o', q', db']
   sFlag <- readSensitivity s' -- sensitivity value
-  eStr <- readLit loc e' -- e-value cutoff (TODO is it called that in diamond?)
+  eStr  <- readLit loc e' -- e-value cutoff (TODO is it called that in diamond?)
   runCmd $ CmdDesc
     { cmdBinary = "diamond.sh"
     , cmdArguments = [o'', q', eStr, db', bCmd, sFlag]
@@ -253,27 +244,19 @@ aDiamondFromDb bCmd (ExprPath o') s' e' q' db' = do
     }
   sanitizeFileInPlace o'
 
--- newVariants :: [Function]
--- newVariants =
+--------------------
+-- _each variants --
+--------------------
 
-  -- _db variants (the simplest ones)
-  -- ++
-  -- non-db (fa) variants
-  -- TODO straighten out the _db naming stuff!
-  -- map (\(name, _, qType, sType, dbType) -> mkDiamondBlastFromFa ("diamond_" ++ name) qType sType dbType)
-    -- []
-    -- [ ("blastp_db"                       , ["blastp"                    ], faa, faa , faa)
-    -- , ("blastx_db"                       , ["blastx"                    ], fna, faa , faa)
-    -- ]
+diamondBlastpDbEach = mkDiamondEach ("blastp_db", faa, dmnd, bht)
+diamondBlastxDbEach = mkDiamondEach ("blastx_db", fna, dmnd, bht)
 
-  -- ++
-
--- mkDiamondEach :: NewDiamondBlastDesc -> Function
-mkDiamondEach (name, _, qType, sType, rType) = newFnA3
+mkDiamondEach :: NewDiamondBlastDesc -> Function
+mkDiamondEach (name, qType, sType, rType) = newFnA4
   ("diamond_" ++ name ++ "_each")
-  (Exactly num, Exactly qType, Exactly $ ListOf sType)
+  (Exactly num, Exactly num, Exactly qType, Exactly $ ListOf sType)
   (Exactly $ ListOf rType)
-  (newMap3of3 $ "diamond_" ++ name)
+  (newMap4of4 $ "diamond_" ++ name)
   [Nondeterministic]
 
   -- _each variants
