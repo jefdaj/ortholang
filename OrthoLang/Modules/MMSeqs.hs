@@ -68,6 +68,13 @@ mms = Type
       return d
   }
 
+-- TODO mht type, because it's not really equivalent to blast!
+-- TODO and then make that a member of ht
+
+-- TODO is this needed, or can we just --format-output directly?
+-- ali :: Type
+-- ali
+
 -------------------------
 -- mmseqs_createdb_all --
 -------------------------
@@ -139,16 +146,40 @@ mMmseqsCreateDb _ _ e = error "orhtolang.modules.mmseqs.mMmseqsCreateDb" $ "bad 
 -- TODO any reason to have a version that takes the query as a db? seems unnecessary
 
 -- TODO rewrite with newFnA3
+-- mmseqsSearchDb :: Function
+-- mmseqsSearchDb = let name = "mmseqs_search_db" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeDesc  = name ++ " : num fa mms -> bht"
+--   -- , fTypeCheck = tMmseqsSearchDb name
+--   , fInputs = [Exactly num, Some fa "any fasta file", Exactly mms]
+--   , fOutput = Exactly bht -- TODO exact format right?
+--   ,fTags = []
+--   , fNewRules = NewNotImplemented, fOldRules = rMmseqsSearchDb
+--   }
+
+-- | This is the "base" search function, but it still expands to two different functions:
+--
+--   * first, the actual search which returns an mms database
+--   * then an extractalis script to convert that to a BLAST-format hit table
+--
 mmseqsSearchDb :: Function
-mmseqsSearchDb = let name = "mmseqs_search_db" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = name ++ " : num fa mms -> bht"
-  -- , fTypeCheck = tMmseqsSearchDb name
-  , fInputs = [Exactly num, Some fa "any fasta file", Exactly mms]
-  , fOutput = Exactly bht -- TODO exact format right?
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMmseqsSearchDb
-  }
+mmseqsSearchDb = newExprExpansion
+  "mmseqs_search_db"
+  [Exactly num, Some fa "any fasta file", Exactly mms]
+  (Exactly bht) -- TODO exact same format, right?
+  -- mMmseqsSearchDb
+  aMmseqsSearchDb
+  [] -- TODO nondeterministic?
+
+-- looks like it will work, but not needed if we can just --format-output like blast in the first place
+-- mMmseqsSearchDb :: ExprExpansion
+-- mMmseqsSearchDb _ _ (Fun r ms ds _ es) = Fun r ms ds "mmseqs_convert_alis" [fn]
+--   where
+--     fn = Fun ali
+-- mMmseqsSearchDb _ _ e = error "orhtolang.modules.mmseqs.mMmseqsSearchDb" $ "bad argument: " ++ show e
+
+-- TODO mmseqs_search_db_ali function returning an aln database (only if needed)
+-- TODO mmseqs_convert_alis function to convert mmseqs aln database -> hit table (only if needed)
 
 -- (num, (Some fa "any fasta file"), (EncodedAs mmseqsdb (Some fa "also any fasta file"))) bht
 -- shown as "num fa1 fa2.mmseqsdb -> bht, where fa1 is any fasta file, fa2 is also any fasta file"
@@ -164,26 +195,26 @@ mmseqsSearchDb = let name = "mmseqs_search_db" in Function
  - now seems to be depending on the .0 one and remembering to remove that
  - suffix later when needed.
  -}
-rMmseqsSearchDb :: RulesFn
-rMmseqsSearchDb scr e@(Fun _ seed _ _ [n, q, s]) = do
-  (ExprPath ePath) <- rExpr scr n
-  (ExprPath qPath) <- rExpr scr $ Fun mms seed (depsOf q) "mmseqs_createdb" [q]
-  (ExprPath sPath) <- rExpr scr s -- note: the subject should already have been converted to a db
-  cfg  <- fmap fromJust getShakeExtraRules
-  dRef <- fmap fromJust getShakeExtraRules
-  let loc = "modules.mmseqs.rMmseqsSearchDb"
-      out    = exprPath cfg dRef scr e
-      out'   = debugRules "rMmseqsSearch" e $ fromPath loc cfg out
-      -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
-      -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
-      searchDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search"
-      outDbBase = searchDbDir </> digest loc out <.> "mmseqs2db"
-      -- outDb0    = outDbBase <.> "0" -- TODO remember to remove the .0 when referencing it!
-      outDbIndex = outDbBase <.> "index" -- TODO remember to remove the ext when referencing it!
-  outDbIndex %> \_ -> aMmseqsSearchDb ePath qPath sPath outDbBase
-  out'   %> \_ -> aMmseqConvertAlis qPath sPath outDbIndex out'
-  return (ExprPath out')
-rMmseqsSearchDb _ e = fail $ "bad argument to rMmseqsSearch: " ++ show e
+-- rMmseqsSearchDb :: RulesFn
+-- rMmseqsSearchDb scr e@(Fun _ seed _ _ [n, q, s]) = do
+--   (ExprPath ePath) <- rExpr scr n
+--   (ExprPath qPath) <- rExpr scr $ Fun mms seed (depsOf q) "mmseqs_createdb" [q]
+--   (ExprPath sPath) <- rExpr scr s -- note: the subject should already have been converted to a db
+--   cfg  <- fmap fromJust getShakeExtraRules
+--   dRef <- fmap fromJust getShakeExtraRules
+--   let loc = "modules.mmseqs.rMmseqsSearchDb"
+--       out    = exprPath cfg dRef scr e
+--       out'   = debugRules "rMmseqsSearch" e $ fromPath loc cfg out
+--       -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
+--       -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
+--       searchDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search"
+--       outDbBase = searchDbDir </> digest loc out <.> "mmseqs2db"
+--       -- outDb0    = outDbBase <.> "0" -- TODO remember to remove the .0 when referencing it!
+--       outDbIndex = outDbBase <.> "index" -- TODO remember to remove the ext when referencing it!
+--   outDbIndex %> \_ -> aMmseqsSearchDb ePath qPath sPath outDbBase
+--   out'   %> \_ -> aMmseqConvertAlis qPath sPath outDbIndex out'
+--   return (ExprPath out')
+-- rMmseqsSearchDb _ e = fail $ "bad argument to rMmseqsSearch: " ++ show e
 
 -- TODO how should this handle the .index and other files issue?
 resolveMmseqsDb :: FilePath -> Action FilePath
@@ -198,8 +229,12 @@ resolveMmseqsDb path = do
 -- TODO is the db being passed in place of the fa too?
 -- TODO interesting! it works in stack repl but not stack exec
 -- TODO search creates some db.* files but not the plain base file or .index! separate into different dir?
-aMmseqsSearchDb :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
-aMmseqsSearchDb ePath qDb sDb outDb = do
+-- aMmseqsSearchDb :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+-- aMmseqsSearchDb ePath qDb sDb outDb = do
+
+-- TODO make outDb not a db with --format-output or whatever, and remove the convert alis step if possible
+aMmseqsSearchDb :: NewAction3
+aMmseqsSearchDb (ExprPath outDb') ePath' qDb' sDb' = do
   let loc = "modules.mmseqs.aMmseqsSearchDb"
   eStr <- readLit loc ePath
   qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
