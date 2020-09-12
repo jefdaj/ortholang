@@ -78,6 +78,10 @@ olModule = Module
       , diamondBlastpDbRev
       , diamondBlastxDbRev
 
+      -- rev from fa
+      , diamondBlastpRev
+      , diamondBlastxRev
+
       -- _each variants
       , diamondBlastpEach
       , diamondBlastxEach
@@ -271,37 +275,32 @@ mDiamondMakedb _ _ (Fun r ms ds n [i1, i2, i3, i4]) = Fun r ms ds (n ++ "_db") [
     fn = Fun dmnd ms (depsOf i4) "diamond_makedb" [i4]
 mDiamondMakedb _ _ e = error "modules.diamond.mDiamondMakedb" $ "bad argument: " ++ show e
 
--- inserts a "makedb" call and reuses the _db compiler from above
--- based on the version in Blast.hs but a little simpler
--- rDiamondFromFa :: [String] -> RulesFn
--- rDiamondFromFa dCmd st (Fun rtn seed deps _ [e, q, s])
---   = rules st (Fun rtn seed deps name1 [e, q, dbExpr])
---   where
---     rules  = rSimple $ aDiamondFromDb dCmd
---     name1  = "diamond_" ++ headOrDie "failed to parse dCmd in rDiamondFromFa" dCmd
---     dbExpr = Fun dmnd seed (depsOf s) "diamond_makedb" [s]
--- rDiamondFromFa _ _ _ = fail "bad argument to rDiamondFromFa"
-
-
 -------------------
 -- _rev variants --
 -------------------
 
-diamondBlastpDbRev = mkDiamondRev ("blastp", faa, dmnd, bht)
-diamondBlastxDbRev = mkDiamondRev ("blastx", fna, dmnd, bht)
+diamondBlastpDbRev = mkDiamondRev "_db_rev" "_db" ("blastp", faa, dmnd, bht)
+diamondBlastxDbRev = mkDiamondRev "_db_rev" "_db" ("blastx", fna, dmnd, bht)
 
-mkDiamondRev :: NewDiamondBlastDesc -> Function
-mkDiamondRev (name, qType, sType, rType) = newExprExpansion
-  ("diamond_" ++ name ++ "_db_rev")
+mkDiamondRev :: String -> String -> NewDiamondBlastDesc -> Function
+mkDiamondRev old new (name, qType, sType, rType) = newExprExpansion
+  ("diamond_" ++ name ++ old)
   [Exactly num, Exactly num, Exactly sType, Exactly qType]
   (Exactly rType)
-  (mFlip34 "_db_rev" "_db")
+  (mFlip34 old new)
   [Nondeterministic]
 
 -- TODO move to NewRules.hs?
 mFlip34 :: String -> String -> ExprExpansion
 mFlip34 old new _ _ (Fun r ms ds n [i1, i2, i3, i4]) = Fun r ms ds (replace old new n) [i1, i2, i4, i3]
 mFlip34 _ _ _ _ e = error "modules.diamond.mFlip34" $ "bad argument: " ++ show e
+
+------------------
+-- _rev from fa --
+------------------
+
+diamondBlastpRev = mkDiamondRev "_rev" "" ("blastp", faa, dmnd, bht)
+diamondBlastxRev = mkDiamondRev "_rev" "" ("blastp", faa, dmnd, bht)
 
 --------------------
 -- _each variants --
@@ -324,6 +323,19 @@ mkDiamondEach old new (base, qType, sType, rType) =
        (Exactly $ ListOf rType)
        (newMap4of4 name')
        [Nondeterministic]
+
+-------------------
+-- _all variants --
+-------------------
+
+-- TODO write these
+
+-------------------
+-- _rbh variants --
+-------------------
+
+-- TODO write these
+
 
   -- _each variants
   -- map (\)
