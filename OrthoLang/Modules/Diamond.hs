@@ -77,6 +77,8 @@ olModule = Module
       -- _each variants
       , diamondBlastpDbEach
       , diamondBlastxDbEach
+      , diamondBlastpDbRevEach
+      , diamondBlastxDbRevEach
       ]
 
 --       ++ map mkDiamondEach
@@ -266,16 +268,21 @@ mFlip34 _ _ _ _ e = error "modules.diamond.mFlip34" $ "bad argument: " ++ show e
 -- _each variants --
 --------------------
 
-diamondBlastpDbEach = mkDiamondEach ("blastp", faa, dmnd, bht)
-diamondBlastxDbEach = mkDiamondEach ("blastx", fna, dmnd, bht)
+diamondBlastpDbEach    = mkDiamondEach "_db_each"     "_db"     ("blastp", faa, dmnd, bht)
+diamondBlastxDbEach    = mkDiamondEach "_db_each"     "_db"     ("blastx", fna, dmnd, bht)
+diamondBlastpDbRevEach = mkDiamondEach "_db_rev_each" "_db_rev" ("blastp", faa, dmnd, bht)
+diamondBlastxDbRevEach = mkDiamondEach "_db_rev_each" "_db_rev" ("blastx", fna, dmnd, bht)
 
-mkDiamondEach :: NewDiamondBlastDesc -> Function
-mkDiamondEach (name, qType, sType, rType) = newFnA4
-  ("diamond_" ++ name ++ "_db_each")
-  (Exactly num, Exactly num, Exactly qType, Exactly $ ListOf sType)
-  (Exactly $ ListOf rType)
-  (newMap4of4 $ "diamond_" ++ name ++ "_db")
-  [Nondeterministic]
+mkDiamondEach :: String -> String -> NewDiamondBlastDesc -> Function
+mkDiamondEach old new (base, qType, sType, rType) =
+  let name  = "diamond_" ++ base ++ old
+      name' = replace old new name
+  in newFnA4
+       name
+       (Exactly num, Exactly num, Exactly qType, Exactly $ ListOf sType)
+       (Exactly $ ListOf rType)
+       (newMap4of4 name')
+       [Nondeterministic]
 
   -- _each variants
   -- map (\)
