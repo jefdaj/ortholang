@@ -65,6 +65,7 @@ mkBlastFromFaRev (bCmd, qType, sType, _) = newExprExpansion
   []
 
 -- flips the query and subject arguments and reuses the regular compiler above
+-- TODO can this be used in Diamond.hs too? make it more generic if possible
 mBlastFromFaRev :: ExprExpansion
 mBlastFromFaRev _ _ (Fun r ms ds n [e, q, s]) = Fun r ms ds (replace "_rev" "" n) [e, s, q]
 mBlastFromFaRev _ _ e = error "ortholang.modules.blastrbh.mBlastFromFaRev" $ "bad argument: " ++ show e
