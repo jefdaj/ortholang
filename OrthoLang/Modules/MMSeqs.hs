@@ -1,6 +1,8 @@
 module OrthoLang.Modules.MMSeqs
   where
 
+-- TODO add variants: _each, _all, _rev, _rev_each, _rbh
+
 -- TODO test failures are because createdb sometimes doesn't create the final .mmseqsdb file, but is otherwise OK?
 
 -- TODO keep intermediate files at least until we can line them up with sonicparanoid if needed
@@ -65,16 +67,24 @@ mms = Type
 -- mmseqs_createdb_all --
 -------------------------
 
+-- mmseqsCreateDbAll :: Function
+-- mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in Function
+--   { fOpChar = Nothing, fName = name
+--   -- , fTypeDesc  = name ++ " : fa.list -> mms"
+--   -- , fTypeCheck = tMmseqsCreateDbAll name
+--   , fInputs = [ListSigs (Some fa "any fasta type")]
+--   , fOutput = Exactly mms
+--   ,fTags = []
+--   , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDbAll
+--   }
+
 mmseqsCreateDbAll :: Function
-mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = name ++ " : fa.list -> mms"
-  -- , fTypeCheck = tMmseqsCreateDbAll name
-  , fInputs = [ListSigs (Some fa "any fasta type")]
-  , fOutput = Exactly mms
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMmseqsCreateDbAll
-  }
+mmseqsCreateDbAll = newFnA1
+  "mmseqs_createdb_all"
+  (ListSigs $ Some fa "any fasta type")
+  (Exactly mms)
+  undefined -- aMmseqsCreateDbAll -- TODO factor this out of the rules one
+  []
 
 -- (ListOf (Some fa "any fasta file")) (EncodedAs mmseqsdb (Some fa "any fasta file"))
 -- shown as "fa.list -> fa.mmseqsdb, where fa is any fasta file"
@@ -143,6 +153,7 @@ mmseqsCreateDb = let name = "mmseqs_createdb" in Function
 -- tMmseqsCreateDb _ [x] | x `elem` [fna, faa] = Right mms
 -- tMmseqsCreateDb name types = fail $ name ++ " requires a fasta file, but got " ++ show types
 
+-- TODO rewrite as ExprExpansion
 rMmseqsCreateDb :: RulesFn
 rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingletonArg e
 
@@ -153,6 +164,7 @@ rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingletonArg e
 -- TODO for now this should also handle the convertalis step
 -- TODO any reason to have a version that takes the query as a db? seems unnecessary
 
+-- TODO rewrite with newFnA3
 mmseqsSearchDb :: Function
 mmseqsSearchDb = let name = "mmseqs_search_db" in Function
   { fOpChar = Nothing, fName = name
@@ -264,6 +276,7 @@ aMmseqConvertAlis qDb sDb outDbIndex outTab = do
 -- mmseqs_search --
 -------------------
 
+-- TODO rewrite as ExprExpansion
 mmseqsSearch :: Function
 mmseqsSearch = let name = "mmseqs_search" in Function
   { fOpChar = Nothing, fName = name
