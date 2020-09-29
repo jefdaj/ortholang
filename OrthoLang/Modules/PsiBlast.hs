@@ -342,13 +342,20 @@ psiblastAll = compose1 "psiblast_all" [Nondeterministic] psiblastEach (mkConcat 
 --   where
 --     name = "psiblast_db"
 
+-- | Search variant that takes a FASTA query and blast DB, and trains a query PSSM before the search
 psiblastDb :: Function
 psiblastDb = newExprExpansion
   "psiblast_db"
   [Exactly num, Exactly faa, Exactly pdb]
   (Exactly bht)
-  undefined
+  mPsiblastDb
   [Nondeterministic]
+
+mPsiblastDb :: ExprExpansion
+mPsiblastDb _ _ (Fun r ms ds _ [e, qFa, sDb]) = Fun r ms ds "psiblast_pssm_db" [e, qPssm, sDb]
+  where
+    qPssm = Fun pssm ms (depsOf qFa) "psilbast_train_db" [e, qPssm, sDb]
+mPsiblastDb _ _ e = error "ortholang.modules.psiblast.mPsiblastDb" $ "bad argument: " ++ show e
 
 -- TODO want map3of3 to read a pdb.list here and pass the individual paths,
 --      but that interferes with one of the others right?
@@ -604,12 +611,13 @@ searchArgs = ["-outfmt", "6", "-out"]
 --   where
 --     name = "psiblast_pssm_db"
 
+-- | The base search function which takes an explicit PSSM and blast DB
 psiblastPssmDb :: Function
 psiblastPssmDb = newFnA3
   "psiblast_pssm_db"
   (Exactly num, Exactly pssm, Exactly pdb)
   (Exactly bht)
-  aPsiblastSearchDb -- TODO is this right?
+  aPsiblastSearchDb
   [Nondeterministic]
 
 -- psiblastPssmDbEach :: Function
