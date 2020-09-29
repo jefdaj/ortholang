@@ -132,22 +132,23 @@ aPsiblastTrainDb = aPsiblastDb True trainingArgs
 aPsiblastSearchDb :: NewAction3
 aPsiblastSearchDb = aPsiblastDb False searchArgs
 
-aPsiblastDb' :: Bool -> [String] -> [Path] -> Action ()
-aPsiblastDb' writingPssm args [oPath, ePath,  qPath, dbPath] = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.psiblast.aPsiblastDb'"
-      oPath'  = fromPath loc cfg oPath
-      ePath'  = fromPath loc cfg ePath
-      qPath'  = fromPath loc cfg qPath -- might be a fasta or pssm
-      dbPath' = fromPath loc cfg dbPath
-  aPsiblastDb writingPssm args (ExprPath oPath') ePath' qPath' dbPath'
-aPsiblastDb' _ _ _ = fail "bad argument to aPsiblastDb'"
+-- TODO remove
+-- aPsiblastDb' :: Bool -> [String] -> [Path] -> Action ()
+-- aPsiblastDb' writingPssm args [oPath, ePath,  qPath, dbPath] = do
+--   cfg <- fmap fromJust getShakeExtra
+--   let loc = "modules.psiblast.aPsiblastDb'"
+--       oPath'  = fromPath loc cfg oPath
+--       ePath'  = fromPath loc cfg ePath
+--       qPath'  = fromPath loc cfg qPath -- might be a fasta or pssm
+--       dbPath' = fromPath loc cfg dbPath
+--   aPsiblastDb writingPssm args (ExprPath oPath') ePath' qPath' dbPath'
+-- aPsiblastDb' _ _ _ = fail "bad argument to aPsiblastDb'"
 
-aPsiblastTrainDb' :: [Path] -> Action ()
-aPsiblastTrainDb' = aPsiblastDb' True  trainingArgs
+-- aPsiblastTrainDb' :: [Path] -> Action ()
+-- aPsiblastTrainDb' = aPsiblastDb' True  trainingArgs
 
-aPsiblastSearchDb' :: [Path] -> Action ()
-aPsiblastSearchDb' = aPsiblastDb' False searchArgs
+-- aPsiblastSearchDb' :: [Path] -> Action ()
+-- aPsiblastSearchDb' = aPsiblastDb' False searchArgs
 
 -- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or
 -- aPsiblastSearchDb to search with an existing PSSM.
