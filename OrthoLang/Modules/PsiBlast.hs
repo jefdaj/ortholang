@@ -297,27 +297,36 @@ psiblast = newExprExpansion
   undefined
   [Nondeterministic]
 
+-- psiblastEach :: Function
+-- psiblastEach = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
+--   , fOutput = Exactly (ListOf bht)
+--   , fTags = [Nondeterministic]
+--   , fNewRules = NewNotImplemented, fOldRules = rPsiblastEach
+--   }
+--   where
+--     name = "psiblast_each"
+
 psiblastEach :: Function
-psiblastEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
-  , fOutput = Exactly (ListOf bht)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rPsiblastEach
-  }
-  where
-    name = "psiblast_each"
+psiblastEach = newFnA3
+  "psiblast_each"
+  (Exactly num, Exactly faa, Exactly $ ListOf faa)
+  (Exactly bht)
+  (newMap3of3 "psiblast")
+  [Nondeterministic]
 
-rPsiblastEach :: RulesFn
-rPsiblastEach st (Fun rtn seed deps name [e, fa, fas])
-  -- = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
-  = (rMap 3 aPsiblastSearchDb') st expr'
-  where
-    ps    = Fun (ListOf pdb) seed deps "psiblast_train_db_each" [e, fa, dbs]
-    dbs   = Fun (ListOf pdb) seed (depsOf fas) "makeblastdb_faa_each" [fas]
-    expr' = Fun rtn seed deps name [e, ps, dbs]
-rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
+-- rPsiblastEach :: RulesFn
+-- rPsiblastEach st (Fun rtn seed deps name [e, fa, fas])
+--   -- = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
+--   = (rMap 3 aPsiblastSearchDb') st expr'
+--   where
+--     ps    = Fun (ListOf pdb) seed deps "psiblast_train_db_each" [e, fa, dbs]
+--     dbs   = Fun (ListOf pdb) seed (depsOf fas) "makeblastdb_faa_each" [fas]
+--     expr' = Fun rtn seed deps name [e, ps, dbs]
+-- rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 
+-- TODO does this still work? is it worth keeping, or just rewrite anyway?
 psiblastAll :: Function
 psiblastAll = compose1 "psiblast_all" [Nondeterministic] psiblastEach (mkConcat bht) -- TODO name the mkConcat?
 
@@ -343,18 +352,26 @@ psiblastDb = newExprExpansion
 -- TODO want map3of3 to read a pdb.list here and pass the individual paths,
 --      but that interferes with one of the others right?
 -- wait can psiblast just take a faa and pdb directly?
+-- psiblastDbEach :: Function
+-- psiblastDbEach = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
+--   , fOutput = Exactly (ListOf bht)
+--   , fTags = [Nondeterministic]
+--   -- can't use withPssmQuery here because there's a list of things to train against
+--   -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
+--   , fNewRules = NewNotImplemented, fOldRules = rMap 3 aPsiblastSearchDb'
+--   }
+--   where
+--     name = "psiblast_db_each"
+
 psiblastDbEach :: Function
-psiblastDbEach = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
-  , fOutput = Exactly (ListOf bht)
-  , fTags = [Nondeterministic]
-  -- can't use withPssmQuery here because there's a list of things to train against
-  -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
-  , fNewRules = NewNotImplemented, fOldRules = rMap 3 aPsiblastSearchDb'
-  }
-  where
-    name = "psiblast_db_each"
+psiblastDbEach = newFnA3
+  "psiblast_db_each"
+  (Exactly num, Exactly faa, Exactly $ ListOf pdb)
+  (Exactly bht)
+  (newMap3of3 "psiblast_db")
+  [Nondeterministic]
 
 ----------------------------
 -- explicitly train pssms --
