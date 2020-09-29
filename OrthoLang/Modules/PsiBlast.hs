@@ -1,5 +1,7 @@
 module OrthoLang.Modules.PsiBlast where
 
+-- TODO simplify by using explicit psiblast_train and psiblast_search everywhere?
+
 -- TODO write more detailed help descriptions for each function
 -- TODO incorporate deltablast too?
 -- TODO checkpoint PSSM type? not unless needed
@@ -295,37 +297,23 @@ psiblast = newExprExpansion
   "psiblast"
   [Exactly num, Exactly faa, Exactly faa]
   (Exactly bht)
-  undefined
+  mPsiblast
   [Nondeterministic]
 
--- psiblastEach :: Function
--- psiblastEach = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
---   , fOutput = Exactly (ListOf bht)
---   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rPsiblastEach
---   }
---   where
---     name = "psiblast_each"
+mPsiblast :: ExprExpansion
+mPsiblast _ _ (Fun r ms ds _ [e, qFa, sFa]) = Fun r ms ds "psiblast_pssm_db" [e, qPssm, sDb]
+  where
+    qPssm = Fun pssm ms (depsOf qFa) "psiblast_train_db" [e, qPssm, sDb]
+    sDb   = Fun pdb  ms (depsOf sFa) "makeblastdb_faa" [sDb]
+mPsiblast _ _ e = error "ortholang.modules.psiblast.mPsiblast" $ "bad argument: " ++ show e
 
 psiblastEach :: Function
 psiblastEach = newFnA3
   "psiblast_each"
   (Exactly num, Exactly faa, Exactly $ ListOf faa)
-  (Exactly bht)
+  (Exactly $ ListOf bht)
   (newMap3of3 "psiblast")
   [Nondeterministic]
-
--- rPsiblastEach :: RulesFn
--- rPsiblastEach st (Fun rtn seed deps name [e, fa, fas])
---   -- = rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) st expr'
---   = (rMap 3 aPsiblastSearchDb') st expr'
---   where
---     ps    = Fun (ListOf pdb) seed deps "psiblast_train_db_each" [e, fa, dbs]
---     dbs   = Fun (ListOf pdb) seed (depsOf fas) "makeblastdb_faa_each" [fas]
---     expr' = Fun rtn seed deps name [e, ps, dbs]
--- rPsiblastEach _ _ = fail "bad argument to rPsiblastEach"
 
 -- TODO does this still work? is it worth keeping, or just rewrite anyway?
 psiblastAll :: Function
@@ -410,12 +398,13 @@ trainingArgs =
 --     name = "psiblast_train"
 
 psiblastTrain :: Function
-psiblastTrain = newExprExpansion
+psiblastTrain = newFnA3
   "psiblast_train"
-  [Exactly num, Exactly faa, Exactly faa]
+  (Exactly num, Exactly faa, Exactly faa)
   (Exactly pssm)
-  undefined
+  aPsiblastTrainDb -- TODO remove db from name?
   [Nondeterministic]
+
 
 -- TODO better name!
 -- psiblastTrainPssms :: Function
@@ -539,6 +528,7 @@ psiblastTrainPssmsDb = newExprExpansion
 --   where
 --     name = "psiblast_pssm"
 
+-- TODO psiblast_search_pssm?
 psiblastPssm :: Function
 psiblastPssm = newExprExpansion
   "psiblast_pssm"
@@ -645,12 +635,13 @@ psiblastPssmDbEach = newFnA3
 --   where
 --     name = "psiblast_each_pssm_db"
 
+-- TODO what should it be called?
 psiblastEachPssmDb :: Function
-psiblastEachPssmDb = newExprExpansion
+psiblastEachPssmDb = newFnA3
   "psiblast_each_pssm_db"
-  [Exactly num, Exactly (ListOf pssm), Exactly pdb]
+  (Exactly num, Exactly (ListOf pssm), Exactly pdb)
   (Exactly $ ListOf bht)
-  undefined
+  (newMap2of3 "psiblast_pssm_db")
   [Nondeterministic]
 
 psiblastPssmsDb :: Function
@@ -670,12 +661,13 @@ psiblastPssmsDb = compose1 "psiblast_pssms_db" [Nondeterministic] psiblastEachPs
 --   where
 --     name = "psiblast_each_pssm"
 
+-- TODO new pattern for these names?
 psiblastEachPssm :: Function
-psiblastEachPssm = newExprExpansion
+psiblastEachPssm = newFnA3
   "psiblast_each_pssm"
-  [Exactly num, Exactly (ListOf pssm), Exactly faa]
+  (Exactly num, Exactly (ListOf pssm), Exactly faa)
   (Exactly $ ListOf bht)
-  undefined
+  (newMap2of3 "psiblast_pssm")
   [Nondeterministic]
 
 -- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
