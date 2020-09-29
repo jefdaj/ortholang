@@ -410,16 +410,24 @@ psiblastTrain = newExprExpansion
   [Nondeterministic]
 
 -- TODO better name!
+-- psiblastTrainPssms :: Function
+-- psiblastTrainPssms = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly num, Exactly (ListOf faa), Exactly faa]
+--   , fOutput = Exactly (ListOf pssm)
+--   , fTags = [Nondeterministic]
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
+--   }
+--   where
+--     name = "psiblast_train_pssms"
+
 psiblastTrainPssms :: Function
-psiblastTrainPssms = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly (ListOf faa), Exactly faa]
-  , fOutput = Exactly (ListOf pssm)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
-  }
-  where
-    name = "psiblast_train_pssms"
+psiblastTrainPssms = newExprExpansion
+  "psiblast_train_pssms"
+  [Exactly num, Exactly (ListOf faa), Exactly faa]
+  (Exactly $ ListOf pssm)
+  undefined
+  [Nondeterministic]
 
 -- TODO appears to succeed, but something is messed up about the mapping?
 --      (makes a list of length 1 from multiple faa subjects)
@@ -500,16 +508,24 @@ psiblastTrainDbEach = newExprExpansion
   undefined
   [Nondeterministic]
 
+-- psiblastTrainPssmsDb :: Function
+-- psiblastTrainPssmsDb = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly num, Exactly (ListOf faa), Exactly pdb]
+--   , fOutput = Exactly (ListOf pssm)
+--   , fTags = [Nondeterministic]
+--   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastTrainDb'
+--   }
+--   where
+--     name = "psiblast_train_pssms_db"
+
 psiblastTrainPssmsDb :: Function
-psiblastTrainPssmsDb = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly (ListOf faa), Exactly pdb]
-  , fOutput = Exactly (ListOf pssm)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastTrainDb'
-  }
-  where
-    name = "psiblast_train_pssms_db"
+psiblastTrainPssmsDb = newExprExpansion
+  "psiblast_train_pssms_db"
+  [Exactly num, Exactly (ListOf faa), Exactly pdb]
+  (Exactly $ ListOf pssm)
+  undefined
+  [Nondeterministic]
 
 ---------------------------------------
 -- search with explicit pssm queries --
@@ -620,16 +636,24 @@ psiblastPssmDbEach = newFnA3
 
 -- TODO better name? this one's pretty bad!
 -- TODO would a user ever want to use this one directly?
+-- psiblastEachPssmDb :: Function
+-- psiblastEachPssmDb = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly pdb]
+--   , fOutput = Exactly (ListOf bht)
+--   , fTags = [Nondeterministic]
+--   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastSearchDb'
+--   }
+--   where
+--     name = "psiblast_each_pssm_db"
+
 psiblastEachPssmDb :: Function
-psiblastEachPssmDb = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly pdb]
-  , fOutput = Exactly (ListOf bht)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastSearchDb'
-  }
-  where
-    name = "psiblast_each_pssm_db"
+psiblastEachPssmDb = newExprExpansion
+  "psiblast_each_pssm_db"
+  [Exactly num, Exactly (ListOf pssm), Exactly pdb]
+  (Exactly $ ListOf bht)
+  undefined
+  [Nondeterministic]
 
 psiblastPssmsDb :: Function
 psiblastPssmsDb = compose1 "psiblast_pssms_db" [Nondeterministic] psiblastEachPssmDb (mkConcat bht) -- TODO name the mkConcat?
@@ -637,16 +661,24 @@ psiblastPssmsDb = compose1 "psiblast_pssms_db" [Nondeterministic] psiblastEachPs
 -- TODO withPdbSubject fails with rMap? psiblastTrainPssms and psiblastEachPssm
 -- TODO OK this is weird, why does it fail but psiblastPssms below can use it correctly?
 --      specific incompatibility with withPdbSubject?
+-- psiblastEachPssm :: Function
+-- psiblastEachPssm = Function
+--   { fOpChar = Nothing, fName = name
+--   , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly faa]
+--   , fOutput = Exactly (ListOf bht)
+--   , fTags = [Nondeterministic]
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
+--   }
+--   where
+--     name = "psiblast_each_pssm"
+
 psiblastEachPssm :: Function
-psiblastEachPssm = Function
-  { fOpChar = Nothing, fName = name
-  , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly faa]
-  , fOutput = Exactly (ListOf bht)
-  , fTags = [Nondeterministic]
-  , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
-  }
-  where
-    name = "psiblast_each_pssm"
+psiblastEachPssm = newExprExpansion
+  "psiblast_each_pssm"
+  [Exactly num, Exactly (ListOf pssm), Exactly faa]
+  (Exactly $ ListOf bht)
+  undefined
+  [Nondeterministic]
 
 -- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
 psiblastPssms :: Function
