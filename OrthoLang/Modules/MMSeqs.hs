@@ -143,7 +143,6 @@ mMmseqsCreateDb _ _ e = error "orhtolang.modules.mmseqs.mMmseqsCreateDb" $ "bad 
 -- mmseqs_search_db --
 ----------------------
 
--- TODO for now this should also handle the convertalis step
 -- TODO any reason to have a version that takes the query as a db? seems unnecessary
 
 -- | This is the "base" search function, but it still expands to two different functions:
@@ -156,7 +155,6 @@ mmseqsSearchDbDb = newFnA3
   "mmseqs_search_db_db" -- TODO is this an ok name?
   (Exactly num, Exactly mms, Exactly mms)
   (Exactly bht) -- TODO exact same format, right?
-  -- mMmseqsSearchDb
   aMmseqsSearchDbDb
   [Hidden, Nondeterministic] -- TODO is it nondeterministic?
 
@@ -175,53 +173,13 @@ mMmseqsSearchDb _ _ (Fun r ms ds _ [e, qFa, sDb]) = Fun r ms ds "mmseqs_search_d
     qDb = Fun mms Nothing ds "mmseqs_createdb" [qFa]
 mMmseqsSearchDb _ _ e = error "ortholang.modules.mmseqs.mMmseqsSearchDb" $ "bad argument: " ++ show e
 
-
--- looks like it will work, but not needed if we can just --format-output like blast in the first place
--- mMmseqsSearchDb :: ExprExpansion
--- mMmseqsSearchDb _ _ (Fun r ms ds _ es) = Fun r ms ds "mmseqs_convert_alis" [fn]
---   where
---     fn = Fun ali
--- mMmseqsSearchDb _ _ e = error "orhtolang.modules.mmseqs.mMmseqsSearchDb" $ "bad argument: " ++ show e
-
--- TODO mmseqs_search_db_ali function returning an aln database (only if needed)
--- TODO mmseqs_convert_alis function to convert mmseqs aln database -> hit table (only if needed)
-
--- (num, (Some fa "any fasta file"), (EncodedAs mmseqsdb (Some fa "also any fasta file"))) bht
--- shown as "num fa1 fa2.mmseqsdb -> bht, where fa1 is any fasta file, fa2 is also any fasta file"
--- tMmseqsSearchDb :: String -> TypeChecker
--- TODO can this error be maintained despite the vague mms type? maybe not...
--- tMmseqsSearch n [x, y] | x == fna && y == fna = error $ "Both " ++ n ++ " args can't be fna; translate one first."
--- tMmseqsSearchDb _ [x, y, z] | x == num && y `elem` [fna, faa] && z == mms = Right bht
--- tMmseqsSearchDb n types = fail $ n ++ " requires a number, fasta, and mmseqs2 db. Instead, got: " ++ show types
-
 {- Even though all the MMseqs2 commands make some kind of database, the files
  - it will include are obscure to me. The search ones here have .0, .1 ... .n
  - suffixes and no .index or plain one with no extension. Easiest solution for
  - now seems to be depending on the .0 one and remembering to remove that
  - suffix later when needed.
+ - TODO how should this handle the .index and other files issue?
  -}
--- rMmseqsSearchDb :: RulesFn
--- rMmseqsSearchDb scr e@(Fun _ seed _ _ [n, q, s]) = do
---   (ExprPath ePath) <- rExpr scr n
---   (ExprPath qPath) <- rExpr scr $ Fun mms seed (depsOf q) "mmseqs_createdb" [q]
---   (ExprPath sPath) <- rExpr scr s -- note: the subject should already have been converted to a db
---   cfg  <- fmap fromJust getShakeExtraRules
---   dRef <- fmap fromJust getShakeExtraRules
---   let loc = "modules.mmseqs.rMmseqsSearchDb"
---       out    = exprPath cfg dRef scr e
---       out'   = debugRules "rMmseqsSearch" e $ fromPath loc cfg out
---       -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search" </> digest e
---       -- createDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "createdb" -- TODO be more or less specific?
---       searchDbDir  = tmpdir cfg </> "cache" </> "mmseqs" </> "search"
---       outDbBase = searchDbDir </> digest loc out <.> "mmseqs2db"
---       -- outDb0    = outDbBase <.> "0" -- TODO remember to remove the .0 when referencing it!
---       outDbIndex = outDbBase <.> "index" -- TODO remember to remove the ext when referencing it!
---   outDbIndex %> \_ -> aMmseqsSearchDb ePath qPath sPath outDbBase
---   out'   %> \_ -> aMmseqsConvertAlis qPath sPath outDbIndex out'
---   return (ExprPath out')
--- rMmseqsSearchDb _ e = fail $ "bad argument to rMmseqsSearch: " ++ show e
-
--- TODO how should this handle the .index and other files issue?
 resolveMmseqsDb :: FilePath -> Action FilePath
 resolveMmseqsDb path = do
   let loc = "modules.mmseqs.resolveMmseqsDb"
@@ -230,12 +188,6 @@ resolveMmseqsDb path = do
   -- let path''  = if ".index" `isSuffixOf` path'  then dropExtension path' else path'
   --     path''' = if "_h"     `isSuffixOf` path'' then init $ init path''  else path''
   return path'
-
--- TODO is the db being passed in place of the fa too?
--- TODO interesting! it works in stack repl but not stack exec
--- TODO search creates some db.* files but not the plain base file or .index! separate into different dir?
--- aMmseqsSearchDb :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
--- aMmseqsSearchDb ePath qDb sDb outDb = do
 
 -- same as the Ali version below, but also runs aMmseqsConvertAlis to generate a table
 -- TODO make that a separate function with ExprExpansion?
@@ -302,27 +254,18 @@ aMmseqsConvertAlis qDb sDb outDbIndex outTab = do
 -- mmseqs_search --
 -------------------
 
--- TODO rewrite as ExprExpansion
+-- | Simplest user-facing version that makes subject + query fastas into dbs first
 mmseqsSearch :: Function
-mmseqsSearch = let name = "mmseqs_search" in Function
-  { fOpChar = Nothing, fName = name
-  -- , fTypeDesc  = name ++ " : num fa fa -> bht"
-  -- , fTypeCheck = tMmseqsSearch name
-  , fInputs = [Exactly num, Some fa "query (any fasta)", Some fa "subject (any fasta)"]
-  , fOutput = Exactly bht
-  ,fTags = []
-  , fNewRules = NewNotImplemented, fOldRules = rMmseqsSearch
-  }
+mmseqsSearch = newExprExpansion
+  "mmseqs_search"
+  [Exactly num, Some fa "any query fasta file", Some fa "any subject fasta file"] -- TODO ok if both same?
+  (Exactly bht)
+  mMmseqsSearch
+  [Nondeterministic]
 
--- tMmseqsSearch :: String -> TypeChecker
--- tMmseqsSearch n [_, y, z] | y == fna && z == fna = fail $ "Both " ++ n ++ " args can't be fna; translate one first."
--- tMmseqsSearch _ [x, y, z] | x == num && y `elem` [fna, faa] && z `elem` [fna, faa] = Right bht
--- tMmseqsSearch n types = fail $ n ++ " requires a number and two fasta files. Instead, got: " ++ show types
-
-rMmseqsSearch :: RulesFn
-rMmseqsSearch st (Fun rtn seed deps name [e, q, s])
-  = rules st (Fun rtn seed deps name [e, q, sDb])
+mMmseqsSearch :: ExprExpansion
+mMmseqsSearch _ _ (Fun r ms ds _ [e, qFa, sFa]) = Fun r ms ds "mmseqs_search_db_db" [e, qDb, sDb]
   where
-    rules = fOldRules mmseqsSearchDb
-    sDb = Fun mms Nothing (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
-rMmseqsSearch _ _ = fail "bad argument to rMmseqsSearch"
+    qDb = Fun mms Nothing ds "mmseqs_createdb" [qFa]
+    sDb = Fun mms Nothing ds "mmseqs_createdb" [sFa]
+mMmseqsSearch _ _ e = error "ortholang.modules.mmseqs.mMmseqsSearch" $ "bad argument: " ++ show e
