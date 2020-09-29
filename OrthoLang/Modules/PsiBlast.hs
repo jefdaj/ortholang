@@ -477,23 +477,12 @@ psiblastTrainAll = newFnA3
   (newMap3of3 "psiblast_train") -- TODO write in terms of train_all instead?
   [Nondeterministic]
 
--- psiblastTrainDb :: Function
--- psiblastTrainDb = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly num, Exactly faa, Exactly pdb]
---   , fOutput = Exactly pssm
---   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastTrainDb
---   }
---   where
---     name = "psiblast_train_db"
-
 psiblastTrainDb :: Function
 psiblastTrainDb = newFnA3
   "psiblast_train_db"
   (Exactly num, Exactly faa, Exactly pdb)
   (Exactly pssm)
-  undefined
+  aPsiblastTrainDb
   [Nondeterministic]
 
 -- psiblastTrainDbEach :: Function
