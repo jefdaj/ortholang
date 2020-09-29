@@ -29,7 +29,7 @@ import OrthoLang.Locks
 import OrthoLang.Modules.Blast   (bht)
 import OrthoLang.Modules.Singletons (withSingleton)
 import OrthoLang.Modules.SeqIO   (fa, fna, faa)
-import System.Directory          (createDirectoryIfMissing, removeDirectoryRecursive)
+import System.Directory          (createDirectoryIfMissing)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
 import Data.Maybe (fromJust)
@@ -50,6 +50,7 @@ olModule = Module
       [ mmseqsCreateDbAll
       , mmseqsCreateDb
       , mmseqsSearchDb
+      , mmseqsSearchDbDb
       , mmseqsSearch
       ]
   }
@@ -145,31 +146,35 @@ mMmseqsCreateDb _ _ e = error "orhtolang.modules.mmseqs.mMmseqsCreateDb" $ "bad 
 -- TODO for now this should also handle the convertalis step
 -- TODO any reason to have a version that takes the query as a db? seems unnecessary
 
--- TODO rewrite with newFnA3
--- mmseqsSearchDb :: Function
--- mmseqsSearchDb = let name = "mmseqs_search_db" in Function
---   { fOpChar = Nothing, fName = name
---   -- , fTypeDesc  = name ++ " : num fa mms -> bht"
---   -- , fTypeCheck = tMmseqsSearchDb name
---   , fInputs = [Exactly num, Some fa "any fasta file", Exactly mms]
---   , fOutput = Exactly bht -- TODO exact format right?
---   ,fTags = []
---   , fNewRules = NewNotImplemented, fOldRules = rMmseqsSearchDb
---   }
-
 -- | This is the "base" search function, but it still expands to two different functions:
 --
 --   * first, the actual search which returns an mms database
 --   * then an extractalis script to convert that to a BLAST-format hit table
 --
-mmseqsSearchDb :: Function
-mmseqsSearchDb = newFnA3
-  "mmseqs_search_db"
-  (Exactly num, Some fa "any fasta file", Exactly mms)
+mmseqsSearchDbDb :: Function
+mmseqsSearchDbDb = newFnA3
+  "mmseqs_search_db_db" -- TODO is this an ok name?
+  (Exactly num, Exactly mms, Exactly mms)
   (Exactly bht) -- TODO exact same format, right?
   -- mMmseqsSearchDb
-  aMmseqsSearchDb
+  aMmseqsSearchDbDb
+  [Hidden, Nondeterministic] -- TODO is it nondeterministic?
+
+-- | Version that takes a query fasta, similar to other search functions, and does the MMSeqs DB thing
+mmseqsSearchDb :: Function
+mmseqsSearchDb = newExprExpansion
+  "mmseqs_search_db"
+  [Exactly num, Some fa "any fasta file", Exactly mms]
+  (Exactly bht) -- TODO exact same format, right?
+  mMmseqsSearchDb
   [Nondeterministic] -- TODO is it nondeterministic?
+
+mMmseqsSearchDb :: ExprExpansion
+mMmseqsSearchDb _ _ (Fun r ms ds _ [e, qFa, sDb]) = Fun r ms ds "mmseqs_search_db_db" [e, qDb, sDb]
+  where
+    qDb = Fun mms Nothing ds "mmseqs_createdb" [qFa]
+mMmseqsSearchDb _ _ e = error "ortholang.modules.mmseqs.mMmseqsSearchDb" $ "bad argument: " ++ show e
+
 
 -- looks like it will work, but not needed if we can just --format-output like blast in the first place
 -- mMmseqsSearchDb :: ExprExpansion
@@ -212,7 +217,7 @@ mmseqsSearchDb = newFnA3
 --       -- outDb0    = outDbBase <.> "0" -- TODO remember to remove the .0 when referencing it!
 --       outDbIndex = outDbBase <.> "index" -- TODO remember to remove the ext when referencing it!
 --   outDbIndex %> \_ -> aMmseqsSearchDb ePath qPath sPath outDbBase
---   out'   %> \_ -> aMmseqConvertAlis qPath sPath outDbIndex out'
+--   out'   %> \_ -> aMmseqsConvertAlis qPath sPath outDbIndex out'
 --   return (ExprPath out')
 -- rMmseqsSearchDb _ e = fail $ "bad argument to rMmseqsSearch: " ++ show e
 
@@ -232,9 +237,21 @@ resolveMmseqsDb path = do
 -- aMmseqsSearchDb :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
 -- aMmseqsSearchDb ePath qDb sDb outDb = do
 
--- TODO make outDb not a db with --format-output or whatever, and remove the convert alis step if possible
-aMmseqsSearchDb :: NewAction3
-aMmseqsSearchDb (ExprPath outDb') ePath qDb sDb = do
+-- same as the Ali version below, but also runs aMmseqsConvertAlis to generate a table
+-- TODO make that a separate function with ExprExpansion?
+-- note that unline most search programs, for mmseqs we also convert the query fasta to a db first
+aMmseqsSearchDbDb :: NewAction3
+aMmseqsSearchDbDb (ExprPath outTab') ePath qDb sDb = do
+  cfg  <- fmap fromJust getShakeExtra
+  let loc = "modules.mmseqs.aMmseqsSearchDb"
+      searchDbDir = tmpdir cfg </> "cache" </> "mmseqs" </> "search"
+      outDbBase   = searchDbDir </> digest loc outTab' <.> "mmseqs2db"
+      outDbIndex  = outDbBase <.> "index" -- TODO remember to remove the ext when referencing it!
+  aMmseqsSearchDbDbAli (ExprPath outDbBase) ePath qDb sDb
+  aMmseqsConvertAlis qDb sDb outDbIndex outTab'
+
+aMmseqsSearchDbDbAli :: NewAction3
+aMmseqsSearchDbDbAli (ExprPath outDb') ePath qDb sDb = do
   let loc = "modules.mmseqs.aMmseqsSearchDb"
   eStr <- readLit loc ePath
   qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
@@ -255,11 +272,11 @@ aMmseqsSearchDb (ExprPath outDb') ePath qDb sDb = do
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [outDb' ++ "*"]
     }
-  liftIO $ removeDirectoryRecursive tmpDir
 
 -- TODO remember to remove the .index extension when actually calling mmseqs
-aMmseqConvertAlis :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
-aMmseqConvertAlis qDb sDb outDbIndex outTab = do
+-- TODO convert this to a separate function with ExprExpansion?
+aMmseqsConvertAlis :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
+aMmseqsConvertAlis qDb sDb outDbIndex outTab = do
   -- let outDbBase = dropExtension outDbIndex
   qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
   sDb' <- fmap dropExtension $ resolveMmseqsDb sDb
@@ -307,5 +324,5 @@ rMmseqsSearch st (Fun rtn seed deps name [e, q, s])
   = rules st (Fun rtn seed deps name [e, q, sDb])
   where
     rules = fOldRules mmseqsSearchDb
-    sDb = Fun mms seed (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
+    sDb = Fun mms Nothing (depsOf s) "mmseqs_createdb" [s] -- TODO also accept a fa.list here?
 rMmseqsSearch _ _ = fail "bad argument to rMmseqsSearch"
