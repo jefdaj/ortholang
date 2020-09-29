@@ -29,7 +29,7 @@ import OrthoLang.Locks
 import OrthoLang.Modules.Blast   (bht)
 import OrthoLang.Modules.Singletons (withSingleton)
 import OrthoLang.Modules.SeqIO   (fa, fna, faa)
-import System.Directory          (createDirectoryIfMissing)
+import System.Directory          (createDirectoryIfMissing, removeDirectoryRecursive)
 import System.Exit               (ExitCode(..))
 import System.FilePath           ((</>), (<.>), (-<.>), takeDirectory, dropExtension)
 import Data.Maybe (fromJust)
@@ -163,13 +163,13 @@ mMmseqsCreateDb _ _ e = error "orhtolang.modules.mmseqs.mMmseqsCreateDb" $ "bad 
 --   * then an extractalis script to convert that to a BLAST-format hit table
 --
 mmseqsSearchDb :: Function
-mmseqsSearchDb = newExprExpansion
+mmseqsSearchDb = newFnA3
   "mmseqs_search_db"
-  [Exactly num, Some fa "any fasta file", Exactly mms]
+  (Exactly num, Some fa "any fasta file", Exactly mms)
   (Exactly bht) -- TODO exact same format, right?
   -- mMmseqsSearchDb
   aMmseqsSearchDb
-  [] -- TODO nondeterministic?
+  [Nondeterministic] -- TODO is it nondeterministic?
 
 -- looks like it will work, but not needed if we can just --format-output like blast in the first place
 -- mMmseqsSearchDb :: ExprExpansion
@@ -234,28 +234,28 @@ resolveMmseqsDb path = do
 
 -- TODO make outDb not a db with --format-output or whatever, and remove the convert alis step if possible
 aMmseqsSearchDb :: NewAction3
-aMmseqsSearchDb (ExprPath outDb') ePath' qDb' sDb' = do
+aMmseqsSearchDb (ExprPath outDb') ePath qDb sDb = do
   let loc = "modules.mmseqs.aMmseqsSearchDb"
   eStr <- readLit loc ePath
   qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
   sDb' <- fmap dropExtension $ resolveMmseqsDb sDb
-  let tmpDir = takeDirectory outDb </> "tmp" -- TODO align this with sonicparanoid
+  let tmpDir = takeDirectory outDb' </> "tmp" -- TODO align this with sonicparanoid
   liftIO $ createDirectoryIfMissing True tmpDir
   runCmd $ CmdDesc
     { cmdParallel = False -- TODO true?
     , cmdFixEmpties = True
-    , cmdOutPath = outDb
-    , cmdInPatterns = [qDb, sDb]
+    , cmdOutPath = outDb'
+    , cmdInPatterns = [qDb', sDb']
     , cmdNoNeedDirs = []
     , cmdExtraOutPaths = []
     , cmdSanitizePaths = [] -- TODO should there be some?
     , cmdOptions =[]
     , cmdBinary = "mmseqs-search.sh"
-    , cmdArguments = [outDb, tmpDir, eStr, qDb', sDb']
+    , cmdArguments = [outDb', tmpDir, eStr, qDb', sDb']
     , cmdExitCode = ExitSuccess
-    , cmdRmPatterns = [outDb ++ "*"]
+    , cmdRmPatterns = [outDb' ++ "*"]
     }
-  -- liftIO $ removeDirectoryRecursive tmpDir
+  liftIO $ removeDirectoryRecursive tmpDir
 
 -- TODO remember to remove the .index extension when actually calling mmseqs
 aMmseqConvertAlis :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
