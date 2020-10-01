@@ -78,35 +78,81 @@ olModule = Module
   , mRules = []
   , mFunctions =
 
+    -- TODO convert to the new explicitly named functions:
+    -- psiblast_search_faa_pdbs_all  : num faa         pdb.list -> bht
+    -- psiblast_search_pssm_pdb_all  : num pssm        pdb.list -> bht
+    -- psiblast_train_faa_pdbs       : num faa         pdb.list -> pssm.list
+    -- psiblast_train_faas_faa       : num faa.list    faa      -> pssm.list
+    -- psiblast_train_faas_pdb       : num faa.list    pdb      -> pssm.list
+ 
     -- runs without obvious errors, but needs more careful verification:
+
+    -- psiblast_search_faa_faa       : num faa         faa      -> bht
     [ psiblast             -- num faa       faa      -> bht
+
+    -- psiblast_search_faa_faas_all  : num faa         faa.list -> bht
     , psiblastAll          -- num faa       faa.list -> bht (TODO test broken?)
+
+    -- psiblast_search_faa_pdb       : num faa         pdb      -> bht
     , psiblastDb           -- num faa       pdb      -> bht
+
+    -- psiblast_search_faa_pdbs      : num faa         pdb.list -> bht.list
     , psiblastDbEach       -- num faa       pdb.list -> bht.list
+
+    -- psiblast_search_faa_faas      : num faa         faa.list -> bht.list
     , psiblastEach         -- num faa       faa.list -> bht.list (TODO test broken?)
+
+    -- psiblast_search_pssms_faa     : num pssm.list   faa      -> bht.list
     , psiblastEachPssm     -- num pssm.list faa      -> bht.list (TODO fix broken)
+
+    -- psiblast_search_pssms_pdb : num pssm.list   pdb      -> bht.list
     , psiblastEachPssmDb   -- num pssm.list pdb      -> bht.list
+
+    -- psiblast_search_pssm_faa      : num pssm        faa      -> bht
     , psiblastPssm         -- num pssm      faa      -> bht
+
+    -- psiblast_search_pssm_faas_all : num pssm        faa.list -> bht
     , psiblastPssmAll      -- num pssm      faa.list -> bht
+
+    -- psiblast_search_pssm_pdb      : num pssm        pdb      -> bht
     , psiblastPssmDb       -- num pssm      pdb      -> bht
+
+    -- psiblast_search_pssm_pdbs     : num pssm        pdb.list -> bht.list
     , psiblastPssmDbEach   -- num pssm      pdb.list -> bht.list
+
+    -- psiblast_search_pssm_faas     : num pssm        faa.list -> bht.list
     , psiblastPssmEach     -- num pssm      faa.list -> bht.list
 
     -- TODO these are all duplicated?
     , psiblastPssms        -- num pssm.list faa      -> bht
+
+    -- psiblast_search_pssms_faa_all : num pssm.list   faa      -> bht
     , psiblastPssmsAll     -- num pssm.list faa      -> bht
+
     -- , psiblastPssmsEach    -- num pssm.list faa.list -> bht.list
 
+    -- psiblast_search_pssms_pdb      : num pssm.list   pdb      -> bht
     , psiblastPssmsDb      -- num pssm.list pdb      -> bht
+
+    -- psiblast_train_faa_faa        : num faa         faa      -> pssm
     , psiblastTrain        -- num faa       faa      -> pssm
+
+    -- psiblast_train_faa_faas_all   : num faa         faa.list -> pssm
     , psiblastTrainAll     -- num faa       faa.list -> pssm
+
+    -- psiblast_train_faa_pdb        : num faa         pdb      -> pssm
     , psiblastTrainDb      -- num faa       pdb      -> pssm
+
 
     -- TODO remove all these if using multi-pssm files?
     --      or just rewrite the fn signatures to have .pssms or something?
     , psiblastTrainDbEach  -- num faa       pdb.list -> pssm.list
+
+    -- psiblast_train_faa_faas       : num faa         faa.list -> pssm.list
     , psiblastTrainEach    -- num faa       faa.list -> pssm.list
+
     , psiblastTrainPssms   -- num faa.list  faa      -> pssm.list
+
     , psiblastTrainPssmsDb -- num faa.list  pdb      -> pssm.list
 
     -- not written yet (may not be needed):
