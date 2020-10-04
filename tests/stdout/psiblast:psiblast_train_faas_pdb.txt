@@ -1,0 +1,5 @@
+$TMPDIR/exprs/psiblast_train_faa_pdb/01b1e93729/7db9341d21/ecdce158d3/s0/result
+$TMPDIR/exprs/psiblast_train_faa_pdb/01b1e93729/5c7b244e49/ecdce158d3/s0/result
+$TMPDIR/exprs/psiblast_train_faa_pdb/01b1e93729/cf21782837/ecdce158d3/s0/result
+$TMPDIR/exprs/psiblast_train_faa_pdb/01b1e93729/ecc64d578a/ecdce158d3/s0/result
+$TMPDIR/exprs/psiblast_train_faa_pdb/01b1e93729/d3e63113ca/ecdce158d3/s0/result

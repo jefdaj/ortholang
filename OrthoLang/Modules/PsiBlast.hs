@@ -97,6 +97,7 @@ olModule = Module
     , psiblastTrainFaaFaas      -- num faa       faa.list -> pssm.list
     , psiblastTrainFaaFaasAll   -- num faa       faa.list -> pssm
     , psiblastTrainFaaPdb       -- num faa       pdb      -> pssm
+    , psiblastTrainFaaPdbs      -- num faa       pdb.list -> pssm.list
     , psiblastTrainFaasPdb      -- num faa.list  pdb      -> pssm.list
     , psiblastTrainFaasFaa      -- num faa.list  faa      -> pssm.list
 
@@ -495,43 +496,20 @@ psiblastTrainFaaPdb = newFnA3
   aPsiblastTrain
   [Nondeterministic]
 
--- psiblastTrainFaaPdbEach :: Function
--- psiblastTrainFaaPdbEach = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
---   , fOutput = Exactly (ListOf pssm)
---   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb pssm aPsiblastTrain
---   }
---   where
---     name = "psiblast_train_db_each"
-
-
 psiblastTrainFaaPdbs :: Function
-psiblastTrainFaaPdbs = newExprExpansion
+psiblastTrainFaaPdbs = newFnA3
   "psiblast_train_faa_pdbs"
-  [Exactly num, Exactly faa, Exactly (ListOf pdb)]
+  (Exactly num, Exactly faa, Exactly $ ListOf pdb)
   (Exactly $ ListOf pssm)
-  undefined
+  (newMap3of3 "psiblast_train_faa_pdb")
   [Nondeterministic]
 
--- psiblastTrainFaasPdb :: Function
--- psiblastTrainFaasPdb = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly num, Exactly (ListOf faa), Exactly pdb]
---   , fOutput = Exactly (ListOf pssm)
---   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastTrain'
---   }
---   where
---     name = "psiblast_train_pssms_db"
-
 psiblastTrainFaasPdb :: Function
-psiblastTrainFaasPdb = newExprExpansion
+psiblastTrainFaasPdb = newFnA3
   "psiblast_train_faas_pdb"
-  [Exactly num, Exactly (ListOf faa), Exactly pdb]
+  (Exactly num, Exactly $ ListOf faa, Exactly pdb)
   (Exactly $ ListOf pssm)
-  undefined
+  (newMap2of3 "psiblast_train_faa_pdb")
   [Nondeterministic]
 
 ---------------------------------------
@@ -599,17 +577,6 @@ psiblastSearchPssmFaas = newExprExpansion
 
 searchArgs :: [String]
 searchArgs = ["-outfmt", "6", "-out"]
-
--- psiblastSearchPssmPdb :: Function
--- psiblastSearchPssmPdb = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = 
---   , fOutput = Exactly bht
---   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastSearch
---   }
---   where
---     name = "psiblast_pssm_db"
 
 -- | The base search function which takes an explicit PSSM and blast DB
 psiblastSearchPssmPdb :: Function
