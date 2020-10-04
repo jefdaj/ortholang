@@ -1,0 +1,1 @@
+gi|84626162|gb|AAC71217.2| DNA polymerase III, beta subunit [Mycoplasma genitalium G37]	WP_009885562.1 DNA polymerase III subunit beta [Mycoplasma genitalium]	100.000	380	0	0	193	572	1	380	0.0	748
