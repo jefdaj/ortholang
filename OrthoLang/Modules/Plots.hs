@@ -103,7 +103,7 @@ histogram = newExprExpansion
 
 -- | Macro that adds the xlab str
 mHistogram :: ExprExpansion
-mHistogram _ scr (Fun r ms ds _ [title, ns]) =
+mHistogram _ _ (Fun r ms ds _ [title, ns]) =
   let xlab = Lit str $ varName "" ns
   in Fun r ms ds "histogram_explicit" [title, xlab, ns]
 mHistogram _ _ e = error "modules.plots.mHistogram" $ "bad argument: " ++ show e
@@ -133,7 +133,7 @@ linegraph = newExprExpansion
 
 -- | Macro that adds the xlab str
 mLinegraph :: ExprExpansion
-mLinegraph _ scr (Fun r ms ds _ [title, ns]) =
+mLinegraph _ _ (Fun r ms ds _ [title, ns]) =
   let xlab = Lit str $ varName "" ns
   in Fun r ms ds "linegraph_explicit" [title, xlab, ns]
 mLinegraph _ _ e = error "modules.plots.mLinegraph" $ "bad argument: " ++ show e
@@ -163,7 +163,7 @@ scatterplot = newExprExpansion
 
 -- | Macro that adds the xlab str
 mScatterplot :: ExprExpansion
-mScatterplot _ scr (Fun r ms ds _ [title, ns]) =
+mScatterplot _ _ (Fun r ms ds _ [title, ns]) =
   let xlab = Lit str $ varName "" ns
   in Fun r ms ds "scatterplot_explicit" [title, xlab, ns]
 mScatterplot _ _ e = error "modules.plots.mScatterplot" $ "bad argument: " ++ show e

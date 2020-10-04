@@ -64,6 +64,10 @@ module OrthoLang.Interpreter.Compile.NewRules
   , newDate1of2
   , newDate1of3
   , newDate1of4
+  , newFnP1
+  , newFnP2
+  , newFnP3
+  , newFnP4
 
   -- * Implementation details
   , rReloadIDs
@@ -514,6 +518,8 @@ newFn name mChar iSigs oSig rFn aFn tags = Function
 -- but can only return one altered 'Expr'.
 
 -- TODO can a Haskell closure be "hidden" in here to implement graph_script? try it!
+-- TODO can you just directly `need` the 2nd expr path to get the 1st one?
+--      or maybe do that + put the 2nd components into the 1st one's deps?
 type ExprExpansion = [Module] -> Script -> Expr -> Expr
 
 {-|
@@ -574,6 +580,7 @@ hidden fn = fn { fTags = Hidden : fTags fn }
 -- the way seeds work this seems reasonable. But are there any edge cases we
 -- need to be aware of?
 
+-- TODO rename to FnName?
 type Prefix = String
 
 -- the Action here is required because one of the input paths will normally be
@@ -745,6 +752,85 @@ aNewDate prefix (ExprPath outPath') userPath = do
 
   need' loc [outPathD']    -- TODO remove?
   symlink outPath outPathD -- TODO remove?
+
+-----------------------------
+-- generic path expansions --
+-----------------------------
+
+-- TODO should newMap* + newDate* above be implemented using this too?
+-- TODO where should path expansions be applied?
+--        probably somewhere in here, right before 'need'
+--        maybe in rNewRules aFn?
+
+type PathExpansion = ExprPath -> Action ExprPath
+
+newFnP1
+  :: String        -- ^ name
+  -> TypeSig       -- ^ 1 argument type
+  -> TypeSig       -- ^ return type
+  -> [FnTag]       -- ^ tags
+  -> PathExpansion -- ^ path expansion
+  -> Function
+newFnP1 name i1 oSig tags pFn = newFn name Nothing [i1] oSig rFn aFn tags
+  where
+    rFn = undefined 1
+    aFn = undefined pFn
+
+newFnP2
+  :: String             -- ^ name
+  -> (TypeSig, TypeSig) -- ^ 2 argument types
+  -> TypeSig            -- ^ return type
+  -> [FnTag]            -- ^ tags
+  -> PathExpansion      -- ^ path expansion
+  -> Function
+newFnP2 name (i1, i2) oSig tags pFn = newFn name Nothing [i1, i2] oSig rFn aFn tags
+  where
+    rFn = undefined 2
+    aFn = undefined pFn
+
+newFnP3
+  :: String                      -- ^ name
+  -> (TypeSig, TypeSig, TypeSig) -- ^ 3 argument types
+  -> TypeSig                     -- ^ return type
+  -> [FnTag]                     -- ^ tags
+  -> PathExpansion               -- ^ path expansion
+  -> Function
+newFnP3 name (i1, i2, i3) oSig tags pFn = newFn name Nothing [i1, i2, i3] oSig rFn aFn tags
+  where
+    rFn = undefined 3
+    aFn = undefined pFn
+
+newFnP4
+  :: String                               -- ^ name
+  -> (TypeSig, TypeSig, TypeSig, TypeSig) -- ^ 4 argument types
+  -> TypeSig                              -- ^ return type
+  -> [FnTag]                              -- ^ tags
+  -> PathExpansion                        -- ^ path expansion
+  -> Function
+newFnP4 name (i1, i2, i3, i4) oSig tags pFn = newFn name Nothing [i1, i2, i3, i4] oSig rFn aFn tags
+  where
+    rFn = undefined 4
+    aFn = undefined pFn
+
+-- TODO factor the common parts out of newMap* + newDate* above
+rPathExpansion :: PathExpansion -> Rules ()
+rPathExpansion pFn = do
+  undefined
+  -- TODO where does the expected outpath come from here?
+  -- TODO once we have that we can apply the pFn to it to get the final path
+  -- TODO then 
+
+-- TODO rename?
+-- newPathExpansion :: String -> [TypeSig] -> TypeSig -> PathExpansion -> [FnTag] -> Function
+-- newPathExpansion name iSigs oSig pFn tags = Function
+--   { fOpChar    = Nothing
+--   , fName      = name
+--   , fInputs    = iSigs
+--   , fOutput    = oSig
+--   , fTags      = tags
+--   , fOldRules  = undefined
+--   , fNewRules  = NewRules $ rPathExpansion pFn
+--   }
 
 ------------------------------
 -- future library functions --

@@ -87,78 +87,60 @@ olModule = Module
  
     -- runs without obvious errors, but needs more careful verification:
 
-    -- psiblast_search_faa_faa       : num faa         faa      -> bht
-    [ psiblast             -- num faa       faa      -> bht
+    [ psiblastSearchFaaFaa             -- num faa       faa      -> bht
 
-    -- psiblast_search_faa_faas_all  : num faa         faa.list -> bht
-    , psiblastAll          -- num faa       faa.list -> bht (TODO test broken?)
+    , psiblastSearchFaaFaasAll          -- num faa       faa.list -> bht
 
-    -- psiblast_search_faa_pdb       : num faa         pdb      -> bht
-    , psiblastDb           -- num faa       pdb      -> bht
+    , psiblastSearchFaaPdb           -- num faa       pdb      -> bht
 
-    -- psiblast_search_faa_pdbs      : num faa         pdb.list -> bht.list
-    , psiblastDbEach       -- num faa       pdb.list -> bht.list
+    , psiblastSearchFaaPdbs       -- num faa       pdb.list -> bht.list
 
-    -- psiblast_search_faa_faas      : num faa         faa.list -> bht.list
-    , psiblastEach         -- num faa       faa.list -> bht.list (TODO test broken?)
+    , psiblastSearchFaaFaas         -- num faa       faa.list -> bht.list
 
-    -- psiblast_search_pssms_faa     : num pssm.list   faa      -> bht.list
-    , psiblastEachPssm     -- num pssm.list faa      -> bht.list (TODO fix broken)
+    , psiblastSearchPssmsFaa     -- num pssm.list faa      -> bht.list
 
-    -- psiblast_search_pssms_pdb : num pssm.list   pdb      -> bht.list
-    , psiblastEachPssmDb   -- num pssm.list pdb      -> bht.list
+    , psiblastSearchPssmsPdb   -- num pssm.list pdb      -> bht.list
 
-    -- psiblast_search_pssm_faa      : num pssm        faa      -> bht
-    , psiblastPssm         -- num pssm      faa      -> bht
+    , psiablstSearchPssmFaa         -- num pssm      faa      -> bht
 
-    -- psiblast_search_pssm_faas_all : num pssm        faa.list -> bht
-    , psiblastPssmAll      -- num pssm      faa.list -> bht
+    , psiblastSearchPssmFaasAll     -- num pssm      faa.list -> bht
 
-    -- psiblast_search_pssm_pdb      : num pssm        pdb      -> bht
-    , psiblastPssmDb       -- num pssm      pdb      -> bht
+    , psiblastSearchPssmPdb       -- num pssm      pdb      -> bht
 
-    -- psiblast_search_pssm_pdbs     : num pssm        pdb.list -> bht.list
-    , psiblastPssmDbEach   -- num pssm      pdb.list -> bht.list
+    , psiblastSearchPssmPdbs   -- num pssm      pdb.list -> bht.list
 
-    -- psiblast_search_pssm_faas     : num pssm        faa.list -> bht.list
-    , psiblastPssmEach     -- num pssm      faa.list -> bht.list
+    , psiblastSearchPssmFaas     -- num pssm      faa.list -> bht.list
 
     -- TODO these are all duplicated?
-    , psiblastPssms        -- num pssm.list faa      -> bht
+    -- , psiablstSearchPssmsFaa        -- num pssm.list faa      -> bht
 
-    -- psiblast_search_pssms_faa_all : num pssm.list   faa      -> bht
-    , psiblastPssmsAll     -- num pssm.list faa      -> bht
+    , psiblastSearchPssmsFaaAll     -- num pssm.list faa      -> bht
 
-    -- , psiblastPssmsEach    -- num pssm.list faa.list -> bht.list
+    -- , psiablstSearchPssmFaasEach    -- num pssm.list faa.list -> bht.list
 
-    -- psiblast_search_pssms_pdb      : num pssm.list   pdb      -> bht
-    , psiblastPssmsDb      -- num pssm.list pdb      -> bht
+    , psiblastSearchPssmsPdb      -- num pssm.list pdb      -> bht
 
-    -- psiblast_train_faa_faa        : num faa         faa      -> pssm
-    , psiblastTrain        -- num faa       faa      -> pssm
+    -- TODO explain the difference between this and the one that takes a list of subjects
+    , psiblastTrainFaaFaa        -- num faa       faa      -> pssm
 
-    -- psiblast_train_faa_faas_all   : num faa         faa.list -> pssm
-    , psiblastTrainAll     -- num faa       faa.list -> pssm
+    , psiblastTrainFaaFaasAll -- num faa       faa.list -> pssm
 
-    -- psiblast_train_faa_pdb        : num faa         pdb      -> pssm
-    , psiblastTrainDb      -- num faa       pdb      -> pssm
-
+    , psiblastTrainFaaPdb      -- num faa       pdb      -> pssm
 
     -- TODO remove all these if using multi-pssm files?
     --      or just rewrite the fn signatures to have .pssms or something?
-    , psiblastTrainDbEach  -- num faa       pdb.list -> pssm.list
+    -- TODO remove bc duplicate: , psiblastTrainFaaPdbEach  -- num faa       pdb.list -> pssm.list
 
-    -- psiblast_train_faa_faas       : num faa         faa.list -> pssm.list
-    , psiblastTrainEach    -- num faa       faa.list -> pssm.list
+    , psiblastTrainFaaFaas    -- num faa       faa.list -> pssm.list
 
-    , psiblastTrainPssms   -- num faa.list  faa      -> pssm.list
+    , psiblastTrainFaasFaa   -- num faa.list  faa      -> pssm.list
 
-    , psiblastTrainPssmsDb -- num faa.list  pdb      -> pssm.list
+    , psiblastTrainFaaFaasDb -- num faa.list  pdb      -> pssm.list
 
     -- not written yet (may not be needed):
-    -- , psiblastPssmsBothMap -- num pssm.list faa.list -> bht.list.list
-    -- , psiblastPssmsAll     -- num pssm.list faa.list -> bht
-    -- , psiblastPssmsDbEach  -- num pssm.list pdb.list -> bht.list
+    -- , psiablstSearchPssmFaasBothMap -- num pssm.list faa.list -> bht.list.list
+    -- , psiblastSearchPssmsFaaAll     -- num pssm.list faa.list -> bht
+    -- , psiblastSearchPssmsPdbEach  -- num pssm.list pdb.list -> bht.list
    ]
   }
 
@@ -314,7 +296,7 @@ withPdbSubject (Fun rtn seed deps name [a1, a2, x ])
             _          -> withSingleton x
 withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 
--- Wrap the faa query argument of a psiblast Function in psiblast_train_db
+-- Wrap the faa query argument of a psiblastSearchFaaFaa Function in psiblast_train_db
 -- TODO sometimes tries to use path to path of db as path to db... where to fix?
 withPssmQuery :: Expr -> Expr
 withPssmQuery (Fun rtn seed deps name [n, q, s])
@@ -327,8 +309,8 @@ withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 -- search with fasta queries --
 -------------------------------
 
--- psiblast :: Function
--- psiblast = Function
+-- psiblastSearchFaaFaa :: Function
+-- psiblastSearchFaaFaa = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly faa, Exactly faa]
 --   , fOutput = Exactly bht
@@ -338,8 +320,8 @@ withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 --   where
 --     name = "psiblast"
 
-psiblast :: Function
-psiblast = newExprExpansion
+psiblastSearchFaaFaa :: Function
+psiblastSearchFaaFaa = newExprExpansion
   "psiblast"
   [Exactly num, Exactly faa, Exactly faa]
   (Exactly bht)
@@ -353,20 +335,20 @@ mPsiblast _ _ (Fun r ms ds _ [e, qFa, sFa]) = Fun r ms ds "psiblast_pssm_db" [e,
     sDb   = Fun pdb  ms (depsOf sFa) "makeblastdb_faa" [sDb]
 mPsiblast _ _ e = error "ortholang.modules.psiblast.mPsiblast" $ "bad argument: " ++ show e
 
-psiblastEach :: Function
-psiblastEach = newFnA3
-  "psiblast_each"
+psiblastSearchFaaFaas :: Function
+psiblastSearchFaaFaas = newFnA3
+  "psiblast_search_faa_faas"
   (Exactly num, Exactly faa, Exactly $ ListOf faa)
   (Exactly $ ListOf bht)
   (newMap3of3 "psiblast")
   [Nondeterministic]
 
 -- TODO does this still work? is it worth keeping, or just rewrite anyway?
-psiblastAll :: Function
-psiblastAll = compose1 "psiblast_all" [Nondeterministic] psiblastEach (mkConcat bht) -- TODO name the mkConcat?
+psiblastSearchFaaFaasAll :: Function
+psiblastSearchFaaFaasAll = compose1 "psiblast_all" [Nondeterministic] psiblastSearchFaaFaas (mkConcat bht) -- TODO name the mkConcat?
 
--- psiblastDb :: Function
--- psiblastDb = Function
+-- psiblastSearchFaaPdb :: Function
+-- psiblastSearchFaaPdb = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly faa, Exactly pdb]
 --   , fOutput = Exactly bht
@@ -377,8 +359,8 @@ psiblastAll = compose1 "psiblast_all" [Nondeterministic] psiblastEach (mkConcat 
 --     name = "psiblast_db"
 
 -- | Search variant that takes a FASTA query and blast DB, and trains a query PSSM before the search
-psiblastDb :: Function
-psiblastDb = newExprExpansion
+psiblastSearchFaaPdb :: Function
+psiblastSearchFaaPdb = newExprExpansion
   "psiblast_db"
   [Exactly num, Exactly faa, Exactly pdb]
   (Exactly bht)
@@ -394,8 +376,8 @@ mPsiblastDb _ _ e = error "ortholang.modules.psiblast.mPsiblastDb" $ "bad argume
 -- TODO want map3of3 to read a pdb.list here and pass the individual paths,
 --      but that interferes with one of the others right?
 -- wait can psiblast just take a faa and pdb directly?
--- psiblastDbEach :: Function
--- psiblastDbEach = Function
+-- psiblastSearchFaaPdbs :: Function
+-- psiblastSearchFaaPdbs = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
 --   , fOutput = Exactly (ListOf bht)
@@ -407,8 +389,8 @@ mPsiblastDb _ _ e = error "ortholang.modules.psiblast.mPsiblastDb" $ "bad argume
 --   where
 --     name = "psiblast_db_each"
 
-psiblastDbEach :: Function
-psiblastDbEach = newFnA3
+psiblastSearchFaaPdbs :: Function
+psiblastSearchFaaPdbs = newFnA3
   "psiblast_db_each"
   (Exactly num, Exactly faa, Exactly $ ListOf pdb)
   (Exactly bht)
@@ -432,8 +414,8 @@ trainingArgs =
   , "-out_ascii_pssm" -- < outPath will be appended here
   ]
 
--- psiblastTrain :: Function
--- psiblastTrain = Function
+-- psiblastTrainFaaFaa :: Function
+-- psiblastTrainFaaFaa = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly faa, Exactly faa]
 --   , fOutput = Exactly pssm
@@ -443,8 +425,8 @@ trainingArgs =
 --   where
 --     name = "psiblast_train"
 
-psiblastTrain :: Function
-psiblastTrain = newFnA3
+psiblastTrainFaaFaa :: Function
+psiblastTrainFaaFaa = newFnA3
   "psiblast_train"
   (Exactly num, Exactly faa, Exactly faa)
   (Exactly pssm)
@@ -453,8 +435,8 @@ psiblastTrain = newFnA3
 
 
 -- TODO better name!
--- psiblastTrainPssms :: Function
--- psiblastTrainPssms = Function
+-- psiblastTrainFaaFaas :: Function
+-- psiblastTrainFaaFaas = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly (ListOf faa), Exactly faa]
 --   , fOutput = Exactly (ListOf pssm)
@@ -464,8 +446,8 @@ psiblastTrain = newFnA3
 --   where
 --     name = "psiblast_train_pssms"
 
-psiblastTrainPssms :: Function
-psiblastTrainPssms = newExprExpansion
+psiblastTrainFaasFaa :: Function
+psiblastTrainFaasFaa = newExprExpansion
   "psiblast_train_pssms"
   [Exactly num, Exactly (ListOf faa), Exactly faa]
   (Exactly $ ListOf pssm)
@@ -474,8 +456,8 @@ psiblastTrainPssms = newExprExpansion
 
 -- TODO appears to succeed, but something is messed up about the mapping?
 --      (makes a list of length 1 from multiple faa subjects)
--- psiblastTrainEach :: Function
--- psiblastTrainEach = Function
+-- psiblastTrainFaaFaas :: Function
+-- psiblastTrainFaaFaas = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
 --   , fOutput = Exactly (ListOf pssm)
@@ -485,16 +467,16 @@ psiblastTrainPssms = newExprExpansion
 --   where
 --     name = "psiblast_train_each"
 
-psiblastTrainEach :: Function
-psiblastTrainEach = newExprExpansion
-  "psiblast_train_each"
+psiblastTrainFaaFaas :: Function
+psiblastTrainFaaFaas = newExprExpansion
+  "psiblast_train_faa_faas"
   [Exactly num, Exactly faa, Exactly $ ListOf faa]
   (Exactly $ ListOf pssm)
   undefined
   [Nondeterministic]
 
--- psiblastTrainAll :: Function
--- psiblastTrainAll = Function
+-- psiblastTrainFaaFaas :: Function
+-- psiblastTrainFaaFaas = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
 --   , fOutput = Exactly pssm
@@ -504,24 +486,26 @@ psiblastTrainEach = newExprExpansion
 --   where
 --     name = "psiblast_train_all"
 
-psiblastTrainAll :: Function
-psiblastTrainAll = newFnA3
-  "psiblast_train_all"
+-- TODO what's the algorithm here? guess we concat the faas first?
+psiblastTrainFaaFaasAll :: Function
+psiblastTrainFaaFaasAll = newFnA3
+  "psiblast_train_faa_faas_all"
   (Exactly num, Exactly faa, Exactly $ ListOf faa)
   (Exactly pssm)
-  (newMap3of3 "psiblast_train") -- TODO write in terms of train_all instead?
+  -- (newMap3of3 "psiblast_train_faa_faa") -- TODO write in terms of train_all instead?
+  undefined
   [Nondeterministic]
 
-psiblastTrainDb :: Function
-psiblastTrainDb = newFnA3
+psiblastTrainFaaPdb :: Function
+psiblastTrainFaaPdb = newFnA3
   "psiblast_train_db"
   (Exactly num, Exactly faa, Exactly pdb)
   (Exactly pssm)
   aPsiblastTrainDb
   [Nondeterministic]
 
--- psiblastTrainDbEach :: Function
--- psiblastTrainDbEach = Function
+-- psiblastTrainFaaPdbEach :: Function
+-- psiblastTrainFaaPdbEach = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
 --   , fOutput = Exactly (ListOf pssm)
@@ -532,16 +516,16 @@ psiblastTrainDb = newFnA3
 --     name = "psiblast_train_db_each"
 
 
-psiblastTrainDbEach :: Function
-psiblastTrainDbEach = newExprExpansion
+psiblastTrainFaaPdbEach :: Function
+psiblastTrainFaaPdbEach = newExprExpansion
   "psiblast_train_db_each"
   [Exactly num, Exactly faa, Exactly (ListOf pdb)]
   (Exactly $ ListOf pssm)
   undefined
   [Nondeterministic]
 
--- psiblastTrainPssmsDb :: Function
--- psiblastTrainPssmsDb = Function
+-- psiblastTrainFaaFaasDb :: Function
+-- psiblastTrainFaaFaasDb = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly (ListOf faa), Exactly pdb]
 --   , fOutput = Exactly (ListOf pssm)
@@ -551,8 +535,8 @@ psiblastTrainDbEach = newExprExpansion
 --   where
 --     name = "psiblast_train_pssms_db"
 
-psiblastTrainPssmsDb :: Function
-psiblastTrainPssmsDb = newExprExpansion
+psiblastTrainFaaFaasDb :: Function
+psiblastTrainFaaFaasDb = newExprExpansion
   "psiblast_train_pssms_db"
   [Exactly num, Exactly (ListOf faa), Exactly pdb]
   (Exactly $ ListOf pssm)
@@ -563,8 +547,8 @@ psiblastTrainPssmsDb = newExprExpansion
 -- search with explicit pssm queries --
 ---------------------------------------
 
--- psiblastPssm :: Function
--- psiblastPssm = Function
+-- psiablstSearchPssmFaa :: Function
+-- psiablstSearchPssmFaa = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly pssm, Exactly faa]
 --   , fOutput = Exactly bht
@@ -575,8 +559,8 @@ psiblastTrainPssmsDb = newExprExpansion
 --     name = "psiblast_pssm"
 
 -- TODO psiblast_search_pssm?
-psiblastPssm :: Function
-psiblastPssm = newExprExpansion
+psiablstSearchPssmFaa :: Function
+psiablstSearchPssmFaa = newExprExpansion
   "psiblast_pssm"
   [Exactly num, Exactly pssm, Exactly faa]
   (Exactly bht)
@@ -584,8 +568,8 @@ psiblastPssm = newExprExpansion
   [Nondeterministic]
 
 -- TODO why does this one fail? it's not even using rMap
--- psiblastPssmAll :: Function
--- psiblastPssmAll = Function
+-- psiblastSearchPssmFaa :: Function
+-- psiblastSearchPssmFaa = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf faa)]
 --   , fOutput = Exactly bht
@@ -595,16 +579,16 @@ psiblastPssm = newExprExpansion
 --   where
 --     name = "psiblast_pssm_all"
 
-psiblastPssmAll :: Function
-psiblastPssmAll = newExprExpansion
+psiblastSearchPssmFaasAll :: Function
+psiblastSearchPssmFaasAll = newExprExpansion
   "psiblast_pssm_all"
   [Exactly num, Exactly pssm, Exactly (ListOf faa)]
   (Exactly bht)
   undefined
   [Nondeterministic]
 
--- psiblastPssmEach :: Function
--- psiblastPssmEach = Function
+-- psiblastSearchPssmPdbs :: Function
+-- psiblastSearchPssmPdbs = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf faa)]
 --   , fOutput = Exactly (ListOf bht)
@@ -614,8 +598,8 @@ psiblastPssmAll = newExprExpansion
 --   where
 --     name = "psiblast_pssm_each"
 
-psiblastPssmEach :: Function
-psiblastPssmEach = newExprExpansion
+psiblastSearchPssmFaas :: Function
+psiblastSearchPssmFaas = newExprExpansion
   "psiblast_pssm_each"
   [Exactly num, Exactly pssm, Exactly (ListOf faa)]
   (Exactly $ ListOf bht)
@@ -625,8 +609,8 @@ psiblastPssmEach = newExprExpansion
 searchArgs :: [String]
 searchArgs = ["-outfmt", "6", "-out"]
 
--- psiblastPssmDb :: Function
--- psiblastPssmDb = Function
+-- psiblastSearchPssmPdb :: Function
+-- psiblastSearchPssmPdb = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = 
 --   , fOutput = Exactly bht
@@ -637,16 +621,16 @@ searchArgs = ["-outfmt", "6", "-out"]
 --     name = "psiblast_pssm_db"
 
 -- | The base search function which takes an explicit PSSM and blast DB
-psiblastPssmDb :: Function
-psiblastPssmDb = newFnA3
+psiblastSearchPssmPdb :: Function
+psiblastSearchPssmPdb = newFnA3
   "psiblast_pssm_db"
   (Exactly num, Exactly pssm, Exactly pdb)
   (Exactly bht)
   aPsiblastSearchDb
   [Nondeterministic]
 
--- psiblastPssmDbEach :: Function
--- psiblastPssmDbEach = Function
+-- psiblastSearchPssmPdbs :: Function
+-- psiblastSearchPssmPdbs = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf pdb)]
 --   , fOutput = Exactly (ListOf bht)
@@ -656,8 +640,8 @@ psiblastPssmDb = newFnA3
 --   where
 --     name = "psiblast_pssm_db_each"
 
-psiblastPssmDbEach :: Function
-psiblastPssmDbEach = newFnA3
+psiblastSearchPssmPdbs :: Function
+psiblastSearchPssmPdbs = newFnA3
   "psiblast_pssm_db_each"
   (Exactly num, Exactly pssm, Exactly $ ListOf pdb)
   (Exactly $ ListOf bht)
@@ -670,8 +654,8 @@ psiblastPssmDbEach = newFnA3
 
 -- TODO better name? this one's pretty bad!
 -- TODO would a user ever want to use this one directly?
--- psiblastEachPssmDb :: Function
--- psiblastEachPssmDb = Function
+-- psiblastSearchPssmsPdb :: Function
+-- psiblastSearchPssmsPdb = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly pdb]
 --   , fOutput = Exactly (ListOf bht)
@@ -682,22 +666,23 @@ psiblastPssmDbEach = newFnA3
 --     name = "psiblast_each_pssm_db"
 
 -- TODO what should it be called?
-psiblastEachPssmDb :: Function
-psiblastEachPssmDb = newFnA3
+psiblastSearchPssmsPdb :: Function
+psiblastSearchPssmsPdb = newFnA3
   "psiblast_each_pssm_db"
   (Exactly num, Exactly (ListOf pssm), Exactly pdb)
   (Exactly $ ListOf bht)
   (newMap2of3 "psiblast_pssm_db")
   [Nondeterministic]
 
-psiblastPssmsDb :: Function
-psiblastPssmsDb = compose1 "psiblast_pssms_db" [Nondeterministic] psiblastEachPssmDb (mkConcat bht) -- TODO name the mkConcat?
+psiblastSearchPssmsPdbAll :: Function
+psiblastSearchPssmsPdbAll =
+  compose1 "psiblast_pssms_db" [Nondeterministic] psiblastSearchPssmsPdb (mkConcat bht) -- TODO name the mkConcat?
 
--- TODO withPdbSubject fails with rMap? psiblastTrainPssms and psiblastEachPssm
--- TODO OK this is weird, why does it fail but psiblastPssms below can use it correctly?
+-- TODO withPdbSubject fails with rMap? psiblastTrainFaaFaas and psiblastSearchPssmsFaa
+-- TODO OK this is weird, why does it fail but psiablstSearchPssmFaas below can use it correctly?
 --      specific incompatibility with withPdbSubject?
--- psiblastEachPssm :: Function
--- psiblastEachPssm = Function
+-- psiblastSearchPssmsFaa :: Function
+-- psiblastSearchPssmsFaa = Function
 --   { fOpChar = Nothing, fName = name
 --   , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly faa]
 --   , fOutput = Exactly (ListOf bht)
@@ -708,8 +693,8 @@ psiblastPssmsDb = compose1 "psiblast_pssms_db" [Nondeterministic] psiblastEachPs
 --     name = "psiblast_each_pssm"
 
 -- TODO new pattern for these names?
-psiblastEachPssm :: Function
-psiblastEachPssm = newFnA3
+psiblastSearchPssmsFaa :: Function
+psiblastSearchPssmsFaa = newFnA3
   "psiblast_each_pssm"
   (Exactly num, Exactly (ListOf pssm), Exactly faa)
   (Exactly $ ListOf bht)
@@ -717,18 +702,21 @@ psiblastEachPssm = newFnA3
   [Nondeterministic]
 
 -- TODO wait this should return a list right? making it the same as psiblast_each_pssm?
-psiblastPssms :: Function
-psiblastPssms = compose1 "psiblast_pssms" [Nondeterministic] psiblastEachPssm (mkConcat bht)
+psiablstSearchPssmFaas :: Function
+psiablstSearchPssmFaas =
+  compose1 "psiblast_pssms" [Nondeterministic] psiblastSearchPssmsFaa (mkConcat bht)
 
 -- TODO wait, this is the same as above?
-psiblastPssmsAll :: Function
-psiblastPssmsAll = compose1 "psiblast_pssms_all" [Nondeterministic] psiblastEachPssm (mkConcat bht)
+psiblastSearchPssmsFaaAll :: Function
+psiblastSearchPssmsFaaAll =
+  compose1 "psiblast_pssms_all" [Nondeterministic] psiblastSearchPssmsFaa (mkConcat bht)
 
 -- TODO think how to write this!
 --      it needs the effect of map3of3 psiblast_pssms_all ^
 --      but can't actually do that the straightforward way
---      could it use psiblastPssmAll and concat_each?
+--      could it use psiblastSearchPssmFaa and concat_each?
 -- TODO test this
 -- TODO wait this is the same as above too??
-psiblastPssmsEach :: Function
-psiblastPssmsEach = compose1 "psiblast_pssms_each" [Nondeterministic] psiblastEachPssm (mkConcat bht)
+psiablstSearchPssmFaasEach :: Function
+psiablstSearchPssmFaasEach =
+  compose1 "psiblast_pssms_each" [Nondeterministic] psiblastSearchPssmsFaa (mkConcat bht)
