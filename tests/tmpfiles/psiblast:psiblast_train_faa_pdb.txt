@@ -31,7 +31,7 @@
 |   |-- num
 |   |   `-- 3e281fad0f
 |   |       `-- result -> ../../../cache/lines/...
-|   |-- psiblast_train_db
+|   |-- psiblast_train_faa_pdb
 |   |   `-- 01b1e93729
 |   |       `-- ec1f6f502d
 |   |           `-- ecdce158d3
@@ -46,11 +46,9 @@
 |       `-- 824ccbd8b2
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- cyanodb.faa.blastdb -> ../exprs/makeblastdb_prot_all/7627de68aa/result
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     |-- mgen.faa -> ../exprs/load_faa/f8a41afad4/result
-    |-- pssm.pssm -> ../exprs/psiblast_train_db/01b1e93729/ec1f6f502d/ecdce158d3/s0/result
-    |-- query.faa -> ../exprs/load_faa/ae9e22061f/result
+    |-- pssm.pssm -> ../exprs/psiblast_train_faa_pdb/01b1e93729/ec1f6f502d/ecdce158d3/s0/result
     `-- result -> ../vars/pssm.pssm
 
-26 directories, 27 files
+26 directories, 25 files
