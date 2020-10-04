@@ -134,37 +134,37 @@ pssm = Type
 --------------------
 
 -- Train a PSSM on a blast database
-aPsiblastTrainDb :: NewAction3
-aPsiblastTrainDb = aPsiblastDb True trainingArgs
+aPsiblastTrain :: NewAction3
+aPsiblastTrain = aPsiblast True trainingArgs
 
-aPsiblastSearchDb :: NewAction3
-aPsiblastSearchDb = aPsiblastDb False searchArgs
+aPsiblastSearch :: NewAction3
+aPsiblastSearch = aPsiblast False searchArgs
 
 -- TODO remove
--- aPsiblastDb' :: Bool -> [String] -> [Path] -> Action ()
--- aPsiblastDb' writingPssm args [oPath, ePath,  qPath, dbPath] = do
+-- aPsiblast' :: Bool -> [String] -> [Path] -> Action ()
+-- aPsiblast' writingPssm args [oPath, ePath,  qPath, dbPath] = do
 --   cfg <- fmap fromJust getShakeExtra
---   let loc = "modules.psiblast.aPsiblastDb'"
+--   let loc = "modules.psiblast.aPsiblast'"
 --       oPath'  = fromPath loc cfg oPath
 --       ePath'  = fromPath loc cfg ePath
 --       qPath'  = fromPath loc cfg qPath -- might be a fasta or pssm
 --       dbPath' = fromPath loc cfg dbPath
---   aPsiblastDb writingPssm args (ExprPath oPath') ePath' qPath' dbPath'
--- aPsiblastDb' _ _ _ = fail "bad argument to aPsiblastDb'"
+--   aPsiblast writingPssm args (ExprPath oPath') ePath' qPath' dbPath'
+-- aPsiblast' _ _ _ = fail "bad argument to aPsiblast'"
 
--- aPsiblastTrainDb' :: [Path] -> Action ()
--- aPsiblastTrainDb' = aPsiblastDb' True  trainingArgs
+-- aPsiblastTrain' :: [Path] -> Action ()
+-- aPsiblastTrain' = aPsiblast' True  trainingArgs
 
--- aPsiblastSearchDb' :: [Path] -> Action ()
--- aPsiblastSearchDb' = aPsiblastDb' False searchArgs
+-- aPsiblastSearch' :: [Path] -> Action ()
+-- aPsiblastSearch' = aPsiblast' False searchArgs
 
--- Base action for running psiblast. Use aPsiblastTrainDb to train a PSSM, or
--- aPsiblastSearchDb to search with an existing PSSM.
-aPsiblastDb :: Bool -> [String] -> NewAction3
-aPsiblastDb writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
+-- Base action for running psiblast. Use aPsiblastTrain to train a PSSM, or
+-- aPsiblastSearch to search with an existing PSSM.
+aPsiblast :: Bool -> [String] -> NewAction3
+aPsiblast writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
 
   cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.psiblast.aPsiblastDb"
+  let loc = "modules.psiblast.aPsiblast"
   -- let oPath'  = fromPath loc cfg oPath
       tPath'  = if writingPssm then oPath' <.> "tmp" else oPath' -- see below
       -- ePath'  = fromPath loc cfg ePath
@@ -180,7 +180,7 @@ aPsiblastDb writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
 
   -- this version works for withPdbSubject, but breaks something else?
   dbPre     <- readPath loc dbPath' -- TODO is this right?
-  dbg "aPsiblastDb" $ "dbPre: " ++ show dbPre
+  dbg "aPsiblast" $ "dbPre: " ++ show dbPre
 
   let eDec = formatScientific Fixed Nothing $ read eStr
       cDir = fromPath loc cfg $ cacheDir cfg "psiblast"
@@ -194,7 +194,7 @@ aPsiblastDb writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
   -- TODO is this needed, or will it end up the default?
   -- psiblastBin <- fmap stripWhiteSpace $
   --                  wrappedCmdOut True cfg ref [] [] [] "which" ["psiblast"]
-  -- dbg "aPsiblastDb" $ "binary: " ++ psiblastBin
+  -- dbg "aPsiblast" $ "binary: " ++ psiblastBin
 
   -- TODO what to do when no hits found? use seqid + nothing as output format
   --      and check for that in the search fn?
@@ -238,7 +238,7 @@ aPsiblastDb writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
        - (If we aren't writing a PSSM, then tPath' is already the final file)
        -}
       when writingPssm $ do
-        let head' = headOrDie "aPsiblastDb failed to read querySeqId"
+        let head' = headOrDie "aPsiblast failed to read querySeqId"
         querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' qPath'
         pssmLines <- fmap lines $ readFileStrict' tPath'
         let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
@@ -295,7 +295,7 @@ withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e
 --   , fInputs = [Exactly num, Exactly faa, Exactly faa]
 --   , fOutput = Exactly bht
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPssmQuery $ withPdbSubject e
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearch s $ withPssmQuery $ withPdbSubject e
 --   }
 --   where
 --     name = "psiblast"
@@ -337,7 +337,7 @@ psiblastSearchFaaFaasAll = compose1
 --   , fInputs = [Exactly num, Exactly faa, Exactly pdb]
 --   , fOutput = Exactly bht
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s (withPssmQuery e)
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearch s (withPssmQuery e)
 --   }
 --   where
 --     name = "psiblast_db"
@@ -367,22 +367,26 @@ mPsiblastDb _ _ e = error "ortholang.modules.psiblast.mPsiblastDb" $ "bad argume
 --   , fOutput = Exactly (ListOf bht)
 --   , fTags = [Nondeterministic]
 --   -- can't use withPssmQuery here because there's a list of things to train against
---   -- but won't aPsiblastDb default to working with this anyway? (not typechecked that way tho)
---   , fNewRules = NewNotImplemented, fOldRules = rMap 3 aPsiblastSearchDb'
+--   -- but won't aPsiblast default to working with this anyway? (not typechecked that way tho)
+--   , fNewRules = NewNotImplemented, fOldRules = rMap 3 aPsiblastSearch'
 --   }
 --   where
 --     name = "psiblast_db_each"
 
 psiblastSearchFaaPdbs :: Function
-psiblastSearchFaaPdbs = undefined
+psiblastSearchFaaPdbs = newFnA3
+  "psiblast_search_faa_pdbs"
+  (Exactly num, Exactly faa, Exactly $ ListOf pdb)
+  (Exactly $ ListOf bht)
+  (newMap3of3 "psiblast_search_faa_pdb") -- TODO pass the Function and typecheck these?
+  [Nondeterministic]
 
 psiblastSearchFaaPdbsAll :: Function
-psiblastSearchFaaPdbsAll = newFnA3
+psiblastSearchFaaPdbsAll = compose1
   "psiblast_search_faa_pdbs_all"
-  (Exactly num, Exactly faa, Exactly $ ListOf pdb)
-  (Exactly bht)
-  (newMap3of3 "psiblast_db") -- TODO fix this
   [Nondeterministic]
+  psiblastSearchFaaPdbs
+  (mkConcat bht)
 
 ----------------------------
 -- explicitly train pssms --
@@ -407,7 +411,7 @@ trainingArgs =
 --   , fInputs = [Exactly num, Exactly faa, Exactly faa]
 --   , fOutput = Exactly pssm
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrainDb s $ withPdbSubject e
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrain s $ withPdbSubject e
 --   }
 --   where
 --     name = "psiblast_train"
@@ -417,7 +421,7 @@ psiblastTrainFaaFaa = newFnA3
   "psiblast_train_faa_faa"
   (Exactly num, Exactly faa, Exactly faa)
   (Exactly pssm)
-  aPsiblastTrainDb -- TODO remove db from name?
+  aPsiblastTrain -- TODO remove db from name?
   [Nondeterministic]
 
 
@@ -428,7 +432,7 @@ psiblastTrainFaaFaa = newFnA3
 --   , fInputs = [Exactly num, Exactly (ListOf faa), Exactly faa]
 --   , fOutput = Exactly (ListOf pssm)
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastTrainDb') s $ withPdbSubject e
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastTrain') s $ withPdbSubject e
 --   }
 --   where
 --     name = "psiblast_train_pssms"
@@ -449,7 +453,7 @@ psiblastTrainFaasFaa = newExprExpansion
 --   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
 --   , fOutput = Exactly (ListOf pssm)
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrainDb) s (withPdbSubjects e)
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb pssm $ aPsiblastTrain) s (withPdbSubjects e)
 --   }
 --   where
 --     name = "psiblast_train_each"
@@ -468,7 +472,7 @@ psiblastTrainFaaFaas = newExprExpansion
 --   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf faa)]
 --   , fOutput = Exactly pssm
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrainDb s (withPdbSubject e)
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastTrain s (withPdbSubject e)
 --   }
 --   where
 --     name = "psiblast_train_all"
@@ -488,7 +492,7 @@ psiblastTrainFaaPdb = newFnA3
   "psiblast_train_faa_pdb"
   (Exactly num, Exactly faa, Exactly pdb)
   (Exactly pssm)
-  aPsiblastTrainDb
+  aPsiblastTrain
   [Nondeterministic]
 
 -- psiblastTrainFaaPdbEach :: Function
@@ -497,7 +501,7 @@ psiblastTrainFaaPdb = newFnA3
 --   , fInputs = [Exactly num, Exactly faa, Exactly (ListOf pdb)]
 --   , fOutput = Exactly (ListOf pssm)
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb pssm aPsiblastTrainDb
+--   , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb pssm aPsiblastTrain
 --   }
 --   where
 --     name = "psiblast_train_db_each"
@@ -517,7 +521,7 @@ psiblastTrainFaaPdbs = newExprExpansion
 --   , fInputs = [Exactly num, Exactly (ListOf faa), Exactly pdb]
 --   , fOutput = Exactly (ListOf pssm)
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastTrainDb'
+--   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastTrain'
 --   }
 --   where
 --     name = "psiblast_train_pssms_db"
@@ -540,7 +544,7 @@ psiblastTrainFaasPdb = newExprExpansion
 --   , fInputs = [Exactly num, Exactly pssm, Exactly faa]
 --   , fOutput = Exactly bht
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearch s $ withPdbSubject e
 --   }
 --   where
 --     name = "psiblast_pssm"
@@ -561,7 +565,7 @@ psiblastSearchPssmFaa = newExprExpansion
 --   , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf faa)]
 --   , fOutput = Exactly bht
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearchDb s $ withPdbSubject e
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 aPsiblastSearch s $ withPdbSubject e
 --   }
 --   where
 --     name = "psiblast_pssm_all"
@@ -580,7 +584,7 @@ psiblastSearchPssmFaa = newExprExpansion
 --   , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf faa)]
 --   , fOutput = Exactly (ListOf bht)
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearchDb) s (withPdbSubjects e)
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> rFun3 (map3of3 pdb bht $ aPsiblastSearch) s (withPdbSubjects e)
 --   }
 --   where
 --     name = "psiblast_pssm_each"
@@ -602,7 +606,7 @@ searchArgs = ["-outfmt", "6", "-out"]
 --   , fInputs = 
 --   , fOutput = Exactly bht
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastSearchDb
+--   , fNewRules = NewNotImplemented, fOldRules = rFun3 aPsiblastSearch
 --   }
 --   where
 --     name = "psiblast_pssm_db"
@@ -613,7 +617,7 @@ psiblastSearchPssmPdb = newFnA3
   "psiblast_search_pssm_pdb"
   (Exactly num, Exactly pssm, Exactly pdb)
   (Exactly bht)
-  aPsiblastSearchDb
+  aPsiblastSearch
   [Nondeterministic]
 
 -- psiblastSearchPssmPdbs :: Function
@@ -622,7 +626,7 @@ psiblastSearchPssmPdb = newFnA3
 --   , fInputs = [Exactly num, Exactly pssm, Exactly (ListOf pdb)]
 --   , fOutput = Exactly (ListOf bht)
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb bht aPsiblastSearchDb
+--   , fNewRules = NewNotImplemented, fOldRules = rFun3 $ map3of3 pdb bht aPsiblastSearch
 --   }
 --   where
 --     name = "psiblast_pssm_db_each"
@@ -647,7 +651,7 @@ psiblastSearchPssmPdbs = newFnA3
 --   , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly pdb]
 --   , fOutput = Exactly (ListOf bht)
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastSearchDb'
+--   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastSearch'
 --   }
 --   where
 --     name = "psiblast_each_pssm_db"
@@ -677,7 +681,7 @@ psiblastSearchPssmsPdbAll = compose1
 --   , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly faa]
 --   , fOutput = Exactly (ListOf bht)
 --   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastSearchDb') s (withPdbSubject e)
+--   , fNewRules = NewNotImplemented, fOldRules = \s e -> (rMap 2 aPsiblastSearch') s (withPdbSubject e)
 --   }
 --   where
 --     name = "psiblast_each_pssm"
