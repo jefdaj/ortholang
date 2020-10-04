@@ -89,6 +89,7 @@ olModule = Module
     , psiblastSearchPssmFaasAll -- num pssm      faa.list -> bht
     , psiblastSearchPssmPdb     -- num pssm      pdb      -> bht
     , psiblastSearchPssmPdbs    -- num pssm      pdb.list -> bht.list
+    , psiblastSearchPssmPdbsAll -- num pssm      pdb.list -> bht
     , psiblastSearchPssmsFaa    -- num pssm.list faa      -> bht.list
     , psiblastSearchPssmsFaaAll -- num pssm.list faa      -> bht
     , psiblastSearchPssmsPdb    -- num pssm.list pdb      -> bht.list
@@ -107,7 +108,6 @@ olModule = Module
     -- psiblast_train_faa_pdbs       : num faa         pdb.list -> pssm.list
     -- psiblast_train_faas_faa       : num faa.list    faa      -> pssm.list
     -- psiblast_train_faas_pdb       : num faa.list    pdb      -> pssm.list
-    -- TODO psiblastSaerchFaaPdbsAll?
     -- TODO psiblastSearchPssmPdbsAll?
     -- TODO psiblastTrainFaasPdbAll?
     -- TODO psiblastTrainFaasFaaAll?
@@ -603,8 +603,16 @@ psiblastSearchPssmPdbs = newFnA3
   "psiblast_search_pssm_pdbs"
   (Exactly num, Exactly pssm, Exactly $ ListOf pdb)
   (Exactly $ ListOf bht)
-  (newMap3of3 "psiblast_train_db") -- TODO right function here?
+  (newMap3of3 "psiblast_search_pssm_pdb")
   [Nondeterministic]
+
+-- TODO have to 'need' another path in newMap to get this working?
+psiblastSearchPssmPdbsAll :: Function
+psiblastSearchPssmPdbsAll = compose1
+  "psiblast_search_pssm_pdbs_all"
+  [Nondeterministic]
+  psiblastSearchPssmPdbs
+  (mkConcat bht)
 
 ---------------------------------------
 -- search with lists of pssm queries --
