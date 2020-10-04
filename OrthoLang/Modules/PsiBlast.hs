@@ -618,26 +618,12 @@ psiblastSearchPssmPdbsAll = compose1
 -- search with lists of pssm queries --
 ---------------------------------------
 
--- TODO better name? this one's pretty bad!
--- TODO would a user ever want to use this one directly?
--- psiblastSearchPssmsPdb :: Function
--- psiblastSearchPssmsPdb = Function
---   { fOpChar = Nothing, fName = name
---   , fInputs = [Exactly num, Exactly (ListOf pssm), Exactly pdb]
---   , fOutput = Exactly (ListOf bht)
---   , fTags = [Nondeterministic]
---   , fNewRules = NewNotImplemented, fOldRules = rMap 2 aPsiblastSearch'
---   }
---   where
---     name = "psiblast_each_pssm_db"
-
--- TODO what should it be called?
 psiblastSearchPssmsPdb :: Function
 psiblastSearchPssmsPdb = newFnA3
   "psiblast_search_pssms_pdb"
-  (Exactly num, Exactly (ListOf pssm), Exactly pdb)
+  (Exactly num, Exactly $ ListOf pssm, Exactly pdb)
   (Exactly $ ListOf bht)
-  (newMap2of3 "psiblast_pssm_db")
+  (newMap2of3 "psiblast_search_pssm_pdb")
   [Nondeterministic]
 
 psiblastSearchPssmsPdbAll :: Function
