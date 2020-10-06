@@ -319,7 +319,6 @@ prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    x   -> error "prefixOf" $ "unknown Bop: \"" ++ x ++ "\""
 
 
--- TODO remove repeat seed if fn is deterministic
 -- note this is always used with its unsafe digest wrapper (below)
 exprPathExplicit :: Config -> String -> Maybe Seed -> [String] -> Path
 exprPathExplicit cfg prefix mSeed hashes = toPath loc cfg path
@@ -405,6 +404,7 @@ addDigest dRef rtype path = atomicModifyIORef' dRef $ \ds ->
   (M.insert (pathDigest path) (rtype, path) ds, ())
 
 -- TODO should the safe version still exist? should one be renamed?
+-- TODO why does this return a Path instead of ExprPath?
 unsafeExprPathExplicit :: Config -> DigestsRef -> String -> Type -> Maybe Seed -> [String] -> Path
 unsafeExprPathExplicit cfg dRef prefix rtype mSeed hashes =
   let path = exprPathExplicit cfg prefix mSeed hashes

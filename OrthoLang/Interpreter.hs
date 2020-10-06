@@ -38,6 +38,8 @@ module OrthoLang.Interpreter
   , newDate1of2
   , newDate1of3
   , newDate1of4
+  , path2info
+  , info2path
 
   , ExprExpansion
   , addDigest

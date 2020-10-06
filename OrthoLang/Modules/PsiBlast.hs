@@ -277,6 +277,14 @@ withPdbSubject (Fun rtn seed deps name [a1, a2, x ])
             _          -> withSingleton x
 withPdbSubject e = error $ "bad argument to withPdbSubject: " ++ show e
 
+aWithPdbSubject :: NewAction3
+aWithPdbSubject = undefined
+  -- TODO ok for these we basically want to
+  --      1. make a new expr based on one of the input paths
+  --      2. insert its digest in place of the original
+  --      3. rename the overall output path and need the new one
+  --      4. symlink the overall output path to that new one
+
 -- Wrap the faa query argument of a psiblastSearchFaaFaa Function in psiblast_train_db
 -- TODO sometimes tries to use path to path of db as path to db... where to fix?
 withPssmQuery :: Expr -> Expr
@@ -422,7 +430,7 @@ psiblastTrainFaaFaa = newFnA3
   "psiblast_train_faa_faa"
   (Exactly num, Exactly faa, Exactly faa)
   (Exactly pssm)
-  aPsiblastTrain -- TODO remove db from name?
+  undefined
   [Nondeterministic]
 
 

@@ -43,6 +43,8 @@ module OrthoLang.Interpreter.Compile.NewRules
   , newFnA2
   , newFnA3
   , newFnA4
+  , path2info
+  , info2path
 
   -- * Binary operators from Actions
   , newBop
@@ -64,10 +66,15 @@ module OrthoLang.Interpreter.Compile.NewRules
   , newDate1of2
   , newDate1of3
   , newDate1of4
-  , newFnP1
-  , newFnP2
-  , newFnP3
-  , newFnP4
+  -- , newPath1
+  -- , newPath2
+  -- , newPath3
+  -- , newPath4
+  -- , newFnP1
+  -- , newFnP2
+  -- , newFnP3
+  -- , newFnP4
+  , path2info
 
   -- * Implementation details
   , rReloadIDs
@@ -111,7 +118,7 @@ import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust)
 import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName, makeRelative, splitDirectories)
 import OrthoLang.Interpreter.Actions     (need', readPaths)
-import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest, exprPath, pathDigest)
+import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest, exprPath, pathDigest, unsafeExprPathExplicit)
 import qualified Data.Map.Strict as M
 import Data.IORef                 (atomicModifyIORef')
 import System.Directory           (createDirectoryIfMissing)
@@ -376,6 +383,19 @@ newPattern cfg useSeed name nArgs =
   tmpdir cfg </> "exprs" </> name </> (foldl1 (</>) (take nStars $ repeat "*")) </> "result"
   where
     nStars = if useSeed then nArgs+1 else nArgs
+
+-- | The 'Maybe Seed' comes from the 'ExprPath' being expanded. So if it's already 'Nothing'
+--   there is no need for a 'Seed', but if it's 'Just' then there might still be no seed
+--   depending on whether the new function is deterministic or not.
+newPath :: Config -> Prefix -> [Path] -> Maybe Seed -> ExprPath
+newPath cfg prefix inputs mSeed = do
+  cfg  <- fmap fromJust $ getShakeExtra
+  mods <- fmap fromJust $ getShakeExtra
+  let useSeed = usesSeed $ fromRight $ findFun mods prefix
+      digests = undefined
+      dirs = undefined digests useSeed mSeed
+      out' = tmpdir cfg </> "exprs" </> prefix </> (foldl1 (</>) digests) </> "result"
+  undefined
 
 -- TODO need to addDigest in here somehow?
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
@@ -757,65 +777,57 @@ aNewDate prefix (ExprPath outPath') userPath = do
 -- generic path expansions --
 -----------------------------
 
+-- | All the info we can get back from an ExprPath:
+--
+--   * fn name/prefix
+--   * return type
+--   * dependency paths
+--   * seed, if any
+--
+-- TODO would a list of (Type, Path) tuples be more useful?
+type ExprPathInfo = (Prefix, Type, [Path], Maybe Seed)
+
+path2info :: ExprPath -> Action ExprPathInfo
+path2info e@(ExprPath p) = do
+  cfg  <- fmap fromJust $ getShakeExtra
+  dRef <- fmap fromJust $ getShakeExtra
+  let prefix = splitDirectories (makeRelative (tmpdir cfg) p) !! 1
+      mSeed  = getExprPathSeed p
+  (oType, _, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef e
+  return (prefix, oType, dPaths, mSeed)
+
+-- TODO need for force evaluation of unsafeExprPathExplicit here?
+info2path :: ExprPathInfo -> Action ExprPath
+info2path (prefix, rType, iPaths, mSeed) = do
+  cfg  <- fmap fromJust $ getShakeExtra
+  dRef <- fmap fromJust $ getShakeExtra
+  let loc    = "ortholang.interpreter.compile.newrules.info2path"
+      hashes = undefined iPaths
+      out    = unsafeExprPathExplicit cfg dRef prefix rType mSeed hashes
+      out'   = fromPath loc cfg out
+  return (ExprPath out')
+
+  -- let inputDirs = foldl1 (</>) inputs
+      -- seedFn = case mSeed of
+                 -- Nothing -> id
+                 -- Just n  -> \p -> p </> "s" ++ show n
+      -- out' = tmpdir cfg </> "exprs" </> prefix </> inputDir
+      -- out' = unsafeExprPathExplicit cfg dRef prefix rtype mSeed hashes
+
 -- TODO should newMap* + newDate* above be implemented using this too?
 -- TODO where should path expansions be applied?
 --        probably somewhere in here, right before 'need'
 --        maybe in rNewRules aFn?
 
-type PathExpansion = ExprPath -> Action ExprPath
+-- type PathExpansion = ExprPath -> Action ExprPath
 
-newFnP1
-  :: String        -- ^ name
-  -> TypeSig       -- ^ 1 argument type
-  -> TypeSig       -- ^ return type
-  -> [FnTag]       -- ^ tags
-  -> PathExpansion -- ^ path expansion
-  -> Function
-newFnP1 name i1 oSig tags pFn = newFn name Nothing [i1] oSig rFn aFn tags
-  where
-    rFn = undefined 1
-    aFn = undefined pFn
-
-newFnP2
-  :: String             -- ^ name
-  -> (TypeSig, TypeSig) -- ^ 2 argument types
-  -> TypeSig            -- ^ return type
-  -> [FnTag]            -- ^ tags
-  -> PathExpansion      -- ^ path expansion
-  -> Function
-newFnP2 name (i1, i2) oSig tags pFn = newFn name Nothing [i1, i2] oSig rFn aFn tags
-  where
-    rFn = undefined 2
-    aFn = undefined pFn
-
-newFnP3
-  :: String                      -- ^ name
-  -> (TypeSig, TypeSig, TypeSig) -- ^ 3 argument types
-  -> TypeSig                     -- ^ return type
-  -> [FnTag]                     -- ^ tags
-  -> PathExpansion               -- ^ path expansion
-  -> Function
-newFnP3 name (i1, i2, i3) oSig tags pFn = newFn name Nothing [i1, i2, i3] oSig rFn aFn tags
-  where
-    rFn = undefined 3
-    aFn = undefined pFn
-
-newFnP4
-  :: String                               -- ^ name
-  -> (TypeSig, TypeSig, TypeSig, TypeSig) -- ^ 4 argument types
-  -> TypeSig                              -- ^ return type
-  -> [FnTag]                              -- ^ tags
-  -> PathExpansion                        -- ^ path expansion
-  -> Function
-newFnP4 name (i1, i2, i3, i4) oSig tags pFn = newFn name Nothing [i1, i2, i3, i4] oSig rFn aFn tags
-  where
-    rFn = undefined 4
-    aFn = undefined pFn
+-- type PathExpansion1 = (ExprPath, Path) -> Action (ExprPath, Path)
+-- type PathExpansion2 = (ExprPath, Path, Path) -> Action (ExprPath, Path, Path)
 
 -- TODO factor the common parts out of newMap* + newDate* above
-rPathExpansion :: PathExpansion -> Rules ()
-rPathExpansion pFn = do
-  undefined
+-- rPathExpansion :: PathExpansion -> Rules ()
+-- rPathExpansion pFn = do
+  -- undefined
   -- TODO where does the expected outpath come from here?
   -- TODO once we have that we can apply the pFn to it to get the final path
   -- TODO then 
@@ -831,6 +843,28 @@ rPathExpansion pFn = do
 --   , fOldRules  = undefined
 --   , fNewRules  = NewRules $ rPathExpansion pFn
 --   }
+
+-- TODO any need for these at all, or should they be made indivually?
+-- newPath1 :: Prefix -> NewAction1
+-- newPath1 prefix (ExprPath out) in1 = undefined
+
+-- newPath2 :: Prefix -> NewAction2
+-- newPath2 prefix (ExprPath out) in1 in2 = undefined
+
+-- type NewPath3 = Prefix -> (FilePath, FilePath, FilePath) -> Action ExprPath
+-- 
+-- newPath3 :: NewPath3 -> NewAction3
+-- newPath3 prefix (ExprPath out') in1 in2 in3 = do
+--   -- TODO out is the path you should symlink the expanded outpath to
+--   -- TODO prefix is the name of the 
+--   cfg <- fmap fromJust getShakeExtra
+--   let loc  = "ortholang.interpreter.compile.newrules.newPath3"
+--       out2 = undefined -- TODO figure out the expanded path to need
+--       out  = toPath loc cfg out'
+--   symlink out out2
+
+-- newPath4 :: Prefix -> NewAction4
+-- newPath4 prefix (ExprPath out) in1 in2 in3 in4 = undefined
 
 ------------------------------
 -- future library functions --
