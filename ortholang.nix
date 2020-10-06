@@ -12,7 +12,7 @@
 }:
 mkDerivation {
   pname = "OrthoLang";
-  version = "0.9.5";
+  version = "0.9.6";
   src = ./.;
   isLibrary = true;
   isExecutable = true;
