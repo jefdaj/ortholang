@@ -115,7 +115,7 @@ import System.Exit (ExitCode(..))
 
 import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
-import Data.Maybe                 (fromJust)
+import Data.Maybe                 (fromJust, isJust)
 import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName, makeRelative, splitDirectories)
 import OrthoLang.Interpreter.Actions     (need', readPaths)
 import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest, exprPath, pathDigest, unsafeExprPathExplicit)
@@ -384,18 +384,23 @@ newPattern cfg useSeed name nArgs =
   where
     nStars = if useSeed then nArgs+1 else nArgs
 
--- | The 'Maybe Seed' comes from the 'ExprPath' being expanded. So if it's already 'Nothing'
+-- | Creates the proper 'ExprPath' for a given function name, list of 'PathDigests', and 'Seed'.
+--   The 'Maybe Seed' comes from the 'ExprPath' being expanded. So if it's already 'Nothing'
 --   there is no need for a 'Seed', but if it's 'Just' then there might still be no seed
 --   depending on whether the new function is deterministic or not.
-newPath :: Config -> Prefix -> [Path] -> Maybe Seed -> ExprPath
-newPath cfg prefix inputs mSeed = do
-  cfg  <- fmap fromJust $ getShakeExtra
+--
+--   TODO document that you can't expand a deterministic path to include nondeterministic ones,
+--        because they would need to know a seed it doesn't have
+newPath :: Config -> Prefix -> [PathDigest] -> Maybe Seed -> Action ExprPath
+newPath cfg prefix digests mSeed = do
   mods <- fmap fromJust $ getShakeExtra
   let useSeed = usesSeed $ fromRight $ findFun mods prefix
-      digests = undefined
-      dirs = undefined digests useSeed mSeed
-      out' = tmpdir cfg </> "exprs" </> prefix </> (foldl1 (</>) digests) </> "result"
-  undefined
+      hashes  = map (\(PathDigest d) -> d) digests
+      path1   = tmpdir cfg </> "exprs" </> prefix </> (foldl1 (</>) hashes)
+      path2   = if useSeed && isJust mSeed
+                  then path1 </> "s" ++ (show $ fromJust mSeed) </> "result"
+                  else path1 </> "result"
+  return $ ExprPath path2
 
 -- TODO need to addDigest in here somehow?
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
@@ -785,7 +790,7 @@ aNewDate prefix (ExprPath outPath') userPath = do
 --   * seed, if any
 --
 -- TODO would a list of (Type, Path) tuples be more useful?
-type ExprPathInfo = (Prefix, Type, [Path], Maybe Seed)
+type ExprPathInfo = (Type, Prefix, [PathDigest], Maybe Seed)
 
 path2info :: ExprPath -> Action ExprPathInfo
 path2info e@(ExprPath p) = do
@@ -794,11 +799,11 @@ path2info e@(ExprPath p) = do
   let prefix = splitDirectories (makeRelative (tmpdir cfg) p) !! 1
       mSeed  = getExprPathSeed p
   (oType, _, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef e
-  return (prefix, oType, dPaths, mSeed)
+  return (oType, prefix, map pathDigest dPaths, mSeed)
 
 -- TODO need for force evaluation of unsafeExprPathExplicit here?
 info2path :: ExprPathInfo -> Action ExprPath
-info2path (prefix, rType, iPaths, mSeed) = do
+info2path (rType, prefix, iPaths, mSeed) = do
   cfg  <- fmap fromJust $ getShakeExtra
   dRef <- fmap fromJust $ getShakeExtra
   let loc    = "ortholang.interpreter.compile.newrules.info2path"
