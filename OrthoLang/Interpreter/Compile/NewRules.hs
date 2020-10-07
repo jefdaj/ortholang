@@ -45,6 +45,7 @@ module OrthoLang.Interpreter.Compile.NewRules
   , newFnA4
   , path2info
   , info2path
+  , newPathDigest
 
   -- * Binary operators from Actions
   , newBop
@@ -384,23 +385,28 @@ newPattern cfg useSeed name nArgs =
   where
     nStars = if useSeed then nArgs+1 else nArgs
 
--- | Creates the proper 'ExprPath' for a given function name, list of 'PathDigests', and 'Seed'.
+-- | Creates the proper 'PathDigest' for a given function name, list of 'PathDigests', and 'Seed'.
+--   This digest can be inserted in place of the old one in a path expansion operation.
 --   The 'Maybe Seed' comes from the 'ExprPath' being expanded. So if it's already 'Nothing'
 --   there is no need for a 'Seed', but if it's 'Just' then there might still be no seed
 --   depending on whether the new function is deterministic or not.
 --
 --   TODO document that you can't expand a deterministic path to include nondeterministic ones,
 --        because they would need to know a seed it doesn't have
-newPath :: Config -> Prefix -> [PathDigest] -> Maybe Seed -> Action ExprPath
-newPath cfg prefix digests mSeed = do
+newPathDigest :: Config -> ExprPathInfo -> Action PathDigest
+newPathDigest cfg (oType, prefix, digests, mSeed) = do
   mods <- fmap fromJust $ getShakeExtra
-  let useSeed = usesSeed $ fromRight $ findFun mods prefix
+  dRef <- fmap fromJust $ getShakeExtra
+  let loc     = "modules.newrules.newPathDigest"
+      useSeed = usesSeed $ fromRight $ findFun mods prefix
       hashes  = map (\(PathDigest d) -> d) digests
       path1   = tmpdir cfg </> "exprs" </> prefix </> (foldl1 (</>) hashes)
       path2   = if useSeed && isJust mSeed
                   then path1 </> "s" ++ (show $ fromJust mSeed) </> "result"
                   else path1 </> "result"
-  return $ ExprPath path2
+      path3 = toPath loc cfg path2
+  liftIO $ addDigest dRef oType path3
+  return $ pathDigest path3
 
 -- TODO need to addDigest in here somehow?
 -- TODO can you add more rules simply by doing >> moreRulesFn after this?
