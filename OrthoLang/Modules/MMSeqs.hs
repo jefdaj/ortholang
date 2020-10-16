@@ -76,7 +76,7 @@ mmseqsCreateDbAll = let name = "mmseqs_createdb_all" in OrthoLangFunction
 
 tMmseqsCreateDbAll :: String -> TypeChecker
 tMmseqsCreateDbAll _ [(ListOf x)] | x `elem` [fna, faa] = Right mms
-tMmseqsCreateDbAll name types = fail $ name ++ " requires a list of fasta files, but got " ++ show types
+tMmseqsCreateDbAll name types = Left $ name ++ " requires a list of fasta files, but got " ++ show types
 
 {- Looks like mmseqs2 expects later commands to be smart about index naming? It
  - doesn't always create the plain no-suffix index file, but expects that
@@ -129,7 +129,7 @@ mmseqsCreateDb = let name = "mmseqs_createdb" in OrthoLangFunction
 
 tMmseqsCreateDb :: String -> TypeChecker
 tMmseqsCreateDb _ [x] | x `elem` [fna, faa] = Right mms
-tMmseqsCreateDb name types = fail $ name ++ " requires a fasta file, but got " ++ show types
+tMmseqsCreateDb name types = Left $ name ++ " requires a fasta file, but got " ++ show types
 
 rMmseqsCreateDb :: RulesFn
 rMmseqsCreateDb s e = rMmseqsCreateDbAll s $ withSingleton e
@@ -154,7 +154,7 @@ tMmseqsSearchDb :: String -> TypeChecker
 -- TODO can this error be maintained despite the vague mms type? maybe not...
 -- tMmseqsSearch n [x, y] | x == fna && y == fna = error $ "Both " ++ n ++ " args can't be fna; translate one first."
 tMmseqsSearchDb _ [x, y, z] | x == num && y `elem` [fna, faa] && z == mms = Right bht
-tMmseqsSearchDb n types = fail $ n ++ " requires a number, fasta, and mmseqs2 db. Instead, got: " ++ show types
+tMmseqsSearchDb n types = Left $ n ++ " requires a number, fasta, and mmseqs2 db. Instead, got: " ++ show types
 
 {- Even though all the MMseqs2 commands make some kind of database, the files
  - it will include are obscure to me. The search ones here have .0, .1 ... .n
@@ -251,9 +251,9 @@ mmseqsSearch = let name = "mmseqs_search" in OrthoLangFunction
   }
 
 tMmseqsSearch :: String -> TypeChecker
-tMmseqsSearch n [_, y, z] | y == fna && z == fna = fail $ "Both " ++ n ++ " args can't be fna; translate one first."
+tMmseqsSearch n [_, y, z] | y == fna && z == fna = Left $ "Both " ++ n ++ " args can't be fna; translate one first."
 tMmseqsSearch _ [x, y, z] | x == num && y `elem` [fna, faa] && z `elem` [fna, faa] = Right bht
-tMmseqsSearch n types = fail $ n ++ " requires a number and two fasta files. Instead, got: " ++ show types
+tMmseqsSearch n types = Left $ n ++ " requires a number and two fasta files. Instead, got: " ++ show types
 
 rMmseqsSearch :: RulesFn
 rMmseqsSearch st (OrthoLangFun rtn salt deps name [e, q, s])

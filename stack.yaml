@@ -8,14 +8,16 @@ extra-package-dbs: []
 packages:
 - .
 - logging
+- docopt
 
 # it works best if this matches the haskell.compiler.ghcXXX version in default.nix
 system-ghc: true
-resolver: lts-14.4
+resolver: lts-16.18
 extra-deps:
   - posix-escape-0.1
   - path-io-1.6.0
   - progress-meter-1.0.0.1
+    # - docopt-0.7.0.5
 
 # TODO are the rtsopts a problem? see if removing fixes any fails
 ghc-options:
