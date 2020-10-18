@@ -1,23 +1,30 @@
 with import ./nixpkgs;
 let
+  sources = import ./nix/sources.nix {};
 
   # Things needed at runtime. Modules are only the scripts called by ortholang,
   # not their indirect (propagated) dependencies since those may conflict.
   # TODO add the ones that don't conflict for easier development?
   inherit (import ./dependencies.nix) runDepends;
 
-  myHaskell = pkgs.haskell.packages.ghc865.override {
-    overrides = new: old: rec {
-      logging = new.callPackage (import ./logging) {};
+  inherit (pkgs.haskell.lib) overrideCabal;
+  myGHC = "ghc865";
+  myHaskell = pkgs.haskell.packages.${myGHC}.override {
+    overrides = hpNew: hpOld: {
 
-      # this will be needed to upgrade to 8.8.x, unless upstream fixes it first:
-      # docopt  = new.callPackage (import ./docopt) {};
-
-      MissingH = pkgs.haskell.lib.overrideCabal old.MissingH (_: {jailbreak = true;});
-      progress-meter = pkgs.haskell.lib.overrideCabal old.progress-meter (_: {
+      # haskell packages that can be fixed with simple overrides
+      MissingH = overrideCabal hpOld.MissingH (_: {jailbreak = true;});
+      progress-meter = overrideCabal hpOld.progress-meter (_: {
         broken = false;
         jailbreak = true;
       });
+
+      # haskell packages that had to be forked
+      logging = hpOld.callPackage sources.logging {};
+
+      # TODO upgrade to ghc884 and include this at the same time?
+      # docopt  = hpOld.callPackage sources.docopt {};
+
     };
   };
 

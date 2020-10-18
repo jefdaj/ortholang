@@ -1,4 +1,28 @@
 {
+    "docopt": {
+        "branch": "master",
+        "description": "A command-line interface description language and parser that will make you smile",
+        "homepage": "http://docopt.org/",
+        "owner": "jefdaj",
+        "repo": "docopt.hs",
+        "rev": "080c3ba6badd736f1b4a3f1f13dbd4c107614136",
+        "sha256": "0yjax4kdc26znip2r4wfkj3s9ahwzd3mkf0v5hk56fajx5g9phci",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/docopt.hs/archive/080c3ba6badd736f1b4a3f1f13dbd4c107614136.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "logging": {
+        "branch": "master",
+        "description": null,
+        "homepage": null,
+        "owner": "jefdaj",
+        "repo": "logging",
+        "rev": "c73b189e083a6427ef5c3e02c0e2fc8387df8382",
+        "sha256": "0m1m7mhd6ra4wi7an4g7djh19sv2hjp78mbsn8flxcbrm16ri37d",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/logging/archive/c73b189e083a6427ef5c3e02c0e2fc8387df8382.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "niv": {
         "branch": "master",
         "description": "Easy dependency management for Nix projects",
