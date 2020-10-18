@@ -1,25 +1,21 @@
+# since ortholang requires lots of nix dependencies, the simplest way to
+# integrate with stack appears to be manually using a nix-shell, like this:
+#
+# nix-shell --run 'stack repl; exit'
+#
+# therefore, nix is disabled below
+
 flags: {}
 allow-newer: true
 
-# this seems to fix the zlib bug in stack repl for now, but it's fiddly
-# see: https://github.com/commercialhaskell/stack/issues/2130#issuecomment-247032332
-# uncomment the packages: line to get stack repl to work:
-# nix-shell --command 'stack repl' (or similar)
-# ...but take it away to get regular builds to work
 nix:
   enable: false
-  pure: false
-  packages: [zlib.dev, zlib.out, pkgconfig, haskell.compiler.ghc865]
 
 extra-package-dbs: []
 packages:
 - .
-- logging
-- docopt
 
-# it works best if this matches the haskell.compiler.ghcXXX version in default.nix
-# lts-15.11 = ghc883
-# lts-14.27 = ghc865
+# it works best if the expected compiler matches myGHC in default.nix
 system-ghc: true
 resolver: lts-16.18
 extra-deps:
@@ -30,6 +26,10 @@ extra-deps:
   - store-core-0.4.4.2
   - th-utilities-0.2.4.0
   - MissingH-1.4.3.0
+  - github: jefdaj/docopt.hs
+    commit: 080c3ba6badd736f1b4a3f1f13dbd4c107614136
+  - github: jefdaj/logging
+    commit: c73b189e083a6427ef5c3e02c0e2fc8387df8382
 
 build:
   haddock: true
