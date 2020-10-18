@@ -11,11 +11,6 @@ let
 
   inherit (pkgs.haskell.lib) overrideCabal;
 
-  # remove some of my big files to prevent duplicating them in /nix/store
-  # TODO remove based on .gitignore file coming in nixpkgs 19.03?
-  noBigDotfiles = path: type: baseNameOf path != ".stack-work"
-                           && baseNameOf path != ".git";
-
   # current version is ghc884, but that requires updating docopt
   # TODO does it break anything else? possibly `fail` calls in OrthoLang
   myGHC = "ghc884";
@@ -41,7 +36,11 @@ let
       # TODO final wrapper with +RTS -N -RTS?
       # TODO get back the enable{Library,Executable}Profiling options?
       ortholang = overrideCabal (hpOld.callCabal2nix "OrthoLang" ./. {}) (drv: {
-        src = builtins.filterSource noBigDotfiles ./.;
+
+        # surprisingly, this works as a drop-in replacement for filterSource,
+        # but with better handling of unwanted files
+        # based on https://github.com/NixOS/nix/issues/885#issuecomment-381904833
+        src = builtins.fetchGit { url = ./.; };
 
         buildDepends = (drv.buildDepends or [])  ++ runDepends ++ [
           makeWrapper zlib.dev zlib.out pkgconfig
