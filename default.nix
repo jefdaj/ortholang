@@ -18,7 +18,7 @@ let
 
   # current version is ghc884, but that requires updating docopt
   # TODO does it break anything else? possibly `fail` calls in OrthoLang
-  myGHC = "ghc865";
+  myGHC = "ghc884";
 
   haskellPackages = pkgs.haskell.packages.${myGHC}.override {
     overrides = hpNew: hpOld: {
@@ -34,7 +34,7 @@ let
       logging = hpOld.callPackage sources.logging {};
 
       # TODO upgrade to ghc884 and include this at the same time?
-      # docopt  = hpOld.callPackage sources.docopt {};
+      docopt  = hpOld.callPackage sources.docopt {};
 
       # the ortholang package, which includes the main binary
       # see https://github.com/jml/nix-haskell-example

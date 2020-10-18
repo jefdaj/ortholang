@@ -36,15 +36,15 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
-        "branch": "clean-20.03",
+        "branch": "release-20.09",
         "description": "Nix Packages collection",
         "homepage": null,
-        "owner": "jefdaj",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "fd3aa9e6e403549f97f3ff2be4b12b8227d6f8f9",
-        "sha256": "0pnbq5119218nhrsm8m6kxxdq2r8zg1abrg31yb6ihbvmin43hv0",
+        "rev": "43e8ec412fdf428ef32c8d56939c99dd48254c49",
+        "sha256": "06j78xs55xar7a1fr27paag788j9r7kgbwahz21wcd663g0r5afd",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/nixpkgs/archive/fd3aa9e6e403549f97f3ff2be4b12b8227d6f8f9.tar.gz",
+        "url": "https://github.com/nixos/nixpkgs/archive/43e8ec412fdf428ef32c8d56939c99dd48254c49.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

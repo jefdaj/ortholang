@@ -110,7 +110,7 @@ in rec {
     ignoreCollisions = true;
 
     extraLibs = with python27Packages; [
-      biopython
+      # biopython
       numpy
       scipy
     ];
