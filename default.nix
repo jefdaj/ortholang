@@ -20,7 +20,9 @@ let
       });
     };
   };
-  haskellPkg = myHaskell.callPackage ./ortholang.nix {};
+
+  # TODO get back the enable{Library,Executable}Profiling options?
+  haskellPkg = myHaskell.callCabal2nix "OrthoLang" ./. {};
 
   # remove some of my big files to prevent duplicating them in /nix/store
   # TODO remove based on .gitignore file coming in nixpkgs 19.03?
