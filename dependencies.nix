@@ -1,3 +1,5 @@
+# TODO rename modules.nix?
+
 with import ./nixpkgs;
 let
   # from nixpkgs/pkgs/applications/networking/cluster/mesos/default.nix
@@ -27,6 +29,7 @@ let
     futile_logger
   ];};
 
+  # TODO should this go in a separate file with the haskell binary definition?
   myEnv = [
     # TODO which of these are needed?
     stdenv
