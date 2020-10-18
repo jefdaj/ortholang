@@ -1,23 +1,10 @@
-# Maintainers willing, everything here is destined to be merged into
-# the main upstream repository at https://github.com/nixos/nixpkgs
-# as soon as I have the time
+# This is a bit of a transitional mess right now. Eventually, the bigger
+# dependencies will go in their own git repos and the smaller ones will be
+# moved to ortholang/nix. Either way, they'll be managed with niv.
 
 let
-  # fetch my pinned nixpkgs for reproducibility.
-  # see https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
-  # to update the the sha256sum:
-  # nix-prefetch-url --unpack https://github.com/jefdaj/nixpkgs/archive/<rev>.tar.gz
-  pkgs = let
-    inherit (import <nixpkgs> {}) stdenv fetchFromGitHub;
-  in import (fetchFromGitHub {
-    owner  = "jefdaj";
-    repo   = "nixpkgs";
-    rev    = "fd3aa9e6e403549f97f3ff2be4b12b8227d6f8f9";
-    sha256 = "0pnbq5119218nhrsm8m6kxxdq2r8zg1abrg31yb6ihbvmin43hv0";
-  }) {};
-
-  # use this instead to try to build it with your system's current nixpkgs:
-  # pkgs = import /home/jefdaj/nixpkgs {};
+  sources = import ../nix/sources.nix {};
+  pkgs = import sources.nixpkgs {};
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
