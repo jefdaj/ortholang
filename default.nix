@@ -1,1 +1,1 @@
-(import ./release.nix).project
+(import ./ortholang.nix).project

@@ -1,1 +1,1 @@
-(import ./release.nix).shell
+(import ./ortholang.nix).shell
