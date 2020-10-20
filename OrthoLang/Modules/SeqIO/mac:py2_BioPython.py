@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import Bio
-print Bio.__version__
+print(Bio.__version__)

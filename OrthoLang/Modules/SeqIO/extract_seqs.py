@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Convert a list of genes back to FASTA.
 # Usage: extract_seqs.py <outfasta> <infasta> <idlist>
@@ -22,7 +22,7 @@ def matches_prefix(seqid, seqids_to_keep):
 with open(inids, 'r') as iis:
     ids = set(i.strip() for i in iis.readlines())
 
-with open(outfa, 'wb') as out:
+with open(outfa, 'w') as out:
     for s in SeqIO.parse(infa , 'fasta'):
         if matches_prefix(s.id, ids):
             SeqIO.write(s, out, 'fasta')

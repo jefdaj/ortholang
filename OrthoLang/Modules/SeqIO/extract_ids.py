@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Convert a FASTA file to a list of genes.
 # Usage: extract-seq-ids <tmpdir> <outgenes> <infasta>
@@ -23,6 +23,6 @@ for seq in SeqIO.parse(infasta, 'fasta'):
 uniq = list(uniq)
 uniq.sort()
 
-with open(outgenes, 'wb') as out:
+with open(outgenes, 'w') as out:
     for line in uniq:
         out.write(line)

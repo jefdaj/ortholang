@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Split one multifasta file into multiple single-sequences ones.
 # Names sequences sequentially to avoid any quoting issues.
@@ -49,7 +49,7 @@ def split_fasta(outlist, outdir, infasta, prefix, suffix):
     md5sum = md5() # will be updated line by line
 
     f=open(infasta)
-    with open(outlist, 'w') as oh:
+    with open(outlist, 'wb') as oh:
         for line in f :
             # runs at the beginning of each seq
             if(line[0] == ">") :
@@ -68,8 +68,8 @@ def split_fasta(outlist, outdir, infasta, prefix, suffix):
                 of=open(tmpfile, "w")
     
             # write a line to file + add it to hash
-            of.write(line)
-            md5sum.update(bytes(line))
+            of.write(line) # TODO is this right?
+            md5sum.update(bytes(line.encode('utf-8'))) # TODO is this right?
 
         # have to repeat this to do the last one
         of.close()

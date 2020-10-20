@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # TODO fix this for newer biopython, and remove my version?
 
@@ -17,7 +17,7 @@ warnings.simplefilter('ignore', BiopythonWarning)
 outfaa = argv[1]
 infna  = argv[2]
 
-with open(outfaa, 'wb') as out:
+with open(outfaa, 'w') as out:
     for rec in SeqIO.parse(infna, 'fasta'):
         rec.seq = rec.seq.translate()
         SeqIO.write(rec, out, 'fasta')

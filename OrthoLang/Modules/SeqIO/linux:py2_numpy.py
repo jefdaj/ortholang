@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import numpy
-print numpy.__version__
+print(numpy.__version__)

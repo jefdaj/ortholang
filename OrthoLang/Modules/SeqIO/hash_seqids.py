@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # TODO move to Core somehow?
 # Sanitize FASTA sequence IDs by putting replacing them with their hashes.
@@ -11,7 +11,7 @@ from sys import argv
 from hashlib import md5
 
 def hash_id(seqid):
-    return 'seqid_' + str(md5(seqid).hexdigest())[:10]
+    return 'seqid_' + md5(seqid.encode('utf-8')).hexdigest()[:10]
 
 outfa = argv[1]
 outids = outfa + '.ids'
@@ -25,7 +25,7 @@ infa = argv[2]
 # all hash -> seqid pairs so far
 SEQIDS = {}
 
-with open(outfa, 'wb') as out:
+with open(outfa, 'w') as out:
     for seq in SeqIO.parse(infa, 'fasta'):
         hashed = hash_id(seq.description)
         if hashed in SEQIDS:
@@ -36,6 +36,6 @@ with open(outfa, 'wb') as out:
         SeqIO.write(seq, out, 'fasta')
 
 # TODO does SEQIDS need any sorting?
-with open(outids, 'wb') as out:
+with open(outids, 'w') as out:
     for hashed in SEQIDS:
         out.write('%s\t%s\n' % (hashed, SEQIDS[hashed]))

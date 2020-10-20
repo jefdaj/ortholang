@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Just a fancy cat with special handling for ortholang's <<emptywhatever>> files
 # TODO disable fixEmptyFile for this one probably
@@ -33,7 +33,7 @@ def is_empty(filetotest):
 def main(outpath, inlist, emptylink):
     # print 'args:', outpath, emptylink, inlist
     all_empty = True
-    with open(outpath, 'wb') as outfile:
+    with open(outpath, 'w') as outfile:
         with open(inlist, 'r') as infiles:
             for infile in infiles:
                 infile = infile.strip()

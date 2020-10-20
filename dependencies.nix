@@ -123,6 +123,7 @@ in rec {
 
     extraLibs = with python3Packages; [
       # TODO add deterministic_zip
+      biopython
     ];
   };
 
@@ -145,7 +146,7 @@ in rec {
   ortholang-zip           = mkModule ./OrthoLang/Modules/Zip           [ myPy3 ] myPy3Wrap;
 
   # TODO should the wrap not be necessary?
-  ortholang-seqio         = mkModule ./OrthoLang/Modules/SeqIO         [ myPy2 ] myPy2Wrap;
+  ortholang-seqio         = mkModule ./OrthoLang/Modules/SeqIO         [ myPy3 ] myPy3Wrap;
   ortholang-orthofinder   = mkModule ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
   ortholang-sonicparanoid = mkModule ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
 
