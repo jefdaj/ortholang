@@ -1,25 +1,42 @@
 # with (import ./..);
-{ pkgs, python36Packages, fetchurl, mmseqs2, mcl }:
+{ pkgs, python3Packages, fetchurl, mmseqs2, mcl }:
 
 let
   # this is only needed for sh >= 1.12.14; remove once nixpkgs includes it
   pypiPython = import ./requirements.nix { inherit pkgs; };
 
-in python36Packages.buildPythonPackage rec {
+in python3Packages.buildPythonPackage rec {
   pname = "sonicparanoid";
-  version = "1.2.3";
+  version = "1.3.4";
 
   src = fetchurl {
-    url = "https://files.pythonhosted.org/packages/8d/bf/4337a0707bffc0cbf805f6d9580f0ca16a21213725d240b0292e6ea70523/sonicparanoid-1.2.3.tar.gz";
-    sha256 = "1sgfg3qf3sj8sjlkiqin6cjp8b38rc58js361yb0ikzmy4nh8f06";
+    url = "https://files.pythonhosted.org/packages/90/ad/aadec7847f30cd1403e6a6f4c04caebdb3c3837a8641fa0befd59a9f8cbf/sonicparanoid-1.3.4.tar.gz";
+    sha256 = "1wqzlc2zsl8yz1qi4xv2vqfa6bdpfwf2r04j496y1bbyw2g6v6ps";
   };
 
-  propagatedBuildInputs = [
+  propagatedBuildInputs = with python3Packages; [
     mmseqs2
-    python36Packages.biopython
-    python36Packages.numpy
-    python36Packages.pandas
-    python36Packages.sh
+
+    # python3Packages.biopython
+    # python3Packages.numpy
+    # python3Packages.pandas
+    # python3Packages.sh
+    # python3Packages.psutil
+    # python3Packages.mypy
+
+    # from install_requires in setup.py
+    scipy
+    numpy
+    pandas
+    cython
+    setuptools
+    pip
+    biopython
+    mypy
+    psutil
+    sklearn-deap # scikit-learn
+    wheel
+
   ];
 
   buildInputs = [
@@ -32,8 +49,10 @@ in python36Packages.buildPythonPackage rec {
     # mmseqs2
     # numpy
     # pandas
-    python36Packages.cython
-    python36Packages.sh
+    python3Packages.cython
+    python3Packages.sh
+    python3Packages.psutil
+    python3Packages.mypy
   ];
 
   # TODO get the tests working! probably just need packages here?
@@ -41,9 +60,10 @@ in python36Packages.buildPythonPackage rec {
   # checkInputs = with pypiPython.packages; [];
 
   patches = [
-    ./add-nix-dependency-paths.patch
-    ./disable-version-checks.patch
-    ./ignore-divide-by-zero.patch # TODO is this a bad idea?
+    # TODO which of these are still needed? update them
+    # ./add-nix-dependency-paths.patch
+    # ./disable-version-checks.patch
+    # ./ignore-divide-by-zero.patch # TODO is this a bad idea?
   ];
 
   # Once the patch above has replaced the setup code with Nix vars,

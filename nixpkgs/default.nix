@@ -49,7 +49,7 @@ let
   # TODO is this pulling in python3 and messing up treeCl?
   sonicparanoid = pkgs.callPackage ./sonicparanoid {
     inherit mmseqs2 mcl;
-    inherit (pkgs) python36Packages;
+    inherit (pkgs) python3Packages;
   };
 
   # TODO detect whether MPI version will work on a given computer and adjust
@@ -73,8 +73,8 @@ let
     };
   };
 
-  myPython3 = pkgs.python36Packages // rec {
-    busco = pkgs.python36Packages.callPackage ./busco {
+  myPython3 = pkgs.python3Packages // rec {
+    busco = pkgs.python3Packages.callPackage ./busco {
       inherit (pkgs.lib) makeBinPath;
       inherit ncbi-blast hmmer;
     };
@@ -89,7 +89,7 @@ in pkgs // {
 
   # TODO will these interfere with each other?
   python27Packages = myPython2;
-  python36Packages = myPython3;
+  python3Packages = myPython3;
   inherit (myPython2) blastdbget treeCl;
   inherit (myPython3) busco;
 
@@ -97,7 +97,7 @@ in pkgs // {
   inherit orthofinder sonicparanoid justorthologs;
 
   # python27Packages = myPython27; # used by treeCl, probably others
-  # python36Packages = myPython36; # used by sonicparanoid
+  # python3Packages = myPython36; # used by sonicparanoid
   # inherit (myPython) treeCl;
   # python3Packages = myPython3;
 }
