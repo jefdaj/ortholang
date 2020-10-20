@@ -46,5 +46,17 @@
         "type": "tarball",
         "url": "https://github.com/nixos/nixpkgs/archive/43e8ec412fdf428ef32c8d56939c99dd48254c49.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "sonicparanoid": {
+        "branch": "master",
+        "description": "An updated version of SonicParanoid",
+        "homepage": "http://iwasakilab.bs.s.u-tokyo.ac.jp/sonicparanoid/",
+        "owner": "jefdaj",
+        "repo": "sonicparanoid2",
+        "rev": "07129cda57d46c2827ee924e8695092d3b9d5864",
+        "sha256": "1qqqmj33zb2rp4g0gljzk9fqjsk3pwjhv0rgrdrj8ly10xp74km5",
+        "type": "tarball",
+        "url": "https://gitlab.com/jefdaj/sonicparanoid2/-/archive/master/sonicparanoid2-07129cda57d46c2827ee924e8695092d3b9d5864.tar.gz",
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive/<branch>/<repo>-<rev>.tar.gz"
     }
 }
