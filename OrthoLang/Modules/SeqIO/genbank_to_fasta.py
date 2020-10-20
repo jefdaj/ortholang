@@ -236,6 +236,7 @@ def genbank_to_fasta_whole(record, annotation_list, user_header, delimiter):
         if "all" in annotation_list:
             # print "record.annotations: '%s'" % record.annotations
             # print "record.annotations.keys(): '%s'" % record.annotations.keys()
+            # TODO update for python3?
             annotation_list = list(record.annotations.keys())
             # print "annotation_list: '%s'" % annotation_list
         for item in annotation_list:
