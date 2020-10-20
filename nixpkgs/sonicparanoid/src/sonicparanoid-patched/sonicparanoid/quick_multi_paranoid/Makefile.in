@@ -1,6 +1,0 @@
-#configuration file
-CONFIG_FILE=120species/config
-
-#execution files
-EXEC_FILE=test
-EXEC_FILEs=tests
