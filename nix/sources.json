@@ -23,6 +23,18 @@
         "url": "https://github.com/jefdaj/logging/archive/c73b189e083a6427ef5c3e02c0e2fc8387df8382.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "mmseqs2": {
+        "branch": "master",
+        "description": "MMseqs2: ultra fast and sensitive search and clustering suite",
+        "homepage": "https://mmseqs.com",
+        "owner": "jefdaj",
+        "repo": "mmseqs2-nix",
+        "rev": "b57a71071f7707c8b46e15a9f142258297c6a135",
+        "sha256": "1vbp0y1ck079ld4hrdnxkqhynz0drdh6xfcg49ilha507hl9zdl1",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/mmseqs2-nix/archive/b57a71071f7707c8b46e15a9f142258297c6a135.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "niv": {
         "branch": "master",
         "description": "Easy dependency management for Nix projects",

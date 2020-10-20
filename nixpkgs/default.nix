@@ -6,6 +6,12 @@ let
   sources = import ../nix/sources.nix {};
   pkgs = import sources.nixpkgs {};
 
+  # These are self-contained enough I should be able to add them directly to
+  # nixpkgs without worrying about maintaining a repo
+  # TODO add to ../nix as overlays?
+  # TODO pull requests!
+  mcl = pkgs.callPackage ./mcl { };
+
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
   hmmer = pkgs.callPackage ./hmmer { };
@@ -29,8 +35,6 @@ let
 
   # cdhit = pkgs.callPackage ./cdhit { };
 
-  mcl = pkgs.callPackage ./mcl { };
-
   fastme = pkgs.callPackage ./fastme { };
 
   # see https://nixos.org/nix-dev/2014-December/015243.html
@@ -38,7 +42,7 @@ let
 
   diamond = pkgs.callPackage ./diamond { };
 
-  mmseqs2 = pkgs.callPackage ./mmseqs2 { };
+  mmseqs2 = import sources.mmseqs2; # TODO proper callPackage
 
   orthofinder = pkgs.callPackage ./orthofinder {
     inherit (pkgs.lib) makeBinPath;
