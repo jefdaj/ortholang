@@ -17,7 +17,7 @@ let
   # the ortholang package.
   inherit (pkgs.haskell.lib) overrideCabal;
   myGHC = "ghc884";
-  haskellPackages = pkgs.haskell.packages.${myGHC}.override {
+  myHs = pkgs.haskell.packages.${myGHC}.override {
     overrides = hpNew: hpOld: {
 
       # Packages that can be fixed with simple overrides
@@ -74,20 +74,20 @@ let
 in {
 
   # This is the main build target for default.nix
-  project = haskellPackages.ortholang;
+  project = myHs.ortholang;
 
   # And this is the development environment for shell.nix
   # Most of the shell stuff is here, but shellHook above is also important
-  shell = haskellPackages.shellFor {
+  shell = myHs.shellFor {
 
     # TODO would there be any reason to add other packages here?
-    packages = p: with p; [ haskellPackages.ortholang ];
+    packages = p: with p; [ myHs.ortholang ];
 
     # Put any packages you want during development here.
     # You can optionally go "full reproducible" by adding your text editor
     # and using `nix-shell --pure`, but you'll also have to add some common
     # unix tools as you go.
-    buildInputs = with haskellPackages; [
+    buildInputs = with myHs; [
       ghcid
       hlint
       stack

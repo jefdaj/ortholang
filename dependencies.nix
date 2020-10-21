@@ -61,7 +61,7 @@ let
   ];
 
   # TODO why is patching shebangs on the wrapped scripts necessary??
-  mkModule = src: extraRunDeps: extraWraps:
+  mkMod = src: extraRunDeps: extraWraps:
     let name = "OrthoLang-" + baseNameOf src;
         runDeps = lib.lists.unique (myEnv ++ extraRunDeps);
     in stdenv.mkDerivation {
@@ -127,41 +127,41 @@ in rec {
     ];
   };
 
-  ortholang-biomartr      = mkModule ./OrthoLang/Modules/BioMartR      [ myR ] "";
-  ortholang-blasthits     = mkModule ./OrthoLang/Modules/BlastHits     [ myR ] "";
-  ortholang-blastrbh      = mkModule ./OrthoLang/Modules/BlastRBH      [ myR ] "";
-  ortholang-plots         = mkModule ./OrthoLang/Modules/Plots         [ myR ] "";
-  ortholang-setstable     = mkModule ./OrthoLang/Modules/SetsTable     [ myR ] "";
-  ortholang-range         = mkModule ./OrthoLang/Modules/Range         [ myR ] "";
-  ortholang-blast         = mkModule ./OrthoLang/Modules/Blast         [ myBlast parallel ] "";
-  ortholang-blastdb       = mkModule ./OrthoLang/Modules/BlastDB       [ myBlast ] "";
-  ortholang-blastdbget    = mkModule ./OrthoLang/Modules/Blastdbget    [ myBlast blastdbget ] ""; # TODO remove myBlast?
-  ortholang-crbblast      = mkModule ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
-  ortholang-flowchart      = mkModule ./OrthoLang/Modules/FlowChart      [ graphviz ] ""; # TODO remove?
-  ortholang-diamond       = mkModule ./OrthoLang/Modules/Diamond       [ diamond ] "";
-  ortholang-hmmer         = mkModule ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
-  ortholang-mmseqs        = mkModule ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
-  ortholang-muscle        = mkModule ./OrthoLang/Modules/Muscle        [ muscle ] "";
-  ortholang-psiblast      = mkModule ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
-  ortholang-zip           = mkModule ./OrthoLang/Modules/Zip           [ myPy3 ] myPy3Wrap;
+  ortholang-biomartr      = mkMod ./OrthoLang/Modules/BioMartR      [ myR ] "";
+  ortholang-blasthits     = mkMod ./OrthoLang/Modules/BlastHits     [ myR ] "";
+  ortholang-blastrbh      = mkMod ./OrthoLang/Modules/BlastRBH      [ myR ] "";
+  ortholang-plots         = mkMod ./OrthoLang/Modules/Plots         [ myR ] "";
+  ortholang-setstable     = mkMod ./OrthoLang/Modules/SetsTable     [ myR ] "";
+  ortholang-range         = mkMod ./OrthoLang/Modules/Range         [ myR ] "";
+  ortholang-blast         = mkMod ./OrthoLang/Modules/Blast         [ myBlast parallel ] "";
+  ortholang-blastdb       = mkMod ./OrthoLang/Modules/BlastDB       [ myBlast ] "";
+  ortholang-blastdbget    = mkMod ./OrthoLang/Modules/Blastdbget    [ myBlast blastdbget ] ""; # TODO remove myBlast?
+  ortholang-crbblast      = mkMod ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
+  ortholang-flowchart      = mkMod ./OrthoLang/Modules/FlowChart      [ graphviz ] ""; # TODO remove?
+  ortholang-diamond       = mkMod ./OrthoLang/Modules/Diamond       [ diamond ] "";
+  ortholang-hmmer         = mkMod ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
+  ortholang-mmseqs        = mkMod ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
+  ortholang-muscle        = mkMod ./OrthoLang/Modules/Muscle        [ muscle ] "";
+  ortholang-psiblast      = mkMod ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
+  ortholang-zip           = mkMod ./OrthoLang/Modules/Zip           [ myPy3 ] myPy3Wrap;
 
   # TODO should the wrap not be necessary?
-  ortholang-seqio         = mkModule ./OrthoLang/Modules/SeqIO         [ myPy3 ] myPy3Wrap;
-  ortholang-orthofinder   = mkModule ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
-  ortholang-sonicparanoid = mkModule ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
+  ortholang-seqio         = mkMod ./OrthoLang/Modules/SeqIO         [ myPy3 ] myPy3Wrap;
+  ortholang-orthofinder   = mkMod ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
+  ortholang-sonicparanoid = mkMod ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
 
-  ortholang-treecl        = mkModule ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
-  # ortholang-justorthologs = mkModule ./OrthoLang/Modules/JustOrthologs [ justorthologs ] "";
+  ortholang-treecl        = mkMod ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
+  # ortholang-justorthologs = mkMod ./OrthoLang/Modules/JustOrthologs [ justorthologs ] "";
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
-  ortholang-busco = mkModule ./OrthoLang/Modules/Busco
+  ortholang-busco = mkMod ./OrthoLang/Modules/Busco
                      [ myBlast hmmer busco python36 which tarWithGzip ]
                      "--set BUSCO_CONFIG_FILE ${busco}/config/config.ini";
 
-  ortholang-curl          = mkModule ./OrthoLang/Modules/Curl          [ curl ] "";
-  ortholang-load          = mkModule ./OrthoLang/Modules/Load          [ ] "";
-  ortholang-orthogroups   = mkModule ./OrthoLang/Modules/OrthoGroups   [ python36 ] "";
-  ortholang-greencut      = mkModule ./OrthoLang/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
+  ortholang-curl          = mkMod ./OrthoLang/Modules/Curl          [ curl ] "";
+  ortholang-load          = mkMod ./OrthoLang/Modules/Load          [ ] "";
+  ortholang-orthogroups   = mkMod ./OrthoLang/Modules/OrthoGroups   [ python36 ] "";
+  ortholang-greencut      = mkMod ./OrthoLang/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
   modules = [
     ortholang-biomartr
