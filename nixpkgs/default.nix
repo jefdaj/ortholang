@@ -54,6 +54,7 @@ let
   #   inherit mmseqs2 mcl;
   #   inherit (pkgs) python3Packages;
   # };
+  # TODO and why does it also break mmseqs? that's weird
   sonicparanoid = import sources.sonicparanoid; # TODO proper callPackage
 
   # TODO detect whether MPI version will work on a given computer and adjust
@@ -86,6 +87,7 @@ let
 
   justorthologs = pkgs.callPackage ./justorthologs {};
 
+# TODO these should probably be converted to a list of overlays
 in pkgs // {
   inherit ncbi-blast crb-blast psiblast-exb;
   inherit fastme;
