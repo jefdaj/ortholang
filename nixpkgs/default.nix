@@ -42,7 +42,7 @@ let
 
   diamond = pkgs.callPackage ./diamond { };
 
-  mmseqs2 = import sources.mmseqs2; # TODO proper callPackage
+  mmseqs2 = pkgs.callPackage sources.mmseqs2 {};
 
   orthofinder = pkgs.callPackage ./orthofinder {
     inherit (pkgs.lib) makeBinPath;

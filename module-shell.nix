@@ -6,4 +6,4 @@
 #
 # nix-shell dependencies.nix -A ortholang-seqio
 
-(import ./dependencies.nix).ortholang-sonicparanoid
+(import ./dependencies.nix).ortholang-mmseqs
