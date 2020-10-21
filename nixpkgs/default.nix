@@ -54,8 +54,8 @@ let
   #   inherit mmseqs2 mcl;
   #   inherit (pkgs) python3Packages;
   # };
-  # TODO and why does it also break mmseqs? that's weird
-  sonicparanoid = import sources.sonicparanoid; # TODO proper callPackage
+  # TODO inherit mmseqs2 + mcl again? probably use an overlay to build pkgs instead
+  sonicparanoid = pkgs.callPackage sources.sonicparanoid { inherit mmseqs2 mcl; };
 
   # TODO detect whether MPI version will work on a given computer and adjust
   raxml  = pkgs.callPackage ./raxml { mpi = true; };

@@ -65,10 +65,10 @@
         "homepage": "http://iwasakilab.bs.s.u-tokyo.ac.jp/sonicparanoid/",
         "owner": "jefdaj",
         "repo": "sonicparanoid2",
-        "rev": "07129cda57d46c2827ee924e8695092d3b9d5864",
-        "sha256": "1qqqmj33zb2rp4g0gljzk9fqjsk3pwjhv0rgrdrj8ly10xp74km5",
+        "rev": "60250f82070a46376776544d936b6ba40e235063",
+        "sha256": "026cf388xf0cvdhg6s6mdi86z9k90fmmrmfgi07w55crw2kjsg73",
         "type": "tarball",
-        "url": "https://gitlab.com/jefdaj/sonicparanoid2/-/archive/master/sonicparanoid2-07129cda57d46c2827ee924e8695092d3b9d5864.tar.gz",
+        "url": "https://gitlab.com/jefdaj/sonicparanoid2/-/archive/master/sonicparanoid2-60250f82070a46376776544d936b6ba40e235063.tar.gz",
         "url_template": "https://gitlab.com/<owner>/<repo>/-/archive/<branch>/<repo>-<rev>.tar.gz"
     }
 }

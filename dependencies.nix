@@ -181,7 +181,7 @@ in rec {
     ortholang-setstable
     ortholang-psiblast
     ortholang-seqio
-    # ortholang-sonicparanoid
+    ortholang-sonicparanoid
     # ortholang-treecl
     # ortholang-justorthologs
     ortholang-busco
