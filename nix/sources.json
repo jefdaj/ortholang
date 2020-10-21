@@ -29,10 +29,10 @@
         "homepage": "https://mmseqs.com",
         "owner": "jefdaj",
         "repo": "mmseqs2-nix",
-        "rev": "6fe461b8bc2efc1381ab688ca9463424c6eb307a",
-        "sha256": "13y9qkbp81s5zpd5p9amp4yfsk1grnjrxyp5la9y6zhkcyihmlp0",
+        "rev": "711b0895d89b6be50fc8aa60537549218ab4e4b7",
+        "sha256": "1pk3khsv993q142m3qa87aismihdmpi574d5gwifffvgrhpvam4p",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/mmseqs2-nix/archive/6fe461b8bc2efc1381ab688ca9463424c6eb307a.tar.gz",
+        "url": "https://github.com/jefdaj/mmseqs2-nix/archive/711b0895d89b6be50fc8aa60537549218ab4e4b7.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
