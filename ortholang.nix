@@ -15,25 +15,27 @@ let
   # Haskell stuff! It starts with the upstream haskellPackages set for the
   # chosen compiler, then we override a few dependencies, and finally we define
   # the ortholang package.
-  inherit (pkgs.haskell.lib) overrideCabal;
+  inherit (pkgs.haskell.lib) overrideCabal dontCheck;
   myGHC = "ghc884";
   myHs = pkgs.haskell.packages.${myGHC}.override {
     overrides = hpNew: hpOld: {
 
       # Packages that can be fixed with simple overrides
+      # TODO try on hpc: unliftio = dontCheck hpOld.unliftio;
+      # TODO try on hpc: unliftio = hpNew.callHackage "unliftio" "0.2.12.1" {};
       progress-meter = overrideCabal hpOld.progress-meter (_: {
         broken = false;
         jailbreak = true;
       });
 
       # Packages that had to be forked
-      logging = hpOld.callPackage sources.logging {};
-      docopt  = hpOld.callPackage sources.docopt {};
+      logging = hpNew.callPackage sources.logging {};
+      docopt  = hpNew.callPackage sources.docopt {};
 
       # The ortholang package, which includes the main binary
       # TODO final wrapper with +RTS -N -RTS?
       # TODO get back the enable{Library,Executable}Profiling options?
-      ortholang = overrideCabal (hpOld.callCabal2nix "OrthoLang" ./. {}) (drv: {
+      ortholang = overrideCabal (hpNew.callCabal2nix "OrthoLang" ./. {}) (drv: {
 
         # surprisingly, this works as a drop-in replacement for filterSource
         # except with better filtering out of non-source files
