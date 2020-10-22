@@ -23,6 +23,18 @@
         "url": "https://github.com/jefdaj/docopt.hs/archive/080c3ba6badd736f1b4a3f1f13dbd4c107614136.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "hmmer": {
+        "branch": "master",
+        "description": "HMMER: biological sequence analysis using profile HMMs",
+        "homepage": "http://hmmer.org",
+        "owner": "jefdaj",
+        "repo": "hmmer-nix",
+        "rev": "a0af7c09b8358571cb3fa707fb3ee0795e88ea93",
+        "sha256": "1pdi22rn41k3z9cd3zcqq9gxavp4gkfg78fhy87r0x70r0hd5ni9",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/hmmer-nix/archive/a0af7c09b8358571cb3fa707fb3ee0795e88ea93.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "logging": {
         "branch": "master",
         "description": null,
