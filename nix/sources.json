@@ -8,8 +8,8 @@
         "rev": "12482c1b33c05a2d95fededf2b0803586f71e06b",
         "sha256": "1smfq3ppsh9jc758cmiy4wfzja17z1swdx236s0hp8jk5il1m2j6",
         "type": "tarball",
-	"url": "https://gitlab.com/jefdaj/busco/-/archive/12482c1b33c05a2d95fededf2b0803586f71e06b/busco-12482c1b33c05a2d95fededf2b0803586f71e06b.tar.gz",
-	"url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
+        "url": "https://gitlab.com/jefdaj/busco/-/archive/12482c1b33c05a2d95fededf2b0803586f71e06b/busco-12482c1b33c05a2d95fededf2b0803586f71e06b.tar.gz",
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
     },
     "diamond": {
         "branch": "master",
@@ -41,10 +41,10 @@
         "homepage": "",
         "owner": "jefdaj",
         "repo": "easel-nix",
-        "rev": "ea6d9daea6060bcfd6375e8b3450cfca534b6ce8",
-        "sha256": "00l214r8rplaim6474w6gkw61q3ll7k4j7p87xqn7glzvby3yv1s",
+        "rev": "47daa7c1020224be9312c4f5cd6953462f659306",
+        "sha256": "1icx5sj2qfwimj4zz6xg4clpazhk3rfirnsmgi0vgqiad4sh6f37",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/easel-nix/archive/ea6d9daea6060bcfd6375e8b3450cfca534b6ce8.tar.gz",
+        "url": "https://github.com/jefdaj/easel-nix/archive/47daa7c1020224be9312c4f5cd6953462f659306.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "hmmer": {
@@ -53,10 +53,10 @@
         "homepage": "http://hmmer.org",
         "owner": "jefdaj",
         "repo": "hmmer-nix",
-        "rev": "95bce2a52a0face48b90fc09fcb7973aa11df5b3",
-        "sha256": "1azhzczq85lp74ak2m43cihpfq5w1lj4ir25m9q3c0il4v553i8b",
+        "rev": "842dfa6ecbeff37bd0386431925673766e5d6b09",
+        "sha256": "0dqxyh3bcy6113g6x41hjafl388jh9kvxn2b2n7w7yl23aand6dv",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/hmmer-nix/archive/95bce2a52a0face48b90fc09fcb7973aa11df5b3.tar.gz",
+        "url": "https://github.com/jefdaj/hmmer-nix/archive/842dfa6ecbeff37bd0386431925673766e5d6b09.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "logging": {
