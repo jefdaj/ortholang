@@ -1,4 +1,16 @@
 {
+    "diamond": {
+        "branch": "master",
+        "description": "Accelerated BLAST compatible local sequence aligner.",
+        "homepage": "http://www.diamondsearch.org/",
+        "owner": "jefdaj",
+        "repo": "diamond-nix",
+        "rev": "b5301a136b3dad095bc5d222acefd6682e993844",
+        "sha256": "0hrxhpbwlwfg79r2dphw3sxvr4vjsnfyb0nrxa6cj30s7kh8gqil",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/diamond-nix/archive/b5301a136b3dad095bc5d222acefd6682e993844.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "docopt": {
         "branch": "master",
         "description": "A command-line interface description language and parser that will make you smile",

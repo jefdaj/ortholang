@@ -40,7 +40,7 @@ let
   # see https://nixos.org/nix-dev/2014-December/015243.html
   muscle = pkgs.callPackage ./muscle { };
 
-  diamond = pkgs.callPackage ./diamond { };
+  diamond = pkgs.callPackage sources.diamond { };
 
   mmseqs2 = pkgs.callPackage sources.mmseqs2 {};
 
