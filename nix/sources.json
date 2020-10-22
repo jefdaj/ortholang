@@ -23,16 +23,28 @@
         "url": "https://github.com/jefdaj/docopt.hs/archive/080c3ba6badd736f1b4a3f1f13dbd4c107614136.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "easel": {
+        "branch": "master",
+        "description": "Sequence analysis library used by Eddy/Rivas lab code",
+        "homepage": "",
+        "owner": "jefdaj",
+        "repo": "easel-nix",
+        "rev": "ea6d9daea6060bcfd6375e8b3450cfca534b6ce8",
+        "sha256": "00l214r8rplaim6474w6gkw61q3ll7k4j7p87xqn7glzvby3yv1s",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/easel-nix/archive/ea6d9daea6060bcfd6375e8b3450cfca534b6ce8.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "hmmer": {
         "branch": "master",
         "description": "HMMER: biological sequence analysis using profile HMMs",
         "homepage": "http://hmmer.org",
         "owner": "jefdaj",
         "repo": "hmmer-nix",
-        "rev": "a0af7c09b8358571cb3fa707fb3ee0795e88ea93",
-        "sha256": "1pdi22rn41k3z9cd3zcqq9gxavp4gkfg78fhy87r0x70r0hd5ni9",
+        "rev": "95bce2a52a0face48b90fc09fcb7973aa11df5b3",
+        "sha256": "1azhzczq85lp74ak2m43cihpfq5w1lj4ir25m9q3c0il4v553i8b",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/hmmer-nix/archive/a0af7c09b8358571cb3fa707fb3ee0795e88ea93.tar.gz",
+        "url": "https://github.com/jefdaj/hmmer-nix/archive/95bce2a52a0face48b90fc09fcb7973aa11df5b3.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "logging": {

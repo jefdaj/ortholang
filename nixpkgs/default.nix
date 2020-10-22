@@ -14,7 +14,8 @@ let
 
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
-  hmmer = pkgs.callPackage sources.hmmer { };
+  easel = pkgs.callPackage sources.easel { };
+  hmmer = pkgs.callPackage sources.hmmer { inherit easel; };
   ncbi-blast = pkgs.callPackage ./ncbi-blast {}; # follows latest version (2.9.0 now)
 
   # crb-blast only supports exactly 2.2.29
