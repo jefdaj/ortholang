@@ -1,4 +1,16 @@
 {
+    "busco": {
+        "branch": "master",
+        "description": "Assessing genome assembly and annotation completeness with Benchmarking Universal Single-Copy Orthologs (BUSCO)",
+        "homepage": "https://gitlab.com/ezlab/busco",
+        "owner": "jefdaj",
+        "repo": "busco",
+        "rev": "12482c1b33c05a2d95fededf2b0803586f71e06b",
+        "sha256": "1smfq3ppsh9jc758cmiy4wfzja17z1swdx236s0hp8jk5il1m2j6",
+        "type": "tarball",
+	"url": "https://gitlab.com/jefdaj/busco/-/archive/12482c1b33c05a2d95fededf2b0803586f71e06b/busco-12482c1b33c05a2d95fededf2b0803586f71e06b.tar.gz",
+	"url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
+    },
     "diamond": {
         "branch": "master",
         "description": "Accelerated BLAST compatible local sequence aligner.",

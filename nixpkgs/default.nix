@@ -80,7 +80,7 @@ let
   };
 
   myPython3 = pkgs.python3Packages // rec {
-    busco = pkgs.python3Packages.callPackage ./busco {
+    busco = pkgs.python3Packages.callPackage sources.busco {
       inherit (pkgs.lib) makeBinPath;
       inherit ncbi-blast hmmer;
     };
