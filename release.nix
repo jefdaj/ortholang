@@ -9,7 +9,7 @@ let
   myHs    = import ./haskell.nix;
   modules = (import ./modules.nix).modules;
 
-in pkgs.haskell.lib.overrideCabal myHs.ortholang (drv: {
+in pkgs.haskell.lib.overrideCabal myHs.OrthoLang (drv: {
 
   # surprisingly, this works as a drop-in replacement for filterSource
   # except with better filtering out of non-source files
@@ -18,7 +18,9 @@ in pkgs.haskell.lib.overrideCabal myHs.ortholang (drv: {
 
   # TODO remove these? are they still needed?
   buildDepends = with pkgs; (drv.buildDepends or [])  ++ modules ++ [
-    makeWrapper zlib.dev zlib.out pkgconfig
+    makeWrapper
+    zlib.dev zlib.out # TODO remove?
+    pkgconfig # TODO remove?
   ];
 
   # TODO PYTHONPATH?
