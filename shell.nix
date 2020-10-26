@@ -12,8 +12,9 @@
 # nix-shell modules.nix -A ortholang-seqio
 
 let
-  sources = import ./nix/sources.nix {};
-  pkgs    = import sources.nixpkgs {};
+  # sources = import ./nix/sources.nix {};
+  # pkgs    = import sources.nixpkgs {};
+  pkgs    = import ./nixpkgs;
   myHs    = import ./haskell.nix;
   release = import ./release.nix;
 

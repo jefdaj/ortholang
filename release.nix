@@ -3,8 +3,9 @@
 # because it includes fanciness like Hoogle and ghcid. But either should work.
 
 let
-  sources = import ./nix/sources.nix {};
-  pkgs    = import sources.nixpkgs {};
+  # sources = import ./nix/sources.nix {};
+  # pkgs    = import sources.nixpkgs {};
+  pkgs    = import ./nixpkgs;
   myHs    = import ./haskell.nix;
   modules = (import ./modules.nix).modules;
 
