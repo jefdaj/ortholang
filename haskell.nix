@@ -13,7 +13,7 @@ let
   # Things needed at runtime. Modules are only the scripts called by ortholang,
   # not their indirect (propagated) dependencies since those may conflict.
   # TODO add the ones that don't conflict for easier development?
-  modules = (import ./modules.nix).modules;
+  # modules = (import ./modules.nix).modules;
 
   # Haskell stuff! It starts with the upstream haskellPackages set for the
   # chosen compiler, then we override a few dependencies, and finally we define
