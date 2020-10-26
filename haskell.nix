@@ -50,6 +50,7 @@ let
         ];
 
         # TODO PYTHONPATH?
+        # TODO any reason to factor this out into default.nix?
         postInstall = ''
           ${drv.postInstall or ""}
           wrapProgram "$out/bin/ortholang" \
@@ -58,16 +59,6 @@ let
             --prefix PATH : "${pkgs.lib.makeBinPath modules}"'' +
         (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else '' \
           --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive"
-        '');
-
-        shellHook = ''
-          ${drv.shellHook or ""}
-          export LANG=en_US.UTF-8
-          export LANGUAGE=en_US.UTF-8
-          # export TASTY_HIDE_SUCCESSES=True
-        '' ++
-        (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else ''
-          export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
         '');
 
       });
@@ -86,7 +77,19 @@ in {
   shell = myHs.shellFor {
 
     # TODO would there be any reason to add other packages here?
-    packages = p: with p; [ myHs.ortholang ];
+    packages = p: with p; [
+      (overrideCabal myHs.ortholang (drv: {
+        shellHook = ''
+          ${drv.shellHook or ""}
+          export LANG=en_US.UTF-8
+          export LANGUAGE=en_US.UTF-8
+          # export TASTY_HIDE_SUCCESSES=True
+        '' ++
+        (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else ''
+          export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
+        '');
+      }))
+    ];
 
     # Put any packages you want during development here.
     # You can optionally go "full reproducible" by adding your text editor
