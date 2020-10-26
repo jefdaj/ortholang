@@ -1,3 +1,5 @@
+# TODO remove in favor of nix-shell release.nix or modules.nix?
+
 # This file defines the default shell for working on the
 # OrthoLang interpreter (the main Haskell program).
 #
@@ -13,24 +15,12 @@ let
   sources = import ./nix/sources.nix {};
   pkgs    = import sources.nixpkgs {};
   myHs    = import ./haskell.nix;
-  inherit (pkgs.haskell.lib) overrideCabal;
+  release = import ./release.nix;
 
 in myHs.shellFor {
 
   # TODO would there be any reason to add other packages here?
-  packages = p: with p; [
-    (overrideCabal myHs.ortholang (drv: {
-      shellHook = ''
-        ${drv.shellHook or ""}
-        export LANG=en_US.UTF-8
-        export LANGUAGE=en_US.UTF-8
-        # export TASTY_HIDE_SUCCESSES=True
-      '' ++
-      (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else ''
-        export LOCALE_ARCHIVE="${glibcLocales}/lib/locale/locale-archive"
-      '');
-    }))
-  ];
+  packages = p: with p; [ release.project ];
 
   # Put any packages you want during development here.
   # You can optionally go "full reproducible" by adding your text editor
