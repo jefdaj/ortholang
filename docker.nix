@@ -5,7 +5,7 @@ with import ./nixpkgs;
 let
   environment = import ./environment.nix;
   modules     = (import ./modules.nix).modules;
-  ortholang   = import ./default.nix;
+  ortholang   = import ./release.nix;
 
 in pkgs.dockerTools.buildImage {
   name = "ortholang";
