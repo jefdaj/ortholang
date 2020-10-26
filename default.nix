@@ -1,1 +1,1 @@
-(import ./ortholang.nix).project
+(import ./haskell.nix).project

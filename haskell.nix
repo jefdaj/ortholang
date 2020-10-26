@@ -1,5 +1,7 @@
 # TODO could everything in here go in a separate haskell-package.nix or similar?
 
+# TODO rename haskell.nix or similar? would explain it a bit more, and be good for importing into the demo/docs package
+
 # to work on a specific module, substitute it here and enter nix-shell
 # TODO make an example .nix file for that
 
@@ -10,7 +12,7 @@ let
   # Things needed at runtime. Modules are only the scripts called by ortholang,
   # not their indirect (propagated) dependencies since those may conflict.
   # TODO add the ones that don't conflict for easier development?
-  inherit (import ./dependencies.nix) runDepends;
+  modules = (import ./modules.nix).modules;
 
   # Haskell stuff! It starts with the upstream haskellPackages set for the
   # chosen compiler, then we override a few dependencies, and finally we define
@@ -43,7 +45,7 @@ let
         src = builtins.fetchGit { url = ./.; };
 
         # TODO remove these? are they still needed?
-        buildDepends = (drv.buildDepends or [])  ++ runDepends ++ [
+        buildDepends = (drv.buildDepends or [])  ++ modules ++ [
           makeWrapper zlib.dev zlib.out pkgconfig
         ];
 
@@ -53,7 +55,7 @@ let
           wrapProgram "$out/bin/ortholang" \
             --set LANG en_US.UTF-8 \
             --set LANGUAGE en_US.UTF-8 \
-            --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"'' +
+            --prefix PATH : "${pkgs.lib.makeBinPath modules}"'' +
         (if stdenv.hostPlatform.system == "x86_64-darwin" then "" else '' \
           --set LOCALE_ARCHIVE "${glibcLocales}/lib/locale/locale-archive"
         '');
@@ -76,6 +78,7 @@ let
 in {
 
   # This is the main build target for default.nix
+  # Oh interesting: the project attribute is expected of all haskell packages?
   project = myHs.ortholang;
 
   # And this is the development environment for shell.nix

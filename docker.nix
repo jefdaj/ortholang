@@ -3,8 +3,9 @@ with import ./nixpkgs;
 # TODO can the docker image also be made into a Snap package?
 
 let
-  ortholang = import ./default.nix;
-  inherit (import ./dependencies.nix) modules runDepends;
+  environment = import ./environment.nix;
+  modules     = (import ./modules.nix).modules;
+  ortholang   = import ./default.nix;
 
 in pkgs.dockerTools.buildImage {
   name = "ortholang";
@@ -17,7 +18,7 @@ in pkgs.dockerTools.buildImage {
 
   contents = lib.lists.unique
     (builtins.concatLists (map (m: m.extraRunDeps) modules)
-    ++ runDepends
+    ++ environment
     ++ [ ortholang ]);
 
   runAsRoot = ''
