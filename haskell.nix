@@ -41,6 +41,12 @@ in pkgs.haskell.packages.${myGHC}.override {
     # TODO get back the enable{Library,Executable}Profiling options?
     # TODO can ortholang.nix be replace with callCabal2nix "OrthoLang" ./. {}?
     # ortholang = overrideCabal (hpNew.callPackage ./ortholang.nix {}) (drv: {
-    OrthoLang = hpNew.callPackage ./default.nix {};
+      OrthoLang = overrideCabal (hpNew.callPackage ./default.nix {}) (drv: {
+        buildDepends = with pkgs; [
+          # makeWrapper
+          zlib.dev zlib.out # TODO remove?
+          pkgconfig # TODO remove?
+        ];
+      });
   };
 }

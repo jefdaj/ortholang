@@ -19,8 +19,8 @@ in pkgs.haskell.lib.overrideCabal myHs.OrthoLang (drv: {
   # TODO remove these? are they still needed?
   buildDepends = with pkgs; (drv.buildDepends or [])  ++ modules ++ [
     makeWrapper
-    zlib.dev zlib.out # TODO remove?
-    pkgconfig # TODO remove?
+    # zlib.dev zlib.out # TODO remove?
+    # pkgconfig # TODO remove?
   ];
 
   # TODO PYTHONPATH?
