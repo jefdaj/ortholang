@@ -1,6 +1,8 @@
 # This is a list of packages needed by the OrthoLang interpreter at runtime,
 # and also by some/all of the modules.
 
+# TODO put this in release.nix instead?
+
 # TODO can a lot/all of this be removed?
 
 with import ./nixpkgs;
