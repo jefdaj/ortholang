@@ -53,7 +53,7 @@ let
     phylo_utils        = pkgs.python27Packages.callPackage ./phylo_utils {};
 
     # TODO upload separate repo and switch to using it with niv
-    blastdbget         = pkgs.python27Packages.callPackage ./blastdbget {};
+    blastdbget = pkgs.python27Packages.callPackage ../../blastdbget-nix {};
 
     treeCl = pkgs.python27Packages.callPackage ./treeCl {
       inherit raxml; # TODO why doesn't it find this?
