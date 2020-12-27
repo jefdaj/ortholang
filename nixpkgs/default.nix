@@ -16,23 +16,10 @@ let
 
   easel = pkgs.callPackage sources.easel { };
   hmmer = pkgs.callPackage sources.hmmer { inherit easel; };
-  ncbi-blast = pkgs.callPackage ./ncbi-blast {}; # follows latest version (2.9.0 now)
 
-  # crb-blast only supports exactly 2.2.29
-  # and there are reports of a bug in newer ones (TODO still?)
-  ncbi-blast-2_2_29 = (pkgs.callPackage ./ncbi-blast {}).overrideDerivation (old: rec {
-    version="2.2.29";
-    name="ncbi-blast-${version}";
-    src = if pkgs.stdenv.hostPlatform.system == "x86_64-darwin"
-      then (pkgs.fetchurl {
-        url = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-universal-macosx.tar.gz";
-        sha256="00g8pzwx11wvc7zqrxnrd9xad68ckl8agz9lyabmn7h4k07p5yll";
-      }) else (pkgs.fetchurl {
-        url = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.2.29/ncbi-blast-2.2.29+-x64-linux.tar.gz";
-        sha256="1pzy0ylkqlbj40mywz358ia0nq9niwqnmxxzrs1jak22zym9fgpm";
-      });
-  });
-  crb-blast  = pkgs.callPackage ./crb-blast  { ncbi-blast = ncbi-blast-2_2_29; };
+  # TODO upload separate repos and switch to importing the with niv
+  ncbi-blast = pkgs.callPackage ../../ncbi-blast-nix {}; # follows latest version (2.9.0 now)
+  crb-blast  = pkgs.callPackage ../../crb-blast-nix  {}; # uses old blast v 2.2.29
 
   fastme = pkgs.callPackage ./fastme { };
 
@@ -64,7 +51,10 @@ let
     CacheControl       = pkgs.python27Packages.callPackage ./CacheControl {};
     scikit-bio         = pkgs.python27Packages.callPackage ./scikit-bio { inherit CacheControl; };
     phylo_utils        = pkgs.python27Packages.callPackage ./phylo_utils {};
+
+    # TODO upload separate repo and switch to using it with niv
     blastdbget         = pkgs.python27Packages.callPackage ./blastdbget {};
+
     treeCl = pkgs.python27Packages.callPackage ./treeCl {
       inherit raxml; # TODO why doesn't it find this?
       inherit fastcluster fasttree tree_distance progressbar-latest CacheControl scikit-bio phylo_utils;
