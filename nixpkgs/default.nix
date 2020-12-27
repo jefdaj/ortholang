@@ -40,29 +40,20 @@ let
   sonicparanoid = pkgs.callPackage sources.sonicparanoid { inherit mmseqs2 mcl; };
 
   # TODO detect whether MPI version will work on a given computer and adjust
-  # TODO uplaod and import via niv
+  # TODO upload and import via niv
   raxml  = pkgs.callPackage ../../raxml-nix { mpi = true; };
 
-  # TODO should treeCl go inside the python packages instead of the other way around?
+  # TODO upload and import via niv
+  # TODO with treecl and blastdbget packaged separately, does the whole myPython2 set serve a purpose anymore?
   myPython2 = pkgs.python27Packages // rec {
-    fastcluster        = pkgs.python27Packages.callPackage ./fastcluster {};
-    fasttree           = pkgs.python27Packages.callPackage ./fasttree {};
-    tree_distance      = pkgs.python27Packages.callPackage ./tree_distance {};
-    progressbar-latest = pkgs.python27Packages.callPackage ./progressbar-latest {};
-    CacheControl       = pkgs.python27Packages.callPackage ./CacheControl {};
-    scikit-bio         = pkgs.python27Packages.callPackage ./scikit-bio { inherit CacheControl; };
-    phylo_utils        = pkgs.python27Packages.callPackage ./phylo_utils {};
-
     # TODO upload separate repo and switch to using it with niv
     blastdbget = pkgs.python27Packages.callPackage ../../blastdbget-nix {};
-
-    treeCl = pkgs.python27Packages.callPackage ./treeCl {
-      inherit raxml; # TODO why doesn't it find this?
-      inherit fastcluster fasttree tree_distance progressbar-latest CacheControl scikit-bio phylo_utils;
-      inherit (pkgs.python27Packages) pyyaml biopython cython dendropy futures;
-      inherit (pkgs.python27Packages) matplotlib nose numpy pandas progressbar scikitlearn scipy;
-    };
   };
+
+  # TODO upload repo and import via niv
+  # TODO and probably put most of release.nix back here? or in its default.nix
+  # TODO package biopython 1.76, or whatever the latest was to support python27, for treecl
+  treeCl = pkgs.python27Packages.callPackage ../../treecl-nix/release.nix {};
 
   myPython3 = pkgs.python3Packages // rec {
     busco = pkgs.python3Packages.callPackage sources.busco {
@@ -82,14 +73,9 @@ in pkgs // {
   # TODO will these interfere with each other?
   python27Packages = myPython2;
   python3Packages = myPython3;
-  inherit (myPython2) blastdbget treeCl;
+  inherit (myPython2) blastdbget;
   inherit (myPython3) busco;
 
   inherit raxml mcl;
   inherit orthofinder sonicparanoid justorthologs;
-
-  # python27Packages = myPython27; # used by treeCl, probably others
-  # python3Packages = myPython36; # used by sonicparanoid
-  # inherit (myPython) treeCl;
-  # python3Packages = myPython3;
 }
