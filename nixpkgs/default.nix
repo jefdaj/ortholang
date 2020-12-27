@@ -40,7 +40,8 @@ let
   sonicparanoid = pkgs.callPackage sources.sonicparanoid { inherit mmseqs2 mcl; };
 
   # TODO detect whether MPI version will work on a given computer and adjust
-  raxml  = pkgs.callPackage ./raxml { mpi = true; };
+  # TODO uplaod and import via niv
+  raxml  = pkgs.callPackage ../../raxml-nix { mpi = true; };
 
   # TODO should treeCl go inside the python packages instead of the other way around?
   myPython2 = pkgs.python27Packages // rec {
