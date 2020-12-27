@@ -1,6 +1,8 @@
+# TODO this requires my fork of singularity right?
+
 with import ./nixpkgs;
 
-let ortholang = import ./default.nix;
+let ortholang = import ./release.nix;
 
 in pkgs.singularity-tools.buildImage {
   name = "ortholang-${ortholang.version}";
