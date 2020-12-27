@@ -50,12 +50,8 @@ let
     inherit mcl fastme ncbi-blast diamond;
   };
 
-  # TODO is this pulling in python3 and messing up treeCl?
-  # sonicparanoid = pkgs.callPackage ./sonicparanoid {
-  #   inherit mmseqs2 mcl;
-  #   inherit (pkgs) python3Packages;
-  # };
   # TODO inherit mmseqs2 + mcl again? probably use an overlay to build pkgs instead
+  # TODO also get python3Packages back?
   sonicparanoid = pkgs.callPackage sources.sonicparanoid { inherit mmseqs2 mcl; };
 
   # TODO detect whether MPI version will work on a given computer and adjust
