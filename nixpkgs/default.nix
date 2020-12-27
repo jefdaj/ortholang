@@ -34,8 +34,6 @@ let
   });
   crb-blast  = pkgs.callPackage ./crb-blast  { ncbi-blast = ncbi-blast-2_2_29; };
 
-  # cdhit = pkgs.callPackage ./cdhit { };
-
   fastme = pkgs.callPackage ./fastme { };
 
   # see https://nixos.org/nix-dev/2014-December/015243.html
