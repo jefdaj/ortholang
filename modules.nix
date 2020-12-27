@@ -2,6 +2,9 @@
 
 with import ./nixpkgs;
 let
+  # TODO can a lot/all of this be removed?
+  environment = import ./environment.nix;
+
   # from nixpkgs/pkgs/applications/networking/cluster/mesos/default.nix
   tarWithGzip = lib.overrideDerivation gnutar (oldAttrs: {
     builder = "${bash}/bin/bash";
@@ -29,41 +32,10 @@ let
     futile_logger
   ];};
 
-  # TODO should this go in a separate file with the haskell binary definition?
-  myEnv = [
-    # TODO which of these are needed?
-    stdenv
-    bash
-    bashInteractive
-    coreutils
-    diffutils
-    glibcLocales # TODO even on mac?
-    tree
-    tarWithGzip
-    gnugrep
-    gnused
-    gawk
-    curl
-    cacert # for curl https
-    fontconfig.lib # for R plotting scripts
-    graphviz
-    rsync
-
-    # TODO is this a good idea?
-    myR
-    gettext # for envsubst in custom scripts
-
-  ] ++ pkgs.lib.optionals (stdenv.isLinux) [
-
-    # works, but remove for release
-    # fsatrace # for Shake linting. still not available on Mac?
-
-  ];
-
   # TODO why is patching shebangs on the wrapped scripts necessary??
   mkMod = src: extraRunDeps: extraWraps:
     let name = "OrthoLang-" + baseNameOf src;
-        runDeps = lib.lists.unique (myEnv ++ extraRunDeps);
+        runDeps = lib.lists.unique (environment ++ extraRunDeps);
     in stdenv.mkDerivation {
       inherit src name extraRunDeps extraWraps;
       NIX_LDFLAGS = "-lfontconfig"; # for R plotting scripts
@@ -97,6 +69,9 @@ let
       '';
     };
 
+# only the modules list here is typically used,
+# but keeping a set of the other attributes lets you enter shells for them
+# (see modules-shell.nix for example)
 in rec {
   myBlast = ncbi-blast; # for swapping it out if needed
 
@@ -163,6 +138,7 @@ in rec {
   ortholang-orthogroups   = mkMod ./OrthoLang/Modules/OrthoGroups   [ python36 ] "";
   ortholang-greencut      = mkMod ./OrthoLang/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
+  # This is the only attribute used by the main build.
   modules = [
     ortholang-biomartr
     ortholang-blast
@@ -192,7 +168,4 @@ in rec {
     ortholang-greencut
     ortholang-zip
   ];
-
-  runDepends = modules ++ myEnv;
-  # TODO separate list of useful, non-conflicting programs to put on PATH?
 }
