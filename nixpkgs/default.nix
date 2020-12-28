@@ -6,7 +6,8 @@ let
   sources = import ../nix/sources.nix {};
   pkgs = import sources.nixpkgs {};
 
-  psiblast-exb = pkgs.callPackage ./psiblast-exb { };
+  # TODO remove in favor of newer vanilla ncbi-blast?
+  psiblast-exb = pkgs.callPackage ../../psiblast-exb-nix { };
 
   easel = pkgs.callPackage sources.easel { };
   hmmer = pkgs.callPackage sources.hmmer { inherit easel; };
