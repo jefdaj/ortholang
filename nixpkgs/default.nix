@@ -6,12 +6,6 @@ let
   sources = import ../nix/sources.nix {};
   pkgs = import sources.nixpkgs {};
 
-  # These are self-contained enough I should be able to add them directly to
-  # nixpkgs without worrying about maintaining a repo
-  # TODO add to ../nix as overlays?
-  # TODO pull requests!
-  mcl = pkgs.callPackage ./mcl { };
-
   psiblast-exb = pkgs.callPackage ./psiblast-exb { };
 
   easel = pkgs.callPackage sources.easel { };
@@ -21,7 +15,6 @@ let
   ncbi-blast = pkgs.callPackage ../../ncbi-blast-nix {}; # follows latest version (2.9.0 now)
   crb-blast  = pkgs.callPackage ../../crb-blast-nix  {}; # uses old blast v 2.2.29
 
-  fastme = pkgs.callPackage ./fastme { };
 
   # see https://nixos.org/nix-dev/2014-December/015243.html
   muscle = pkgs.callPackage ./muscle { };
@@ -30,7 +23,9 @@ let
 
   mmseqs2 = pkgs.callPackage sources.mmseqs2 {};
 
-  orthofinder = pkgs.callPackage ./orthofinder {
+  mcl    = pkgs.callPackage ../../mcl-nix    { };
+  fastme = pkgs.callPackage ../../fastme-nix { };
+  orthofinder = pkgs.callPackage sources.orthofinder {
     inherit (pkgs.lib) makeBinPath;
     inherit mcl fastme ncbi-blast diamond;
   };

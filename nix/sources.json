@@ -107,6 +107,18 @@
         "url": "https://github.com/nixos/nixpkgs/archive/43e8ec412fdf428ef32c8d56939c99dd48254c49.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "orthofinder": {
+        "branch": "nix-tooling",
+        "description": "Phylogenetic orthology inference for comparative genomics",
+        "homepage": "https://davidemms.github.io/",
+        "owner": "jefdaj",
+        "repo": "orthofinder-nix",
+        "rev": "40787493b3f24411cd6cad415d2d054ecb2ca147",
+        "sha256": "0x1j7k5kkk55h7f10dbdqjjhpbx0gvcv97xd96kxg2fh2zrvq8k6",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/orthofinder-nix/archive/40787493b3f24411cd6cad415d2d054ecb2ca147.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "sonicparanoid": {
         "branch": "master",
         "description": "An updated version of SonicParanoid",
