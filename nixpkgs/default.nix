@@ -17,7 +17,8 @@ let
 
 
   # see https://nixos.org/nix-dev/2014-December/015243.html
-  muscle = pkgs.callPackage ./muscle { };
+  # TODO upload repo and import via niv
+  muscle = pkgs.callPackage ../../muscle-nix { };
 
   diamond = pkgs.callPackage sources.diamond { };
 
