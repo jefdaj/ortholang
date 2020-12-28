@@ -1,6 +1,6 @@
 # TODO rename modules.nix?
 
-with import ./nixpkgs;
+with import ./nix;
 let
   # TODO can a lot/all of this be removed?
   environment = import ./environment.nix;

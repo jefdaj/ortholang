@@ -6,7 +6,7 @@
 # to work on a specific module, substitute it here and enter nix-shell
 # TODO make an example .nix file for that
 
-with import ./nixpkgs;
+with import ./nix;
 let
   sources = import ./nix/sources.nix {};
 

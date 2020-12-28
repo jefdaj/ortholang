@@ -14,7 +14,7 @@
 let
   # sources = import ./nix/sources.nix {};
   # pkgs    = import sources.nixpkgs {};
-  pkgs    = import ./nixpkgs;
+  pkgs    = import ./nix;
   myHs    = import ./haskell.nix;
   release = import ./release.nix;
 

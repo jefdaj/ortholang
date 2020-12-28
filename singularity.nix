@@ -1,6 +1,6 @@
 # TODO this requires my fork of singularity right?
 
-with import ./nixpkgs;
+with import ./nix;
 
 let ortholang = import ./release.nix;
 

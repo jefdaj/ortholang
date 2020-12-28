@@ -5,7 +5,7 @@
 
 # TODO can a lot/all of this be removed?
 
-with import ./nixpkgs;
+with import ./nix;
 
 # TODO should this go in a separate file with the haskell binary definition?
 [

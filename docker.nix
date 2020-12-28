@@ -1,4 +1,4 @@
-with import ./nixpkgs;
+with import ./nix;
 
 # TODO can the docker image also be made into a Snap package?
 

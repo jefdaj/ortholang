@@ -3,7 +3,7 @@
 # moved to ortholang/nix. Either way, they'll be managed with niv.
 
 let
-  sources = import ../nix/sources.nix {};
+  sources = import ./sources.nix {};
   pkgs = import sources.nixpkgs {};
 
   # TODO remove in favor of newer vanilla ncbi-blast?
