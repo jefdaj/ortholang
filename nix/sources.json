@@ -53,10 +53,10 @@
         "homepage": "http://hmmer.org",
         "owner": "jefdaj",
         "repo": "hmmer-nix",
-        "rev": "842dfa6ecbeff37bd0386431925673766e5d6b09",
-        "sha256": "0dqxyh3bcy6113g6x41hjafl388jh9kvxn2b2n7w7yl23aand6dv",
+        "rev": "7837a2aebcc50f049426a01861118cd66627a9f6",
+        "sha256": "0zckl39ag5ifcg2dffdd5s024zn8a3xvr5nhxn3mi7lbl31pkia3",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/hmmer-nix/archive/842dfa6ecbeff37bd0386431925673766e5d6b09.tar.gz",
+        "url": "https://github.com/jefdaj/hmmer-nix/archive/7837a2aebcc50f049426a01861118cd66627a9f6.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "logging": {
