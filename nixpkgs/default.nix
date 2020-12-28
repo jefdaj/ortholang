@@ -59,7 +59,9 @@ let
     };
   };
 
-  justorthologs = pkgs.callPackage ./justorthologs {};
+  # TODO upload repo and import via niv
+  # TODO add a module, or remove this if not helpful
+  justorthologs = pkgs.callPackage ../../justorthologs-nix {};
 
 # TODO these should probably be converted to a list of overlays
 in pkgs // {
