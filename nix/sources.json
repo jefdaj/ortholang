@@ -29,10 +29,10 @@
         "homepage": "http://docopt.org/",
         "owner": "jefdaj",
         "repo": "docopt.hs",
-        "rev": "080c3ba6badd736f1b4a3f1f13dbd4c107614136",
-        "sha256": "0yjax4kdc26znip2r4wfkj3s9ahwzd3mkf0v5hk56fajx5g9phci",
+        "rev": "462f9252652f3e179092c4a6d6b142b3615b0e1c",
+        "sha256": "1jmsv4a7iwpdk5yr8icl5cbrh0q5xawm0liiqpjapa7fcny79vh5",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/docopt.hs/archive/080c3ba6badd736f1b4a3f1f13dbd4c107614136.tar.gz",
+        "url": "https://github.com/jefdaj/docopt.hs/archive/462f9252652f3e179092c4a6d6b142b3615b0e1c.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "easel": {
