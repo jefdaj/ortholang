@@ -53,7 +53,9 @@ let
   treeCl = pkgs.python27Packages.callPackage ../../treecl-nix/release.nix {};
 
   myPython3 = pkgs.python3Packages // rec {
-    busco = pkgs.python3Packages.callPackage sources.busco {
+    # TODO finish signing up for gitlab, push repo, update niv package
+    #busco = pkgs.python3Packages.callPackage sources.busco {
+    busco = pkgs.python3Packages.callPackage ../../busco-nix {
       inherit (pkgs.lib) makeBinPath;
       inherit ncbi-blast hmmer;
     };
