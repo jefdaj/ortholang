@@ -65,10 +65,10 @@
         "homepage": null,
         "owner": "jefdaj",
         "repo": "logging",
-        "rev": "c73b189e083a6427ef5c3e02c0e2fc8387df8382",
-        "sha256": "0m1m7mhd6ra4wi7an4g7djh19sv2hjp78mbsn8flxcbrm16ri37d",
+        "rev": "7c6161b503b8fbc8aa806285f23633d17246a33f",
+        "sha256": "1yy6n7swa81kij8mcd1aibbpwpnxi9bx6yzjpcys37c6zmhbksp0",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/logging/archive/c73b189e083a6427ef5c3e02c0e2fc8387df8382.tar.gz",
+        "url": "https://github.com/jefdaj/logging/archive/7c6161b503b8fbc8aa806285f23633d17246a33f.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "mmseqs2": {
