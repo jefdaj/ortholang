@@ -34,7 +34,11 @@ let
 
   # TODO inherit mmseqs2 + mcl again? probably use an overlay to build pkgs instead
   # TODO also get python3Packages back?
-  sonicparanoid = pkgs.callPackage sources.sonicparanoid { inherit mmseqs2 mcl; };
+  # sonicparanoid = pkgs.callPackage sources.sonicparanoid { inherit mmseqs2 mcl; };
+  quick-multi-paranoid = pkgs.callPackage ../../quick-multi-paranoid-nix {};
+  sonicparanoid = pkgs.callPackage ../../sonicparanoid-nix {
+    inherit mmseqs2 mcl quick-multi-paranoid;
+  }; # TODO upload and go back to niv
 
   # TODO detect whether MPI version will work on a given computer and adjust
   # TODO upload and import via niv
