@@ -16,12 +16,12 @@
         "description": "Assessing genome assembly and annotation completeness with Benchmarking Universal Single-Copy Orthologs (BUSCO)",
         "homepage": "https://gitlab.com/ezlab/busco",
         "owner": "jefdaj",
-        "repo": "busco",
+        "repo": "busco-nix",
         "rev": "56cb980d16486ef71a7e5543504ff7f76e156557",
         "sha256": "0bfvv7fy6qkjkvi8wp83xla5s3wljr08skd2hk915lhxmabqrn7c",
         "type": "tarball",
-        "url": "https://gitlab.com/jefdaj/busco/-/archive/56cb980d16486ef71a7e5543504ff7f76e156557/busco-56cb980d16486ef71a7e5543504ff7f76e156557.tar.gz",
-        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
+        "url": "https://gitlab.com/jefdaj/busco-nix/-/archive/56cb980d16486ef71a7e5543504ff7f76e156557/busco-nix-56cb980d16486ef71a7e5543504ff7f76e156557.tar.gz",
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
     },
     "crb-blast": {
         "branch": "master",
@@ -81,7 +81,7 @@
         "sha256": "042ycia9kypayys3i52wzfwww4dqp9cfix65k64km5ka0isd2d7i",
         "type": "tarball",
         "url": "https://gitlab.com/jefdaj/fastme-nix/-/archive/1a6bf05aa9626f71d67e8c0334bae95adc66b0a3/fastme-nix-1a6bf05aa9626f71d67e8c0334bae95adc66b0a3.tar.gz",
-        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
     },
     "hmmer": {
         "branch": "master",
@@ -201,7 +201,7 @@
         "sha256": "0bfvv7fy6qkjkvi8wp83xla5s3wljr08skd2hk915lhxmabqrn7c",
         "type": "tarball",
         "url": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix/-/archive/deb119adccc780ab237557c644fdce543dacdc5a/quick-multi-paranoid-nix-deb119adccc780ab237557c644fdce543dacdc5a.tar.gz",
-        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
     },
     "raxml-nix": {
         "branch": "master",
@@ -225,6 +225,6 @@
         "sha256": "03fspjmsg0gfvs15sgr5ddd415gbm86l8mpn7f7daiwhs66qjxvr",
         "type": "tarball",
         "url": "https://gitlab.com/jefdaj/sonicparanoid2/-/archive/master/sonicparanoid2-d1ac692ea70e4a6d295245c5b8fe5874e7080f7d.tar.gz",
-        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
     }
 }
