@@ -7,26 +7,24 @@ let
   pkgs = import sources.nixpkgs {};
 
   # TODO remove in favor of newer vanilla ncbi-blast?
-  psiblast-exb = pkgs.callPackage ../../psiblast-exb-nix { };
+  psiblast-exb = pkgs.callPackage sources.psiblast-exb { };
 
   easel = pkgs.callPackage sources.easel { };
   hmmer = pkgs.callPackage sources.hmmer { inherit easel; };
 
-  # TODO upload separate repos and switch to importing the with niv
-  ncbi-blast = pkgs.callPackage ../../ncbi-blast-nix {}; # follows latest version (2.9.0 now)
-  crb-blast  = pkgs.callPackage ../../crb-blast-nix  {}; # uses old blast v 2.2.29
+  ncbi-blast = pkgs.callPackage sources.ncbi-blast {}; # follows latest version (2.9.0 now)
+  crb-blast  = pkgs.callPackage sources.crb-blast  { inherit ncbi-blast; }; # uses old blast v 2.2.29
 
 
   # see https://nixos.org/nix-dev/2014-December/015243.html
-  # TODO upload repo and import via niv
-  muscle = pkgs.callPackage ../../muscle-nix { };
+  muscle = pkgs.callPackage sources.muscle { };
 
   diamond = pkgs.callPackage sources.diamond { };
 
   mmseqs2 = pkgs.callPackage sources.mmseqs2 {};
 
-  mcl    = pkgs.callPackage ../../mcl-nix    { };
-  fastme = pkgs.callPackage ../../fastme-nix { };
+  mcl    = pkgs.callPackage sources.mcl    { };
+  fastme = pkgs.callPackage sources.fastme { };
   orthofinder = pkgs.callPackage sources.orthofinder {
     inherit (pkgs.lib) makeBinPath;
     inherit mcl fastme ncbi-blast diamond;
@@ -35,39 +33,35 @@ let
   # TODO inherit mmseqs2 + mcl again? probably use an overlay to build pkgs instead
   # TODO also get python3Packages back?
   # sonicparanoid = pkgs.callPackage sources.sonicparanoid { inherit mmseqs2 mcl; };
-  quick-multi-paranoid = pkgs.callPackage ../../quick-multi-paranoid-nix {};
-  sonicparanoid = pkgs.callPackage ../../sonicparanoid-nix {
+  quick-multi-paranoid = pkgs.callPackage sources.quick-multi-paranoid {};
+  sonicparanoid = pkgs.callPackage sources.sonicparanoid {
     inherit mmseqs2 mcl quick-multi-paranoid;
-  }; # TODO upload and go back to niv
+  };
 
   # TODO detect whether MPI version will work on a given computer and adjust
-  # TODO upload and import via niv
-  raxml  = pkgs.callPackage ../../raxml-nix { mpi = true; };
+  raxml  = pkgs.callPackage sources.raxml { mpi = true; };
 
   # TODO upload and import via niv
   # TODO with treecl and blastdbget packaged separately, does the whole myPython2 set serve a purpose anymore?
   myPython2 = pkgs.python27Packages // rec {
     # TODO upload separate repo and switch to using it with niv
-    blastdbget = pkgs.python27Packages.callPackage ../../blastdbget-nix {};
+    blastdbget = pkgs.python27Packages.callPackage sources.blastdbget {};
   };
 
   # TODO upload repo and import via niv
   # TODO and probably put most of release.nix back here? or in its default.nix
   # TODO package biopython 1.76, or whatever the latest was to support python27, for treecl
-  treeCl = pkgs.python27Packages.callPackage ../../treecl-nix/release.nix {};
+  # treeCl = pkgs.python27Packages.callPackage ../../treecl-nix/release.nix {};
 
   myPython3 = pkgs.python3Packages // rec {
-    # TODO finish signing up for gitlab, push repo, update niv package
-    #busco = pkgs.python3Packages.callPackage sources.busco {
-    busco = pkgs.python3Packages.callPackage ../../busco-nix {
+    busco = pkgs.python3Packages.callPackage sources.busco {
       inherit (pkgs.lib) makeBinPath;
       inherit ncbi-blast hmmer;
     };
   };
 
-  # TODO upload repo and import via niv
   # TODO add a module, or remove this if not helpful
-  justorthologs = pkgs.callPackage ../../justorthologs-nix {};
+  justorthologs = pkgs.callPackage sources.justorthologs {};
 
 # TODO these should probably be converted to a list of overlays
 in pkgs // {

@@ -1,15 +1,39 @@
 {
+    "blastdbget": {
+        "branch": "master",
+        "description": "Download Blast databases from ftp.ncbi.nlm.nih.gov/blast/db, validate, and extract.",
+        "homepage": "http://brwnj.github.io/blastdbget",
+        "owner": "jefdaj",
+        "repo": "blastdbget-nix",
+        "rev": "6ea4f440bb5afe0a2be5e9a90a69d1df02c87a6f",
+        "sha256": "1i4vrlq66hjbws3s61dqcxr0raw8ymw2hrdgbcg1iq96p77ym4ad",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/blastdbget-nix/archive/6ea4f440bb5afe0a2be5e9a90a69d1df02c87a6f.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "busco": {
         "branch": "master",
         "description": "Assessing genome assembly and annotation completeness with Benchmarking Universal Single-Copy Orthologs (BUSCO)",
         "homepage": "https://gitlab.com/ezlab/busco",
         "owner": "jefdaj",
         "repo": "busco",
-        "rev": "12482c1b33c05a2d95fededf2b0803586f71e06b",
-        "sha256": "1smfq3ppsh9jc758cmiy4wfzja17z1swdx236s0hp8jk5il1m2j6",
+        "rev": "56cb980d16486ef71a7e5543504ff7f76e156557",
+        "sha256": "0bfvv7fy6qkjkvi8wp83xla5s3wljr08skd2hk915lhxmabqrn7c",
         "type": "tarball",
-        "url": "https://gitlab.com/jefdaj/busco/-/archive/12482c1b33c05a2d95fededf2b0803586f71e06b/busco-12482c1b33c05a2d95fededf2b0803586f71e06b.tar.gz",
+        "url": "https://gitlab.com/jefdaj/busco/-/archive/56cb980d16486ef71a7e5543504ff7f76e156557/busco-56cb980d16486ef71a7e5543504ff7f76e156557.tar.gz",
         "url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
+    },
+    "crb-blast": {
+        "branch": "master",
+        "description": "Conditional Reciprocal Best Blast",
+        "homepage": "",
+        "owner": "jefdaj",
+        "repo": "crb-blast-nix",
+        "rev": "ec55e7ac131adc792a340491053ef797f31afcb7",
+        "sha256": "1rpvxx20qg43l1hcxpcw4qfasrw778ispaxzgmmal7qn70lvh5hh",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/crb-blast-nix/archive/ec55e7ac131adc792a340491053ef797f31afcb7.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "diamond": {
         "branch": "master",
@@ -47,6 +71,18 @@
         "url": "https://github.com/jefdaj/easel-nix/archive/47daa7c1020224be9312c4f5cd6953462f659306.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "fastme": {
+        "branch": "master",
+        "description": null,
+        "homepage": null,
+        "owner": "jefdaj",
+        "repo": "fastme-nix",
+        "rev": "1a6bf05aa9626f71d67e8c0334bae95adc66b0a3",
+        "sha256": "042ycia9kypayys3i52wzfwww4dqp9cfix65k64km5ka0isd2d7i",
+        "type": "tarball",
+        "url": "https://gitlab.com/jefdaj/fastme-nix/-/archive/1a6bf05aa9626f71d67e8c0334bae95adc66b0a3/fastme-nix-1a6bf05aa9626f71d67e8c0334bae95adc66b0a3.tar.gz",
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
+    },
     "hmmer": {
         "branch": "master",
         "description": "HMMER: biological sequence analysis using profile HMMs",
@@ -71,16 +107,52 @@
         "url": "https://github.com/jefdaj/logging/archive/7c6161b503b8fbc8aa806285f23633d17246a33f.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "mcl": {
+        "branch": "master",
+        "description": null,
+        "homepage": null,
+        "owner": "jefdaj",
+        "repo": "mcl-nix",
+        "rev": "7d5ed76a8f0a10e6343ad60bde8c25bff7189f82",
+        "sha256": "0ajd957wgvpr1sr35phk28hv1qbbh6abca7d4pz1yq6xvq6c9ll6",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/mcl-nix/archive/7d5ed76a8f0a10e6343ad60bde8c25bff7189f82.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "mmseqs2": {
         "branch": "master",
         "description": "MMseqs2: ultra fast and sensitive search and clustering suite",
         "homepage": "https://mmseqs.com",
         "owner": "jefdaj",
         "repo": "mmseqs2-nix",
-        "rev": "dd2bc9919075f379755e12f08b1f238729d00c1e",
-        "sha256": "009s772p7c0gs00s7fjsxriivyvhdj2x68kjmsljdl8bnv58h0fg",
+        "rev": "45f42b86f080423e246d32feb04c0b1035a0079d",
+        "sha256": "17b697l9d5q2n7hqgbk7v5n97s99xssiwiwlz2mc97nax5mvg29x",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/mmseqs2-nix/archive/dd2bc9919075f379755e12f08b1f238729d00c1e.tar.gz",
+        "url": "https://github.com/jefdaj/mmseqs2-nix/archive/45f42b86f080423e246d32feb04c0b1035a0079d.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "muscle": {
+        "branch": "master",
+        "description": null,
+        "homepage": null,
+        "owner": "jefdaj",
+        "repo": "muscle-nix",
+        "rev": "4f334c74e3710d4dea881647b4bb2414227875e0",
+        "sha256": "1n9rfk07icl56fi1y9fkxn49xl4jbva6kvpvfx7l21svx7ikszil",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/muscle-nix/archive/4f334c74e3710d4dea881647b4bb2414227875e0.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "ncbi-blast": {
+        "branch": "master",
+        "description": null,
+        "homepage": null,
+        "owner": "jefdaj",
+        "repo": "ncbi-blast-nix",
+        "rev": "7f1a8abd8b59cbf4e04180f6b8c25d3b104fb818",
+        "sha256": "1yqz07affcncmrzpbwy4p3nirx3akpffck7x3dzvrpyxb8zib0b0",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/ncbi-blast-nix/archive/7f1a8abd8b59cbf4e04180f6b8c25d3b104fb818.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -119,16 +191,40 @@
         "url": "https://github.com/jefdaj/orthofinder-nix/archive/40787493b3f24411cd6cad415d2d054ecb2ca147.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "quick-multi-paranoid": {
+        "branch": "master",
+        "description": null,
+        "homepage": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix",
+        "owner": "jefdaj",
+        "repo": "quick-multi-paranoid-nix",
+        "rev": "deb119adccc780ab237557c644fdce543dacdc5a",
+        "sha256": "0bfvv7fy6qkjkvi8wp83xla5s3wljr08skd2hk915lhxmabqrn7c",
+        "type": "tarball",
+        "url": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix/-/archive/deb119adccc780ab237557c644fdce543dacdc5a/quick-multi-paranoid-nix-deb119adccc780ab237557c644fdce543dacdc5a.tar.gz",
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
+    },
+    "raxml-nix": {
+        "branch": "master",
+        "description": null,
+        "homepage": "www.exelixis-lab.org",
+        "owner": "jefdaj",
+        "repo": "raxml-nix",
+        "rev": "2c23befaa6c560bdd84a2cadadfa8923dc310434",
+        "sha256": "1a7nqlacnpj8g4x0gx9d8syiq72mz9pcidnsic13kv9b8bqjkj7z",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/raxml-nix/archive/2c23befaa6c560bdd84a2cadadfa8923dc310434.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "sonicparanoid": {
         "branch": "master",
         "description": "An updated version of SonicParanoid",
         "homepage": "http://iwasakilab.bs.s.u-tokyo.ac.jp/sonicparanoid/",
         "owner": "jefdaj",
         "repo": "sonicparanoid2",
-        "rev": "60250f82070a46376776544d936b6ba40e235063",
-        "sha256": "026cf388xf0cvdhg6s6mdi86z9k90fmmrmfgi07w55crw2kjsg73",
+        "rev": "76835c1053e883fad1b62a21a377e1d9c739cad9",
+        "sha256": "03fspjmsg0gfvs15sgr5ddd415gbm86l8mpn7f7daiwhs66qjxvr",
         "type": "tarball",
-        "url": "https://gitlab.com/jefdaj/sonicparanoid2/-/archive/master/sonicparanoid2-60250f82070a46376776544d936b6ba40e235063.tar.gz",
-        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive/<branch>/<repo>-<rev>.tar.gz"
+        "url": "https://gitlab.com/jefdaj/sonicparanoid2/-/archive/master/sonicparanoid2-d1ac692ea70e4a6d295245c5b8fe5874e7080f7d.tar.gz",
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive.tar.gz?ref=<rev>"
     }
 }
