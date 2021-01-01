@@ -54,10 +54,12 @@ let
   # treeCl = pkgs.python27Packages.callPackage ../../treecl-nix/release.nix {};
 
   myPython3 = pkgs.python3Packages // rec {
-    busco = pkgs.python3Packages.callPackage sources.busco {
-      inherit (pkgs.lib) makeBinPath;
-      inherit ncbi-blast hmmer;
-    };
+  };
+
+  # TODO put back inside myPython3?
+  busco = myPython3.callPackage sources.busco {
+    inherit (pkgs.lib) makeBinPath;
+    inherit ncbi-blast hmmer;
   };
 
   # TODO add a module, or remove this if not helpful
@@ -73,7 +75,8 @@ in pkgs // {
   python27Packages = myPython2;
   python3Packages = myPython3;
   inherit (myPython2) blastdbget;
-  inherit (myPython3) busco;
+  inherit busco; # TODO back inside myPython3?
+  inherit quick-multi-paranoid;
 
   inherit raxml mcl;
   inherit orthofinder sonicparanoid justorthologs;

@@ -16,11 +16,11 @@
         "description": "Assessing genome assembly and annotation completeness with Benchmarking Universal Single-Copy Orthologs (BUSCO)",
         "homepage": "https://gitlab.com/ezlab/busco",
         "owner": "jefdaj",
-        "repo": "busco-nix",
-        "rev": "56cb980d16486ef71a7e5543504ff7f76e156557",
-        "sha256": "0bfvv7fy6qkjkvi8wp83xla5s3wljr08skd2hk915lhxmabqrn7c",
+        "repo": "busco",
+        "rev": "c7fbb53707a8cc496e31ba01a1253ddd0328b366",
+        "sha256": "1k6p5af7hy15c7dhkw87f9wv4hhycwq2akqzznxc5riqsw9lgq0f",
         "type": "tarball",
-        "url": "https://gitlab.com/jefdaj/busco-nix/-/archive/56cb980d16486ef71a7e5543504ff7f76e156557/busco-nix-56cb980d16486ef71a7e5543504ff7f76e156557.tar.gz",
+        "url": "https://gitlab.com/jefdaj/busco/-/archive/c7fbb53707a8cc496e31ba01a1253ddd0328b366/busco-c7fbb53707a8cc496e31ba01a1253ddd0328b366.tar.gz",
         "url_template": "https://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
     },
     "crb-blast": {
@@ -201,7 +201,7 @@
         "sha256": "0bfvv7fy6qkjkvi8wp83xla5s3wljr08skd2hk915lhxmabqrn7c",
         "type": "tarball",
         "url": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix/-/archive/deb119adccc780ab237557c644fdce543dacdc5a/quick-multi-paranoid-nix-deb119adccc780ab237557c644fdce543dacdc5a.tar.gz",
-        "url_template": "https://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive/<rev>/<repo>-<rev>.tar.gz"
     },
     "raxml-nix": {
         "branch": "master",
