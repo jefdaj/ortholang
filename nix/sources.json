@@ -20,8 +20,8 @@
         "rev": "c7fbb53707a8cc496e31ba01a1253ddd0328b366",
         "sha256": "1k6p5af7hy15c7dhkw87f9wv4hhycwq2akqzznxc5riqsw9lgq0f",
         "type": "tarball",
-        "url": "https://gitlab.com/jefdaj/busco/-/archive/c7fbb53707a8cc496e31ba01a1253ddd0328b366/busco-c7fbb53707a8cc496e31ba01a1253ddd0328b366.tar.gz",
-        "url_template": "https://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
+        "url": "http://gitlab.com/jefdaj/busco/-/archive/c7fbb53707a8cc496e31ba01a1253ddd0328b366/busco-c7fbb53707a8cc496e31ba01a1253ddd0328b366.tar.gz",
+        "url_template": "http://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
     },
     "crb-blast": {
         "branch": "master",
@@ -222,7 +222,7 @@
         "owner": "jefdaj",
         "repo": "sonicparanoid2",
         "rev": "76835c1053e883fad1b62a21a377e1d9c739cad9",
-        "sha256": "03fspjmsg0gfvs15sgr5ddd415gbm86l8mpn7f7daiwhs66qjxvr",
+        "sha256": "046qv50cmmm2a1clbnp3275mqy4cy9d2knhmcmq8fikkrms2gzp1",
         "type": "tarball",
         "url": "https://gitlab.com/jefdaj/sonicparanoid2/-/archive/master/sonicparanoid2-d1ac692ea70e4a6d295245c5b8fe5874e7080f7d.tar.gz",
         "url_template": "https://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
