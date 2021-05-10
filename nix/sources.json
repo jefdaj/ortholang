@@ -197,10 +197,10 @@
         "homepage": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix",
         "owner": "jefdaj",
         "repo": "quick-multi-paranoid-nix",
-        "rev": "deb119adccc780ab237557c644fdce543dacdc5a",
-        "sha256": "0bfvv7fy6qkjkvi8wp83xla5s3wljr08skd2hk915lhxmabqrn7c",
+        "rev": "36f124ba85e323fa80fa9b2707c34f4f666d8037",
+        "sha256": "1shfhxmpn7s4p0adcwizclrdzy8g4hy56w0fsxrnw2d3bk9gapp6",
         "type": "tarball",
-        "url": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix/-/archive/deb119adccc780ab237557c644fdce543dacdc5a/quick-multi-paranoid-nix-deb119adccc780ab237557c644fdce543dacdc5a.tar.gz",
+				"url": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix/-/archive/36f124ba85e323fa80fa9b2707c34f4f666d8037/quick-multi-paranoid-nix-36f124ba85e323fa80fa9b2707c34f4f666d8037.tar.gz",
         "url_template": "https://gitlab.com/<owner>/<repo>/-/archive/<rev>/<repo>-<rev>.tar.gz"
     },
     "raxml-nix": {
