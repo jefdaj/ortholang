@@ -95,6 +95,18 @@
         "url": "https://github.com/jefdaj/hmmer-nix/archive/7837a2aebcc50f049426a01861118cd66627a9f6.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "justorthologs-nix": {
+        "branch": "master",
+        "description": null,
+        "homepage": null,
+        "owner": "jefdaj",
+        "repo": "justorthologs-nix",
+        "rev": "fec4feadab5a97f15f1c56d8cc7832dcdae8d34e",
+        "sha256": "0dpskp3n5l52hm59m0yphl3lk806nnpvrxbkgwmnjcd6whkphhcp",
+        "type": "tarball",
+        "url": "https://github.com/jefdaj/justorthologs-nix/archive/fec4feadab5a97f15f1c56d8cc7832dcdae8d34e.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "logging": {
         "branch": "master",
         "description": null,
@@ -200,7 +212,7 @@
         "rev": "36f124ba85e323fa80fa9b2707c34f4f666d8037",
         "sha256": "1shfhxmpn7s4p0adcwizclrdzy8g4hy56w0fsxrnw2d3bk9gapp6",
         "type": "tarball",
-				"url": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix/-/archive/36f124ba85e323fa80fa9b2707c34f4f666d8037/quick-multi-paranoid-nix-36f124ba85e323fa80fa9b2707c34f4f666d8037.tar.gz",
+        "url": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix/-/archive/36f124ba85e323fa80fa9b2707c34f4f666d8037/quick-multi-paranoid-nix-36f124ba85e323fa80fa9b2707c34f4f666d8037.tar.gz",
         "url_template": "https://gitlab.com/<owner>/<repo>/-/archive/<rev>/<repo>-<rev>.tar.gz"
     },
     "raxml-nix": {
