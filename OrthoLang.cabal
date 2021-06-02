@@ -148,6 +148,7 @@ library
                     OrthoLang.Modules.FlowChart,
                     OrthoLang.Modules.Diamond,
                     OrthoLang.Modules.Hmmer,
+                    OrthoLang.Modules.JustOrthologs,
                     OrthoLang.Modules.ListLike,
                     OrthoLang.Modules.Curl,
                     OrthoLang.Modules.Load,
