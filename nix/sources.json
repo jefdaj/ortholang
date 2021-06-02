@@ -209,10 +209,10 @@
         "homepage": "www.exelixis-lab.org",
         "owner": "jefdaj",
         "repo": "raxml-nix",
-        "rev": "2c23befaa6c560bdd84a2cadadfa8923dc310434",
-        "sha256": "1a7nqlacnpj8g4x0gx9d8syiq72mz9pcidnsic13kv9b8bqjkj7z",
+        "rev": "fe7a6008ef89f30638ca6e21e0cf3943db25f028",
+        "sha256": "1j2skl1mc8wq1zv8hqyi45njk52xhpdrxkizg2fq20m4lzsi3qs4",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/raxml-nix/archive/2c23befaa6c560bdd84a2cadadfa8923dc310434.tar.gz",
+        "url": "https://github.com/jefdaj/raxml-nix/archive/fe7a6008ef89f30638ca6e21e0cf3943db25f028.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "sonicparanoid": {
