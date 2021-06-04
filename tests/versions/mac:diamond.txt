@@ -1,1 +1,1 @@
-diamond v0.9.29.130 
+diamond version 2.0.4
