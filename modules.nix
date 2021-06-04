@@ -5,15 +5,6 @@ let
   # TODO can a lot/all of this be removed?
   environment = import ./environment.nix;
 
-  # from nixpkgs/pkgs/applications/networking/cluster/mesos/default.nix
-  tarWithGzip = lib.overrideDerivation gnutar (oldAttrs: {
-    builder = "${bash}/bin/bash";
-    buildInputs = (oldAttrs.buildInputs or []) ++ [ makeWrapper ];
-    postInstall = (oldAttrs.postInstall or "") + ''
-      wrapProgram $out/bin/tar --prefix PATH ":" "${gzip}/bin"
-    '';
-  });
-
   # fixes "Fontconfig error: Cannot load default config file"
   # from nixpkgs/pkgs/development/libraries/pipewire/default.nix
   fontsConf = makeFontsConf {
@@ -132,7 +123,7 @@ in rec {
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
   ortholang-busco = mkMod ./OrthoLang/Modules/Busco
-                     [ myBlast hmmer busco python36 which tarWithGzip ]
+                     [ myBlast hmmer busco python36 which ]
                      "--set BUSCO_CONFIG_FILE ${busco}/config/config.ini";
 
   ortholang-curl          = mkMod ./OrthoLang/Modules/Curl          [ curl ] "";
