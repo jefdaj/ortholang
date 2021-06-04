@@ -1,5 +1,17 @@
 language: nix
 nix: 2.3.7
+sudo: false
+
+env:
+  global:
+  - CACHIX_CACHE=jefdaj
+
+install:
+- echo "trusted-users = $USER" | sudo tee -a /etc/nix/nix.conf
+- sudo systemctl restart nix-daemon
+- nix-env -iA nixpkgs.cachix
+- cachix use $CACHIX_CACHE
+- nix path-info --all > /tmp/store-path-pre-build
 
 # see: https://github.com/ChrisPenner/haskell-stack-travis-ci/blob/master/.travis.yml
 # cache:
@@ -34,13 +46,11 @@ branches:
   - /^feature-.*$/
 
 # see: https://github.com/cachix/cachix/issues/228
-before_script:
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then echo "trusted-users = root $USER" | sudo tee -a /etc/nix/nix.conf; fi
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; fi
+# TODO remove?
+#before_script:
+#- if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; fi
 
 script:
-  - nix-env -iA cachix -f https://cachix.org/api/v1/install
-  - cachix use jefdaj || echo "cachix install failed"
   - ./scripts/dev/test-nix.sh
 
 notifications:
