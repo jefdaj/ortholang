@@ -1,0 +1,2 @@
+file-5.39
+magic file from /nix/store/bx9l7vrcb9izgjgwkjwvryxsdqdd5zba-file-5.39/share/misc/magic
