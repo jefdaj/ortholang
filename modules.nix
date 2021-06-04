@@ -121,7 +121,7 @@ in rec {
   ortholang-mmseqs        = mkMod ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
   ortholang-muscle        = mkMod ./OrthoLang/Modules/Muscle        [ muscle ] "";
   ortholang-psiblast      = mkMod ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
-  ortholang-zip           = mkMod ./OrthoLang/Modules/Zip           [ myPy3 ] myPy3Wrap;
+  ortholang-zip           = mkMod ./OrthoLang/Modules/Zip           [ zip myPy3 ] myPy3Wrap;
 
   # TODO should the wrap not be necessary?
   ortholang-seqio         = mkMod ./OrthoLang/Modules/SeqIO         [ myPy3 ] myPy3Wrap;

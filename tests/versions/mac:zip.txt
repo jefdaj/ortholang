@@ -6,15 +6,16 @@ the authors using the web page at www.info-zip.org; see README for details.
 Latest sources and executables are at ftp://ftp.info-zip.org/pub/infozip,
 as of above date; see http://www.info-zip.org/ for other sites.
 
-Compiled with gcc 4.2.1 Compatible Apple LLVM 9.0.0 (clang-900.0.31) for Unix (Mac OS X) on Jan 18 2020.
+Compiled with gcc 4.2.1 Compatible Clang 7.1.0 (tags/RELEASE_710/final) for Unix (Mac OS X) on Sep 10 2020.
 
 Zip special compilation options:
 	USE_EF_UT_TIME       (store Universal Time)
 	SYMLINK_SUPPORT      (symbolic links supported)
 	LARGE_FILE_SUPPORT   (can read and write large files on file system)
 	ZIP64_SUPPORT        (use Zip64 to store large files in archives)
+	UNICODE_SUPPORT      (store and read UTF-8 Unicode paths)
 	STORE_UNIX_UIDs_GIDs (store UID/GID sizes/values using new extra field)
-	UIDGID_16BIT         (old Unix 16-bit UID/GID extra field also used)
+	UIDGID_NOT_16BIT     (old Unix 16-bit UID/GID extra field not used)
 	[encryption, version 2.91 of 05 Jan 2007] (modified for Zip 3)
 
 Encryption notice:
