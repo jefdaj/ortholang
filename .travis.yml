@@ -8,7 +8,7 @@ env:
 
 install:
 - echo "trusted-users = $USER" | sudo tee -a /etc/nix/nix.conf
-- sudo systemctl restart nix-daemon
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; else sudo systemctl restart nix-daemon; fi
 - nix-env -iA nixpkgs.cachix
 - cachix use $CACHIX_CACHE
 - nix path-info --all > /tmp/store-path-pre-build
@@ -48,7 +48,6 @@ branches:
 # see: https://github.com/cachix/cachix/issues/228
 # TODO remove?
 #before_script:
-#- if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; fi
 
 script:
   - ./scripts/dev/test-nix.sh
