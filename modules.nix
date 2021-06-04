@@ -107,16 +107,16 @@ in rec {
   ortholang-blastdbget    = mkMod ./OrthoLang/Modules/Blastdbget    [ myBlast blastdbget ] ""; # TODO remove myBlast?
   ortholang-crbblast      = mkMod ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
   ortholang-flowchart      = mkMod ./OrthoLang/Modules/FlowChart      [ graphviz ] ""; # TODO remove?
-  ortholang-diamond       = mkMod ./OrthoLang/Modules/Diamond       [ diamond ] "";
+  # ortholang-diamond       = mkMod ./OrthoLang/Modules/Diamond       [ diamond ] "";
   ortholang-hmmer         = mkMod ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
-  ortholang-mmseqs        = mkMod ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
+  # ortholang-mmseqs        = mkMod ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
   ortholang-muscle        = mkMod ./OrthoLang/Modules/Muscle        [ muscle ] "";
   ortholang-psiblast      = mkMod ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
   ortholang-zip           = mkMod ./OrthoLang/Modules/Zip           [ zip myPy3 ] myPy3Wrap;
 
   # TODO should the wrap not be necessary?
   ortholang-seqio         = mkMod ./OrthoLang/Modules/SeqIO         [ myPy3 ] myPy3Wrap;
-  ortholang-orthofinder   = mkMod ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
+  # ortholang-orthofinder   = mkMod ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
   ortholang-sonicparanoid = mkMod ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
 
   ortholang-treecl        = mkMod ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
@@ -141,11 +141,11 @@ in rec {
     ortholang-blastrbh
     ortholang-crbblast
     ortholang-flowchart
-    ortholang-diamond
+    # ortholang-diamond
     ortholang-hmmer
-    ortholang-mmseqs
+    # ortholang-mmseqs
     ortholang-muscle
-    ortholang-orthofinder
+    # ortholang-orthofinder
     ortholang-plots
     ortholang-setstable
     ortholang-psiblast
