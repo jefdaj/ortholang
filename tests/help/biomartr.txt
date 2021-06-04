@@ -3,5 +3,7 @@ Search + download genomes and proteomes from Biomart
 Functions:
 
 parse_searches
+get_genomes_explicit
 get_genomes
+get_proteomes_explicit
 get_proteomes
