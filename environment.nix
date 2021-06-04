@@ -26,6 +26,7 @@ with import ./nix;
   fontconfig.lib # for R plotting scripts
   graphviz
   rsync
+  file
 
   # TODO is this a good idea?
   # myR # TODO is this needed at runtime?
