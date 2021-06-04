@@ -17,7 +17,7 @@ branch="$TRAVIS_BRANCH"
 [[ "$branch" =~ '^(master|develop|bugfix)' ]] && testfilter="all"
 
 # or one of these specific cases.
-[[ "$branch" == feature-nix-tooling ]] && testfilter="none"
+[[ "$branch" == feature-nix-tooling ]] && testfilter='$2 ~/version/'
 
 # finally, override from the command line
 [[ -z "$1" ]] || testfilter="$1"
