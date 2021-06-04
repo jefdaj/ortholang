@@ -40,13 +40,15 @@ versionScripts = map (\(a,b) -> (a, os ++ ":" ++ b))
   , ("orthofinder"  , "orthofinder.sh")
   , ("psiblast"     , "psiblast.sh") -- TODO remove?
 
-  , ("python2"  , "python2.sh")
-  , ("numpy"    , "py2_numpy.py")
-  , ("scipy"    , "py2_scipy.py")
-  , ("BioPython", "py2_BioPython.py")
+  , ("python2"      , "python2.sh")
+  , ("py2_numpy"    , "py2_numpy.py")
+  , ("py2_scipy"    , "py2_scipy.py")
+  , ("py2_BioPython", "py2_BioPython.py")
 
-  , ("python3"  , "python3.sh")
-  -- TODO py3 packages?
+  , ("python3"      , "python3.sh")
+  , ("py3_numpy"    , "py3_numpy.py")
+  , ("py3_scipy"    , "py3_scipy.py")
+  , ("py3_BioPython", "py3_BioPython.py")
 
   , ("r"            , "r.sh")
   , ("biomartr"     , "r_biomartr.R")
