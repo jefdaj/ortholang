@@ -8,7 +8,7 @@ env:
 
 install:
 - echo "trusted-users = $USER" | sudo tee -a /etc/nix/nix.conf
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; else; sudo systemctl restart nix-daemon; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; else sudo systemctl restart nix-daemon; fi
 - nix-env -iA nixpkgs.cachix
 - cachix use $CACHIX_CACHE
 - nix path-info --all > /tmp/store-path-pre-build
