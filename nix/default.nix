@@ -46,6 +46,7 @@ let
   myPython2 = pkgs.python27Packages // rec {
     # TODO upload separate repo and switch to using it with niv
     blastdbget = pkgs.python27Packages.callPackage sources.blastdbget {};
+    biopython  = pkgs.python27Packages.callPackage ./pydeps/biopython {}; # old version 1.76 with python2 support
   };
 
   # TODO upload repo and import via niv
@@ -61,9 +62,13 @@ let
     inherit (pkgs.lib) makeBinPath;
     inherit ncbi-blast hmmer;
   };
+  
+  # TODO clean this up
+  justorthologs = pkgs.callPackage sources.justorthologs {
+    python = myPython2.python.withPackages (_: [myPython2.biopython]);
+  };
 
   # TODO add a module, or remove this if not helpful
-  justorthologs = pkgs.callPackage sources.justorthologs {};
 
 # TODO these should probably be converted to a list of overlays
 in pkgs // {

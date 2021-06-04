@@ -95,16 +95,16 @@
         "url": "https://github.com/jefdaj/hmmer-nix/archive/7837a2aebcc50f049426a01861118cd66627a9f6.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
-    "justorthologs-nix": {
+    "justorthologs": {
         "branch": "master",
         "description": null,
         "homepage": null,
         "owner": "jefdaj",
         "repo": "justorthologs-nix",
-        "rev": "fec4feadab5a97f15f1c56d8cc7832dcdae8d34e",
-        "sha256": "0dpskp3n5l52hm59m0yphl3lk806nnpvrxbkgwmnjcd6whkphhcp",
+        "rev": "5a7f505cb1df91f240da887d1dc5f0dc003a6f85",
+        "sha256": "19053mvqjdd9vkg54ix8j8c82aazbvi0j652c945nfvwgmbzghhq",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/justorthologs-nix/archive/fec4feadab5a97f15f1c56d8cc7832dcdae8d34e.tar.gz",
+        "url": "https://github.com/jefdaj/justorthologs-nix/archive/5a7f505cb1df91f240da887d1dc5f0dc003a6f85.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "logging": {

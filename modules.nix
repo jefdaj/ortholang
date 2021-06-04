@@ -85,7 +85,8 @@ in rec {
     ignoreCollisions = true;
 
     extraLibs = with python27Packages; [
-      biopython
+      biopython # old version 1.76 with python2 support
+      justorthologs
       numpy
       scipy
     ];
@@ -126,7 +127,6 @@ in rec {
   ortholang-sonicparanoid = mkMod ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
 
   ortholang-treecl        = mkMod ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
-  # ortholang-justorthologs = mkMod ./OrthoLang/Modules/JustOrthologs [ justorthologs ] "";
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
   ortholang-busco = mkMod ./OrthoLang/Modules/Busco
@@ -159,7 +159,6 @@ in rec {
     ortholang-seqio
     ortholang-sonicparanoid
     # ortholang-treecl
-    # ortholang-justorthologs
     ortholang-busco
     ortholang-curl
     ortholang-load
