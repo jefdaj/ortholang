@@ -6,7 +6,7 @@ the authors using the web page at www.info-zip.org; see README for details.
 Latest sources and executables are at ftp://ftp.info-zip.org/pub/infozip,
 as of above date; see http://www.info-zip.org/ for other sites.
 
-Compiled with gcc 7.4.0 for Unix (Linux ELF) on Jul  5 2008.
+Compiled with gcc 9.3.0 for Unix (Linux ELF) on Jul  5 2008.
 
 Zip special compilation options:
 	USE_EF_UT_TIME       (store Universal Time)
