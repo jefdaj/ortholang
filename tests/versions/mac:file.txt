@@ -1,2 +1,2 @@
-file-5.31
-magic file from /usr/share/file/magic
+file-5.39
+magic file from /nix/store/8azyb7gnpnah0aw6xacb0ygwjml9nci5-file-5.39/share/misc/magic
