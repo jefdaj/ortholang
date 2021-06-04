@@ -3,14 +3,18 @@
 set -x
 set -o pipefail
 
-# start with the basic tests
-testfilter='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
-
-# add module-specific scripts if any
+# figure out what branch we're on
 branch="$TRAVIS_BRANCH"
 [[ -z "$branch" ]] && branch="$(git rev-parse --abbrev-ref HEAD)"
+
+# run module-specific tests only on module branches,
+# and the standard interpreter tests everywhere else
 [[ "$branch" =~ module ]] \
-  && testfilter="$testfilter || \$5 ~/$(echo "$branch" | cut -d'-' -f2):/"
+  && testfilter="\$5 ~/$(echo "$branch" | cut -d'-' -f2):/" \
+  || testfilter='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
+
+# ... unless it's something important. then run all tests
+[[ "$branch" =~ '^(master|develop|bugfix)' ]] && testfilter="all"
 
 # override from the command line
 [[ -z "$1" ]] || testfilter="$1"
@@ -27,7 +31,7 @@ NIX_ARGS="" # TODO put back --pure?
 # LOGFILE="ortholang_${testfilter}_${TIMESTAMP}.log"
 LOGFILE='test.log'
 
-nix-build $NIX_ARGS 2>&1 | tee -a $LOGFILE
+nix-build release.nix $NIX_ARGS 2>&1 | tee -a $LOGFILE
 code0=$?
 [[ $code0 == 0 ]] || exit $code0
 
