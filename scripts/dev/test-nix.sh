@@ -9,8 +9,9 @@ branch="$TRAVIS_BRANCH"
 
 # run module-specific tests only on module branches,
 # and the standard interpreter tests everywhere else
+# TODO how to exclude things here that are the matched name + something more?
 [[ "$branch" =~ module ]] \
-  && testfilter="\$5 ~/$(echo "$branch" | cut -d'-' -f2):/" \
+  && testfilter="\$0 ~ /$(echo "$branch" | cut -d'-' -f2):/ || \$0 ~ /'$(echo "$branch" | cut -d'-' -f2)'/" \
   || testfilter='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
 
 # unless it's something important,
@@ -34,9 +35,9 @@ NIX_ARGS="" # TODO put back --pure?
 # LOGFILE="ortholang_${testfilter}_${TIMESTAMP}.log"
 LOGFILE='test.log'
 
-nix-build release.nix $NIX_ARGS 2>&1 | tee -a $LOGFILE
-code0=$?
-[[ $code0 == 0 ]] || exit $code0
+# nix-build release.nix $NIX_ARGS 2>&1 | tee -a $LOGFILE
+# code0=$?
+# [[ $code0 == 0 ]] || exit $code0
 
 # bin-run() {
 #   rm -f $LOGFILE
