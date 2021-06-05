@@ -53,11 +53,8 @@
 |       `-- f6e8c8ce02
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits_aln.aln -> ../exprs/muscle/f41f58f755/result
-    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/702bb5a7b3/s0/result
-    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/aca8adfd5e/result
     |-- hits_hmm.hmm -> ../exprs/hmmbuild/b4c929006b/result
     |-- mgen.faa -> ../exprs/load_faa/d96205bf90/result
     `-- result -> ../vars/hits_hmm.hmm
 
-32 directories, 28 files
+32 directories, 25 files

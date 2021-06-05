@@ -1,4 +1,4 @@
-HMMER3/f [3.2.1 | June 2018]
+HMMER3/f [3.3.1 | Jul 2020]
 NAME  result
 LENG  380
 ALPH  amino
@@ -7,7 +7,7 @@ MM    no
 CONS  yes
 CS    no
 MAP   yes
-DATE  Thu Jun  4 06:59:56 2020
+DATE  Fri Jun  4 21:44:07 2021
 NSEQ  1
 EFFN  0.394531
 CKSUM 1365025685

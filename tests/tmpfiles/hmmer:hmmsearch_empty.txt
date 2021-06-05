@@ -67,12 +67,7 @@
 |       `-- f6e8c8ce02
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- hits3.hht -> ../exprs/hmmsearch/d00a650518/41fb5211db/695ad777c5/result
-    |-- hits_aln.aln -> ../exprs/muscle/f41f58f755/result
-    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/702bb5a7b3/s0/result
-    |-- hits_faa.faa -> ../exprs/extract_seqs/695ad777c5/aca8adfd5e/result
-    |-- hits_hmm.hmm -> ../exprs/hmmbuild/b4c929006b/result
     |-- mgen.faa -> ../exprs/load_faa/d96205bf90/result
     `-- result -> ../exprs/extract_hmm_targets/608c777e3f/result
 
-40 directories, 35 files
+40 directories, 30 files
