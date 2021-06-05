@@ -11,7 +11,7 @@ branch="$TRAVIS_BRANCH"
 # and the standard interpreter tests everywhere else
 # TODO how to exclude things here that are the matched name + something more?
 [[ "$branch" =~ module ]] \
-  && testfilter="\$0 ~ /.$(echo "$branch" | cut -d'-' -f2):/ || \$0 ~ /\'$(echo "$branch" | cut -d'-' -f2)\'/" \
+  && testfilter="\$0 ~ /.$(echo "$branch" | cut -d'-' -f2):/ || \$0 ~ /'$(echo "$branch" | cut -d'-' -f2)'/" \
   || testfilter='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
 
 # unless it's something important,
