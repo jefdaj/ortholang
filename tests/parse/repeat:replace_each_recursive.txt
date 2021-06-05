@@ -1,141 +1,141 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "ind" 
-            , aExpr = Lit num "547.0" 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "ind2" 
-            , aExpr = Lit num "557.0" 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "ind3" 
-            , aExpr = Lit num "563.0" 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "dep" 
-            , aExpr = Bop num Nothing 
-                [ Var ( RepID Nothing ) "ind" 
-                , Var ( RepID Nothing ) "ind2" 
-                , Var ( RepID Nothing ) "ind3" 
-                ] "*" 
-                ( Bop num Nothing 
-                    [ Var ( RepID Nothing ) "ind" 
-                    , Var ( RepID Nothing ) "ind2" 
-                    ] "*" 
-                    ( Bop num Nothing 
-                        [ Var ( RepID Nothing ) "ind" ] "*" ( Lit num "569.0" ) 
-                        ( Ref num Nothing [] 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "ind"
+            , aExpr = Lit num "547.0"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "ind2"
+            , aExpr = Lit num "557.0"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "ind3"
+            , aExpr = Lit num "563.0"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "dep"
+            , aExpr = Bop num Nothing
+                [ Var ( RepID Nothing ) "ind"
+                , Var ( RepID Nothing ) "ind2"
+                , Var ( RepID Nothing ) "ind3"
+                ] "*"
+                ( Bop num Nothing
+                    [ Var ( RepID Nothing ) "ind"
+                    , Var ( RepID Nothing ) "ind2"
+                    ] "*"
+                    ( Bop num Nothing
+                        [ Var ( RepID Nothing ) "ind" ] "*" ( Lit num "569.0" )
+                        ( Ref num Nothing []
                             ( Var ( RepID Nothing ) "ind" )
                         )
-                    ) 
-                    ( Ref num Nothing [] 
+                    )
+                    ( Ref num Nothing []
                         ( Var ( RepID Nothing ) "ind2" )
                     )
-                ) 
-                ( Ref num Nothing [] 
+                )
+                ( Ref num Nothing []
                     ( Var ( RepID Nothing ) "ind3" )
                 )
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "rep1" 
-            , aExpr = Fun num.list Nothing 
-                [ Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                , Var ( RepID Nothing ) "ind2" 
-                , Var ( RepID Nothing ) "ind3" 
-                ] "replace_each" 
-                [ Ref num Nothing 
-                    [ Var ( RepID Nothing ) "ind" 
-                    , Var ( RepID Nothing ) "ind2" 
-                    , Var ( RepID Nothing ) "ind3" 
-                    ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "rep1"
+            , aExpr = Fun num.list Nothing
+                [ Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                , Var ( RepID Nothing ) "ind2"
+                , Var ( RepID Nothing ) "ind3"
+                ] "replace_each"
+                [ Ref num Nothing
+                    [ Var ( RepID Nothing ) "ind"
+                    , Var ( RepID Nothing ) "ind2"
+                    , Var ( RepID Nothing ) "ind3"
+                    ]
                     ( Var ( RepID Nothing ) "dep" )
-                , Ref num Nothing [] 
+                , Ref num Nothing []
                     ( Var ( RepID Nothing ) "ind" )
-                , Lst num Nothing [] 
-                    [ Lit num "571.0" 
-                    , Lit num "577.0" 
-                    ] 
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "rep2" 
-            , aExpr = Fun num.list.list Nothing 
-                [ Var ( RepID Nothing ) "rep1" 
-                , Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                , Var ( RepID Nothing ) "ind2" 
-                , Var ( RepID Nothing ) "ind3" 
-                ] "replace_each" 
-                [ Ref num.list Nothing 
-                    [ Var ( RepID Nothing ) "dep" 
-                    , Var ( RepID Nothing ) "ind" 
-                    , Var ( RepID Nothing ) "ind2" 
-                    , Var ( RepID Nothing ) "ind3" 
-                    ] 
+                , Lst num Nothing []
+                    [ Lit num "571.0"
+                    , Lit num "577.0"
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "rep2"
+            , aExpr = Fun num.list.list Nothing
+                [ Var ( RepID Nothing ) "rep1"
+                , Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                , Var ( RepID Nothing ) "ind2"
+                , Var ( RepID Nothing ) "ind3"
+                ] "replace_each"
+                [ Ref num.list Nothing
+                    [ Var ( RepID Nothing ) "dep"
+                    , Var ( RepID Nothing ) "ind"
+                    , Var ( RepID Nothing ) "ind2"
+                    , Var ( RepID Nothing ) "ind3"
+                    ]
                     ( Var ( RepID Nothing ) "rep1" )
-                , Ref num Nothing [] 
+                , Ref num Nothing []
                     ( Var ( RepID Nothing ) "ind2" )
-                , Lst num Nothing [] 
-                    [ Lit num "587.0" 
-                    , Lit num "701.0" 
-                    , Lit num "709.0" 
-                    , Lit num "719.0" 
-                    , Lit num "727.0" 
-                    , Lit num "733.0" 
-                    ] 
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "rep3" 
-            , aExpr = Fun num.list.list.list Nothing 
-                [ Var ( RepID Nothing ) "rep2" 
-                , Var ( RepID Nothing ) "rep1" 
-                , Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                , Var ( RepID Nothing ) "ind2" 
-                , Var ( RepID Nothing ) "ind3" 
-                ] "replace_each" 
-                [ Ref num.list.list Nothing 
-                    [ Var ( RepID Nothing ) "rep1" 
-                    , Var ( RepID Nothing ) "dep" 
-                    , Var ( RepID Nothing ) "ind" 
-                    , Var ( RepID Nothing ) "ind2" 
-                    , Var ( RepID Nothing ) "ind3" 
-                    ] 
+                , Lst num Nothing []
+                    [ Lit num "587.0"
+                    , Lit num "701.0"
+                    , Lit num "709.0"
+                    , Lit num "719.0"
+                    , Lit num "727.0"
+                    , Lit num "733.0"
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "rep3"
+            , aExpr = Fun num.list.list.list Nothing
+                [ Var ( RepID Nothing ) "rep2"
+                , Var ( RepID Nothing ) "rep1"
+                , Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                , Var ( RepID Nothing ) "ind2"
+                , Var ( RepID Nothing ) "ind3"
+                ] "replace_each"
+                [ Ref num.list.list Nothing
+                    [ Var ( RepID Nothing ) "rep1"
+                    , Var ( RepID Nothing ) "dep"
+                    , Var ( RepID Nothing ) "ind"
+                    , Var ( RepID Nothing ) "ind2"
+                    , Var ( RepID Nothing ) "ind3"
+                    ]
                     ( Var ( RepID Nothing ) "rep2" )
-                , Ref num Nothing [] 
+                , Ref num Nothing []
                     ( Var ( RepID Nothing ) "ind3" )
-                , Lst num Nothing [] 
-                    [ Lit num "739.0" 
-                    , Lit num "743.0" 
-                    , Lit num "877.0" 
-                    ] 
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Ref num.list.list.list Nothing 
-                [ Var ( RepID Nothing ) "rep2" 
-                , Var ( RepID Nothing ) "rep1" 
-                , Var ( RepID Nothing ) "dep" 
-                , Var ( RepID Nothing ) "ind" 
-                , Var ( RepID Nothing ) "ind2" 
-                , Var ( RepID Nothing ) "ind3" 
-                ] 
+                , Lst num Nothing []
+                    [ Lit num "739.0"
+                    , Lit num "743.0"
+                    , Lit num "877.0"
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Ref num.list.list.list Nothing
+                [ Var ( RepID Nothing ) "rep2"
+                , Var ( RepID Nothing ) "rep1"
+                , Var ( RepID Nothing ) "dep"
+                , Var ( RepID Nothing ) "ind"
+                , Var ( RepID Nothing ) "ind2"
+                , Var ( RepID Nothing ) "ind3"
+                ]
                 ( Var ( RepID Nothing ) "rep3" )
-            } 
-        ] 
-    , sResult = Just 
-        ( Ref num.list.list.list Nothing 
-            [ Var ( RepID Nothing ) "rep2" 
-            , Var ( RepID Nothing ) "rep1" 
-            , Var ( RepID Nothing ) "dep" 
-            , Var ( RepID Nothing ) "ind" 
-            , Var ( RepID Nothing ) "ind2" 
-            , Var ( RepID Nothing ) "ind3" 
-            ] 
+            }
+        ]
+    , sResult = Just
+        ( Ref num.list.list.list Nothing
+            [ Var ( RepID Nothing ) "rep2"
+            , Var ( RepID Nothing ) "rep1"
+            , Var ( RepID Nothing ) "dep"
+            , Var ( RepID Nothing ) "ind"
+            , Var ( RepID Nothing ) "ind2"
+            , Var ( RepID Nothing ) "ind3"
+            ]
             ( Var ( RepID Nothing ) "rep3" )
         )
-    } 
+    }

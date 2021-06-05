@@ -1,0 +1,367 @@
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "nums"
+            , aExpr = Lst num Nothing []
+                [ Lit num "1.0"
+                , Lit num "2.0"
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "strs"
+            , aExpr = Lst str Nothing []
+                [ Lit str "1.0"
+                , Lit str "2.0"
+                , Lit str "3.0"
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "cyano_paths"
+            , aExpr = Fun str.list Nothing [] "glob_files" [ Lit str "examples/sequences/PCC*genes.faa" ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "cyano_faas"
+            , aExpr = Fun faa.list Nothing
+                [ Var ( RepID Nothing ) "cyano_paths" ] "load_faa_each"
+                [ Ref str.list Nothing []
+                    ( Var ( RepID Nothing ) "cyano_paths" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "emt"
+            , aExpr = Lst empty Nothing [] []
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "emt_singles"
+            , aExpr = Fun empty.list.list Nothing
+                [ Var ( RepID Nothing ) "emt" ] "singletons"
+                [ Ref empty.list Nothing []
+                    ( Var ( RepID Nothing ) "emt" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "num_singles"
+            , aExpr = Fun num.list.list Nothing
+                [ Var ( RepID Nothing ) "nums" ] "singletons"
+                [ Ref num.list Nothing []
+                    ( Var ( RepID Nothing ) "nums" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "str_singles"
+            , aExpr = Fun str.list.list Nothing
+                [ Var ( RepID Nothing ) "strs" ] "singletons"
+                [ Ref str.list Nothing []
+                    ( Var ( RepID Nothing ) "strs" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "faa_singles"
+            , aExpr = Fun faa.list.list Nothing
+                [ Var ( RepID Nothing ) "cyano_faas"
+                , Var ( RepID Nothing ) "cyano_paths"
+                ] "singletons"
+                [ Ref faa.list Nothing
+                    [ Var ( RepID Nothing ) "cyano_paths" ]
+                    ( Var ( RepID Nothing ) "cyano_faas" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "emt_len"
+            , aExpr = Fun num Nothing
+                [ Var ( RepID Nothing ) "emt_singles"
+                , Var ( RepID Nothing ) "emt"
+                ] "length"
+                [ Ref empty.list.list Nothing
+                    [ Var ( RepID Nothing ) "emt" ]
+                    ( Var ( RepID Nothing ) "emt_singles" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "num_len"
+            , aExpr = Fun num Nothing
+                [ Var ( RepID Nothing ) "num_singles"
+                , Var ( RepID Nothing ) "nums"
+                ] "length"
+                [ Ref num.list.list Nothing
+                    [ Var ( RepID Nothing ) "nums" ]
+                    ( Var ( RepID Nothing ) "num_singles" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "str_len"
+            , aExpr = Fun num Nothing
+                [ Var ( RepID Nothing ) "str_singles"
+                , Var ( RepID Nothing ) "strs"
+                ] "length"
+                [ Ref str.list.list Nothing
+                    [ Var ( RepID Nothing ) "strs" ]
+                    ( Var ( RepID Nothing ) "str_singles" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "faa_len"
+            , aExpr = Fun num Nothing
+                [ Var ( RepID Nothing ) "faa_singles"
+                , Var ( RepID Nothing ) "cyano_faas"
+                , Var ( RepID Nothing ) "cyano_paths"
+                ] "length"
+                [ Ref faa.list.list Nothing
+                    [ Var ( RepID Nothing ) "cyano_faas"
+                    , Var ( RepID Nothing ) "cyano_paths"
+                    ]
+                    ( Var ( RepID Nothing ) "faa_singles" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "lens"
+            , aExpr = Lst num Nothing
+                [ Var ( RepID Nothing ) "emt_len"
+                , Var ( RepID Nothing ) "emt_singles"
+                , Var ( RepID Nothing ) "emt"
+                , Var ( RepID Nothing ) "num_len"
+                , Var ( RepID Nothing ) "num_singles"
+                , Var ( RepID Nothing ) "nums"
+                , Var ( RepID Nothing ) "str_len"
+                , Var ( RepID Nothing ) "str_singles"
+                , Var ( RepID Nothing ) "strs"
+                , Var ( RepID Nothing ) "faa_len"
+                , Var ( RepID Nothing ) "faa_singles"
+                , Var ( RepID Nothing ) "cyano_faas"
+                , Var ( RepID Nothing ) "cyano_paths"
+                ]
+                [ Ref num Nothing
+                    [ Var ( RepID Nothing ) "emt_singles"
+                    , Var ( RepID Nothing ) "emt"
+                    ]
+                    ( Var ( RepID Nothing ) "emt_len" )
+                , Ref num Nothing
+                    [ Var ( RepID Nothing ) "num_singles"
+                    , Var ( RepID Nothing ) "nums"
+                    ]
+                    ( Var ( RepID Nothing ) "num_len" )
+                , Ref num Nothing
+                    [ Var ( RepID Nothing ) "str_singles"
+                    , Var ( RepID Nothing ) "strs"
+                    ]
+                    ( Var ( RepID Nothing ) "str_len" )
+                , Ref num Nothing
+                    [ Var ( RepID Nothing ) "faa_singles"
+                    , Var ( RepID Nothing ) "cyano_faas"
+                    , Var ( RepID Nothing ) "cyano_paths"
+                    ]
+                    ( Var ( RepID Nothing ) "faa_len" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "emt_le"
+            , aExpr = Fun num.list Nothing
+                [ Var ( RepID Nothing ) "emt_singles"
+                , Var ( RepID Nothing ) "emt"
+                ] "length_each"
+                [ Ref empty.list.list Nothing
+                    [ Var ( RepID Nothing ) "emt" ]
+                    ( Var ( RepID Nothing ) "emt_singles" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "num_le"
+            , aExpr = Fun num.list Nothing
+                [ Var ( RepID Nothing ) "num_singles"
+                , Var ( RepID Nothing ) "nums"
+                ] "length_each"
+                [ Ref num.list.list Nothing
+                    [ Var ( RepID Nothing ) "nums" ]
+                    ( Var ( RepID Nothing ) "num_singles" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "str_le"
+            , aExpr = Fun num.list Nothing
+                [ Var ( RepID Nothing ) "str_singles"
+                , Var ( RepID Nothing ) "strs"
+                ] "length_each"
+                [ Ref str.list.list Nothing
+                    [ Var ( RepID Nothing ) "strs" ]
+                    ( Var ( RepID Nothing ) "str_singles" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "faa_le"
+            , aExpr = Fun num.list Nothing
+                [ Var ( RepID Nothing ) "faa_singles"
+                , Var ( RepID Nothing ) "cyano_faas"
+                , Var ( RepID Nothing ) "cyano_paths"
+                ] "length_each"
+                [ Ref faa.list.list Nothing
+                    [ Var ( RepID Nothing ) "cyano_faas"
+                    , Var ( RepID Nothing ) "cyano_paths"
+                    ]
+                    ( Var ( RepID Nothing ) "faa_singles" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "lens_each"
+            , aExpr = Lst num.list Nothing
+                [ Var ( RepID Nothing ) "emt_le"
+                , Var ( RepID Nothing ) "emt_singles"
+                , Var ( RepID Nothing ) "emt"
+                , Var ( RepID Nothing ) "num_le"
+                , Var ( RepID Nothing ) "num_singles"
+                , Var ( RepID Nothing ) "nums"
+                , Var ( RepID Nothing ) "str_le"
+                , Var ( RepID Nothing ) "str_singles"
+                , Var ( RepID Nothing ) "strs"
+                , Var ( RepID Nothing ) "faa_le"
+                , Var ( RepID Nothing ) "faa_singles"
+                , Var ( RepID Nothing ) "cyano_faas"
+                , Var ( RepID Nothing ) "cyano_paths"
+                ]
+                [ Ref num.list Nothing
+                    [ Var ( RepID Nothing ) "emt_singles"
+                    , Var ( RepID Nothing ) "emt"
+                    ]
+                    ( Var ( RepID Nothing ) "emt_le" )
+                , Ref num.list Nothing
+                    [ Var ( RepID Nothing ) "num_singles"
+                    , Var ( RepID Nothing ) "nums"
+                    ]
+                    ( Var ( RepID Nothing ) "num_le" )
+                , Ref num.list Nothing
+                    [ Var ( RepID Nothing ) "str_singles"
+                    , Var ( RepID Nothing ) "strs"
+                    ]
+                    ( Var ( RepID Nothing ) "str_le" )
+                , Ref num.list Nothing
+                    [ Var ( RepID Nothing ) "faa_singles"
+                    , Var ( RepID Nothing ) "cyano_faas"
+                    , Var ( RepID Nothing ) "cyano_paths"
+                    ]
+                    ( Var ( RepID Nothing ) "faa_le" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "both"
+            , aExpr = Lst num.list Nothing
+                [ Var ( RepID Nothing ) "lens"
+                , Var ( RepID Nothing ) "emt_len"
+                , Var ( RepID Nothing ) "emt_singles"
+                , Var ( RepID Nothing ) "emt"
+                , Var ( RepID Nothing ) "num_len"
+                , Var ( RepID Nothing ) "num_singles"
+                , Var ( RepID Nothing ) "nums"
+                , Var ( RepID Nothing ) "str_len"
+                , Var ( RepID Nothing ) "str_singles"
+                , Var ( RepID Nothing ) "strs"
+                , Var ( RepID Nothing ) "faa_len"
+                , Var ( RepID Nothing ) "faa_singles"
+                , Var ( RepID Nothing ) "cyano_faas"
+                , Var ( RepID Nothing ) "cyano_paths"
+                , Var ( RepID Nothing ) "lens_each"
+                , Var ( RepID Nothing ) "emt_le"
+                , Var ( RepID Nothing ) "num_le"
+                , Var ( RepID Nothing ) "str_le"
+                , Var ( RepID Nothing ) "faa_le"
+                ]
+                [ Ref num.list Nothing
+                    [ Var ( RepID Nothing ) "emt_len"
+                    , Var ( RepID Nothing ) "emt_singles"
+                    , Var ( RepID Nothing ) "emt"
+                    , Var ( RepID Nothing ) "num_len"
+                    , Var ( RepID Nothing ) "num_singles"
+                    , Var ( RepID Nothing ) "nums"
+                    , Var ( RepID Nothing ) "str_len"
+                    , Var ( RepID Nothing ) "str_singles"
+                    , Var ( RepID Nothing ) "strs"
+                    , Var ( RepID Nothing ) "faa_len"
+                    , Var ( RepID Nothing ) "faa_singles"
+                    , Var ( RepID Nothing ) "cyano_faas"
+                    , Var ( RepID Nothing ) "cyano_paths"
+                    ]
+                    ( Var ( RepID Nothing ) "lens" )
+                , Fun num.list Nothing
+                    [ Var ( RepID Nothing ) "lens_each"
+                    , Var ( RepID Nothing ) "emt_le"
+                    , Var ( RepID Nothing ) "emt_singles"
+                    , Var ( RepID Nothing ) "emt"
+                    , Var ( RepID Nothing ) "num_le"
+                    , Var ( RepID Nothing ) "num_singles"
+                    , Var ( RepID Nothing ) "nums"
+                    , Var ( RepID Nothing ) "str_le"
+                    , Var ( RepID Nothing ) "str_singles"
+                    , Var ( RepID Nothing ) "strs"
+                    , Var ( RepID Nothing ) "faa_le"
+                    , Var ( RepID Nothing ) "faa_singles"
+                    , Var ( RepID Nothing ) "cyano_faas"
+                    , Var ( RepID Nothing ) "cyano_paths"
+                    ] "length_each"
+                    [ Ref num.list.list Nothing
+                        [ Var ( RepID Nothing ) "emt_le"
+                        , Var ( RepID Nothing ) "emt_singles"
+                        , Var ( RepID Nothing ) "emt"
+                        , Var ( RepID Nothing ) "num_le"
+                        , Var ( RepID Nothing ) "num_singles"
+                        , Var ( RepID Nothing ) "nums"
+                        , Var ( RepID Nothing ) "str_le"
+                        , Var ( RepID Nothing ) "str_singles"
+                        , Var ( RepID Nothing ) "strs"
+                        , Var ( RepID Nothing ) "faa_le"
+                        , Var ( RepID Nothing ) "faa_singles"
+                        , Var ( RepID Nothing ) "cyano_faas"
+                        , Var ( RepID Nothing ) "cyano_paths"
+                        ]
+                        ( Var ( RepID Nothing ) "lens_each" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Ref num.list.list Nothing
+                [ Var ( RepID Nothing ) "lens"
+                , Var ( RepID Nothing ) "emt_len"
+                , Var ( RepID Nothing ) "emt_singles"
+                , Var ( RepID Nothing ) "emt"
+                , Var ( RepID Nothing ) "num_len"
+                , Var ( RepID Nothing ) "num_singles"
+                , Var ( RepID Nothing ) "nums"
+                , Var ( RepID Nothing ) "str_len"
+                , Var ( RepID Nothing ) "str_singles"
+                , Var ( RepID Nothing ) "strs"
+                , Var ( RepID Nothing ) "faa_len"
+                , Var ( RepID Nothing ) "faa_singles"
+                , Var ( RepID Nothing ) "cyano_faas"
+                , Var ( RepID Nothing ) "cyano_paths"
+                , Var ( RepID Nothing ) "lens_each"
+                , Var ( RepID Nothing ) "emt_le"
+                , Var ( RepID Nothing ) "num_le"
+                , Var ( RepID Nothing ) "str_le"
+                , Var ( RepID Nothing ) "faa_le"
+                ]
+                ( Var ( RepID Nothing ) "both" )
+            }
+        ]
+    , sResult = Just
+        ( Ref num.list.list Nothing
+            [ Var ( RepID Nothing ) "lens"
+            , Var ( RepID Nothing ) "emt_len"
+            , Var ( RepID Nothing ) "emt_singles"
+            , Var ( RepID Nothing ) "emt"
+            , Var ( RepID Nothing ) "num_len"
+            , Var ( RepID Nothing ) "num_singles"
+            , Var ( RepID Nothing ) "nums"
+            , Var ( RepID Nothing ) "str_len"
+            , Var ( RepID Nothing ) "str_singles"
+            , Var ( RepID Nothing ) "strs"
+            , Var ( RepID Nothing ) "faa_len"
+            , Var ( RepID Nothing ) "faa_singles"
+            , Var ( RepID Nothing ) "cyano_faas"
+            , Var ( RepID Nothing ) "cyano_paths"
+            , Var ( RepID Nothing ) "lens_each"
+            , Var ( RepID Nothing ) "emt_le"
+            , Var ( RepID Nothing ) "num_le"
+            , Var ( RepID Nothing ) "str_le"
+            , Var ( RepID Nothing ) "faa_le"
+            ]
+            ( Var ( RepID Nothing ) "both" )
+        )
+    }

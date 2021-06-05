@@ -1,35 +1,35 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "var1" 
-            , aExpr = Lit num "2.0" 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Fun num.list Nothing 
-                [ Var ( RepID Nothing ) "var1" ] "repeat" 
-                [ Bop num Nothing 
-                    [ Var ( RepID Nothing ) "var1" ] "*" 
-                    ( Ref num Nothing [] 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "var1"
+            , aExpr = Lit num "2.0"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Fun num.list Nothing
+                [ Var ( RepID Nothing ) "var1" ] "repeat"
+                [ Bop num Nothing
+                    [ Var ( RepID Nothing ) "var1" ] "*"
+                    ( Ref num Nothing []
                         ( Var ( RepID Nothing ) "var1" )
                     ) ( Lit num "3.0" )
-                , Ref num Nothing [] 
+                , Ref num Nothing []
                     ( Var ( RepID Nothing ) "var1" )
-                , Lit num "5.0" 
-                ] 
-            } 
-        ] 
-    , sResult = Just 
-        ( Fun num.list Nothing 
-            [ Var ( RepID Nothing ) "var1" ] "repeat" 
-            [ Bop num Nothing 
-                [ Var ( RepID Nothing ) "var1" ] "*" 
-                ( Ref num Nothing [] 
+                , Lit num "5.0"
+                ]
+            }
+        ]
+    , sResult = Just
+        ( Fun num.list Nothing
+            [ Var ( RepID Nothing ) "var1" ] "repeat"
+            [ Bop num Nothing
+                [ Var ( RepID Nothing ) "var1" ] "*"
+                ( Ref num Nothing []
                     ( Var ( RepID Nothing ) "var1" )
                 ) ( Lit num "3.0" )
-            , Ref num Nothing [] 
+            , Ref num Nothing []
                 ( Var ( RepID Nothing ) "var1" )
-            , Lit num "5.0" 
-            ] 
+            , Lit num "5.0"
+            ]
         )
-    } 
+    }

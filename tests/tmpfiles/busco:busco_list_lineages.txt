@@ -1,7 +1,5 @@
 .
 |-- cache
-|   `-- busco
-|       `-- dblist.txt -> ../../cache/lines/...
 |-- exprs
 |   |-- busco_list_lineages
 |   |   |-- 4f1d387677
@@ -21,4 +19,4 @@
     |-- blins.str.list -> ../exprs/busco_list_lineages/4f1d387677/result
     `-- result -> ../exprs/list/2125f6af0c/result
 
-12 directories, 9 files
+11 directories, 8 files

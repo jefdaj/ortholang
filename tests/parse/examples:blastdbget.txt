@@ -1,0 +1,4 @@
+Script
+    { sAssigns = []
+    , sResult = Nothing
+    }

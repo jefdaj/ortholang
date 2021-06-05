@@ -1,0 +1,945 @@
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "s1"
+            , aExpr = Lit str "first, a single string (text file)"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a1"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "s1" ] "zip_archive"
+                [ Lst str Nothing
+                    [ Var ( RepID Nothing ) "s1" ]
+                    [ Ref str Nothing []
+                        ( Var ( RepID Nothing ) "s1" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a2"
+            , aExpr = Fun zip Nothing [] "zip_archive"
+                [ Lst str Nothing [] [ Lit str "same, but with no variable name" ] ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "s2"
+            , aExpr = Lit str "how about two strings?"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a3"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "s1"
+                , Var ( RepID Nothing ) "s2"
+                ] "zip_archive"
+                [ Lst str Nothing
+                    [ Var ( RepID Nothing ) "s1"
+                    , Var ( RepID Nothing ) "s2"
+                    ]
+                    [ Ref str Nothing []
+                        ( Var ( RepID Nothing ) "s1" )
+                    , Ref str Nothing []
+                        ( Var ( RepID Nothing ) "s2" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a4"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "s1"
+                , Var ( RepID Nothing ) "s2"
+                ] "zip_archive"
+                [ Lst str Nothing
+                    [ Var ( RepID Nothing ) "s1"
+                    , Var ( RepID Nothing ) "s2"
+                    ]
+                    [ Ref str Nothing []
+                        ( Var ( RepID Nothing ) "s1" )
+                    , Ref str Nothing []
+                        ( Var ( RepID Nothing ) "s2" )
+                    , Lit str "how about two strings and another unnamed one?"
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a5"
+            , aExpr = Fun zip Nothing [] "zip_archive" [ Lst empty Nothing [] [] ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a6"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "a1"
+                , Var ( RepID Nothing ) "s1"
+                , Var ( RepID Nothing ) "a2"
+                , Var ( RepID Nothing ) "a3"
+                , Var ( RepID Nothing ) "s2"
+                , Var ( RepID Nothing ) "a4"
+                , Var ( RepID Nothing ) "a5"
+                ] "zip_archive"
+                [ Lst zip Nothing
+                    [ Var ( RepID Nothing ) "a1"
+                    , Var ( RepID Nothing ) "s1"
+                    , Var ( RepID Nothing ) "a2"
+                    , Var ( RepID Nothing ) "a3"
+                    , Var ( RepID Nothing ) "s2"
+                    , Var ( RepID Nothing ) "a4"
+                    , Var ( RepID Nothing ) "a5"
+                    ]
+                    [ Ref zip Nothing
+                        [ Var ( RepID Nothing ) "s1" ]
+                        ( Var ( RepID Nothing ) "a1" )
+                    , Ref zip Nothing []
+                        ( Var ( RepID Nothing ) "a2" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "s1"
+                        , Var ( RepID Nothing ) "s2"
+                        ]
+                        ( Var ( RepID Nothing ) "a3" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "s1"
+                        , Var ( RepID Nothing ) "s2"
+                        ]
+                        ( Var ( RepID Nothing ) "a4" )
+                    , Ref zip Nothing []
+                        ( Var ( RepID Nothing ) "a5" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "n1"
+            , aExpr = Lit num "34.0"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a7"
+            , aExpr = Fun zip Nothing [] "zip_archive"
+                [ Lst num Nothing [] [ Lit num "1.0e-45" ] ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a8"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "n1" ] "zip_archive"
+                [ Lst num Nothing
+                    [ Var ( RepID Nothing ) "n1" ]
+                    [ Ref num Nothing []
+                        ( Var ( RepID Nothing ) "n1" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a9"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "n1" ] "zip_archive"
+                [ Lst num Nothing
+                    [ Var ( RepID Nothing ) "n1" ]
+                    [ Ref num Nothing []
+                        ( Var ( RepID Nothing ) "n1" )
+                    , Lit num "2.0"
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "n2"
+            , aExpr = Lit num "4.0"
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a10"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "n2"
+                ] "zip_archive"
+                [ Lst num Nothing
+                    [ Var ( RepID Nothing ) "n1"
+                    , Var ( RepID Nothing ) "n2"
+                    ]
+                    [ Ref num Nothing []
+                        ( Var ( RepID Nothing ) "n1" )
+                    , Ref num Nothing []
+                        ( Var ( RepID Nothing ) "n2" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a11"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "a7"
+                , Var ( RepID Nothing ) "a8"
+                , Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "a9"
+                , Var ( RepID Nothing ) "a10"
+                , Var ( RepID Nothing ) "n2"
+                ] "zip_archive"
+                [ Lst zip Nothing
+                    [ Var ( RepID Nothing ) "a7"
+                    , Var ( RepID Nothing ) "a8"
+                    , Var ( RepID Nothing ) "n1"
+                    , Var ( RepID Nothing ) "a9"
+                    , Var ( RepID Nothing ) "a10"
+                    , Var ( RepID Nothing ) "n2"
+                    ]
+                    [ Ref zip Nothing []
+                        ( Var ( RepID Nothing ) "a7" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "n1" ]
+                        ( Var ( RepID Nothing ) "a8" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "n1" ]
+                        ( Var ( RepID Nothing ) "a9" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "n1"
+                        , Var ( RepID Nothing ) "n2"
+                        ]
+                        ( Var ( RepID Nothing ) "a10" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "f1"
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_gallisepticum_protein_refseq.faa" ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "f2"
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_pulmonis_protein_refseq.faa" ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a12"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "f1" ] "zip_archive"
+                [ Lst faa Nothing
+                    [ Var ( RepID Nothing ) "f1" ]
+                    [ Ref faa Nothing []
+                        ( Var ( RepID Nothing ) "f1" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a13"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "f2"
+                , Var ( RepID Nothing ) "f1"
+                ] "zip_archive"
+                [ Lst faa Nothing
+                    [ Var ( RepID Nothing ) "f2"
+                    , Var ( RepID Nothing ) "f1"
+                    ]
+                    [ Ref faa Nothing []
+                        ( Var ( RepID Nothing ) "f2" )
+                    , Ref faa Nothing []
+                        ( Var ( RepID Nothing ) "f1" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "hits"
+            , aExpr = Fun bht
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                ] "blastp"
+                [ Lit num "1.0e-20"
+                , Ref faa Nothing []
+                    ( Var ( RepID Nothing ) "f1" )
+                , Ref faa Nothing []
+                    ( Var ( RepID Nothing ) "f2" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a14"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                ] "zip_archive"
+                [ Lst bht Nothing
+                    [ Var ( RepID Nothing ) "hits"
+                    , Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    ]
+                    [ Ref bht
+                        ( Just ( Seed 0 ) )
+                        [ Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        ( Var ( RepID Nothing ) "hits" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a15"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                , Var ( RepID Nothing ) "hits"
+                ] "zip_archive"
+                [ Lst untyped Nothing
+                    [ Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    , Var ( RepID Nothing ) "hits"
+                    ]
+                    [ Ref faa Nothing []
+                        ( Var ( RepID Nothing ) "f1" )
+                    , Ref faa Nothing []
+                        ( Var ( RepID Nothing ) "f2" )
+                    , Ref bht
+                        ( Just ( Seed 0 ) )
+                        [ Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        ( Var ( RepID Nothing ) "hits" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a16"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                ] "zip_archive"
+                [ Lst untyped Nothing
+                    [ Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    ]
+                    [ Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_pulmonis_protein_refseq.faa" ]
+                    , Fun bht
+                        ( Just ( Seed 0 ) )
+                        [ Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ] "blastp"
+                        [ Lit num "1.0e-20"
+                        , Ref faa Nothing []
+                            ( Var ( RepID Nothing ) "f1" )
+                        , Ref faa Nothing []
+                            ( Var ( RepID Nothing ) "f2" )
+                        ]
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a17"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "a14"
+                , Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                , Var ( RepID Nothing ) "a16"
+                , Var ( RepID Nothing ) "a15"
+                ] "zip_archive"
+                [ Lst zip Nothing
+                    [ Var ( RepID Nothing ) "a14"
+                    , Var ( RepID Nothing ) "hits"
+                    , Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    , Var ( RepID Nothing ) "a16"
+                    , Var ( RepID Nothing ) "a15"
+                    ]
+                    [ Ref zip Nothing
+                        [ Var ( RepID Nothing ) "hits"
+                        , Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        ( Var ( RepID Nothing ) "a14" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        ( Var ( RepID Nothing ) "a16" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        , Var ( RepID Nothing ) "hits"
+                        ]
+                        ( Var ( RepID Nothing ) "a15" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "l1"
+            , aExpr = Lst num Nothing
+                [ Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "n2"
+                ]
+                [ Ref num Nothing []
+                    ( Var ( RepID Nothing ) "n1" )
+                , Ref num Nothing []
+                    ( Var ( RepID Nothing ) "n2" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a18"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "l1"
+                , Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "n2"
+                ] "zip_archive"
+                [ Lst num.list Nothing
+                    [ Var ( RepID Nothing ) "l1"
+                    , Var ( RepID Nothing ) "n1"
+                    , Var ( RepID Nothing ) "n2"
+                    ]
+                    [ Ref num.list Nothing
+                        [ Var ( RepID Nothing ) "n1"
+                        , Var ( RepID Nothing ) "n2"
+                        ]
+                        ( Var ( RepID Nothing ) "l1" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "l1b"
+            , aExpr = Lst str Nothing
+                [ Var ( RepID Nothing ) "s1"
+                , Var ( RepID Nothing ) "s2"
+                ]
+                [ Ref str Nothing []
+                    ( Var ( RepID Nothing ) "s1" )
+                , Ref str Nothing []
+                    ( Var ( RepID Nothing ) "s2" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a18b"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "l1b"
+                , Var ( RepID Nothing ) "s1"
+                , Var ( RepID Nothing ) "s2"
+                ] "zip_archive"
+                [ Lst str.list Nothing
+                    [ Var ( RepID Nothing ) "l1b"
+                    , Var ( RepID Nothing ) "s1"
+                    , Var ( RepID Nothing ) "s2"
+                    ]
+                    [ Ref str.list Nothing
+                        [ Var ( RepID Nothing ) "s1"
+                        , Var ( RepID Nothing ) "s2"
+                        ]
+                        ( Var ( RepID Nothing ) "l1b" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "l2"
+            , aExpr = Lst zip Nothing
+                [ Var ( RepID Nothing ) "a7"
+                , Var ( RepID Nothing ) "a8"
+                , Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "a9"
+                ]
+                [ Ref zip Nothing []
+                    ( Var ( RepID Nothing ) "a7" )
+                , Ref zip Nothing
+                    [ Var ( RepID Nothing ) "n1" ]
+                    ( Var ( RepID Nothing ) "a8" )
+                , Ref zip Nothing
+                    [ Var ( RepID Nothing ) "n1" ]
+                    ( Var ( RepID Nothing ) "a9" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a19"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "l2"
+                , Var ( RepID Nothing ) "a7"
+                , Var ( RepID Nothing ) "a8"
+                , Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "a9"
+                ] "zip_archive"
+                [ Lst zip.list Nothing
+                    [ Var ( RepID Nothing ) "l2"
+                    , Var ( RepID Nothing ) "a7"
+                    , Var ( RepID Nothing ) "a8"
+                    , Var ( RepID Nothing ) "n1"
+                    , Var ( RepID Nothing ) "a9"
+                    ]
+                    [ Ref zip.list Nothing
+                        [ Var ( RepID Nothing ) "a7"
+                        , Var ( RepID Nothing ) "a8"
+                        , Var ( RepID Nothing ) "n1"
+                        , Var ( RepID Nothing ) "a9"
+                        ]
+                        ( Var ( RepID Nothing ) "l2" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a20"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "a7"
+                , Var ( RepID Nothing ) "a8"
+                , Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "a9"
+                ] "zip_archive"
+                [ Lst zip Nothing
+                    [ Var ( RepID Nothing ) "a7"
+                    , Var ( RepID Nothing ) "a8"
+                    , Var ( RepID Nothing ) "n1"
+                    , Var ( RepID Nothing ) "a9"
+                    ]
+                    [ Ref zip Nothing []
+                        ( Var ( RepID Nothing ) "a7" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "n1" ]
+                        ( Var ( RepID Nothing ) "a8" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "n1" ]
+                        ( Var ( RepID Nothing ) "a9" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "l3"
+            , aExpr = Lst faa Nothing
+                [ Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                ]
+                [ Ref faa Nothing []
+                    ( Var ( RepID Nothing ) "f1" )
+                , Ref faa Nothing []
+                    ( Var ( RepID Nothing ) "f2" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a21"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "l3"
+                , Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                ] "zip_archive"
+                [ Lst faa.list Nothing
+                    [ Var ( RepID Nothing ) "l3"
+                    , Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    ]
+                    [ Ref faa.list Nothing
+                        [ Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        ( Var ( RepID Nothing ) "l3" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "l4"
+            , aExpr = Lst bht Nothing
+                [ Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                ]
+                [ Ref bht
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    ]
+                    ( Var ( RepID Nothing ) "hits" )
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a22"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                ] "zip_archive"
+                [ Lst bht.list Nothing
+                    [ Var ( RepID Nothing ) "hits"
+                    , Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    ]
+                    [ Lst bht Nothing
+                        [ Var ( RepID Nothing ) "hits"
+                        , Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        [ Ref bht
+                            ( Just ( Seed 0 ) )
+                            [ Var ( RepID Nothing ) "f1"
+                            , Var ( RepID Nothing ) "f2"
+                            ]
+                            ( Var ( RepID Nothing ) "hits" )
+                        ]
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a23"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "l4"
+                , Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                ] "zip_archive"
+                [ Lst bht.list Nothing
+                    [ Var ( RepID Nothing ) "l4"
+                    , Var ( RepID Nothing ) "hits"
+                    , Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    ]
+                    [ Ref bht.list Nothing
+                        [ Var ( RepID Nothing ) "hits"
+                        , Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        ( Var ( RepID Nothing ) "l4" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "a24"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "a18"
+                , Var ( RepID Nothing ) "l1"
+                , Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "n2"
+                , Var ( RepID Nothing ) "a18b"
+                , Var ( RepID Nothing ) "l1b"
+                , Var ( RepID Nothing ) "s1"
+                , Var ( RepID Nothing ) "s2"
+                , Var ( RepID Nothing ) "a19"
+                , Var ( RepID Nothing ) "l2"
+                , Var ( RepID Nothing ) "a7"
+                , Var ( RepID Nothing ) "a8"
+                , Var ( RepID Nothing ) "a9"
+                , Var ( RepID Nothing ) "a20"
+                , Var ( RepID Nothing ) "a21"
+                , Var ( RepID Nothing ) "l3"
+                , Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                , Var ( RepID Nothing ) "a22"
+                , Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "a23"
+                , Var ( RepID Nothing ) "l4"
+                ] "zip_archive"
+                [ Lst zip Nothing
+                    [ Var ( RepID Nothing ) "a18"
+                    , Var ( RepID Nothing ) "l1"
+                    , Var ( RepID Nothing ) "n1"
+                    , Var ( RepID Nothing ) "n2"
+                    , Var ( RepID Nothing ) "a18b"
+                    , Var ( RepID Nothing ) "l1b"
+                    , Var ( RepID Nothing ) "s1"
+                    , Var ( RepID Nothing ) "s2"
+                    , Var ( RepID Nothing ) "a19"
+                    , Var ( RepID Nothing ) "l2"
+                    , Var ( RepID Nothing ) "a7"
+                    , Var ( RepID Nothing ) "a8"
+                    , Var ( RepID Nothing ) "a9"
+                    , Var ( RepID Nothing ) "a20"
+                    , Var ( RepID Nothing ) "a21"
+                    , Var ( RepID Nothing ) "l3"
+                    , Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    , Var ( RepID Nothing ) "a22"
+                    , Var ( RepID Nothing ) "hits"
+                    , Var ( RepID Nothing ) "a23"
+                    , Var ( RepID Nothing ) "l4"
+                    ]
+                    [ Ref zip Nothing
+                        [ Var ( RepID Nothing ) "l1"
+                        , Var ( RepID Nothing ) "n1"
+                        , Var ( RepID Nothing ) "n2"
+                        ]
+                        ( Var ( RepID Nothing ) "a18" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "l1b"
+                        , Var ( RepID Nothing ) "s1"
+                        , Var ( RepID Nothing ) "s2"
+                        ]
+                        ( Var ( RepID Nothing ) "a18b" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "l2"
+                        , Var ( RepID Nothing ) "a7"
+                        , Var ( RepID Nothing ) "a8"
+                        , Var ( RepID Nothing ) "n1"
+                        , Var ( RepID Nothing ) "a9"
+                        ]
+                        ( Var ( RepID Nothing ) "a19" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "a7"
+                        , Var ( RepID Nothing ) "a8"
+                        , Var ( RepID Nothing ) "n1"
+                        , Var ( RepID Nothing ) "a9"
+                        ]
+                        ( Var ( RepID Nothing ) "a20" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "l3"
+                        , Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        ( Var ( RepID Nothing ) "a21" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "hits"
+                        , Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        ( Var ( RepID Nothing ) "a22" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "l4"
+                        , Var ( RepID Nothing ) "hits"
+                        , Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        ]
+                        ( Var ( RepID Nothing ) "a23" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Fun zip Nothing
+                [ Var ( RepID Nothing ) "a6"
+                , Var ( RepID Nothing ) "a1"
+                , Var ( RepID Nothing ) "s1"
+                , Var ( RepID Nothing ) "a2"
+                , Var ( RepID Nothing ) "a3"
+                , Var ( RepID Nothing ) "s2"
+                , Var ( RepID Nothing ) "a4"
+                , Var ( RepID Nothing ) "a5"
+                , Var ( RepID Nothing ) "a11"
+                , Var ( RepID Nothing ) "a7"
+                , Var ( RepID Nothing ) "a8"
+                , Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "a9"
+                , Var ( RepID Nothing ) "a10"
+                , Var ( RepID Nothing ) "n2"
+                , Var ( RepID Nothing ) "a17"
+                , Var ( RepID Nothing ) "a14"
+                , Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                , Var ( RepID Nothing ) "a16"
+                , Var ( RepID Nothing ) "a15"
+                , Var ( RepID Nothing ) "a24"
+                , Var ( RepID Nothing ) "a18"
+                , Var ( RepID Nothing ) "l1"
+                , Var ( RepID Nothing ) "a18b"
+                , Var ( RepID Nothing ) "l1b"
+                , Var ( RepID Nothing ) "a19"
+                , Var ( RepID Nothing ) "l2"
+                , Var ( RepID Nothing ) "a20"
+                , Var ( RepID Nothing ) "a21"
+                , Var ( RepID Nothing ) "l3"
+                , Var ( RepID Nothing ) "a22"
+                , Var ( RepID Nothing ) "a23"
+                , Var ( RepID Nothing ) "l4"
+                ] "zip_archive"
+                [ Lst zip Nothing
+                    [ Var ( RepID Nothing ) "a6"
+                    , Var ( RepID Nothing ) "a1"
+                    , Var ( RepID Nothing ) "s1"
+                    , Var ( RepID Nothing ) "a2"
+                    , Var ( RepID Nothing ) "a3"
+                    , Var ( RepID Nothing ) "s2"
+                    , Var ( RepID Nothing ) "a4"
+                    , Var ( RepID Nothing ) "a5"
+                    , Var ( RepID Nothing ) "a11"
+                    , Var ( RepID Nothing ) "a7"
+                    , Var ( RepID Nothing ) "a8"
+                    , Var ( RepID Nothing ) "n1"
+                    , Var ( RepID Nothing ) "a9"
+                    , Var ( RepID Nothing ) "a10"
+                    , Var ( RepID Nothing ) "n2"
+                    , Var ( RepID Nothing ) "a17"
+                    , Var ( RepID Nothing ) "a14"
+                    , Var ( RepID Nothing ) "hits"
+                    , Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    , Var ( RepID Nothing ) "a16"
+                    , Var ( RepID Nothing ) "a15"
+                    , Var ( RepID Nothing ) "a24"
+                    , Var ( RepID Nothing ) "a18"
+                    , Var ( RepID Nothing ) "l1"
+                    , Var ( RepID Nothing ) "a18b"
+                    , Var ( RepID Nothing ) "l1b"
+                    , Var ( RepID Nothing ) "a19"
+                    , Var ( RepID Nothing ) "l2"
+                    , Var ( RepID Nothing ) "a20"
+                    , Var ( RepID Nothing ) "a21"
+                    , Var ( RepID Nothing ) "l3"
+                    , Var ( RepID Nothing ) "a22"
+                    , Var ( RepID Nothing ) "a23"
+                    , Var ( RepID Nothing ) "l4"
+                    ]
+                    [ Ref zip Nothing
+                        [ Var ( RepID Nothing ) "a1"
+                        , Var ( RepID Nothing ) "s1"
+                        , Var ( RepID Nothing ) "a2"
+                        , Var ( RepID Nothing ) "a3"
+                        , Var ( RepID Nothing ) "s2"
+                        , Var ( RepID Nothing ) "a4"
+                        , Var ( RepID Nothing ) "a5"
+                        ]
+                        ( Var ( RepID Nothing ) "a6" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "a7"
+                        , Var ( RepID Nothing ) "a8"
+                        , Var ( RepID Nothing ) "n1"
+                        , Var ( RepID Nothing ) "a9"
+                        , Var ( RepID Nothing ) "a10"
+                        , Var ( RepID Nothing ) "n2"
+                        ]
+                        ( Var ( RepID Nothing ) "a11" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "a14"
+                        , Var ( RepID Nothing ) "hits"
+                        , Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        , Var ( RepID Nothing ) "a16"
+                        , Var ( RepID Nothing ) "a15"
+                        ]
+                        ( Var ( RepID Nothing ) "a17" )
+                    , Ref zip Nothing
+                        [ Var ( RepID Nothing ) "a18"
+                        , Var ( RepID Nothing ) "l1"
+                        , Var ( RepID Nothing ) "n1"
+                        , Var ( RepID Nothing ) "n2"
+                        , Var ( RepID Nothing ) "a18b"
+                        , Var ( RepID Nothing ) "l1b"
+                        , Var ( RepID Nothing ) "s1"
+                        , Var ( RepID Nothing ) "s2"
+                        , Var ( RepID Nothing ) "a19"
+                        , Var ( RepID Nothing ) "l2"
+                        , Var ( RepID Nothing ) "a7"
+                        , Var ( RepID Nothing ) "a8"
+                        , Var ( RepID Nothing ) "a9"
+                        , Var ( RepID Nothing ) "a20"
+                        , Var ( RepID Nothing ) "a21"
+                        , Var ( RepID Nothing ) "l3"
+                        , Var ( RepID Nothing ) "f1"
+                        , Var ( RepID Nothing ) "f2"
+                        , Var ( RepID Nothing ) "a22"
+                        , Var ( RepID Nothing ) "hits"
+                        , Var ( RepID Nothing ) "a23"
+                        , Var ( RepID Nothing ) "l4"
+                        ]
+                        ( Var ( RepID Nothing ) "a24" )
+                    ]
+                ]
+            }
+        ]
+    , sResult = Just
+        ( Fun zip Nothing
+            [ Var ( RepID Nothing ) "a6"
+            , Var ( RepID Nothing ) "a1"
+            , Var ( RepID Nothing ) "s1"
+            , Var ( RepID Nothing ) "a2"
+            , Var ( RepID Nothing ) "a3"
+            , Var ( RepID Nothing ) "s2"
+            , Var ( RepID Nothing ) "a4"
+            , Var ( RepID Nothing ) "a5"
+            , Var ( RepID Nothing ) "a11"
+            , Var ( RepID Nothing ) "a7"
+            , Var ( RepID Nothing ) "a8"
+            , Var ( RepID Nothing ) "n1"
+            , Var ( RepID Nothing ) "a9"
+            , Var ( RepID Nothing ) "a10"
+            , Var ( RepID Nothing ) "n2"
+            , Var ( RepID Nothing ) "a17"
+            , Var ( RepID Nothing ) "a14"
+            , Var ( RepID Nothing ) "hits"
+            , Var ( RepID Nothing ) "f1"
+            , Var ( RepID Nothing ) "f2"
+            , Var ( RepID Nothing ) "a16"
+            , Var ( RepID Nothing ) "a15"
+            , Var ( RepID Nothing ) "a24"
+            , Var ( RepID Nothing ) "a18"
+            , Var ( RepID Nothing ) "l1"
+            , Var ( RepID Nothing ) "a18b"
+            , Var ( RepID Nothing ) "l1b"
+            , Var ( RepID Nothing ) "a19"
+            , Var ( RepID Nothing ) "l2"
+            , Var ( RepID Nothing ) "a20"
+            , Var ( RepID Nothing ) "a21"
+            , Var ( RepID Nothing ) "l3"
+            , Var ( RepID Nothing ) "a22"
+            , Var ( RepID Nothing ) "a23"
+            , Var ( RepID Nothing ) "l4"
+            ] "zip_archive"
+            [ Lst zip Nothing
+                [ Var ( RepID Nothing ) "a6"
+                , Var ( RepID Nothing ) "a1"
+                , Var ( RepID Nothing ) "s1"
+                , Var ( RepID Nothing ) "a2"
+                , Var ( RepID Nothing ) "a3"
+                , Var ( RepID Nothing ) "s2"
+                , Var ( RepID Nothing ) "a4"
+                , Var ( RepID Nothing ) "a5"
+                , Var ( RepID Nothing ) "a11"
+                , Var ( RepID Nothing ) "a7"
+                , Var ( RepID Nothing ) "a8"
+                , Var ( RepID Nothing ) "n1"
+                , Var ( RepID Nothing ) "a9"
+                , Var ( RepID Nothing ) "a10"
+                , Var ( RepID Nothing ) "n2"
+                , Var ( RepID Nothing ) "a17"
+                , Var ( RepID Nothing ) "a14"
+                , Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "f1"
+                , Var ( RepID Nothing ) "f2"
+                , Var ( RepID Nothing ) "a16"
+                , Var ( RepID Nothing ) "a15"
+                , Var ( RepID Nothing ) "a24"
+                , Var ( RepID Nothing ) "a18"
+                , Var ( RepID Nothing ) "l1"
+                , Var ( RepID Nothing ) "a18b"
+                , Var ( RepID Nothing ) "l1b"
+                , Var ( RepID Nothing ) "a19"
+                , Var ( RepID Nothing ) "l2"
+                , Var ( RepID Nothing ) "a20"
+                , Var ( RepID Nothing ) "a21"
+                , Var ( RepID Nothing ) "l3"
+                , Var ( RepID Nothing ) "a22"
+                , Var ( RepID Nothing ) "a23"
+                , Var ( RepID Nothing ) "l4"
+                ]
+                [ Ref zip Nothing
+                    [ Var ( RepID Nothing ) "a1"
+                    , Var ( RepID Nothing ) "s1"
+                    , Var ( RepID Nothing ) "a2"
+                    , Var ( RepID Nothing ) "a3"
+                    , Var ( RepID Nothing ) "s2"
+                    , Var ( RepID Nothing ) "a4"
+                    , Var ( RepID Nothing ) "a5"
+                    ]
+                    ( Var ( RepID Nothing ) "a6" )
+                , Ref zip Nothing
+                    [ Var ( RepID Nothing ) "a7"
+                    , Var ( RepID Nothing ) "a8"
+                    , Var ( RepID Nothing ) "n1"
+                    , Var ( RepID Nothing ) "a9"
+                    , Var ( RepID Nothing ) "a10"
+                    , Var ( RepID Nothing ) "n2"
+                    ]
+                    ( Var ( RepID Nothing ) "a11" )
+                , Ref zip Nothing
+                    [ Var ( RepID Nothing ) "a14"
+                    , Var ( RepID Nothing ) "hits"
+                    , Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    , Var ( RepID Nothing ) "a16"
+                    , Var ( RepID Nothing ) "a15"
+                    ]
+                    ( Var ( RepID Nothing ) "a17" )
+                , Ref zip Nothing
+                    [ Var ( RepID Nothing ) "a18"
+                    , Var ( RepID Nothing ) "l1"
+                    , Var ( RepID Nothing ) "n1"
+                    , Var ( RepID Nothing ) "n2"
+                    , Var ( RepID Nothing ) "a18b"
+                    , Var ( RepID Nothing ) "l1b"
+                    , Var ( RepID Nothing ) "s1"
+                    , Var ( RepID Nothing ) "s2"
+                    , Var ( RepID Nothing ) "a19"
+                    , Var ( RepID Nothing ) "l2"
+                    , Var ( RepID Nothing ) "a7"
+                    , Var ( RepID Nothing ) "a8"
+                    , Var ( RepID Nothing ) "a9"
+                    , Var ( RepID Nothing ) "a20"
+                    , Var ( RepID Nothing ) "a21"
+                    , Var ( RepID Nothing ) "l3"
+                    , Var ( RepID Nothing ) "f1"
+                    , Var ( RepID Nothing ) "f2"
+                    , Var ( RepID Nothing ) "a22"
+                    , Var ( RepID Nothing ) "hits"
+                    , Var ( RepID Nothing ) "a23"
+                    , Var ( RepID Nothing ) "l4"
+                    ]
+                    ( Var ( RepID Nothing ) "a24" )
+                ]
+            ]
+        )
+    }

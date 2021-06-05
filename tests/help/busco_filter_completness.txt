@@ -1,0 +1,6 @@
+busco_filter_completness : num bst faa.list -> faa.list
+
+where
+  num = number in regular or scientific notation
+  bst = BUSCO scores table
+  faa = FASTA amino acid

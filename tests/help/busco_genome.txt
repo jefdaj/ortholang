@@ -1,0 +1,6 @@
+busco_genome : blh fna -> bsr
+
+where
+  blh = BUSCO lineage HMMs
+  fna = FASTA nucleic acid
+  bsr = BUSCO results

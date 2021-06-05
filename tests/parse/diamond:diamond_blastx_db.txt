@@ -1,57 +1,127 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "mgen" 
-            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_genitalium_small.faa" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "maga" 
-            , aExpr = Fun fna Nothing [] "gbk_to_fna" 
-                [ Lit str "cds" 
-                , Fun gbk Nothing [] "load_gbk" [ Lit str "examples/sequences/Mycoplasma_agalactiae_PG2.gbk" ]
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "db" 
-            , aExpr = Fun dmnd 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "mgen" ] "diamond_makedb" 
-                [ Ref faa Nothing [] 
-                    ( Var ( RepID Nothing ) "mgen" )
-                ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Fun bht 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "db" 
-                , Var ( RepID Nothing ) "mgen" 
-                ] "diamond_blastx_db" 
-                [ Lit num "1.0e-45" 
-                , Ref fna Nothing [] 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "mgen"
+            , aExpr = Fun fna Nothing [] "load_fna" [ Lit str "examples/sequences/Mycoplasma_genitalium_M2321_5genes.fna" ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "maga"
+            , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "db"
+            , aExpr = Fun dmnd
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "maga" ] "diamond_makedb"
+                [ Ref faa Nothing []
                     ( Var ( RepID Nothing ) "maga" )
-                , Ref dmnd 
-                    ( Just ( Seed 0 ) ) 
-                    [ Var ( RepID Nothing ) "mgen" ] 
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "hits"
+            , aExpr = Fun bht
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "db"
+                , Var ( RepID Nothing ) "maga"
+                ] "diamond_blastx_db"
+                [ Lit num "0.0"
+                , Lit num "1.0e-20"
+                , Ref fna Nothing []
+                    ( Var ( RepID Nothing ) "mgen" )
+                , Ref dmnd
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "maga" ]
                     ( Var ( RepID Nothing ) "db" )
-                ] 
-            } 
-        ] 
-    , sResult = Just 
-        ( Fun bht 
-            ( Just ( Seed 0 ) ) 
-            [ Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "db" 
-            , Var ( RepID Nothing ) "mgen" 
-            ] "diamond_blastx_db" 
-            [ Lit num "1.0e-45" 
-            , Ref fna Nothing [] 
-                ( Var ( RepID Nothing ) "maga" )
-            , Ref dmnd 
-                ( Just ( Seed 0 ) ) 
-                [ Var ( RepID Nothing ) "mgen" ] 
-                ( Var ( RepID Nothing ) "db" )
-            ] 
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "hits2"
+            , aExpr = Fun bht.list
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "db"
+                , Var ( RepID Nothing ) "maga"
+                ] "diamond_blastx_db_each"
+                [ Lit num "0.0"
+                , Lit num "1.0e-20"
+                , Ref fna Nothing []
+                    ( Var ( RepID Nothing ) "mgen" )
+                , Lst dmnd Nothing
+                    [ Var ( RepID Nothing ) "db"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
+                    [ Ref dmnd
+                        ( Just ( Seed 0 ) )
+                        [ Var ( RepID Nothing ) "maga" ]
+                        ( Var ( RepID Nothing ) "db" )
+                    ]
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Bop bht.list Nothing
+                [ Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "db"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "hits2"
+                ] "|"
+                ( Lst bht Nothing
+                    [ Var ( RepID Nothing ) "hits"
+                    , Var ( RepID Nothing ) "mgen"
+                    , Var ( RepID Nothing ) "db"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
+                    [ Ref bht
+                        ( Just ( Seed 0 ) )
+                        [ Var ( RepID Nothing ) "mgen"
+                        , Var ( RepID Nothing ) "db"
+                        , Var ( RepID Nothing ) "maga"
+                        ]
+                        ( Var ( RepID Nothing ) "hits" )
+                    ]
+                )
+                ( Ref bht.list
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "mgen"
+                    , Var ( RepID Nothing ) "db"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
+                    ( Var ( RepID Nothing ) "hits2" )
+                )
+            }
+        ]
+    , sResult = Just
+        ( Bop bht.list Nothing
+            [ Var ( RepID Nothing ) "hits"
+            , Var ( RepID Nothing ) "mgen"
+            , Var ( RepID Nothing ) "db"
+            , Var ( RepID Nothing ) "maga"
+            , Var ( RepID Nothing ) "hits2"
+            ] "|"
+            ( Lst bht Nothing
+                [ Var ( RepID Nothing ) "hits"
+                , Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "db"
+                , Var ( RepID Nothing ) "maga"
+                ]
+                [ Ref bht
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "mgen"
+                    , Var ( RepID Nothing ) "db"
+                    , Var ( RepID Nothing ) "maga"
+                    ]
+                    ( Var ( RepID Nothing ) "hits" )
+                ]
+            )
+            ( Ref bht.list
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "mgen"
+                , Var ( RepID Nothing ) "db"
+                , Var ( RepID Nothing ) "maga"
+                ]
+                ( Var ( RepID Nothing ) "hits2" )
+            )
         )
-    } 
+    }
