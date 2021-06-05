@@ -1,0 +1,6 @@
+sets_table_explicit : str.list lit.list.list -> tsv
+
+where
+  str = string
+  lit = a literal (str or num)
+  tsv = set membership table (spreadsheet)

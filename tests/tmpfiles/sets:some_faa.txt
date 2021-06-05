@@ -1,18 +1,7 @@
 .
 |-- cache
 |-- exprs
-|   |-- all
-|   |   `-- 33e59acb2e
-|   |       `-- result -> ../../../cache/lines/...
-|   |-- any
-|   |   `-- 33e59acb2e
-|   |       `-- result -> ../../../cache/lines/...
-|   |-- diff
-|   |   `-- 2ca7389a1e
-|   |       `-- result -> ../../../cache/lines/...
 |   |-- list
-|   |   |-- 067c11e5b4
-|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 5b5080429a
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 8d00c044aa
@@ -20,6 +9,9 @@
 |   |   |-- eb60398198
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- f1a477805d
+|   |       `-- result -> ../../../cache/lines/...
+|   |-- some
+|   |   `-- 33e59acb2e
 |   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 824ccbd8b2
@@ -29,9 +21,9 @@
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- result -> ../exprs/diff/2ca7389a1e/result
+    |-- result -> ../exprs/some/33e59acb2e/result
     |-- set1.str.list -> ../exprs/list/f1a477805d/result
     |-- set2.str.list -> ../exprs/list/8d00c044aa/result
     `-- set3.str.list -> ../exprs/list/eb60398198/result
 
-19 directories, 15 files
+14 directories, 12 files

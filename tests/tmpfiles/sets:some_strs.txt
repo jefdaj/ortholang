@@ -1,25 +1,17 @@
 .
 |-- cache
 |-- exprs
-|   |-- all
-|   |   `-- ba46f53204
-|   |       `-- result -> ../../../cache/lines/...
-|   |-- any
-|   |   `-- ba46f53204
-|   |       `-- result -> ../../../cache/lines/...
-|   |-- diff
-|   |   `-- 218b195062
-|   |       `-- result -> ../../../cache/lines/...
 |   |-- list
 |   |   |-- 4b9cc2936a
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- 5b4c2e750a
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- ba9746f094
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- c89035290c
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- e857e3f567
+|   |       `-- result -> ../../../cache/lines/...
+|   |-- some
+|   |   `-- ba46f53204
 |   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 151a835cea
@@ -53,10 +45,10 @@
 |       `-- f27d5f6e3d
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- fn.str.list -> ../exprs/diff/218b195062/result
+    |-- fn.str.list -> ../exprs/some/ba46f53204/result
     |-- result -> ../vars/fn.str.list
     |-- set1.str.list -> ../exprs/list/c89035290c/result
     |-- set2.str.list -> ../exprs/list/ba9746f094/result
     `-- set3.str.list -> ../exprs/list/4b9cc2936a/result
 
-31 directories, 28 files
+26 directories, 25 files

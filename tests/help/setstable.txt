@@ -3,3 +3,4 @@ Generate set membership tables (spreadsheets) for easier list comparison
 Functions:
 
 sets_table
+sets_table_explicit
