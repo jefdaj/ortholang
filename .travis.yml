@@ -25,15 +25,6 @@ install:
 - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo launchctl kickstart -k system/org.nixos.nix-daemon || true; else sudo systemctl restart nix-daemon; fi
 - nix-env -iA nixpkgs.cachix
 - cachix use $CACHIX_CACHE
-- nix path-info --all > /tmp/store-path-pre-build
-
-# see: https://github.com/ChrisPenner/haskell-stack-travis-ci/blob/master/.travis.yml
-# cache:
-#   directories:
-#     - $HOME/.ghc
-#     - $HOME/.cabal
-#     - $HOME/.stack
-#     - .stack-work
 
 matrix:
   fast_finish: true
@@ -58,10 +49,6 @@ branches:
   - /^bugfix-.*$/
   - /^module-.*$/
   - /^feature-.*$/
-
-# see: https://github.com/cachix/cachix/issues/228
-# TODO remove?
-#before_script:
 
 script:
   - ./scripts/dev/test-nix.sh
