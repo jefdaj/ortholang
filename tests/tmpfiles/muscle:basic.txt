@@ -50,9 +50,7 @@
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- hits_aln.aln -> ../exprs/muscle/e0dd698211/result
-    |-- hits.bht -> ../exprs/blastp_db/76bf3d901d/ec1f6f502d/27f8999d34/s0/result
-    |-- hits_faa.faa -> ../exprs/extract_seqs/ccc25bfe26/62ea81de36/result
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     `-- result -> ../vars/hits_aln.aln
 
-30 directories, 25 files
+30 directories, 23 files
