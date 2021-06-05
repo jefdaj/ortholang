@@ -3,6 +3,10 @@ Generate half-decent plots
 Functions:
 
 histogram
+histogram_explicit
 linegraph
+linegraph_explicit
 scatterplot
+scatterplot_explicit
 venndiagram
+venndiagram_explicit
