@@ -163,7 +163,7 @@ mkTreeTest cfg ref ids dRef name act t = goldenDiff d t (act' >> treeAct)
     -- TODO add nondeterministic expression + cache dirs here by parsing modules:
     ignores = "-I '*.lock|*.database|*.log|*.tmp|*.html|round-trip.*|*.out|lines|output.txt|jobs|out|err'"
     sedCmd  = "sed 's/lines\\/.*/lines\\/\\.\\.\\./g'"
-    treeCmd = "tree -a --dirsfirst --charset=ascii " ++ ignores ++ " | " ++ sedCmd
+    treeCmd = "tree -a --dirsfirst --charset=ascii --sort=name " ++ ignores ++ " | " ++ sedCmd
     wholeCmd = (shell treeCmd) { cwd = Just $ tmpdir cfg }
     treeAct = do
       out <- withTmpDirLock cfg ref $ fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
