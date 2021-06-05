@@ -35,9 +35,9 @@ NIX_ARGS="" # TODO put back --pure?
 # LOGFILE="ortholang_${testfilter}_${TIMESTAMP}.log"
 LOGFILE='test.log'
 
-nix-build release.nix $NIX_ARGS 2>&1 | tee -a $LOGFILE
+nix-build release.nix $NIX_ARGS &> $LOGFILE
 code0=$?
-[[ $code0 == 0 ]] || exit $code0
+[[ $code0 == 0 ]] || (cat $LOGFILE; exit $code0)
 
 # bin-run() {
 #   rm -f $LOGFILE
