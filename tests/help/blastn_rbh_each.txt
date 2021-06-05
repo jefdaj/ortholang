@@ -1,4 +1,4 @@
-blastn_rbh_each : num fna fna.list -> bht.list
+blastn_rbh_each : num fna fna -> bht
 
 where
   num = number in regular or scientific notation

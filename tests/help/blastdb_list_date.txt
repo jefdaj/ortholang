@@ -1,0 +1,4 @@
+blastdb_list_date : str -> str.list
+
+where
+  str = string

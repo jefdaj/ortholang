@@ -1,4 +1,4 @@
-diamond_blastx_db : num fna dmnd -> bht
+diamond_blastx_db : num num fna dmnd -> bht
 
 where
   num = number in regular or scientific notation

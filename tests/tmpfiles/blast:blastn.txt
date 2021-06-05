@@ -1,10 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   `-- 9da6085998
-|   |       `-- 66d18ad789
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/66d18ad789/result
 |   |-- load
 |   |   |-- 1e7afd22cf.gbk -> $WORKDIR/examples/sequences/Mycoplasma_bovis_HB0801-P115.gbk
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
@@ -93,4 +88,4 @@
     |-- result -> ../exprs/any/d2a83dc688/result
     `-- single.str.list -> ../exprs/extract_queries/66d18ad789/result
 
-54 directories, 39 files
+51 directories, 37 files

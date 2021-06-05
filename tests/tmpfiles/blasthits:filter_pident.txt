@@ -1,14 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   |-- 663c986be7
-|   |   |   `-- 46325670e5
-|   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/filter_pident/9e5ce45397/46325670e5/result
-|   |   `-- 7d561f10e6
-|   |       `-- 81485c4976
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/81485c4976/result
 |   |-- load
 |   |   |-- 10ffe0cf0f.faa
 |   |   |-- 10ffe0cf0f.faa.ids
@@ -82,4 +73,4 @@
     |-- result -> ../exprs/length/32afff8fdf/result
     `-- single.str.list -> ../exprs/extract_queries/81485c4976/result
 
-46 directories, 36 files
+41 directories, 32 files

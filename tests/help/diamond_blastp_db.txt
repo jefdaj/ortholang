@@ -1,4 +1,4 @@
-diamond_blastp_db : num faa dmnd -> bht
+diamond_blastp_db : num num faa dmnd -> bht
 
 where
   num = number in regular or scientific notation

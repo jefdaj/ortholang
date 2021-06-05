@@ -55,11 +55,9 @@
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- fwdHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/ccc25bfe26/e11df78e7c/s0/result
     |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
     |-- mgen.faa -> ../exprs/load_faa/cfed7edd23/result
     |-- recHits.bht -> ../exprs/reciprocal_best/526f9afa12/194a225b65/result
-    |-- result -> ../vars/recHits.bht
-    `-- revHits.bht -> ../exprs/blastp_db/b6d4e4cdf4/afa6e907a5/27f8999d34/s0/result
+    `-- result -> ../vars/recHits.bht
 
-32 directories, 30 files
+32 directories, 28 files

@@ -1,0 +1,10 @@
+Download BLAST databases from NCBI
+
+Functions:
+
+blastdb_list
+blastdb_list_date
+blastdb_get_fna
+blastdb_get_faa
+blastdb_get_fna_date
+blastdb_get_faa_date

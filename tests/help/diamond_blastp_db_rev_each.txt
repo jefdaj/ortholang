@@ -1,0 +1,7 @@
+diamond_blastp_db_rev_each : num num faa dmnd.list -> bht.list
+
+where
+  num = number in regular or scientific notation
+  faa = FASTA amino acid
+  dmnd = DIAMOND database
+  bht = tab-separated table of blast hits (outfmt 6)

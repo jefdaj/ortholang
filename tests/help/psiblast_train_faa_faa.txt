@@ -1,0 +1,6 @@
+psiblast_train_faa_faa : num faa faa -> pssm
+
+where
+  num = number in regular or scientific notation
+  faa = FASTA amino acid
+  pssm = PSI-BLAST position-specific substitution matrix as ASCII

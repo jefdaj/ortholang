@@ -1,0 +1,5 @@
+blastdb_get_faa_date : str str -> faa.blastdb
+
+where
+  str = string
+  faa = FASTA amino acid

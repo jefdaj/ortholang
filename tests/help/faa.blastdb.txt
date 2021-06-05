@@ -1,7 +1,8 @@
 The faa.blastdb extension is for FASTA amino acid encoded as NCBI BLAST+ sequence database.
 
-You can create them with these 4 functions:
-  blastdbget_faa : str -> faa.blastdb
+You can create them with these 5 functions:
+  blastdb_get_faa : str str -> faa.blastdb
+  blastdb_get_faa_date : str str -> faa.blastdb
   load_faa_db : str -> faa.blastdb
   makeblastdb_prot : faa -> faa.blastdb
   makeblastdb_prot_all : faa.list -> faa.blastdb
@@ -9,9 +10,9 @@ You can create them with these 4 functions:
 And use them with these 8 functions:
   blastp_db : num faa faa.blastdb -> bht
   blastx_db : num fna faa.blastdb -> bht
-  psiblast_db : num faa faa.blastdb -> bht
-  psiblast_each_pssm_db : num pssm.list faa.blastdb -> bht.list
-  psiblast_pssm_db : num pssm faa.blastdb -> bht
-  psiblast_pssms_db : num pssm.list faa.blastdb -> bht
-  psiblast_train_db : num faa faa.blastdb -> pssm
-  psiblast_train_pssms_db : num faa.list faa.blastdb -> pssm.list
+  psiblast_search_faa_pdb : num faa faa.blastdb -> bht
+  psiblast_search_pssm_pdb : num pssm faa.blastdb -> bht
+  psiblast_search_pssms_pdb : num pssm.list faa.blastdb -> bht.list
+  psiblast_search_pssms_pdb_all : num pssm.list faa.blastdb -> bht
+  psiblast_train_faa_pdb : num faa faa.blastdb -> pssm
+  psiblast_train_faas_pdb : num faa.list faa.blastdb -> pssm.list

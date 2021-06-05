@@ -1,1 +1,5 @@
+/nix/store/pih9dipn5c91amz955qaxyqcswi5vqkx-OrthoLang-SeqIO/bin/.genbank_to_fasta.py-wrapped:263: DeprecationWarning: 'U' mode is deprecated
+  in_file_handle = open (in_file, 'rU') #The 'U' option so we don't have to worry about line endings
+/nix/store/pih9dipn5c91amz955qaxyqcswi5vqkx-OrthoLang-SeqIO/bin/.genbank_to_fasta.py-wrapped:263: DeprecationWarning: 'U' mode is deprecated
+  in_file_handle = open (in_file, 'rU') #The 'U' option so we don't have to worry about line endings
 $TMPDIR/cache/lines/59fbd69816.txt

@@ -11,4 +11,6 @@ result = solidHitIDs
 n_hits_by_n_repeats = score_repeats (length solidHitIDs)
                                     n_repeats
                                     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 50, 75, 100]
-result = linegraph "After X repeats, how many genes have been found every time?" n_hits_by_n_repeats
+result = linegraph_explicit "After X repeats, how many genes have been found every time?"
+                            "n_hits_by_n_repeats.num.scores"
+                            n_hits_by_n_repeats

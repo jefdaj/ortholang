@@ -1,10 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   `-- ef8c8b5326
-|   |       `-- 5227ba27cd
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/5227ba27cd/result
 |   |-- load
 |   |   |-- 36189032ad.faa
 |   |   |-- 36189032ad.faa.ids
@@ -73,4 +68,4 @@
     |-- result -> ../exprs/all/12f29bed27/result
     `-- single.str.list -> ../exprs/extract_queries/5227ba27cd/result
 
-42 directories, 31 files
+39 directories, 29 files

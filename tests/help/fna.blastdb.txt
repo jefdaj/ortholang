@@ -1,7 +1,8 @@
 The fna.blastdb extension is for FASTA nucleic acid encoded as NCBI BLAST+ sequence database.
 
-You can create them with these 4 functions:
-  blastdbget_fna : str -> fna.blastdb
+You can create them with these 5 functions:
+  blastdb_get_fna : str str -> fna.blastdb
+  blastdb_get_fna_date : str str -> fna.blastdb
   load_fna_db : str -> fna.blastdb
   makeblastdb_nucl : fa -> fna.blastdb
   makeblastdb_nucl_all : fa.list -> fna.blastdb

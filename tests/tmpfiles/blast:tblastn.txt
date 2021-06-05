@@ -1,10 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   `-- e1991fabe0
-|   |       `-- 2bec2f51e9
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/2bec2f51e9/result
 |   |-- load
 |   |   |-- 6046a54e92.fna
 |   |   |-- 6046a54e92.fna.ids
@@ -80,4 +75,4 @@
     |-- result -> ../exprs/all/a1a7fcee62/result
     `-- single.str.list -> ../exprs/extract_queries/2bec2f51e9/result
 
-47 directories, 33 files
+44 directories, 31 files

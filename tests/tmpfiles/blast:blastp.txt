@@ -1,14 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   |-- 0beca37915
-|   |   |   `-- caab3c1333
-|   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/extract_queries/caab3c1333/result
-|   |   `-- fdf381fe88
-|   |       `-- fdd2ce21a3
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/length/fdd2ce21a3/result
 |   |-- load
 |   |   |-- 0d8dfa261e.faa
 |   |   |-- 0d8dfa261e.faa.ids
@@ -86,4 +77,4 @@
     |-- result -> ../exprs/length_each/8e8ce256c8/result
     `-- single.str.list -> ../exprs/extract_queries/caab3c1333/result
 
-50 directories, 36 files
+45 directories, 32 files

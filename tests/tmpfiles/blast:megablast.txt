@@ -1,10 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   `-- d2e8b208dc
-|   |       `-- a5736537a2
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/a5736537a2/result
 |   |-- load
 |   |   |-- 6046a54e92.fna
 |   |   `-- 6046a54e92.fna.ids
@@ -70,4 +65,4 @@
     |-- result -> ../exprs/any/2e1c6011f0/result
     `-- single.str.list -> ../exprs/extract_queries/a5736537a2/result
 
-42 directories, 28 files
+39 directories, 26 files
