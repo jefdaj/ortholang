@@ -24,7 +24,6 @@
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- fna.fna -> ../exprs/load_fna_path/fe2757ed86/result
-    |-- gbk.gbk -> ../exprs/load_gbk/b5a17d977e/result
     `-- result -> ../vars/fna.fna
 
-16 directories, 11 files
+16 directories, 10 files

@@ -1,14 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   |-- 310eee161f
-|   |   |   `-- 2c7651beca
-|   |   |       |-- args -> ../../../../cache/lines/...
-|   |   |       `-- result -> ../../../../exprs/extract_ids/2c7651beca/result
-|   |   `-- adec6e30ce
-|   |       `-- 494baa00c6
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_ids/494baa00c6/result
 |   `-- load
 |       |-- 6046a54e92.fna
 |       |-- 6046a54e92.fna.ids
@@ -69,4 +60,4 @@
     |-- singleFaa.str.list -> ../exprs/extract_ids/2c7651beca/result
     `-- singleFna.str.list -> ../exprs/extract_ids/494baa00c6/result
 
-34 directories, 35 files
+29 directories, 31 files

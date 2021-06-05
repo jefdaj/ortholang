@@ -2,8 +2,8 @@ Generate ranges of numbers
 
 Functions:
 
-range_add
-range_exponent
 range_integers
+range_add
 range_length
 range_multiply
+range_exponent

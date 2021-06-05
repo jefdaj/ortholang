@@ -1,10 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   `-- d0f59010cd
-|   |       `-- 46325670e5
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_queries/46325670e5/result
 |   |-- load
 |   |   |-- 10ffe0cf0f.faa
 |   |   |-- 10ffe0cf0f.faa.ids
@@ -64,4 +59,4 @@
     |-- result -> ../exprs/any/5f7463b414/result
     `-- single.str.list -> ../exprs/extract_queries/46325670e5/result
 
-35 directories, 29 files
+32 directories, 27 files

@@ -51,14 +51,10 @@
 `-- vars
     |-- faaDiff.str.list -> ../exprs/diff/2c21f59e12/result
     |-- faaSmallAll.str.list -> ../exprs/extract_ids/dd8f8ca6ab/result
-    |-- faaSmall.faa -> ../exprs/load_faa/81fa36fcfa/result
     |-- faaSmallIDs.str.list -> ../exprs/extract_ids/2c7651beca/result
-    |-- faaSmallSeqs.faa -> ../exprs/extract_seqs/2c7651beca/0f1884b59c/result
     |-- fnaDiff.str.list -> ../exprs/diff/2a62761d97/result
     |-- fnaSmallAll.str.list -> ../exprs/extract_ids/57fa910811/result
-    |-- fnaSmall.fna -> ../exprs/load_fna/821d1bdfd1/result
     |-- fnaSmallIDs.str.list -> ../exprs/extract_ids/494baa00c6/result
-    |-- fnaSmallSeqs.fna -> ../exprs/extract_seqs/494baa00c6/00d7993aba/result
     `-- result -> ../exprs/any/a13d499d86/result
 
-30 directories, 31 files
+30 directories, 27 files

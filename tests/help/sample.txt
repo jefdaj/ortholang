@@ -2,7 +2,7 @@ sample : num any.list -> any.list
 
 where
   num = number in regular or scientific notation
-  any = any type
+  any = type of the thing to sample
 
 Take a random sample from a list. Can be used to test your
 algorithm on a smaller set of genes/genomes, or as the 'permute'

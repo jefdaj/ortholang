@@ -1,10 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   `-- 53c2461037
-|   |       `-- f833ff8154
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/extract_targets/f833ff8154/result
 |   |-- load
 |   |   |-- 28ce925871.gbk -> $WORKDIR/examples/sequences/Mycoplasma_genitalium_M2321.gbk
 |   |   |-- 7050df5d6e.faa
@@ -76,4 +71,4 @@
     |-- result -> ../exprs/any/19a041edcd/result
     `-- single.str.list -> ../exprs/extract_targets/f833ff8154/result
 
-43 directories, 33 files
+40 directories, 31 files

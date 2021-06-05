@@ -1,10 +1,5 @@
 .
 |-- cache
-|   |-- each
-|   |   `-- bcde19d913
-|   |       `-- 4ddb325c30
-|   |           |-- args -> ../../../../cache/lines/...
-|   |           `-- result -> ../../../../exprs/translate/4ddb325c30/result
 |   `-- load
 |       |-- 6046a54e92.fna
 |       `-- 6046a54e92.fna.ids
@@ -41,4 +36,4 @@
     |-- result -> ../exprs/any/fcad8bc1ee/result
     `-- single.faa -> ../exprs/translate/494baa00c6/result
 
-24 directories, 17 files
+21 directories, 15 files
