@@ -20,7 +20,7 @@ logfile="test.log"
 testdir="tests"
 [[ -z "$1" ]] && testfilter="all" || testfilter="$1"
 
-nix-shell shell.nix --command 'stack build'
+nix-shell release.nix --command 'stack build'
 
 stacktestdir="$(find .stack-work -type d -name tests)"
 
@@ -36,7 +36,7 @@ rsync_every_10sec() { while sleep 10; do  rsync_tests; done; }
 # run tests to remake them, while syncing back to main tests dir
 rsync_every_10sec & disown
 
-nix-shell shell.nix --command "stack exec ortholang -- --test '$testfilter' 2>&1 | tee '$logfile'"
+nix-shell release.nix --command "stack exec ortholang -- --test '$testfilter' 2>&1 | tee '$logfile'"
 
 # one last sync
 rsync_tests
