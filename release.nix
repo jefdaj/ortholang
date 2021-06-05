@@ -9,6 +9,7 @@ let
   myHs    = import ./haskell.nix;
   modules = (import ./modules.nix).modules;
   environment = import ./environment.nix; # TODO can most of this be removed?
+  runDepends = environment ++ modules;
 
 in pkgs.haskell.lib.overrideCabal myHs.OrthoLang (drv: {
 
@@ -18,7 +19,7 @@ in pkgs.haskell.lib.overrideCabal myHs.OrthoLang (drv: {
   # src = builtins.fetchGit { url = ./.; };
 
   # TODO remove these? are they still needed?
-  buildDepends = with pkgs; (drv.buildDepends or [])  ++ environment ++ modules ++ [
+  buildDepends = with pkgs; (drv.buildDepends or [])  ++ runDepends ++ [
     makeWrapper
     # zlib.dev zlib.out # TODO remove?
     # pkgconfig # TODO remove?
@@ -31,7 +32,7 @@ in pkgs.haskell.lib.overrideCabal myHs.OrthoLang (drv: {
     wrapProgram "$out/bin/ortholang" \
       --set LANG en_US.UTF-8 \
       --set LANGUAGE en_US.UTF-8 \
-      --prefix PATH : "${pkgs.lib.makeBinPath modules}"'' +
+      --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"'' +
   (if pkgs.stdenv.hostPlatform.system == "x86_64-darwin" then "" else '' \
     --set LOCALE_ARCHIVE "${pkgs.glibcLocales}/lib/locale/locale-archive"
   '');
