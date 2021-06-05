@@ -3,6 +3,11 @@
 set -x
 set -o pipefail
 
+# TIMESTAMP=$(date '+%Y-%m-%d_%H:%M')
+# LOGFILE="ortholang_${testfilter}_${TIMESTAMP}.log"
+LOGFILE='test.log'
+rm -f "$LOGFILE" # helps prevent unneccesary nix-builds
+
 # figure out what branch we're on
 branch="$TRAVIS_BRANCH"
 [[ -z "$branch" ]] && branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -31,9 +36,6 @@ fi
 ### build the binary ###
 
 NIX_ARGS="" # TODO put back --pure?
-# TIMESTAMP=$(date '+%Y-%m-%d_%H:%M')
-# LOGFILE="ortholang_${testfilter}_${TIMESTAMP}.log"
-LOGFILE='test.log'
 
 nix-build release.nix $NIX_ARGS &> $LOGFILE
 code0=$?
