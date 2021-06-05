@@ -8,6 +8,7 @@ let
   pkgs    = import ./nix;
   myHs    = import ./haskell.nix;
   modules = (import ./modules.nix).modules;
+  environment = import ./environment.nix; # TODO can most of this be removed?
 
 in pkgs.haskell.lib.overrideCabal myHs.OrthoLang (drv: {
 
@@ -17,7 +18,7 @@ in pkgs.haskell.lib.overrideCabal myHs.OrthoLang (drv: {
   # src = builtins.fetchGit { url = ./.; };
 
   # TODO remove these? are they still needed?
-  buildDepends = with pkgs; (drv.buildDepends or [])  ++ modules ++ [
+  buildDepends = with pkgs; (drv.buildDepends or [])  ++ environment ++ modules ++ [
     makeWrapper
     # zlib.dev zlib.out # TODO remove?
     # pkgconfig # TODO remove?
