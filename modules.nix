@@ -5,15 +5,6 @@ let
   # TODO can a lot/all of this be removed?
   environment = import ./environment.nix;
 
-  # from nixpkgs/pkgs/applications/networking/cluster/mesos/default.nix
-  tarWithGzip = lib.overrideDerivation gnutar (oldAttrs: {
-    builder = "${bash}/bin/bash";
-    buildInputs = (oldAttrs.buildInputs or []) ++ [ makeWrapper ];
-    postInstall = (oldAttrs.postInstall or "") + ''
-      wrapProgram $out/bin/tar --prefix PATH ":" "${gzip}/bin"
-    '';
-  });
-
   # fixes "Fontconfig error: Cannot load default config file"
   # from nixpkgs/pkgs/development/libraries/pipewire/default.nix
   fontsConf = makeFontsConf {
@@ -85,9 +76,10 @@ in rec {
     ignoreCollisions = true;
 
     extraLibs = with python27Packages; [
-      # biopython
-      numpy
-      scipy
+      biopython # old version 1.76 with python2 support
+      justorthologs
+      numpy # TODO remove?
+      scipy # TODO remove?
     ];
   };
 
@@ -99,6 +91,8 @@ in rec {
     extraLibs = with python3Packages; [
       # TODO add deterministic_zip
       biopython
+      numpy # TODO remove?
+      scipy # TODO remove?
     ];
   };
 
@@ -113,24 +107,23 @@ in rec {
   ortholang-blastdbget    = mkMod ./OrthoLang/Modules/Blastdbget    [ myBlast blastdbget ] ""; # TODO remove myBlast?
   ortholang-crbblast      = mkMod ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
   ortholang-flowchart      = mkMod ./OrthoLang/Modules/FlowChart      [ graphviz ] ""; # TODO remove?
-  ortholang-diamond       = mkMod ./OrthoLang/Modules/Diamond       [ diamond ] "";
+  # ortholang-diamond       = mkMod ./OrthoLang/Modules/Diamond       [ diamond ] "";
   ortholang-hmmer         = mkMod ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
-  ortholang-mmseqs        = mkMod ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
+  # ortholang-mmseqs        = mkMod ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
   ortholang-muscle        = mkMod ./OrthoLang/Modules/Muscle        [ muscle ] "";
   ortholang-psiblast      = mkMod ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
-  ortholang-zip           = mkMod ./OrthoLang/Modules/Zip           [ myPy3 ] myPy3Wrap;
+  ortholang-zip           = mkMod ./OrthoLang/Modules/Zip           [ zip myPy3 ] myPy3Wrap;
 
   # TODO should the wrap not be necessary?
   ortholang-seqio         = mkMod ./OrthoLang/Modules/SeqIO         [ myPy3 ] myPy3Wrap;
-  ortholang-orthofinder   = mkMod ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
+  # ortholang-orthofinder   = mkMod ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
   ortholang-sonicparanoid = mkMod ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
 
   ortholang-treecl        = mkMod ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
-  # ortholang-justorthologs = mkMod ./OrthoLang/Modules/JustOrthologs [ justorthologs ] "";
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
   ortholang-busco = mkMod ./OrthoLang/Modules/Busco
-                     [ myBlast hmmer busco python36 which tarWithGzip ]
+                     [ myBlast hmmer busco python36 which ]
                      "--set BUSCO_CONFIG_FILE ${busco}/config/config.ini";
 
   ortholang-curl          = mkMod ./OrthoLang/Modules/Curl          [ curl ] "";
@@ -148,18 +141,17 @@ in rec {
     ortholang-blastrbh
     ortholang-crbblast
     ortholang-flowchart
-    ortholang-diamond
+    # ortholang-diamond
     ortholang-hmmer
-    ortholang-mmseqs
+    # ortholang-mmseqs
     ortholang-muscle
-    ortholang-orthofinder
+    # ortholang-orthofinder
     ortholang-plots
     ortholang-setstable
     ortholang-psiblast
     ortholang-seqio
     ortholang-sonicparanoid
     # ortholang-treecl
-    # ortholang-justorthologs
     ortholang-busco
     ortholang-curl
     ortholang-load

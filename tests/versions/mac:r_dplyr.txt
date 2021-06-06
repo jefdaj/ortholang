@@ -10,4 +10,4 @@ The following objects are masked from package:base:
 
     intersect, setdiff, setequal, union
 
-[1] 0.8.3
+[1] 0.8.5

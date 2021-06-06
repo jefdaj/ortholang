@@ -13,10 +13,13 @@ branch="$TRAVIS_BRANCH"
   && testfilter="\$5 ~/$(echo "$branch" | cut -d'-' -f2):/" \
   || testfilter='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
 
-# ... unless it's something important. then run all tests
+# unless it's something important,
 [[ "$branch" =~ '^(master|develop|bugfix)' ]] && testfilter="all"
 
-# override from the command line
+# or one of these specific cases.
+[[ "$branch" == feature-nix-tooling ]] && testfilter='$2 ~/version/'
+
+# finally, override from the command line
 [[ -z "$1" ]] || testfilter="$1"
 
 if [[ -z "$TMPDIR" ]]; then

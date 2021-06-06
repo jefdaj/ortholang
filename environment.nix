@@ -7,8 +7,19 @@
 
 with import ./nix;
 
+let
+  # from nixpkgs/pkgs/applications/networking/cluster/mesos/default.nix
+  tarWithGzip = lib.overrideDerivation gnutar (oldAttrs: {
+    builder = "${bash}/bin/bash";
+    buildInputs = (oldAttrs.buildInputs or []) ++ [ makeWrapper ];
+    postInstall = (oldAttrs.postInstall or "") + ''
+      wrapProgram $out/bin/tar --prefix PATH ":" "${gzip}/bin"
+    '';
+  });
+
+
 # TODO should this go in a separate file with the haskell binary definition?
-[
+in [
   # TODO which of these are needed?
   stdenv
   bash
@@ -17,7 +28,7 @@ with import ./nix;
   diffutils
   glibcLocales # TODO even on mac?
   tree
-  # tarWithGzip # TODO is this needed at runtime?
+  tarWithGzip # TODO is this needed at runtime?
   gnugrep
   gnused
   gawk
@@ -26,6 +37,7 @@ with import ./nix;
   fontconfig.lib # for R plotting scripts
   graphviz
   rsync
+  file
 
   # TODO is this a good idea?
   # myR # TODO is this needed at runtime?
