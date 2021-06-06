@@ -7,7 +7,7 @@ MM    no
 CONS  yes
 CS    no
 MAP   yes
-DATE  Fri Jun  4 21:44:07 2021
+DATE  Sat Jun  5 19:31:43 2021
 NSEQ  1
 EFFN  0.394531
 CKSUM 1365025685

@@ -1,23 +1,18 @@
 .
 |-- cache
-|   `-- bin
-|       |-- 4f8cf1456b -> ../../cache/bin/bf4495e8d6
-|       |-- 6c0951650a
-|       |-- aae9217315 -> ../../cache/bin/6c0951650a
-|       `-- bf4495e8d6
 |-- exprs
 |   |-- list
 |   |   |-- 022ef6c8cc
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 27f3f5704c
 |   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 3422becdb2
+|   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 7678d31a3a
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- 80f47732f0
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   |-- a06333d5a4
-|   |   |   `-- result -> ../../../cache/lines/...
-|   |   |-- bc8a2727b1
 |   |   |   `-- result -> ../../../cache/lines/...
 |   |   `-- dc614e8e54
 |   |       `-- result -> ../../../cache/lines/...
@@ -50,13 +45,15 @@
 |   |       `-- 3f97c936b2
 |   |           `-- d1bbcfbc4e
 |   |               `-- result -> ../../../../../cache/lines/...
-|   |-- scatterplot
+|   |-- scatterplot_explicit
 |   |   |-- 23ca535784
-|   |   |   `-- 5631d6bd63
-|   |   |       `-- result -> ../../../../cache/bin/aae9217315
+|   |   |   `-- 5f78a778de
+|   |   |       `-- 5631d6bd63
+|   |   |           `-- result
 |   |   `-- fc2a2aad6b
-|   |       `-- 5631d6bd63
-|   |           `-- result -> ../../../../cache/bin/4f8cf1456b
+|   |       `-- 911bd48a1d
+|   |           `-- 5631d6bd63
+|   |               `-- result
 |   |-- score_repeats
 |   |   `-- a3a8c74eca
 |   |       `-- 3f97c936b2
@@ -65,35 +62,35 @@
 |   `-- str
 |       |-- 18849995c1
 |       |   `-- result -> ../../../cache/lines/...
-|       |-- 9d4568c009
+|       |-- 3f0cd94395
+|       |   `-- result -> ../../../cache/lines/...
+|       |-- 50e3f52bf8
 |       |   `-- result -> ../../../cache/lines/...
 |       `-- b7f47efb8d
 |           `-- result -> ../../../cache/lines/...
 |-- reps
-|   |-- 255f9e171c
-|   |   |-- result -> ../../reps/255f9e171c/yvar.num
-|   |   `-- yvar.num -> ../../exprs/multiply/ef1611cf4d/result
-|   |-- 65c5c83fdc
-|   |   |-- result -> ../../reps/65c5c83fdc/yvar.num
+|   |-- 19ecbfb4b8
+|   |   |-- result -> ../../reps/19ecbfb4b8/yvar.num
 |   |   |-- xvar.num -> ../../exprs/num/eaad7f2e40/result
 |   |   `-- yvar.num -> ../../exprs/multiply/55089a0da6/result
-|   |-- 6715c2cf0f
-|   |   |-- result -> ../../reps/6715c2cf0f/yvar.num
-|   |   |-- xvar.num -> ../../exprs/num/ea11b49459/result
-|   |   `-- yvar.num -> ../../exprs/multiply/16bebae5d3/result
-|   |-- 82bb301dab
-|   |   |-- result -> ../../reps/82bb301dab/yvar.num
+|   |-- 1f7cceb2ef
+|   |   |-- result -> ../../reps/1f7cceb2ef/yvar.num
+|   |   |-- xvar.num -> ../../exprs/num/89fb8b4aed/result
+|   |   `-- yvar.num -> ../../exprs/multiply/7f577e7a50/result
+|   |-- a9a288d028
+|   |   |-- result -> ../../reps/a9a288d028/yvar.num
 |   |   |-- xvar.num -> ../../exprs/num/a629005e3c/result
 |   |   `-- yvar.num -> ../../exprs/multiply/b89aa05d8e/result
-|   `-- a10427b5dc
-|       |-- result -> ../../reps/a10427b5dc/yvar.num
-|       |-- xvar.num -> ../../exprs/num/89fb8b4aed/result
-|       `-- yvar.num -> ../../exprs/multiply/7f577e7a50/result
+|   |-- c589a2056e
+|   |   |-- result -> ../../reps/c589a2056e/yvar.num
+|   |   `-- yvar.num -> ../../exprs/multiply/ef1611cf4d/result
+|   `-- e00f78c38c
+|       |-- result -> ../../reps/e00f78c38c/yvar.num
+|       |-- xvar.num -> ../../exprs/num/ea11b49459/result
+|       `-- yvar.num -> ../../exprs/multiply/16bebae5d3/result
 `-- vars
-    |-- named.num.scores -> ../exprs/score_repeats/a3a8c74eca/3f97c936b2/d1bbcfbc4e/result
-    |-- plots.png.list -> ../exprs/list/bc8a2727b1/result
+    |-- plots.png.list -> ../exprs/list/3422becdb2/result
     |-- result -> ../vars/plots.png.list
-    |-- unnamed.num.scores -> ../exprs/score_repeats/a3a8c74eca/3f97c936b2/d1bbcfbc4e/result
     `-- xvar.num -> ../exprs/num/ee383407c9/result
 
-48 directories, 48 files
+50 directories, 43 files
