@@ -37,9 +37,9 @@ fi
 
 NIX_ARGS="" # TODO put back --pure?
 
-nix-build release.nix $NIX_ARGS &> $LOGFILE
+nix-build release.nix $NIX_ARGS
 code0=$?
-[[ $code0 == 0 ]] || (cat $LOGFILE; exit $code0)
+[[ $code0 == 0 ]] || exit $code0
 
 # bin-run() {
 #   rm -f $LOGFILE
