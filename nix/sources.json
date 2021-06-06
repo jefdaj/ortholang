@@ -5,10 +5,10 @@
         "homepage": "http://brwnj.github.io/blastdbget",
         "owner": "jefdaj",
         "repo": "blastdbget-nix",
-        "rev": "6ea4f440bb5afe0a2be5e9a90a69d1df02c87a6f",
-        "sha256": "1i4vrlq66hjbws3s61dqcxr0raw8ymw2hrdgbcg1iq96p77ym4ad",
+        "rev": "deb968a2b39a04e0c096e17dede65ab3a6f895ba",
+        "sha256": "0jc1nk75b5zmnw2nyppm92aj18r5m89lqxnsvs5z2ilspp0in9wh",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/blastdbget-nix/archive/6ea4f440bb5afe0a2be5e9a90a69d1df02c87a6f.tar.gz",
+        "url": "https://github.com/jefdaj/blastdbget-nix/archive/deb968a2b39a04e0c096e17dede65ab3a6f895ba.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "busco": {
@@ -29,10 +29,10 @@
         "homepage": "",
         "owner": "jefdaj",
         "repo": "crb-blast-nix",
-        "rev": "ec55e7ac131adc792a340491053ef797f31afcb7",
-        "sha256": "1rpvxx20qg43l1hcxpcw4qfasrw778ispaxzgmmal7qn70lvh5hh",
+        "rev": "b463700d097379346f12c40bd29b02f740c839d7",
+        "sha256": "0frwz90v3hag3p1ik7kyi5by7b33n7fk1pif6v40wm87ld3qs4l4",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/crb-blast-nix/archive/ec55e7ac131adc792a340491053ef797f31afcb7.tar.gz",
+        "url": "https://github.com/jefdaj/crb-blast-nix/archive/b463700d097379346f12c40bd29b02f740c839d7.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "diamond": {
@@ -41,10 +41,10 @@
         "homepage": "http://www.diamondsearch.org/",
         "owner": "jefdaj",
         "repo": "diamond-nix",
-        "rev": "b5301a136b3dad095bc5d222acefd6682e993844",
-        "sha256": "0hrxhpbwlwfg79r2dphw3sxvr4vjsnfyb0nrxa6cj30s7kh8gqil",
+        "rev": "900595fbd7643e5fd468f6f2786172a603a38fcb",
+        "sha256": "0ch77lk8ji868mbr7cq1bxhhq16v2bqf8daf392bwajgcczq8xr2",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/diamond-nix/archive/b5301a136b3dad095bc5d222acefd6682e993844.tar.gz",
+        "url": "https://github.com/jefdaj/diamond-nix/archive/900595fbd7643e5fd468f6f2786172a603a38fcb.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "docopt": {
@@ -53,10 +53,10 @@
         "homepage": "http://docopt.org/",
         "owner": "jefdaj",
         "repo": "docopt.hs",
-        "rev": "462f9252652f3e179092c4a6d6b142b3615b0e1c",
-        "sha256": "1jmsv4a7iwpdk5yr8icl5cbrh0q5xawm0liiqpjapa7fcny79vh5",
+        "rev": "304580160b7574e6b16b29306c363002e8e94546",
+        "sha256": "0kb7nrkmvwv9whw2x66bxhsai761z8s08g386axxr9aial0673gf",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/docopt.hs/archive/462f9252652f3e179092c4a6d6b142b3615b0e1c.tar.gz",
+        "url": "https://github.com/jefdaj/docopt.hs/archive/304580160b7574e6b16b29306c363002e8e94546.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "easel": {
@@ -65,10 +65,10 @@
         "homepage": "",
         "owner": "jefdaj",
         "repo": "easel-nix",
-        "rev": "47daa7c1020224be9312c4f5cd6953462f659306",
-        "sha256": "1icx5sj2qfwimj4zz6xg4clpazhk3rfirnsmgi0vgqiad4sh6f37",
+        "rev": "be568f52189cb53b2060657e94fc747406134023",
+        "sha256": "03jsw0p0zr2fp5i0nwsrpay8cnwrnyidh760p71k9di89abbdm9a",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/easel-nix/archive/47daa7c1020224be9312c4f5cd6953462f659306.tar.gz",
+        "url": "https://github.com/jefdaj/easel-nix/archive/be568f52189cb53b2060657e94fc747406134023.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "fastme": {
@@ -89,10 +89,10 @@
         "homepage": "http://hmmer.org",
         "owner": "jefdaj",
         "repo": "hmmer-nix",
-        "rev": "7837a2aebcc50f049426a01861118cd66627a9f6",
-        "sha256": "0zckl39ag5ifcg2dffdd5s024zn8a3xvr5nhxn3mi7lbl31pkia3",
+        "rev": "5ddc4d148f34a362fc6eaa9d52877c122ae41413",
+        "sha256": "17gqyl4fws0w8diahwimhpszyb1gx6daizix25iv8wynh439iyk1",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/hmmer-nix/archive/7837a2aebcc50f049426a01861118cd66627a9f6.tar.gz",
+        "url": "https://github.com/jefdaj/hmmer-nix/archive/5ddc4d148f34a362fc6eaa9d52877c122ae41413.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "logging": {
@@ -113,10 +113,10 @@
         "homepage": null,
         "owner": "jefdaj",
         "repo": "mcl-nix",
-        "rev": "7d5ed76a8f0a10e6343ad60bde8c25bff7189f82",
-        "sha256": "0ajd957wgvpr1sr35phk28hv1qbbh6abca7d4pz1yq6xvq6c9ll6",
+        "rev": "c974fe8d44799a64478a390cc45a67b1103500b7",
+        "sha256": "0y7ayzfh9l13hl8ql7s3rn128gdl0fd4xh03lz9xakibf36zfckq",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/mcl-nix/archive/7d5ed76a8f0a10e6343ad60bde8c25bff7189f82.tar.gz",
+        "url": "https://github.com/jefdaj/mcl-nix/archive/c974fe8d44799a64478a390cc45a67b1103500b7.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "mmseqs2": {
@@ -137,10 +137,10 @@
         "homepage": null,
         "owner": "jefdaj",
         "repo": "muscle-nix",
-        "rev": "4f334c74e3710d4dea881647b4bb2414227875e0",
-        "sha256": "1n9rfk07icl56fi1y9fkxn49xl4jbva6kvpvfx7l21svx7ikszil",
+        "rev": "b1c6b769dca0a2a0c99aa9028965b1b7a3b7b229",
+        "sha256": "1yi1qrgrqsgpajq9j39fxbk6cajhqijzqdq8c0nwd43h082g04md",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/muscle-nix/archive/4f334c74e3710d4dea881647b4bb2414227875e0.tar.gz",
+        "url": "https://github.com/jefdaj/muscle-nix/archive/b1c6b769dca0a2a0c99aa9028965b1b7a3b7b229.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "ncbi-blast": {
@@ -149,10 +149,10 @@
         "homepage": null,
         "owner": "jefdaj",
         "repo": "ncbi-blast-nix",
-        "rev": "7f1a8abd8b59cbf4e04180f6b8c25d3b104fb818",
-        "sha256": "1yqz07affcncmrzpbwy4p3nirx3akpffck7x3dzvrpyxb8zib0b0",
+        "rev": "f5903466109a3a8e6cf2f3dd071b2ace8efdca46",
+        "sha256": "12m6zdxm1rxr8qbi0kg82n2m5l9vg8yk36kc8bvg82n6k7hjj9f8",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/ncbi-blast-nix/archive/7f1a8abd8b59cbf4e04180f6b8c25d3b104fb818.tar.gz",
+        "url": "https://github.com/jefdaj/ncbi-blast-nix/archive/f5903466109a3a8e6cf2f3dd071b2ace8efdca46.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -200,7 +200,7 @@
         "rev": "36f124ba85e323fa80fa9b2707c34f4f666d8037",
         "sha256": "1shfhxmpn7s4p0adcwizclrdzy8g4hy56w0fsxrnw2d3bk9gapp6",
         "type": "tarball",
-				"url": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix/-/archive/36f124ba85e323fa80fa9b2707c34f4f666d8037/quick-multi-paranoid-nix-36f124ba85e323fa80fa9b2707c34f4f666d8037.tar.gz",
+        "url": "https://gitlab.com/jefdaj/quick-multi-paranoid-nix/-/archive/36f124ba85e323fa80fa9b2707c34f4f666d8037/quick-multi-paranoid-nix-36f124ba85e323fa80fa9b2707c34f4f666d8037.tar.gz",
         "url_template": "https://gitlab.com/<owner>/<repo>/-/archive/<rev>/<repo>-<rev>.tar.gz"
     },
     "raxml-nix": {
@@ -209,10 +209,10 @@
         "homepage": "www.exelixis-lab.org",
         "owner": "jefdaj",
         "repo": "raxml-nix",
-        "rev": "fe7a6008ef89f30638ca6e21e0cf3943db25f028",
-        "sha256": "1j2skl1mc8wq1zv8hqyi45njk52xhpdrxkizg2fq20m4lzsi3qs4",
+        "rev": "99f76e46c0b37eaf8ba1ca7fd78558b45beb2964",
+        "sha256": "1pjlj9zsz3cdlxqifm2rfjviljy2p4ik38ypb5j2qldyjl0mjhdr",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/raxml-nix/archive/fe7a6008ef89f30638ca6e21e0cf3943db25f028.tar.gz",
+        "url": "https://github.com/jefdaj/raxml-nix/archive/99f76e46c0b37eaf8ba1ca7fd78558b45beb2964.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "sonicparanoid": {
