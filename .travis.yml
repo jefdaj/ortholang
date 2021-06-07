@@ -18,7 +18,9 @@ before_install:
 
 before_cache:
   - mkdir -p $HOME/nix.store
-  - nix copy --to file://$HOME/nix.store -f release.nix --all
+  - nix copy --to file://$HOME/nix.store -f environment.nix --all
+  - nix copy --to file://$HOME/nix.store -f modules.nix --all
+    # - nix copy --to file://$HOME/nix.store -f release.nix --all
 
 install:
 - echo "trusted-users = $USER" | sudo tee -a /etc/nix/nix.conf
