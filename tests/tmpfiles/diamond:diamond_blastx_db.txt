@@ -1,50 +1,59 @@
 .
 |-- cache
-|   |-- load
-|   |   |-- 10ffe0cf0f.faa
-|   |   |-- 10ffe0cf0f.faa.ids
-|   |   |-- bb17ca9dfe.gbk -> $WORKDIR/examples/sequences/Mycoplasma_agalactiae_PG2.gbk
-|   |   |-- c0d0b015f9.fna
-|   |   `-- c0d0b015f9.fna.ids
-|   `-- seqio
+|   `-- load
+|       |-- 36189032ad.faa
+|       |-- 36189032ad.faa.ids
+|       |-- 6046a54e92.fna
+|       `-- 6046a54e92.fna.ids
 |-- exprs
+|   |-- any
+|   |   `-- fb84c5207f
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- diamond_blastx_db
-|   |   `-- 929694ebc5
-|   |       `-- b6deebbe38
-|   |           `-- 4421e53da1
-|   |               `-- s0
-|   |                   `-- result
+|   |   `-- e6c0faf0df
+|   |       `-- 91df83025b
+|   |           `-- 494baa00c6
+|   |               `-- 48b25dfa2b
+|   |                   `-- s0
+|   |                       `-- result
+|   |-- diamond_blastx_db_each
+|   |   `-- e6c0faf0df
+|   |       `-- 91df83025b
+|   |           `-- 494baa00c6
+|   |               `-- f03acd065c
+|   |                   `-- s0
+|   |                       `-- result -> ../../../../../../../cache/lines/...
 |   |-- diamond_makedb
-|   |   `-- afa6e907a5
+|   |   `-- ccc25bfe26
 |   |       `-- s0
 |   |           `-- result
-|   |-- gbk_to_fna_rawids
-|   |   `-- 3feaffccb4
-|   |       `-- 980bd58c0d
-|   |           `-- result
+|   |-- list
+|   |   |-- a5af1d7390
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- d87584e354
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- eaab876fe2
+|   |       `-- result -> ../../../cache/lines/...
 |   |-- load_faa
-|   |   `-- cfed7edd23
-|   |       `-- result -> ../../../cache/load/10ffe0cf0f.faa
+|   |   `-- 1e0498b59a
+|   |       `-- result -> ../../../cache/load/36189032ad.faa
 |   |-- load_fna
-|   |-- load_fna_path
-|   |   `-- 593ca3842e
-|   |       `-- result -> ../../../cache/load/c0d0b015f9.fna
-|   |-- load_gbk
-|   |   `-- 22d675da85
-|   |       `-- result -> ../../../cache/load/bb17ca9dfe.gbk
+|   |   `-- 821d1bdfd1
+|   |       `-- result -> ../../../cache/load/6046a54e92.fna
 |   |-- num
-|   |   `-- 17e11bef85
+|   |   |-- 1759491fab
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- 98a75cf1b9
 |   |       `-- result -> ../../../cache/lines/...
 |   `-- str
-|       |-- 3e6793b201
+|       |-- 824ccbd8b2
 |       |   `-- result -> ../../../cache/lines/...
-|       |-- 90811d06ee
-|       |   `-- result -> ../../../cache/lines/...
-|       `-- cdba97c8d8
+|       `-- ac19b3d2a1
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- db.dmnd -> ../exprs/diamond_makedb/afa6e907a5/s0/result
-    |-- maga.fna -> ../exprs/load_fna_path/593ca3842e/result
-    `-- result -> ../exprs/diamond_blastx_db/929694ebc5/b6deebbe38/4421e53da1/s0/result
+    |-- db.dmnd -> ../exprs/diamond_makedb/ccc25bfe26/s0/result
+    |-- hits2.bht.list -> ../exprs/diamond_blastx_db_each/e6c0faf0df/91df83025b/494baa00c6/f03acd065c/s0/result
+    |-- hits.bht -> ../exprs/diamond_blastx_db/e6c0faf0df/91df83025b/494baa00c6/48b25dfa2b/s0/result
+    `-- result -> ../exprs/any/fb84c5207f/result
 
-29 directories, 18 files
+35 directories, 21 files

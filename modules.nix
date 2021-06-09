@@ -107,7 +107,7 @@ in rec {
   ortholang-blastdbget    = mkMod ./OrthoLang/Modules/Blastdbget    [ myBlast blastdbget ] ""; # TODO remove myBlast?
   ortholang-crbblast      = mkMod ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";
   ortholang-flowchart      = mkMod ./OrthoLang/Modules/FlowChart      [ graphviz ] ""; # TODO remove?
-  # ortholang-diamond       = mkMod ./OrthoLang/Modules/Diamond       [ diamond ] "";
+  ortholang-diamond       = mkMod ./OrthoLang/Modules/Diamond       [ diamond ] "";
   ortholang-hmmer         = mkMod ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
   # ortholang-mmseqs        = mkMod ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
   ortholang-muscle        = mkMod ./OrthoLang/Modules/Muscle        [ muscle ] "";
@@ -141,7 +141,7 @@ in rec {
     ortholang-blastrbh
     ortholang-crbblast
     ortholang-flowchart
-    # ortholang-diamond
+    ortholang-diamond
     ortholang-hmmer
     # ortholang-mmseqs
     ortholang-muscle
