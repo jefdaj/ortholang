@@ -115,7 +115,8 @@ in rec {
 
   # TODO should the wrap not be necessary?
   ortholang-seqio         = mkMod ./OrthoLang/Modules/SeqIO         [ myPy3 ] myPy3Wrap;
-  # ortholang-orthofinder   = mkMod ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
+  ortholang-orthofinder   = mkMod ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
+  ortholang-sonicparanoid = mkMod ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
 
   ortholang-treecl        = mkMod ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
 
@@ -142,7 +143,7 @@ in rec {
     ortholang-hmmer
     ortholang-mmseqs
     ortholang-muscle
-    # ortholang-orthofinder
+    ortholang-orthofinder
     ortholang-plots
     ortholang-setstable
     ortholang-psiblast
