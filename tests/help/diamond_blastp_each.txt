@@ -1,4 +1,4 @@
-diamond_blastp_each : num faa faa.list -> bht.list
+diamond_blastp_each : num num faa faa.list -> bht.list
 
 where
   num = number in regular or scientific notation

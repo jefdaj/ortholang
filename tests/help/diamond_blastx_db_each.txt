@@ -1,4 +1,4 @@
-diamond_blastx_db_each : num fna dmnd.list -> bht.list
+diamond_blastx_db_each : num num fna dmnd.list -> bht.list
 
 where
   num = number in regular or scientific notation

@@ -7,13 +7,14 @@
 |       `-- 36189032ad.faa.ids
 |-- exprs
 |   |-- diamond_blastp_db
-|   |   `-- 87c44c2675
-|   |       `-- ccc25bfe26
-|   |           `-- 4421e53da1
-|   |               `-- s0
-|   |                   `-- result
+|   |   `-- e6c0faf0df
+|   |       `-- 91df83025b
+|   |           `-- afa6e907a5
+|   |               `-- 48b25dfa2b
+|   |                   `-- s0
+|   |                       `-- result
 |   |-- diamond_makedb
-|   |   `-- afa6e907a5
+|   |   `-- ccc25bfe26
 |   |       `-- s0
 |   |           `-- result
 |   |-- load_faa
@@ -22,7 +23,9 @@
 |   |   `-- cfed7edd23
 |   |       `-- result -> ../../../cache/load/10ffe0cf0f.faa
 |   |-- num
-|   |   `-- 6de785566e
+|   |   |-- 1759491fab
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- 98a75cf1b9
 |   |       `-- result -> ../../../cache/lines/...
 |   `-- str
 |       |-- 824ccbd8b2
@@ -30,8 +33,7 @@
 |       `-- cdba97c8d8
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
-    |-- mgendb.dmnd -> ../exprs/diamond_makedb/afa6e907a5/s0/result
-    `-- result -> ../exprs/diamond_blastp_db/87c44c2675/ccc25bfe26/4421e53da1/s0/result
+    |-- hits.bht -> ../exprs/diamond_blastp_db/e6c0faf0df/91df83025b/afa6e907a5/48b25dfa2b/s0/result
+    `-- result -> ../vars/hits.bht
 
-20 directories, 14 files
+22 directories, 14 files

@@ -41,10 +41,10 @@
         "homepage": "http://www.diamondsearch.org/",
         "owner": "jefdaj",
         "repo": "diamond-nix",
-        "rev": "900595fbd7643e5fd468f6f2786172a603a38fcb",
-        "sha256": "0ch77lk8ji868mbr7cq1bxhhq16v2bqf8daf392bwajgcczq8xr2",
+        "rev": "39890cfdfba5a1811ea104013df952f44ef53c3f",
+        "sha256": "1qa436phiayqkf3fxwpwv595qxdk4dwc6xbvvllqzi2yx5lvpkx9",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/diamond-nix/archive/900595fbd7643e5fd468f6f2786172a603a38fcb.tar.gz",
+        "url": "https://github.com/jefdaj/diamond-nix/archive/39890cfdfba5a1811ea104013df952f44ef53c3f.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "docopt": {

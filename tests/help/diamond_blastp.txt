@@ -1,4 +1,4 @@
-diamond_blastp : num faa faa -> bht
+diamond_blastp : num num faa faa -> bht
 
 where
   num = number in regular or scientific notation
