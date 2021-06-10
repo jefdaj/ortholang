@@ -3,16 +3,30 @@
 set -x
 set -o pipefail
 
-# start with the basic tests
-TEST_FILTER='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
+# TIMESTAMP=$(date '+%Y-%m-%d_%H:%M')
+# LOGFILE="ortholang_${testfilter}_${TIMESTAMP}.log"
+LOGFILE='test.log'
+rm -f "$LOGFILE" # helps prevent unneccesary nix-builds
 
-# add module-specific scripts if any
-BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-[[ "$BRANCH" =~ module ]] \
-  && TEST_FILTER="$TEST_FILTER || \$5 ~/$(echo "$BRANCH" | cut -d'-' -f2):/"
+# figure out what branch we're on
+branch="$TRAVIS_BRANCH"
+[[ -z "$branch" ]] && branch="$(git rev-parse --abbrev-ref HEAD)"
 
-# override from the command line
-[[ -z "$1" ]] || TEST_FILTER="$1"
+# run module-specific tests only on module branches,
+# and the standard interpreter tests everywhere else
+# TODO how to exclude things here that are the matched name + something more?
+[[ "$branch" =~ module ]] \
+  && testfilter="\$0 ~ /.$(echo "$branch" | cut -d'-' -f2):/ || \$0 ~ /'$(echo "$branch" | cut -d'-' -f2)'/" \
+  || testfilter='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
+
+# unless it's something important,
+[[ "$branch" =~ ^(master|bugfix) ]] && testfilter="all"
+
+# or one of these specific cases.
+[[ "$branch" =~ ^(feature-nix-tooling|develop)$ ]] && testfilter='$2 ~/version/'
+
+# finally, override from the command line
+[[ -z "$1" ]] || testfilter="$1"
 
 if [[ -z "$TMPDIR" ]]; then
   export TMPDIR=$PWD/.stack-work/tmp
@@ -22,13 +36,10 @@ fi
 ### build the binary ###
 
 NIX_ARGS="" # TODO put back --pure?
-# TIMESTAMP=$(date '+%Y-%m-%d_%H:%M')
-# LOGFILE="ortholang_${TEST_FILTER}_${TIMESTAMP}.log"
-LOGFILE='test.log'
 
 nix-run() {
   rm -f "$LOGFILE"
-  nix-shell shell.nix $NIX_ARGS --run "$@" 2>&1 | tee -a "$LOGFILE"
+  nix-shell release.nix $NIX_ARGS --run "$@" 2>&1 | tee -a "$LOGFILE"
   code="$?"
   [[ $code == 0 ]] || cat "$LOGFILE"
   return $code
@@ -44,7 +55,7 @@ export TASTY_COLOR="always"
 export TASTY_QUICKCHECK_SHOW_REPLAY=True
 
 STACK_CMD="stack exec ortholang --"
-TEST_ARGS="--debug '.*' --test '$TEST_FILTER'"
+TEST_ARGS="--debug '.*' --test '$testfilter'"
 
 # test using shared cache first because it's faster
 # nix-run "$STACK_CMD --shared http://shortcut.pmb.berkeley.edu/shared $TEST_ARGS"
@@ -57,4 +68,4 @@ TEST_ARGS="--debug '.*' --test '$TEST_FILTER'"
 # exit $code2
 
 # local tests only pending server update
-nix-shell shell.nix --command "$STACK_CMD $TEST_ARGS; exit"
+nix-shell release.nix --command "$STACK_CMD $TEST_ARGS; exit"
