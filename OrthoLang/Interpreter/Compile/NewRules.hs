@@ -75,7 +75,6 @@ module OrthoLang.Interpreter.Compile.NewRules
   -- , newFnP2
   -- , newFnP3
   -- , newFnP4
-  , path2info
 
   -- * Implementation details
   , rReloadIDs
