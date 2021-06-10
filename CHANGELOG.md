@@ -6,7 +6,34 @@ This project adheres (loosely) to [Semantic Versioning](https://semver.org/spec/
 and [A successful Git branching model](https://nvie.com/posts/a-successful-git-branching-model/).
 
 ## [unreleased]
+### Added
+- "new-style" Shake patterns
+- Path expansions
+* Untyped script type for use in the script and zip modules
+- New modules:
+    * curl
+		* zip
+
 ### Changed
+- Update all Nix files along with some of the dependency programs
+- Rewrote modules to use new-style Shake patterns:
+    * psiblast
+	  * mmseqs
+	  * diamond
+		* orthofinder
+		* listlike
+		* blastrbh
+		* blasthits
+		* blastdb
+		* blastdbget
+		* orthogroups
+		* busco
+		* sets
+		* sample
+		* range
+		* plots
+
+### Fixed
 - Clean up compiler warnings
 - Disable haddocks to speed up compilation
 
@@ -18,6 +45,7 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 
 ### Added
 - Work in progress on "NewRules" module and related rewrites
+- More checks related to file locking
 
 ### Fixed
 - Remove dates from tShow output
@@ -69,7 +97,7 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 - Move development to `develop` branch; `master` will be for releases
 - Start using semantic versioning
 
-[unreleased]: https://github.com/jefdaj/ortholang/compare/v0.9.4...HEAD
+[unreleased]: https://github.com/jefdaj/ortholang/compare/v0.9.5...HEAD
 [0.9.5]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.5
 [0.9.4]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.4
 [0.9.3]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.3
