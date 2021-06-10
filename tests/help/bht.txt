@@ -1,16 +1,16 @@
 The bht extension is for tab-separated table of blast hits (outfmt 6).
 
-You can create them with these 58 functions:
+You can create them with these 45 functions:
   blastn : num fna fna -> bht
   blastn_db : num fna fna.blastdb -> bht
   blastn_rbh : num fna fna -> bht
+  blastn_rbh_each : num fna fna -> bht
   blastn_rev : num fna fna -> bht
   blastp : num faa faa -> bht
   blastp_db : num faa faa.blastdb -> bht
   blastp_rbh : num faa faa -> bht
+  blastp_rbh_each : num faa faa -> bht
   blastp_rev : num faa faa -> bht
-  blastx : num fna faa -> bht
-  blastx_db : num fna faa.blastdb -> bht
   ...
 
 And use them with these 2 functions:

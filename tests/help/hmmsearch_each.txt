@@ -1,4 +1,4 @@
-hmmsearch_each : num hmm.list faa -> hht
+hmmsearch_each : num hmm.list faa -> hht.list
 
 where
   num = number in regular or scientific notation

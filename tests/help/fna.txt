@@ -7,13 +7,13 @@ You can create them with these 5 functions:
   load_fna : str -> fna
   load_fna_path : str -> fna
 
-And use them with these 52 functions:
+And use them with these 40 functions:
   blastn : num fna fna -> bht
   blastn_db : num fna fna.blastdb -> bht
   blastn_db_each : num fna fna.blastdb.list -> bht.list
   blastn_each : num fna fna.list -> bht.list
   blastn_rbh : num fna fna -> bht
-  blastn_rbh_each : num fna fna.list -> bht.list
+  blastn_rbh_each : num fna fna -> bht
   blastn_rev : num fna fna -> bht
   blastn_rev_each : num fna fna.list -> bht.list
   blastx : num fna faa -> bht

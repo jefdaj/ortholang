@@ -1,4 +1,4 @@
 diff : any.list.list -> any.list
 
 where
-  any = any type
+  any = the type of the list elements

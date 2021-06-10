@@ -1,5 +1,5 @@
-get_proteomes : str.list -> faa.gz.list
+get_proteomes : str.list -> fna.gz.list
 
 where
   str = string
-  faa = FASTA amino acid
+  fna = FASTA nucleic acid

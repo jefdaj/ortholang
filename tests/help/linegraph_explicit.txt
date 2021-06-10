@@ -1,0 +1,6 @@
+linegraph_explicit : str str num.scores -> png
+
+where
+  str = string
+  num = number in regular or scientific notation
+  png = plot image

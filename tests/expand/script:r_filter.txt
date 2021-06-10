@@ -1,0 +1,11 @@
+s1 = load_faa "examples/sequences/Mycoplasma_gallisepticum_protein_refseq.faa"
+s2 = load_faa "examples/sequences/Mycoplasma_pulmonis_protein_refseq.faa"
+fwd_hits = blastp_db 1.0e-20 s1 (makeblastdb_prot_all [s2])
+fwd_hits_filtered = run_script_explicit (load_script "examples/scripts/custom-r-filter.R")
+                                        ["fwd_hits.bht"]
+                                        [fwd_hits]
+target_ids = extract_targets fwd_hits_filtered
+s2_small = extract_seqs s2 target_ids
+rev_hits = blastp_db 1.0e-20 s2_small (makeblastdb_prot_all [s1])
+rb_hits = reciprocal_best fwd_hits rev_hits
+result = rb_hits

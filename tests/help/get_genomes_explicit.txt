@@ -1,0 +1,5 @@
+get_genomes_explicit : str.list -> fna.gz.list
+
+where
+  str = string
+  fna = FASTA nucleic acid

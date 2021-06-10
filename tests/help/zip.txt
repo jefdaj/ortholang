@@ -1,0 +1,7 @@
+The zip extension is for zip archives.
+
+You can create them with these 2 functions:
+  zip_archive : untyped.list -> zip
+  zip_archive_explicit : str.list untyped.list -> zip
+
+And use them with these 0 functions:

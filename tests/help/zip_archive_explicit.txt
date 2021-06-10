@@ -1,0 +1,6 @@
+zip_archive_explicit : str.list untyped.list -> zip
+
+where
+  str = string
+  untyped = untyped file
+  zip = zip archives

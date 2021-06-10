@@ -1,0 +1,5 @@
+curl : str str -> untyped
+
+where
+  str = string
+  untyped = untyped file

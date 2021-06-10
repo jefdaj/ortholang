@@ -1,0 +1,7 @@
+The bin extension is for custom scripts.
+
+You can create them with these 1 functions:
+  load_script : str -> bin
+
+And use them with these 1 functions:
+  run_script_explicit : bin str.list untyped.list -> untyped

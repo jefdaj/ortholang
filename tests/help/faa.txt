@@ -9,13 +9,13 @@ You can create them with these 7 functions:
   newrulestest2 : str faa faa -> faa
   translate : fna -> faa
 
-And use them with these 66 functions:
+And use them with these 44 functions:
   blastp : num faa faa -> bht
   blastp_db : num faa faa.blastdb -> bht
   blastp_db_each : num faa faa.blastdb.list -> bht.list
   blastp_each : num faa faa.list -> bht.list
   blastp_rbh : num faa faa -> bht
-  blastp_rbh_each : num faa faa.list -> bht.list
+  blastp_rbh_each : num faa faa -> bht
   blastp_rev : num faa faa -> bht
   blastp_rev_each : num faa faa.list -> bht.list
   blastx : num fna faa -> bht

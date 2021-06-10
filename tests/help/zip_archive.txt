@@ -1,0 +1,5 @@
+zip_archive : untyped.list -> zip
+
+where
+  untyped = untyped file
+  zip = zip archives

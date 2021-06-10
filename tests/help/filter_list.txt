@@ -1,0 +1,4 @@
+filter_list : str.list str -> str.list
+
+where
+  str = string

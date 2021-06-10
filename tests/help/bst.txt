@@ -5,4 +5,4 @@ You can create them with these 2 functions:
   concat_bst : bst.list -> bst
 
 And use them with these 1 functions:
-  busco_filter_completeness : num bst faa.list -> faa.list
+  busco_filter_completness : num bst faa.list -> faa.list

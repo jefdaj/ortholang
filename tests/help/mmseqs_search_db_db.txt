@@ -1,0 +1,6 @@
+mmseqs_search_db_db : num mms mms -> bht
+
+where
+  num = number in regular or scientific notation
+  mms = MMSeqs2 sequence database
+  bht = tab-separated table of blast hits (outfmt 6)

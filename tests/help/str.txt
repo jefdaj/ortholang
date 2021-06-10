@@ -4,15 +4,15 @@ You can create them with these 2 functions:
   newrulestest1 : str str -> str
   newrulestest3 : str str str -> str
 
-And use them with these 39 functions:
-  blastdbget_faa : str -> faa.blastdb
-  blastdbget_fna : str -> fna.blastdb
-  blastdblist : str -> str.list
+And use them with these 51 functions:
+  blastdb_get_faa : str str -> faa.blastdb
+  blastdb_get_faa_date : str str -> faa.blastdb
+  blastdb_get_fna : str str -> fna.blastdb
+  blastdb_get_fna_date : str str -> fna.blastdb
+  blastdb_list : str -> str.list
+  blastdb_list_date : str -> str.list
   busco_fetch_lineage : str -> blh
   busco_list_lineages : str -> str.list
-  cheat : str any str -> any
-  gbk_to_faa : str gbk -> faa
-  gbk_to_faa_each : str gbk.list -> faa.list
-  gbk_to_faa_rawids : str gbk -> faa
-  gbk_to_faa_rawids_each : str gbk.list -> faa.list
+  curl : str str -> untyped
+  curl_date : str str -> untyped
   ...

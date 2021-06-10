@@ -1,0 +1,21 @@
+run_script : str untyped.list -> untyped
+
+where
+  str = string
+  untyped = untyped file
+
+This is a special function for using your own scripts in OrthoLang. The first
+str argument is name/path of the script to run, and the second is a "list of
+whatever". That is, it ignores the type system and lets you pass it any mixture
+of values. You'll need to make sure your script expects the type of files you
+give it and returns something formatted reasonably.
+
+If you want to use the result in further OrthoLang functions, follow the same
+conventions they do. This is easiest if you copy one of the existing scripts to
+start from. For example you could copy filter_hits.R and change it to filter
+for particular genes rather than an e-value cutoff, and the result would still
+work in any other function expecting a hit table.
+
+If not, you can return anything and use it as the overall result. This would be
+useful, for example, if you want to gather all previous results and run another
+pipeline on them, or make a publication-quality plot in R.

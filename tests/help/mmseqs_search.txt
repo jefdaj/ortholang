@@ -2,8 +2,8 @@ mmseqs_search : num fa1 fa2 -> bht
 
 where
   num = number in regular or scientific notation
-  fa1 = query (any fasta) (fna or faa)
-  fa2 = subject (any fasta) (fna or faa)
+  fa1 = any query fasta file (fna or faa)
+  fa2 = any subject fasta file (fna or faa)
   bht = tab-separated table of blast hits (outfmt 6)
 
 Find matching sequences in two fasta files, similar to BLAST.

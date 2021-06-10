@@ -1,0 +1,6 @@
+histogram_explicit : str str num.list -> png
+
+where
+  str = string
+  num = number in regular or scientific notation
+  png = plot image

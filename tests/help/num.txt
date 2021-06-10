@@ -8,13 +8,13 @@ You can create them with these 6 functions:
   multiply : num.list -> num
   subtract : num.list -> num
 
-And use them with these 127 functions:
+And use them with these 98 functions:
   blastn : num fna fna -> bht
   blastn_db : num fna fna.blastdb -> bht
   blastn_db_each : num fna fna.blastdb.list -> bht.list
   blastn_each : num fna fna.list -> bht.list
   blastn_rbh : num fna fna -> bht
-  blastn_rbh_each : num fna fna.list -> bht.list
+  blastn_rbh_each : num fna fna -> bht
   blastn_rev : num fna fna -> bht
   blastn_rev_each : num fna fna.list -> bht.list
   blastp : num faa faa -> bht

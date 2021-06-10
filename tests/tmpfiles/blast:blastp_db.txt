@@ -87,10 +87,10 @@
 |       `-- dec8f9d2e2
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    |-- mapped.str.list.list -> ../exprs/extract_queries_each/2a462c629e/result
     |-- mappeddb.str.list.list -> ../exprs/extract_queries_each/e28d617fa2/result
-    |-- mgen.faa -> ../exprs/load_faa/f8a41afad4/result
+    |-- mapped.str.list.list -> ../exprs/extract_queries_each/2a462c629e/result
     |-- mgendb.faa.blastdb -> ../exprs/makeblastdb_prot_all/1898488812/result
+    |-- mgen.faa -> ../exprs/load_faa/f8a41afad4/result
     |-- result -> ../exprs/length_each/9bbbb0e4de/result
     `-- single.str.list -> ../exprs/extract_queries/caab3c1333/result
 

@@ -4,7 +4,9 @@ You can create them with these 2 functions:
   busco_fetch_lineage : str -> blh
   load_lineage : str -> blh
 
-And use them with these 4 functions:
+And use them with these 6 functions:
+  busco_genome : blh fna -> bsr
+  busco_genome_each : blh fna.list -> bsr.list
   busco_proteins : blh faa -> bsr
   busco_proteins_each : blh faa.list -> bsr.list
   busco_transcriptome : blh fna -> bsr

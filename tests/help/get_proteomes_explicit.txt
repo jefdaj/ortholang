@@ -1,0 +1,5 @@
+get_proteomes_explicit : search -> fna.gz.list
+
+where
+  search = intermediate table describing biomartr searches
+  fna = FASTA nucleic acid

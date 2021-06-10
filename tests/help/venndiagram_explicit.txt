@@ -1,0 +1,6 @@
+venndiagram_explicit : str str any.list.list -> png
+
+where
+  str = string
+  any = the type to count unique values of
+  png = plot image
