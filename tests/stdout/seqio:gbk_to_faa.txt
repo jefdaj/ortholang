@@ -1,5 +1,3 @@
-/nix/store/9was2aizdqz43j8svk3bfa7ycll8ww1c-OrthoLang-SeqIO/bin/.genbank_to_fasta.py-wrapped:263: DeprecationWarning: 'U' mode is deprecated
-  in_file_handle = open (in_file, 'rU') #The 'U' option so we don't have to worry about line endings
 >MAG0010 | dnaA | Chromosomal replication initiator protein DnaA | 1:1401 Forward
 MNINSPNDKEIALKSYTETFLDILRQELGDQMLYKNFFANFEIKDVSKIGHITIGTTNVT
 PNSQYVIRAYESSIQKSLDETFERKCTFSFVLLDSAVKKKVKRERKEAAIENIELSNREV
