@@ -47,6 +47,7 @@ in pkgs.haskell.packages.${myGHC}.override {
           zlib.dev zlib.out # TODO remove?
           pkgconfig # TODO remove?
         ];
+        doHaddock = false; # TODO put back when needed?
       });
   };
 }

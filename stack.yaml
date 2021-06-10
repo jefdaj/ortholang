@@ -32,4 +32,4 @@ extra-deps:
     commit: c73b189e083a6427ef5c3e02c0e2fc8387df8382
 
 build:
-  haddock: true
+  haddock: false # TODO re-enable when needed
