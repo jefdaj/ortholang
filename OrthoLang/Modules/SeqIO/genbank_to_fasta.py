@@ -260,7 +260,7 @@ def genbank_to_fasta_whole(record, annotation_list, user_header, delimiter):
 
 #### Main ####
 ##############
-in_file_handle = open (in_file, 'rU') #The 'U' option so we don't have to worry about line endings
+in_file_handle = open (in_file, 'r')
 out_file_handle = open (out_file, 'w')
 
 record_iterator = SeqIO.parse(in_file_handle, file_format)
