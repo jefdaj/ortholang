@@ -13,9 +13,20 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 ## [0.9.5] - 2020-06-04
 ### Changed
 - Gather scripts into one directory
+- Experiment with FSATrace on Shake files
+- Update nix dependencies and tests
 
 ### Added
+- Work in progress on "NewRules" module and related rewrites
+
 ### Fixed
+- Remove dates from tShow output
+- Print parens around negative numbers
+- List arg hashing in aPermute
+- Singleton hashes
+- `blastp_db` duplication
+- Strip decimals in check scripts
+- Many other small bugfixes
 
 ## [0.9.4] - 2020-01-22
 ### Changed
