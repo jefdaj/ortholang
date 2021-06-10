@@ -12,26 +12,26 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 * Untyped script type for use in the script and zip modules
 - New modules:
     * curl
-		* zip
+    * zip
 
 ### Changed
 - Update all Nix files along with some of the dependency programs
 - Rewrote modules to use new-style Shake patterns:
     * psiblast
-	  * mmseqs
-	  * diamond
-		* orthofinder
-		* listlike
-		* blastrbh
-		* blasthits
-		* blastdb
-		* blastdbget
-		* orthogroups
-		* busco
-		* sets
-		* sample
-		* range
-		* plots
+    * mmseqs
+    * diamond
+    * orthofinder
+    * listlike
+    * blastrbh
+    * blasthits
+    * blastdb
+    * blastdbget
+    * orthogroups
+    * busco
+    * sets
+    * sample
+    * range
+    * plots
 
 ### Fixed
 - Clean up compiler warnings
