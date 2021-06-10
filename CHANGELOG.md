@@ -7,8 +7,12 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 
 ## [unreleased]
 
-## Changed
+## [0.9.5] - 2020-06-04
+### Changed
 - Gather scripts into one directory
+
+### Added
+### Fixed
 
 ## [0.9.4] - 2020-01-22
 ### Changed
@@ -52,6 +56,7 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 - Start using semantic versioning
 
 [unreleased]: https://github.com/jefdaj/ortholang/compare/v0.9.4...HEAD
+[0.9.5]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.5
 [0.9.4]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.4
 [0.9.3]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.3
 [0.9.2]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.2
