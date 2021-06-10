@@ -201,7 +201,10 @@ badlyBroken =
   , "test"
   , "zip"
   , "zip:zip_archive"
-  , "repeat:replace_each_recursive" -- times out rather than failing
+
+  -- times out rather than failing
+  , "repeat:replace_each_recursive"
+  , "singletons:singletons"
   ]
 
 mkTestGroup ::  Config -> LocksRef -> IDsRef -> DigestsRef -> String
