@@ -20,10 +20,10 @@ branch="$TRAVIS_BRANCH"
   || testfilter='$2 ~/version/ || $2 ~/repl/ || $2 ~/parser/ || $5 ~/parses/ || $5 ~/expands/'
 
 # unless it's something important,
-[[ "$branch" =~ '^(master|bugfix)' ]] && testfilter="all"
+[[ "$branch" =~ ^(master|bugfix) ]] && testfilter="all"
 
 # or one of these specific cases.
-[[ "$branch" =~ '^(feature-nix-tooling|develop)$' ]] && testfilter='$2 ~/version/'
+[[ "$branch" =~ ^(feature-nix-tooling|develop)$ ]] && testfilter='$2 ~/version/'
 
 # finally, override from the command line
 [[ -z "$1" ]] || testfilter="$1"
