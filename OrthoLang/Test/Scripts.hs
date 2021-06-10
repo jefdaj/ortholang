@@ -52,6 +52,7 @@ tmpfilesVary =
   , "plots:linegraph"
   , "plots:scatterplot"
   , "plots:histogram"
+  , "permute:leave_each_out" -- TODO this is a weird one
   ]
 
 -- | These work, but the stdout varies so they require a check script.
@@ -61,6 +62,7 @@ stdoutVaries =
   , "blasthits:reciprocal_best" -- TODO should this be fixable?
   , "blasthits:best_hits"
   , "hmmer:hmmbuild" -- TODO should be easy to fix by filtering out the DATE line
+  , "permute:leave_each_out" -- TODO this is a weird one
   ]
 
 -- | These generally need work and should be skipped for now :(
