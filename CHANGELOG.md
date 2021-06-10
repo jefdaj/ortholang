@@ -6,6 +6,9 @@ This project adheres (loosely) to [Semantic Versioning](https://semver.org/spec/
 and [A successful Git branching model](https://nvie.com/posts/a-successful-git-branching-model/).
 
 ## [unreleased]
+### Changed
+- Clean up compiler warnings
+- Disable haddocks to speed up compilation
 
 ## [0.9.5] - 2020-06-04
 ### Changed
