@@ -26,15 +26,10 @@ git:
   # quiet: true
   depth: 1
 
-# see: https://nvie.com/posts/a-successful-git-branching-model
+# the rest are done on a case-by-case basis to save build minutes
 branches:
   only:
   - master
-  - develop
-  - /^release-.*$/
-  - /^bugfix-.*$/
-  - /^module-.*$/
-  - /^feature-.*$/
 
 script:
   - ./scripts/dev/test-nix.sh
