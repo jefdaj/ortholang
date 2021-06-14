@@ -61,7 +61,6 @@ stdoutVaries =
   [ "crbblast:crb_blast_each2"
   , "blasthits:reciprocal_best" -- TODO should this be fixable?
   , "blasthits:best_hits"
-  , "hmmer:hmmbuild" -- TODO should be easy to fix by filtering out the DATE line
   , "permute:leave_each_out" -- TODO this is a weird one
   ]
 
