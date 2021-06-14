@@ -1,5 +1,0 @@
-newrulestest2 : str faa faa -> faa
-
-where
-  str = string
-  faa = FASTA amino acid

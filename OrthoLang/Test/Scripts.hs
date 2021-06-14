@@ -187,7 +187,6 @@ badlyBroken =
   , "maga-vs-mgen-blastp-rbh-3x"
   , "mmseqs:createdb"
   , "mmseqs:createdb_all"
-  , "newrulestest"
   , "prs02"
   , "repeat:faas"
   , "repeat:load"
