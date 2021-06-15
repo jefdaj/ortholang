@@ -88,6 +88,10 @@ cellDigest c d ms fnName t (PathDigest eHash) (PathDigest qHash) (PathDigest sHa
     hashes = [eHash, qHash, sHash]
     path   = unsafeExprPathExplicit c d fnName t ms hashes
 
+-- TODO shit. forgot to take expansions into account!
+--      for example we can't just use blastp because it's implemented as blastp_db + makeblastdb
+--      should still be able to do it by building the expr for each cell and evaling it though
+
 aAva :: String -> NewAction2
 aAva fnName (ExprPath oPath) ePath fasPath = do
   cfg  <- fmap fromJust getShakeExtra
