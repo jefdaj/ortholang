@@ -1,2 +1,0 @@
-gi|84626162|gb|AAC71217.2| DNA polymerase III, beta subunit [Mycoplasma genitalium G37]	gi|290752268|emb|CBH40239.1| DNA polymerase III, beta chain [Mycoplasma agalactiae]	23.604	394	261	14	1	380	1	368	1.05e-10	55.5
-gi|84626162|gb|AAC71217.2| DNA polymerase III, beta subunit [Mycoplasma genitalium G37]	gi|84626162|gb|AAC71217.2| DNA polymerase III, beta subunit [Mycoplasma genitalium G37]	100.000	380	0	0	1	380	1	380	0.0	741

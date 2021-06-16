@@ -1,2 +1,0 @@
-$TMPDIR/exprs/psiblast_db/4467ed0f79/ec1f6f502d/8ea5d5eb81/s0/result
-$TMPDIR/exprs/psiblast_db/4467ed0f79/ec1f6f502d/4f0bccea88/s0/result

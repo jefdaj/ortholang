@@ -1,5 +1,0 @@
-$TMPDIR/cache/lines/27942d1701.txt
-$TMPDIR/cache/lines/dee558b398.txt
-$TMPDIR/cache/lines/d268bbd07e.txt
-$TMPDIR/cache/lines/b0abfac195.txt
-$TMPDIR/cache/lines/d0d6a5605f.txt

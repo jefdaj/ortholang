@@ -1,5 +1,0 @@
-query = load_faa "examples/sequences/Mycoplasma_genitalium_single.faa"
-mgendb = makeblastdb_prot_all [load_faa "examples/sequences/Mycoplasma_genitalium_protein_refseq.faa"]
-magadb = makeblastdb_prot_all [load_faa "examples/sequences/Mycoplasma_agalactiae_small.faa"]
-pssm = psiblast_train_faa_pdbs 1.0e-2 query [mgendb, magadb]
-result = pssm

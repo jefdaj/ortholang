@@ -1,9 +1,0 @@
-s = "a string"
-n = 14000000
-nl = [1, 2, 3, 100]
-sl = ["another string", "and another", "and a third"]
-nll = [nl, [1, 2, 3]]
-txt = run_script_explicit (load_script "examples/scripts/custom-bash-script.sh")
-                          ["s.str", "n.num", "nl.num.list", "sl.str.list", "nll.num.list.list"]
-                          [s, n, nl, sl, nll]
-result = txt

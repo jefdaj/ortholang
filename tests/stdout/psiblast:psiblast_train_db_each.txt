@@ -1,2 +1,0 @@
-$TMPDIR/cache/map/35872e75dd/result
-$TMPDIR/cache/map/da4a6b690a/result

@@ -1,1 +1,0 @@
-["examples/sequences/Mycoplasma_genitalium_M2321_single.fna"]

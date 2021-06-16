@@ -1,2 +1,0 @@
-$TMPDIR/cache/lines/ab7686046d.txt
-$TMPDIR/cache/lines/71aa032b99.txt

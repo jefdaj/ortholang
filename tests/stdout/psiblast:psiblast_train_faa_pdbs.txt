@@ -1,2 +1,0 @@
-$TMPDIR/exprs/psiblast_train_faa_pdb/0c631e7663/ec1f6f502d/1cf0fe026c/s0/result
-$TMPDIR/exprs/psiblast_train_faa_pdb/0c631e7663/ec1f6f502d/27f8999d34/s0/result

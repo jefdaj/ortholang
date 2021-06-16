@@ -1,9 +1,0 @@
-single = concat_fna [load_fna_path (gbk_to_fna_rawids "cds"
-                                                      (load_gbk "examples/sequences/Mycoplasma_genitalium_M2321.gbk")),
-                     load_fna_path (gbk_to_fna_rawids "cds"
-                                                      (load_gbk "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk"))]
-mapped = concat_fna_each [[load_fna_path (gbk_to_fna_rawids "cds"
-                                                            (load_gbk "examples/sequences/Mycoplasma_genitalium_M2321.gbk")),
-                           load_fna_path (gbk_to_fna_rawids "cds"
-                                                            (load_gbk "examples/sequences/Mycoplasma_canadense_HAZ360_1.gbk"))]]
-result = [single] | mapped

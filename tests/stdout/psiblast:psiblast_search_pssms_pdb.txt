@@ -1,1 +1,0 @@
-$TMPDIR/exprs/psiblast_search_pssm_pdb/6887bbc13b/ead850a1cf/1cf0fe026c/s0/result

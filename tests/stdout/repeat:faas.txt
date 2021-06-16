@@ -1,5 +1,0 @@
-examples/sequences/Mycoplasma_gallisepticum_protein_refseq.faa
-examples/sequences/Mycoplasma_genitalium_single.faa
-examples/sequences/Mycoplasma_hyopneumoniae_J_protein_refseq.faa
-examples/sequences/Mycoplasma_mobile_protein_refseq.faa
-examples/sequences/Mycoplasma_synoviae_protein_refseq.faa

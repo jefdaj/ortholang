@@ -52,8 +52,8 @@
 |           `-- result -> ../../../cache/lines/...
 `-- vars
     |-- db.dmnd -> ../exprs/diamond_makedb/ccc25bfe26/s0/result
-    |-- hits2.bht.list -> ../exprs/diamond_blastx_db_each/e6c0faf0df/91df83025b/494baa00c6/f03acd065c/s0/result
     |-- hits.bht -> ../exprs/diamond_blastx_db/e6c0faf0df/91df83025b/494baa00c6/48b25dfa2b/s0/result
+    |-- hits2.bht.list -> ../exprs/diamond_blastx_db_each/e6c0faf0df/91df83025b/494baa00c6/f03acd065c/s0/result
     `-- result -> ../exprs/any/fb84c5207f/result
 
 35 directories, 21 files
