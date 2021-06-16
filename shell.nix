@@ -12,9 +12,12 @@
 # nix-shell modules.nix -A ortholang-seqio
 
 let
-  pkgs    = import ./nix;
-  myHs    = import ./haskell.nix;
-  release = import ./release.nix;
+  pkgs        = import ./nix;
+  myHs        = import ./haskell.nix;
+  release     = import ./release.nix;
+  environment = import ./environment.nix;
+  modules     = (import ./modules.nix).modules;
+  runDepends  = environment ++ modules;
 
 in myHs.shellFor {
 
@@ -25,7 +28,7 @@ in myHs.shellFor {
   # You can optionally go "full reproducible" by adding your text editor
   # and using `nix-shell --pure`, but you'll also have to add some common
   # unix tools as you go.
-  buildInputs = with pkgs; [
+  buildInputs = with pkgs; runDepends ++ [
     myHs.ghcid
     myHs.hlint
     myHs.stack

@@ -68,4 +68,4 @@ TEST_ARGS="--debug '.*' --test '$testfilter'"
 # exit $code2
 
 # local tests only pending server update
-nix-shell release.nix --command "$STACK_CMD $TEST_ARGS; exit"
+nix-shell --command "$STACK_CMD $TEST_ARGS; exit"

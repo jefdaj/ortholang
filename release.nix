@@ -35,6 +35,7 @@ in pkgs.haskell.lib.overrideCabal myHs.OrthoLang (drv: {
     --set LOCALE_ARCHIVE "${pkgs.glibcLocales}/lib/locale/locale-archive"
   '');
 
+  # TODO move this to shell.nix?
   shellHook = ''
     ${drv.shellHook or ""}
     export LANG=en_US.UTF-8
