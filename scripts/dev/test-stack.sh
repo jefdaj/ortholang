@@ -39,7 +39,7 @@ NIX_ARGS="" # TODO put back --pure?
 
 nix-run() {
   rm -f "$LOGFILE"
-  nix-shell release.nix $NIX_ARGS --run "$@" 2>&1 | tee -a "$LOGFILE"
+  nix-shell $NIX_ARGS --run "$@" 2>&1 | tee -a "$LOGFILE"
   code="$?"
   [[ $code == 0 ]] || cat "$LOGFILE"
   return $code

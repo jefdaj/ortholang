@@ -12,8 +12,6 @@
 # nix-shell modules.nix -A ortholang-seqio
 
 let
-  # sources = import ./nix/sources.nix {};
-  # pkgs    = import sources.nixpkgs {};
   pkgs    = import ./nix;
   myHs    = import ./haskell.nix;
   release = import ./release.nix;
@@ -21,16 +19,18 @@ let
 in myHs.shellFor {
 
   # TODO would there be any reason to add other packages here?
-  packages = p: with p; [ release.project ];
+  packages = p: with p; [ release ];
 
   # Put any packages you want during development here.
   # You can optionally go "full reproducible" by adding your text editor
   # and using `nix-shell --pure`, but you'll also have to add some common
   # unix tools as you go.
-  buildInputs = with myHs; [
-    ghcid
-    hlint
-    stack
+  buildInputs = with pkgs; [
+    myHs.ghcid
+    myHs.hlint
+    myHs.stack
+    zlib.dev
+    zlib.out
   ];
 
   # Run a local Hoogle instance like this:
