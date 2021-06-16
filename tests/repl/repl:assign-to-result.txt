@@ -8,7 +8,7 @@ ortholang —▶
 ortholang —▶ # then at the end, another 'result' should be implicitly added that
 ortholang —▶ # points the new variable
 ortholang —▶ 
-ortholang —▶ load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
+ortholang —▶ load_faa "https://raw.githubusercontent.com/jefdaj/ortholang/master/examples/sequences/PCC_6803_genes_10.faa"
 >derice
 ACTGACTAGCTAGCTAACTG
 >sanka
@@ -17,11 +17,11 @@ GCATCGTAGCTAGCTACGAT
 ...
 
 ortholang —▶ :show
-result = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
+result = load_faa "https://raw.githubusercontent.com/jefdaj/ortholang/master/examples/sequences/PCC_6803_genes_10.faa"
 
 ortholang —▶ samplefa = result
 ortholang —▶ :show
-samplefa = load_fna "https://molb7621.github.io/workshop/_downloads/sample.fa"
+samplefa = load_faa "https://raw.githubusercontent.com/jefdaj/ortholang/master/examples/sequences/PCC_6803_genes_10.faa"
 result = samplefa
 
 ortholang —▶ :quit
