@@ -225,7 +225,7 @@ getTestScripts testDir mPrefix = do
     Just p  -> filter ((p ++ ":") `isPrefixOf`) names
 
 goldenDiff :: String -> FilePath -> IO BL.ByteString -> TestTree
-goldenDiff name file action = goldenVsStringDiff name fn file action
+goldenDiff name = goldenVsStringDiff name fn
   where
     -- based on the Tasty docs
     fn ref new = ["diff", "--text", "-u", ref, new]

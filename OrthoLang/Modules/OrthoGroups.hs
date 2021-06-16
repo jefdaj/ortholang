@@ -179,9 +179,9 @@ orthogroupContaining = newFnA2
 
 aOrthogroupContaining :: NewAction2
 aOrthogroupContaining (ExprPath out) ofrPath' idPath = do
-  ids  <- fmap fromJust getShakeExtra
+  cfg  <- fromJust <$> getShakeExtra
+  ids  <- fromJust <$> getShakeExtra
   ids' <- liftIO $ readIORef ids
-  cfg  <- fmap fromJust getShakeExtra
   let loc = "modules.orthogroups.aOrthogroupContaining"
       ofrPath = toPath loc cfg ofrPath'
   partialID <- readLit loc idPath
@@ -216,9 +216,9 @@ containsOneOf lists elems = filter (flip any elems . flip elem) lists
 -- TODO should this error when not finding one too, like aOrthogroupContaining?
 aOrthogroupsFilter :: FilterFn -> NewAction2
 aOrthogroupsFilter filterFn (ExprPath out') ofrPath' idsPath = do
-  ids  <- fmap fromJust getShakeExtra
+  cfg  <- fromJust <$> getShakeExtra
+  ids  <- fromJust <$> getShakeExtra
   ids' <- liftIO $ readIORef ids
-  cfg <- fmap fromJust getShakeExtra
   let loc = "modules.orthogroups.aOrthogroupsFilter"
       out = toPath loc cfg out'
       ofrPath = toPath loc cfg ofrPath'
@@ -293,8 +293,8 @@ pickAll nIDs = nIDs
 
 aOrthologFilterStr :: String -> PickerFn -> NewAction2
 aOrthologFilterStr fnName pickerFn (ExprPath out) groupListsPath idListsPath = do
-  cfg  <- fmap fromJust getShakeExtra
-  let loc = "modules.orthogroups.rOrthologFilterStr"
+  cfg <- fmap fromJust getShakeExtra
+  let loc     = "modules.orthogroups.rOrthologFilterStr"
       out'    = debugRules loc cfg out
       ogDir   = fromPath loc cfg $ ogCache cfg
       ogsPath = ogDir </> digest loc groupListsPath <.> "txt"
@@ -351,8 +351,8 @@ ogCache cfg = cacheDir cfg "orthogroups"
 
 aOrthologFilterStrFrac :: String -> PickerFn2 -> NewAction3
 aOrthologFilterStrFrac fnName pickerFn (ExprPath out) fracPath groupListsPath idListsPath = do
-  cfg  <- fmap fromJust getShakeExtra
-  let loc = "modules.orthogroups.rOrthologFilterStr"
+  cfg <- fmap fromJust getShakeExtra
+  let loc     = "modules.orthogroups.rOrthologFilterStr"
       out'    = debugRules loc cfg out
       ogDir   = fromPath loc cfg $ ogCache cfg
       ogsPath = ogDir </> digest loc groupListsPath <.> "txt"
