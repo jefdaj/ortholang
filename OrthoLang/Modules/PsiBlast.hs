@@ -205,8 +205,8 @@ aPsiblast writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
 
   -- before running psiblast, check whether the query is an empty pssm
   -- and if so, just return empty hits immediately
-  lines2 <- fmap (take 2 . lines) $ readFileStrict' qPath'
-  if (not writingPssm) && (length lines2 > 1) && (last lines2 == "<<emptypssm>>")
+  lines2 <- take 2 . lines <$> readFileStrict' qPath'
+  if not writingPssm && (length lines2 > 1) && (last lines2 == "<<emptypssm>>")
     then writeCachedLines loc oPath' ["<<emptybht>>"]
     else do
 
@@ -227,11 +227,11 @@ aPsiblast writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
         , cmdOutPath = tPath' -- note that it isn't the final outpath
         , cmdRmPatterns = [dbPre' ++ "*"]
         }
-    
+
       -- TODO instead of wrappedCmdWrite, check explicitly for tPath'
       --      and write a "no hits, empty pssm" message if needed
       -- TODO actually, do that as part of the if writing pssm thing below
-    
+
       {- By default PSSMs get a blank first line, but I figured out that you can
        - also put a sequence ID there and it will use it in place of the annoying
        - "Query_1" in hit tables. So here we write the PSSM to a tempfile, replace
@@ -240,8 +240,8 @@ aPsiblast writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
        -}
       when writingPssm $ do
         let head' = headOrDie "aPsiblast failed to read querySeqId"
-        querySeqId <- fmap (head' . words . head' . lines) $ readFileStrict' qPath'
-        pssmLines <- fmap lines $ readFileStrict' tPath'
+        querySeqId <- head' . words . head' . lines <$> readFileStrict' qPath'
+        pssmLines <- lines <$> readFileStrict' tPath'
         let pssmLines' = if null pssmLines then ["<<emptypssm>>"] else tail pssmLines
             dbName     = takeFileName $ takeDirectory dbPre'
             trainInfo  = "(trained on " ++ dbName ++ " with e-value cutoff " ++ eStr ++ ")"
@@ -249,7 +249,7 @@ aPsiblast writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
             pssmWithId = queryInfo : pssmLines'
         writeCachedLines loc oPath'' pssmWithId
         -- liftIO $ removeFile tPath'
-    
+
 ----------------------------------------------
 -- helpers that make blast dbs and/or pssms --
 ----------------------------------------------
@@ -261,7 +261,7 @@ aPsiblast writingPssm args (ExprPath oPath') ePath' qPath' dbPath' = do
 -- TODO fix passing dbprefix as db itself
 withPdbSubjects :: Expr -> Expr
 withPdbSubjects (Fun rtn seed deps name [a1, a2, xs ])
-  =             (Fun rtn seed deps name [a1, a2, dbs])
+  =             Fun rtn seed deps name [a1, a2, dbs]
   where
     dbs = Fun  (ListOf pdb) seed (depsOf xs) "makeblastdb_faa_each" [xs]
 withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
@@ -269,7 +269,7 @@ withPdbSubjects e = error $ "bad argument to withPdbSubjects: " ++ show e
 -- Wraps a single faa or an faa.list in makeblastdb_faa
 withPdbSubject :: Expr -> Expr
 withPdbSubject (Fun rtn seed deps name [a1, a2, x ])
-  =            (Fun rtn seed deps name [a1, a2, db])
+  =            Fun rtn seed deps name [a1, a2, db]
   where
     db  = Fun  (ListOf pdb) seed (depsOf fas) "makeblastdb_faa_all" [fas]
     fas = case typeOf x of
@@ -289,7 +289,7 @@ aWithPdbSubject = undefined
 -- TODO sometimes tries to use path to path of db as path to db... where to fix?
 withPssmQuery :: Expr -> Expr
 withPssmQuery (Fun rtn seed deps name [n, q, s])
-  =           (Fun rtn seed deps name [n, p, s])
+  =           Fun rtn seed deps name [n, p, s]
   where
     p = Fun pssm seed deps "psiblast_train_db" [n, q, s]
 withPssmQuery e = error $ "bad argument to withPssmQuery: " ++ show e

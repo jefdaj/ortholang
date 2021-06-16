@@ -28,7 +28,7 @@ import OrthoLang.Types
 import OrthoLang.Interpreter.Paths (cacheDir, exprPath, toPath,
                             fromPath, Path)
 
-import Data.List                  (intersperse)
+import Data.List                  (intersperse, intercalate)
 import Development.Shake.FilePath ((</>))
 import OrthoLang.Interpreter.Actions      (runCmd, CmdDesc(..), traceA, need')
 import OrthoLang.Util         (resolveSymlinks, digest)
@@ -119,7 +119,7 @@ aSimple' outPath actFn mTmpDir argPaths = do
   -- TODO probably not "simple tmp" anymore... remove? rename?
   cfg <- fmap fromJust getShakeExtra
   let loc = "interpreter.compile.basic.aSimple'"
-      hashes     = concat $ intersperse "/" $ map (digest loc) argPaths'
+      hashes     = intercalate "/" (map (digest loc) argPaths')
       argPaths'  = map (fromPath loc cfg) argPaths
       outPath'   = fromPath loc cfg outPath
       out = traceA loc outPath' (outPath':tmpDir':argPaths')

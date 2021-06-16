@@ -44,9 +44,10 @@ setsTable = newExprExpansion
 
 -- | Macro that adds the label strs
 mSetsTable :: ExprExpansion
-mSetsTable mods scr (Fun r ms ds n [(Ref _ _ _ (Var _ name))]) = case lookupExpr name (sAssigns scr) of
-  Nothing -> error "modules.plots.mSetsTable" $ "no such var: " ++ name
-  Just e -> mSetsTable mods scr (Fun r ms ds n [e]) -- TODO is this the right way to handle it?
+mSetsTable mods scr (Fun r ms ds n [Ref _ _ _ (Var _ name)]) =
+  case lookupExpr name (sAssigns scr) of
+    Nothing -> error "modules.plots.mSetsTable" $ "no such var: " ++ name
+    Just e -> mSetsTable mods scr (Fun r ms ds n [e]) -- TODO is this the right way to handle it?
 mSetsTable _ scr (Fun r ms ds _ [e@(Lst _ _ _ es)]) =
   let names = listVarNames "list" scr es
   in Fun r ms ds "sets_table_explicit" [names, e]

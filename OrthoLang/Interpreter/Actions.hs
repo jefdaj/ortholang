@@ -162,7 +162,7 @@ needShared name path@(Path p) = do
     || ("$TMPDIR/reps/" `isPrefixOf` p)
     || ("$TMPDIR/vars/" `isPrefixOf` p)
     -- these depend on the local filesystem
-    || (not ("$TMPDIR" `isPrefixOf` p))
+    || not ("$TMPDIR" `isPrefixOf` p)
     || ("$TMPDIR/exprs/load" `isPrefixOf` p)
     || ("$TMPDIR/exprs/glob" `isPrefixOf` p)
     -- if any of those ^ special cases apply, skip shared lookup
@@ -234,7 +234,7 @@ download cfg url = do
   es <- openURIString url
   case es of
     Left _ -> return Nothing
-    Right s -> fmap Just $ writeTempFile (tmpdir cfg) "download.txt" s
+    Right s -> Just <$> writeTempFile (tmpdir cfg) "download.txt" s
 
 ----------------
 -- read files --
@@ -264,24 +264,19 @@ readLit loc path = do
   empty <- isEmpty path
   if empty
     then return ""
-    else fmap (checkLit loc . init) -- TODO safe? already checked if empty
-       $ readFileStrict' path
+    else checkLit loc . init <$> readFileStrict' path
 
 readLits :: DebugLocation -> FilePath -> Action [String]
-readLits loc path = readList loc path >>= return . checkLits loc
+readLits loc path = checkLits loc <$> readList loc path
 
 readPath :: DebugLocation -> FilePath -> Action Path
-readPath loc path = readPaths loc path >>= return . headOrDie "readPath failed"
+readPath loc path = headOrDie "readPath failed" <$> readPaths loc path
 
 -- TODO should this have checkPaths?
 -- TODO what happens when each is itself a list of paths?
 readPaths :: DebugLocation -> FilePath -> Action [Path]
 readPaths loc path = do
-  paths <- (fmap . map) stringPath $ readList loc path
-  -- cfg <- fmap fromJust getShakeExtra
-  -- let loc' = loc ++ ".readPaths"
-  -- need' loc' $ map (fromPath loc' cfg) paths -- TODO remove? seems like it would kill laziness
-  return paths
+  map stringPath <$> readList loc path
 
 -- makes a copy of a list of paths without ortholang funny business,
 -- suitible for external scripts to read
@@ -304,10 +299,11 @@ readLitPaths loc path = do
   let loc' = loc ++ ".readLitPaths"
   cfg <- fmap fromJust getShakeExtra
   -- pth'' <- if isURL pth' then curl pth' else return $ toPath loc cfg pth'
-  let toAbs line = if isURL line then line
-                   else if isGeneric line then fromGeneric loc' cfg line
-                   else if isAbsolute line then line
-                   else workdir cfg </> line
+  let toAbs line
+        | isURL line = line
+        | isGeneric line = fromGeneric loc' cfg line
+        | isAbsolute line = line
+        | otherwise = workdir cfg </> line
   ls <- readList loc' path
   let ls'  = map toAbs ls
       ls'' = map (toPath loc cfg) ls'
@@ -316,11 +312,11 @@ readLitPaths loc path = do
   return ls''
 
 readLitPath :: DebugLocation -> FilePath -> Action Path
-readLitPath loc path = readLitPaths loc path >>= return . headOrDie "readLitPaths failed"
+readLitPath loc path = headOrDie "readLitPaths failed" <$> readLitPaths loc path
 
 -- TODO how should this relate to readLit and readStr?
 readString :: DebugLocation -> Type -> FilePath -> Action String
-readString loc etype path = readStrings loc etype path >>= return . headOrDie "readString failed"
+readString loc etype path = headOrDie "readString failed" <$> readStrings loc etype path
 
 {- Read a "list of whatever". Mostly for generic set operations. You include
  - the Type (of each element, not the list!) so it knows how to convert from
@@ -360,7 +356,7 @@ readList loc path = do
         $ readFileStrict lRef path
 
 countLines :: FilePath -> Action Scientific
-countLines path = readList "interpreter.actions.countLines" path >>= return . count
+countLines path = count <$> readList "interpreter.actions.countLines" path
   where
     count ls = read (show $ length ls) :: Scientific
 
@@ -383,7 +379,7 @@ first50 thing = if length shown > 50 then take 50 shown ++ "..." else shown
 
 -- TODO move to Util?
 last50 :: Show a => a -> String
-last50 thing = if length shown > 50 then "..." ++ (reverse $ take 50 $ reverse shown) else shown
+last50 thing = if length shown > 50 then "..." ++ reverse (take 50 $ reverse shown) else shown
   where
     shown = show thing
 
@@ -406,7 +402,7 @@ writeCachedLines :: DebugLocation -> FilePath -> [String] -> Action ()
 writeCachedLines loc outPath content = do
   cfg <- fmap fromJust getShakeExtra
   let cache = cachedLinesPath cfg content
-  let loc' = loc ++ ".writeCachedLines" 
+  let loc' = loc ++ ".writeCachedLines"
   debugA' loc' $ first50 content ++ " -> " ++ last50 cache
   -- withWriteOnce cache $ do
   writeFile' cache $ unlines content -- TODO writeFile'?
@@ -419,7 +415,7 @@ writeCachedLines loc outPath content = do
 writeCachedVersion :: DebugLocation -> FilePath -> FilePath -> Action ()
 writeCachedVersion loc outPath inPath = do
   let loc' = loc ++ ".writeCachedVersion"
-  content <- fmap lines $ readFileStrict' inPath
+  content <- lines <$> readFileStrict' inPath
   cfg <- fmap fromJust getShakeExtra
   let content' = map (toGeneric cfg) content
   writeCachedLines loc' outPath content'
@@ -618,14 +614,14 @@ runCmd d = do
           dbg $ "runCmd acquired extra write locks: " ++ show (cmdExtraOutPaths d)
           parLockFn fn
 
-  path <- fmap fromJust $ getEnv "PATH"
+  path <- fromJust <$> getEnv "PATH"
   let envDirs = Env [("PATH", path), ("TMPDIR", tmpdir cfg), ("WORKDIR", workdir cfg)]
 
   -- writeLockFn $ withReadLocks' inPaths' $ do
   writeLockFn $ do
     -- TODO remove opts?
     -- TODO always assume disk is 1?
-    dbg $ "runCmd proper starting"
+    dbg "runCmd proper starting"
     Exit code <- withResource disk (length inPaths' + 1) $ case wrapper cfg of
       Nothing -> command (envDirs:cmdOptions d) (cmdBinary d) (cmdArguments d)
       Just w  -> command (envDirs:Shell:cmdOptions d) w [escape $ unwords (cmdBinary d:cmdArguments d)]
@@ -636,7 +632,7 @@ runCmd d = do
 
     -- TODO use exitWith here?
     when (code /= cmdExitCode d) $
-      let rmPatterns = (takeDirectory (cmdOutPath d) </> "*"):(cmdRmPatterns d)
+      let rmPatterns = (takeDirectory (cmdOutPath d) </> "*"):cmdRmPatterns d
       in handleCmdError (cmdBinary d) code stderrPath rmPatterns
 
     let sPaths = stdoutPath:stderrPath:cmdSanitizePaths d -- TODO main outpath too?
@@ -661,10 +657,10 @@ handleCmdError bin n stderrPath rmPatterns = do
   errMsg2 <- if hasErr
                then do
                  errTxt <- readFileStrict' stderrPath
-                 return $ ["Stderr was:", errTxt]
+                 return ["Stderr was:", errTxt]
                else return []
   cfg <- fmap fromJust getShakeExtra
-  files' <- fmap concat $ mapM (matchPattern cfg) rmPatterns
+  files' <- concat <$> mapM (matchPattern cfg) rmPatterns
   let files'' = sort $ nub files'
   liftIO $ rmAll files''
   let errMsg = [ bin ++ " failed with " ++ show n ++ "."
@@ -758,7 +754,7 @@ tmpLink :: Config -> FilePath -> FilePath -> FilePath
 tmpLink cfg src dst = dots </> tmpRel dst
   where
     tmpRel  = makeRelative $ tmpdir cfg
-    dots    = foldr1 (</>) $ take (nSeps - 1) $ repeat ".."
+    dots    = foldr1 (</>) $ replicate (nSeps - 1) ".."
     nSeps   = length $ splitOneOf pathSeparators $ tmpRel src
 
 {-|
@@ -802,4 +798,4 @@ Apply toGeneric to sanitize the output(s) of a script.
 Should be done before trackWrite to avoid confusing Shake
 -}
 sanitizeFilesInPlace :: [FilePath] -> Action ()
-sanitizeFilesInPlace = mapM_ (sanitizeFileInPlace)
+sanitizeFilesInPlace = mapM_ sanitizeFileInPlace

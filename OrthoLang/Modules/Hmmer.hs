@@ -44,7 +44,7 @@ hmm = Type
   , tDesc = "hidden markov model"
   -- , tShow = \_ _ f -> return $ "hidden markov model \"" ++ f ++ "\""
   , tShow = \c r p -> let rmDate = unlines . filter (\l -> not ("DATE" `isInfixOf` l)) . lines
-                      in defaultShowN 13 c r p >>= return . rmDate
+                      in rmDate <$> defaultShowN 13 c r p
   }
 
 hht :: Type

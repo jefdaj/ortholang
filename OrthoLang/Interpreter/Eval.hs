@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RecordWildCards #-}
+
 
 {- OrthoLang code is interpreted in phases, but client code shouldn't need to
  - care about that, so this module wraps them in a simplified interface. It
@@ -93,7 +93,7 @@ myShake mods cfg ref ids dr pm rules = do
         { shakeFiles     = tDir
         , shakeVerbosity = Quiet -- TODO can you make it  but sent only to the logfile?
         , shakeThreads   = nproc
-        , shakeReport    = [tDir </> "profile.html"] ++ maybeToList (report cfg)
+        , shakeReport    = (tDir </> "profile.html") : maybeToList (report cfg)
         , shakeAbbreviations = [(tDir, "$TMPDIR"), (workdir cfg, "$WORKDIR")]
         , shakeChange    = ChangeModtimeAndDigestInput
         -- , shakeCommandOptions = [EchoStdout True]
@@ -200,11 +200,11 @@ prettyResult cfg ref (ListOf t) f
     let lits' = if t == str
                   then map (\s -> text $ "\"" ++ s ++ "\"") lits
                   else map prettyNum lits
-    return $ text "[" <> sep ((punctuate (text ",") lits')) <> text "]"
+    return $ text "[" <> sep (punctuate (text ",") lits') <> text "]"
   | otherwise = do
     paths <- readPaths "interpreter.eval.prettyResult" $ fromPath loc cfg f
     pretties <- mapM (prettyResult cfg ref t) paths
-    return $ text "[" <> sep ((punctuate (text ",") pretties)) <> text "]"
+    return $ text "[" <> sep (punctuate (text ",") pretties) <> text "]"
   where
     loc = "interpreter.eval.eval.prettyResult"
 prettyResult cfg ref (ScoresOf _)  f = do
@@ -214,7 +214,7 @@ prettyResult cfg ref (ScoresOf _)  f = do
     loc = "interpreter.eval.eval.prettyResult"
 
 -- TODO case for EncodedAs here, and later redesign this as a typeclass
-prettyResult cfg ref (EncodedAs e _)  f = liftIO $ fmap text $ enShow e cfg ref f'
+prettyResult cfg ref (EncodedAs e _)  f = liftIO $ text <$> enShow e cfg ref f'
   where
     f' = fromPath loc cfg f
     loc = "interpreter.eval.eval.prettyResult"
@@ -225,7 +225,7 @@ prettyResult cfg ref Untyped path = do
   out <- fmap init $ liftIO $ withReadLock ref path' $ readProcess "file" [path'] []
   return $ text $ "Untyped file " ++ toGeneric cfg out
 
-prettyResult cfg ref t f = liftIO $ fmap showFn $ (tShow t cfg ref) f'
+prettyResult cfg ref t f = liftIO $ showFn <$> tShow t cfg ref f'
   where
     showFn = if t == num then prettyNum else text
     f' = fromPath loc cfg f

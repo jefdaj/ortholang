@@ -22,7 +22,7 @@ olModule = Module
     [ mkMathBop "add"      '+' (+)
     , mkMathBop "subtract" '-' (-)
     , mkMathBop "multiply" '*' (*)
-    , mkMathBop "divide"   '/' (divDouble)
+    , mkMathBop "divide"   '/' divDouble
     ]
   }
 

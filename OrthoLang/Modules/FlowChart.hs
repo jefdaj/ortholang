@@ -68,7 +68,7 @@ aPlotDot :: NewAction1
 aPlotDot (ExprPath out) inDot = do
   let loc = "ortholang.modules.flowchart.aPlotDot"
   txt <- readLit loc inDot
-  cfg <- fmap fromJust $ getShakeExtra
+  cfg <- fromJust <$> getShakeExtra
   let g = read txt :: DotGraph Node
       out' = toPath loc cfg out
   withBinHash out out' $ \tmpPath -> do
@@ -238,7 +238,7 @@ Like depsOf, but customized for pretty graph output. Differences:
 * does not include indirect dependencies
 -}
 inputNodes :: String -> Expr -> [String]
-inputNodes tmp e = inputs ++ if length inputs < 2 then [] else [tmp]
+inputNodes tmp e = inputs ++ [tmp | length inputs >= 2]
   where
     inputs = map (\(Var _ n) -> n) $ inputVars e -- TODO have to handle repeats here?
 
@@ -261,9 +261,7 @@ mkNodes' assigns = mkNodes new nodes'
     varNodes = concatMap (\(Assign (Var _ v) _) -> [NLVar v]) assigns
     tmpNodes = concatMap (\(Assign (Var _ v) e) ->
                             let inputs = filter (`elem` selected) $ inputVars e
-                            in if length inputs < 2
-                              then []
-                              else [NLTmp (prefixOf e) (digest loc e)])
+                            in [NLTmp (prefixOf e) (digest loc e) | length inputs >= 2])
                          assigns
     nodes = varNodes ++ tmpNodes
     nodes' = trace "ortholang.modules.flowchart.mkNodes'" ("nodes: " ++ show nodes) nodes
@@ -284,13 +282,13 @@ mkInputEdges selected (Assign (Var _ v) e) = directInputs
     directInputs = if length inputs < 2 then edgesLabeled else edgesMerged
     loc = "ortholang.modules.flowchart.mkInputEdges"
     tmpNode      = NLTmp (prefixOf e) (digest loc e)
-    inputs       = filter (\i -> i `elem` selected) $ filter (/= (digest loc e)) $ inputNodes (digest loc e) e
+    inputs       = filter (`elem` selected) $ filter (/= digest loc e) $ inputNodes (digest loc e) e
     edgesLabeled = map (\i -> (NLVar i, NLVar v, ELArrow (prefixOf e))) inputs
     edgesMerged  = map (\i -> (NLVar i, tmpNode, ELTail)) inputs ++ [(tmpNode, NLVar v, ELHead)]
 
 keepAssign :: Assign -> Bool
-keepAssign (Assign (Var _ v) e) = not (v `elem` varNamesToIgnore)
-                               && not (prefixOf e `elem` fnNamesToIgnore)
+keepAssign (Assign (Var _ v) e) = notElem v varNamesToIgnore
+                               && notElem (prefixOf e) fnNamesToIgnore
 
 mkEdges' :: NodeMap NLabel -> [Assign] -> [LEdge ELabel]
 mkEdges' nodemap assigns = justOrDie "mkEdges'" $ mkEdges nodemap edges'

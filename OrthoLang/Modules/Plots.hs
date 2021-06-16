@@ -193,9 +193,10 @@ venndiagram = newExprExpansion
 
 -- | Macro that adds the xlab str
 mVenndiagram :: ExprExpansion
-mVenndiagram mods scr (Fun r ms ds n [title, (Ref _ _ _ (Var _ name))]) = case lookupExpr name (sAssigns scr) of
-  Nothing -> error "modules.plots.mVenndiagram" $ "no such var: " ++ name
-  Just e -> mVenndiagram mods scr (Fun r ms ds n [title, e]) -- TODO is this the right way to handle it?
+mVenndiagram mods scr (Fun r ms ds n [title, Ref _ _ _ (Var _ name)]) =
+  case lookupExpr name (sAssigns scr) of
+    Nothing -> error "modules.plots.mVenndiagram" $ "no such var: " ++ name
+    Just e -> mVenndiagram mods scr (Fun r ms ds n [title, e]) -- TODO is this the right way to handle it?
 mVenndiagram _ scr (Fun r ms ds _ [title, e@(Lst _ _ _ es)]) =
   let names = listVarNames "list" scr es
   in Fun r ms ds "venndiagram_explicit" [title, names, e]

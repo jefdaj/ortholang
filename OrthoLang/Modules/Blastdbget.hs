@@ -165,7 +165,7 @@ aBlastdbGetDate (ExprPath outPath') datePath' namePath' = do
   date <- readLit loc datePath'
   let tmpDir'    = fromPath loc cfg (blastdbgetCache cfg) </> date
       outPath'' = traceA loc outPath' [outPath', tmpDir', namePath']
-  dbName <- fmap stripWhiteSpace $ readLit loc namePath' -- TODO need to strip?
+  dbName <- stripWhiteSpace <$> readLit loc namePath' -- TODO need to strip?
   liftIO $ createDirectoryIfMissing True tmpDir'
   debugA' "aBlastdbget" $ "outPath'': " ++ outPath''
   runCmd $ CmdDesc

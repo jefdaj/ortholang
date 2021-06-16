@@ -36,17 +36,16 @@ import qualified Control.Concurrent.ReadWriteLock as RWLock
 
 import Development.Shake hiding (doesFileExist, doesDirectoryExist)
 import Control.Concurrent.ReadWriteLock (RWLock)
-import Control.Monad                    (when)
+import Control.Monad                    (when, unless)
 import Data.List                        (nub)
 import Data.Maybe                       (fromJust)
 import Data.IORef                       (IORef, newIORef, atomicModifyIORef')
 import Data.Map.Strict                  (Map)
-import Control.Exception.Safe     (bracket_)
+import Control.Exception.Safe ( bracket_, catch, throwM )
 import System.Directory           (createDirectoryIfMissing, doesFileExist,
                                    doesDirectoryExist, pathIsSymbolicLink)
 import System.FilePath            (takeDirectory, (<.>))
 import System.Posix.Files         (setFileMode)
-import Control.Exception.Safe     (catch, throwM)
 import System.IO.Error            (isDoesNotExistError)
 import Text.Regex.Posix           ((=~))
 
@@ -90,8 +89,7 @@ initLocks = do
   -- TODO how high is high enough to allow all sonicparanoid but not hit the OS limit?
   rDisk <- newResourceIO "disk" 1000
   rPar  <- newResourceIO "parallel" 8 -- TODO set to number of nodes
-  lRef  <- newIORef (rDisk, rPar, Map.empty)
-  return lRef
+  newIORef (rDisk, rPar, Map.empty)
 
 getReadLock :: LocksRef -> FilePath -> IO RWLock
 getReadLock lRef path = do
@@ -149,7 +147,7 @@ markDone lRef path = do
 
 -- describes some paths we don't want to see duplicate write errors for
 whitelisted :: FilePath -> Bool
-whitelisted path = any (\p -> path =~ p) regexes
+whitelisted path = any (path =~) regexes
   where
     regexes =
       [
@@ -235,15 +233,14 @@ withWriteLockEmpty ref path ioFn = do
   createDirectoryIfMissing True $ takeDirectory path
   -- randomDelay
   l <- liftIO $ getWriteLock ref path
-  res <- bracket_
+  bracket_
     (debugLock ("withWriteLock acquiring '" ++ path ++ "'") >> RWLock.acquireWrite l)
     (debugLock ("withWriteLock releasing '" ++ path ++ "'") >> RWLock.releaseWrite l)
     (withMarkDone ref [path] ioFn)
-  return res
 
 withWriteLocks' :: [FilePath] -> Action a -> Action a
 withWriteLocks' paths actFn = do
-  liftIO $ mapM_ (\p -> createDirectoryIfMissing True $ takeDirectory p) paths
+  liftIO $ mapM_ (createDirectoryIfMissing True . takeDirectory) paths
   ref <- fmap fromJust getShakeExtra
   locks <- liftIO $ mapM (getWriteLock ref) (nub paths)
   debugLock' $ "withWriteLocks' acquiring " ++ show paths
@@ -279,7 +276,7 @@ withWriteOnce path actFn = withWriteLock' path $ do
   fBefore <- liftIO $ doesFileExist path      -- Do not use Shake's version here
   dBefore <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here
   let before = fBefore || dBefore
-  when (not before) actFn
+  unless before actFn
 
   -- fAfter <- liftIO $ doesFileExist path      -- Do not use Shake's version here
   -- dAfter <- liftIO $ doesDirectoryExist path -- Do not use Shake's version here

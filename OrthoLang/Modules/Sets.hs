@@ -64,13 +64,13 @@ aSetFold setFn (ExprPath oPath) setsPath = do
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
   (ListOf (ListOf eType)) <- liftIO $ decodeNewRulesType cfg dRef (ExprPath setsPath) -- TODO convenience fn for this as Action
-  setElems  <- mapM (readStrings loc eType) (map (fromPath loc cfg) setPaths)
+  setElems  <- mapM (readStrings loc eType . fromPath loc cfg) setPaths
   setElems' <- liftIO $ mapM (canonicalLinks cfg eType) setElems
   idsRef <- fmap fromJust getShakeExtra
   ids <- liftIO $ readIORef idsRef
   let sets = map fromList setElems'
       sets' = (map . Set.map) (unhashIDs False ids) sets -- TODO will this work?
-      oLst = toList $ (foldr1 setFn) sets'
+      oLst = toList $ foldr1 setFn sets'
       oPath' = traceA loc oPath [oPath, setsPath]
   oLst'' <- if eType `elem` [str, num]
               then mapM return oLst
@@ -92,6 +92,6 @@ dedupByContent paths = do
   -- TODO if the paths are already in the load cache, no need for content?
   cfg <- fmap fromJust getShakeExtra
   let loc = "modules.sets.dedupByContent"
-  hashes <- mapM hashContent $ map (toPath loc cfg) paths
+  hashes <- mapM (hashContent . toPath loc cfg) paths
   let paths' = map fst $ nubBy ((==) `on` snd) $ zip paths hashes
   return paths'

@@ -32,7 +32,7 @@ olModule = Module
 --   }
 
 summaryTypeCheck :: [Type] -> Either String Type
-summaryTypeCheck [(ListOf (ListOf t))] = Right $ ListOf t
+summaryTypeCheck [ListOf (ListOf t)] = Right $ ListOf t
 summaryTypeCheck _ = Left "type error in summary!"
 
 -- takes a list of lists and summarizes (flattens?) it to a single list

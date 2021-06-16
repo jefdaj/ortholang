@@ -164,10 +164,11 @@ import OrthoLang.Util (digest, digestLength)
 import OrthoLang.Debug
 
 import Data.Maybe                     (maybeToList)
-import Data.List                      (intersperse, isInfixOf, isPrefixOf)
+import Data.List                      (intersperse, isInfixOf, isPrefixOf, intercalate)
 import Data.List.Split                (splitOn)
 import Data.String.Utils              (replace)
-import Development.Shake.FilePath     ((</>), (<.>), isAbsolute)
+import Development.Shake.FilePath
+    ( (</>), (<.>), isAbsolute, makeRelative, splitPath )
 import Path                           (parseAbsFile, fromAbsFile)
 -- import Text.PrettyPrint.HughesPJClass (Pretty)
 import qualified Text.PrettyPrint as PP
@@ -180,9 +181,8 @@ import qualified Data.Map.Strict as M
 -- import qualified OrthoLang.Util as U
 
 import Control.Monad.IO.Class     (liftIO)
-import Control.Monad              (when)
+import Control.Monad              (when, unless)
 import Data.Either                (partitionEithers)
-import Development.Shake.FilePath (makeRelative, splitPath)
 import Data.IORef (readIORef, atomicModifyIORef')
 import System.IO.Unsafe (unsafePerformIO)
 import Control.Exception (throw, throwIO)
@@ -199,8 +199,7 @@ TODO rewrite with a more elegant [(fn, string)] if there's time
 -}
 toGeneric :: Config -> String -> String
 toGeneric cfg txt = replace (workdir cfg) "$WORKDIR"
-                  $ replace (tmpdir  cfg) "$TMPDIR"
-                  $ txt
+                  $ replace (tmpdir  cfg) "$TMPDIR" txt
 
 -- | Replace generic path placeholders with current paths
 -- TODO rewrite with a more elegant [(fn, string)] if there's time
@@ -291,7 +290,7 @@ exprPath :: Config -> DigestsRef -> Script -> Expr -> Path
 exprPath c d s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
                                Nothing -> error "exprPath" $ "no such var '" ++ vName ++ "'\n" ++ show (sAssigns s)
                                Just e  -> exprPath c d s e
-exprPath c d s e@(Bop _ _ _ _ _ _) = exprPath c d s (bop2fun e)
+exprPath c d s e@Bop {} = exprPath c d s (bop2fun e)
 exprPath c d s expr = traceP "exprPath" expr res
   where
     prefix = prefixOf expr
@@ -305,8 +304,8 @@ exprPath c d s expr = traceP "exprPath" expr res
 prefixOf :: Expr -> String
 prefixOf (Lit rtn _       ) = ext rtn
 prefixOf (Fun _ _ _ name _) = name
-prefixOf (Lst _ _ _ _     ) = "list"
-prefixOf (Ref _ _ _ _     ) = error "prefixOf" "Refs don't need a prefix"
+prefixOf Lst {} = "list"
+prefixOf Ref {} = error "prefixOf" "Refs don't need a prefix"
 prefixOf (Bop _ _ _ n _ _ ) = case n of
                                    "+" -> "add"
                                    "-" -> "subtract"
@@ -325,7 +324,7 @@ exprPathExplicit cfg prefix mSeed hashes = toPath loc cfg path
   where
     loc = "interpreter.paths.exprPathExplicit"
     dir  = tmpdir cfg </> "exprs" </> prefix
-    base = concat $ intersperse "/" $ hashes ++ (maybeToList $ fmap (\(Seed n) -> 's': show n) mSeed)
+    base = intercalate "/" (hashes ++ maybeToList (fmap (\(Seed n) -> 's': show n) mSeed))
     path = dir </> base </> "result" -- <.> ext rtype
 
 -- TODO remove VarPath, ExprPath types once Path works everywhere
@@ -377,7 +376,7 @@ upBy n (Path path) = Path path'
   where
     components = splitOn  "/" path -- TODO allow other delims?
     components' = reverse $ drop n $ reverse components
-    path' = concat $ intersperse "/" $ components'
+    path' = intercalate "/" components'
 
 {-|
 For passing scripts paths that don't depend on the $TMPDIR location, but also
@@ -390,7 +389,7 @@ TODO any good way to simplify that?
 makeTmpdirRelative :: Int -> Path -> FilePath
 makeTmpdirRelative level (Path path) = replace "$TMPDIR" dots path
   where
-    dots = concat $ intersperse "/" $ take level $ repeat ".."
+    dots = intercalate "/" (replicate level "..")
 
 
 -------------
@@ -436,11 +435,11 @@ exprDigests cfg dRef scr exprs = M.unions $ map (exprDigest cfg dRef scr) $ conc
 TODO is there a better word for this, or a matching typeclass?
 -}
 listExprs :: Expr -> [Expr]
-listExprs   (Ref _ _ _ _    ) = [] -- TODO or is it e?
+listExprs   Ref {} = [] -- TODO or is it e?
 listExprs e@(Lit _ _        ) = [e]
 listExprs e@(Fun _ _ _ _  es) = e : concatMap listExprs es
 listExprs e@(Lst _ _ _    es) = e : concatMap listExprs es
-listExprs e@(Bop _ _ _ _ _ _) = listExprs $ bop2fun e
+listExprs e@Bop {} = listExprs $ bop2fun e
 
 -- listScriptExprs :: Script -> [Expr]
 -- listScriptExprs scr = concatMap listExprs $ map snd scr
@@ -487,7 +486,7 @@ decodeNewRulesDeps cfg dRef (ExprPath out) = do
           (dFails, dVals) = partitionEithers $ map findk $ trace loc ("dKeys: " ++ show dKeys) dKeys
           dTypes = map fst dVals
           dPaths = map snd dVals
-      when (length dFails > 0) $ do
+      unless (null dFails) $ do
         liftIO $ putStrLn $ "entire dMap:\n" ++ T.unpack (pShowNoColor dMap)
         liftIO $ putStrLn $ "dVals:\n" ++ show dVals
         throwIO $ MissingDigests out $ map show dFails

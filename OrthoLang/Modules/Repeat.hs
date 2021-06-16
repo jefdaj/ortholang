@@ -79,7 +79,7 @@ rRepeatN       scr (Fun t mSeed deps name [resExpr, subVar@(Ref _ _ _ (Var _ v))
   where
     subExpr = justOrDie "lookup of subExpr in rRepeatN failed!" $ lookupExpr v (sAssigns scr)
     nReps   = extractNum scr repsExpr
-    subs    = take nReps $ zipWith setSeed [0..] (repeat subExpr) -- TODO is always starting from 0 right?
+    subs    = take nReps $ map (`setSeed` subExpr) [0..] -- TODO is always starting from 0 right?
     -- subs    = zipWith setSeed (unfoldRepID seed nReps) (repeat subExpr)
     -- subs'   = trace ("rRepeatN seeds: " ++ show (map seedOf subs)) subs
     subList = Lst (typeOf subExpr) (seedOf subExpr) (depsOf subExpr) subs -- TODO seed right?

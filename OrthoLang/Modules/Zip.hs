@@ -12,11 +12,10 @@ import Data.Maybe (fromJust)
 import OrthoLang.Modules.Plots (listVarNames)
 import OrthoLang.Locks (withReadLock)
 import System.Process          (readProcess)
-import Data.List (intersperse)
+import Data.List ( intersperse, isSuffixOf, intercalate)
 import Data.List.Split (splitOn)
 import System.Directory           (createDirectoryIfMissing, removeDirectoryRecursive)
 import System.FilePath        ((</>), (<.>), takeDirectory)
-import Data.List (isSuffixOf)
 import Control.Monad (forM_)
 import OrthoLang.Util (trim)
 import OrthoLang.Interpreter.Sanitize (unhashIDsFile)
@@ -65,7 +64,7 @@ zipArchiveExplicit = newFnA2
 
 aZipArchiveExplicit :: NewAction2
 aZipArchiveExplicit (ExprPath out') inNames inList = do
-  cfg <- fmap fromJust $ getShakeExtra
+  cfg <- fromJust <$> getShakeExtra
   let loc = "modules.zip.aZipArchiveExplicit"
       out = toPath loc cfg out'
 
@@ -76,7 +75,7 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
   -- pair names with their paths
   -- note that this is an unrelated meaning of zip
   names <- readLits loc inNames
-  paths <- fmap lines $ readFileStrict' inList -- TODO warning! these are probably not lits
+  paths <- lines <$> readFileStrict' inList -- TODO warning! these are probably not lits
 
   -- liftIO $ putStrLn $ "names: " ++ show names
   -- liftIO $ putStrLn $ "paths: " ++ show paths
@@ -91,7 +90,7 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
       let n1 = head names
           p1 = Path (head paths)
           dst = inputDir </> n1
-      in if (".str.list" `isSuffixOf` n1 || ".num.list" `isSuffixOf` n1)
+      in if ".str.list" `isSuffixOf` n1 || ".num.list" `isSuffixOf` n1
         then do
           -- case 2: entire list is a list of lits, and the first path points to it
           -- liftIO $ putStrLn $ "chose case 2"
@@ -103,7 +102,7 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
           -- TODO rename var to reflect that
           -- liftIO $ putStrLn $ "chose case 3"
           let pairs = Prelude.zip paths names
-          forM_ pairs $ \(path, name) -> writeOrtholangArg inputDir path name
+          forM_ pairs $ uncurry (writeOrtholangArg inputDir)
 
   -- last step is to zip up the input dir and remove it
   -- this should probably depend on inputDir, but that causes a shake error
@@ -113,8 +112,8 @@ aZipArchiveExplicit (ExprPath out') inNames inList = do
 -- TODO should just be Path right?
 writeOrtholangArg :: FilePath -> String -> String -> Action ()
 writeOrtholangArg inputDir path name = do
-  cfg  <- fmap fromJust $ getShakeExtra
-  lRef <- fmap fromJust $ getShakeExtra
+  cfg  <- fromJust <$> getShakeExtra
+  lRef <- fromJust <$> getShakeExtra
   let loc  = "modules.zip.writeOrtholangArg"
       -- path = fromPath loc cfg (Path path') -- TODO error here
       dst  = inputDir </> name
@@ -130,7 +129,7 @@ writeOrtholangArg inputDir path name = do
     else
       -- at this point we know the path is an actual Path, so treat it that way
       let path' = Path path
-      in if (exts `elem` [["str", "list"], ["num", "list"]] || last exts /= "list")
+      in if exts `elem` [["str", "list"], ["num", "list"]] || last exts /= "list"
         then do
           -- case 3b: path is a lit.list or a single non-lit type, and should be copied over
           -- (same action as case 2, but this one may be called recursively)
@@ -139,7 +138,7 @@ writeOrtholangArg inputDir path name = do
           dst' <- if exts == ["untyped"]
                      then do
                        guess <- guessUntypedExtension cfg lRef path'
-                       return $ inputDir </> (head $ splitOn "." name) <.> guess
+                       return $ inputDir </> head (splitOn "." name) <.> guess
                      else return dst
           -- liftIO $ putStrLn $ "unhashIDsFile " ++ show path' ++ " " ++ show dst'
           unhashIDsFile path' dst' -- TODO this fails on binary files? i guess skip it in that case
@@ -152,10 +151,10 @@ writeOrtholangArg inputDir path name = do
 
 writeOrtholangList :: FilePath -> Path -> String -> Action ()
 writeOrtholangList inputDir path name = do
-  cfg <- fmap fromJust $ getShakeExtra
+  cfg <- fromJust <$> getShakeExtra
   let loc   = "modules.zip.writeOrtholangList"
       name' = takeWhile (/= '.') name
-      ext'  = concat $ intersperse "." $ tail $ init $ splitOn "." name
+      ext'  = intercalate "." (tail $ init $ splitOn "." name)
       iDir  = inputDir </> name'
   -- liftIO $ putStrLn $ "writeOrtholangList path: " ++ show path
   -- liftIO $ putStrLn $ "writeOrtholangList name': " ++ name'
@@ -177,7 +176,7 @@ guessUntypedExtension cfg lRef path = do
       path' = fromPath loc cfg path
   out <- liftIO $ withReadLock lRef path' $ readProcess "file" ["--extension", path'] []
   case splitOn ":" out of
-    (_:x:[]) -> return $ trim x
+    [_, x] -> return $ trim x
     _ -> return "untyped"
 
 -----------------

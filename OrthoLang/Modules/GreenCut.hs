@@ -26,7 +26,7 @@ gcr = Type
   , tDesc = "GreenCut results"
   , tShow = defaultShow
   }
- 
+
 greencutTwoFamilies :: Function
 greencutTwoFamilies = newFnS2
   "greencut2_families"

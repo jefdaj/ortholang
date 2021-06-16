@@ -179,7 +179,7 @@ aMkBlastFromDb bCmd [o, e, q, p] = do
     , cmdRmPatterns = [o'' ++ "*", stdoutPath, stderrPath]
     }
   -- symlink o (toPath loc cfg stdoutPath) -- TODO reverse it? move/copy instead?
-aMkBlastFromDb _ _ = error $ "bad argument to aMkBlastFromDb"
+aMkBlastFromDb _ _ = error "bad argument to aMkBlastFromDb"
 
 -------------
 -- *blast* --
@@ -234,10 +234,10 @@ mkBlastFromFaEach d@(bCmd, qType, faType, _) = newExprExpansion
 
 mBlastFromFaEach :: BlastDesc -> ExprExpansion
 mBlastFromFaEach d@(_, _, _, np) _ _ (Fun rtn seed deps _   [e, q, ss])
-  =                                  (Fun rtn seed deps fn2 [e, q, ss'])
+  =                                  Fun rtn seed deps fn2 [e, q, ss']
   where
     dbType = if np == "nucl" then fna else faa
     ss'   = Fun (ListOf (EncodedAs blastdb dbType)) Nothing (depsOf ss) fn1 [ss]
     fn1   = "makeblastdb_" ++ np ++ "_each"
-    fn2   = (fName $ mkBlastFromFa d) ++ "_db_each"
+    fn2   = fName (mkBlastFromFa d) ++ "_db_each"
 mBlastFromFaEach _ _ _ e = error "ortholang.modules.blast.mkBlastFromFaEach" $  "bad arg: " ++ show e

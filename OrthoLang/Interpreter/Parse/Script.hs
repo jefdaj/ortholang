@@ -43,7 +43,7 @@ import OrthoLang.Script (appendStatementRepl, appendStatementFile)
 -- import OrthoLang.Interpreter.Paths (scriptDigests)
 
 import Control.Applicative    ((<|>), many)
-import Control.Monad          (when)
+import Control.Monad          (when, unless)
 -- import Data.List              (partition)
 -- import Data.List.Utils        (hasKeyAL)
 import OrthoLang.Util    (readFileStrict)
@@ -66,7 +66,7 @@ readScriptWithIncludes ref path = do
     processInclude :: String -> IO String
     processInclude line = case words (stripComments line) of
                            ("include":relpath:_) ->
-                             readScriptWithIncludes ref $ takeDirectory path </> (stripQuotes relpath)
+                             readScriptWithIncludes ref $ takeDirectory path </> stripQuotes relpath
                            _ -> return line
 
 stripQuotes :: String -> String
@@ -95,7 +95,7 @@ pAssign = debugParser "pAssign" $ do
   -- void $ lookAhead $ debugParser "first pVarEq" pVarEq
   -- TODO use lookAhead here to decide whether to commit to it?
   scr <- getState
-  v@(Var _ vName) <- (try (optional newline *> pVarEq))
+  v@(Var _ vName) <- try (optional newline *> pVarEq)
 
   -- I can't think of any obvious reason a user would need to define the same
   -- variable twice in a written script, so it's prohibited here. But that's
@@ -110,7 +110,7 @@ pAssign = debugParser "pAssign" $ do
   -- TODO in either case, prevent recursive self-references!
   cfg <- askConfig
   when (hasVar vName (sAssigns scr) && vName /= "result") $ do
-    when (not $ interactive cfg) $ fail $ "duplicate variable \"" ++ vName ++ "\"" -- TODO word this better
+    unless (interactive cfg) $ fail $ "duplicate variable \"" ++ vName ++ "\"" -- TODO word this better
 
   e <- lexeme pExpr
 
@@ -142,7 +142,7 @@ pNaked = debugParser "pNaked" $ do
   -- putAssign "pNaked" ra
       -- scr' = scr {sAssigns = delVar (sAssigns scr) rv, sResult = Just e}
   cfg <- askConfig
-  when (not $ interactive cfg) $ fail "naked expression in script" -- TODO better error here
+  unless (interactive cfg) $ fail "naked expression in script" -- TODO better error here
   scr <- getState
   let scr' = appendStatementRepl scr (Left e) -- Left is not an error here
       ra   = Assign {aVar = Var (RepID Nothing) "result", aExpr = e}
@@ -208,7 +208,7 @@ pScript :: ParseM Script
 pScript = debugParser "pScript" $ do
   optional spaces
   as <- many pStatement
-  (Script {sResult = r}) <- getState
+  Script {sResult = r} <- getState
   -- this should only be needed when the user manually wrote a script and forgot the "result" var
   let r' = case r of
              Nothing -> if null as then Nothing else Just (aExpr $ last as)

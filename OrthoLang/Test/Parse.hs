@@ -72,7 +72,7 @@ regularParse :: ParseM a -> Config -> String -> Either String a
 regularParse p cfg = parseWithEof modules p cfg emptyScript
 
 takeVar :: String -> Var
-takeVar = Var (RepID Nothing) . takeWhile (flip elem $ vNonFirstChars)
+takeVar = Var (RepID Nothing) . takeWhile (flip elem vNonFirstChars)
 
 parsedItAll :: ParseM a -> Config -> String -> Bool
 parsedItAll p cfg str' = case parseWithLeftOver modules p cfg emptyScript str' of

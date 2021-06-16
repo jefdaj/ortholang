@@ -61,7 +61,7 @@ mms = Type
   { tExt  = "mms"
   , tDesc = "MMSeqs2 sequence database"
   , tShow = \cfg ref path -> do
-      path' <- fmap (-<.> "lookup") $ resolveSymlinks (Just [tmpdir cfg]) path
+      path' <- (-<.> "lookup") <$> resolveSymlinks (Just [tmpdir cfg]) path
       Stdout out <- withReadLock ref path' $ cmd "wc" ["-l", path']
       let n = headOrDie "failed to read first word of MMSeqs2 db description" $ words out
       -- h5    <- fmap (take 5 . lines) $ withReadLock ref path $ readFileStrict' path'
@@ -117,7 +117,7 @@ aMmseqsCreateDbAll (ExprPath out') fasPath' = do
     , cmdSanitizePaths = [] -- TODO should there be some?
     , cmdOptions =[Cwd createDbDir] -- TODO remove?
     , cmdBinary = "mmseqs-createdb-all.sh"
-    , cmdArguments = [dbPath] ++ faPaths'
+    , cmdArguments = dbPath : faPaths'
     , cmdExitCode = ExitSuccess
     , cmdRmPatterns = [out', dbPath ++ "*"] -- TODO adjust the code to handle patterns!
     }
@@ -184,10 +184,7 @@ resolveMmseqsDb :: FilePath -> Action FilePath
 resolveMmseqsDb path = do
   let loc = "modules.mmseqs.resolveMmseqsDb"
   need' loc [path] -- path is to a symlink to the main db file
-  path' <- liftIO $ resolveSymlinks Nothing path
-  -- let path''  = if ".index" `isSuffixOf` path'  then dropExtension path' else path'
-  --     path''' = if "_h"     `isSuffixOf` path'' then init $ init path''  else path''
-  return path'
+  liftIO $ resolveSymlinks Nothing path
 
 -- same as the Ali version below, but also runs aMmseqsConvertAlis to generate a table
 -- TODO make that a separate function with ExprExpansion?
@@ -206,8 +203,8 @@ aMmseqsSearchDbDbAli :: NewAction3
 aMmseqsSearchDbDbAli (ExprPath outDb') ePath qDb sDb = do
   let loc = "modules.mmseqs.aMmseqsSearchDb"
   eStr <- readLit loc ePath
-  qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
-  sDb' <- fmap dropExtension $ resolveMmseqsDb sDb
+  qDb' <- dropExtension <$> resolveMmseqsDb qDb
+  sDb' <- dropExtension <$> resolveMmseqsDb sDb
   let tmpDir = takeDirectory outDb' </> "tmp" -- TODO align this with sonicparanoid
   liftIO $ createDirectoryIfMissing True tmpDir
   runCmd $ CmdDesc
@@ -230,9 +227,9 @@ aMmseqsSearchDbDbAli (ExprPath outDb') ePath qDb sDb = do
 aMmseqsConvertAlis :: FilePath -> FilePath -> FilePath -> FilePath -> Action ()
 aMmseqsConvertAlis qDb sDb outDbIndex outTab = do
   -- let outDbBase = dropExtension outDbIndex
-  qDb' <- fmap dropExtension $ resolveMmseqsDb qDb
-  sDb' <- fmap dropExtension $ resolveMmseqsDb sDb
-  oDb' <- fmap dropExtension $ resolveMmseqsDb outDbIndex
+  qDb' <- dropExtension <$> resolveMmseqsDb qDb
+  sDb' <- dropExtension <$> resolveMmseqsDb sDb
+  oDb' <- dropExtension <$> resolveMmseqsDb outDbIndex
   -- TODO check this matches my existing blast hit tables, since mmseqs seems to have removed the format option?
   -- , "--format-output", "query target pident alnlen mismatch gapopen qstart qend tstart tend evalue bits"
   runCmd $ CmdDesc

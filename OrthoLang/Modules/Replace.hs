@@ -99,7 +99,7 @@ replace = Function
 
 -- | Guards `rReplace'` against invalid arguments
 rReplace :: RulesFn
-rReplace st (Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subExpr:[])) = rReplace' st resExpr subVar subExpr
+rReplace st (Fun _ _ _ _ [resExpr, Ref _ _ _ subVar, subExpr]) = rReplace' st resExpr subVar subExpr
 rReplace _ e = fail $ "bad argument to rReplace: " ++ show e
 
 {-|
@@ -120,7 +120,7 @@ rReplace' scr resExpr subVar@(Var _ _) subExpr = do
   let res   = Assign resultVar resExpr
       rRef  = Ref (typeOf resExpr) (seedOf resExpr) (depsOf resExpr) resultVar -- TODO is resultVar a dep too?
       sub   = Assign subVar subExpr
-      deps  = filter (\a -> (elem (aVar a) $ depsOf resExpr ++ depsOf subExpr)) (sAssigns scr)
+      deps  = filter (\a -> elem (aVar a) $ depsOf resExpr ++ depsOf subExpr) (sAssigns scr)
       newID = calcRepID scr resExpr subVar subExpr
       scr'  = setRepIDs newID $ Script
                 { sAssigns = [sub] ++ deps ++ [res] -- TODO put sub deps before it?
@@ -225,7 +225,7 @@ replaceEach = Function
 rReplaceEach :: Script
              -> Expr -- the final result expression, which contains all the info we need
              -> Rules ExprPath
-rReplaceEach scr expr@(Fun _ _ _ _ (resExpr:(Ref _ _ _ subVar):subList:[])) = do
+rReplaceEach scr expr@(Fun _ _ _ _ [resExpr, Ref _ _ _ subVar, subList]) = do
   subPaths <- rExpr scr subList
 
   -- TODO how to replace this with the NewMap machinery?

@@ -60,9 +60,7 @@ promptArrow = " —▶ "
 shortPrompt :: Config -> String
 shortPrompt cfg = name ++ promptArrow
   where
-    name = case script cfg of
-      Nothing -> "ortholang"
-      Just s  -> takeFileName s
+    name = maybe "ortholang" takeFileName (script cfg)
 
 
 ----------
@@ -97,7 +95,7 @@ showExprType ms (s, c, _, _, _) e = case parseExpr ms c s e of
   Left  err  -> show err
 
 showAssignType :: Assign -> String
-showAssignType (Assign {aVar = (Var _ v), aExpr = e}) = unwords [typedVar, "=", prettyExpr]
+showAssignType Assign {aVar = (Var _ v), aExpr = e} = unwords [typedVar, "=", prettyExpr]
   where
     -- parentheses also work:
     -- typedVar = v ++ " (" ++ show (typeOf e) ++ ")"
@@ -123,7 +121,7 @@ cmdDepends :: ReplInfo
 cmdDepends _ (scr, cfg, _, _, _) hdl var =
   case lookupExpr var (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> let vars = (Var (RepID Nothing) var) : depsOf e
+    Just e  -> let vars = Var (RepID Nothing) var : depsOf e
                in mapM_ (pPrintHdl cfg hdl) $ filter (\(Assign v _) -> v `elem` vars)
                                                      (sAssigns scr)
 
@@ -158,10 +156,8 @@ quotedCompletions :: String -> ReplM [Completion]
 quotedCompletions wordSoFar = do
   (_, _, _, idRef, _) <- get
   files  <- listFiles wordSoFar
-  seqIDs <- fmap (map $ headOrDie "quotedCompletions failed" . words) $
-            fmap M.elems $
-            fmap (M.unions . M.elems . hSeqIDs) $
-            liftIO $ readIORef idRef
+  seqIDs <- fmap (((map $ headOrDie "quotedCompletions failed" . words) . M.elems) . (M.unions . M.elems . hSeqIDs)) (
+            liftIO $ readIORef idRef)
   let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
   return $ files ++ seqIDs'
 
@@ -178,4 +174,4 @@ nakedCompletions mods cmdNames lineReveresed wordSoFar = do
       typeExts = map ext $ concatMap mTypes mods
       cfgFields = map fst configFields
   files <- if ":" `isSuffixOf` lineReveresed then listFiles wordSoFar else return []
-  return $ files ++ (map simpleCompletion $ filter (wordSoFar `isPrefixOf`) wordSoFarList)
+  return $ files ++ map simpleCompletion (filter (wordSoFar `isPrefixOf`) wordSoFarList)

@@ -22,7 +22,6 @@ import Development.Shake
 
 import Control.Monad.IO.Class     (liftIO)
 import Data.Maybe                 (fromJust)
-import Development.Shake          (Action, getShakeExtra)
 import Development.Shake.FilePath ((</>))
 import System.Directory           (createDirectoryIfMissing)
 import System.Exit                (ExitCode(..))

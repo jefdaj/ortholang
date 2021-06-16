@@ -64,7 +64,7 @@ parserTrace' s = pt <|> return ()
         pt = try $ do
            x <- try $ many1 anyToken
            let x' = let sx = show x in if length sx > n then take n sx ++ "\"..." else sx
-           trace ("interpreter.parser." ++ s) (x') $ try $ eof
+           trace ("interpreter.parser." ++ s) x' $ try eof
            fail x'
 
 {-|

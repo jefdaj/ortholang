@@ -20,16 +20,15 @@ import OrthoLang.Modules.OrthoFinder   (ofr)
 import OrthoLang.Modules.SonicParanoid (spr)
 import OrthoLang.Modules.GreenCut      (gcr)
 
-import Control.Monad     (forM, when)
+import Control.Monad     (forM, when, unless)
 import Data.IORef        (readIORef)
-import Data.Maybe        (isJust, catMaybes)
+import Data.Maybe ( isJust, catMaybes, fromJust )
 import Data.Scientific   (toRealFloat)
 import Data.String.Utils (split)
 import System.Directory  (createDirectoryIfMissing)
 import System.Exit       (ExitCode(..))
 import System.FilePath   ((<.>), (</>), takeDirectory)
 import Text.Regex.Posix  ((=~))
-import Data.Maybe (fromJust)
 
 -- this is just shorthand
 sll :: Type
@@ -155,10 +154,11 @@ aOrthogroups (ExprPath out') ogPath' = do
   cfg  <- fmap fromJust getShakeExtra
   dRef <- fmap fromJust getShakeExtra
   rtn <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out')
-  let parser = if      rtn == spr then parseSonicParanoid
-               else if rtn == ofr then parseOrthoFinder
-               else if rtn == gcr then parseGreenCut
-               else error $ "bad type for aOrthogroups: " ++ show rtn
+  let parser
+        | rtn == spr = parseSonicParanoid
+        | rtn == ofr = parseOrthoFinder
+        | rtn == gcr = parseGreenCut
+        | otherwise = error $ "bad type for aOrthogroups: " ++ show rtn
       loc = "modules.orthogroups.aOrthogroups"
       out = toPath loc cfg out'
       ogPath = toPath loc cfg ogPath'
@@ -189,7 +189,7 @@ aOrthogroupContaining (ExprPath out) ofrPath' idPath = do
   let geneId = case lookupID ids' partialID of
                  Just k -> k
                  Nothing -> error $ "ERROR: id \"" ++ partialID ++ "' not found"
-  groups' <- fmap (filter $ elem geneId) $ parseOrthoFinder ofrPath -- TODO handle the others!
+  groups' <- filter (elem geneId) <$> parseOrthoFinder ofrPath -- TODO handle the others!
   let group = if null groups' then [] else headOrDie "aOrthogroupContaining failed" groups' -- TODO check for more?
   writeLits loc out group
 
@@ -222,8 +222,8 @@ aOrthogroupsFilter filterFn (ExprPath out') ofrPath' idsPath = do
   let loc = "modules.orthogroups.aOrthogroupsFilter"
       out = toPath loc cfg out'
       ofrPath = toPath loc cfg ofrPath'
-  lookups <- fmap (map $ lookupID ids') $ readLits loc idsPath
-  when (not $ all isJust lookups) $ error "unable to find some seqids! probably a programming error"
+  lookups <- map (lookupID ids') <$> readLits loc idsPath
+  unless (all isJust lookups) $ error "unable to find some seqids! probably a programming error"
   let geneIds = catMaybes lookups
   groups <- parseOrthoFinder ofrPath -- TODO handle the others!
   let groups' = filterFn groups geneIds
@@ -303,7 +303,7 @@ aOrthologFilterStr fnName pickerFn (ExprPath out) groupListsPath idListsPath = d
   absolutizePaths loc groupListsPath ogsPath -- TODO separate function?
   absolutizePaths loc idListsPath idsPath -- TODO separate function?
   -- TODO is there a way to avoid reading this?
-  nIDs  <- fmap length $ readPaths loc idListsPath
+  nIDs  <- length <$> readPaths loc idListsPath
   let fnArg' = show $ pickerFn nIDs
   -- need' loc [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?
   runCmd $ CmdDesc
@@ -329,7 +329,7 @@ pickMin :: (RealFrac a, Integral b) => a -> b -> b
 pickMin userNum nGroups
   | userNum == 0 = 0
   | userNum > -1 && userNum < 1 = ceiling (userNum * fromIntegral nGroups)
-  | userNum < 0 - fromIntegral nGroups = 0
+  | userNum < negate (fromIntegral nGroups) = 0
   | userNum < 0 = pickMin (fromIntegral nGroups + userNum) nGroups
   | otherwise = ceiling userNum -- TODO floor?
 
@@ -362,7 +362,7 @@ aOrthologFilterStrFrac fnName pickerFn (ExprPath out) fracPath groupListsPath id
   absolutizePaths loc idListsPath idsPath -- TODO separate function?
   -- TODO is there a way to avoid reading this?
   fnArg <- readLit loc fracPath
-  nIDs  <- fmap length $ readPaths loc idListsPath
+  nIDs  <- length <$> readPaths loc idListsPath
   -- let fnArg' = show $ pickerFn nIDs
   let fnArg' = show $ pickerFn (toRealFloat (read fnArg) :: Double) nIDs
   -- need' loc [ogsPath, idsPath] -- TODO shouldn't cmdInPatterns pick that up?

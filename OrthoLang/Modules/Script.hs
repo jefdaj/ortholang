@@ -64,7 +64,7 @@ runScriptExplicit = hidden $ newFnA3
 -- TODO adjust scripts to handle the case where the list of names is nested?
 aRunScriptExplicit :: NewAction3
 aRunScriptExplicit (ExprPath out) inScr inNames inList = do
-  cfg <- fmap fromJust $ getShakeExtra
+  cfg <- fromJust <$> getShakeExtra
   let loc  = "modules.customscript.aRunScriptExplicit"
       out' = toPath loc cfg out
   withBinHash out out' $ \tmpPath -> do

@@ -89,7 +89,7 @@ dmnd = Type
   , tShow = \_ ref path -> do
       path' <- resolveSymlinks Nothing path
       out <- withReadLock ref path' $ readProcess "diamond_dbinfo.sh" [path'] []
-      let d = unlines $ ("DIAMOND database " ++ path) : (drop 4 $ lines out)
+      let d = unlines $ ("DIAMOND database " ++ path) : drop 4 (lines out)
       return d
   }
 
@@ -113,7 +113,7 @@ diamondmakedbEach = newFnA1
   (Exactly $ ListOf dmnd)
   (newMap1of1 "diamond_makedb")
   [Nondeterministic]
- 
+
 diamondmakedbAll :: Function
 diamondmakedbAll = newFnA1
   "diamond_makedb_all"
@@ -156,10 +156,11 @@ readSensitivity :: FilePath -> Action String
 readSensitivity numPath = do
   -- cfg <- fmap fromJust getShakeExtra
   let loc = "ortholang.modules.diamond.readSensitivity"
-  n <- fmap (read :: String -> Scientific) $ readLit loc numPath
-  let n' = if n <= 0 then 0
-           else if n >= 5 then 5
-           else floor n
+  n <- (read :: String -> Scientific) <$> readLit loc numPath
+  let n'
+        | n <= 0 = 0
+        | n >= 5 = 5
+        | otherwise = floor n
       flag = fromJust $ lookup n' sensitivityFlags
   return flag
 

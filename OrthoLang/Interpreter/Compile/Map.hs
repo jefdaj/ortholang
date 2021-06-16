@@ -44,7 +44,7 @@ import OrthoLang.Interpreter.Compile.Simple
 import OrthoLang.Types
 import Text.PrettyPrint.HughesPJClass
 
-import Data.List                  (intersperse)
+import Data.List                  (intersperse, intercalate)
 import Data.List.Utils            (replace)
 import Development.Shake.FilePath ((</>), (<.>), replaceBaseName)
 import OrthoLang.Interpreter.Actions      (readPaths, writePaths, symlink,
@@ -87,7 +87,7 @@ rMapTmps index actFn tmpPrefix scr e = do
   cfg <- fmap fromJust getShakeExtraRules
   let tmpFn args = do
         let loc = "interpreter.compile.map.rMapTmps"
-            base = concat $ intersperse "/" $ map (digest loc) args
+            base = intercalate "/" (map (digest loc) args)
             dir  = fromPath loc cfg $ cacheDir cfg tmpPrefix
         return $ toPath loc cfg (dir </> base)
   rMapMain index (Just tmpFn) actFn scr e
@@ -124,7 +124,7 @@ rMapMain mapIndex mTmpFn actFn scr e@(Fun r ms _ name exprs) = do
       mainOutPath    = fromPath loc cfg $ exprPath cfg dRef scr e
       regularArgPaths'  = map (\(ExprPath p) -> toPath loc cfg p) regularArgPaths
       argLastsPath'  = toPath loc cfg mappedArgsPath
-      elemCacheDir   = (fromPath loc cfg $ cacheDir cfg "each") </> hashFun cfg dRef scr e
+      elemCacheDir   = fromPath loc cfg (cacheDir cfg "each") </> hashFun cfg dRef scr e
       elemCacheDir'  = toPath loc cfg elemCacheDir -- TODO redundant?
       elemCachePtn   = elemCacheDir </> "*" </> "result" -- <.> ext eType
       eType = case r of
@@ -158,10 +158,9 @@ aMapMain mapIndex regularArgs mapTmpDir eType mappedArg outPath = do
   need' loc regularArgs' -- TODO remove?
   regularArgs'' <- liftIO $ mapM resolve regularArgs'
   mappedPaths  <- readPaths loc mappedArgList'
-  mappedPaths' <- liftIO $ mapM resolve $ map (fromPath loc cfg) mappedPaths
+  mappedPaths' <- liftIO $ mapM (resolve . fromPath loc cfg) mappedPaths
   debugA' loc $ "mappedPaths': " ++ show mappedPaths'
-  mapM_ (aMapArgs mapIndex eType regularArgs'' mapTmpDir')
-        (map (toPath loc cfg) mappedPaths') -- TODO wrong if lits?
+  mapM_ (aMapArgs mapIndex eType regularArgs'' mapTmpDir' . toPath loc cfg) mappedPaths' -- TODO wrong if lits?
   let outPaths = map (eachPath cfg mapTmpDir' eType) mappedPaths'
   need' loc outPaths -- TODO remove?
   outPaths' <- liftIO $ mapM resolve outPaths

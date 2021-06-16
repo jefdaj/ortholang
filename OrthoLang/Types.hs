@@ -95,17 +95,18 @@ import qualified Data.Text.Lazy   as T
 import qualified Text.PrettyPrint as PP
 
 import OrthoLang.Locks (LocksRef, withReadLock)
-import OrthoLang.Util  (readFileStrict, readFileLazy)
+import OrthoLang.Util
+    ( readFileStrict, readFileLazy, absolutize, justOrDie )
 
-import Control.Monad.Reader       (ReaderT, runReaderT, ask)
+import Control.Monad.Reader       (ReaderT, runReaderT, ask, asks)
 import Control.Monad.State.Strict (StateT, execStateT, lift, get, put)
 import Control.Monad.Trans        (lift)
 import Control.Monad.Trans.Except (Except, runExcept, throwE)
 import Data.Char                  (toLower)
 import Data.IORef                 (IORef)
-import Data.List                  (nub, find, isPrefixOf, elem)
+import Data.List ( nub, find, isPrefixOf, elem, filter, delete )
 import Data.Map.Strict            (Map, empty)
-import Data.Maybe                 (fromJust, catMaybes, isJust, isNothing)
+import Data.Maybe                 (fromJust, catMaybes, isJust, isNothing, fromMaybe, mapMaybe)
 import Development.Shake          (Rules, Action, Resource)
 import Development.Shake.FilePath (makeRelative)
 import System.Console.Haskeline   (Settings, InputT, runInputT)
@@ -118,9 +119,6 @@ import Text.PrettyPrint.HughesPJClass (Pretty, pPrint, prettyShow)
 import Text.PrettyPrint               (Doc, (<>), (<+>), render)
 import Data.Scientific                (Scientific(), toBoundedInteger)
 import Text.Pretty.Simple             (pShowNoColor)
-
-import Data.List           (filter, delete)
-import OrthoLang.Util               (absolutize, justOrDie)
 
 -----------
 -- paths --
@@ -237,8 +235,8 @@ prettyNum s = if "-" `isPrefixOf` s' then PP.parens (PP.text s') else PP.text s'
 -- this adds parens around nested function calls
 -- without it things can get really messy!
 pNested :: Expr -> Doc
-pNested e@(Fun  _ _ _ _ _  ) = PP.parens $ pPrint e
-pNested e@(Bop  _ _ _ _ _ _) = PP.parens $ pPrint e
+pNested e@Fun {} = PP.parens $ pPrint e
+pNested e@Bop {} = PP.parens $ pPrint e
 pNested e = pPrint e
 
 -- TODO is this not actually needed? seems "show expr" handles it?
@@ -294,7 +292,7 @@ hasVar v as = isJust $ lookupExpr v as
 
 -- TODO any need to compare more than the name? anything to do with reps?
 delVar :: [Assign] -> String -> [Assign]
-delVar as vName = filter (\(Assign {aVar = Var _ n}) -> n /= vName) as
+delVar as vName = filter (\Assign {aVar = Var _ n} -> n /= vName) as
 
 {-
 This data type supports different behavior in the REPL vs when parsing scripts from file...
@@ -330,8 +328,8 @@ instance Pretty Assign where
 
 -- TODO is totally ignoring the sDigests part OK here?
 instance Pretty Script where
-  pPrint (Script {sResult = Nothing}) = PP.empty -- TODO enforce that sAssigns is also empty? it should be
-  pPrint (Script {sResult = Just _, sAssigns = as}) = PP.vcat $ map pPrint as
+  pPrint Script {sResult = Nothing} = PP.empty -- TODO enforce that sAssigns is also empty? it should be
+  pPrint Script {sResult = Just _, sAssigns = as} = PP.vcat $ map pPrint as
 
 emptyScript :: Script
 emptyScript = Script {sAssigns = [], sResult = Nothing}
@@ -387,7 +385,7 @@ instance Eq Type where
   (ListOf t1)        == (ListOf t2)        = t1 == t2
   (ScoresOf t1)      == (ScoresOf t2)      = t1 == t2
   (EncodedAs e1 t1)  == (EncodedAs e2 t2)  = e1 == e2 && t1 == t2
-  (Type {tExt = e1}) == (Type {tExt = e2}) = e1 == e2
+  Type {tExt = e1} == Type {tExt = e2} = e1 == e2
   _                  ==                  _ = False
 
 -- TODO don't call this Show! maybe Pretty?
@@ -405,7 +403,7 @@ instance Pretty Type where
   pPrint (ScoresOf    t) = PP.text "list of" <+> pPrint t <> PP.text "s with scores"
   pPrint (EncodedAs e t) = pPrint t <+> PP.text "encoded as" <+> PP.text (enExt e)
   -- pPrint (Some (TypeGroup {tgExt = t, tgDesc = d}) s) = PP.text t <+> PP.parens (PP.text d) <+> parens (PP.text s) -- TODO refine this
-  pPrint (Type            { tExt = t,  tDesc = d}   ) = PP.text t <+> PP.parens (PP.text d)
+  pPrint Type            { tExt = t,  tDesc = d} = PP.text t <+> PP.parens (PP.text d)
 
 -- ^ tarballs, blast dbs, etc. where both format and wrapped type matter
 -- TODO can it be unified with Type using typeclasses or something? redesign this part
@@ -419,7 +417,7 @@ instance Show Encoding where
   show = enExt
 
 instance Eq Encoding where
-  (Encoding {enExt = e1}) == (Encoding {enExt = e2}) = e1 == e2
+  Encoding {enExt = e1} == Encoding {enExt = e2} = e1 == e2
 
 instance Pretty Encoding where
   pPrint e = PP.text $ enExt e
@@ -466,7 +464,7 @@ data TypeGroup = TypeGroup
 -- TODO is it dangerous to just assume they're the same by extension?
 --      maybe we need to assert no duplicates while loading modules?
 instance Eq TypeGroup where
-  (TypeGroup {tgExt = e1}) == (TypeGroup {tgExt = e2}) = e1 == e2
+  TypeGroup {tgExt = e1} == TypeGroup {tgExt = e2} = e1 == e2
 
 instance Pretty TypeGroup where
   pPrint g = PP.text $ tgExt g
@@ -486,7 +484,7 @@ instance Ext Type where
   ext (ListOf        t) = ext t ++ ".list"
   ext (ScoresOf      t) = ext t ++ ".scores"
   ext (EncodedAs   e t) = ext t ++ "." ++ ext e
-  ext (Type {tExt = e}) = e
+  ext Type {tExt = e} = e
 
 instance Desc Type where
   desc Empty           = "empty list" -- for lists with nothing in them yet
@@ -494,7 +492,7 @@ instance Desc Type where
   desc (ListOf      t) = "list of " ++ desc t
   desc (ScoresOf    t) = "scores for " ++ desc t
   desc (EncodedAs e t) = desc t ++ " encoded as " ++ desc e
-  desc (Type {tDesc = d}) = d
+  desc Type {tDesc = d} = d
 
 instance Ext TypeGroup where
   ext  = tgExt -- TODO move defition here
@@ -530,7 +528,7 @@ defaultShow = defaultShowN 5
 
 -- TODO remove? or make part of a typeclass
 defaultShowN :: Int -> Config -> LocksRef -> FilePath -> IO String
-defaultShowN nLines _ locks = fmap (dropNewline . unlines . fmtLines . lines) . (readFileLazy locks)
+defaultShowN nLines _ locks = fmap (dropNewline . unlines . fmtLines . lines) . readFileLazy locks
   where
     dropNewline = reverse . dropWhile (== '\n') . reverse
     fmtLine  l  = if length l > 80 then take 77 l ++ "..." else l -- TODO base this on termcolumns cfg
@@ -654,10 +652,10 @@ findFunction mods name = find (\f -> map toLower (fName f) == n
 findFun :: [Module] -> String -> Either String Function
 findFun mods name =
   let n   = map toLower name
-      fns = concat $ map mFunctions mods
+      fns = concatMap mFunctions mods
   in case filter (\f -> map toLower (fName f) == n) fns of
        []     -> Left $ "no function found with name \"" ++ name ++ "\""
-       (f:[]) -> Right f
+       [f] -> Right f
        _      -> Left $ "function name collision! multiple fns match \"" ++ name ++ "\""
 
 usesSeed :: Function -> Bool
@@ -686,7 +684,7 @@ listFunctions mods = concatMap mFunctions mods
 
 -- Now with guard against accidentally including parts of prefix fn names!
 operatorChars :: [Module] -> [Char]
-operatorChars mods = catMaybes $ map fOpChar $ listFunctions mods
+operatorChars mods = mapMaybe fOpChar (listFunctions mods)
 
 
 ------------
@@ -697,10 +695,10 @@ type ParseEnv = (Config, [Module])
 type ParseM a = ParsecT String Script (ReaderT ParseEnv (Except String)) a
 
 askConfig :: ParseM Config
-askConfig = fmap fst $ ask
+askConfig = asks fst
 
 askModules :: ParseM [Module]
-askModules = fmap snd $ ask
+askModules = asks snd
 
 -- TODO is cfg still needed? if so, add mods
 -- originally based on https://stackoverflow.com/a/54089987/429898
@@ -807,7 +805,7 @@ typeSigMatches (EncodedSig e1 s) (EncodedAs e2 t) = e1 == e2 && typeSigMatches s
 typeSigMatches (ListSigs _)      _                = False
 typeSigMatches (ScoresSigs _)    _                = False
 typeSigMatches (EncodedSig _ _)  _                = False
-typeSigMatches (Some g _)        t                = any (\s -> typeSigMatches s t) (tgMembers g)
+typeSigMatches (Some g _)        t                = any (`typeSigMatches` t) (tgMembers g)
 
 ----------
 -- repl --
@@ -839,16 +837,14 @@ getWidth = do
   s <- size
   return $ case s of
     Nothing -> 120
-    Just (Window {width = w}) -> w
+    Just Window {width = w} -> w
 
 -- Render with my custom style (just width so far)
 -- Needs to have the optional constant width for the REPL tests
 renderIO :: Config -> Doc -> IO String
 renderIO cfg doc = do
   currentWidth <- getWidth
-  let renderWidth = case termcolumns cfg of
-                      Nothing -> currentWidth
-                      Just w  -> w
+  let renderWidth = fromMaybe currentWidth (termcolumns cfg)
   let s = PP.style {PP.lineLength = renderWidth, PP.ribbonsPerLine = 1.0}
   -- let s = style {lineLength = renderWidth}
   return $ PP.renderStyle s doc

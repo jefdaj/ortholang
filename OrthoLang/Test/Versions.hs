@@ -68,10 +68,10 @@ versionScripts = map (\(a,b) -> (a, os ++ ":" ++ b))
 -- Unlike the other tests, these don't need access to the runtime config
 mkTests :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 mkTests cfg _ _ _ = do
-  testDir <- getDataFileName $ "tests"
+  testDir <- getDataFileName "tests"
   debug "test.versions" $ "test dir is " ++ testDir
   return $ testGroup "check dependency versions"
-         $ map (mkTestVersion cfg testDir) (versionScripts)
+         $ map (mkTestVersion cfg testDir) versionScripts
 
 mkTestVersion :: Config -> FilePath -> (TestName, String) -> TestTree
 mkTestVersion _ dir (name, cmd) = goldenVsString d gld act

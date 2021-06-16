@@ -81,7 +81,7 @@ dropFromList xs n
   | n < 1 || n > length xs = error "attmpt to drop nonexistent list element"
   | otherwise = before ++ after
   where
-    (before, (_:after)) = splitAt (n-1) xs
+    (before, _:after) = splitAt (n-1) xs
 
 -- returns a list of lists where each element is left out once
 -- TODO should it be an error to call this with only one element?

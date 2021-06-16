@@ -47,12 +47,11 @@ import Control.Applicative    ((<|>))
 import Control.Monad          (void)
 import Data.Either            (isRight)
 import Data.List              (union, find, intercalate)
-import Data.Maybe             (isJust, fromJust, catMaybes)
-import Text.Parsec            (try, (<?>))
+import Data.Maybe             (isJust, fromJust, catMaybes, mapMaybe)
+import Text.Parsec ( try, (<?>), getState )
 import Text.Parsec.Char       (string)
 import Text.Parsec.Combinator (manyTill, eof, between, choice, sepBy)
 import Control.Monad.Reader   (ReaderT)
-import Text.Parsec            (getState)
 
 
 {-
@@ -79,9 +78,10 @@ listElemType :: [Type] -> Either String Type
 listElemType ts = if typesOK then Right elemType else Right Untyped -- TODO is this right?
   where
     nonEmpty = filter isNonEmpty ts
-    elemType = if      null ts       then Empty
-               else if null nonEmpty then headOrDie "listElemType failed" ts -- for example (ListOf Empty)
-               else    headOrDie "listElemType failed" nonEmpty
+    elemType
+      | null ts = Empty
+      | null nonEmpty = headOrDie "listElemType failed" ts
+      | otherwise = headOrDie "listElemType failed" nonEmpty
     typesOK  = all (== elemType) nonEmpty -- TODO is this where we could allow heterogenous lists?
     -- errorMsg = "list elements have different types: " ++ show ts
 
@@ -103,7 +103,7 @@ operatorTable :: [Module] -> [[E.Operator String Script (ReaderT ParseEnv (Excep
 operatorTable mods = [map binary bops] -- modules would work
   where
     binary f = E.Infix (pBop f) E.AssocLeft
-    bops = filter (isJust . fOpChar) (concat $ map mFunctions mods)
+    bops = filter (isJust . fOpChar) (concatMap mFunctions mods)
 
 {-|
 This is an annoying extra type, but I can't figure out how to implement pBop without it.
@@ -128,15 +128,15 @@ pBopOp name c = debugParser ("pBopOp " ++ name) (pSym c)
 
 mkBop :: Function -> BopExprsParser
 mkBop bop = return $ \e1 e2 ->
-  let eType = listElemType $ [typeOf e1, typeOf e2]
+  let eType = listElemType [typeOf e1, typeOf e2]
   in case eType of
        Left  e  -> error "mkBop" e -- TODO is a better error type possible here?
        Right r1 ->
          case typecheckFn [fromJust $ fOpChar bop] (fOutput bop) (bopInputs $ fInputs bop) [typeOf e1, typeOf e2] of
            Left  msg -> error "mkBop" msg -- TODO can't `fail` because not in monad here?
            -- TODO is the seed thing right here?
-           Right _ -> let seed = if usesSeed bop then (Just $ Seed 0) else Nothing
-                      in Bop r1 seed (union (depsOf e1) (depsOf e2)) [fromJust $ fOpChar bop] e1 e2
+           Right _ -> let seed = if usesSeed bop then Just $ Seed 0 else Nothing
+                      in Bop r1 seed (depsOf e1 `union` depsOf e2) [fromJust $ fOpChar bop] e1 e2
 
         -- TODO is naming it after the opchar wrong now?
 -- TODO how to putState with these? is it needed at all?
@@ -183,7 +183,7 @@ TODO get function names from modules
 pFunName :: ParseM String
 pFunName = do
   mods <- askModules
-  (choice $ map (try . str') $ listFunctionNames mods) <?> "fn name"
+  choice (map (try . str') $ listFunctionNames mods) <?> "fn name"
   where
     str' s = string s <* (void spaces1 <|> eof)
 
@@ -208,9 +208,7 @@ TODO is this where we forget to add the list digest?
 -}
 pArgs :: ParseM [Expr]
 pArgs = debugParser "pArgs" $ do
-  es <- manyTill (try pTerm) pEnd
-  -- putDigests "pArgs" es
-  return es
+  manyTill (try pTerm) pEnd
 
 {-|
 This function uses error rather than fail to prevent parsec from trying anything more
@@ -270,7 +268,7 @@ typecheckFn' name outSig inSigs inTypes =
     then Left $ errHeader ++ unlines errors
     else inferOutputType name outSig $ zip inSigs inTypes
   where
-    errors = catMaybes $ map sigMatch $ zip3 [1..] inSigs inTypes
+    errors = mapMaybe sigMatch (zip3 [1..] inSigs inTypes)
     sigMatch (n,s,t) = if typeSigMatches s t then Nothing else Just $ explain (n,s,t)
     errHeader = name ++ " has the type signature " ++ show inSigs
                      ++ ",\nwhich doesn't match its inputs "   ++ show inTypes
@@ -286,9 +284,9 @@ TODO also error if it matches more than one unique type
 -}
 inferOutputType :: String -> TypeSig -> [(TypeSig, Type)] -> Either String Type
 inferOutputType _ (Exactly t) _ = Right t
-inferOutputType n (ListSigs     s) sts = fmap  ListOf       $ inferOutputType n s sts
-inferOutputType n (ScoresSigs   s) sts = fmap  ScoresOf     $ inferOutputType n s sts
-inferOutputType n (EncodedSig e s) sts = fmap (EncodedAs e) $ inferOutputType n s sts
+inferOutputType n (ListSigs     s) sts = ListOf <$> inferOutputType n s sts
+inferOutputType n (ScoresSigs   s) sts = ScoresOf <$> inferOutputType n s sts
+inferOutputType n (EncodedSig e s) sts = EncodedAs e <$> inferOutputType n s sts
 inferOutputType n s@(AnyType _) sts = inferAmbigOutputType n s sts
 inferOutputType n s@(Some  _ _) sts = inferAmbigOutputType n s sts
 
@@ -307,7 +305,7 @@ inferAmbigOutputType n s sts =
   in case find (\(s2,_) -> s == s2) sts' of
        Nothing -> Left $ "Invalid type signature for " ++ n ++ "!" ++
                          "\nAmbiguous return type " ++  show s ++
-                         " doesn't match any of the ambiguous inputs:\n" ++ 
+                         " doesn't match any of the ambiguous inputs:\n" ++
                          intercalate "\n" (map show sts')
        Just (_,t) -> Right t
 
@@ -323,8 +321,8 @@ flattenAmbigTypes acc (x:xs) = case x of
   (EncodedSig _ s, EncodedAs _ t) -> flattenAmbigTypes acc ((s,t):xs)
   (EncodedSig _ _, _            ) -> flattenAmbigTypes acc xs
   (Exactly      _, _            ) -> flattenAmbigTypes acc xs
-  ((AnyType _),_) -> flattenAmbigTypes (x:acc) xs
-  ((Some  _ _),_) -> flattenAmbigTypes (x:acc) xs
+  (AnyType _,_) -> flattenAmbigTypes (x:acc) xs
+  (Some  _ _,_) -> flattenAmbigTypes (x:acc) xs
 
 {-|
 A reference is just a variable name, but that variable has to be in the script.

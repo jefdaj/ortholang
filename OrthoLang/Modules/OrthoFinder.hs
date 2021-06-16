@@ -65,7 +65,7 @@ aOrthofinder (ExprPath out') faListPath' = do
   faPaths <- readPaths loc faListPath'
   let faPaths' = map (fromPath loc cfg) faPaths
   need' "ortholang.modules.orthofinder.aOrthofinder" faPaths'
-  let faLinks = map (\p -> toPath loc cfg $ tmpDir </> (takeFileName $ fromPath loc cfg p)) faPaths
+  let faLinks = map (\p -> toPath loc cfg $ tmpDir </> takeFileName (fromPath loc cfg p)) faPaths
   -- orthofinder is sensitive to which files and dirs have been created before it runs
   -- so we need to lock the tmpDir to prevent it creating something like Results__1
   -- and we can't mark statsPath' as an extra outpath

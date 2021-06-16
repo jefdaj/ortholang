@@ -12,7 +12,7 @@ import OrthoLang.Interpreter
 -- import OrthoLang.Modules.Curl (curl)
 import OrthoLang.Modules.Load (mkLoad)
 
-import Control.Monad             (when)
+import Control.Monad             (when, unless)
 import Data.List                 ((\\), isInfixOf)
 import Data.Maybe                (fromJust)
 import Data.Scientific           (Scientific)
@@ -199,16 +199,16 @@ aBuscoFetchLineage (ExprPath out') namePath = do
   let loc = "modules.busco.aBuscoFetchLineage"
   nameStr <- readLit loc namePath
   let out = toPath loc cfg out'
-      blhDir   = (fromPath loc cfg $ buscoCache cfg) </> "lineages"
+      blhDir   = fromPath loc cfg (buscoCache cfg) </> "lineages"
       untarPath = blhDir </> nameStr
       url       = toPath loc cfg $ "http://busco.ezlab.org/" ++ nameStr ++ ".tar.gz"
       datasetPath'  = untarPath </> "dataset.cfg" -- final output we link to
       datasetPath   = toPath loc cfg datasetPath'
-  tarPath <- fmap (fromPath loc cfg) $ undefined url -- TODO fix this with new curl!
+  tarPath <- fromPath loc cfg <$> undefined url -- TODO fix this with new curl!
   unlessExists untarPath $ do
     untar (toPath loc cfg tarPath) (toPath loc cfg untarPath)
   symlink out datasetPath
- 
+
 -------------------------------------------
 -- busco_{genome,proteins,transcriptome} --
 -------------------------------------------
@@ -257,7 +257,7 @@ aBusco mode (ExprPath outPath) blhPath faaPath = do
   -- This is rediculous but I haven't been able to shorten it...
   let oBasePtn = "*" ++ takeBaseName outPath ++ "*"
       tmpOutPtn = rDir </> oBasePtn </> "short_summary*.txt"
-  tmpOut <- liftIO $ fmap (headOrDie "failed to read BUSCO summary in aBusco") $ glob tmpOutPtn
+  tmpOut <- liftIO $ headOrDie "failed to read BUSCO summary in aBusco" <$> glob tmpOutPtn
   sanitizeFileInPlace tmpOut -- will this confuse shake?
   symlink out' $ toPath loc cfg tmpOut
 
@@ -366,12 +366,12 @@ parseWords ws = error $ "bad argument to parseWords: " ++ show ws
 aBuscoFilterCompleteness :: NewAction3
 aBuscoFilterCompleteness (ExprPath out') scorePath tablePath faasList = do
   let loc = "modules.busco.rBuscoFilterCompleteness"
-  score <- fmap (read :: String -> Scientific) $ readLit loc scorePath
+  score <- (read :: String -> Scientific) <$> readLit loc scorePath
   table <- readFileStrict' tablePath -- TODO best read fn?
   faaPaths <- readPaths loc faasList
-  let allScores = map parseWords $ map words $ lines table
+  let allScores = map (parseWords . words) (lines table)
       missing   = faaPaths \\ map fst allScores
       okPaths   = map fst $ filter (\(_, c) -> c >= score) allScores
-  when (not $ null missing) $
+  unless (null missing) $
     error $ "these paths are missing from the table: " ++ show missing
   writePaths loc out' okPaths

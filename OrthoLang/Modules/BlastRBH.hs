@@ -137,7 +137,7 @@ aReciprocalBestAll (ExprPath out') lefts' rights' = do
       ins  = map (toPath loc cfg . snd) ins'
       out  = toPath loc cfg out'
   liftIO $ createDirectoryIfMissing True cDir
-  mapM_ (\(inPath, outPath) -> absolutizePaths loc inPath outPath) ins'
+  mapM_ (uncurry (absolutizePaths loc)) ins'
   aSimpleScriptNoFix "reciprocal_best_all.R" (out:ins)
 
 -----------------

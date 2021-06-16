@@ -48,7 +48,7 @@ aScores scoresPath othersPath othersType outPath = do
   scores <- readLits loc $ fromPath loc cfg scoresPath
   others <- readStrings loc othersType $ fromPath loc cfg othersPath
   let out' = fromPath loc cfg outPath
-      rows = map (\(a,b) -> a ++ "\t" ++ b) $ zip scores others
+      rows = zipWith (\ a b -> a ++ "\t" ++ b) scores others
   when (length scores /= length others) $ error $ unlines
      ["mismatched scores and others in aScores:", show scores, show others]
   debug' $ "aScores scores': " ++ show scores
@@ -85,7 +85,7 @@ scoreRepeats = Function
 -- tScoreRepeats _ = Left "invalid args to scoreRepeats"
 
 rScoreRepeats :: RulesFn
-rScoreRepeats scr expr@(Fun (ScoresOf t) seed deps _ as@(_:_:subList:[])) = do
+rScoreRepeats scr expr@(Fun (ScoresOf t) seed deps _ as@[_, _, subList]) = do
   inputs <- rExpr scr subList
   cfg  <- fmap fromJust getShakeExtraRules
   dRef <- fmap fromJust getShakeExtraRules
@@ -98,7 +98,7 @@ rScoreRepeats scr expr@(Fun (ScoresOf t) seed deps _ as@(_:_:subList:[])) = do
       inputs' = hack inputs
       scores' = hack scores
   outPath' %> \_ -> aScores scores' inputs' t outPath
-  return $ ExprPath $ outPath'
+  return $ ExprPath outPath'
 rScoreRepeats _ expr = error $ "bad argument to rScoreRepeats: " ++ show expr
 
 ----------------------------------

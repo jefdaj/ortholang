@@ -69,7 +69,7 @@ goldenRepl cfg ref ids dRef goldenFile = do
   txt <- readFileStrict ref goldenFile -- TODO have to handle unicode here with the new prompt?
   let name   = takeBaseName goldenFile
       d      = "repl output matches " ++ name <.> "txt"
-      cfg'   = cfg { tmpdir = (tmpdir cfg </> name) }
+      cfg'   = cfg { tmpdir = tmpdir cfg </> name }
       tstOut = tmpdir cfg' <.> "txt"
       stdin  = extractPrompted ("ortholang" ++ promptArrow) txt -- TODO pass the prompt here
       action = mockRepl stdin tstOut (emptyScript, cfg', ref, ids, dRef)
@@ -88,7 +88,7 @@ findGoldenFiles :: IO [FilePath]
 findGoldenFiles = do
   testDir  <- getDataFileName "tests/repl"
   txtFiles <- findByExtension [".txt"] testDir
-  let txtFiles' = filter (\t -> not $ (takeBaseName t) `elem` knownFailing) txtFiles
+  let txtFiles' = filter (\t -> (takeBaseName t) `notElem` knownFailing) txtFiles
   return txtFiles'
 
 goldenRepls :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
@@ -103,13 +103,13 @@ goldenReplTree cfg ref ids dRef ses = mkTreeTest cfg' ref ids dRef name gtAct tr
   where
     tre  = replace "tests/repl" "tests/tmpfiles" ses
     name = takeBaseName ses
-    cfg' = cfg { tmpdir = (tmpdir cfg </> name) }
+    cfg' = cfg { tmpdir = tmpdir cfg </> name }
     gtAct _ r i d = do
       txt <- readFileStrict r ses
       let stdin  = extractPrompted promptArrow txt
           tmpOut = tmpdir cfg </> name ++ ".out" -- TODO remove?
       mockRepl stdin tmpOut (emptyScript, cfg, r, i, d)
-  
+
 goldenReplTrees :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree
 goldenReplTrees cfg ref ids dRef = do
   txts <- findGoldenFiles

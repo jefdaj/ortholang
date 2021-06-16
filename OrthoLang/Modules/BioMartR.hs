@@ -26,8 +26,8 @@ import OrthoLang.Interpreter
 import Development.Shake
 import OrthoLang.Modules.SeqIO (fna, faa)
 import Control.Monad (void)
-import Text.Parsec            (spaces, runParser)
-import Text.Parsec (Parsec, try, choice, (<|>), many1)
+import Text.Parsec
+    ( spaces, runParser, Parsec, try, choice, (<|>), many1 )
 import Text.Parsec.Char (char, string, alphaNum, oneOf)
 import Text.Parsec.Combinator (between, optionMaybe)
 import Data.Maybe (fromMaybe, fromJust)
@@ -184,7 +184,7 @@ pSearch = do
     Just (n,i) -> return $ Search species n i
   where
     inParens = between (pSym' '(') (pSym' ')')
-    pSym'    = void . char 
+    pSym'    = void . char
 
 -- TODO bug: this is getting passed a filepath and is partially parsing it
 --           it expects a single filepath but gets a list of them
@@ -192,7 +192,7 @@ pSearch = do
 readSearch :: String -> Either String Search
 readSearch txt = case runParser pSearch () "search string" txt of
   Left  e -> Left  $ show e
-  Right s@(Search _ _ _) -> Right s
+  Right s@Search {} -> Right s
 
 -- TODO use cassava?
 toTsvRows :: [Search] -> [String]

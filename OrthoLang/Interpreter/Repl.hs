@@ -48,19 +48,18 @@ import OrthoLang.Interpreter.Repl.Info
 import OrthoLang.Interpreter.Eval          (evalScript)
 import OrthoLang.Interpreter.Parse         (isExpr, parseStatement, stripComments)
 import OrthoLang.Interpreter.Config    (showConfig, showConfigField, setConfigField)
-import OrthoLang.Interpreter.Repl.Help (help)
 import OrthoLang.Util           (stripWhiteSpace, headOrDie)
 
-import Control.Exception.Safe     (Exception, throw)
+import Control.Exception.Safe ( Exception, throw, catch )
 import Control.Monad              (when)
 import Control.Monad.IO.Class     (liftIO)
 import Control.Monad.State.Strict (lift, get, put)
 import Data.Char                  (isSpace)
 import Data.List                  (isPrefixOf, filter, intercalate)
+import Data.Bifunctor             (second)
 import System.Console.Haskeline   (Settings(..), InputT, getInputLine)
 import System.IO                  (Handle, hPutStrLn, stdout)
 import System.Process             (runCommand, waitForProcess)
-import Control.Exception.Safe     (catch)
 
 -- | Main entry point for running the REPL
 runRepl :: [Module] -> GlobalEnv -> IO ()
@@ -106,7 +105,7 @@ mkRepl mods promptFns hdl (_, cfg, ref, ids, dRef) = do
 loop :: [Module] -> [String -> InputT ReplM (Maybe String)] -> Handle -> InputT ReplM (Maybe String)
 loop _ [] _ = return Nothing
 loop mods (promptFn:promptFns) hdl = do
-  st@(_, cfg, _, _, _)  <- lift $ get
+  st@(_, cfg, _, _, _)  <- lift get
   mLine <- promptFn $ shortPrompt cfg
   st' <- liftIO $ step mods st hdl mLine
   lift $ put st'
@@ -141,7 +140,7 @@ runCmd mods st@(_, cfg, _, _, _) hdl line = case matches of
         in hPutStrLn hdl msg >> return st
   where
     (cmd, args) = break isSpace line
-    matches = filter ((isPrefixOf cmd) . fst) (cmds cfg)
+    matches = filter (isPrefixOf cmd . fst) (cmds cfg)
 
 cmds :: Config -> [(String, ReplEdit)]
 cmds cfg = secureCmds ++ replCmds ++ editCmds ++ infoCmds
@@ -158,15 +157,14 @@ cmds cfg = secureCmds ++ replCmds ++ editCmds ++ infoCmds
       -- post-edit hook is skipped for writes to prevent double-writing
       -- TODO are there other hooks that do still need to be run?
       -- TODO do more people expect 'save' or 'write'?
-      [ ("write", cmdWrite) ]
-      ++
-      map (\(n, c) -> (n, withPostEditHook c))
+      ("write", cmdWrite) :
+      map (second withPostEditHook)
         [ ("load"  , cmdLoad  )
         , ("drop"  , cmdDrop  ) -- TODO autosave here?
         , ("reload", cmdReload)
         ]
     infoCmds :: [(String, ReplEdit)]
-    infoCmds = map (\(n,c) -> (n, withSameState c))
+    infoCmds = map (second withSameState)
       [ ("help"    , cmdHelp      )
       , ("type"    , cmdType      )
       , ("show"    , cmdShow      )
@@ -221,13 +219,13 @@ cmdShell _ st _ cmd = (runCommand cmd >>= waitForProcess) >> return st
 cmdConfig :: ReplEdit
 cmdConfig _ st@(scr, cfg, ref, ids, dRef) hdl s = do
   let ws = words s -- TODO only split on the first + second space, passing the rest as one string (for patterns)
-  if (length ws == 0)
+  if null ws
     then hPutStrLn hdl (showConfig cfg ++ "\n") >> return st -- TODO Pretty instance?
-    else if (length ws  > 2)
+    else if length ws  > 2
       then hPutStrLn hdl "too many variables\n" >> return st
       -- TODO any better way to handle this?
       -- TODO make repl tests for these
-      else if (length ws == 1)
+      else if length ws == 1
         -- TODO use pretty print or display here instead
         -- TODO remove modules, since they're never used and can't show/read
         then hPutStrLn hdl (showConfigField cfg $ head ws) >> return st -- TODO just the one field

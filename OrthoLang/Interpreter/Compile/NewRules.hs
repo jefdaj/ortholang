@@ -105,8 +105,19 @@ import Prelude hiding (error)
 import OrthoLang.Debug
 import Control.Monad.Reader
 import Development.Shake hiding (doesDirectoryExist)
-import System.Directory (doesDirectoryExist)
-import OrthoLang.Interpreter.Actions       (runCmd, CmdDesc(..), writePaths, trackWrite', readLit, writeLit, symlink, debugA)
+import System.Directory
+    ( doesDirectoryExist, createDirectoryIfMissing, doesPathExist )
+import OrthoLang.Interpreter.Actions
+    ( runCmd,
+      CmdDesc(..),
+      writePaths,
+      trackWrite',
+      readLit,
+      writeLit,
+      symlink,
+      debugA,
+      need',
+      readPaths )
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Locks (withWriteOnce)
 import OrthoLang.Types
@@ -117,11 +128,9 @@ import Control.Monad              (when)
 import Data.Either.Utils          (fromRight)
 import Data.Maybe                 (fromJust, isJust)
 import Development.Shake.FilePath ((</>), takeDirectory, dropExtension, takeBaseName, makeRelative, splitDirectories)
-import OrthoLang.Interpreter.Actions     (need', readPaths)
 import OrthoLang.Interpreter.Paths (toPath, fromPath, decodeNewRulesDeps, addDigest, listDigestsInPath, getExprPathSeed, pathDigest, exprPath, pathDigest, unsafeExprPathExplicit)
 import qualified Data.Map.Strict as M
 import Data.IORef                 (atomicModifyIORef')
-import System.Directory           (createDirectoryIfMissing)
 
 import Data.Time
 import Text.Printf
@@ -130,8 +139,8 @@ import Data.List.Split (splitOn)
 import OrthoLang.Util (absolutize, globFiles)
 import Data.List (sort)
 import Data.List.Utils (replace)
-import System.Directory (doesPathExist)
 import System.FilePath (takeBaseName, takeDirectory)
+import Data.Foldable (forM_)
 
 ---------------
 -- debugging --
@@ -306,9 +315,7 @@ rReloadIDs = "reloadids" ~> do
   alwaysRerun
   cfg <- fmap fromJust getShakeExtra
   -- find ids in shared load cache, if any
-  case shared cfg of
-    Nothing -> return ()
-    Just sd -> aReloadIDsDir sd
+  forM_ (shared cfg) aReloadIDsDir
   -- find ids in regular load cache
   let ld = tmpdir cfg </> "cache" </> "load"
   aReloadIDsDir ld
@@ -347,7 +354,7 @@ aLoadIDs idsPath' = do
   -- liftIO $ debug "interpreter.sanitize.aLoadIDs" $ "k: " ++ k
   -- liftIO $ debug "interpreter.sanitize.aLoadIDs" $ "v: " ++ v
   ids <- fmap fromJust getShakeExtra
-  liftIO $ atomicModifyIORef' ids $ \h@(IDs {hFiles = fs, hSeqIDs = is}) ->
+  liftIO $ atomicModifyIORef' ids $ \h@IDs {hFiles = fs, hSeqIDs = is} ->
     (h { hFiles  = M.insert k v fs
        , hSeqIDs = M.insert k newIDs    is
        -- , hSeqHashes = M.insert k newHashes hs
@@ -380,7 +387,7 @@ TODO any need to look up prefixOf to get the canonical name?
 -}
 newPattern :: Config -> Bool -> String -> Int -> FilePattern
 newPattern cfg useSeed name nArgs =
-  tmpdir cfg </> "exprs" </> name </> (foldl1 (</>) (take nStars $ repeat "*")) </> "result"
+  tmpdir cfg </> "exprs" </> name </> foldl1 (</>) (replicate nStars "*") </> "result"
   where
     nStars = if useSeed then nArgs+1 else nArgs
 
@@ -394,14 +401,14 @@ newPattern cfg useSeed name nArgs =
 --        because they would need to know a seed it doesn't have
 newPathDigest :: Config -> ExprPathInfo -> Action PathDigest
 newPathDigest cfg (oType, prefix, digests, mSeed) = do
-  mods <- fmap fromJust $ getShakeExtra
-  dRef <- fmap fromJust $ getShakeExtra
+  mods <- fromJust <$> getShakeExtra
+  dRef <- fromJust <$> getShakeExtra
   let loc     = "modules.newrules.newPathDigest"
       useSeed = usesSeed $ fromRight $ findFun mods prefix
       hashes  = map (\(PathDigest d) -> d) digests
-      path1   = tmpdir cfg </> "exprs" </> prefix </> (foldl1 (</>) hashes)
+      path1   = tmpdir cfg </> "exprs" </> prefix </> foldl1 (</>) hashes
       path2   = if useSeed && isJust mSeed
-                  then path1 </> "s" ++ (show $ fromJust mSeed) </> "result"
+                  then path1 </> "s" ++ show (fromJust mSeed) </> "result"
                   else path1 </> "result"
       path3 = toPath loc cfg path2
   liftIO $ addDigest dRef oType path3
@@ -421,8 +428,8 @@ rNewRules
   -> (ExprPath -> t)
   -> Rules ()
 rNewRules nArgs applyFn oSig name aFn = do
-  cfg  <- fmap fromJust $ getShakeExtraRules
-  mods <- fmap fromJust $ getShakeExtraRules
+  cfg  <- fromJust <$> getShakeExtraRules
+  mods <- fromJust <$> getShakeExtraRules
   let useSeed = usesSeed $ fromRight $ findFun mods name
       ptn = newPattern cfg useSeed name nArgs
       ptn' = traceShow "rNewrules" ptn
@@ -433,7 +440,7 @@ rNewRules nArgs applyFn oSig name aFn = do
 -- | This deduplicates singleton paths (and others?) to prevent duplicate blast tmpfiles
 canonicalExprLinks :: [FilePath] -> Action [FilePath]
 canonicalExprLinks deps = do
-  cfg  <- fmap fromJust $ getShakeExtra
+  cfg  <- fromJust <$> getShakeExtra
   liftIO $ mapM (resolveSymlinks (Just [tmpdir cfg </> "vars", tmpdir cfg </> "exprs"])) deps
 
 -- TODO is it possible to get the return type here?
@@ -443,7 +450,7 @@ rNewRulesA1 = rNewRules 1 applyList1
 applyList1 :: (FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList1 fn deps = do
   deps' <- canonicalExprLinks deps
-  fn (deps' !! 0)
+  fn (head deps')
 
 rNewRulesA2 :: TypeSig -> String -> NewAction2 -> Rules ()
 rNewRulesA2 = rNewRules 2 applyList2
@@ -451,7 +458,7 @@ rNewRulesA2 = rNewRules 2 applyList2
 applyList2 :: (FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList2 fn deps = do
   deps' <- canonicalExprLinks deps
-  fn (deps' !! 0) (deps' !! 1)
+  fn (head deps') (deps' !! 1)
 
 rNewRulesA3 :: TypeSig -> String -> NewAction3 -> Rules ()
 rNewRulesA3 = rNewRules 3 applyList3
@@ -459,7 +466,7 @@ rNewRulesA3 = rNewRules 3 applyList3
 applyList3 :: (FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList3 fn deps = do
   deps' <- canonicalExprLinks deps
-  fn (deps' !! 0) (deps' !! 1) (deps' !! 2)
+  fn (head deps') (deps' !! 1) (deps' !! 2)
 
 rNewRulesA4 :: TypeSig -> String -> NewAction4 -> Rules ()
 rNewRulesA4 = rNewRules 4 applyList4
@@ -467,7 +474,7 @@ rNewRulesA4 = rNewRules 4 applyList4
 applyList4 :: (FilePath -> FilePath -> FilePath -> FilePath -> Action ()) -> [FilePath] -> Action ()
 applyList4 fn deps = do
   deps' <- canonicalExprLinks deps
-  fn (deps' !! 0) (deps' !! 1) (deps' !! 2) (deps' !! 3)
+  fn (head deps') (deps' !! 1) (deps' !! 2) (deps' !! 3)
 
 {-|
 -}
@@ -477,14 +484,14 @@ aNewRules
   -> (ExprPath -> t)
   ->  ExprPath -> Action ()
 aNewRules applyFn oSig aFn o@(ExprPath out) = do
-  cfg  <- fmap fromJust $ getShakeExtra
-  dRef <- fmap fromJust $ getShakeExtra
+  cfg  <- fromJust <$> getShakeExtra
+  dRef <- fromJust <$> getShakeExtra
   let loc = "modules.newrulestest.aNewRules"
   -- TODO don't try to return oType here because outpath won't have a digest entry yet
   (oType, _, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef o
 
   -- TODO produce a better error message here
-  when (not $ oSig `typeSigMatches` oType) $
+  unless (oSig `typeSigMatches` oType) $
     error "aNewRules" $ "typechecking error: " ++ show oSig ++ " /= " ++ show oType
 
   -- dRef <- fmap fromJust $ getShakeExtra
@@ -656,13 +663,13 @@ newMap mapPrefix mapIndex out@(ExprPath outList) listToMapOver = do
   liftIO $ debug loc $ "outList: " ++ outList
   liftIO $ debug loc $ "listToMapOver: " ++ listToMapOver
   cfg <- fmap fromJust getShakeExtra
-  
+
   liftIO $ debug loc $ "about to readPaths from  " ++ listToMapOver
   inPaths <- readPaths loc listToMapOver -- TODO get the type and do readStrings instead?
   liftIO $ debug loc $ "successfully readPaths from  " ++ listToMapOver
 
   dRef <- fmap fromJust getShakeExtra
-  ((ListOf oType), dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef out
+  (ListOf oType, dTypes, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef out
   liftIO $ debug loc $ "oType: " ++ show oType
   liftIO $ debug loc $ "dTypes: " ++ show dTypes
   liftIO $ debug loc $ "dPaths: " ++ show dPaths
@@ -722,7 +729,7 @@ newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cf
     newDigests path = map (\(PathDigest s) -> s) $
                       replaceN oldDigests' (mapIndex - 1, pathDigest path)
     mkPath p = tmpdir cfg </> "exprs" </> newFnName </>
-               (foldl1 (</>) (newDigests p)) </>
+               foldl1 (</>) (newDigests p) </>
                newSuffix
 
 -- replace the Nth element in a list
@@ -732,7 +739,7 @@ replaceN [] _ = []
 replaceN (_:xs) (0,a) = a:xs
 replaceN (x:xs) (n,a) =
   if n < 0
-    then (x:xs)
+    then x:xs
     else x: replaceN xs (n-1,a)
 
 ------------------------------------------------------
@@ -761,9 +768,9 @@ aNewDate prefix (ExprPath outPath') userPath = do
   dRef <- fmap fromJust getShakeExtra
   let loc = "ortholang.interpreter.compile.newrules.newDate"
       cacheDir   = tmpdir cfg </> "exprs" </> prefix
-      cachePath  = makeRelative (cacheDir) outPath'
+      cachePath  = makeRelative cacheDir outPath'
 
-  properDate <- fmap show $ properDay cacheDir cachePath userPath
+  properDate <- show <$> properDay cacheDir cachePath userPath
 
   debugA' "aNewDate" $ "properDate: '" ++ properDate ++ "'"
   let properPath   = exprPath cfg dRef emptyScript $ Lit str properDate
@@ -799,8 +806,8 @@ type ExprPathInfo = (Type, Prefix, [PathDigest], Maybe Seed)
 
 path2info :: ExprPath -> Action ExprPathInfo
 path2info e@(ExprPath p) = do
-  cfg  <- fmap fromJust $ getShakeExtra
-  dRef <- fmap fromJust $ getShakeExtra
+  cfg  <- fromJust <$> getShakeExtra
+  dRef <- fromJust <$> getShakeExtra
   let prefix = splitDirectories (makeRelative (tmpdir cfg) p) !! 1
       mSeed  = getExprPathSeed p
   (oType, _, dPaths) <- liftIO $ decodeNewRulesDeps cfg dRef e
@@ -809,8 +816,8 @@ path2info e@(ExprPath p) = do
 -- TODO need for force evaluation of unsafeExprPathExplicit here?
 info2path :: ExprPathInfo -> Action ExprPath
 info2path (rType, prefix, iPaths, mSeed) = do
-  cfg  <- fmap fromJust $ getShakeExtra
-  dRef <- fmap fromJust $ getShakeExtra
+  cfg  <- fromJust <$> getShakeExtra
+  dRef <- fromJust <$> getShakeExtra
   let loc    = "ortholang.interpreter.compile.newrules.info2path"
       hashes = undefined iPaths
       out    = unsafeExprPathExplicit cfg dRef prefix rType mSeed hashes
@@ -890,7 +897,7 @@ cachedDay cacheDir cachePath = do
   let dateOf dir = head $ splitDirectories $ makeRelative cachePath dir
       dated = map (\m -> (dateOf m, m)) matches
   if null matches then return Nothing
-  else return $ parseDay $ snd $ head $ sort dated
+  else return $ parseDay $ snd $ minimum dated
 
 -- | Entry point for finding a cached file from a user-specified date.
 --   If this returns Nothing, it means we'll need to download the file.
@@ -911,11 +918,10 @@ properDay cacheDir cachePath userInput = do
   let loc = "ortholang.interpreter.compile.newrules.properDay"
   today <- fmap fromJust getShakeExtra
   mUserCachePath <- userDay cacheDir cachePath userInput
-  cachePath' <- case mUserCachePath of
+  case mUserCachePath of
     Nothing -> do
       userDate <- readLit loc userInput
       liftIO $ putStrLn $ "Warning: no cache found for \"" ++ userDate ++ "\". " ++
                           "Defaulting to the current UTC date, " ++ show today ++ "."
       return today
     Just p -> return p
-  return cachePath'

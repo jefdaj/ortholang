@@ -20,6 +20,7 @@ import System.IO.Temp        (withTempDirectory)
 import System.Process        (readCreateProcessWithExitCode, shell)
 import Test.Tasty            (TestTree, defaultMain)
 import System.Console.Docopt (Arguments, getArg, longOption)
+import Data.Foldable (forM_)
 -- import Data.List.Utils       (replace)
 
 -- we just need <each of these>.mkTests
@@ -83,9 +84,8 @@ runTests args cfg ref ids dRef = withArgs [] $ do
     setEnv "TASTY_NUM_THREADS" "1"
     setEnv "TASTY_TIMEOUT" "2m" -- TODO configure this?
     -- TODO can you also just export this before running ortholang?
-    case getArg args $ longOption "test" of
-      Nothing -> return ()
-      Just ptn -> setEnv "TASTY_PATTERN" ptn
+    forM_
+      (getArg args $ longOption "test") (setEnv "TASTY_PATTERN")
     let exSrc = wd </> "examples"
         exDst = tmpSubDir </> "examples"
     (_,_,_) <- readCreateProcessWithExitCode

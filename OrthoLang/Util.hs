@@ -142,12 +142,12 @@ unlessExists path act = do
 unlessMatch :: [FilePath] -> Action () -> Action ()
 unlessMatch paths act = do
   tests <- liftIO $ mapM doesPathExist paths
-  unless (any id tests) act
+  unless (or tests) act
 
 -- TODO call this module something besides Debug now that it also handles errors?
 -- TODO can you remove the liftIO part? does the monadcatch part help vs just io?
 removeIfExists :: (MonadIO m, MonadCatch m) => LocksRef -> FilePath -> m ()
-removeIfExists ref fileName = (liftIO (withWriteLock ref fileName $ removeFile fileName)) `catch` handleExists
+removeIfExists ref fileName = liftIO (withWriteLock ref fileName $ removeFile fileName) `catch` handleExists
   where handleExists e
           | isDoesNotExistError e = return ()
           | otherwise = throwM e
@@ -175,7 +175,7 @@ resolveSymlinks mPrefixes path = do
       -- putStrLn $ "resolveSymlinks absPath: " ++ absPath
       case mPrefixes of
         Nothing -> resolveSymlinks mPrefixes absPath
-        Just ps -> if any (\p -> p `isPrefixOf` absPath) ps
+        Just ps -> if any (`isPrefixOf` absPath) ps
                      then resolveSymlinks mPrefixes absPath
                      else return path
 
@@ -193,8 +193,7 @@ absolutize aPath = do
     else do
       pathMaybeWithDots <- absolute_path aPath
       return $ justOrDie "guess_dotdot in absolutize failed!" $ guess_dotdot pathMaybeWithDots
-  aPath'' <- makeAbsolute aPath'
-  return aPath''
+  makeAbsolute aPath'
   -- resolveSymlink aPath''
 
 -- makes a copy of a list of lists of lits, suitible for passing to a script
@@ -231,7 +230,7 @@ retryIgnore fn = ignoreErrors $ recoverAll limitedBackoff fn
 -- | Run an IO action, incrementing the filepath suffix if and retrying if it fails
 -- TODO should there be a max number of retries?
 retryIncSuffix :: FilePath -> Int -> (FilePath -> IO a) -> IO a
-retryIncSuffix path n io = catch (io path') $ (\(_ :: IOError) -> io')
+retryIncSuffix path n io = catch (io path') (\(_ :: IOError) -> io')
   where
     path' = if n < 2 then path else dropExtension path ++ show n ++ takeExtension path
     io' = retryIncSuffix path (n+1) io

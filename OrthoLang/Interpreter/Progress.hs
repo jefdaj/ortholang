@@ -45,7 +45,7 @@ initProgress cfg hdl = do
                 { progressDelay = pDelay
                 , progressHandle = hdl
                 , progressInitial = ep
-                , progressRender = if not (progressbar cfg) then (const "") else renderProgress
+                , progressRender = if not (progressbar cfg) then const "" else renderProgress
                 }
   return opts
 
@@ -109,7 +109,7 @@ renderProgress EvalProgress{..} = unwords $ [epTitle, "[" ++ arrow ++ "]"] ++ [f
     threads  = if firstTask == lastTask then 1 else lastTask - firstTask + 1
     working  = show firstTask ++ if threads < 2 then "" else "-" ++ show lastTask
     arrowWidth = epWidth - length epTitle - length time - length fraction
-    arrowFrac  = ((fromIntegral epDone) :: Double) / (fromIntegral epTotal)
+    arrowFrac  = (fromIntegral epDone :: Double) / fromIntegral epTotal
     arrow = if epStart == epUpdate then replicate arrowWidth ' '
             else renderBar arrowWidth threads arrowFrac epArrowShaft epArrowHead
 

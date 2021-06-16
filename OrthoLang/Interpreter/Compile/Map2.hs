@@ -42,7 +42,7 @@ map3of3 inType outType act3 out a1 a2 a3 = do
   -- inPaths <- readStrings inType cfg locks $ fromPath loc cfg a3path
   debugFn $ "map3Base inPaths read from a3: " ++ show inPaths
   let tmpDir   = tmpdir cfg </> "cache" </> "map" -- TODO figure this out better
-      outPaths = (flip map) inPaths $ \i -> tmpDir </> digest loc [out, toPath loc cfg i] </> "result"
+      outPaths = flip map inPaths $ \i -> tmpDir </> digest loc [out, toPath loc cfg i] </> "result"
                  -- <.> ext outType
       ioPairs  = zip inPaths outPaths
   forM_ ioPairs $ \(i,o) -> do

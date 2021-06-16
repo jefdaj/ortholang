@@ -11,12 +11,11 @@ import OrthoLang.Modules     (modules)
 import OrthoLang.Locks (withWriteLockEmpty, withWriteLock)
 import OrthoLang.Util   (justOrDie, rmAll)
 
-import Control.Monad         (when)
+import Control.Monad         (when, void, unless)
 import Data.Char             (toLower)
 import Data.List             (zip7, isPrefixOf)
 import Data.List.Split       (splitOn)
 import Data.List.Utils       (replace)
-import OrthoLang.Modules     (modules)
 import Paths_OrthoLang       (getDataFileName)
 import System.Directory      (doesFileExist, createDirectoryIfMissing)
 import System.FilePath.Posix (takeBaseName, (</>), (<.>))
@@ -212,8 +211,7 @@ mkTestGroup ::  Config -> LocksRef -> IDsRef -> DigestsRef -> String
             -> [Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree] -> IO TestTree
 mkTestGroup cfg ref ids dRef name trees = do
   let trees' = mapM (\t -> t cfg ref ids dRef) trees
-  trees'' <- trees'
-  return $ testGroup name trees''
+  testGroup name <$> trees'
 
 getTestScripts :: FilePath -> Maybe String -> IO [FilePath]
 getTestScripts testDir mPrefix = do
@@ -260,7 +258,7 @@ mkTreeTest cfg ref ids dRef name act t = goldenDiff d t (act' >> treeAct)
     treeCmd = "tree -a --dirsfirst --charset=ascii --sort=name " ++ ignores ++ " | " ++ sedCmd
     wholeCmd = (shell treeCmd) { cwd = Just $ tmpdir cfg }
     treeAct = do
-      out <- withTmpDirLock cfg ref $ fmap (toGeneric cfg) $ readCreateProcess wholeCmd ""
+      out <- withTmpDirLock cfg ref $ toGeneric cfg <$> readCreateProcess wholeCmd ""
       -- uncomment to update golden tmpfile trees:
       -- writeFile ("tests/tmpfiles" </> takeBaseName t <.> "txt") out
       return $ B8.pack out
@@ -364,7 +362,7 @@ runScript cfg ref ids dRef = withTmpDirLock cfg ref $ do
   (out, ()) <- hCapture [stdout, stderr] $ evalFile modules (emptyScript, cfg, ref, ids, dRef) stdout
   D.delay 100000 -- wait 0.1 second so we don't capture output from tasty
   result <- doesFileExist $ tmpdir cfg </> "vars" </> "result"
-  when (not result) (fail $ "no result file. stdout was:\n" ++ out)
+  unless result (fail $ "no result file. stdout was:\n" ++ out)
   writeBinaryFile (tmpdir cfg </> "output" <.> "txt") $ toGeneric cfg out
   return $ toGeneric cfg out
 
@@ -381,16 +379,16 @@ mkScriptTests sDir (name, cut, parse, expand, out, tre, mchk) cfg ref ids dRef =
       tripTest  = mkTripTest   cfg' ref ids dRef name cut
       expTest   = mkExpandTest cfg' ref ids dRef name cut expand
       shareTest = mkShareTest  cfg' ref ids dRef sDir name out
-      runScriptU c r i d = runScript c r i d >> return ()
-      outTests  = if (name `elem` (badlyBroken ++ stdoutVaries)) then [] else [mkOutTest  cfg' ref ids dRef sDir name out]
-      treeTests = if (name `elem` (badlyBroken ++ tmpfilesVary)) then [] else [mkTreeTest cfg' ref ids dRef name runScriptU tre]
-      tests     = if (name `elem`  badlyBroken)
+      runScriptU c r i d = void (runScript c r i d)
+      outTests  = [mkOutTest  cfg' ref ids dRef sDir name out | notElem name (badlyBroken ++ stdoutVaries)]
+      treeTests = [mkTreeTest cfg' ref ids dRef name runScriptU tre | notElem name (badlyBroken ++ tmpfilesVary)]
+      tests     = if name `elem`  badlyBroken
                      then []
                      else [parseTest, tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]
   return $ testGroup (removePrefix name) tests
   where
     name' = replace ":" "_" name -- ':' messes with BLASTDB paths
-    cfg' = cfg { script = Just cut, tmpdir = (tmpdir cfg </> name') }
+    cfg' = cfg { script = Just cut, tmpdir = tmpdir cfg </> name' }
 
 {-|
 "Check scripts" for handling the tricky cases where tmpfile names vary. They
@@ -458,7 +456,6 @@ mkTests cfg ref ids dRef = do
   testDir <- getDataFileName "tests"
   exDir   <- getDataFileName "examples"
   let sDir = tmpdir cfg </> "sharedir"
-  groups  <- mapM (\mn -> mkTestsPrefix cfg ref ids dRef testDir mn sDir $ Just mn) $
-               map (simplify . mName) modules
+  groups  <- mapM ((\mn -> mkTestsPrefix cfg ref ids dRef testDir mn sDir $ Just mn) . (simplify . mName)) modules
   exGroup <- mkExampleTests cfg ref ids dRef exDir sDir testDir
   return $ testGroup "run test scripts" $ groups ++ [exGroup]

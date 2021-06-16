@@ -38,7 +38,8 @@ import qualified Data.Map.Strict as M
 import Control.Applicative    ((<|>), many)
 import Control.Monad          (void, fail)
 import Data.Char              (isPrint)
-import Data.Scientific        (Scientific())
+import Data.Scientific
+    ( Scientific(), Scientific(), toBoundedInteger )
 import Text.Parsec            (getState, putState, (<?>), try)
 import Text.Parsec.Char       (char, digit ,letter, spaces, oneOf)
 import Text.Parsec.Combinator (many1, between, notFollowedBy, choice, lookAhead, eof, optionMaybe, anyToken)
@@ -47,7 +48,6 @@ import OrthoLang.Interpreter.Parse.Util (debugParser)
 import Control.Monad.Reader   (ask)
 
 import Text.PrettyPrint               (Doc, (<>), (<+>), render)
-import Data.Scientific                (Scientific(), toBoundedInteger)
 
 --------------
 -- utilites --
@@ -87,7 +87,7 @@ This is like spaces, except it requires at least one.
 TODO can this be replaced with something from Text.Parsec.Token?
 -}
 spaces1 :: ParseM ()
-spaces1 = debugParser "spaces1" ((void $ many1 $ oneOf spaceChars) <?> "whitespace and/or newline")
+spaces1 = debugParser "spaces1" (void (many1 $ oneOf spaceChars) <?> "whitespace and/or newline")
 
 pSym :: Char -> ParseM ()
 pSym c = debugParser ("pSym " ++ [c]) (void $ lexeme $ char c) <?> "symbol \"" ++ [c] ++ "\""
@@ -113,7 +113,7 @@ pEnd = debugParser "pEnd" $ do
   try $ lookAhead $ choice
     [ eof
     , void $ choice $ map pSym $ operatorChars mods ++ ")],"
-    , try $ void $ pVarEq
+    , try $ void pVarEq
     ]
 
 pIden :: ParseM String
@@ -156,7 +156,7 @@ pNum = debugParser "pNum" $ do
   -- read + show puts it in "canonical" form to avoid duplicate tmpfiles
   let sign = case neg of { Just x -> x; _ -> ' ' }
       l    = show (read (sign:n:ns) :: Scientific)
-      expr = Lit num l 
+      expr = Lit num l
   -- putDigests "pNum" [expr]
   return expr
 
@@ -169,20 +169,18 @@ escapeChars = "\\\""
 literalChars :: [Char]
 literalChars = filter valid $ map toEnum [0..127]
   where
-    valid c = isPrint c && not (elem c escapeChars)
+    valid c = isPrint c && notElem c escapeChars
 
 -- Tricky bit: the first quote char needs to NOT be a lexeme,
 -- because that would consume spaces inside the string literal.
 -- see stackoverflow.com/questions/24106314
 -- TODO can the between part be replaced with something from Text.Parsec.Token?
 pQuoted :: ParseM String
-pQuoted = debugParser "pQuoted" ((lexeme $ between (char '\"') (char '\"') $ many (l <|> esc)) <?> "quoted")
+pQuoted = debugParser "pQuoted" (lexeme (between (char '\"') (char '\"') $ many (l <|> esc)) <?> "quoted")
   where
     l = oneOf literalChars
     esc = char '\\' *> oneOf escapeChars
 
 pStr :: ParseM Expr
 pStr = debugParser "pStr" $ do
-  expr <- Lit str <$> pQuoted <?> "string literal"
-  -- putDigests "pStr" [expr]
-  return expr
+  Lit str <$> pQuoted <?> "string literal"

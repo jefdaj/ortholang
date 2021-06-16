@@ -32,7 +32,7 @@ import Data.List           (filter, delete)
 import Data.List.Utils     (delFromAL)
 import System.Console.ANSI (clearScreen, cursorUp)
 import System.Directory    (doesFileExist)
-import System.IO           (Handle, hPutStrLn)
+import System.IO           (Handle, hPutStrLn, hPrint)
 
 import Test.Tasty.Golden (writeBinaryFile)
 
@@ -52,7 +52,7 @@ cmdLoad mods st@(scr, cfg, ref, ids, dRef) hdl path = do
       let cfg' = cfg { script = Just path' } -- TODO why the False??
       new <- parseFile mods (scr, cfg', ref, ids, dRef) path' -- TODO insert ids
       case new of
-        Left  e -> hPutStrLn hdl (show e) >> return st
+        Left  e -> hPrint hdl e >> return st
         Right s -> do
           clear
           let st' = (s, cfg', ref, ids, dRef)
@@ -91,7 +91,7 @@ cmdRevDepends :: ReplEdit
 cmdRevDepends _ st@(scr, cfg, _, _, _) hdl var = do
   case lookupExpr var (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just e  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ (Var (RepID Nothing) var):depsOf e) (sAssigns scr)
+    Just e  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ Var (RepID Nothing) var:depsOf e) (sAssigns scr)
   return st
 
 cmdDepends :: ReplEdit
@@ -99,7 +99,7 @@ cmdDepends _ st@(scr, cfg, _, _, _) hdl var = do
   let var' = Var (RepID Nothing) var
   case lookupExpr var (sAssigns scr) of
     Nothing -> hPutStrLn hdl $ "Var \"" ++ var ++ "' not found"
-    Just _  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ (Var (RepID Nothing) var):rDepsOf scr var') (sAssigns scr)
+    Just _  -> pPrintHdl cfg hdl $ filter (\a -> elem (aVar a) $ Var (RepID Nothing) var:rDepsOf scr var') (sAssigns scr)
   return st
 
 -- TODO factor out the variable lookup stuff

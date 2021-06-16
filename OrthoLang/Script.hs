@@ -227,7 +227,7 @@ eScript mods s c dr = s
   }
 
 eAssign :: [Module] -> Script -> Config -> DigestsRef -> Assign -> Assign
-eAssign mods scr cfg dRef a@(Assign {aExpr = e}) = a {aExpr = eExpr mods scr cfg dRef e}
+eAssign mods scr cfg dRef a@Assign {aExpr = e} = a {aExpr = eExpr mods scr cfg dRef e}
 
 -- | This one is recursive in case one macro expression is hidden inside the
 --   result of another
@@ -271,7 +271,7 @@ extractExprs _ (Lst _ _ _ es) = es
 extractExprs s (Ref _ _ _ (Var _ vName)) = case lookupExpr vName (sAssigns s) of
                                        Nothing -> error "types.extractExprs" $ "no such var '" ++ vName ++ "'"
                                        Just e  -> extractExprs s e
-extractExprs _   (Fun _ _ _ _ _) = error "types.extractExprs" explainFnBug
+extractExprs _   Fun {} = error "types.extractExprs" explainFnBug
 extractExprs scr (Bop _ _ _ _ l r) = extractExprs scr l ++ extractExprs scr r
 extractExprs  _   e               = error "types.extractExprs" $ "bad arg: " ++ show e
 
@@ -347,7 +347,7 @@ rDepsOf s var = map aVar rDeps
 depsOnly :: Expr -> Script -> Script
 depsOnly expr scr = scr {sAssigns = deps ++ [res], sResult = Just expr}
   where
-    deps = filter (\a -> (elem (aVar a) $ depsOf expr)) (sAssigns scr)
+    deps = filter (\a -> elem (aVar a) $ depsOf expr) (sAssigns scr)
     res  = Assign {aVar = resultVar, aExpr = expr}
 
 {-|
@@ -401,8 +401,8 @@ result = myvar
 That's only allowed in the Repl of course.
 -}
 removeAssignSelfReferences :: Script -> Assign -> Assign
-removeAssignSelfReferences s a@(Assign {aVar=v, aExpr=e}) =
-  if not (v `elem` depsOf e)
+removeAssignSelfReferences s a@Assign {aVar=v, aExpr=e} =
+  if v `notElem` (depsOf e)
     then a
     else a {aExpr=rmRef s v e}
 

@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns #-}
+
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module OrthoLang.Interpreter.Sanitize
@@ -69,7 +69,7 @@ hashIDsTxt txt = (unlines lines', M.fromList seqids)
   where
     hashed = map hashIDsLine $ lines txt
     lines' = map fst hashed
-    seqids = catMaybes $ map snd $ hashed
+    seqids = mapMaybe snd hashed
 
 -- copy a fasta file to another path, replacing sequence ids with their hashes
 -- hashIDsFile :: Config -> LocksRef -> Path -> Path -> Action IDs
@@ -154,13 +154,13 @@ unhashIDs longIDs ids t = case findNext t of
                               Just v  -> if longIDs
                                            then v ++ rest
                                            else fst (splitSeqid' v) ++ rest
-    findNext txt = case catMaybes $ map (\p -> subIndex p txt) (map fst patterns) of
+    findNext txt = case mapMaybe ((\p -> subIndex p txt) . fst) patterns of
                      (x:xs) -> Just $ minimum (x:xs)
                      _ -> Nothing
     patterns =
       [ ("seqid_"  , \_   -> length "seqid_" + digestLength)
-      , ("$TMPDIR" , \txt -> length $ takeWhile (not . isSpace) txt)
-      , ("$WORKDIR", \txt -> length $ takeWhile (not . isSpace) txt) -- TODO remove this one?
+      , ("$TMPDIR" , length . takeWhile (not . isSpace))
+      , ("$WORKDIR", length . takeWhile (not . isSpace)) -- TODO remove this one?
       ]
 
 -- This sometimes operates internally, but also writes the final result of the cut to a file.
@@ -192,7 +192,7 @@ unhashIDsFile inPath outPath = do
   cfg <- fmap fromJust getShakeExtra
   let loc = "interpreter.sanitize.unhashIDsFile'"
       in' = fromPath loc cfg inPath
-  (unhashIDsFile' inPath outPath) `actionCatch` (\(_ :: SomeException) -> liftIO $ copyFile in' outPath)
+  unhashIDsFile' inPath outPath `actionCatch` (\(_ :: SomeException) -> liftIO $ copyFile in' outPath)
 
 -- from: https://stackoverflow.com/a/40297465
 splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
@@ -231,9 +231,9 @@ readIDs path = do
 
 -- this works whether the ID is for a file or seqid. files are checked first
 lookupID :: IDs -> String -> Maybe String
-lookupID (IDs {hFiles = f, hSeqIDs = s}) i =
+lookupID IDs {hFiles = f, hSeqIDs = s} i =
   if M.member i f then M.lookup i f                     -- i is a path; return the short version
-  else case catMaybes (map (M.lookup i) (M.elems s)) of -- i is a seqid; look in all the maps for it
+  else case mapMaybe (M.lookup i) (M.elems s) of -- i is a seqid; look in all the maps for it
     []  -> Nothing
     [x] -> Just x
     xs  -> trace "interpreter.sanitize.lookupID" ("WARNING: duplicate seqids. using the first:\n" ++ show xs) (Just $ head xs)

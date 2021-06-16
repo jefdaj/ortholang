@@ -59,7 +59,7 @@ gVar = (:) <$> first <*> listOf rest
 newtype ExVar = ExVar Var deriving (Eq, Show)
 
 instance Arbitrary ExVar where
-  arbitrary = (ExVar . Var (RepID Nothing)) <$> gVar
+  arbitrary = ExVar . Var (RepID Nothing) <$> gVar
 
 -- references --
 
@@ -107,14 +107,14 @@ gEscaped :: Gen String
 gEscaped = (\c -> '\\':[c]) <$> elements escapeChars
 
 gLiteral :: Gen String
-gLiteral = (\c -> [c]) <$> elements literalChars
+gLiteral = (: []) <$> elements literalChars
 
 -- the repeat 15 thing is just to make sure there are more literal chars
 -- than escaped ones, because otherwise the strings are very hard to read
 -- TODO should just "" be allowed here?
 gQuoted :: Gen String
 gQuoted = do
-  ss <- (listOf . oneof) $ gEscaped:(take 15 $ repeat gLiteral)
+  ss <- (listOf . oneof) $ gEscaped:replicate 15 gLiteral
   return $ "\"" ++ concat ss ++ "\""
 
 newtype ExQuoted = ExQuoted String deriving (Eq, Show)
@@ -129,7 +129,7 @@ instance Arbitrary ExFile where
 -- comments --
 
 gComment :: Gen String
-gComment = (\ss -> '#':(concat ss)) <$> listOf gLiteral
+gComment = (\ss -> '#':concat ss) <$> listOf gLiteral
 
 newtype ExComment = ExComment String deriving (Eq, Show)
 
@@ -143,7 +143,7 @@ gSci = scientific <$> arbitrary <*> arbitrary
 
 -- TODO negative numbers too?
 gNum :: Gen String
-gNum = (show . abs) <$> gSci
+gNum = show . abs <$> gSci
 
 newtype ExNum = ExNum String deriving (Eq, Show)
 
@@ -160,7 +160,7 @@ gFunName = elements fnNames
 -- this is duplicated from Types.hs without the Config argument
 -- TODO should this version replace it?
 fnNames :: [String]
-fnNames = map fName $ concat $ map mFunctions modules
+fnNames = map fName $ concatMap mFunctions modules
 
 -- TODO why the one argument? can't do typechecking here anyway
 gFun :: Gen String
@@ -189,7 +189,7 @@ gBop = do
   op <- elements ["+", "-", "*", "/", "&", "~", "|"]
   s1 <- gExpr
   s2 <- gExpr
-  return $ concat $ zipWith (++) [s1,op,s2] (repeat " ")
+  return $ concatMap (\ x -> ((++)) x " ") [s1,op,s2]
 
 newtype ExBop = ExBop String deriving (Eq, Show)
 

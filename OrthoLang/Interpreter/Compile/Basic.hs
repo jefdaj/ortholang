@@ -92,10 +92,10 @@ TODO are the extra rExpr steps needed in most cases, or only for rNamedFunction?
 -- TODO could this be the cause of the big parsing slowdown?
 rExpr :: RulesFn
 rExpr s e@(Lit _ _       ) = rLit s e
-rExpr s e@(Ref _ _ _ _   ) = rRef s e
-rExpr s e@(Lst _ _ _   es) = mapM (rExpr s) es >> rList s e
-rExpr s e@(Fun _ _ _ n es) = mapM (rExpr s) es >> rNamedFunction s e n -- TODO is the map part needed?
-rExpr s e@(Bop t ms ds _ e1 e2) = mapM (rExpr s) [e1, e2, Lst t ms ds [e1, e2]] >> rBop s e -- TODO remove the map part?
+rExpr s e@(Ref {}) = rRef s e
+rExpr s e@(Lst _ _ _   es) = mapM_ (rExpr s) es >> rList s e
+rExpr s e@(Fun _ _ _ n es) = mapM_ (rExpr s) es >> rNamedFunction s e n -- TODO is the map part needed?
+rExpr s e@(Bop t ms ds _ e1 e2) = mapM_ (rExpr s) [e1, e2, Lst t ms ds [e1, e2]] >> rBop s e -- TODO remove the map part?
 
 -- | Temporary hack to fix Bops
 rBop :: RulesFn
@@ -108,7 +108,7 @@ rBop _ e = error "rBop" $ "called with non-Bop: \"" ++ render (pPrint e) ++ "\""
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
 rNamedFunction :: Script -> Expr -> String -> Rules ExprPath
-rNamedFunction s e@(Fun _ _ _ _ _) n = rNamedFunction' s e n -- TODO is this missing the map part above?
+rNamedFunction s e@(Fun {}) n = rNamedFunction' s e n -- TODO is this missing the map part above?
 rNamedFunction _ _ n = error "rNamedFunction" $ "bad argument: " ++ n
 
 rNamedFunction' :: Script -> Expr -> String -> Rules ExprPath
@@ -121,8 +121,8 @@ rNamedFunction' scr expr name = do
     Nothing -> error "rNamedFunction" $ "no such function \"" ++ name ++ "\""
     Just f  -> case fNewRules f of
                  NewNotImplemented -> if "load_" `isPrefixOf` fName f
-                                        then (fOldRules f) scr $ setSeed 0 expr
-                                        else (fOldRules f) scr expr
+                                        then fOldRules f scr $ setSeed 0 expr
+                                        else fOldRules f scr expr
                  -- note that the rules themselves should have been added by 'newRules'
                  NewRules _ -> let p   = fromPath loc cfg $ exprPath cfg dRef scr expr
                                    res = ExprPath p
@@ -157,8 +157,8 @@ compileScript scr = do
       scr' = trace loc ("scr:\n" ++ render (pPrint scr)) scr
   mapM_ (rAssign scr') (sAssigns scr') -- TODO remove?
   -- case lookupResult (sAssigns scr') of -- TODO can't we use sResult here?
-  rp <- case sResult scr' of
-    Nothing -> compileScript emptyScriptMsg 
+  case sResult scr' of
+    Nothing -> compileScript emptyScriptMsg
     Just re -> do
       let rid = justOrDie "lookupRepID falied in compileScript" $
                           lookupRepID "result" $ sAssigns scr
@@ -168,7 +168,6 @@ compileScript scr = do
       let ep = toPath loc cfg ep'
       rp' %> \_ -> symlink rp ep
       return $ ResPath rp'
-  return rp
 
 -- TODO move to Paths
 -- resPath :: Config -> RepID -> ResPath
@@ -322,7 +321,7 @@ rRef _ e@(Ref _ _ _ var) = do
   let loc = "interpreter.compile.basic.rRef"
       ePath p = ExprPath $ debugRules loc e $ fromPath loc cfg p
   return $ ePath $ varPath cfg var e
-    
+
 rRef _ _ = fail "bad argument to rRef"
 
 -- Creates a symlink from varname to expression file.

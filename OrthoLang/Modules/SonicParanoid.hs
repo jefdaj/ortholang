@@ -81,7 +81,7 @@ aSonicparanoid (ExprPath out') faListPath' = do
     faPaths <- readPaths loc faListPath'
     let faPaths' = map (fromPath loc cfg) faPaths
     need' "ortholang.moodules.sonicparanoid.aSonicparanoid" faPaths'
-    let faLinks = map (\p -> toPath loc cfg $ inDir </> (takeBaseName $ fromPath loc cfg p)) faPaths
+    let faLinks = map (\p -> toPath loc cfg $ inDir </> takeBaseName (fromPath loc cfg p)) faPaths
     mapM_ (\(p, l) -> symlink l p) $ zip faPaths faLinks
 
     -- TODO decide mode based on fn name

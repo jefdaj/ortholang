@@ -27,7 +27,7 @@ import Data.Char             (toLower)
 import Data.List             (nub, sort, isInfixOf, intercalate)
 import Data.List.Utils       (addToAL)
 import Data.List.Split       (splitOn)
-import Data.Maybe            (catMaybes, fromJust, listToMaybe)
+import Data.Maybe            (catMaybes, fromJust, listToMaybe, mapMaybe)
 
 -- note: head should be OK here because of the fallback
 help :: Config -> [Module] -> String -> IO String
@@ -40,7 +40,7 @@ help cfg mods line = case words (map toLower line) of
              m = mHelp mods w
              e = eHelp mods w
              b = return $ Just $ fallbackHelp cfg mods w
-  _ -> getDoc "repl" >>= return . fromJust
+  _ -> fromJust <$> getDoc "repl"
 
 -- TODO make sure lowercase names of everything are unique! got about 10 overlaps here...
 -- TODO include something notfound?
@@ -68,7 +68,7 @@ fallbackHelp cfg mods wrd = init $ unlines $ nohelp : ss'
 -- TODO figure out how to `less` the output
 -- TODO show function types by default in module help too?
 mHelp :: [Module] -> String -> IO (Maybe String)
-mHelp mods name = case findModule mods (map toLower name) of 
+mHelp mods name = case findModule mods (map toLower name) of
   Nothing -> return Nothing
   Just m -> do
     let mfnames = map fName $ mFunctions m
@@ -123,14 +123,14 @@ listFunctionTypesWithInput :: [Module] -> String -> [String]
 listFunctionTypesWithInput mods e = sort $ filter matches descs
   where
     -- TODO match more carefully because it should have to be an entire word
-    matches d = e `elem` (words $ headOrDie "listFunctionTypesWithInput failed" $
+    matches d = e `elem` words (headOrDie "listFunctionTypesWithInput failed" $
                                        splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ renderSig f) (listFunctions mods)
 
 listFunctionTypesWithOutput :: [Module] -> String -> [String]
 listFunctionTypesWithOutput mods e = sort $ filter matches descs
   where
-    matches d = e `elem` (words $ unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
+    matches d = e `elem` words (unwords $ tail $ splitOn ">" $ unwords $ tail $ splitOn ":" d)
     descs = map (\f -> "  " ++ renderSig f) (listFunctions mods)
 
 
@@ -148,8 +148,7 @@ inputNames :: Function -> VarMap
 inputNames f = inputNames' [] $ fInputs f
 
 inputNames' :: VarMap -> [TypeSig] -> VarMap
-inputNames' acc [] = acc
-inputNames' acc (s:ss) = inputNames' (addSig acc s) ss
+inputNames' acc ss = foldl addSig acc ss
 
 addSig :: VarMap -> TypeSig -> VarMap
 addSig vm (ListSigs     t) = addSig vm t
@@ -251,9 +250,9 @@ renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ 
     withCommas  ms = intercalate ", " (map ext ms) ++ ","
 
 renderWhere :: VarMap -> [TypeSig] -> String
-renderWhere names inSigs = if length descs == 0 then "" else unlines $ "\nwhere" : descs
+renderWhere names inSigs = if null descs then "" else unlines $ "\nwhere" : descs
   where
-    descs = nub $ catMaybes $ map (\i -> fmap (withExt i) $ renderWhereDesc i) inSigs
+    descs = nub $ mapMaybe (\i -> (withExt i) <$> renderWhereDesc i) inSigs
     withExt i d = "  " ++ unwords [renderExtBase names i, "=", d]
 
 -- Renders the type variable name: faa, og, any1, etc.

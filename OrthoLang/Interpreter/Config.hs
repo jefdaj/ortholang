@@ -11,7 +11,7 @@ import OrthoLang.Types (Config(..))
 import OrthoLang.Util  (absolutize, headOrDie, justOrDie, retryIncSuffix, stripWhiteSpace)
 
 import Control.Logging            (LogLevel(..), setLogLevel, setDebugSourceRegex, setLogFile)
-import Control.Monad              (when)
+import Control.Monad              (when, (>=>))
 import Data.Char                  (toUpper, toLower)
 import Data.List                  (isInfixOf)
 import Data.Maybe                 (isNothing, catMaybes, fromJust)
@@ -19,10 +19,9 @@ import Data.Text                  (pack)
 import Paths_OrthoLang            (getDataFileName)
 import System.Console.Docopt      (Docopt, Arguments, getArg, isPresent, longOption)
 import System.Console.Docopt.NoTH (parseUsageOrExit)
-import System.Directory           (doesFileExist)
+import System.Directory ( doesFileExist, createDirectoryIfMissing )
 import System.FilePath            ((</>), (<.>))
 import Text.Read.HT               (maybeRead)
-import System.Directory           (createDirectoryIfMissing)
 import qualified System.Info as I
 
 os :: String
@@ -70,7 +69,7 @@ loadMaybeAbs args cfg key = do
   mPath <- loadMaybe args cfg key
   case mPath of
     Nothing -> return Nothing
-    Just p -> absolutize p >>= return . Just
+    Just p -> Just <$> absolutize p
 
 loadMaybeInt :: Arguments -> C.Config -> String -> IO (Maybe Int)
 loadMaybeInt args cfg key = do
@@ -80,7 +79,7 @@ loadMaybeInt args cfg key = do
     Just s  -> return $ maybeRead s
 
 loadAbs :: Arguments -> C.Config -> String -> IO FilePath
-loadAbs args cfg key = fmap (justOrDie msg) $ loadMaybeAbs args cfg key
+loadAbs args cfg key = justOrDie msg <$> loadMaybeAbs args cfg key
   where
     msg = "failed to parse --" ++ key
 
@@ -130,7 +129,7 @@ getDoc name = do
   exists <- doesFileExist path
   if not exists
     then return Nothing
-    else readFile path >>= return . Just . stripWhiteSpace
+    else Just . stripWhiteSpace <$> readFile path
 
 getUsage :: IO Docopt
 getUsage = getDoc "usage" >>= parseUsageOrExit . fromJust
@@ -168,18 +167,18 @@ configFields :: [(String, (Config -> String, ConfigSetter))]
 configFields =
   [ ("tmpdir"     , (show . tmpdir     , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {tmpdir  =  a})))
   , ("workdir"    , (show . workdir    , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> return $ c {workdir =  a})))
-  , ("logfile"    , (show . logfile    , mkSet parseString      (\c  p ->       absolutize  p  >>=  \a -> updateLog a >>= \a' -> return (c {logfile =  a'}))))
-  , ("script"     , (show . script     , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {script  = ma})))
-  , ("wrapper"    , (show . wrapper    , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {wrapper  = ma})))
-  , ("report"     , (show . report     , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {report  = ma})))
-  , ("outfile"    , (show . outfile    , mkSet parseMaybeString (\c mp -> (mapM absolutize mp) >>= \ma -> return $ c {outfile = ma})))
-  , ("shared"     , (show . shared     , mkSet parseMaybeString (\c ms -> (mapM absPathOrUrl ms) >>= \ma -> return $ c {shared  = ma})))
+  , ("logfile"    , (show . logfile    , mkSet parseString      (\c  p ->       absolutize  p  >>=  (updateLog >=> (\ a' -> return (c {logfile = a'}))))))
+  , ("script"     , (show . script     , mkSet parseMaybeString (\c mp -> mapM absolutize mp >>= \ma -> return $ c {script  = ma})))
+  , ("wrapper"    , (show . wrapper    , mkSet parseMaybeString (\c mp -> mapM absolutize mp >>= \ma -> return $ c {wrapper  = ma})))
+  , ("report"     , (show . report     , mkSet parseMaybeString (\c mp -> mapM absolutize mp >>= \ma -> return $ c {report  = ma})))
+  , ("outfile"    , (show . outfile    , mkSet parseMaybeString (\c mp -> mapM absolutize mp >>= \ma -> return $ c {outfile = ma})))
+  , ("shared"     , (show . shared     , mkSet parseMaybeString (\c ms -> mapM absPathOrUrl ms >>= \ma -> return $ c {shared  = ma})))
   , ("termcolumns", (show . termcolumns, mkSet parseMaybeInt (\c mi -> return $ c {termcolumns = mi})))
   , ("debugregex" , (show . debugregex , mkSet parseMaybeString (\c mr -> updateDebug mr >> return (c {debugregex = mr}))))
   , ("showhidden" , (show . showhidden , mkSet parseBool (\c b -> return (c {showhidden = b}))))
   , ("showtypes" , (show . showtypes , mkSet parseBool (\c b -> return (c {showtypes = b}))))
   , ("shellaccess" , (show . shellaccess , mkSet parseBool (\c b -> if b
-                                                                      then (putStrLn securityMessage >> return c)
+                                                                      then putStrLn securityMessage >> return c
                                                                       else return c { shellaccess = b})))
   , ("progressbar" , (show . progressbar , mkSet parseBool (\c b -> return (c {progressbar = b}))))
   , ("autosave" , (show . autosave , mkSet parseBool (\c b -> return (c {autosave = b}))))
@@ -238,7 +237,7 @@ sq s                         = s
 parseString :: String -> Either String FilePath
 parseString input = case maybeRead ("\"" ++ sq input ++ "\"") of
                     Nothing -> Left $ "invalid: '" ++ input ++ "'"
-                    Just "" -> Left $ "invalid: \"\""
+                    Just "" -> Left "invalid: \"\""
                     Just p  -> Right p
 
 -- note that if you write a quoted empty string it gets parsed as Nothing here,
@@ -247,7 +246,7 @@ parseString input = case maybeRead ("\"" ++ sq input ++ "\"") of
 parseMaybeString :: String -> Either String (Maybe String)
 parseMaybeString input
   | map toLower input `elem` ["\"\"", "''", "nothing"] = Right Nothing
-  | otherwise = fmap Just $ parseString input
+  | otherwise = Just <$> parseString input
 
 parseInt :: String -> Either String Int
 parseInt input = case maybeRead input of
@@ -257,10 +256,10 @@ parseInt input = case maybeRead input of
 parseMaybeInt :: String -> Either String (Maybe Int)
 parseMaybeInt input
   | map toLower input `elem` ["\"\"", "''", "nothing"] = Right Nothing
-  | otherwise = fmap Just $ parseInt input
+  | otherwise = Just <$> parseInt input
 
 parseBool :: String -> Either String Bool
-parseBool []     = Left $ "invalid: ''"
+parseBool []     = Left "invalid: ''"
 parseBool "''"   = Right False
 parseBool "\"\"" = Right False
 parseBool input = let noquotes' = sq input

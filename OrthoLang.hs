@@ -15,8 +15,7 @@ import OrthoLang.Test        (runTests)
 import Paths_OrthoLang       (version)
 import System.Console.Docopt (exitWithUsage, parseArgsOrExit)
 import System.Directory      (setCurrentDirectory)
-import System.Environment    (getArgs)
-import System.Environment    (setEnv)
+import System.Environment ( getArgs, setEnv )
 import System.Exit           (exitSuccess)
 import System.IO             (stdout)
 
@@ -60,7 +59,7 @@ main = do
 
     -- TODO typecheck only option here
     let initialState = (emptyScript, cfg, ref, ids, dRef)
-    if (interactive cfg)
+    if interactive cfg
       then runRepl  modules initialState
       else evalFile modules initialState stdout
 
