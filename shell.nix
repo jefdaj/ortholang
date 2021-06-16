@@ -31,6 +31,7 @@ in myHs.shellFor {
   buildInputs = with pkgs; runDepends ++ [
     myHs.ghcid
     myHs.hlint
+    myHs.apply-refact
     myHs.stack
     zlib.dev
     zlib.out
