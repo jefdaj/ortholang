@@ -203,7 +203,7 @@ replaceEach = Function
  - It has one major flaw that I'm trying to fix now: it assumes that the list
  - of expressions to substitute in are known at compile-time. That makes it
  - impossible to repeat based on the results of a function call, limiting it to
- - just lists you explicitly write in the cut code.
+ - just lists you explicitly write in the ortholang code.
  -
  - The initial rewrite plan was:
  - 1) separate out aReplaceEach for clarity

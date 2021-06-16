@@ -80,7 +80,7 @@ parsedItAll p cfg str' = case parseWithLeftOver modules p cfg emptyScript str' o
   _ -> False
 
 {-|
-Parse some cut code, pretty-print it, parse again,
+Parse some ortholang code, pretty-print it, parse again,
 and check that the two parsed ASTs are equal.
 -}
 roundTrip :: (Eq a, Show a, Pretty a) => Config
@@ -124,7 +124,7 @@ mkCase cfg ref ids name parser examples =
   testCase name $ Right () @=? tripExamples cfg parser examples
 
 exTests :: Config -> LocksRef -> IDsRef -> TestTree
-exTests cfg ref ids = testGroup "round-trip handwritten cut code"
+exTests cfg ref ids = testGroup "round-trip handwritten ortholang code"
   [ mkCase cfg ref ids "function calls"   pFun       exFuns
   , mkCase cfg ref ids "terms"            pTerm      exTerms
   , mkCase cfg ref ids "expressions"      pExpr      exExprs
@@ -152,7 +152,7 @@ wsProps cfg ref ids = testGroup "consume randomly generated whitespace"
 
 -- TODO use round-trip here too
 acProps :: Config -> LocksRef -> IDsRef -> TestTree
-acProps cfg ref ids = testGroup "parse randomly generated cut code"
+acProps cfg ref ids = testGroup "parse randomly generated ortholang code"
   [ testProperty "variable names" $
       \(ExVar v@(Var _ s)) -> parseWithLeftOver modules pVar cfg emptyScript s == Right (v, "")
   , testProperty "symbols (reserved characters)" $
