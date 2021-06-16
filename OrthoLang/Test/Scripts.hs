@@ -205,6 +205,9 @@ badlyBroken =
   -- times out rather than failing
   , "repeat:replace_each_recursive"
   , "singletons:singletons"
+
+  -- waiting on url loading rewrite to use curl
+  , "repl:assign-to-result"
   ]
 
 mkTestGroup ::  Config -> LocksRef -> IDsRef -> DigestsRef -> String
