@@ -135,7 +135,7 @@ mkLoadDBEach name faType = newFnA1
 aLoadDB :: NewAction1
 aLoadDB (ExprPath oPath') sPath' = do
   cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.blastdb.aLoadDB"
+  let loc     = "modules.blastdb.aLoadDB"
       oPath'' = traceA loc oPath' [oPath', sPath']
   pattern <- readLit loc sPath'
   let pattern' = makeRelative (tmpdir cfg) pattern -- TODO is this right??

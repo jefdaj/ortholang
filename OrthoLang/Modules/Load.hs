@@ -56,7 +56,7 @@ aGlobNew (ExprPath out) a1 = do
 
 -- TODO does it ever read a URL?
 mkLoadGlob :: String -> Function -> Function
-mkLoadGlob name eachFn = compose1 name [ReadsDirs, ReadsFile, ReadsURL] globFiles eachFn
+mkLoadGlob name = compose1 name [ReadsDirs, ReadsFile, ReadsURL] globFiles
 
 {-|
 Takes a string with the filepath to load. Creates a trivial expression file

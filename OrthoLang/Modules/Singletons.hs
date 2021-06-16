@@ -22,7 +22,7 @@ import Control.Monad (forM)
 import Data.Maybe (fromJust)
 
 debugA' :: String -> String -> Action ()
-debugA' name msg = debugA ("ortholang.modules.singletons." ++ name) msg
+debugA' name = debugA $ "ortholang.modules.singletons." ++ name
 
 olModule :: Module
 olModule = Module

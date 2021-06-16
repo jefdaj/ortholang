@@ -189,7 +189,7 @@ gBop = do
   op <- elements ["+", "-", "*", "/", "&", "~", "|"]
   s1 <- gExpr
   s2 <- gExpr
-  return $ concatMap (\ x -> ((++)) x " ") [s1,op,s2]
+  return $ concatMap (++ " ") [s1,op,s2]
 
 newtype ExBop = ExBop String deriving (Eq, Show)
 

@@ -240,7 +240,7 @@ mkOutTest cfg ref ids dRef sDir name gld = goldenDiff d gld scriptAct
     d = name ++ ".ol prints expected output"
 
 withTmpDirLock :: Config -> LocksRef -> IO a -> IO a
-withTmpDirLock cfg ref act = withWriteLockEmpty ref (tmpdir cfg </> "lock") act
+withTmpDirLock cfg ref = withWriteLockEmpty ref $ tmpdir cfg </> "lock"
 
 -- TODO use this in repl tree tests too
 mkTreeTest ::  Config -> LocksRef -> IDsRef -> DigestsRef -> FilePath
@@ -380,8 +380,8 @@ mkScriptTests sDir (name, cut, parse, expand, out, tre, mchk) cfg ref ids dRef =
       expTest   = mkExpandTest cfg' ref ids dRef name cut expand
       shareTest = mkShareTest  cfg' ref ids dRef sDir name out
       runScriptU c r i d = void (runScript c r i d)
-      outTests  = [mkOutTest  cfg' ref ids dRef sDir name out | notElem name (badlyBroken ++ stdoutVaries)]
-      treeTests = [mkTreeTest cfg' ref ids dRef name runScriptU tre | notElem name (badlyBroken ++ tmpfilesVary)]
+      outTests  = [mkOutTest  cfg' ref ids dRef sDir name out | name `notElem` (badlyBroken ++ stdoutVaries)]
+      treeTests = [mkTreeTest cfg' ref ids dRef name runScriptU tre | name `notElem` (badlyBroken ++ tmpfilesVary)]
       tests     = if name `elem`  badlyBroken
                      then []
                      else [parseTest, tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]

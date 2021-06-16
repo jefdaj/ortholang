@@ -88,7 +88,7 @@ findGoldenFiles :: IO [FilePath]
 findGoldenFiles = do
   testDir  <- getDataFileName "tests/repl"
   txtFiles <- findByExtension [".txt"] testDir
-  let txtFiles' = filter (\t -> (takeBaseName t) `notElem` knownFailing) txtFiles
+  let txtFiles' = filter (\t -> takeBaseName t `notElem` knownFailing) txtFiles
   return txtFiles'
 
 goldenRepls :: Config -> LocksRef -> IDsRef -> DigestsRef -> IO TestTree

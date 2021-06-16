@@ -111,7 +111,7 @@ olFromException x = do
   SomeOLException a <- fromException x
   cast a
 
-data Mistake = Mistake [String]
+newtype Mistake = Mistake [String]
 
 instance Show Mistake where
   show (Mistake hints) = unlines $ "Programming mistake! Please report it to Jeff Johnson:" : hints'
@@ -143,7 +143,7 @@ parserFromException x = do
   SomeParserException a <- fromException x
   cast a
 
-data NoSuchVar = NoSuchVar String
+newtype NoSuchVar = NoSuchVar String
 
 instance Show NoSuchVar where
   show (NoSuchVar var) = "No such var: '" ++ var ++ "'"

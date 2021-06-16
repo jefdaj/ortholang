@@ -121,7 +121,7 @@ import OrthoLang.Interpreter.Actions
 import OrthoLang.Interpreter.Sanitize (readIDs)
 import OrthoLang.Locks (withWriteOnce)
 import OrthoLang.Types
-import OrthoLang.Util (resolveSymlinks)
+import OrthoLang.Util (resolveSymlinks, absolutize, globFiles)
 import System.Exit (ExitCode(..))
 
 import Control.Monad              (when)
@@ -136,7 +136,6 @@ import Data.Time
 import Text.Printf
 -- import System.FilePath ((</>))
 import Data.List.Split (splitOn)
-import OrthoLang.Util (absolutize, globFiles)
 import Data.List (sort)
 import Data.List.Utils (replace)
 import System.FilePath (takeBaseName, takeDirectory)
@@ -631,12 +630,12 @@ type Prefix = String
 -- | Maps a NewAction1 over its only argument and writes the result list to the
 --   final output path.
 newMap1of1 :: Prefix -> NewAction1
-newMap1of1 prefix out lst = newMap prefix 1 out lst
+newMap1of1 prefix = newMap prefix 1
 
 -- | Maps a NewAction2 over its 2nd argument and writes the result list to the
 --   final output path.
 newMap2of2 :: Prefix -> NewAction2
-newMap2of2 prefix out _ lst = newMap prefix 2 out lst
+newMap2of2 prefix out _ = newMap prefix 2 out
 
 -- | Maps a NewAction3 over its 2nd argument and writes the result list to the
 --   final output path.
@@ -646,12 +645,12 @@ newMap2of3 prefix out _ lst _ = newMap prefix 2 out lst
 -- | Maps a NewAction3 over its 3rd argument and writes the result list to the
 --   final output path.
 newMap3of3 :: Prefix -> NewAction3
-newMap3of3 prefix out _ _ lst = newMap prefix 3 out lst
+newMap3of3 prefix out _ _ = newMap prefix 3 out
 
 -- | Maps a NewAction3 over its 3rd argument and writes the result list to the
 --   final output path.
 newMap4of4 :: Prefix -> NewAction4
-newMap4of4 prefix out _ _ _ lst = newMap prefix 4 out lst
+newMap4of4 prefix out _ _ _ = newMap prefix 4 out
 
 -- | Pass it a 1-argument Action. It maps it over the list and writes the outputs to a list file.
 --   Used to implement all the newMapNofN fns above.
@@ -706,7 +705,7 @@ newMap mapPrefix mapIndex out@(ExprPath outList) listToMapOver = do
 
 -- TODO does this need to be added to the digestmap?
 newMapOutPaths :: [Module] -> Config -> Prefix -> Int -> FilePath -> [Path] -> [Path]
-newMapOutPaths mods cfg newFnName mapIndex oldPath newPaths = map (toPath loc cfg . mkPath) newPaths
+newMapOutPaths mods cfg newFnName mapIndex oldPath = map $ toPath loc cfg . mkPath
   where
     loc = "ortholang.interpreter.compile.newrules.newMapOutPaths"
     oldDigests = listDigestsInPath cfg oldPath
@@ -748,7 +747,7 @@ replaceN (x:xs) (n,a) =
 
 -- | Expands a 1-argument function to the corresponding _date version
 newDate1of1 :: Prefix -> NewAction1
-newDate1of1 prefix out a1 = aNewDate prefix out a1
+newDate1of1 = aNewDate
 
 -- | Expands a 2-argument function to the corresponding _date version
 newDate1of2 :: Prefix -> NewAction2

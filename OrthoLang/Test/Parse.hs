@@ -63,7 +63,7 @@ import Text.Parsec.Combinator     (manyTill, eof, anyToken)
 -- digestExamples st = mapM (digestExample st)
 
 parseWithLeftOver :: [Module] -> ParseM a -> Config -> Script -> String -> Either String (a,String)
-parseWithLeftOver ms p c s = runParseM ms ((,) <$> p <*> leftOver) c s
+parseWithLeftOver ms p = runParseM ms ((,) <$> p <*> leftOver)
   where
     leftOver = manyTill anyToken eof
 
@@ -72,7 +72,7 @@ regularParse :: ParseM a -> Config -> String -> Either String a
 regularParse p cfg = parseWithEof modules p cfg emptyScript
 
 takeVar :: String -> Var
-takeVar = Var (RepID Nothing) . takeWhile (flip elem vNonFirstChars)
+takeVar = Var (RepID Nothing) . takeWhile (`elem` vNonFirstChars)
 
 parsedItAll :: ParseM a -> Config -> String -> Bool
 parsedItAll p cfg str' = case parseWithLeftOver modules p cfg emptyScript str' of

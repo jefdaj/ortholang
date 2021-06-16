@@ -23,7 +23,7 @@ import OrthoLang.Interpreter.Compile.Basic (rExpr, debugRules)
 import Data.Maybe (fromJust)
 
 debugA' :: String -> String -> Action ()
-debugA' name msg = debugA ("ortholang.core.compile.map2." ++ name) msg
+debugA' name = debugA $ "ortholang.core.compile.map2." ++ name
 
 {- These take explicit path arguments rather than a [Path] in order to be
  - better-typed, now and in the future when the whole AST will be a GADT.

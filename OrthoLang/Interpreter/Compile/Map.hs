@@ -60,7 +60,7 @@ import Data.Maybe (fromJust)
 -- TODO swap out plain debug fn for a proper one with module name
 
 debugA' :: String -> String -> Action ()
-debugA' name msg = debugA ("ortholang.core.compile.map." ++ name) msg
+debugA' name = debugA $ "ortholang.core.compile.map." ++ name
 
 ------------------------------------
 -- simplified versions for export --

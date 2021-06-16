@@ -680,7 +680,7 @@ findEncoding mods e = find (\g -> ext g == e') ts
     ts = concatMap mEncodings mods
 
 listFunctions :: [Module] -> [Function]
-listFunctions mods = concatMap mFunctions mods
+listFunctions = concatMap mFunctions
 
 -- Now with guard against accidentally including parts of prefix fn names!
 operatorChars :: [Module] -> [Char]

@@ -49,7 +49,7 @@ stripComments = unlines . map stripComment . lines
 --   Right s2 -> show s2
 
 parseWithEof :: [Module] -> ParseM a -> Config -> Script -> String -> Either String a
-parseWithEof ms p c s = runParseM ms (p <* eof) c s
+parseWithEof ms p = runParseM ms $ p <* eof
 
 {-|
 Based on Text.Parsec.Combinator.parserTrace, but:
@@ -84,7 +84,7 @@ Trace for a parser
 TODO go back to removing it when not in debug mode for speed, even though order might change?
 -}
 debugParser :: Show a => String -> ParseM a -> ParseM a
-debugParser name pFn = parserTraced' name pFn
+debugParser = parserTraced'
 
 parseFail :: String -> ParseM a
 parseFail = lift . lift . throwE

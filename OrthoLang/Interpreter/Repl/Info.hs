@@ -156,7 +156,7 @@ quotedCompletions :: String -> ReplM [Completion]
 quotedCompletions wordSoFar = do
   (_, _, _, idRef, _) <- get
   files  <- listFiles wordSoFar
-  seqIDs <- fmap (((map $ headOrDie "quotedCompletions failed" . words) . M.elems) . (M.unions . M.elems . hSeqIDs)) (
+  seqIDs <- fmap ((map (headOrDie "quotedCompletions failed" . words) . M.elems) . (M.unions . M.elems . hSeqIDs)) (
             liftIO $ readIORef idRef)
   let seqIDs' = map simpleCompletion $ filter (wordSoFar `isPrefixOf`) seqIDs
   return $ files ++ seqIDs'

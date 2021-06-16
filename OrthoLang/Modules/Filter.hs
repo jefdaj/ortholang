@@ -49,7 +49,7 @@ filterList = newFnA2
   []
 
 regexMatches :: String -> [String] -> [String]
-regexMatches s cs = filter (=~ s) cs
+regexMatches s = filter (=~ s)
 
 aFilterList :: NewAction2
 aFilterList (ExprPath oPath') listTmp' fPath' = do

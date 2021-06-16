@@ -154,7 +154,7 @@ unhashIDs longIDs ids t = case findNext t of
                               Just v  -> if longIDs
                                            then v ++ rest
                                            else fst (splitSeqid' v) ++ rest
-    findNext txt = case mapMaybe ((\p -> subIndex p txt) . fst) patterns of
+    findNext txt = case mapMaybe ((`subIndex` txt) . fst) patterns of
                      (x:xs) -> Just $ minimum (x:xs)
                      _ -> Nothing
     patterns =

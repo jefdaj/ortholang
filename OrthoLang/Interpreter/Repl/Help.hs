@@ -148,7 +148,7 @@ inputNames :: Function -> VarMap
 inputNames f = inputNames' [] $ fInputs f
 
 inputNames' :: VarMap -> [TypeSig] -> VarMap
-inputNames' acc ss = foldl addSig acc ss
+inputNames' = foldl addSig
 
 addSig :: VarMap -> TypeSig -> VarMap
 addSig vm (ListSigs     t) = addSig vm t
@@ -252,7 +252,7 @@ renderGroupMembers g = withCommas (init $ tgMembers g) ++ " or " ++ ext (last $ 
 renderWhere :: VarMap -> [TypeSig] -> String
 renderWhere names inSigs = if null descs then "" else unlines $ "\nwhere" : descs
   where
-    descs = nub $ mapMaybe (\i -> (withExt i) <$> renderWhereDesc i) inSigs
+    descs = nub $ mapMaybe (\i -> withExt i <$> renderWhereDesc i) inSigs
     withExt i d = "  " ++ unwords [renderExtBase names i, "=", d]
 
 -- Renders the type variable name: faa, og, any1, etc.

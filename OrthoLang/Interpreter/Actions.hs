@@ -594,7 +594,7 @@ runCmd d = do
 
   -- TODO need to have this whole operation run on the mapped elements too, right?
   let parLockFn = if cmdParallel d
-                    then \f -> withResource par 1 f
+                    then withResource par 1
                     else id
 
       -- TODO any problem locking the whole dir?

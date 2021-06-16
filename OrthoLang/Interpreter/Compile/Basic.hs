@@ -67,7 +67,7 @@ import System.FilePath ((</>))
 
 
 debugC :: String -> String -> a -> a
-debugC name msg rtn = trace ("interpreter.compile." ++ name) msg rtn
+debugC name = trace $ "interpreter.compile." ++ name
 
 -- TODO restrict to Expr?
 -- TODO put in rExpr to catch everything at once? but misses which fn was called
@@ -91,8 +91,8 @@ TODO are the extra rExpr steps needed in most cases, or only for rNamedFunction?
 -}
 -- TODO could this be the cause of the big parsing slowdown?
 rExpr :: RulesFn
-rExpr s e@(Lit _ _       ) = rLit s e
-rExpr s e@(Ref {}) = rRef s e
+rExpr s e@Lit {} = rLit s e
+rExpr s e@Ref {} = rRef s e
 rExpr s e@(Lst _ _ _   es) = mapM_ (rExpr s) es >> rList s e
 rExpr s e@(Fun _ _ _ n es) = mapM_ (rExpr s) es >> rNamedFunction s e n -- TODO is the map part needed?
 rExpr s e@(Bop t ms ds _ e1 e2) = mapM_ (rExpr s) [e1, e2, Lst t ms ds [e1, e2]] >> rBop s e -- TODO remove the map part?
@@ -108,7 +108,7 @@ rBop _ e = error "rBop" $ "called with non-Bop: \"" ++ render (pPrint e) ++ "\""
 -- | This is in the process of being replaced with fNewRules,
 --   so we ignore any function that already has that field written.
 rNamedFunction :: Script -> Expr -> String -> Rules ExprPath
-rNamedFunction s e@(Fun {}) n = rNamedFunction' s e n -- TODO is this missing the map part above?
+rNamedFunction s e@Fun {} n = rNamedFunction' s e n -- TODO is this missing the map part above?
 rNamedFunction _ _ n = error "rNamedFunction" $ "bad argument: " ++ n
 
 rNamedFunction' :: Script -> Expr -> String -> Rules ExprPath

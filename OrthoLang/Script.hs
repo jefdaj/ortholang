@@ -402,12 +402,12 @@ That's only allowed in the Repl of course.
 -}
 removeAssignSelfReferences :: Script -> Assign -> Assign
 removeAssignSelfReferences s a@Assign {aVar=v, aExpr=e} =
-  if v `notElem` (depsOf e)
+  if v `notElem` depsOf e
     then a
     else a {aExpr=rmRef s v e}
 
 removeResultReferences :: Script -> Expr -> Expr
-removeResultReferences scr expr = rmRef scr resultVar expr
+removeResultReferences scr = rmRef scr resultVar
 
 {-|
 Remove a particular 'Var' from an 'Expr' by substituting its value from the

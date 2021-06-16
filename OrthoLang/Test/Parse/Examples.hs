@@ -39,7 +39,7 @@ bop40 = Bop (ListOf str  ) Nothing [] "|" lst4 lst0
 bop04 = Bop (ListOf str  ) Nothing [] "|" lst0 lst4
 
 len :: [Expr] -> Expr
-len es = Fun num Nothing [] "length" es
+len = Fun num Nothing [] "length"
 
 addParens :: (String, a) -> (String, a)
 addParens (s, a) = ("(" ++ s ++ ")", a)

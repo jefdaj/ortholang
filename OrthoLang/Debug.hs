@@ -44,11 +44,10 @@ debug suffix msg = L.debugS (T.pack $ "ortholang." ++ suffix) (T.pack msg)
 -- TODO rearrange imports so you can make a debugA :: ActionR () too
 
 time :: String -> String -> IO a -> IO a
-time suffix msg act = L.timedDebugEndS (T.pack $ "ortholang." ++ suffix)
-                                       (T.pack msg) act
+time suffix msg = L.timedDebugEndS (T.pack $ "ortholang." ++ suffix) (T.pack msg)
 
 logIO :: String -> String -> IO ()
-logIO fnName msg = debug fnName msg
+logIO = debug
 
 -- TODO take Text instead?
 traceP :: (Pretty a, Show b) => String -> a -> b -> b

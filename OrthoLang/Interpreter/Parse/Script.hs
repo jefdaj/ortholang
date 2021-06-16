@@ -178,7 +178,7 @@ TODO error if it has leftover?
 
 -}
 parseString :: [Module] -> Config -> String -> Either String Script
-parseString ms c s = parseWithEof ms pScript c emptyScript s -- config not needed? pass modules here instead?
+parseString ms c = parseWithEof ms pScript c emptyScript -- config not needed? pass modules here instead?
   -- where
   --   addDigests :: Script -> Script
   --   addDigests scr = scr {sDigests = scriptDigests c scr}
