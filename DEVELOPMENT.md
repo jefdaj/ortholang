@@ -7,11 +7,18 @@ nix-shell $ niv update nixpkgs -o nixos -r nixpkgs -b release-20.09
 
 # Work on the interpreter
 
-This builds the Haskell dependencies an extra time with Stack, but seems to
+Stack builds the Haskell dependencies an extra time, but seems to
 result in a better edit -> compile -> test loop compared to pure Nix.
+Either one works for now.
 
 ```
-nix-shell --run 'stack repl; exit'
+nix-shell --run 'stack repl'
+nix-shell --run 'stack build'
+nix-shell --run 'stack exec ortholang'
+
+nix-shell --run 'cabal v2-repl'
+nix-shell --run 'cabal v2-build'
+nix-shell --run 'cabal v2-run ortholang'
 ```
 
 # Release checklist

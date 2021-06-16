@@ -13,3 +13,5 @@ release-*
 result*
 tmp
 todo.txt
+dist
+dist-newstyle
