@@ -3,8 +3,7 @@ Type :help for a list of the available commands.
 
 ortholang —▶ # the first time we ask for the cached list, there will be a warning
 ortholang —▶ # TODO substitute the date in repl test output
-ortholang —▶ blastdb_list "cached"
-Warning: no cache found for "cached". Defaulting to the current UTC date, 2020-09-11.
+ortholang —▶ blastdb_list "today"
 ["16S_ribosomal_RNA",
  "18S_fungal_sequences",
  "28S_fungal_sequences",
@@ -38,7 +37,7 @@ Warning: no cache found for "cached". Defaulting to the current UTC date, 2020-0
 
 ortholang —▶ # now we can find the specific db(s) we want with text or regex filtering
 ortholang —▶
-ortholang —▶ filter_list (blastdb_list "cached") "ref"
+ortholang —▶ filter_list (blastdb_list "today") "ref"
 ["ref_euk_rep_genomes",
  "ref_prok_rep_genomes",
  "ref_viroids_rep_genomes",
@@ -46,7 +45,7 @@ ortholang —▶ filter_list (blastdb_list "cached") "ref"
  "refseq_protein",
  "refseq_rna"]
 
-ortholang —▶ filter_list (blastdb_list "cached") "^..S_"
+ortholang —▶ filter_list (blastdb_list "today") "^..S_"
 ["16S_ribosomal_RNA",
  "18S_fungal_sequences",
  "28S_fungal_sequences",
