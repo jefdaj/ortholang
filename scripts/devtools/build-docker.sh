@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Usage ./dev-scripts/build-docker-image.sh
+# Usage ./scripts/devtools/build-docker-image.sh
 # Uncomment the last run_repl line for manual debugging.
 # Command line arguments are passed to nix-build.
 

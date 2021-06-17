@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage:
-# ./scripts/dev/update-tests.sh [filter]
+# ./scripts/devtools/update-tests.sh [filter]
 #
 # Optional test filter follows this format:
 # https://ro-che.info/articles/2018-01-08-tasty-new-patterns
