@@ -31,7 +31,6 @@ import qualified OrthoLang.Modules.Load          as Load
 import qualified OrthoLang.Modules.MMSeqs        as MMSeqs
 import qualified OrthoLang.Modules.Math          as Math
 import qualified OrthoLang.Modules.Muscle        as Muscle
-import qualified OrthoLang.Modules.NewRulesTest  as NewRulesTest
 import qualified OrthoLang.Modules.OrthoFinder   as OrthoFinder
 import qualified OrthoLang.Modules.OrthoGroups   as OrthoGroups
 import qualified OrthoLang.Modules.Permute       as Permute
@@ -102,7 +101,6 @@ modules =
   , AllVsAll.olModule
   , Script.olModule
   , GreenCut.olModule
-  , NewRulesTest.olModule
   , Summarize.olModule
   , OrthoFinder.olModule
   , Singletons.olModule
