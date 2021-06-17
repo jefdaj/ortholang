@@ -102,7 +102,7 @@ in rec {
   ortholang-plots         = mkMod ./OrthoLang/Modules/Plots         [ myR ] "";
   ortholang-setstable     = mkMod ./OrthoLang/Modules/SetsTable     [ myR ] "";
   ortholang-range         = mkMod ./OrthoLang/Modules/Range         [ myR ] "";
-  ortholang-blast         = mkMod ./OrthoLang/Modules/Blast         [ myBlast parallel ] "";
+  ortholang-blast         = mkMod ./OrthoLang/Modules/Blast         [ myBlast bzip2 parallel ] "";
   ortholang-blastdb       = mkMod ./OrthoLang/Modules/BlastDB       [ myBlast ] "";
   ortholang-blastdbget    = mkMod ./OrthoLang/Modules/Blastdbget    [ myBlast blastdbget ] ""; # TODO remove myBlast?
   ortholang-crbblast      = mkMod ./OrthoLang/Modules/CRBBlast      [ crb-blast ] "";

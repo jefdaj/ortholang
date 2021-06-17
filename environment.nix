@@ -38,6 +38,7 @@ in [
   graphviz
   rsync
   file
+  bzip2 # for parallel on docker
 
   # TODO is this a good idea?
   # myR # TODO is this needed at runtime?
