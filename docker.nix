@@ -25,6 +25,7 @@ in pkgs.dockerTools.buildImage {
     #!${pkgs.runtimeShell}
     mkdir -p /.ortholang
     mkdir -p /workdir
+    mkdir -p /tmp
   '';
 
   config = {
