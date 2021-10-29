@@ -30,6 +30,7 @@ git:
 branches:
   only:
   - master
+  - develop
 
 script:
   - ./scripts/dev/test-nix.sh
