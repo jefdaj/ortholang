@@ -15,18 +15,19 @@
 #   git add tests
 
 set -e
+set -x
 
 logfile="test.log"
 testdir="tests"
 [[ -z "$1" ]] && testfilter="all" || testfilter="$1"
 
-nix-shell --command 'stack build'
+nix-shell --command 'stack --allow-different-user build'
 
 stacktestdir="$(find .stack-work -type d -name tests)"
 
 # delete golden files so they'll be recreated
 for d in ${stacktestdir}/*; do
-  [[ $d =~ 'scripts' ]] || rm -rf  $d/*
+  [[ $d =~ 'scripts' || $d =~ 'repl' ]] || rm -rf  $d/*
 done
 
 rsync_tests() { rsync -qr ${stacktestdir}/* ${testdir}/; }
@@ -37,7 +38,7 @@ rsync_every_10sec() { while sleep 10; do rsync_tests || break; done || true; }
 rsync_every_10sec &
 rsync_pid=$!
 
-nix-shell --command "stack exec ortholang -- --test '$testfilter' 2>&1 | tee '$logfile'"
+nix-shell --command "stack --allow-different-user exec ortholang -- --test '$testfilter' 2>&1 | tee '$logfile'"
 
 # one last clean rsync
 kill -9 $rsync_pid || true &> /dev/null
