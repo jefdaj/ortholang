@@ -52,6 +52,11 @@ tmpfilesVary =
   , "plots:scatterplot"
   , "plots:histogram"
   , "permute:leave_each_out" -- TODO this is a weird one
+
+  -- TODO add wildcard patterns to these? i think all mmseqs scripts do it
+  , "mmseqs"
+  , "mmseqs:search"
+  , "mmseqs:search_db"
   ]
 
 -- | These work, but the stdout varies so they require a check script.
