@@ -1,10 +1,8 @@
 The str extension is for string.
 
-You can create them with these 2 functions:
-  newrulestest1 : str str -> str
-  newrulestest3 : str str str -> str
+You can create them with these 0 functions:
 
-And use them with these 51 functions:
+And use them with these 48 functions:
   blastdb_get_faa : str str -> faa.blastdb
   blastdb_get_faa_date : str str -> faa.blastdb
   blastdb_get_fna : str str -> fna.blastdb

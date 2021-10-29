@@ -1,15 +1,14 @@
 The faa extension is for FASTA amino acid.
 
-You can create them with these 7 functions:
+You can create them with these 6 functions:
   concat_faa : faa.list -> faa
   gbk_to_faa : str gbk -> faa
   gbk_to_faa_rawids : str gbk -> faa
   load_faa : str -> faa
   load_faa_path : str -> faa
-  newrulestest2 : str faa faa -> faa
   translate : fna -> faa
 
-And use them with these 44 functions:
+And use them with these 43 functions:
   blastp : num faa faa -> bht
   blastp_db : num faa faa.blastdb -> bht
   blastp_db_each : num faa faa.blastdb.list -> bht.list

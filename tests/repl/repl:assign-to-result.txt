@@ -1,0 +1,28 @@
+Welcome to the OrthoLang interpreter!
+Type :help for a list of the available commands.
+
+ortholang —▶ # this tests assigning 'result' to another variable.
+ortholang —▶ # the correct behavior is to substitute the current result expression
+ortholang —▶ # wherever the 'result' ref appears. otherwise the script may be invalid.
+ortholang —▶ 
+ortholang —▶ # then at the end, another 'result' should be implicitly added that
+ortholang —▶ # points the new variable
+ortholang —▶ 
+ortholang —▶ load_faa "https://raw.githubusercontent.com/jefdaj/ortholang/master/examples/sequences/PCC_6803_genes_10.faa"
+>derice
+ACTGACTAGCTAGCTAACTG
+>sanka
+GCATCGTAGCTAGCTACGAT
+>junior
+...
+
+ortholang —▶ :show
+result = load_faa "https://raw.githubusercontent.com/jefdaj/ortholang/master/examples/sequences/PCC_6803_genes_10.faa"
+
+ortholang —▶ samplefa = result
+ortholang —▶ :show
+samplefa = load_faa "https://raw.githubusercontent.com/jefdaj/ortholang/master/examples/sequences/PCC_6803_genes_10.faa"
+result = samplefa
+
+ortholang —▶ :quit
+Bye for now!

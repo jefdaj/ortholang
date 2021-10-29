@@ -1,0 +1,32 @@
+Welcome to the OrthoLang interpreter!
+Type :help for a list of the available commands.
+
+ortholang —▶ []
+[]
+
+ortholang —▶ :t []
+empty.list
+
+ortholang —▶ :t [[]]
+empty.list.list
+
+ortholang —▶ [[]]
+[[]]
+
+ortholang —▶ [[1]]
+[[1]]
+
+ortholang —▶ :t [[1], []]
+num.list.list
+
+ortholang —▶ [[1], []]
+[[1], []]
+
+ortholang —▶ :t [[], [1]]
+num.list.list
+
+ortholang —▶ [[], [1]]
+[[], [1]]
+
+ortholang —▶ :quit
+Bye for now!

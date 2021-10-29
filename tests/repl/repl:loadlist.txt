@@ -1,0 +1,119 @@
+Welcome to the OrthoLang interpreter!
+Type :help for a list of the available commands.
+
+ortholang —▶ load_list "data/proteomes-mmseqs.txt" 
+["data/Mycoplasma_agalactiae_small.faa",
+ "data/Mycoplasma_bovis_small.fa",
+ "data/Mycoplasma_genitalium_small.faa",
+ "data/Mycoplasma_hyopneumoniae_small.faa"]
+
+ortholang —▶ load_faa_each (load_list "data/proteomes-mmseqs.txt")
+[>gi|290752267|emb|CBH40238.1|
+MNINSPNDKEIALKSYTETFLDILRQELGDQMLYKNFFANFEIKDVSKIGHITIGTTNVTPNSQYVIRAY
+ESSIQKSLDETFERKCTFSFVLLDSAVKKKVKRERKEAAIENIELSNREVDKTKTFENYVEGNFNKEAIR
+IAKLIVEGEEDYNPIFIYGKSGIGKTHLLNAICNELLKKEVSVKYINANSFTRDISYFLQENDQRKLKQI
+RNHFDNADIVMFDDFQSYGIGNKKATIELIFNILDSRINQKRTTIICSDRPIYSLQNSFDARLISRLSMG
+...
+,
+ >AKO50237
+MNINSTNDKEIALKSYTETFLDILRQELGDQMLYKNFFANFEIKDISKIGHITIGTTNIT
+PNSQYVIKAYESSIQKSLDETFERKCTFSFVLLDSAIKKKIKRERKEEAIENIELSNREV
+DKAKTFDNYVEGNFNKEAIRIAKLIVDGEEDYNPIFIYGKSGIGKTHLLNAICNEFLKKD
+VSVKYINANSFTRDISYFLQENDQRKLKQIRNHFDNADIVMFDDFQSYGIGNKKATIELI
+...
+,
+ >gi|84626162|gb|AAC71217.2|
+MKILINKSELNKILKKMNNVIISNNKIKPHHSYFLIEAKEKEINFYANNEYFSVKCNLNKNIDILEQGSL
+IVKGKIFNDLINGIKEEIITIQEKDQTLLVKTKKTSINLNTINVNEFPRIRFNEKNDLSEFNQFKINYSL
+LVKGIKKIFHSVSNNREISSKFNGVNFNGSNGKEIFLEASDTYKLSVFEIKQETEPFDFILESNLLSFIN
+SFNPEEDKSIVFYYRKDNKDSFSTEMLISMDNFMISYTSVNEKFPEVNYFFEFEPETKIVVQKNELKDAL
+...
+,
+ >gi|144227417|gb|AAZ44095.2|
+MQTNKNNLKVRTQQIRQQIENLLNDRMLYNNFFSTIYVLNETETEIIIDFTDLIAKQEVISRWVDTVEKA
+IKNLEISKILTFNNTNNYTINSKESQNFSIKNKYCSFNINNVLNKFTFRNFIKSSYNFQIFSIYDAIVAN
+SRLNYSPIFISGPSGIGKTHFINAIGNLLVEKQKKVFYINDYKFISCVSSWMQNGQNEKISEFLNWLSQV
+DAFLFDDIQGLANKQQTSIVALEILNRFIEEDKTVIITSDKSPSLLGGFEERFITRFSSGLHIKLNKPKK
+...
+]
+
+ortholang —▶ load_list "data/proteomes-refseq.txt"  
+["data/Mycoplasma_agalactiae_PG2_protein_refseq.faa",
+ "data/Mycoplasma_agalactiae_protein_refseq.faa",
+ "data/Mycoplasma_arthritidis_protein_refseq.faa",
+ "data/Mycoplasma_capricolum_protein_refseq.faa",
+ "data/Mycoplasma_conjunctivae_protein_refseq.faa",
+ "data/Mycoplasma_crocodyli_protein_refseq.faa",
+ "data/Mycoplasma_gallisepticum_protein_refseq.faa",
+ "data/Mycoplasma_genitalium_G37_protein_refseq.faa",
+ "data/Mycoplasma_genitalium_protein_refseq.faa",
+ "data/Mycoplasma_hyopneumoniae_J_protein_refseq.faa",
+ "data/Mycoplasma_hyopneumoniae_protein_refseq.faa",
+ "data/Mycoplasma_mobile_protein_refseq.faa",
+ "data/Mycoplasma_mycoides_protein_refseq.faa",
+ "data/Mycoplasma_penetrans_protein_refseq.faa",
+ "data/Mycoplasma_pulmonis_protein_refseq.faa",
+ "data/Mycoplasma_synoviae_protein_refseq.faa"]
+
+ortholang —▶ load_list "data/genomes-genbank.txt" 
+["data/Mycoplasma_agalactiae_PG2.gbk",
+ "data/Mycoplasma_arthritidis_158L3-1.gbk",
+ "data/Mycoplasma_bovis_HB0801-P115.gbk",
+ "data/Mycoplasma_canadense_HAZ360_1.gbk",
+ "data/Mycoplasma_genitalium_M2321.gbk",
+ "data/SynPCC7942_chr.gbk",
+ "data/SynPCC7942_pANL.gbk"]
+
+ortholang —▶ load_gbk_each (load_list "data/genomes-genbank.txt")
+[LOCUS       CU179680              877438 bp    DNA     circular BCT 27-FEB-2015
+DEFINITION  Mycoplasma agalactiae PG2 chromosome, complete sequence.
+ACCESSION   CU179680
+VERSION     CU179680.1
+DBLINK      BioProject: PRJNA16095
+...
+,
+ LOCUS       CP001047              820453 bp    DNA     circular BCT 31-JAN-2014
+DEFINITION  Mycoplasma arthritidis 158L3-1, complete genome.
+ACCESSION   CP001047
+VERSION     CP001047.1
+DBLINK      BioProject: PRJNA1422
+...
+,
+ LOCUS       CP007589              977322 bp    DNA     circular BCT 06-APR-2016
+DEFINITION  Mycoplasma bovis strain HB0801-P115, complete genome.
+ACCESSION   CP007589
+VERSION     CP007589.1
+DBLINK      BioProject: PRJNA237726
+...
+,
+ LOCUS       AP014631              693241 bp    DNA     circular BCT 11-OCT-2014
+DEFINITION  Mycoplasma canadense DNA, complete genome, strain: HAZ360_1.
+ACCESSION   AP014631
+VERSION     AP014631.1
+DBLINK      BioProject: PRJDB3071
+...
+,
+ LOCUS       CP003770              579977 bp    DNA     circular BCT 31-JAN-2014
+DEFINITION  Mycoplasma genitalium M2321, complete genome.
+ACCESSION   CP003770
+VERSION     CP003770.1
+DBLINK      BioProject: PRJNA39739
+...
+,
+ LOCUS       CP000100             2695903 bp    DNA     circular BCT 28-JAN-2014
+DEFINITION  Synechococcus elongatus PCC 7942, complete genome.
+ACCESSION   CP000100 AADZ01000000 AADZ01000001 AADZ01000002 AADZ01000003
+            AADZ01000004
+VERSION     CP000100.1
+...
+,
+ LOCUS       CP000101               46366 bp    DNA     circular BCT 26-JUL-2016
+DEFINITION  Synechococcus elongatus PCC 7942 plasmid 1, complete sequence.
+ACCESSION   CP000101 AADZ01000000 AADZ01000001 AADZ01000002 AADZ01000003
+            AADZ01000004
+VERSION     CP000101.1
+...
+]
+
+ortholang —▶ :q
+Bye for now!

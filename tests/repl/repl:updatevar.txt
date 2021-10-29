@@ -1,0 +1,37 @@
+Welcome to the OrthoLang interpreter!
+Type :help for a list of the available commands.
+
+ortholang —▶ v1 = "original first var"
+ortholang —▶ v2 = "second var"
+ortholang —▶ :show
+v1 = "original first var"
+v2 = "second var"
+result = v2
+
+ortholang —▶ v1 = "replacement first var"
+ortholang —▶ :show
+v1 = "replacement first var"
+v2 = "second var"
+result = v1
+
+ortholang —▶ v2
+"second var"
+
+ortholang —▶ v3 = "third var, inserted after result"
+ortholang —▶ :show
+v1 = "replacement first var"
+v2 = "second var"
+v3 = "third var, inserted after result"
+result = v3
+
+ortholang —▶ v3
+"third var, inserted after result"
+
+ortholang —▶ :show
+v1 = "replacement first var"
+v2 = "second var"
+v3 = "third var, inserted after result"
+result = v3
+
+ortholang —▶ :quit
+Bye for now!
