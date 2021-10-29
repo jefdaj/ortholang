@@ -385,13 +385,13 @@ mkScriptTests sDir (name, cut, parse, expand, out, tre, mchk) cfg ref ids dRef =
   let parseTest = mkParseTest  cfg' ref ids dRef name cut parse
       tripTest  = mkTripTest   cfg' ref ids dRef name cut
       expTest   = mkExpandTest cfg' ref ids dRef name cut expand
-      shareTest = mkShareTest  cfg' ref ids dRef sDir name out
+      -- shareTest = mkShareTest  cfg' ref ids dRef sDir name out
       runScriptU c r i d = void (runScript c r i d)
       outTests  = [mkOutTest  cfg' ref ids dRef sDir name out | name `notElem` (badlyBroken ++ stdoutVaries)]
       treeTests = [mkTreeTest cfg' ref ids dRef name runScriptU tre | name `notElem` (badlyBroken ++ tmpfilesVary)]
       tests     = if name `elem`  badlyBroken
                      then []
-                     else [parseTest, tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]
+                     else [parseTest, tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests -- ++ [shareTest]
   return $ testGroup (removePrefix name) tests
   where
     name' = replace ":" "_" name -- ':' messes with BLASTDB paths
