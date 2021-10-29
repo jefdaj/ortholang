@@ -33,7 +33,7 @@ branches:
   - develop
 
 script:
-  - ./scripts/dev/test-nix.sh
+  - ./scripts/devtools/test-nix.sh
 
 notifications:
   email:
