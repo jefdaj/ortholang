@@ -137,10 +137,10 @@
         "homepage": "https://mmseqs.com",
         "owner": "jefdaj",
         "repo": "mmseqs2-nix",
-        "rev": "18199c8c986b4335d143d214b4fd7b7b42a63415",
-        "sha256": "11imp5ndih7vl5fpr7y17ikkm11ymz7r4jh4gcvf2znj68610xfr",
+        "rev": "22a580a6ab8f43ac835a604bb345a449f19c44f0",
+        "sha256": "0qwlgxnfvqqpbggjzyri2mn0v341s861ajdy4sxczb79jhxwhg0n",
         "type": "tarball",
-        "url": "https://github.com/jefdaj/mmseqs2-nix/archive/18199c8c986b4335d143d214b4fd7b7b42a63415.tar.gz",
+        "url": "https://github.com/jefdaj/mmseqs2-nix/archive/22a580a6ab8f43ac835a604bb345a449f19c44f0.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "muscle": {
