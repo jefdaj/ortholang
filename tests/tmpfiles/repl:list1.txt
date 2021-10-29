@@ -1,0 +1,23 @@
+.
+|-- cache
+|-- exprs
+|   |-- list
+|   |   |-- 11c2f49d6c
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 54b16788dd
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 645c51a62f
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 6d5bff7727
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   |-- 7f26da8a72
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- d751713988
+|   |       `-- result -> ../../../cache/lines/...
+|   `-- num
+|       `-- ee383407c9
+|           `-- result -> ../../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/list/645c51a62f/result
+
+12 directories, 8 files

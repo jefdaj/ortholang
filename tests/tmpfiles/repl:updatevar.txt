@@ -1,0 +1,14 @@
+.
+|-- cache
+|-- exprs
+|   `-- str
+|       |-- c8362326da
+|       |   `-- result -> ../../../cache/lines/...
+|       `-- d9c432ba64
+|           `-- result -> ../../../cache/lines/...
+`-- vars
+    |-- result -> ../vars/v3.str
+    |-- v2.str -> ../exprs/str/d9c432ba64/result
+    `-- v3.str -> ../exprs/str/c8362326da/result
+
+6 directories, 5 files

@@ -1,0 +1,15 @@
+.
+|-- cache
+|-- exprs
+|   |-- list
+|   |   |-- 4ac24697aa
+|   |   |   `-- result -> ../../../cache/lines/...
+|   |   `-- 8911df8800
+|   |       `-- result -> ../../../cache/lines/...
+|   `-- str
+|       `-- a2a665650c
+|           `-- result -> ../../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/list/8911df8800/result
+
+8 directories, 4 files
