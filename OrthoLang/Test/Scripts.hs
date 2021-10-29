@@ -96,11 +96,11 @@ badlyBroken =
   , "crbblast:crb_blast_many_cyanos"
   , "crbblast:crb_blast_two_cyanos"
   , "biomartr" -- from examples
-  , "mmseqs" -- from examples
+  -- , "mmseqs" -- from examples
   , "psiblast_rbh" -- from examples
   , "listlike:length"
-  , "mmseqs:search"
-  , "mmseqs:search_db"
+  -- , "mmseqs:search"
+  -- , "mmseqs:search_db"
   , "orthofinder:basic"
   , "orthofinder:orthogroups"
   , "orthogroups:orthogroup_containing"
@@ -184,8 +184,8 @@ badlyBroken =
   , "maga-vs-mgen-blastp-rbh-100x"
   , "maga-vs-mgen-blastp-rbh-100x-ids"
   , "maga-vs-mgen-blastp-rbh-3x"
-  , "mmseqs:createdb"
-  , "mmseqs:createdb_all"
+  -- , "mmseqs:createdb"
+  -- , "mmseqs:createdb_all"
   , "prs02"
   , "repeat:faas"
   , "repeat:load"

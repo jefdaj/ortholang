@@ -1,0 +1,36 @@
+.
+|-- cache
+|   |-- load
+|   |   |-- 36189032ad.faa
+|   |   `-- 36189032ad.faa.ids
+|   `-- mmseqs
+|       `-- createdb
+|           `-- 329cb2539d
+|               |-- result
+|               |-- result.dbtype
+|               |-- result.err
+|               |-- result_h
+|               |-- result_h.dbtype
+|               |-- result_h.index
+|               |-- result.index
+|               |-- result.lookup
+|               `-- result.source
+|-- exprs
+|   |-- list
+|   |   `-- 7666691bcd
+|   |       `-- result -> ../../../cache/lines/...
+|   |-- load_faa
+|   |   `-- 1e0498b59a
+|   |       `-- result -> ../../../cache/load/36189032ad.faa
+|   |-- mmseqs_createdb_all
+|   |   `-- 329cb2539d
+|   |       `-- result -> ../../../cache/mmseqs/createdb/329cb2539d/result.index
+|   `-- str
+|       `-- 824ccbd8b2
+|           `-- result -> ../../../cache/lines/...
+`-- vars
+    |-- maga_db.mms -> ../exprs/mmseqs_createdb_all/329cb2539d/result
+    |-- maga.faa -> ../exprs/load_faa/1e0498b59a/result
+    `-- result -> ../vars/maga_db.mms
+
+15 directories, 18 files
