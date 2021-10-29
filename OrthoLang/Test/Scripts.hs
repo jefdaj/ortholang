@@ -54,7 +54,7 @@ tmpfilesVary =
   , "permute:leave_each_out" -- TODO this is a weird one
 
   -- TODO add wildcard patterns to these? i think all mmseqs scripts do it
-  , "examples:mmseqs"
+  , "mmseqs" -- skip the examples: prefix when adding these
   , "mmseqs:search"
   , "mmseqs:search_db"
   ]
