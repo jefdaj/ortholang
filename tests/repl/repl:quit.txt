@@ -1,5 +1,0 @@
-Welcome to the OrthoLang interpreter!
-Type :help for a list of the available commands.
-
-ortholang —▶ :q
-Bye for now!
