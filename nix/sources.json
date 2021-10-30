@@ -226,17 +226,5 @@
         "type": "tarball",
         "url": "https://github.com/jefdaj/raxml-nix/archive/99f76e46c0b37eaf8ba1ca7fd78558b45beb2964.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
-    "sonicparanoid": {
-        "branch": "master",
-        "description": "An updated version of SonicParanoid",
-        "homepage": "http://iwasakilab.bs.s.u-tokyo.ac.jp/sonicparanoid/",
-        "owner": "jefdaj",
-        "repo": "sonicparanoid2",
-        "rev": "76835c1053e883fad1b62a21a377e1d9c739cad9",
-        "sha256": "046qv50cmmm2a1clbnp3275mqy4cy9d2knhmcmq8fikkrms2gzp1",
-        "type": "tarball",
-        "url": "https://gitlab.com/jefdaj/sonicparanoid2/-/archive/master/sonicparanoid2-d1ac692ea70e4a6d295245c5b8fe5874e7080f7d.tar.gz",
-        "url_template": "https://gitlab.com/<owner>/<repo>/-/<rev>/<repo>-<rev>.tar.gz"
     }
 }
