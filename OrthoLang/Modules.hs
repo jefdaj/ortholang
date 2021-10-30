@@ -42,6 +42,8 @@ import qualified OrthoLang.Modules.SeqIO         as SeqIO
 import qualified OrthoLang.Modules.Sets          as Sets
 import qualified OrthoLang.Modules.SetsTable     as SetsTable
 import qualified OrthoLang.Modules.Singletons    as Singletons
+import qualified OrthoLang.Modules.SonicParanoid as SonicParanoid
+import qualified OrthoLang.Modules.Summarize     as Summarize
 import qualified OrthoLang.Modules.Zip           as Zip
 
 modules :: [Module]
@@ -85,6 +87,7 @@ modules =
   -- orthogroup search programs
   , Busco.olModule         -- medium complicated
   , OrthoGroups.olModule   -- complicated str code, but simple Rules?
+  , SonicParanoid.olModule -- short and simple Rules
 
   -- plots and figures
   , Plots.olModule     -- rewrite done

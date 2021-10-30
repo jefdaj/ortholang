@@ -16,7 +16,7 @@ import System.FilePath.Posix      (takeBaseName)
 import OrthoLang.Interpreter.Config (os)
 
 -- TODO blastdbget makeblastdb cut blast tar hmmsearch orthogroups.py?
---      psiblast? seqiostuff
+--      greencut psiblast? seqiostuff sonicparanoid
 versionScripts :: [(String, FilePath)]
 versionScripts = map (\(a,b) -> (a, os ++ ":" ++ b))
   [ ("bash"         , "bash.sh")
@@ -61,6 +61,7 @@ versionScripts = map (\(a,b) -> (a, os ++ ":" ++ b))
   , ("UpSetR"       , "r_UpSetR.R")
   , ("VennDiagram"  , "r_VennDiagram.R")
 
+  -- , ("sonicparanoid", "sonicparanoid.sh")
   -- , ("treecl"       , "treecl.sh")
   ]
 
