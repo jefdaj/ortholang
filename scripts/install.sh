@@ -1,10 +1,11 @@
 #/usr/bin/env bash
 
 export LOG=ortholang.log
+export VERSION='0.9.4'
 
 case "$(uname)" in
-  Linux ) export CHANNEL=nixos-20.03 ;;
-  Darwin) export CHANNEL=nixpkgs-20.03-darwin ;;
+  Linux ) export CHANNEL=nixos-20.09 ;;
+  Darwin) export CHANNEL=nixpkgs-20.09-darwin ;;
   *) echo "Sorry, unsupported OS: $(uname). Try git clone + nix-build, or ask Jeff!"; exit 1 ;;
 esac
 
@@ -24,7 +25,7 @@ install_nix() {
     Linux )
 
       (curl https://nixos.org/nix/install | sh) >> $LOG 2>&1
-			. $HOME/.nix-profile/etc/profile.d/nix.sh;;
+      . $HOME/.nix-profile/etc/profile.d/nix.sh;;
 
     Darwin)
 
@@ -35,7 +36,7 @@ install_nix() {
       else
         (curl https://nixos.org/nix/install | sh) >> $LOG 2>&1
       fi
-			. $HOME/.nix-profile/etc/profile.d/nix.sh;;
+      . $HOME/.nix-profile/etc/profile.d/nix.sh;;
 
     *)
       echo "Sorry, unsupported OS: $(uname). Try git clone + nix-build, or ask Jeff!";
@@ -51,7 +52,7 @@ install_nix() {
   echo -n "Installing the Nix package manager..."
   which nix-env &> /dev/null
   if [[ $? != 0 ]]; then
-		install_nix
+    install_nix
     . $HOME/.nix-profile/etc/profile.d/nix.sh
   fi
   which nix-env &> /dev/null
@@ -82,8 +83,7 @@ install_nix() {
 
   echo "Installing OrthoLang..."
   # TODO how to work around the git-annex dylib priority bug?
-  export VERSION='0.9.5'
-  archive="https://ortholang.pmb.berkeley.edu/static/ortholang-v${VERSION}.tar.gz"
+  archive="https://github.com/jefdaj/ortholang/archive/refs/tags/v${VERSION}.tar.gz"
   nix-env -i -f $archive 2>&1 | tee -a $LOG
   if [[ $? != 0 ]]; then
     echo "ERROR $?. See $LOG for details."
