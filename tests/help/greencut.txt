@@ -1,5 +1,0 @@
-A re-implementation of the original GreenCut(2) ortholog-finding algorithm
-
-Functions:
-
-greencut2_families

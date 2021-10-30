@@ -23,7 +23,6 @@ import qualified OrthoLang.Modules.CRBBlast      as CRBBlast
 import qualified OrthoLang.Modules.Script  as Script
 import qualified OrthoLang.Modules.FlowChart     as FlowChart
 import qualified OrthoLang.Modules.Diamond       as Diamond
-import qualified OrthoLang.Modules.GreenCut      as GreenCut
 import qualified OrthoLang.Modules.Hmmer         as Hmmer
 import qualified OrthoLang.Modules.ListLike      as ListLike
 import qualified OrthoLang.Modules.Curl          as Curl
@@ -98,7 +97,6 @@ modules =
   -- works in progress and/or tests
   , AllVsAll.olModule
   , Script.olModule
-  , GreenCut.olModule
   , Summarize.olModule
   , OrthoFinder.olModule
   , Singletons.olModule
