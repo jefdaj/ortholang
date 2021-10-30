@@ -77,7 +77,6 @@ in rec {
 
     extraLibs = with python27Packages; [
       biopython # old version 1.76 with python2 support
-      justorthologs
       numpy # TODO remove?
       scipy # TODO remove?
     ];
