@@ -10,6 +10,7 @@ module OrthoLang.Modules (modules)
 import OrthoLang.Types (Module)
 -- TODO ensure nothing is undefined: import Control.DeepSeq
 
+import qualified OrthoLang.Modules.AllVsAll      as AllVsAll
 import qualified OrthoLang.Modules.BioMartR      as BioMartR
 import qualified OrthoLang.Modules.Blast         as Blast
 import qualified OrthoLang.Modules.BlastDB       as BlastDB
@@ -92,6 +93,8 @@ modules =
   , FlowChart.olModule -- rewrite done
 
   -- works in progress and/or tests
+  , AllVsAll.olModule
+  , Summarize.olModule
   , OrthoFinder.olModule
   , Singletons.olModule
   , Zip.olModule -- rewrite done
