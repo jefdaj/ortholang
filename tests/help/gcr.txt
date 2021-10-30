@@ -1,0 +1,6 @@
+The gcr extension is for GreenCut results.
+
+You can create them with these 1 functions:
+  greencut2_families : bht bht -> gcr
+
+And use them with these 0 functions:
