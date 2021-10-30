@@ -63,6 +63,11 @@ let
     inherit ncbi-blast hmmer;
   };
   
+  # TODO clean this up
+  justorthologs = pkgs.callPackage sources.justorthologs {
+    python = myPython2.python.withPackages (_: [myPython2.biopython]);
+  };
+
   # TODO add a module, or remove this if not helpful
 
 # TODO these should probably be converted to a list of overlays
@@ -79,5 +84,5 @@ in pkgs // {
   inherit quick-multi-paranoid;
 
   inherit raxml mcl;
-  inherit orthofinder sonicparanoid;
+  inherit orthofinder sonicparanoid justorthologs;
 }
