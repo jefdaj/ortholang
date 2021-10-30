@@ -17,8 +17,8 @@ import OrthoLang.Interpreter
 
 import OrthoLang.Modules.SeqIO         (faa)
 import OrthoLang.Modules.OrthoFinder   (ofr)
-import OrthoLang.Modules.SonicParanoid (spr)
-import OrthoLang.Modules.GreenCut      (gcr)
+-- import OrthoLang.Modules.SonicParanoid (spr)
+-- import OrthoLang.Modules.GreenCut      (gcr)
 
 import Control.Monad     (forM, when, unless)
 import Data.IORef        (readIORef)
@@ -41,7 +41,7 @@ olModule :: Module
 olModule = Module
   { mName = "OrthoGroups"
   , mDesc = "Common interface for working with the results of OrthoFinder, SonicParanoid, etc."
-  , mTypes = [ofr, spr, gcr]
+  , mTypes = [ofr] -- spr, gcr
   , mGroups = [og]
   , mEncodings = []
   , mRules = []
@@ -67,7 +67,7 @@ og :: TypeGroup
 og = TypeGroup
   { tgExt = "og"
   , tgDesc = "orthogroup list"
-  , tgMembers = [Exactly ofr, Exactly spr, Exactly gcr]
+  , tgMembers = [Exactly ofr] -- Exactly spr, Exactly gcr
   }
 
 -----------------
@@ -103,32 +103,32 @@ parseOrthoFinder ofrPath = do
   let groups = map (words . drop 11) (lines txt)
   return groups
 
-parseSonicParanoid :: Path -> Action [[String]]
-parseSonicParanoid ogPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.orthogroups.parseSonicParanoid"
-      resDir = takeDirectory $ fromPath loc cfg ogPath
-      grpPath = resDir </> "ortholog_groups.tsv"
-  -- ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
-  -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' grpPath -- TODO openFile error during this?
-  txt <- readFileStrict' grpPath -- TODO openFile error during this?
-  let groups = map parseLine $ tail $ lines txt -- TODO be safe about tail
-  -- liftIO $ putStrLn $ "groups: " ++ show groups
-      --groups' = map (unhashIDs cfg) groups
-  -- let groups = map (words . drop 11) (lines txt)
-  return groups
-  where
-    parseLine l = concat (l =~ "seqid_[a-zA-Z0-9]*?" :: [[String]])
+-- parseSonicParanoid :: Path -> Action [[String]]
+-- parseSonicParanoid ogPath = do
+--   cfg <- fmap fromJust getShakeExtra
+--   let loc = "modules.orthogroups.parseSonicParanoid"
+--       resDir = takeDirectory $ fromPath loc cfg ogPath
+--       grpPath = resDir </> "ortholog_groups.tsv"
+--   -- ids <- liftIO $ readIORef idref -- TODO why are we unhashing here again?
+--   -- txt <- fmap (unhashIDs cfg ids) $ readFileStrict' grpPath -- TODO openFile error during this?
+--   txt <- readFileStrict' grpPath -- TODO openFile error during this?
+--   let groups = map parseLine $ tail $ lines txt -- TODO be safe about tail
+--   -- liftIO $ putStrLn $ "groups: " ++ show groups
+--       --groups' = map (unhashIDs cfg) groups
+--   -- let groups = map (words . drop 11) (lines txt)
+--   return groups
+--   where
+--     parseLine l = concat (l =~ "seqid_[a-zA-Z0-9]*?" :: [[String]])
 
-parseGreenCut :: Path -> Action [[String]]
-parseGreenCut ogPath = do
-  cfg <- fmap fromJust getShakeExtra
-  let loc = "modules.orthogroups.parseGreenCut"
-  txt <- readFileStrict' $ fromPath loc cfg ogPath
-  let groups = map parseLine $ lines txt
-  return groups
-  where
-    parseLine l = filter (/= ":") $ split "\t" l
+-- parseGreenCut :: Path -> Action [[String]]
+-- parseGreenCut ogPath = do
+--   cfg <- fmap fromJust getShakeExtra
+--   let loc = "modules.orthogroups.parseGreenCut"
+--   txt <- readFileStrict' $ fromPath loc cfg ogPath
+--   let groups = map parseLine $ lines txt
+--   return groups
+--   where
+--     parseLine l = filter (/= ":") $ split "\t" l
 
 writeOrthogroups :: Path -> [[String]] -> Action ()
 writeOrthogroups out groups = do
@@ -155,9 +155,9 @@ aOrthogroups (ExprPath out') ogPath' = do
   dRef <- fmap fromJust getShakeExtra
   rtn <- liftIO $ decodeNewRulesType cfg dRef (ExprPath out')
   let parser
-        | rtn == spr = parseSonicParanoid
+        -- | rtn == spr = parseSonicParanoid
         | rtn == ofr = parseOrthoFinder
-        | rtn == gcr = parseGreenCut
+        -- | rtn == gcr = parseGreenCut
         | otherwise = error $ "bad type for aOrthogroups: " ++ show rtn
       loc = "modules.orthogroups.aOrthogroups"
       out = toPath loc cfg out'

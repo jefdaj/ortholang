@@ -117,9 +117,6 @@ in rec {
   ortholang-seqio         = mkMod ./OrthoLang/Modules/SeqIO         [ myPy3 ] myPy3Wrap;
   # ortholang-orthofinder   = mkMod ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
 
-  # TODO why does this break mmseqs?
-  # ortholang-sonicparanoid = mkMod ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
-
   ortholang-treecl        = mkMod ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
 
   # this config file is only a template; it needs to be completed by busco.sh at runtime
@@ -130,7 +127,6 @@ in rec {
   ortholang-curl          = mkMod ./OrthoLang/Modules/Curl          [ curl ] "";
   ortholang-load          = mkMod ./OrthoLang/Modules/Load          [ ] "";
   ortholang-orthogroups   = mkMod ./OrthoLang/Modules/OrthoGroups   [ python36 ] "";
-  ortholang-greencut      = mkMod ./OrthoLang/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
   # This is the only attribute used by the main build.
   modules = [
@@ -151,14 +147,12 @@ in rec {
     ortholang-setstable
     ortholang-psiblast
     ortholang-seqio
-    # ortholang-sonicparanoid
     # ortholang-treecl
     ortholang-busco
     ortholang-curl
     ortholang-load
     ortholang-range
     ortholang-orthogroups
-    ortholang-greencut
     ortholang-zip
   ];
 }
