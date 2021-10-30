@@ -128,6 +128,7 @@ in rec {
   ortholang-curl          = mkMod ./OrthoLang/Modules/Curl          [ curl ] "";
   ortholang-load          = mkMod ./OrthoLang/Modules/Load          [ ] "";
   ortholang-orthogroups   = mkMod ./OrthoLang/Modules/OrthoGroups   [ python36 ] "";
+  ortholang-greencut      = mkMod ./OrthoLang/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
   # This is the only attribute used by the main build.
   modules = [
@@ -154,6 +155,7 @@ in rec {
     ortholang-load
     ortholang-range
     ortholang-orthogroups
+    ortholang-greencut
     ortholang-zip
   ];
 }
