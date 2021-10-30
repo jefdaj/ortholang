@@ -1,9 +1,0 @@
-Script
-    { sAssigns =
-        [ Assign
-            { aVar = Var ( RepID Nothing ) "result"
-            , aExpr = Lit str "example not written yet"
-            }
-        ]
-    , sResult = Just ( Lit str "example not written yet" )
-    }
