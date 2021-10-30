@@ -23,6 +23,9 @@ onfailure() {
 }
 
 onsuccess() {
+  if [[ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
+    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+  fi
   echo "Success! Try opening a new terminal and running: ortholang"
   echo "If you get 'command not found', add this line to your .profile or .bashrc and try again:"
   echo "source $HOME/.nix-profile/etc/profile.d/nix.sh"
@@ -115,6 +118,3 @@ install_nix() {
 )
 
 [[ $? == 0 ]] && onsuccess || onfailure
-if [[ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
-    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-fi
