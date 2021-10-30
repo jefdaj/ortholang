@@ -20,6 +20,7 @@ import qualified OrthoLang.Modules.BlastHits     as BlastHits
 import qualified OrthoLang.Modules.BlastRBH      as BlastRBH
 import qualified OrthoLang.Modules.Busco         as Busco
 import qualified OrthoLang.Modules.CRBBlast      as CRBBlast
+import qualified OrthoLang.Modules.Script  as Script
 import qualified OrthoLang.Modules.FlowChart     as FlowChart
 import qualified OrthoLang.Modules.Diamond       as Diamond
 import qualified OrthoLang.Modules.Hmmer         as Hmmer
@@ -95,6 +96,7 @@ modules =
 
   -- works in progress and/or tests
   , AllVsAll.olModule
+  , Script.olModule
   , Summarize.olModule
   , OrthoFinder.olModule
   , Singletons.olModule
