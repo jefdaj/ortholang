@@ -42,6 +42,7 @@ import qualified OrthoLang.Modules.SeqIO         as SeqIO
 import qualified OrthoLang.Modules.Sets          as Sets
 import qualified OrthoLang.Modules.SetsTable     as SetsTable
 import qualified OrthoLang.Modules.Singletons    as Singletons
+import qualified OrthoLang.Modules.Summarize     as Summarize
 import qualified OrthoLang.Modules.Zip           as Zip
 
 modules :: [Module]
@@ -92,6 +93,7 @@ modules =
   , FlowChart.olModule -- rewrite done
 
   -- works in progress and/or tests
+  , Summarize.olModule
   , OrthoFinder.olModule
   , Singletons.olModule
   , Zip.olModule -- rewrite done

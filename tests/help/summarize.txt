@@ -1,0 +1,3 @@
+Collapse a list of results into a single summary
+
+Functions:
