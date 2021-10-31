@@ -1,7 +1,7 @@
 orthogroups : og -> str.list.list
 
 where
-  og = orthogroup (ofr, spr, or gcr)
+  og = orthogroup ( or ofr)
   str = string
 
 Parse results from an ortholog finder and list genes in all orthogroups.
