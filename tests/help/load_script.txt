@@ -1,5 +1,0 @@
-load_script : str -> bin
-
-where
-  str = string
-  bin = custom scripts

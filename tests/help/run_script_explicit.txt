@@ -1,6 +1,0 @@
-run_script_explicit : bin str.list untyped.list -> untyped
-
-where
-  bin = custom scripts
-  str = string
-  untyped = untyped file

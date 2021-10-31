@@ -3,3 +3,10 @@ blastdb_get_fna : str str -> fna.blastdb
 where
   str = string
   fna = FASTA nucleic acid
+
+Fetch a nucleic acid BLAST database from NCBI.
+Use blastdblist to list the available options.
+
+WARNING: Unfortunately, you have to check outside ortholang whether the
+database you're interested in is nucleic acid or protein and use the
+proper get function.

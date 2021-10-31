@@ -1,5 +1,0 @@
-makeblastdb_faa_each : any.list -> faa.blastdb.list
-
-where
-  any = any type
-  faa = FASTA amino acid

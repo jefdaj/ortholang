@@ -1,3 +1,0 @@
-Creates all-vs-all hit tables from any BLAST-like search for use in ortholog finding algorithms
-
-Functions:
