@@ -1,6 +1,0 @@
-psiblast_train_pssms_db : num faa.list faa.blastdb -> pssm.list
-
-where
-  num = number in regular or scientific notation
-  faa = FASTA amino acid
-  pssm = PSI-BLAST position-specific substitution matrix as ASCII

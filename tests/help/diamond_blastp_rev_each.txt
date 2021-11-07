@@ -1,6 +1,0 @@
-diamond_blastp_rev_each : num faa faa.list -> bht.list
-
-where
-  num = number in regular or scientific notation
-  faa = FASTA amino acid
-  bht = tab-separated table of blast hits (outfmt 6)

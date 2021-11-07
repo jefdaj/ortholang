@@ -50,7 +50,7 @@ And these are "modules" related to a specific language feature or bioinformatics
 | [module-blasthits](https://github.com/jefdaj/ortholang/tree/module-blasthits) | :heavy_check_mark: | ![module-blasthits](https://badgen.net/travis/jefdaj/ortholang/module-blasthits?label=) | :heavy_check_mark:  |  |
 | [module-blastrbh](https://github.com/jefdaj/ortholang/tree/module-blastrbh) | :heavy_check_mark: | ![module-blastrbh](https://badgen.net/travis/jefdaj/ortholang/module-blastrbh?label=) | :white_check_mark:  |  |
 | [module-busco](https://github.com/jefdaj/ortholang/tree/module-busco) | :heavy_check_mark: | ![module-busco](https://badgen.net/travis/jefdaj/ortholang/module-busco?label=) | :heavy_check_mark: |  |
-| [module-cheat](https://github.com/jefdaj/ortholang/tree/module-cheat) | | ![module-cheat](https://badgen.net/travis/jefdaj/ortholang/module-cheat?label=) |  |  |
+| [module-script](https://github.com/jefdaj/ortholang/tree/module-script) | | ![module-script](https://badgen.net/travis/jefdaj/ortholang/module-script?label=) |  |  |
 | [module-crbblast](https://github.com/jefdaj/ortholang/tree/module-crbblast) | :heavy_check_mark: | ![module-crbblast](https://badgen.net/travis/jefdaj/ortholang/module-crbblast?label=) | :heavy_check_mark:  |  |
 | [module-diamond](https://github.com/jefdaj/ortholang/tree/module-diamond) | :heavy_check_mark: | ![module-diamond](https://badgen.net/travis/jefdaj/ortholang/module-diamond?label=) | :heavy_check_mark: |  |
 | [module-greencut](https://github.com/jefdaj/ortholang/tree/module-greencut) | :white_check_mark: | ![module-greencut](https://badgen.net/travis/jefdaj/ortholang/module-greencut?label=) |  |  |

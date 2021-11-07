@@ -1,135 +1,139 @@
-Script 
-    { sAssigns = 
-        [ Assign 
-            { aVar = Var ( RepID Nothing ) "maga" 
+Script
+    { sAssigns =
+        [ Assign
+            { aVar = Var ( RepID Nothing ) "maga"
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_agalactiae_small.faa" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "mbov" 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "mbov"
             , aExpr = Fun faa Nothing [] "load_faa" [ Lit str "examples/sequences/Mycoplasma_bovis_small.fa" ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "hits1" 
-            , aExpr = Fun bht Nothing 
-                [ Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mbov" 
-                ] "mmseqs_search" 
-                [ Lit num "1.0e-20" 
-                , Ref faa Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "hits1"
+            , aExpr = Fun bht
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "mbov"
+                ] "mmseqs_search"
+                [ Lit num "1.0e-20"
+                , Ref faa Nothing []
                     ( Var ( RepID Nothing ) "maga" )
-                , Ref faa Nothing [] 
+                , Ref faa Nothing []
                     ( Var ( RepID Nothing ) "mbov" )
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "genes1" 
-            , aExpr = Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "hits1" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mbov" 
-                ] "extract_queries" 
-                [ Ref bht Nothing 
-                    [ Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "mbov" 
-                    ] 
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "genes1"
+            , aExpr = Fun str.list Nothing
+                [ Var ( RepID Nothing ) "hits1"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "mbov"
+                ] "extract_queries"
+                [ Ref bht
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "mbov"
+                    ]
                     ( Var ( RepID Nothing ) "hits1" )
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "others" 
-            , aExpr = Bop faa.list Nothing 
-                [ Var ( RepID Nothing ) "maga" ] "~" 
-                ( Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ] ) 
-                ( Lst faa Nothing 
-                    [ Var ( RepID Nothing ) "maga" ] 
-                    [ Ref faa Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "others"
+            , aExpr = Bop faa.list Nothing
+                [ Var ( RepID Nothing ) "maga" ] "~"
+                ( Fun faa.list Nothing [] "load_faa_glob" [ Lit str "examples/sequences/Mycoplasma_*_refseq.faa" ] )
+                ( Lst faa Nothing
+                    [ Var ( RepID Nothing ) "maga" ]
+                    [ Ref faa Nothing []
                         ( Var ( RepID Nothing ) "maga" )
                     ]
                 )
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "hits2" 
-            , aExpr = Fun bht Nothing 
-                [ Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "others" 
-                ] "mmseqs_search_db" 
-                [ Lit num "1.0e-20" 
-                , Ref faa Nothing [] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "hits2"
+            , aExpr = Fun bht
+                ( Just ( Seed 0 ) )
+                [ Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "others"
+                ] "mmseqs_search_db"
+                [ Lit num "1.0e-20"
+                , Ref faa Nothing []
                     ( Var ( RepID Nothing ) "maga" )
-                , Fun mms Nothing 
-                    [ Var ( RepID Nothing ) "others" 
-                    , Var ( RepID Nothing ) "maga" 
-                    ] "mmseqs_createdb_all" 
-                    [ Ref faa.list Nothing 
-                        [ Var ( RepID Nothing ) "maga" ] 
+                , Fun mms Nothing
+                    [ Var ( RepID Nothing ) "others"
+                    , Var ( RepID Nothing ) "maga"
+                    ] "mmseqs_createdb_all"
+                    [ Ref faa.list Nothing
+                        [ Var ( RepID Nothing ) "maga" ]
                         ( Var ( RepID Nothing ) "others" )
                     ]
-                ] 
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "genes2" 
-            , aExpr = Fun str.list Nothing 
-                [ Var ( RepID Nothing ) "hits2" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "others" 
-                ] "extract_queries" 
-                [ Ref bht Nothing 
-                    [ Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "others" 
-                    ] 
+                ]
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "genes2"
+            , aExpr = Fun str.list Nothing
+                [ Var ( RepID Nothing ) "hits2"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "others"
+                ] "extract_queries"
+                [ Ref bht
+                    ( Just ( Seed 0 ) )
+                    [ Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "others"
+                    ]
                     ( Var ( RepID Nothing ) "hits2" )
                 ]
-            } 
-        , Assign 
-            { aVar = Var ( RepID Nothing ) "result" 
-            , aExpr = Bop str.list Nothing 
-                [ Var ( RepID Nothing ) "genes1" 
-                , Var ( RepID Nothing ) "hits1" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mbov" 
-                , Var ( RepID Nothing ) "genes2" 
-                , Var ( RepID Nothing ) "hits2" 
-                , Var ( RepID Nothing ) "others" 
-                ] "~" 
-                ( Ref str.list Nothing 
-                    [ Var ( RepID Nothing ) "hits1" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "mbov" 
-                    ] 
+            }
+        , Assign
+            { aVar = Var ( RepID Nothing ) "result"
+            , aExpr = Bop str.list Nothing
+                [ Var ( RepID Nothing ) "genes1"
+                , Var ( RepID Nothing ) "hits1"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "mbov"
+                , Var ( RepID Nothing ) "genes2"
+                , Var ( RepID Nothing ) "hits2"
+                , Var ( RepID Nothing ) "others"
+                ] "~"
+                ( Ref str.list Nothing
+                    [ Var ( RepID Nothing ) "hits1"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "mbov"
+                    ]
                     ( Var ( RepID Nothing ) "genes1" )
-                ) 
-                ( Ref str.list Nothing 
-                    [ Var ( RepID Nothing ) "hits2" 
-                    , Var ( RepID Nothing ) "maga" 
-                    , Var ( RepID Nothing ) "others" 
-                    ] 
+                )
+                ( Ref str.list Nothing
+                    [ Var ( RepID Nothing ) "hits2"
+                    , Var ( RepID Nothing ) "maga"
+                    , Var ( RepID Nothing ) "others"
+                    ]
                     ( Var ( RepID Nothing ) "genes2" )
                 )
-            } 
-        ] 
-    , sResult = Just 
-        ( Bop str.list Nothing 
-            [ Var ( RepID Nothing ) "genes1" 
-            , Var ( RepID Nothing ) "hits1" 
-            , Var ( RepID Nothing ) "maga" 
-            , Var ( RepID Nothing ) "mbov" 
-            , Var ( RepID Nothing ) "genes2" 
-            , Var ( RepID Nothing ) "hits2" 
-            , Var ( RepID Nothing ) "others" 
-            ] "~" 
-            ( Ref str.list Nothing 
-                [ Var ( RepID Nothing ) "hits1" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "mbov" 
-                ] 
+            }
+        ]
+    , sResult = Just
+        ( Bop str.list Nothing
+            [ Var ( RepID Nothing ) "genes1"
+            , Var ( RepID Nothing ) "hits1"
+            , Var ( RepID Nothing ) "maga"
+            , Var ( RepID Nothing ) "mbov"
+            , Var ( RepID Nothing ) "genes2"
+            , Var ( RepID Nothing ) "hits2"
+            , Var ( RepID Nothing ) "others"
+            ] "~"
+            ( Ref str.list Nothing
+                [ Var ( RepID Nothing ) "hits1"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "mbov"
+                ]
                 ( Var ( RepID Nothing ) "genes1" )
-            ) 
-            ( Ref str.list Nothing 
-                [ Var ( RepID Nothing ) "hits2" 
-                , Var ( RepID Nothing ) "maga" 
-                , Var ( RepID Nothing ) "others" 
-                ] 
+            )
+            ( Ref str.list Nothing
+                [ Var ( RepID Nothing ) "hits2"
+                , Var ( RepID Nothing ) "maga"
+                , Var ( RepID Nothing ) "others"
+                ]
                 ( Var ( RepID Nothing ) "genes2" )
             )
         )
-    } 
+    }

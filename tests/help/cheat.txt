@@ -1,5 +1,0 @@
-cheat : str any str -> any
-
-where
-  str = string
-  any = the return type

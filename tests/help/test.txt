@@ -1,7 +1,0 @@
-Test module for the 'new rules' infrastructure
-
-Functions:
-
-newrulestest1
-newrulestest2
-newrulestest3

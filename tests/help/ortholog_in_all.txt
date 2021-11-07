@@ -1,7 +1,7 @@
 ortholog_in_all : og faa.list -> str.list.list
 
 where
-  og = any orthogroup (ofr, spr, or gcr)
+  og = any orthogroup ( or ofr)
   faa = FASTA amino acid
   str = string
 

@@ -1,19 +1,31 @@
 #/usr/bin/env bash
 
-export LOG=ortholang.log
+# TODO push a proper 1.0 release and pin to that
+export VERSION='0.10.0'
+export REVHASH='9fcdf1f352260b5b48252acfcfa56e26bddcece9'
+
+export LOG="${PWD}/ortholang.log"
+
+[[ -d "$TMPDIR" ]] || export TMPDIR=/tmp
+export TMPDIR="${TMPDIR}/ortholang-install"
+rm -rf "${TMPDIR}/*"
 
 case "$(uname)" in
-  Linux ) export CHANNEL=nixos-20.03 ;;
-  Darwin) export CHANNEL=nixpkgs-20.03-darwin ;;
+  Linux ) export CHANNEL=nixos-20.09 ;;
+  Darwin) export CHANNEL=nixpkgs-20.09-darwin ;;
   *) echo "Sorry, unsupported OS: $(uname). Try git clone + nix-build, or ask Jeff!"; exit 1 ;;
 esac
 
 onfailure() {
   echo "Oh no, something went wrong. See ${LOG} for details."
   echo "And if you have time, please submit a bug report!"
+  exit 1
 }
 
 onsuccess() {
+  if [[ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
+    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+  fi
   echo "Success! Try opening a new terminal and running: ortholang"
   echo "If you get 'command not found', add this line to your .profile or .bashrc and try again:"
   echo "source $HOME/.nix-profile/etc/profile.d/nix.sh"
@@ -24,7 +36,7 @@ install_nix() {
     Linux )
 
       (curl https://nixos.org/nix/install | sh) >> $LOG 2>&1
-			. $HOME/.nix-profile/etc/profile.d/nix.sh;;
+      . $HOME/.nix-profile/etc/profile.d/nix.sh;;
 
     Darwin)
 
@@ -35,7 +47,7 @@ install_nix() {
       else
         (curl https://nixos.org/nix/install | sh) >> $LOG 2>&1
       fi
-			. $HOME/.nix-profile/etc/profile.d/nix.sh;;
+      . $HOME/.nix-profile/etc/profile.d/nix.sh;;
 
     *)
       echo "Sorry, unsupported OS: $(uname). Try git clone + nix-build, or ask Jeff!";
@@ -51,7 +63,7 @@ install_nix() {
   echo -n "Installing the Nix package manager..."
   which nix-env &> /dev/null
   if [[ $? != 0 ]]; then
-		install_nix
+    install_nix
     . $HOME/.nix-profile/etc/profile.d/nix.sh
   fi
   which nix-env &> /dev/null
@@ -82,9 +94,17 @@ install_nix() {
 
   echo "Installing OrthoLang..."
   # TODO how to work around the git-annex dylib priority bug?
-  export VERSION='0.9.5'
-  archive="https://ortholang.pmb.berkeley.edu/static/ortholang-v${VERSION}.tar.gz"
-  nix-env -i -f $archive 2>&1 | tee -a $LOG
+
+  # first format is for tags, second for revision hashes
+  # archive="https://github.com/jefdaj/ortholang/archive/refs/tags/v${VERSION}.tar.gz"
+  archive="https://github.com/jefdaj/ortholang/archive/${REVHASH}.tar.gz"
+
+  mkdir -p "$TMPDIR"
+  cd "$TMPDIR"
+  wget "$archive"
+  tar -xvzf *.tar.gz
+  cd ortholang-*
+  nix-env -i -f release.nix 2>&1 | tee -a $LOG
   if [[ $? != 0 ]]; then
     echo "ERROR $?. See $LOG for details."
     exit 1
@@ -96,4 +116,5 @@ install_nix() {
   ortholang --test version
   echo
 )
-[[ $? == 0 ]] && onsuccess && . $HOME/.nix-profile/etc/profile.d/nix.sh || onfailure
+
+[[ $? == 0 ]] && onsuccess || onfailure

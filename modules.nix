@@ -77,7 +77,6 @@ in rec {
 
     extraLibs = with python27Packages; [
       biopython # old version 1.76 with python2 support
-      justorthologs
       numpy # TODO remove?
       scipy # TODO remove?
     ];
@@ -109,7 +108,7 @@ in rec {
   ortholang-flowchart      = mkMod ./OrthoLang/Modules/FlowChart      [ graphviz ] ""; # TODO remove?
   ortholang-diamond       = mkMod ./OrthoLang/Modules/Diamond       [ diamond ] "";
   ortholang-hmmer         = mkMod ./OrthoLang/Modules/Hmmer         [ myPy2 hmmer ] myPy2Wrap;
-  # ortholang-mmseqs        = mkMod ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
+  ortholang-mmseqs        = mkMod ./OrthoLang/Modules/MMSeqs        [ mmseqs2 ] "";
   ortholang-muscle        = mkMod ./OrthoLang/Modules/Muscle        [ muscle ] "";
   ortholang-psiblast      = mkMod ./OrthoLang/Modules/PsiBlast      [ myBlast ] "";
   ortholang-zip           = mkMod ./OrthoLang/Modules/Zip           [ zip myPy3 ] myPy3Wrap;
@@ -117,7 +116,6 @@ in rec {
   # TODO should the wrap not be necessary?
   ortholang-seqio         = mkMod ./OrthoLang/Modules/SeqIO         [ myPy3 ] myPy3Wrap;
   # ortholang-orthofinder   = mkMod ./OrthoLang/Modules/OrthoFinder   [ myPy2 myBlast diamond orthofinder mcl fastme ] myPy2Wrap;
-  ortholang-sonicparanoid = mkMod ./OrthoLang/Modules/SonicParanoid [ sonicparanoid ] myPy3Wrap;
 
   ortholang-treecl        = mkMod ./OrthoLang/Modules/TreeCl        [ myPy2 treeCl ] myPy2Wrap;
 
@@ -129,7 +127,6 @@ in rec {
   ortholang-curl          = mkMod ./OrthoLang/Modules/Curl          [ curl ] "";
   ortholang-load          = mkMod ./OrthoLang/Modules/Load          [ ] "";
   ortholang-orthogroups   = mkMod ./OrthoLang/Modules/OrthoGroups   [ python36 ] "";
-  ortholang-greencut      = mkMod ./OrthoLang/Modules/GreenCut      [ myPy2 ] myPy2Wrap;
 
   # This is the only attribute used by the main build.
   modules = [
@@ -143,21 +140,19 @@ in rec {
     ortholang-flowchart
     ortholang-diamond
     ortholang-hmmer
-    # ortholang-mmseqs
+    ortholang-mmseqs
     ortholang-muscle
     # ortholang-orthofinder
     ortholang-plots
     ortholang-setstable
     ortholang-psiblast
     ortholang-seqio
-    ortholang-sonicparanoid
     # ortholang-treecl
     ortholang-busco
     ortholang-curl
     ortholang-load
     ortholang-range
     ortholang-orthogroups
-    ortholang-greencut
     ortholang-zip
   ];
 }

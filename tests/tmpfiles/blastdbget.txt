@@ -1,0 +1,31 @@
+.
+|-- cache
+|   `-- blastdbget
+|       `-- 2021-10-31
+|           `-- dblist.txt
+|-- exprs
+|   |-- blastdb_list
+|   |   `-- cc4951d416
+|   |       `-- result -> ../../../exprs/blastdb_list_date/05a6808efc/result
+|   |-- blastdb_list_date
+|   |   `-- 05a6808efc
+|   |       `-- result -> ../../../cache/blastdbget/2021-10-31/dblist.txt
+|   |-- filter_list
+|   |   `-- 5409c3605c
+|   |       |-- 308cc7e059
+|   |       |   `-- result -> ../../../../cache/lines/...
+|   |       `-- 3e9b5298a3
+|   |           `-- result -> ../../../../cache/lines/...
+|   `-- str
+|       |-- 1d572f714d
+|       |   `-- result -> ../../../cache/lines/...
+|       |-- 2711559dbf
+|       |   `-- result -> ../../../cache/lines/...
+|       |-- bd71cd3b33
+|       |   `-- result -> ../../../cache/lines/...
+|       `-- c8b191f469
+|           `-- result -> ../../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/filter_list/5409c3605c/3e9b5298a3/result
+
+18 directories, 10 files

@@ -1,19 +1,11 @@
 .
 |-- cache
-|   |-- curl
-|   |   |-- 2857224b49
-|   |   `-- 2857224b49.err
-|   `-- load
-|       |-- 46d3084751.fna
-|       `-- 46d3084751.fna.ids
 |-- exprs
-|   |-- load_fna
-|   |   `-- 39cfbdcad3
-|   |       `-- result -> ../../../cache/load/46d3084751.fna
+|   |-- load_faa
+|   |   `-- f5e787add6
 |   `-- str
-|       `-- 0ba64ec1b2
+|       `-- 39866d4e45
 |           `-- result -> ../../../cache/lines/...
 `-- vars
-    `-- result -> ../exprs/load_fna/39cfbdcad3/result
 
-9 directories, 7 files
+7 directories, 1 file

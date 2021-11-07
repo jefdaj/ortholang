@@ -140,7 +140,7 @@ aReplaceEachLits _ outPath subPaths resPaths = do
   let outPath'  = fromPath loc cfg outPath
       subPaths' = fromPath loc cfg subPaths
       resPaths' = map (fromPath loc cfg) resPaths
-      loc = "modules.summarize.aReplaceEachLits"
+      loc = "modules.replace.aReplaceEachLits"
       out = traceA loc outPath' (outPath':subPaths':resPaths')
   lits <- mapM (readLit loc) resPaths'
   let lits' = map stripWhiteSpace lits
@@ -155,7 +155,7 @@ aReplaceEachLinks outPath subPaths resPaths = do
   let outPath'  = fromPath loc cfg outPath
       subPaths' = fromPath loc cfg subPaths
       resPaths' = map (fromPath loc cfg) resPaths
-      loc = "modules.summarize.aReplaceEachLinks"
+      loc = "modules.replace.aReplaceEachLinks"
       out = traceA loc outPath' (outPath':subPaths':resPaths')
   need' loc (subPaths':resPaths') -- TODO is needing subPaths required?
 

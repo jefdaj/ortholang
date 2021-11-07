@@ -1,3 +1,10 @@
 .
+|-- cache
+|-- exprs
+|   `-- num
+|       `-- ee383407c9
+|           `-- result -> ../../../cache/lines/...
+`-- vars
+    `-- result -> ../exprs/num/ee383407c9/result
 
-0 directories, 0 files
+5 directories, 2 files

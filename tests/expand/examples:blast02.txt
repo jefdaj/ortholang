@@ -1,7 +1,0 @@
-pcc6803 = load_faa "examples/sequences/PCC_6803_genes.faa"
-pcc7942 = concat_faa [load_faa_path (gbk_to_faa_rawids "cds"
-                                                       (load_gbk "examples/sequences/PCC_7942_chr.gbk")),
-                      load_faa_path (gbk_to_faa_rawids "cds"
-                                                       (load_gbk "examples/sequences/PCC_7942_pANL.gbk"))]
-hits = blastp_db 1.0e-50 pcc7942 (blastdbget_faa "swissprot")
-result = "nothing so far"

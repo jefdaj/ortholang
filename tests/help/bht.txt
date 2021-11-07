@@ -13,6 +13,5 @@ You can create them with these 45 functions:
   blastp_rev : num faa faa -> bht
   ...
 
-And use them with these 2 functions:
-  greencut2_families : bht bht -> gcr
+And use them with these 1 functions:
   reciprocal_best : bht bht -> bht

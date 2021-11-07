@@ -52,6 +52,11 @@ tmpfilesVary =
   , "plots:scatterplot"
   , "plots:histogram"
   , "permute:leave_each_out" -- TODO this is a weird one
+
+  -- TODO add wildcard patterns to these? i think all mmseqs scripts do it
+  , "mmseqs" -- skip the examples: prefix when adding these
+  , "mmseqs:search"
+  , "mmseqs:search_db"
   ]
 
 -- | These work, but the stdout varies so they require a check script.
@@ -96,11 +101,11 @@ badlyBroken =
   , "crbblast:crb_blast_many_cyanos"
   , "crbblast:crb_blast_two_cyanos"
   , "biomartr" -- from examples
-  , "mmseqs" -- from examples
+  -- , "mmseqs" -- from examples
   , "psiblast_rbh" -- from examples
   , "listlike:length"
-  , "mmseqs:search"
-  , "mmseqs:search_db"
+  -- , "mmseqs:search"
+  -- , "mmseqs:search_db"
   , "orthofinder:basic"
   , "orthofinder:orthogroups"
   , "orthogroups:orthogroup_containing"
@@ -184,16 +189,12 @@ badlyBroken =
   , "maga-vs-mgen-blastp-rbh-100x"
   , "maga-vs-mgen-blastp-rbh-100x-ids"
   , "maga-vs-mgen-blastp-rbh-3x"
-  , "mmseqs:createdb"
-  , "mmseqs:createdb_all"
+  -- , "mmseqs:createdb"
+  -- , "mmseqs:createdb_all"
   , "prs02"
   , "repeat:faas"
   , "repeat:load"
   , "sample:test1"
-  , "script"
-  , "script:bash_tutorial"
-  , "script:r_filter"
-  , "script:r_plots"
   , "seqio:concat_fastas"
   , "seqio:split_fasta"
   , "singletons"
@@ -380,13 +381,13 @@ mkScriptTests sDir (name, cut, parse, expand, out, tre, mchk) cfg ref ids dRef =
   let parseTest = mkParseTest  cfg' ref ids dRef name cut parse
       tripTest  = mkTripTest   cfg' ref ids dRef name cut
       expTest   = mkExpandTest cfg' ref ids dRef name cut expand
-      shareTest = mkShareTest  cfg' ref ids dRef sDir name out
+      -- shareTest = mkShareTest  cfg' ref ids dRef sDir name out
       runScriptU c r i d = void (runScript c r i d)
       outTests  = [mkOutTest  cfg' ref ids dRef sDir name out | name `notElem` (badlyBroken ++ stdoutVaries)]
       treeTests = [mkTreeTest cfg' ref ids dRef name runScriptU tre | name `notElem` (badlyBroken ++ tmpfilesVary)]
       tests     = if name `elem`  badlyBroken
                      then []
-                     else [parseTest, tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests ++ [shareTest]
+                     else [parseTest, tripTest, expTest] ++ outTests ++ absTests ++ treeTests ++ checkTests -- ++ [shareTest]
   return $ testGroup (removePrefix name) tests
   where
     name' = replace ":" "_" name -- ':' messes with BLASTDB paths

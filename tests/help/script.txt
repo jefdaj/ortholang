@@ -1,7 +1,0 @@
-Plug custom scripts into OrthoLang
-
-Functions:
-
-load_script
-run_script_explicit
-run_script
