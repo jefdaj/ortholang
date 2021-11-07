@@ -1,65 +1,49 @@
-# Old style:
-# (import ./haskell.nix).ortholang
+# This hooks up the Haskell package with all its runtime dependencies. For
+# development, you might want to nix-shell shell.nix instead of this one,
+# because it includes fanciness like Hoogle and ghcid. But either should work.
 
-# New style leaves default.nix as the one to be imported from other Haskell projects,
-# since this seems to be the least flexible. For other uses, we can customize.
-# This was generated with cabal2nix ./., then customized a bit by hand.
-# It will build the main interpreter, but without required non-Haskell dependencies.
-# See release.nix for the version with all those added on.
+let
+  pkgs    = import ./nix;
+  myHs    = import ./haskell.nix;
+  modules = (import ./modules.nix).modules;
+  environment = import ./environment.nix; # TODO can most of this be removed?
+  runDepends = environment ++ modules;
 
-{ mkDerivation, ansi-terminal, base, bytestring, concurrent-extra
-, configurator, containers, cryptohash, data-default-class, deepseq
-, directory, dlist, docopt, download, fgl, filelock, filepath, Glob
-, graphviz, haskeline, hspec, logging, MissingH, mtl, parsec, path
-, path-io, posix-escape, pretty, pretty-simple, process
-, progress-meter, QuickCheck, random, random-shuffle
-, raw-strings-qq, regex-compat, regex-posix, retry, safe-exceptions
-, scientific, setlocale, shake, silently, split, stdenv, store
-, strict, tasty, tasty-golden, tasty-hspec, tasty-hunit
-, tasty-quickcheck, temporary, terminal-size, text, time
-, transformers, unbounded-delays, unix, unordered-containers
-, utility-ht, zlib
-}:
-mkDerivation {
-  pname = "OrthoLang";
-  version = "0.10.0";
+in pkgs.haskell.lib.overrideCabal myHs.OrthoLang (drv: {
 
   # surprisingly, this works as a drop-in replacement for filterSource
   # except with better filtering out of non-source files
   # based on https://github.com/NixOS/nix/issues/885#issuecomment-381904833
   # src = builtins.fetchGit { url = ./.; };
-  src = ./.;
 
-  isLibrary = true;
-  isExecutable = true;
-  enableSeparateDataOutput = true;
-  libraryHaskellDepends = [
-    ansi-terminal base bytestring concurrent-extra configurator
-    containers cryptohash data-default-class deepseq directory dlist
-    docopt download fgl filelock filepath Glob graphviz haskeline hspec
-    logging MissingH mtl parsec path path-io posix-escape pretty
-    pretty-simple process progress-meter QuickCheck random
-    random-shuffle raw-strings-qq regex-compat regex-posix retry
-    safe-exceptions scientific setlocale shake silently split store
-    strict tasty tasty-golden tasty-hspec tasty-hunit tasty-quickcheck
-    temporary terminal-size text time transformers unbounded-delays
-    unix unordered-containers utility-ht
+  # TODO remove these? are they still needed?
+  buildDepends = with pkgs; (drv.buildDepends or [])  ++ runDepends ++ [
+    makeWrapper
+    # zlib.dev zlib.out # TODO remove?
+    # pkgconfig # TODO remove?
   ];
-  libraryPkgconfigDepends = [ zlib ];
-  executableHaskellDepends = [
-    ansi-terminal base bytestring concurrent-extra configurator
-    containers cryptohash data-default-class deepseq directory dlist
-    docopt download fgl filelock filepath Glob graphviz haskeline hspec
-    logging MissingH mtl parsec path path-io posix-escape pretty
-    pretty-simple process progress-meter QuickCheck random
-    random-shuffle raw-strings-qq regex-compat regex-posix retry
-    safe-exceptions scientific setlocale shake silently split store
-    strict tasty tasty-golden tasty-hspec tasty-hunit tasty-quickcheck
-    temporary terminal-size text time transformers unbounded-delays
-    unix unordered-containers utility-ht
-  ];
-  executablePkgconfigDepends = [ zlib ];
-  description = "Short, reproducible phylogenomic cuts";
-  license = "unknown";
-  hydraPlatforms = stdenv.lib.platforms.none;
-}
+
+  # TODO PYTHONPATH?
+  # TODO any reason to factor this out into default.nix?
+  postInstall = ''
+    ${drv.postInstall or ""}
+    wrapProgram "$out/bin/ortholang" \
+      --set LANG en_US.UTF-8 \
+      --set LANGUAGE en_US.UTF-8 \
+      --prefix PATH : "${pkgs.lib.makeBinPath runDepends}"'' +
+  (if pkgs.stdenv.hostPlatform.system == "x86_64-darwin" then "" else '' \
+    --set LOCALE_ARCHIVE "${pkgs.glibcLocales}/lib/locale/locale-archive"
+  '');
+
+  # TODO move this to shell.nix?
+  shellHook = ''
+    ${drv.shellHook or ""}
+    export LANG=en_US.UTF-8
+    export LANGUAGE=en_US.UTF-8
+    # export TASTY_HIDE_SUCCESSES=True
+  '' ++
+  (if pkgs.stdenv.hostPlatform.system == "x86_64-darwin" then "" else ''
+    export LOCALE_ARCHIVE="${pkgs.glibcLocales}/lib/locale/locale-archive"
+  '');
+ 
+})

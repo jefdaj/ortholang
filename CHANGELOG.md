@@ -6,6 +6,14 @@ This project adheres (loosely) to [Semantic Versioning](https://semver.org/spec/
 and [A successful Git branching model](https://nvie.com/posts/a-successful-git-branching-model/).
 
 ## [unreleased]
+
+## [0.10.1] 2021-11-07
+
+### Changed
+* Made `default.nix` the main binary so it will work when imported by other projects,
+  and renamed `default.nix` -> `haskell-generated.nix`
+
+## [0.10.0] 2020
 ### Added
 - "new-style" Shake patterns
 - Path expansions
@@ -98,6 +106,8 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 - Start using semantic versioning
 
 [unreleased]: https://github.com/jefdaj/ortholang/compare/v0.9.5...HEAD
+[0.10.1]: https://github.com/jefdaj/ortholang/releases/tag/v0.10.1
+[0.10.0]: https://github.com/jefdaj/ortholang/releases/tag/v0.10.0
 [0.9.5]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.5
 [0.9.4]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.4
 [0.9.3]: https://github.com/jefdaj/ortholang/releases/tag/v0.9.3

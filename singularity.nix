@@ -2,7 +2,7 @@
 
 with import ./nix;
 
-let ortholang = import ./release.nix;
+let ortholang = import ./default.nix;
 
 in pkgs.singularity-tools.buildImage {
   name = "ortholang-${ortholang.version}";

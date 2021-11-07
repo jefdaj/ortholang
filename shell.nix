@@ -14,7 +14,7 @@
 let
   pkgs        = import ./nix;
   myHs        = import ./haskell.nix;
-  release     = import ./release.nix;
+  release     = import ./default.nix;
   environment = import ./environment.nix;
   modules     = (import ./modules.nix).modules;
   runDepends  = environment ++ modules;
