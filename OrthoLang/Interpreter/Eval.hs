@@ -250,8 +250,8 @@ eval mods hdl cfg ref ids dr rtype p = do
       "eval" ~> do
         alwaysRerun
         need ["reloadids"]
-        -- actionRetry 9 $ need [path]
-        need [path] -- TODO need'?
+        actionRetry 99 $ need [path]
+        -- need [path] -- TODO need'?
         completeProgress pm -- TODO only when doing the progressbar?
       -- writes unhashed output to outfile
       "outfile" ~> case outfile cfg of

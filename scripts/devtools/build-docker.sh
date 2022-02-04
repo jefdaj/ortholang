@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# Usage ./scripts/devtools/build-docker-image.sh
+# Usage ./scripts/devtools/build-docker.sh
 # Uncomment the last run_repl line for manual debugging.
 # Command line arguments are passed to nix-build.
 
 set -e
 
 # Set to something with >7.5GB free for the nix-build step
-export TMPDIR=/mnt/scratch
+export TMPDIR=/home/jefdaj/scratch
 
 # leave blank if nothing special needed
 export NIX_ARGS="$@"

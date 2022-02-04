@@ -7,6 +7,12 @@ and [A successful Git branching model](https://nvie.com/posts/a-successful-git-b
 
 ## [unreleased]
 
+## [0.10.2] 2022-02-04
+
+### Fixed
+* Removed currently broken modules: `summarize`, `sonicparanoid`, `allvsall`
+* Silently retry when encountering the `Error, file does not exist and no rule available` bug
+
 ## [0.10.1] 2021-11-07
 
 ### Changed

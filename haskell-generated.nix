@@ -22,7 +22,7 @@
 }:
 mkDerivation {
   pname = "OrthoLang";
-  version = "0.10.1";
+  version = "0.10.2";
 
   # surprisingly, this works as a drop-in replacement for filterSource
   # except with better filtering out of non-source files
