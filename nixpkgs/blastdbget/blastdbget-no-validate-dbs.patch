@@ -1,5 +1,14 @@
---- blastdbget/blastdbget.py	2017-10-08 23:04:30.578000000 -0700
-+++ blastdbget-no-validate-dbs/blastdbget.py	2017-10-08 23:05:49.479000000 -0700
+--- blastdbget/blastdbget.py	2023-07-23 11:57:22.845000000 -0700
++++ blastdbget-no-validate-dbs/blastdbget.py	2023-07-23 11:55:01.937000000 -0700
+@@ -21,7 +21,7 @@
+ import urllib
+ 
+ from contextlib import contextmanager
+-from sh import blastdbcheck, ErrorReturnCode
++from sh import ErrorReturnCode
+ from tempfile import mkdtemp
+ from threading import Thread
+ from Queue import Queue
 @@ -301,7 +301,7 @@
          show_available(remote_files)
  
